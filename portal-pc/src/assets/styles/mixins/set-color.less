@@ -1,0 +1,101 @@
+/*
+* set color
+*/
+
+/*
+  .set-color('red', #f5222d)
+
+  .red{
+    background-color: #f5222d;
+    border-color: #f5222d;
+  }
+
+  .red--text{
+    color: #f5222d;
+    caret-color: #f5222d;
+  }
+*/
+.set-color(@key, @value) {
+  .@{key},
+  .@{key}__hover:hover,
+  .@{key}__active:active
+  .@{key}__focus:focus{
+    background-color: @value;
+    border-color: @value;
+  }
+
+  .@{key}--text,
+  .@{key}--text__hover:hover,
+  .@{key}--text__active:active,
+  .@{key}--text__focus:focus{
+    color: @value;
+    caret-color: @value;
+  }
+}
+
+
+/*
+  .set-color('red', #f5222d, 'darken-1')
+
+  .red.darken-1{
+    background-color: #f5222d;
+    border-color: #f5222d;
+  }
+
+  .red--text.text--darken-1{
+    color: #f5222d;
+    caret-color: #f5222d;
+  }
+*/
+.set-color(@key, @value, @deep){
+  .@{key}.@{deep},
+  .@{key}__hover:hover.@{deep}__hover,
+  .@{key}__active:active.@{deep}__active,
+  .@{key}__focus:focus.@{deep}__focus{
+    background-color: @value;
+    border-color: @value;
+  }
+
+  .@{key}--text.text--@{deep},
+  .@{key}--text__hover:hover.text--@{deep}__hover,
+  .@{key}--text__active:active.text--@{deep}__active,
+  .@{key}--text__focus:focus.text--@{deep}__focus{
+    color: @value;
+    caret-color: @value;
+  }
+}
+
+/*
+  .set-var-color('primary', #f5222d);
+
+  .primary{
+    background-color: #f5222d;
+    background-color: var(--theme-primary, #f5222d);
+    border-color: #f5222d;
+    border-color: var(--theme-primary, #f5222d);
+  }
+
+  .primary--text{
+    color: #f5222d;
+    color: var(--theme-primary, #f5222d);
+    caret-color: #f5222d;
+    caret-color: var(--theme-primary, #f5222d);
+  }
+*/
+.set-var-color(@key,@value,@prefix:'theme-'){
+  .@{key},
+  .@{key}__hover:hover,
+  .@{key}__active:active
+  .@{key}__focus:focus{
+    background-color: var(e('--@{prefix}@{key}'), @value);
+    border-color: var(e('--@{prefix}@{key}'), @value);
+  }
+
+  .@{key}--text,
+  .@{key}--text__hover:hover,
+  .@{key}--text__active:active,
+  .@{key}--text__focus:focus{
+    color: var(e('--@{prefix}@{key}'), @value);
+    caret-color: var(e('--@{prefix}@{key}'), @value);
+  }
+}

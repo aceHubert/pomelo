@@ -1,0 +1,12 @@
+{
+  "controller": {
+    "init_data": {
+      "success": "初始化表数据成功!",
+      "faild": "在初始化表数据时发生错误!"
+    },
+    "init_database": {
+      "success": "初始化数据库成功!",
+      "faild": "在初始化数据库时发生错误!"
+    }
+  }
+}

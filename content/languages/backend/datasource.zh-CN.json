@@ -1,0 +1,25 @@
+{
+  "default_data": {
+    "uncategorized": "未分类",
+    "article_title": "示例文章",
+    "article_content": "这是您的第一篇文章。"
+  },
+  "user": {
+    "username_unique_required": "用户名必须是唯一的！",
+    "email_unique_required": "Email必须是唯一的！",
+    "mobile_unique_required": "手机号码必须是唯一的！",
+    "delete_self_forbidden": "不可以删除您自己！",
+    "delete_admin_forbidden": "不可以删除超级管理员账号！"
+  },
+  "term": {
+    "relationship_duplicate_definition": "关系定义已在在！"
+  },
+  "post": {
+    "update_status_forbidden_in_trash_status": "不可以修改\"回收站\"中的内容, 请先使用\"重置\"方法！",
+    "bulk_update_status_forbidden_in_trash_status": "不可以修改\"回收站\"中的内容, 请先使用\"重置\"方法, ids: {ids}!",
+    "restore_forbidden_not_in_trash_status": "不可以重置非\"回收站\"中的内容！",
+    "bulk_restore_forbidden_not_in_trash_status": "不可以重置非\"回收站\"中的内容, ids: {ids}!",
+    "delete_forbidden_not_in_trash_status": "不可以删除非\"回收站\"中的内容！",
+    "bulk_delete_forbidden_not_in_trash_status": "不可以删除非\"回收站\"中的内容！, ids: {ids}!"
+  }
+}

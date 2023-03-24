@@ -1,0 +1,5 @@
+.vscode
+.workflow
+node_modules
+admin-web-react
+portal-mp

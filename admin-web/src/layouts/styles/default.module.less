@@ -1,0 +1,303 @@
+
+:global(.theme-reallight) {
+  .layout-header {
+    &__wrapper {
+      background: @white;
+      box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    }
+
+    .header-logo h1 {
+      color:@heading-color;
+    }
+  }
+
+  :global(.@{ant-prefix}-drawer-open).layout-sider-drawer .layout-sider {
+    box-shadow: 2px 0 6px rgba(0, 21, 41, 0.08);
+  }
+}
+
+:global(.theme-light) {
+  .layout-header {
+    &__wrapper {
+      background: @white;
+    }
+
+    &.has-top-menu .layout-header__wrapper {
+      color: @white;
+      background: transparent;
+    }
+
+    .header-logo h1 {
+      color: @white;
+    }
+  }
+}
+
+:global(.theme-dark) {
+  .layout-header {
+    &__wrapper {
+      box-shadow: 0 1px 4px rgba(203, 203, 203, 0.08);
+    }
+
+    .header-logo h1 {
+      color: @white;
+    }
+  }
+
+  .layout-sider {
+    box-shadow: 2px 0 8px rgba(203, 203, 203, 0.05);
+  }
+
+  :global(.@{ant-prefix}-drawer-open).layout-sider-drawer .layout-sider {
+      box-shadow: 2px 0 6px rgba(203, 203, 203, 0.22);
+  }
+}
+
+.layout {
+  &__wrapper{
+     width: 100%;
+     min-height: 100vh;
+     position: relative;
+  }
+
+  &-header {
+    width: 100%;
+    transition: width 0.2s;
+
+    &__wrapper {
+      padding: 0 16px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+      position: relative;
+    }
+
+    &--fixed {
+      position: fixed;
+      top: 0;
+    }
+
+    .header-logo {
+      height: 100%;
+      vertical-align: top;
+      overflow: hidden;
+      white-space: nowrap;
+      cursor: pointer;
+
+      :global {
+        .logo {
+          height: 32px;
+          font-size: 32px;
+          vertical-align: middle;
+          display: inline-block;
+        }
+
+        h1 {
+          margin: 0 0 0 12px;
+          font-size: 16px;
+          font-weight: 600;
+          line-height: inherit;
+          vertical-align: top;
+          display: inline-block;
+        }
+      }
+    }
+
+    .trigger {
+      padding: 0 0 0 12px;
+      display: inline-block;
+      cursor: pointer;
+      transition: color 0.3s;
+
+      :global(.@{ant-prefix}icon) {
+        font-size: 20px;
+        vertical-align: -0.225em;
+      }
+    }
+
+    .content-right {
+      margin-left: auto;
+      height: 100%;
+      display: flex;
+      float: right;
+      overflow: hidden;
+
+      &__action {
+        padding: 0 12px;
+        display: inline-block;
+        cursor: pointer;
+        transition: color 0.3s;
+      }
+    }
+
+    :global{
+      .@{ant-prefix}-menu{
+        background: 0 0;
+        border-bottom: none;
+        line-height: 48px;
+      }
+
+      .@{ant-prefix}-menu-light.@{ant-prefix}-menu-horizontal > .@{ant-prefix}-menu-item,
+      .@{ant-prefix}-menu-light.@{ant-prefix}-menu-horizontal > .@{ant-prefix}-menu-submenu{
+        top: 0;
+        margin-top: 0;
+        border-bottom: 0;
+      }
+
+      .@{ant-prefix}-menu-horizontal{
+        & > .@{ant-prefix}-menu-item:hover,
+        & > .@{ant-prefix}-menu-submenu:hover,
+        & > .@{ant-prefix}-menu-item-active,
+        & > .@{ant-prefix}-menu-submenu-active,
+        & > .@{ant-prefix}-menu-item-open,
+        & > .@{ant-prefix}-menu-submenu-open,
+        & > .@{ant-prefix}-menu-item-selected,
+        & > .@{ant-prefix}-menu-submenu-selected{
+          &:not(.@{ant-prefix}-menu-overflowed-submenu){
+            color: @var-primary;
+          }
+        }
+      }
+
+      .@{ant-prefix}-menu-item-selected,
+      .@{ant-prefix}-menu-submenu-selected {
+        .anticon,.anticon + span{
+          color: @white;
+        }
+      }
+
+      .@{ant-prefix}-menu-item-selected,
+      .@{ant-prefix}-menu-submenu-selected,
+      .@{ant-prefix}-menu-submenu-popup .@{ant-prefix}-menu-item-selected
+      {
+        &:not(.@{ant-prefix}-menu-overflowed-submenu){
+          background-color: @var-primary;
+        }
+      }
+    }
+  }
+
+  &-sider {
+    position: relative;
+    box-shadow: 2px 0 8px rgba(29, 35, 41, 0.05);
+
+    &--fixed {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+
+    .layout-sider-drawer & {
+      box-shadow: none;
+
+      :global(.@{ant-prefix}-drawer-open)& {
+        box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
+      }
+    }
+
+    .top-in-sider{
+      color: @white;
+      background-color: @menu-dark-bg;
+    }
+
+    .sider-logo {
+      padding: 8px 16px;
+      height: 45px;
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: all 0.3s;
+      position: relative;
+
+      :global {
+        .logo,
+        h1 {
+          vertical-align: middle;
+          display: inline-block;
+        }
+
+        .logo {
+          height: 32px;
+          font-size: 32px;
+        }
+
+        h1 {
+          margin: 0 0 0 12px;
+          height: 32px;
+          line-height: 32px;
+          font-size: 18px;
+          font-weight: 600;
+        }
+      }
+    }
+
+    &--collapsed .sider-logo{
+      padding: 8px;
+
+      :global{
+        h1{
+          display: none;
+        }
+      }
+    }
+
+    :global{
+      .@{ant-prefix}-menu{
+        width: 100%;
+        border-right: none;
+      }
+    }
+  }
+
+  &-breadcrumb{
+    padding: 12px 16px;
+  }
+
+  &-content {
+    padding: 0 16px;
+    // min-height: 100%;
+
+    &--has-breadcrumb{
+    // min-height: calc(100% - 50px);
+    }
+
+    &--has-footer{
+      // min-height: calc(100% - 70px);
+    }
+
+    &--has-breadcrumb&--has-footer{
+      // min-height: calc(100% - 120px);
+    }
+
+    // webkit h1 在section下字号不正常， layout 使用section布局
+    h1{
+      font-size: 2em;
+    }
+
+    &__wrapper {
+      width: 100%;
+      min-height: 100%;
+      // transition: 0.3s;
+      position: relative;
+
+      &.content-width-fixed {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    }
+
+    &__loading{
+      padding-top: 30%;
+      background-color: fadeout(@white, 30%);
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 0;
+      bottom: 0;
+      z-index: 1000;
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "@pomelo/shared-web",
+  "description": "web 端 shared 内容",
+  "version": "0.1.0",
+  "private": true,
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./esm/index.js",
+      "require": "./lib/index.js"
+    },
+    "./*": {
+      "types": "./types/*",
+      "import": "./esm/*",
+      "require": "./lib/*",
+      "default": {
+        "types": "./types/*/index.d.ts",
+        "import": "./esm/*/index.js",
+        "require": "./lib/*/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "serve": "run -T tsc --project tsconfig.build.json --module es2015 --declaration --declarationDir types --outDir esm --watch",
+    "build": "run -T rimraf -rf lib esm dist types && yarn build:cjs && yarn build:esm && yarn build:types",
+    "build:cjs": "run -T tsc --project tsconfig.build.json",
+    "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
+    "build:types": "run -T tsc --project tsconfig.types.json"
+  },
+  "devDependencies": {
+    "@vue-async/fetch": "^0.1.0-alpha.9",
+    "@vue-async/fetch-axios": "^0.1.0-alpha.12",
+    "lodash-es": "^4.17.21",
+    "moment": "^2.29.4",
+    "pinia": "^2.0.17"
+  },
+  "peerDependencies": {
+    "@vue-async/fetch": "^0.1.0-alpha.9",
+    "@vue-async/fetch-axios": "^0.1.0-alpha.12",
+    "lodash-es": "^4.17.0",
+    "moment": "^2.29.4",
+    "pinia": "^2.0.0"
+  },
+  "packageManager": "yarn@3.1.0"
+}

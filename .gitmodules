@@ -1,0 +1,12 @@
+[submodule ".submodules/formily-antdv"]
+	path = .submodules/formily-antdv
+	url = https://github.com/aceHubert/formily-antdv.git
+[submodule ".submodules/formily-vant"]
+	path = .submodules/formily-vant
+	url = https://github.com/aceHubert/formily-vant.git
+[submodule ".submodules/formily-portal-antdv"]
+	path = .submodules/formily-portal-antdv
+	url = https://github.com/aceHubert/formily-portal-antdv.git
+[submodule ".submodules/formily-portal-vant"]
+	path = .submodules/formily-portal-vant
+	url = https://github.com/aceHubert/formily-portal-vant.git

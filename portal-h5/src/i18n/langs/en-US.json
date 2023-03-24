@@ -1,0 +1,35 @@
+{
+  "name": "English",
+  "common": {
+    "tips": {
+      "loading": "Loading"
+    },
+    "btn_text": {
+      "submit": "Submit"
+    }
+  },
+  "page_home": {
+    "tips": "Enterprise module site, if you have any questions, please contact the administrator!"
+  },
+  "page_template": {
+    "index": {
+      "not_found_text": "Page not found!",
+      "schema_error_text": "Page configuration error!",
+      "render_error_text": "Page rendering error!"
+    }
+  },
+  "form_template": {
+    "index": {
+      "not_found_text": "Form not found!",
+      "render_error_text": "Form rendering error!",
+      "schema_error_text": "Form configuration error!"
+    }
+  },
+  "post_template": {
+    "index": {
+      "not_found_text": "Content not found!",
+      "render_error_text": "Content rendering error!",
+      "schema_error_text": "Content configuration error!"
+    }
+  }
+}

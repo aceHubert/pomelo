@@ -1,0 +1,16 @@
+/*
+* font-size
+* 主要应用于文字片段，文章内容部分
+*/
+
+.fontSize(@fontSize,@designDpr:1) {
+  font-size: @fontSize / @designDpr;
+
+  [data-dpr='2'] {
+    font-size: @fontSize / @designDpr * 2;
+  }
+
+  [data-dpr='3'] {
+    font-size: @fontSize / @designDpr * 3;
+  }
+}

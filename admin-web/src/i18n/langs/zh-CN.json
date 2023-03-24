@@ -1,0 +1,365 @@
+{
+  "name": "简体中文",
+  "site_title": "Pomelo",
+  "common": {
+    "btn_text": {
+      "ok": "是",
+      "yes": "是",
+      "no": "否",
+      "cancel": "取消",
+      "confirm": "确认",
+      "create": "新建",
+      "edit": "编辑",
+      "update": "修改",
+      "save": "保存",
+      "delete": "删除",
+      "search": "搜索",
+      "submit": "提交",
+      "reset": "重置",
+      "expand": "展开",
+      "collapse": "收起",
+      "upload": "上传",
+      "back_to_home": "返回主页",
+      "in_operation": "操作中"
+    },
+    "btn_tips": {
+      "go_back": "返回上一级"
+    },
+    "dialog": {
+      "title": {
+        "tips": "提示",
+        "comfirm": "确认"
+      },
+      "btn": {
+        "ok": "@:common.btn_text.ok",
+        "yes": "@:common.btn_text.yes",
+        "no": "@:common.btn_text.no",
+        "cancel": "@:common.btn_text.cancel",
+        "confirm": "@:common.btn_text.confirm"
+      }
+    },
+    "placeholder": {
+      "input": "请输入{field}",
+      "choose": "请选择{field}",
+      "search": "\"{field}\"模糊搜索"
+    },
+    "search": {
+      "keyword_placeholder": "搜索",
+      "bulk_delete_action_text": "删除"
+    },
+    "tips": {
+      "early_morning": "早上好",
+      "morning": "上午好",
+      "noon": "中午好",
+      "afternoon": "下午好",
+      "evening": "晚上好",
+      "loading_text": "加载中...",
+      "theme": "主题"
+    },
+    "error": {
+      "unauthorized": "抱歉，您没有权限访问此站点。",
+      "page_not_found": "页面未找到！",
+      "internal_error": "系统错误，请稍后重试！",
+      "refresh_token_required": "没有提供可用于刷新的token！",
+      "no_token_provide": "没有提供token！",
+      "no_capability": "抱歉，您没有权限操作此页面！",
+      "load_module_failed": "模块加载失败！",
+      "bulk_row_select_reqrired": "请选择至少一行数据！",
+      "delete_faild": {
+        "default": "删除失败！",
+        "with_message": "删除失败，错误：{message}!"
+      },
+      "bluk_apply_faild": {
+        "default": "批量操作失败!",
+        "with_message": "批量操作失败，错误：{message}!"
+      }
+    }
+  },
+  "menu": {
+    "dashboard": "仪表盘",
+    "content-root": "内容",
+    "content": {
+      "taxonomy": "Taxonomy",
+      "template": "模版",
+      "pages": "页面",
+      "pages_index": "页面管理",
+      "pages_design": "页面设计",
+      "pages_add": "新建页面",
+      "forms": "表单",
+      "forms_index": "表单管理",
+      "forms_add": "新建表单",
+      "forms_design": "表单设计",
+      "posts": "内容",
+      "posts_index": "内容管理",
+      "posts_design": "内容设计",
+      "posts_add": "新建内容",
+      "data-scope": "数据范围",
+      "data-scope_index": "数据范围管理",
+      "data-scope_design": "数据范围设计",
+      "data-scope_add": "新建数据范围",
+      "submodules": "模块",
+      "submodules_index": "模块管理",
+      "submodules_details": "模块详情"
+    }
+  },
+  "components": {
+    "search_form": {
+      "keyword_placeholder": "搜索",
+      "row_count": "{count} 行",
+      "bulk_action_placeholder": "批量操作",
+      "bulk_apply_btn_tips": "执行批量操作",
+      "bulk_apply_btn_text": "应用"
+    },
+    "async_table": {
+      "sum": "总数",
+      "selected": "选中",
+      "selected_row_count": "{count} 行",
+      "clear": "清除"
+    },
+    "avatar_dropdown": {
+      "user": {
+        "profile": "用户信息",
+        "settings": "设置",
+        "signout": "退出登录"
+      },
+      "dialog": {
+        "signout": {
+          "title": "@:common.dialog.title.tips",
+          "content": "确认退出吗？",
+          "ok_text": "@:common.btn_text.ok",
+          "cancel_text": "@:common.btn_text.no"
+        }
+      }
+    },
+    "message_dropdown": {
+      "item": {
+        "view_link_text": "查看",
+        "make_as_read_link_text": "设置已读"
+      },
+      "no_messasge_text": "没有新消息！",
+      "show_more_btn_text": "查看更多"
+    }
+  },
+  "layout_default": {
+    "sider_drawer": {
+      "title": "菜单",
+      "collapse_sidebar": "折叠",
+      "expand_sidebar": "展开"
+    }
+  },
+  "page_signin": {
+    "page_title": "登录",
+    "tips": {
+      "waiting": "请稍后...",
+      "redirecting": "跳转中...",
+      "no_signin_request_pinding": "没有登录请求信息。",
+      "server_time_unmatch_error": "当前设备日期时间有误<br/>请调整为标准北京时间后重新进入"
+    },
+    "silent": {
+      "content": "登录中..."
+    }
+  },
+  "page_signout": {
+    "page_title": "登出",
+    "tips": {
+      "content": "登出中..."
+    }
+  },
+  "page_session_timeout": {
+    "page_title": "会话超时",
+    "title": "OOPS!",
+    "info": "登录会话已超时，需要您重新登录。",
+    "log_back_in": "重新登录"
+  },
+  "page_dashboard": {
+    "title": "仪表盘",
+    "alert": {
+      "message": "综合管理系统(IMPS)",
+      "description": {
+        "form_template": "表单模版",
+        "page_template": "页面模版",
+        "module_template": "模块管理",
+        "post_template": "内容管理",
+        "data_scope": "数据范围管理"
+      }
+    }
+  },
+  "page_submodules": {
+    "page_title": "模块",
+    "details": {
+      "page_title": "模块详情"
+    }
+  },
+  "page_templates": {
+    "title_label": "标题",
+    "title_placeholder": "请输入标题",
+    "title_required": "标题必填！",
+    "name_label": "自定义路由",
+    "name_placeholder": "请输入自定义路由",
+    "content_placeholder": "请编辑内容",
+    "status_label": "状态",
+    "category_label": "分类",
+    "category_placeholder": "请选择分类",
+    "category_search_placeholder": "请输入查询分类",
+    "tag_label": "标签",
+    "tag_placeholder": "请选择标签(或输入标签添加)",
+    "create_at_label": "创建时间",
+    "status_options": {
+      "all": "所有",
+      "draft": "草稿",
+      "pending": "待审核",
+      "publish": "已发布",
+      "private": "私有",
+      "future": "定时发布",
+      "trash": "回收站",
+      "self": "我的",
+      "all_not_include_trash_data_tooltip": "不包含在草稿箱中的数据"
+    },
+    "btn_text": {
+      "review": "审核",
+      "save_and_publish": "保存并发布",
+      "save_to_draft": "保存至草稿",
+      "restore": "重置",
+      "move_to_trush": "放入回收站",
+      "switch_to_draft": "修改并保存至草稿",
+      "update": "修改",
+      "publish": "发布",
+      "submit_to_review": "提交审核",
+      "review_confirm": "审核通过",
+      "review_reject": "审核不通过"
+    },
+    "filter": {
+      "all_categories_text": "所有分类",
+      "all_month_count_text": "所有日期"
+    },
+    "error": {
+      "move_to_trash_faild": {
+        "default": "放入回收站失败！",
+        "with_message": "放入回收站失败，错误：{message}！"
+      },
+      "restore_faild": {
+        "default": "重置失败！",
+        "with_message": "重置失败，错误：{message}！"
+      }
+    },
+    "forms": {
+      "page_title": "表单列表",
+      "design": {
+        "page_title": "表单设计",
+        "sider_title": "表单设置",
+        "submit_action_placeholder": "请输入请求地址",
+        "submit_config_label": "请求配置",
+        "submit_action_label": "请求地址",
+        "submit_success_redirect_label": "请求成功跳转地址",
+        "submit_success_redirect_placeholder": "请输入请求成功跳转地址",
+        "submit_success_tips_placeholder": "请输入请求成功提示文案",
+        "submit_success_tips_label": "请求成功提示文案"
+      },
+      "tips": {
+        "unsaved_confirm": "未保存表单配置将会丢失，是否离开页面？",
+        "unpublishe_confirm": "确认是否将已发布表单配置放入到草稿箱？",
+        "delete_confirm": "确认删除这条表单配置？"
+      }
+    },
+    "pages": {
+      "page_title": "页面列表",
+      "design": {
+        "page_title": "页面设计",
+        "sider_title": "页面设置"
+      },
+      "tips": {
+        "unsaved_confirm": "未保存页面配置将会丢失，是否离开页面？",
+        "unpublishe_confirm": "确认是否将已发布页面配置放入到草稿箱？",
+        "delete_confirm": "确认删除这条页面配置？"
+      }
+    },
+    "posts": {
+      "page_title": "内容列表",
+      "excerpt_placeholder": "请输入内容简介",
+      "excerpt_required": "请输入内容简介！",
+      "excerpt_label": "简介",
+      "content_placeholder": "请输入内容",
+      "content_required": "请输入内容！",
+      "content_label": "内容",
+      "design": {
+        "page_title": "内容设计"
+      },
+      "tips": {
+        "unsaved_confirm": "未保存内容将会丢失，是否离开页面？",
+        "unpublishe_confirm": "确认是否将已发布内容放入到草稿箱？",
+        "delete_confirm": "确认删除这条内容配置？"
+      }
+    },
+    "data_scopes": {
+      "page_title": "数据范围列表",
+      "components": {
+        "clause_form": {
+          "operator_options": {
+            "include": "包含"
+          },
+          "logical_options": {
+            "or": "或",
+            "and": "与"
+          },
+          "table_header": {
+            "logical": "与/或",
+            "field": "字段",
+            "operator": "运算符",
+            "value": "值"
+          },
+          "tips": {
+            "group_to_selected_items": "对所选子句进行分组",
+            "ungroup_current_items": "取消子句分组",
+            "group_checkbox": "切换筛选子句的分组",
+            "insert_new_row": "插入新的筛选器行",
+            "remove_current_row": "删除此筛选器行"
+          },
+          "btn_text": {
+            "create_new_row": "添加新子句"
+          },
+          "error": {
+            "clauses_definition_required": "范围至少需要一个子句！",
+            "field_required_in_row": "第{row}行存在字段为空的子句！",
+            "value_invalid": "第{row}存在字段值验证失败！",
+            "value_required_in_row": "第{row}存在字段值为空的子句！",
+            "unable_to_group_those_clauses": "无法将这些子句分组！",
+            "no_need_to_group_those_clauses": "所选子句分组不必要！",
+            "selected_clauses_already_has_a_group": "所选子句已有一个组！",
+            "no_crossing_between_groups": "组与组之间不能交叉！"
+          }
+        }
+      },
+      "design": {
+        "page_title": "数据范围设计",
+        "fields_config_label": "字段配置",
+        "fields_config_placeholder": "请选择字段配置",
+        "fields_config_required": "请选择字段配置！",
+        "organization_label": "企业/组织",
+        "organization_placeholder": "请输入搜索\"企业/组织\"",
+        "organization_required": "企业/组织必选！",
+        "content_label": "语句定义",
+        "tips": {
+          "choose_fields_config": "选择字段配置",
+          "clause_reset_by_fields_change_confirm": "字段配置变更定义将会重置，确认修改吗？",
+          "choose_organization_config": "请输入查询组织",
+          "clause_reset_by_organization_change_confirm": "企业/组织变更定义将会重置，确认修改吗？"
+        }
+      },
+      "tips": {
+        "delete_confirm": "确认删除这条数据范围？"
+      }
+    },
+    "btn_tips": {
+      "switch_to_draft": "修改并保存内容至草稿箱",
+      "update": "保存修改内容",
+      "save_to_draft": "保存内容至草稿箱",
+      "publish": "发布内容",
+      "submit_to_review": "提交内容审核",
+      "review_confirm": "内容审核通过",
+      "review_reject": "内容审核不通过"
+    },
+    "design_sider": {
+      "settings_title": "设置"
+    }
+  }
+}

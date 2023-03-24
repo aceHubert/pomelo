@@ -1,0 +1,187 @@
+import DataLoader from 'dataloader';
+import { ModuleRef } from '@nestjs/core';
+import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
+import { createMetaResolver } from '@/common/resolvers/meta.resolver';
+import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
+import { User } from '@/common/decorators/user.decorator';
+import { TermTaxonomyDataSource } from '@/sequelize-datasources/datasources';
+import { Anonymous, Authorized } from '@/common/decorators/authorized.decorator';
+import { RamAuthorized, Actions } from '@/common/decorators/ram-authorized.decorator';
+import { Taxonomy } from '@/orm-entities/interfaces';
+
+// Types
+import { TermTaxonomyModel } from '@/sequelize-datasources/interfaces';
+import { TermTaxonomyArgs, CategoryTermTaxonomyArgs, TagTermTaxonomyArgs } from './dto/term-taxonomy.args';
+import { TermTaxonomyByObjectIdArgs } from './dto/term-taxonomy-by-object-id.args';
+import { NewTermTaxonomyInput } from './dto/new-term-taxonomy.input';
+import { NewTermTaxonomyMetaInput } from './dto/new-term-taxonomy-meta.input';
+import { NewTermRelationshipInput } from './dto/new-term-relationship.input';
+import { UpdateTermTaxonomyInput } from './dto/update-term-taxonomy.input';
+import { TermTaxonomy, TermTaxonomyMeta, TermRelationship } from './models/term-taxonomy.model';
+
+@Authorized()
+@Resolver(() => TermTaxonomy)
+export class TermTaxonomyResolver extends createMetaResolver(
+  TermTaxonomy,
+  TermTaxonomyMeta,
+  NewTermTaxonomyMetaInput,
+  TermTaxonomyDataSource,
+) {
+  private cascadeLoader!: DataLoader<{ parentId: number; fields: string[] }, TermTaxonomyModel[]>;
+
+  constructor(
+    protected readonly moduleRef: ModuleRef,
+    private readonly termTaxonomyDataSource: TermTaxonomyDataSource,
+  ) {
+    super(moduleRef);
+    this.cascadeLoader = new DataLoader(async (keys) => {
+      if (keys.length) {
+        // 所有调用的 fields 都是相同的
+        const results = await this.termTaxonomyDataSource.getList(
+          keys.map((key) => key.parentId),
+          keys[0].fields,
+        );
+        return keys.map(({ parentId }) => results[parentId] || []);
+      } else {
+        return Promise.resolve([]);
+      }
+    });
+  }
+
+  @Anonymous()
+  @Query((returns) => TermTaxonomy, { nullable: true, description: 'Get term taxonomy.' })
+  termTaxonomy(
+    @Args('id', { type: () => ID, description: 'Term taxonomy id' }) id: number,
+    @Fields() fields: ResolveTree,
+  ): Promise<TermTaxonomy | null> {
+    return this.termTaxonomyDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy));
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.List)
+  @Query((returns) => [TermTaxonomy!], { description: 'Get term taxonomy list.' })
+  termTaxonomies(@Args() args: TermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
+    return this.termTaxonomyDataSource
+      .getList(args, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
+      .then((terms) =>
+        terms.map((term) =>
+          // 级联查询将参数传给 children
+          Object.assign(
+            {
+              taxonomy: args.taxonomy,
+              group: args.group,
+            },
+            term,
+          ),
+        ),
+      );
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.CategoryList)
+  @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
+  categoryTermTaxonomies(
+    @Args() args: CategoryTermTaxonomyArgs,
+    @Fields() fields: ResolveTree,
+  ): Promise<TermTaxonomy[]> {
+    return this.termTaxonomyDataSource
+      .getList({ ...args, taxonomy: Taxonomy.Category }, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
+      .then((terms) =>
+        terms.map((term) =>
+          // 级联查询将参数传给 children
+          Object.assign(
+            {
+              taxonomy: Taxonomy.Category,
+              group: args.group,
+            },
+            term,
+          ),
+        ),
+      );
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.TagList)
+  @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
+  tagTermTaxonomies(@Args() args: TagTermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
+    return this.termTaxonomyDataSource
+      .getList({ ...args, taxonomy: Taxonomy.Tag }, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
+      .then((terms) =>
+        terms.map((term) =>
+          // 级联查询将参数传给 children
+          Object.assign(
+            {
+              taxonomy: Taxonomy.Tag,
+              group: args.group,
+            },
+            term,
+          ),
+        ),
+      );
+  }
+
+  @ResolveField((returns) => [TermTaxonomy!], { description: 'Get cascade term taxonomies.' })
+  children(
+    @Parent() { taxonomyId: parentId }: { taxonomyId: number },
+    @Fields() fields: ResolveTree,
+  ): Promise<TermTaxonomy[]> {
+    return this.cascadeLoader.load({ parentId, fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy) });
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.ListByObjectId)
+  @Query((returns) => [TermTaxonomy!], { description: 'Get term taxonomies by objectId.' })
+  termTaxonomiesByObjectId(
+    @Args() args: TermTaxonomyByObjectIdArgs,
+    @Fields() fields: ResolveTree,
+  ): Promise<TermTaxonomy[]> {
+    return this.termTaxonomyDataSource.getListByObjectId(
+      args,
+      this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+    );
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.Create)
+  @Mutation((returns) => TermTaxonomy, { description: 'Create a new term taxonomy.' })
+  createTermTaxonomy(
+    @Args('model', { type: () => NewTermTaxonomyInput }) model: NewTermTaxonomyInput,
+    @User() requestUser: RequestUser,
+  ): Promise<TermTaxonomy> {
+    return this.termTaxonomyDataSource.create(model, requestUser);
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.CreateRelationship)
+  @Mutation((returns) => TermRelationship, { description: 'Create a new term relationship.' })
+  createTermRelationship(
+    @Args('model', { type: () => NewTermRelationshipInput }) model: NewTermRelationshipInput,
+    @User() requestUser: RequestUser,
+  ): Promise<TermRelationship> {
+    return this.termTaxonomyDataSource.createRelationship(model, requestUser);
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.Update)
+  @Mutation((returns) => Boolean, { description: 'Update term taxonomy.' })
+  updateTermTaxonomy(
+    @Args('id', { type: () => ID, description: 'Term id' }) id: number,
+    @Args('model', { type: () => UpdateTermTaxonomyInput }) model: UpdateTermTaxonomyInput,
+  ): Promise<boolean> {
+    return this.termTaxonomyDataSource.update(id, model);
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.Delete)
+  @Mutation((returns) => Boolean, { description: 'Delete term taxonomy permanently (include term relationship).' })
+  deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<boolean> {
+    return this.termTaxonomyDataSource.delete(id);
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.BulkDelete)
+  @Mutation((returns) => Boolean, { description: 'Delete term taxonomies permanently (include term relationship).' })
+  bulkDeleteTermTaxonomy(@Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[]): Promise<boolean> {
+    return this.termTaxonomyDataSource.bulkDelete(ids);
+  }
+
+  @RamAuthorized(Actions.TermTaxonomy.DeleteRelationship)
+  @Mutation((returns) => Boolean, { description: 'Delete term relationship permanently.' })
+  deleteTermRelationship(
+    @Args('objectId', { type: () => ID, description: 'Object id' }) objectId: number,
+    @Args('termTaxonomyId', { type: () => ID, description: 'Term taxonomy id' }) termTaxonomyId: number,
+  ): Promise<boolean> {
+    return this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
+  }
+}

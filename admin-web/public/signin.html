@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <style type="text/css">
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #ececec;
+    }
+
+    p {
+      font-size: 14px;
+      text-align: center;
+      color: #858585;
+    }
+
+    #msg {
+      margin-top: 100px;
+    }
+
+    #home {
+      margin-top: 50px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <p id="msg">正在登录...</p>
+  <p id="home"><a href="/">去首页</a></p>
+  <script src="https://www.unpkg.com/oidc-client@1.11.5/dist/oidc-client.min.js"></script>
+  <script>
+    (window.Oidc || document.write('<script src="./static/js/oidc-client.min.js"><\/script>'));
+    var redirect = function () {
+      var url = localStorage.getItem('oidc.redirect') || '/';
+      if (history.replaceState) {
+        history.replaceState({}, document.title, url);
+        history.go(0);
+      } else {
+        location.replace(url);
+      }
+    };
+    new Oidc.UserManager().signinRedirectCallback().then(function (user) {
+      history.replaceState({}, document.title, location.origin + location.pathname);
+      redirect();
+    }).catch(function (e) {
+      document.getElementById('home').style.display = 'block';
+      var msg = e.message;
+      if (msg.indexOf('iat is in the future') !== -1 ||
+        msg.indexOf('exp is in the past') !== -1) {
+        document.getElementById('msg').innerText = '当前设备日期时间有误<br/>请调整为标准北京时间后重新进入';
+      } else {
+        document.getElementById('msg').innerText = msg;
+        setTimeout(redirect, 2000);
+      }
+    });
+  </script>
+</body>
+
+</html>

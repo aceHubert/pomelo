@@ -1,0 +1,99 @@
+@import 'ant-design-vue/lib/style/themes/index';
+@import '@formily-portal/antdv/lib/__builtins__/styles/common';
+
+@ant-prefix: ~'tpl-portal-pc';
+
+// colors(不可以使用 var 变量)
+@gray-1: #f8f9fb;
+@gray-2: #f1f3f7;
+@gray-3: #e9ecf2;
+@gray-4: #d9dde6;
+@gray-5: #c6cad3;
+@gray-6: #909399;
+@gray-7: #606266;
+@gray-8: #333538;
+
+@border-color: #c6cad3;
+
+@theme-success: @green;
+@theme-warn: @orange;
+@theme-error: @red;
+@theme-info: @blue;
+
+@text-color: @gray-8; // override text-color
+
+@text-primary: @text-color;
+@text-secondary: @gray-6;
+@text-disabled: @gray-5;
+@text-inverse: @white;
+
+@box-shadow: 0 2px 20px 0 rgba(217, 221, 230, 0.4);
+
+@body-background: @gray-1;
+@component-background: @white;
+@green: #1abd80;
+@red: #f95155;
+@orange: #fda900;
+@blue: #046bde;
+@orange-dark: #e94709;
+
+@active-opacity: 0.6;
+
+// 圆角
+@border-radius-root: 4px;
+@border-radius-sm: @border-radius-root / 2;
+@border-radius-md: @border-radius-root;
+@border-radius-lg: @border-radius-root * 2;
+@border-radius-md-l: 10px; // 特殊使用
+@border-radius-xl: @border-radius-root * 4;
+@border-radius-max: 999px;
+
+// 圆角简写
+@br-sm: @border-radius-sm;
+@br-md: @border-radius-md;
+@br-lg: @border-radius-lg;
+@br-md-l: @border-radius-md-l;
+@br-xl: @border-radius-xl;
+@br-max: @border-radius-max;
+
+// 字号 - 主要用于大标题
+@font-size-xs: 10px;
+@font-size-sm: 12px;
+@font-size-md: 14px;
+@font-size-lg: 16px;
+@font-size-xl: 18px;
+@font-size-xxl: 20px;
+@font-size-xxxl: 28px;
+
+// 行高
+@line-height-xs: 14px;
+@line-height-sm: 18px;
+@line-height-md: 20px;
+@line-height-lg: 22px;
+@line-height-xl: 26px;
+@line-height-xxl: 28px;
+@line-height-xxxl: 40px;
+
+// 字体粗细
+@font-weight-black: 900;
+@font-weight-bold: 700;
+@font-weight-medium: 500;
+@font-weight-regular: 400;
+@font-weight-light: 300;
+@font-weight-thin: 100;
+
+// antdv reset
+@link-color: @var-primary;
+@link-hover-color: @var-primary-dark;
+@link-active-color: @var-primary-dark;
+
+// steps
+@process-icon-color: @var-primary;
+@finish-tail-color: @var-primary;
+
+// tabs
+@tabs-card-active-color: @var-primary;
+@tabs-ink-bar-color: @var-primary;
+@tabs-highlight-color: @var-primary;
+@tabs-hover-color: @var-primary-dark;
+@tabs-active-color: @var-primary-darker;

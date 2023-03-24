@@ -1,0 +1,72 @@
+@search-from-prefix-cls: ~'@{ant-prefix}-search-form';
+
+.@{search-from-prefix-cls}{
+  &-wrapper{
+    position: relative;
+    .clearfix();
+
+    @media screen and (max-width: 576px) {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  }
+
+  &-sub {
+    margin: 8px 0 0;
+    padding: 0;
+    position: absolute;
+    z-index: 1;
+
+    @media screen and (max-width: 576px) {
+      margin: 0 0 8px;
+      position: static;
+    }
+
+    &__item {
+      display: inline-block;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    &__item-link {
+      color: @text-color;
+    }
+  }
+
+  &-sub__slot {
+    line-height: 40px;
+    position: absolute;
+    z-index: 1;
+    order: 1; // 正序
+
+    @media screen and (max-width: 576px) {
+      position: static;
+    }
+  }
+
+  &-content {
+    @media screen and (max-width: 576px) {
+      .@{search-from-prefix-cls}-sub-slot + & {
+        margin-bottom: 4px !important;
+      }
+    }
+
+    &__input-item {
+      float: right;
+
+      @media screen and (max-width: 576px) {
+        & {
+          float: initial;
+        }
+      }
+    }
+
+    &__count-item {
+      float: right;
+      text-align: right;
+    }
+  }
+}

@@ -1,0 +1,80 @@
+import { Field, ObjectType, ID, OmitType, PickType } from '@nestjs/graphql';
+// import { FieldAuthorized, UserRole } from '@/common/decorators/authorized.decorator';
+import { Meta } from '@/common/resolvers/models/meta.model';
+import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
+import { TemplateStatus } from '@/orm-entities/interfaces';
+
+@ObjectType({ description: 'Template model' })
+export class Template {
+  @Field((type) => ID, { description: 'Template Id' })
+  id!: number;
+
+  @Field((type) => ID, { description: 'Name (Route path alias)' })
+  name!: string;
+
+  @Field({ description: 'Title' })
+  title!: string;
+
+  @Field({ description: 'Short description' })
+  excerpt!: string;
+
+  @Field({ description: 'Content' })
+  content!: string;
+
+  // @FieldAuthorized(UserRole.Administrator)
+  @Field({ description: 'Author id' })
+  author!: string;
+
+  // @FieldAuthorized(UserRole.Administrator)
+  @Field((type) => TemplateStatus, { description: 'Status' })
+  status!: TemplateStatus;
+
+  @Field({ description: 'Type' })
+  type!: string;
+
+  @Field({ description: 'Creation time' })
+  createdAt!: Date;
+}
+
+@ObjectType({ description: 'Template meta' })
+export class TemplateMeta extends Meta {
+  @Field((type) => ID, { description: 'Template Id' })
+  templateId!: number;
+}
+
+@ObjectType({ description: 'Paged  template item model' })
+export class PagedTemplateItem extends OmitType(Template, ['content'] as const) {}
+
+@ObjectType({ description: 'Paged template model' })
+export class PagedTemplate extends PagedResponse(PagedTemplateItem) {
+  // other fields
+}
+
+@ObjectType({ description: 'Template option model' })
+export class TemplateOption extends PickType(Template, ['id', 'title'] as const) {
+  // other fields
+}
+
+@ObjectType({ description: 'Template count by status' })
+export class TemplateStatusCount extends Count {
+  @Field((type) => TemplateStatus, { description: 'Template status' })
+  status!: TemplateStatus;
+}
+
+@ObjectType({ description: `Template count by day` })
+export class TemplateDayCount extends Count {
+  @Field({ description: 'Day (format: yyyyMMdd)' })
+  day!: string;
+}
+
+@ObjectType({ description: `Template count by month` })
+export class TemplateMonthCount extends Count {
+  @Field({ description: 'Month (format: yyyyMM)' })
+  month!: string;
+}
+
+@ObjectType({ description: `Template count by year` })
+export class TemplateYearCount extends Count {
+  @Field({ description: 'Year (format: yyyy)' })
+  year!: string;
+}

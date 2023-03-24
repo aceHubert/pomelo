@@ -1,0 +1,74 @@
+/* colors */
+
+.theme-vars(){
+  primary: @primary-color;
+  primary-light: @primary-light-color;
+  primary-lighter: @primary-lighter-color;
+  primary-dark: @primary-dark-color;
+  primary-darker: @primary-darker-color;
+  success: @theme-success;
+  warn: @theme-warn;
+  error: @theme-error;
+  info: @theme-info;
+}
+
+each(.theme-vars(),{
+  .set-var-color(@key,@value) !important;
+})
+
+.text-vars(){
+  primary: @text-primary;
+  secondary: @text-secondary;
+  disabled: @text-disabled;
+  inverse: @text-inverse;
+}
+
+each(.text-vars(),{
+  .text--@{key}{
+    color: @value !important;
+  }
+})
+
+/* 不支持IE */
+:root {
+  each(.theme-vars(), {
+    --theme-@{key}: @value;
+  })
+  each(.text-vars(), {
+    --text-@{key}: @value;
+  })
+  --link-color: @primary-color;
+  --body-background: @body-background;
+  --component-background: @component-background;
+}
+
+@gray: {
+  lighten-4: @gray-1;
+  lighten-3: @gray-2;
+  lighten-2: @gray-3;
+  lighten-1: @gray-4;
+  base: @gray-5;
+  darken-1: @gray-6;
+  darken-2: @gray-7;
+  darken-3: @gray-8;
+};
+
+@shades: {
+  white: #fff;
+  black: #000;
+  transparent: transparent;
+};
+
+
+@selector-colors:  gray, shades;
+
+each(@selector-colors,.(@root-value){
+  each(@@root-value,.(@value,@key){
+    & when(@key = base){
+      .set-color(@root-value,@value) !important;
+    }
+    & when not (@key = base){
+      .set-color(@root-value,@value,@key) !important;
+    }
+  })
+})

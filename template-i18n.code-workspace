@@ -1,0 +1,64 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "admin-web"
+    },
+    {
+      "path": "portal-pc"
+    },
+    {
+      "path": "portal-h5"
+    }
+  ],
+  "settings": {
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on",
+    "files.insertFinalNewline": true,
+    "files.eol": "\n",
+    // "vetur.validation.template": false,
+    // "vetur.validation.script": false, // package 不在根目录下，ts 引用时使用别名"@/" 找不到模块
+    "vetur.grammar.customBlocks": {
+      "docs": "md",
+      "i18n": "json",
+      "router": "js"
+    },
+    "vetur.format.defaultFormatterOptions": {
+      "js-beautify-html": {
+        "wrap_line_length": 120,
+        "wrap_attributes": "auto",
+        "end_with_newline": false
+      }
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[vue]": {
+      "editor.defaultFormatter": "octref.vetur"
+    },
+    "javascript.format.insertSpaceBeforeFunctionParenthesis": false,
+    // "javascript.implicitProjectConfig.experimentalDecorators": true,
+    "javascript.preferences.quoteStyle": "single",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
+    "typescript.preferences.quoteStyle": "single",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    // 自动修复
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": false
+    },
+    "i18n-ally.fullReloadOnChanged": true,
+    "i18n-ally.keystyle": "nested",
+    "i18n-ally.sourceLanguage": "zh-CN",
+    "i18n-ally.localesPaths": ["src/i18n", "src/i18n/langs"],
+    "i18n-ally.translate.engines": ["baidu", "google", "deepl"],
+    "i18n-ally.translate.baidu.appId": "20221114001451503",
+    "i18n-ally.translate.baidu.secretKey": "UE42YEj5DeSqTJnp8QCz",
+    "i18n-ally.translate.baidu.enableLog": true
+  }
+}
