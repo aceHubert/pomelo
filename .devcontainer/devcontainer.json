@@ -19,7 +19,18 @@
     "vscode": {
       // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
-        "streetsidesoftware.code-spell-checker"
+        "streetsidesoftware.code-spell-checker",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "irongeek.vscode-env",
+        "dbaeumer.vscode-eslint",
+        "visualstudioexptteam.vscodeintellicode",
+        "visualstudioexptteam.intellicode-api-usage-examples",
+        "octref.vetur",
+        "lokalise.i18n-ally",
+        "ritwickdey.liveserver",
+        "genieai.chatgpt-vscode",
+        "github.copilot"
       ]
     }
   }
