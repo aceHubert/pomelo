@@ -1,7 +1,7 @@
 import { defineComponent, ref, computed, watch } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { createResource } from '@vue-async/resource-manager';
-import { useTemplateApi, formatDate, vueWarn } from '@pomelo/shared-web';
+import { useTemplateApi, formatDate, warn } from '@pomelo/shared-web';
 import { TemplateStyleLinkMetaKey, TemplateStyleCssTextMetaKey } from '../constants';
 import classes from './index.module.less';
 
@@ -97,7 +97,7 @@ export default defineComponent({
     };
   },
   errorCaptured(err, vm, info) {
-    vueWarn(process.env.NODE_ENV === 'production', info || err.message, vm);
+    warn(process.env.NODE_ENV === 'production', info || err.message, vm);
     this.renderError = info || err.message;
     return false;
   },

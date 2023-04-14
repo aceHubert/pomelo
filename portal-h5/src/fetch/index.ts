@@ -1,11 +1,11 @@
 import Vue from 'vue';
 import { hasIn } from 'lodash-es';
-import { ref, reactive } from '@vue/composition-api';
 import axios from 'axios';
 import { FetchVuePlugin, createFetch } from '@vue-async/fetch';
 import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@vue-async/fetch-axios';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
+import { loadingRef, errorRef, SharedError } from '@/shared';
 
 // Types
 import type { AxiosError } from 'axios';
@@ -27,6 +27,7 @@ axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) =
 
   if (SUPPORTS_CORS) {
     return {
+      params,
       headers: {
         ...headers,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -65,10 +66,19 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
       })
       .catch(() => {
         userManager.signIn();
-        return new Promise(() => {});
+        return new Promise(() => {
+          // stop next
+        });
       });
   }
-  return Promise.reject(error);
+  return Promise.reject(
+    error.response?.data
+      ? new SharedError(
+          (error.response.data as any)!.message || 'System error!',
+          error.isAxiosError ? error.response?.status : 500,
+        )
+      : error,
+  );
 });
 
 export const afetch = createFetch(axiosInstance);
@@ -80,10 +90,6 @@ afetch.use(
   }),
 );
 
-/**
- * 全局的request loading 状态
- */
-export const loadingRef = ref(false);
 afetch.use(
   createLoadingPlugin({
     handler: () => {
@@ -95,13 +101,6 @@ afetch.use(
   }),
 );
 
-/**
- * 全局的request error
- */
-export const errorRef = reactive({
-  statusCode: 200,
-  message: '',
-});
 afetch.use(
   createCatchErrorPlugin({
     serializerData: (data: any) => {
@@ -121,10 +120,17 @@ afetch.use(
       }
       return data;
     },
-    handler: (err) => {
-      errorRef.statusCode = (err as any).code || 500;
-      errorRef.message = err.message || 'System error!';
-      return new Promise(() => {});
+    handler: (error) => {
+      errorRef.value =
+        error instanceof SharedError
+          ? error
+          : new SharedError(
+              error.message || 'System error!',
+              (axios.isAxiosError(error) ? error.response?.status : (error as any).code) || 500,
+            );
+      return new Promise(() => {
+        // stop next
+      });
     },
   }),
 );

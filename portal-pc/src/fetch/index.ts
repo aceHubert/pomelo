@@ -3,9 +3,9 @@ import { hasIn } from 'lodash-es';
 import axios from 'axios';
 import { FetchVuePlugin, createFetch } from '@vue-async/fetch';
 import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@vue-async/fetch-axios';
-import { loadingRef, errorRef, SharedError } from '@/shared';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
+import { loadingRef, errorRef, SharedError } from '@/shared';
 
 // Types
 import type { AxiosError } from 'axios';
@@ -66,10 +66,19 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
       })
       .catch(() => {
         userManager.signIn();
-        return new Promise(() => {}); // 阻止向下执行
+        return new Promise(() => {
+          // stop next
+        });
       });
   }
-  return Promise.reject(error);
+  return Promise.reject(
+    error.response?.data
+      ? new SharedError(
+          (error.response.data as any)!.message || 'System error!',
+          error.isAxiosError ? error.response?.status : 500,
+        )
+      : error,
+  );
 });
 
 export const afetch = createFetch(axiosInstance);
@@ -77,12 +86,10 @@ export const afetch = createFetch(axiosInstance);
 afetch.use(
   createRetryPlugin({
     maxCount: 3,
+    delay: true,
   }),
 );
 
-/**
- * 全局的request loading 状态
- */
 afetch.use(
   createLoadingPlugin({
     handler: () => {
@@ -94,9 +101,6 @@ afetch.use(
   }),
 );
 
-/**
- * 全局的request error
- */
 afetch.use(
   createCatchErrorPlugin({
     serializerData: (data: any) => {
@@ -117,11 +121,16 @@ afetch.use(
       return data;
     },
     handler: (error) => {
-      errorRef.value = new SharedError(
-        error.message || 'System error!',
-        (axios.isAxiosError(error) ? error.response?.status : (error as any).code) || 500,
-      );
-      return new Promise(() => {});
+      errorRef.value =
+        error instanceof SharedError
+          ? error
+          : new SharedError(
+              error.message || 'System error!',
+              (axios.isAxiosError(error) ? error.response?.status : (error as any).code) || 500,
+            );
+      return new Promise(() => {
+        // stop next
+      });
     },
   }),
 );
