@@ -1,0 +1,41 @@
+/* 1px */
+
+.bdr {
+  &-all,
+  &-t,
+  &-b,
+  &-tb,
+  &-l,
+  &-r {
+    position: relative;
+  }
+
+  &-all:before {
+    .setLine(@border-color-base);
+  }
+
+  &-t:before {
+    .setTopLine(@border-color-base);
+  }
+
+  &-b:after {
+    .setBottomLine(@border-color-base);
+  }
+
+  &-tb {
+    &:before {
+      .setTopLine(@border-color-base);
+    }
+    &:after {
+      .setBottomLine(@border-color-base);
+    }
+  }
+
+  &-l:before {
+    .setLeftLine(@border-color-base);
+  }
+
+  &-r:after {
+    .setRightLine(@border-color-base);
+  }
+}
