@@ -76,7 +76,6 @@ export default defineComponent({
     bulkApplying: Boolean,
     rowCount: Number,
     i18nKeyPrefix: { type: String, default: 'components.search_form' },
-    i18nRender: { type: Function, default: (key: string, fallback: string) => fallback },
   },
   setup(props: SearchFromProps, { emit, slots }) {
     const router = useRouter();
