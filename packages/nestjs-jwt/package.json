@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "jsonwebtoken": "^8.0.0",
-    "jwks-rsa": "^2.1.4"
+    "jwks-rsa": "^2.1.4",
+    "node-fetch": "2"
   },
   "devDependencies": {
     "@nestjs/common": "^9.0.0",
@@ -23,8 +24,8 @@
     "express-unless": "^2.1.1"
   },
   "peerDependencies": {
-    "@nestjs/common": ">=8.0.0",
-    "@nestjs/core": ">=8.0.0",
+    "@nestjs/common": "^8.2.3 || ^9.0.0",
+    "@nestjs/core": "^8.2.3 || ^9.0.0",
     "express-jwt": "^7.7.0"
   },
   "peerDependenciesMeta": {

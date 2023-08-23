@@ -1,0 +1,756 @@
+import md5 from 'md5';
+import { isUndefined } from 'lodash';
+import { isEmail, isPhoneNumber } from 'class-validator';
+import { ModuleRef } from '@nestjs/core';
+import { Injectable } from '@nestjs/common';
+import { WhereOptions } from 'sequelize';
+import { CountryCode } from 'libphonenumber-js';
+import { ForbiddenError, ValidationError } from '@/common/utils/errors.util';
+import { UserStatus, UserAttributes, UserRole } from '@/orm-entities/interfaces';
+import { UserCapability } from '../utils/user-capability.util';
+import { UserMetaKeys } from '../utils/keys.util';
+import {
+  UserModel,
+  UserSimpleModel,
+  UserWithRoleModel,
+  UserMetaModel,
+  PagedUserArgs,
+  PagedUserModel,
+  NewUserInput,
+  NewUserMetaInput,
+  UpdateUserInput,
+} from '../interfaces/user.interface';
+import { MetaDataSource } from './meta.datasource';
+
+@Injectable()
+export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInput> {
+  constructor(protected readonly moduleRef: ModuleRef) {
+    super(moduleRef);
+  }
+
+  /**
+   * 根据 Id 获取用户（不包含登录密码）
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(optional)]
+   * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
+   * @param fields 返回的字段
+   */
+  async get(id: number | null, fields: string[], requestUser: RequestUser): Promise<UserModel | null> {
+    // 查询非自己时，需要权限验证
+    if (id && String(id) !== String(requestUser.sub!)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    } else {
+      id = parseInt(requestUser.sub!);
+    }
+
+    // 排除登录密码
+    fields = fields.filter((field) => field !== 'loginPwd');
+
+    // 主键
+    if (!fields.includes('id')) {
+      fields.push('id');
+    }
+
+    return this.models.Users.findByPk(id, {
+      attributes: this.filterFields(fields, this.models.Users),
+    }).then((user) => user?.toJSON() as any as UserModel);
+  }
+
+  /**
+   * 根据 Id 获取用户
+   * 实段：id, displayName, email
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access none
+   * @param id 用户 Id（null返回请求用户的实体）
+   * @param fields 返回的字段
+   */
+  async getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null> {
+    // 过滤掉敏感字段
+    fields = fields.filter((field) => ['id', 'displayName', 'email'].includes(field));
+
+    return this.models.Users.findByPk(id, {
+      attributes: this.filterFields(fields, this.models.Users),
+    }).then((user) => user?.toJSON() as UserSimpleModel);
+  }
+
+  /**
+   * 获取用户分页列表
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [ListUsers]
+   * @param query 分页 Query 参数
+   * @param fields 返回的字段
+   */
+  async getPaged(
+    { offset, limit, ...query }: PagedUserArgs,
+    fields: string[],
+    requestUser: RequestUser,
+  ): Promise<PagedUserModel> {
+    await this.hasCapability(UserCapability.ListUsers, requestUser, true);
+
+    const where: WhereOptions<UserAttributes> = {};
+    if (query.keyword) {
+      where['displayName'] = {
+        [this.Op.like]: `%${query.keyword}%`,
+      };
+    }
+    if (query.status) {
+      where['status'] = query.status;
+    }
+
+    if (query.userRole) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$` as keyof UserAttributes] =
+        query.userRole === 'none'
+          ? {
+              [this.Op.is]: null,
+            }
+          : query.userRole;
+    }
+
+    return this.models.Users.findAndCountAll({
+      attributes: this.filterFields(fields, this.models.Users),
+      include: [
+        {
+          model: this.models.UserMeta,
+          as: 'UserMetas',
+          where: {
+            metaKey: `${this.tablePrefix}${UserMetaKeys.UserRole}`,
+          },
+          required: false,
+          duplicating: false,
+        },
+      ],
+      where,
+      offset,
+      limit,
+      order: [['createdAt', 'DESC']],
+    }).then(({ rows, count: total }) => ({
+      rows: rows.map((row) => {
+        const { UserMetas, ...rest } = row.toJSON() as any;
+        return {
+          userRole: UserMetas.length ? UserMetas[0].metaValue : null,
+          ...rest,
+        } as UserWithRoleModel;
+      }),
+      total,
+    }));
+  }
+
+  /**
+   * 获取用户角色
+   * @param userId 用户 Id
+   */
+  async getRole(userId: number): Promise<UserRole | null> {
+    // 角色
+    const role = await this.models.UserMeta.findOne({
+      attributes: ['metaValue'],
+      where: {
+        userId,
+        metaKey: `${this.tablePrefix}${UserMetaKeys.UserRole}`,
+      },
+    });
+    return role?.metaValue as UserRole;
+  }
+
+  /**
+   * 根据状态分组获取数量
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param type 类型
+   */
+  getCountByStatus() {
+    return this.models.Users.count({
+      attributes: ['status'],
+      group: 'status',
+    });
+  }
+
+  /**
+   * 按角色分组获取数量
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   */
+  getCountByRole() {
+    return this.models.Users.count({
+      attributes: [
+        [this.sequelize.fn('ifnull', this.col('metaValue', this.models.UserMeta, 'UserMetas'), 'none'), 'userRole'],
+      ],
+      include: [
+        {
+          model: this.models.UserMeta,
+          as: 'UserMetas',
+          where: {
+            metaKey: `${this.tablePrefix}${UserMetaKeys.UserRole}`,
+          },
+          required: false,
+          duplicating: false,
+        },
+      ],
+      group: 'userRole',
+    });
+  }
+
+  /**
+   * 判断登录名是否在在
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param loginName 登录名
+   */
+  async isLoginNameExists(loginName: string): Promise<boolean> {
+    return (
+      (await this.models.Users.count({
+        where: {
+          loginName,
+        },
+      })) > 0
+    );
+  }
+
+  /**
+   * 判断手机号码是否在在
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param mobile 手机号码
+   */
+  async isMobileExists(mobile: string): Promise<boolean> {
+    return (
+      (await this.models.Users.count({
+        where: {
+          mobile,
+        },
+      })) > 0
+    );
+  }
+
+  /**
+   * 判断电子邮箱是否在在
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param email 电子邮箱
+   */
+  async isEmailExists(email: string): Promise<boolean> {
+    return (
+      (await this.models.Users.count({
+        where: {
+          email,
+        },
+      })) > 0
+    );
+  }
+
+  /**
+   * 添加用户
+   * loginName, mobile, emaile 要求必须是唯一，否则会抛出 ValidationError
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [CreateUsers]
+   * @param model 添加实体模型
+   * @param fields 返回的字段
+   */
+  async create(model: NewUserInput, requestUser: RequestUser): Promise<UserModel> {
+    await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
+
+    if (await this.isLoginNameExists(model.loginName)) {
+      throw new ValidationError(
+        await this.i18nService.tv(
+          'core.datasource.user.username_unique_required',
+          'Username is reqiured to be unique!',
+          {
+            lang: requestUser.lang,
+          },
+        ),
+      );
+    }
+
+    if (await this.isEmailExists(model.email)) {
+      throw new ValidationError(
+        await this.i18nService.tv('core.datasource.user.email_unique_required', `Email is reqiured to be unique!`, {
+          lang: requestUser.lang,
+        }),
+      );
+    }
+
+    if (model.mobile && (await this.isMobileExists(model.mobile))) {
+      throw new ValidationError(
+        await this.i18nService.tv('core.datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
+          lang: requestUser.lang,
+        }),
+      );
+    }
+
+    const { loginName, loginPwd, firstName, lastName, avator, description, userRole, locale, ...rest } = model;
+
+    const t = await this.sequelize.transaction();
+    try {
+      const user = await this.models.Users.create(
+        {
+          ...rest,
+          loginName,
+          loginPwd: md5(loginPwd),
+          niceName: loginName,
+          displayName: loginName,
+        },
+        { transaction: t },
+      );
+
+      let metaCreationModels: NewUserMetaInput[] = [
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.NickName,
+          metaValue: loginName,
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.FirstName,
+          metaValue: firstName || '',
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.LastName,
+          metaValue: lastName || '',
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.Avatar,
+          metaValue: avator || '',
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.Description,
+          metaValue: description || '',
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.Locale,
+          metaValue: locale || '',
+        },
+        {
+          userId: user.id,
+          metaKey: UserMetaKeys.AdminColor,
+          metaValue: '{}',
+        },
+        {
+          userId: user.id,
+          metaKey: `${this.tablePrefix}${UserMetaKeys.UserRole}`,
+          metaValue: userRole,
+        },
+      ];
+      // 添加元数据
+      if (model.metas) {
+        metaCreationModels = metaCreationModels.concat(
+          model.metas.map((meta) => ({
+            ...meta,
+            userId: user.id,
+          })),
+        );
+      }
+
+      await this.models.UserMeta.bulkCreate(metaCreationModels, { transaction: t });
+
+      await t.commit();
+
+      // 排除登录密码
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { loginPwd: pwd, ...restUser } = user.toJSON() as any;
+      return restUser as UserModel;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
+  }
+
+  /**
+   * 修改用户
+   * mobile, email 要求必须是唯一，否则会抛出 ValidationError
+   * todo: 修改了角色后要重置 access_token
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param id 用户 Id
+   * @param model 修改实体模型
+   * @param requestUser 请求的用户
+   */
+  async update(id: number, model: UpdateUserInput, requestUser: RequestUser): Promise<boolean> {
+    // 修改非自己信息
+    if (String(id) !== String(requestUser.sub!)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    }
+
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      if (model.email && model.email !== user.email && (await this.isEmailExists(model.email))) {
+        throw new ValidationError(
+          await this.i18nService.tv('core.datasource.user.email_unique_required', 'Email is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
+        );
+      }
+      if (model.mobile && model.mobile !== user.mobile && (await this.isMobileExists(model.mobile))) {
+        throw new ValidationError(
+          await this.i18nService.tv('core.datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
+        );
+      }
+
+      const { nickName, firstName, lastName, avator, description, adminColor, userRole, locale, ...updateUser } = model;
+      const t = await this.sequelize.transaction();
+      try {
+        await this.models.Users.update(updateUser, {
+          where: { id },
+          transaction: t,
+        });
+
+        if (!isUndefined(userRole)) {
+          await this.models.UserMeta.update(
+            { metaValue: userRole === 'none' ? '' : userRole },
+            {
+              where: {
+                userId: id,
+                metaKey: `${this.tablePrefix}${UserMetaKeys.UserRole}`,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(locale)) {
+          await this.models.UserMeta.update(
+            { metaValue: locale || '' },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.Locale,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(description)) {
+          await this.models.UserMeta.update(
+            { metaValue: description },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.Description,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(adminColor)) {
+          await this.models.UserMeta.update(
+            { metaValue: adminColor },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.AdminColor,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(nickName)) {
+          await this.models.UserMeta.update(
+            { metaValue: nickName },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.NickName,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(firstName)) {
+          await this.models.UserMeta.update(
+            { metaValue: firstName },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.FirstName,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(lastName)) {
+          await this.models.UserMeta.update(
+            { metaValue: lastName },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.LastName,
+              },
+              transaction: t,
+            },
+          );
+        }
+        if (!isUndefined(avator)) {
+          await this.models.UserMeta.update(
+            { metaValue: avator },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaKeys.Avatar,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        await t.commit();
+        return true;
+      } catch (err) {
+        await t.rollback();
+        throw err;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * 修改用户Email
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param id 用户 Id
+   * @param email Email
+   * @param requestUser 请求的用户
+   */
+  async updateEmail(id: number, email: string, requestUser: RequestUser): Promise<boolean> {
+    // 修改非自己信息
+    if (String(id) !== String(requestUser.sub!)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    }
+
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      // 相同不需要修改
+      if (email === user.email) {
+        return true;
+      }
+      if (await this.isEmailExists(email)) {
+        throw new ValidationError(
+          await this.i18nService.tv('core.datasource.user.email_unique_required', 'Email is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
+        );
+      }
+
+      user.email = email;
+      await user.save();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 修改用户手机号码
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param id 用户 Id
+   * @param mobile 手机号码
+   * @param requestUser 请求的用户
+   */
+  async updateMobile(id: number, mobile: string, requestUser: RequestUser): Promise<boolean> {
+    // 修改非自己信息
+    if (String(id) !== String(requestUser.sub!)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    }
+
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      // 相同不需要修改
+      if (mobile === user.mobile) {
+        return true;
+      }
+      if (await this.isMobileExists(mobile)) {
+        throw new ValidationError(
+          await this.i18nService.tv('core.datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
+            lang: requestUser.lang,
+          }),
+        );
+      }
+
+      user.mobile = mobile;
+      await user.save();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 修改用户状态
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers]
+   * @param id 用户 Id
+   * @param status 状态
+   */
+  async updateStatus(id: number, status: UserStatus, requestUser: RequestUser): Promise<boolean> {
+    await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+
+    return await this.models.Users.update(
+      { status },
+      {
+        where: {
+          id,
+        },
+      },
+    ).then(([count]) => count > 0);
+  }
+
+  /**
+   * 修改密码
+   * 旧密码不正确返回 false
+   * @param userId 用户 Id
+   * @param oldPwd 旧密码
+   * @param newPwd 新密码
+   * @returns
+   */
+  async updateLoginPwd(userId: number, oldPwd: string, newPwd: string): Promise<boolean> {
+    const user = await this.models.Users.findOne({
+      where: {
+        id: userId,
+        loginPwd: md5(oldPwd),
+      },
+    });
+
+    // 旧密码可以找到用户
+    if (user) {
+      user.loginPwd = newPwd;
+      await user.save();
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 删除用户
+   * Super Admin 无法删除，抛出 ForbiddenError 错误
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [DeleteUsers]
+   * @param id 用户 Id
+   */
+  async delete(id: number, requestUser: RequestUser): Promise<true> {
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
+
+    if (String(id) === String(requestUser.sub!)) {
+      throw new ForbiddenError(
+        await this.i18nService.tv('core.datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
+          lang: requestUser.lang,
+        }),
+      );
+    }
+
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.UserMeta.destroy({
+        where: { userId: id },
+        transaction: t,
+      });
+      await this.models.Users.destroy({
+        where: { id },
+        transaction: t,
+      });
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
+  }
+
+  /**
+   * 批量删除用户
+   * Super Admin 无法删除，抛出 ForbiddenError 错误
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [DeleteUsers]
+   * @param id 用户 Id
+   */
+  async bulkDelete(ids: number[], requestUser: RequestUser): Promise<true> {
+    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
+
+    if (ids.includes(parseInt(requestUser.sub!))) {
+      throw new ForbiddenError(
+        await this.i18nService.tv('core.datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
+          lang: requestUser.lang,
+        }),
+      );
+    }
+
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.UserMeta.destroy({
+        where: { userId: ids },
+        transaction: t,
+      });
+      await this.models.Users.destroy({
+        where: { id: ids },
+        transaction: t,
+      });
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      throw err;
+    }
+  }
+
+  /**
+   * 验证用户登录账号密码
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param loginName 登录名/邮箱/手机号码
+   * @param loginPwd 登录密码
+   * @param region Specific region for phone number check
+   */
+  async verifyUser(loginName: string, loginPwd: string, region?: CountryCode): Promise<boolean> {
+    const count = await this.models.Users.count({
+      where: {
+        [this.Op.or]: [
+          { loginName },
+          isEmail(loginName) && { email: loginName },
+          isPhoneNumber(loginName, region) && { mobile: loginName },
+        ].filter(Boolean) as any,
+        loginPwd: md5(loginPwd),
+        status: UserStatus.Enable,
+      },
+    });
+
+    return count > 0;
+  }
+}

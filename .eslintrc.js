@@ -9,9 +9,11 @@ module.exports = {
     node: true,
     jest: true,
   },
-  parser: 'babel-eslint',
+  parser: '@babel/eslint-parser',
   extends: [
     'prettier', // Uses eslint-config-prettier to disable ESLint rules
+    'plugin:import/recommended', // eslint-plugin-import, https://github.com/import-js/eslint-plugin-import#installation
+    'plugin:import/typescript', // https://github.com/import-js/eslint-plugin-import#typescript
     'plugin:prettier/recommended', // Enables eslint-plugin-prettier and displays prettier errors as ESLint errors
   ],
   // parser 解析代码时的参数
@@ -75,6 +77,43 @@ module.exports = {
     'prefer-destructuring': 'off',
     // printWidth is 120 in prettier
     'max-len': ['error', { code: 120, tabWidth: 2 }],
+    'no-unused-vars': [
+      'error',
+      {
+        // 允许声明未使用变量
+        vars: 'local',
+        // 在使用的参数之前定义的不检测
+        args: 'after-used',
+        // 忽略以_开始或 h 的参数
+        argsIgnorePattern: '^_|^h$',
+      },
+    ],
+    'import/no-named-as-default-member': 'off',
+    'import/no-unresolved': 'off',
+    'import/order': [
+      'error',
+      {
+        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+        pathGroups: [
+          {
+            pattern: '@/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '../**/*.less',
+            group: 'object',
+            position: 'after',
+          },
+        ],
+        pathGroupsExcludedImportTypes: ['builtin', 'type'],
+        // alphabetize: {
+        //   order: 'asc',
+        //   caseInsensitive: true,
+        // },
+        warnOnUnassignedImports: true,
+      },
+    ],
   },
   // Specially files setting
   overrides: [
@@ -97,6 +136,7 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
+        '@typescript-eslint/consistent-type-imports': 'off',
         '@typescript-eslint/no-this-alias': ['error', { allowedNames: ['vm'] }],
         '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
         '@typescript-eslint/no-empty-function': 'off',
@@ -127,10 +167,27 @@ module.exports = {
         'local/jsx-uses-vars': 'error',
       },
     },
+    {
+      files: ['web-apps/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+      },
+    },
   ],
   // Adding Shared Settings
   settings: {
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
+    },
     'import/resolver': {
+      // typescript: {
+      //   project: [
+      //     'admin-web/tsconfig.json',
+      //     'portal-h5/tsconfig.json',
+      //     'portal-pc/tsconfig.json',
+      //     'packages/*/tsconfig.json',
+      //   ],
+      // },
       node: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
       },

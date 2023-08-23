@@ -2,17 +2,15 @@ import jwksRsa from 'jwks-rsa';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Inject, Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
+import { AdjustJwtOptions } from '../interfaces/jwt-options.interface';
 import { JWT_OPTIONS } from '../constants';
-
-// Types
-import type { JwtOptions } from '../interfaces/jwt-options.interface';
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {
   private readonly logger = new Logger(JwtMiddleware.name, { timestamp: true });
 
   constructor(
-    @Inject(JWT_OPTIONS) private readonly options: JwtOptions,
+    @Inject(JWT_OPTIONS) private readonly options: AdjustJwtOptions,
     private readonly httpAdapterHost: HttpAdapterHost,
   ) {}
 
@@ -20,9 +18,9 @@ export class JwtMiddleware implements NestMiddleware {
     const platformName = this.httpAdapterHost.httpAdapter.getType();
 
     const {
-      endpoint: jwksHost,
+      issuer,
       unless,
-      jwksRsa: jwksRasOptions = {},
+      jwksRsa: jwksRasOptions,
       requestProperty,
       algorithms = ['RS256'],
       credentialsRequired,
@@ -32,11 +30,8 @@ export class JwtMiddleware implements NestMiddleware {
     if (platformName === 'express') {
       const { expressjwt } = loadPackage('express-jwt', 'JwtModule', () => require('express-jwt'));
       const middleware = expressjwt({
-        secret: jwksRsa.expressJwtSecret({
-          ...jwksRasOptions,
-          jwksUri: jwksRasOptions.jwksUri || `${jwksHost}.well-known/openid-configuration/jwks`,
-        }),
-        issuer: [jwksHost, jwksHost.substring(0, jwksHost.length - 1)], // end with "/"" problem
+        secret: jwksRsa.expressJwtSecret(jwksRasOptions),
+        issuer: [issuer, issuer.substring(0, issuer.length - 1)], // end with "/"" problem
         algorithms,
         requestProperty,
         credentialsRequired,

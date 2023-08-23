@@ -53,10 +53,27 @@
     "baseUrl": "." /* Base directory to resolve non-absolute module names. */,
     "paths": {
       /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
-      "@formily/antdv": ["./.submodules/formily-antdv/packages/components/src"],
-      "@formily/vant": ["./.submodules/formily-vant/packages/components/src"],
-      "@formily-portal/antdv": ["./.submodules/formily-portal-antdv/packages/components/src"],
-      "@formily-portal/vant": ["./.submodules/formily-portal-vant/packages/components/src"]
+      "@/*": ["src/*"],
+      "@formily/antdv": ["../.submodules/formily-antdv/packages/components/src"],
+      "@formily/antdv/esm*": ["../.submodules/formily-antdv/packages/components/src/*"],
+      "@formily/antdv/lib/*": ["../.submodules/formily-antdv/packages/components/src/*"],
+      "@formily/antdv-*": ["../.submodules/formily-antdv/packages/*/src"],
+      "@formily/vant": ["../.submodules/formily-vant/packages/components/src"],
+      "@formily/vant/esm/*": ["../.submodules/formily-vant/packages/components/src/*"],
+      "@formily/vant/lib/*": ["../.submodules/formily-vant/packages/components/src/*"],
+      "@formily/vant-*": ["../.submodules/formily-vant/packages/*/src"],
+      "@formily-portal/antdv": ["../.submodules/formily-portal-antdv/packages/components/src"],
+      "@formily-portal/antdv/esm/*": ["../.submodules/formily-portal-antdv/packages/components/src/*"],
+      "@formily-portal/antdv/lib/*": ["../.submodules/formily-portal-antdv/packages/components/src/*"],
+      "@formily-portal/antdv-*": ["../.submodules/formily-portal-antdv/packages/*/src"],
+      "@formily-portal/vant": ["../.submodules/formily-portal-vant/packages/components/src"],
+      "@formily-portal/vant/esm/*": ["../.submodules/formily-portal-vant/packages/components/src/*"],
+      "@formily-portal/vant/lib/*": ["../.submodules/formily-portal-vant/packages/components/src/*"],
+      "@formily-portal/vant-*": ["../.submodules/formily-portal-vant/packages/*/src"],
+      "nestjs-identity": ["../packages/nestjs-identity/src"],
+      "nestjs-jwt": ["../packages/nestjs-jwt/src"],
+      "@pomelo/shared": ["../packages/shared/src"],
+      "@pomelo/shared-web": ["../packages/shared-web/src"]
     },
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                       /* List of folders to include type definitions from. */

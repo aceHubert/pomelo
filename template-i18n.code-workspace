@@ -4,13 +4,13 @@
       "path": "."
     },
     {
-      "path": "admin-web"
+      "path": "web-apps/vue-admin"
     },
     {
-      "path": "portal-pc"
+      "path": "web-apps/vue-pc"
     },
     {
-      "path": "portal-h5"
+      "path": "web-apps/vue-h5"
     }
   ],
   "settings": {

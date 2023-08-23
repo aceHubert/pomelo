@@ -1,0 +1,53 @@
+import { debounce } from 'lodash-es';
+import { defineComponent, computed } from '@vue/composition-api';
+import { codemirror as CodeMirror } from 'vue-codemirror';
+// import base style
+import 'codemirror/mode/javascript/javascript';
+import 'codemirror/lib/codemirror.css';
+
+import { transformToPageSchema, transformToPageTreeNode } from '../utils';
+
+// Types
+import type { TreeNode } from '@designable/core';
+
+export type SchemaEditorWidgetProps = {
+  tree: TreeNode;
+};
+
+export const SchemaEditorWidget = defineComponent({
+  name: 'SchemaEditorWidget',
+  props: ['tree'],
+  emits: ['change'],
+  setup(props, { emit }) {
+    const code = computed(() => {
+      return JSON.stringify(transformToPageSchema(props.tree), null, 2);
+    });
+
+    const handleEmitChanges = debounce((cm) => {
+      emit('change', transformToPageTreeNode(JSON.parse(cm.getValue())));
+    }, 200);
+
+    const cmReady = (mirror: any) => {
+      mirror.setSize('100%', '100%');
+      mirror.on('changes', handleEmitChanges);
+    };
+
+    return () => {
+      return (
+        <CodeMirror
+          onReady={cmReady}
+          style="height:100%;width:100%;"
+          value={code.value}
+          props={{
+            options: {
+              tabSize: 4,
+              lineNumbers: true,
+              line: true,
+              mode: 'text/javascript',
+            },
+          }}
+        />
+      );
+    };
+  },
+});

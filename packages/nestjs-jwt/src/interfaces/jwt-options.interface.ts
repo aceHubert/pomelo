@@ -1,8 +1,9 @@
-import type { ModuleMetadata, Type } from '@nestjs/common';
-import type { Algorithm } from 'jsonwebtoken';
-import type { TokenGetter, IsRevoked } from 'express-jwt';
-import type { Params } from 'express-unless';
-import type { Options } from 'jwks-rsa';
+import { ModuleMetadata, Type } from '@nestjs/common';
+import { Algorithm } from 'jsonwebtoken';
+import { TokenGetter, IsRevoked } from 'express-jwt';
+import { Params } from 'express-unless';
+import { Options as JwksRasOptions } from 'jwks-rsa';
+import { OidcMetadata } from './oidc-metadata.interface';
 
 export interface JwtOptions {
   /**
@@ -11,9 +12,8 @@ export interface JwtOptions {
   endpoint: string;
   /**
    * jwks-ras options
-   * jwksUri will be "{endpoint}.well-known/openid-configuration/jwks" if not set.
    */
-  jwksRsa?: Partial<Options>;
+  jwksRsa?: Partial<JwksRasOptions>;
   /**
    * Defines how to retrieves the token from the request object.
    */
@@ -55,6 +55,10 @@ export interface JwtOptions {
    * is global module
    */
   isGlobal?: boolean;
+}
+
+export interface AdjustJwtOptions extends Omit<JwtOptions, 'endpoint' | 'jwksRas' | 'isGlobal'>, OidcMetadata {
+  jwksRsa: JwksRasOptions;
 }
 
 export interface JwtOptionsFactory {

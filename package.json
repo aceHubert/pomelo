@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "postinstall": "yarn workspaces foreach -vptR --from 'nestjs-jwt' --from '@pomelo/shared-web' run build",
-    "serve": "concurrently 'yarn serve:backend' 'yarn serve:h5' 'yarn serve:pc' 'yarn serve:admin'",
+    "serve": "concurrently 'yarn serve:core-server' 'yarn serve:h5' 'yarn serve:pc' 'yarn serve:admin'",
     "serve:h5": "yarn workspace @pomelo/portal-h5 run serve",
     "serve:pc": "yarn workspace @pomelo/portal-pc run serve",
     "serve:admin": "yarn workspace @pomelo/admin-web run serve",
-    "serve:backend": "yarn workspace @pomelo/backend start:dev",
-    "start:backend": "yarn workspace @pomelo/backend start:prod",
+    "serve:core-server": "yarn workspace @pomelo/core-server start:webpack",
+    "start:core-server": "yarn workspace @pomelo/core-server start:prod",
     "build": "yarn workspaces foreach -vptR --from '@pomelo/*' run build",
-    "build:backend": "yarn workspaces foreach -vptR --from '@pomelo/backend' run build",
+    "build:core-server": "yarn workspaces foreach -vptR --from '@pomelo/core-server' run build",
     "build:admin": "yarn workspaces foreach -vptR --from '@pomelo/admin-web' run build",
     "build:portal": "yarn workspaces foreach -vptR --from '@pomelo/portal-*' run build",
     "build:prod-web": "yarn workspaces foreach -vptR --from '@pomelo/admin-web' --from '@pomelo/portal-*' run build",
@@ -33,6 +33,7 @@
     "commit": "git-cz"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.21.8",
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "@types/jest": "27.0.2",
@@ -54,6 +55,8 @@
     "cz-conventional-changelog-zh": "^0.0.2",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jest": "^23.8.2",
     "eslint-plugin-local": "^1.0.0",
     "eslint-plugin-prettier": "^4.0.0",
@@ -86,8 +89,7 @@
   "resolutions": {
     "vue": "~2.6.x",
     "vue-server-renderer": "~2.6.x",
-    "vue-template-compiler": "~2.6.x",
-    "typescript": "~4.6.x"
+    "vue-template-compiler": "~2.6.x"
   },
   "config": {
     "commitizen": {
@@ -99,11 +101,8 @@
     "pre-commit": "lint-staged"
   },
   "workspaces": [
-    "portal-h5",
-    "portal-pc",
-    "admin-web",
-    "shared-web",
-    "backend",
+    "web-apps/**",
+    "backend-apps/**",
     "packages/**"
   ],
   "packageManager": "yarn@3.2.0"

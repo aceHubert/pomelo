@@ -1,0 +1,136 @@
+@import 'ant-design-vue/lib/style/themes/index';
+@import 'ant-design-vue/lib/style/color/colors';
+
+@theme: light;
+@ant-prefix: ~'workhub'; // ant input-password/model 不能适配
+
+// 主题色
+@primary-color: #409eff; // 全局主色
+@primary-light-color: lighten(desaturate(@primary-color, 20%), 35%);
+@primary-lighter-color: lighten(@primary-color, 96% - lightness(@primary-color));
+@primary-dark-color: darken(desaturate(@primary-color, 20%), 10%);
+@primary-darker-color: darken(@primary-color, lightness(@primary-color) - 20%);
+// 变量主题色(不可以用于计算)
+@var-primary: var(--theme-primary, @primary-color);
+@var-primary-light: var(--theme-primary-light, @primary-light-color);
+@var-primary-lighter: var(--theme-primary-lighter, @primary-lighter-color);
+@var-primary-dark: var(--theme-primary-dark, @primary-dark-color);
+@var-primary-darker: var(--theme-primary-darker, @primary-darker-color);
+
+// antd color reset
+@success-color: #1abd80; // 成功色
+@warning-color: #fda900; // 警告色
+@error-color: #f95155; // 错误色
+@info-color: #046bde; // 一般提示
+
+@blue-base: #1890ff;
+@blue-6: @blue-base;
+
+@purple-base: #722ed1;
+@purple-6: @purple-base;
+
+@cyan-base: #13c2c2;
+@cyan-6: @cyan-base;
+
+@green-base: #52c41a;
+@green-6: @green-base;
+
+@magenta-base: #eb2f96;
+@magenta-6: @magenta-base;
+
+@pink-base: #eb2f96;
+@pink-6: @pink-base;
+
+@red-base: #f5222d;
+@red-6: @red-base;
+
+@orange-base: #fa8c16;
+@orange-6: @orange-base;
+
+@yellow-base: #fadb14;
+@yellow-6: @yellow-base;
+
+@volcano-base: #fa541c;
+@volcano-6: @volcano-base;
+
+@geekblue-base: #2f54eb;
+@geekblue-6: @geekblue-base;
+
+@lime-base: #a0d911;
+@lime-6: @lime-base;
+
+@gold-base: #faad14;
+@gold-6: @gold-base;
+
+@grey-base: #9e9e9e;
+@grey-1: #fafafa;
+@grey-2: #f5f5f5;
+@grey-3: #eeeeee;
+@grey-4: #e0e0e0;
+@grey-5: #bdbdbd;
+@grey-6: @grey-base;
+@grey-7: #757575;
+@grey-8: #616161;
+@grey-9: #424242;
+@grey-10: #212121;
+
+// @border-color: #c6cad3;
+
+@base-color: if(@theme = dark, @white, @black);
+@text-color: fade(@base-color, 85%); // override text-color
+@text-primary: @text-color; // 主文本色
+@text-secondary: fade(@base-color, 45%); // 次文本色
+@text-disabled: fade(@base-color, 25%); // 失效色
+@text-inverse: if(@theme = dark, @black, @white);
+@icon-color-hover: fade(@base-color, 75%);
+@heading-color: fade(@base-color, 85%); // 标题色
+@link-color: if(@theme = dark, #1e9fde, #006799); // 链接色
+@link-hover-color: color(~`colorPalette('@{link-color}', 5) `);
+@link-active-color: color(~`colorPalette('@{link-color}', 7) `);
+@border-color-base: #d9d9d9; // 边框色
+@box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.15); // 浮层阴影
+@active-opacity: 0.6;
+
+// 圆角
+@border-radius-root: 4px;
+@border-radius-sm: @border-radius-root / 2;
+@border-radius-md: @border-radius-root;
+@border-radius-lg: @border-radius-root * 2;
+@border-radius-md-l: 10px; // 特殊使用
+@border-radius-xl: @border-radius-root * 4;
+@border-radius-max: 999px;
+
+// 字号 - 主要用于大标题
+@font-size-xs: 10px;
+@font-size-sm: 12px;
+@font-size-md: 14px;
+@font-size-lg: 16px;
+@font-size-xl: 18px;
+@font-size-xxl: 20px;
+@font-size-xxxl: 28px;
+
+// 行高
+@line-height-xs: 14px;
+@line-height-sm: 18px;
+@line-height-md: 20px;
+@line-height-lg: 22px;
+@line-height-xl: 26px;
+@line-height-xxl: 28px;
+@line-height-xxxl: 40px;
+
+// 字体粗细
+@font-weight-black: 900;
+@font-weight-bold: 700;
+@font-weight-medium: 500;
+@font-weight-regular: 400;
+@font-weight-light: 300;
+@font-weight-thin: 100;
+
+// Layout
+@layout-header-background: #545c64;
+@layout-trigger-background: #6b7580;
+
+// Menu
+@menu-collapsed-width: 48px;
+@menu-item-vertical-margin: 0;
+@menu-item-boundary-margin: 0;

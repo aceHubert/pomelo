@@ -18,6 +18,6 @@ jobs:
     - name: fly setup
       uses: superfly/flyctl-actions/setup-flyctl@master
     - name: fly deploy
-      run: flyctl deploy --config fly.backend.toml --dockerfile ./Dockerfile.backend
+      run: flyctl deploy --config fly.core-server.toml --dockerfile ./Dockerfile.core-server
       env:
         FLY_API_TOKEN: ${{ secrets.FLYIO_API_TOKEN }}

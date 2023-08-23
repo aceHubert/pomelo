@@ -1,5 +1,5 @@
-import type { MiddlewareConsumer } from '@nestjs/common';
-import type { AbstractHttpAdapter } from '@nestjs/core';
+import { MiddlewareConsumer } from '@nestjs/common';
+import { AbstractHttpAdapter } from '@nestjs/core';
 
 export interface NestMiddlewareConsumer extends MiddlewareConsumer {
   httpAdapter: AbstractHttpAdapter;

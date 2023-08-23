@@ -2,10 +2,8 @@ import jwt from 'jsonwebtoken';
 import jwksRsa from 'jwks-rsa';
 import { Logger, Inject, Injectable } from '@nestjs/common';
 import { UnauthorizedError } from './errors/UnauthorizedError';
+import { JwtOptions } from './interfaces/jwt-options.interface';
 import { JWT_OPTIONS } from './constants';
-
-// Types
-import type { JwtOptions } from './interfaces/jwt-options.interface';
 
 @Injectable()
 export class JwtService {

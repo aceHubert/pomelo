@@ -1,17 +1,20 @@
+import fetch from 'node-fetch';
 import { Inject, Logger, Module, DynamicModule, NestModule, Provider, MiddlewareConsumer } from '@nestjs/common';
 import { JwtMiddleware } from './middlewares/jwt.middleware';
-import { isNestMiddleware, usingFastify } from './utils/util';
+import { JwtOptions, AdjustJwtOptions, JwtAsyncOptions, JwtOptionsFactory } from './interfaces/jwt-options.interface';
+import { OidcMetadata } from './interfaces/oidc-metadata.interface';
 import { JwtService } from './jwt.service';
+import { isNestMiddleware, usingFastify } from './utils/util';
 import { JWT_OPTIONS } from './constants';
 
-// Types
-import type { JwtOptions, JwtAsyncOptions, JwtOptionsFactory } from './interfaces/jwt-options.interface';
-
-@Module({})
+@Module({
+  providers: [JwtService],
+  exports: [JWT_OPTIONS, JwtService],
+})
 export class JwtModule implements NestModule {
   private static logger = new Logger(JwtModule.name, { timestamp: true });
 
-  constructor(@Inject(JWT_OPTIONS) private readonly options: JwtOptions) {}
+  constructor(@Inject(JWT_OPTIONS) private readonly options: AdjustJwtOptions) {}
 
   configure(consumer: MiddlewareConsumer) {
     if (this.options.disableMiddleware) return;
@@ -23,17 +26,19 @@ export class JwtModule implements NestModule {
   static forRoot(options: JwtOptions): DynamicModule {
     this.assertEndpoint(options);
 
+    const { isGlobal, ...restOptions } = options;
+
     return {
       module: JwtModule,
-      global: options.isGlobal,
+      global: isGlobal,
       providers: [
         {
           provide: JWT_OPTIONS,
-          useValue: options,
+          useFactory: async () => {
+            this.adjustOptions(restOptions);
+          },
         },
-        JwtService,
       ],
-      exports: [JWT_OPTIONS, JwtService],
     };
   }
 
@@ -42,8 +47,7 @@ export class JwtModule implements NestModule {
       module: JwtModule,
       global: options.isGlobal,
       imports: options.imports || [],
-      providers: [JwtService, ...this.createAsyncProviders(options)],
-      exports: [JWT_OPTIONS, JwtService],
+      providers: this.createAsyncProviders(options),
     };
   }
 
@@ -68,7 +72,7 @@ export class JwtModule implements NestModule {
           const config = await options.useFactory!(...args);
           this.assertEndpoint(config);
 
-          return config;
+          return this.adjustOptions(config);
         },
         inject: options.inject || [],
       };
@@ -79,9 +83,22 @@ export class JwtModule implements NestModule {
         const config = await optionsFactory.createJwtOptions();
         this.assertEndpoint(config);
 
-        return config;
+        return this.adjustOptions(config);
       },
       inject: [options.useExisting! || options.useClass!],
+    };
+  }
+
+  private static async adjustOptions({ endpoint, ...options }: JwtOptions): Promise<AdjustJwtOptions> {
+    const response = await fetch(endpoint + '.well-known/openid-configuration');
+    const metadata = (await response.json()) as OidcMetadata;
+    return {
+      ...metadata,
+      ...options,
+      jwksRsa: {
+        ...options.jwksRsa,
+        jwksUri: options.jwksRsa?.jwksUri ?? metadata.jwks_uri,
+      },
     };
   }
 
