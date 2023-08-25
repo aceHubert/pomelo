@@ -2,8 +2,7 @@ import { debounce } from 'lodash-es';
 import { defineComponent, computed, ref, reactive, watch } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { Input, Form, Select, TreeSelect, Divider, Collapse } from 'ant-design-vue';
-import { obsFormatDisplayUrl } from '@pomelo/shared-web';
-import { Modal, message } from '@/components';
+import { Modal, message, getObsDisplayUrl } from '@/components';
 import { usePostApi, useResApi, formatError, TemplateStatus } from '@/fetch/graphql';
 import { useI18n, useUserManager } from '@/hooks';
 import { DesignLayout, DocumentEditor } from '../components';
@@ -95,7 +94,7 @@ export default defineComponent({
               },
             });
             return {
-              displayUrl: obsFormatDisplayUrl(objectKey),
+              displayUrl: getObsDisplayUrl(objectKey),
               uploadAction: url,
               method: 'PUT',
               headers,

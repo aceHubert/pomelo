@@ -1,0 +1,403 @@
+@import '../../styles/themes/index';
+
+@layout-admin-prefix-cls: ~'@{ant-prefix}-layout-admin';
+@layout-admin-footer-height: 70px;
+
+.theme-reallight {
+  .@{layout-admin-prefix-cls}-header {
+    &__wrapper {
+      color: @text-color-primary;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    }
+  }
+
+  // .@{ant-prefix}-drawer-open.@{layout-admin-prefix-cls}-sider-drawer .@{layout-admin-prefix-cls}-sider {
+  //   box-shadow: 2px 0 6px rgba(0, 21, 41, 0.08);
+  // }
+}
+
+.theme-light {
+  .@{layout-admin-prefix-cls}-header {
+    &__wrapper {
+      color: #fff;
+      background: @layout-header-background;
+      box-shadow: 0 1px 4px @layout-header-background;
+    }
+
+    .header-logo {
+      .logo-content{
+        .site-logo,
+        .site-name {
+          color: #fff;
+        }
+      }
+    }
+  }
+}
+
+.theme-dark {
+  .@{layout-admin-prefix-cls}-header {
+    &__wrapper {
+      color: #fff;
+      background: @layout-header-background;     
+      box-shadow: 0 1px 4px rgba(203, 203, 203, 0.08);
+    }
+  }
+
+  .@{layout-admin-prefix-cls}-sider {
+    box-shadow: 2px 0 8px rgba(203, 203, 203, 0.05);
+  }
+
+  // .@{ant-prefix}-drawer-open.@{layout-admin-prefix-cls}-sider-drawer .@{layout-admin-prefix-cls}-sider {
+  //   box-shadow: 2px 0 6px rgba(203, 203, 203, 0.22);
+  // }
+}
+
+.@{layout-admin-prefix-cls} {
+  &__wrapper {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+
+    &:not(.is-mobile) .header-logo {
+      min-width: 186px;
+    }
+
+    &:not(.is-mobile) .@{layout-admin-prefix-cls}-header-right{
+      min-width: 168px;
+    }
+
+    .logo-content {
+      .site-logo {
+        display: inline-block;
+        vertical-align: middle;
+
+        img {
+          height: 100% !important;
+          vertical-align: top;
+        }
+      }
+      .site-name {
+        margin: 0 0 0 12px;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: inherit;
+        display: inline-block;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  &-header {
+    width: 100%;
+    transition: width 0.2s;
+    background: transparent;
+
+    &__wrapper {
+      padding: 0 16px;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+      position: relative;
+    }
+
+    &--fixed {
+      position: fixed;
+      top: 0;
+    }
+
+    .header-logo {
+      height: 100%;
+      vertical-align: top;
+      overflow: hidden;
+      white-space: nowrap;
+      cursor: pointer;
+
+      .logo-content{
+        .site-logo,
+        .site-name {
+          color: @heading-color;
+        }
+
+        .site-logo {
+          height: 32px;
+          font-size: 32px;
+        }
+
+        .site-name {
+          vertical-align: top;
+        }
+      }
+    }
+
+    .trigger {
+      padding: 0 0 0 12px;
+      display: inline-block;
+      cursor: pointer;
+      transition: color 0.3s;
+
+      .@{iconfont-css-prefix} {
+        font-size: 20px;
+        vertical-align: -0.225em;
+      }
+    }
+
+    &-right {
+      margin-left: auto;
+      height: 100%;
+      display: flex;
+      justify-content: flex-end;
+      overflow: hidden;
+    }
+
+    .@{ant-prefix}-menu { 
+      line-height: 48px;
+
+      &-horizontal {
+        border-bottom: none;
+
+        &.@{ant-prefix}-menu-light{
+          & > .@{ant-prefix}-menu-item,
+          & > .@{ant-prefix}-menu-submenu {
+            top: 0;
+            margin-top: 0;
+            border-bottom: 0;
+          }
+        }
+
+        & > .@{ant-prefix}-menu-item,
+        & > .@{ant-prefix}-menu-submenu{
+          &:hover,&-active,&-open,&-selected {
+            &:not(.@{ant-prefix}-menu-overflowed-submenu) {
+              color: @var-primary;
+            }
+          }
+
+          &-selected {
+            .@{iconfont-css-prefix}, .@{iconfont-css-prefix} + span {
+              color: #fff;
+            }
+          }
+
+          &-selected, &-popup{
+            &:not(.@{ant-prefix}-menu-overflowed-submenu) {
+              background-color: @var-primary;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &-sider {
+    position: relative;
+    box-shadow: 2px 0 8px rgba(29, 35, 41, 0.05);
+
+    &--fixed {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+
+    &-drawer {
+      .@{ant-prefix}-drawer{
+        &-wrapper-body{
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+
+        &-header{
+          flex: none;
+        }
+
+        &-body{
+          flex: 1 1 auto;
+          height: 0;
+        }       
+      }
+
+      .@{ant-prefix}-menu{
+        height: 100%;
+      }
+    }
+
+    // 去掉边框 1px 后防止超出抖动
+    .@{ant-prefix}-menu, &-drawer .@{ant-prefix}-menu {
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      &-vertical,
+      &-vertical-left,
+      &-vertical-right,
+      &-inline {
+        border-right: none;
+        width: 100%;
+
+        .@{ant-prefix}-menu-item,
+        .@{ant-prefix}-menu-submenu-title {
+          margin-top: 0;
+          margin-bottom: 0;
+          width: 100%;
+
+          .@{iconfont-css-prefix}{
+            margin-right: 6px;
+          }
+        }
+
+        .@{ant-prefix}-menu-item:not(:last-child) {
+          margin-bottom: 0;
+        }
+
+        &-collapsed {
+          width: 48px;
+
+          > .@{ant-prefix}-menu-item,
+          > .@{ant-prefix}-menu-item-group > .@{ant-prefix}-menu-item-group-list > .@{ant-prefix}-menu-item,
+          > .@{ant-prefix}-menu-item-group
+            > .@{ant-prefix}-menu-item-group-list
+            > .@{ant-prefix}-menu-submenu
+            > .@{ant-prefix}-menu-submenu-title,
+          > .@{ant-prefix}-menu-submenu > .@{ant-prefix}-menu-submenu-title {
+            padding: 0 13px !important;
+          }
+        }
+      }
+    }
+
+    // &-popup-submenu{
+    //   display: none;
+    // }
+
+    .top-in-sider {
+      color: #fff;
+      background-color: @menu-dark-bg;
+      transition: all 0.2s;
+
+      .@{ant-prefix}-menu-inline-collapsed {
+        .@{iconfont-css-prefix} {
+          font-size: 22px;
+          vertical-align: middle;
+        }
+      }
+    }
+
+    .sider-logo {
+      padding: 8px 16px;
+      height: 45px;
+      background-color: if(@theme = dark, @layout-sider-background, #fff);
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+      transition: all 0.2s;
+      position: relative;
+      box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+      z-index: 1;
+
+      .logo-content {
+        width: 100%;
+        display: flex;
+
+        .site-logo,
+        .site-name {
+          color: if(@theme = dark, #fff, @heading-color);
+        }
+
+        .site-logo {
+          height: 32px;
+          font-size: 32px;
+        }
+
+        .site-name {
+          height: 32px;
+          line-height: 32px;
+          overflow: hidden;
+          // TODO: https://juejin.cn/post/7140273000120909838
+          // overflow-x: auto;
+          text-overflow: ellipsis;
+          flex: 1 1 auto;
+        }
+      }
+    }
+
+    &--collapsed .sider-logo {
+      padding: 8px;
+    }
+
+    &-placeholder {
+      transition: all 0.2s;
+    }
+  }
+
+  &-content {
+    padding: 0 16px;
+    min-height: 100%;
+    box-sizing: border-box;
+
+    &--has-footer {
+      min-height: calc(100% - @layout-admin-footer-height);
+    }
+
+    // webkit h1 在section下字号不正常， layout 使用section布局
+    h1 {
+      font-size: 2em;
+    }
+
+    &__wrapper {
+      width: 100%;
+      min-height: 100%;
+      position: relative;
+
+      &.content-width-fixed {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    }
+
+    &__loading {
+      padding-top: 30%;
+      background-color: fadeout(#fff, 30%);
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 0;
+      bottom: 0;
+      z-index: 1000;
+    }
+
+    &__tabs{
+      margin-top: 12px;
+
+      &.@{ant-prefix}-tabs-card .@{ant-prefix}-tabs-card-bar{
+        .@{ant-prefix}-tabs-tab{
+          line-height: 32px;
+        }
+
+        .@{ant-prefix}-tabs-nav-container, .@{ant-prefix}-tabs-tab, .@{ant-prefix}-tabs-tab-active{
+          height: 34px;
+        }
+      }
+
+      .@{ant-prefix}-tabs-bar{
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &-footer {
+    padding: 0;
+    width: 100%;
+    height: @layout-admin-footer-height;
+    box-sizing: border-box;
+  }
+}

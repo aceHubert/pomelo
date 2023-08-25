@@ -1,6 +1,6 @@
 import { ref, reactive, computed, nextTick } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { useEffect } from '@/components';
+import { useEffect } from '@/hooks';
 import { getDefaultMenus } from '@/configs/menu.config';
 import {
   createMenuMap,

@@ -1,0 +1,32 @@
+@import '../../styles/themes/index';
+
+@import '~jsoneditor/dist/jsoneditor.css';
+
+.jsoneditor-modal {
+  .pico-modal-header {
+    background: @var-primary;
+  }
+
+  a {
+    color: @link-color;
+  }
+
+  .selectr-selected .selectr-tag {
+    background-color: @var-primary;
+  }
+
+  .jsoneditor-button-group.jsoneditor-button-group-value-asc input.jsoneditor-button-asc,
+  .jsoneditor-button-group.jsoneditor-button-group-value-desc input.jsoneditor-button-desc {
+    background: @var-primary;
+    border-color: @var-primary;
+  }
+}
+
+.jsoneditor {
+  border-color: @var-primary;
+
+  &-menu {
+    background-color: @var-primary;
+    border-color: @var-primary;
+  }
+}

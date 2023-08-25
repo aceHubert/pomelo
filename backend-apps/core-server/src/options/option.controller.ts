@@ -1,13 +1,20 @@
-import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { Controller, Query, Param, Body, Get, Post, Put, Delete, ParseIntPipe, HttpStatus } from '@nestjs/common';
-import { Authorized, RamAuthorized } from 'nestjs-identity';
-import { BaseController } from '@/common/controllers/base.controller';
-import { describeType, createResponseSuccessType } from '@/common/utils/swagger-type.util';
-import { ApiAuth } from '@/common/decorators/api-auth.decorator';
-import { ParseQueryPipe } from '@/common/pipes/parse-query.pipe';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
-import { OptionDataSource } from '@/sequelize-datasources/datasources';
+import { Response } from 'express';
+import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
+import { Controller, Query, Param, Body, Get, Post, Put, Delete, ParseIntPipe, Res, HttpStatus } from '@nestjs/common';
+import { OptionDataSource } from '@pomelo/datasource';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import {
+  BaseController,
+  User,
+  ApiAuth,
+  ParseQueryPipe,
+  describeType,
+  createResponseSuccessType,
+  RequestUser,
+} from '@pomelo/shared';
+import { OptionAction } from '@/common/actions';
 import { OptionQueryDto } from './dto/option-query.dto';
 import { NewOptionDto } from './dto/new-option.dto';
 import { UpdateOptionDto } from './dto/update-option.dto';
@@ -43,9 +50,13 @@ export class OptionController extends BaseController {
     description: 'Option model',
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
   })
-  async get(@Param('id', ParseIntPipe) id: number) {
+  @ApiNoContentResponse({ description: 'Option not found' })
+  async get(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res: Response) {
     const result = await this.optionDataSource.get(id, ['id', 'optionName', 'optionValue', 'autoload']);
-    this.success({
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+    return this.success({
       data: result,
     });
   }
@@ -62,8 +73,12 @@ export class OptionController extends BaseController {
         'OptionValueSuccessResp',
       ),
   })
-  async getValue(@Param('name') name: string) {
+  @ApiNoContentResponse({ description: 'Option not found' })
+  async getValue(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
     const value = await this.optionDataSource.getOptionValue(name);
+    if (value === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
     return this.success({
       data: value,
     });
@@ -74,7 +89,7 @@ export class OptionController extends BaseController {
    */
   @Get()
   @Authorized()
-  @RamAuthorized(Actions.Option.List)
+  @RamAuthorized(OptionAction.List)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Option models',
@@ -92,9 +107,9 @@ export class OptionController extends BaseController {
    */
   @Post()
   @Authorized()
-  @RamAuthorized(Actions.Option.Create)
+  @RamAuthorized(OptionAction.Create)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     description: 'Option model',
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
   })
@@ -110,21 +125,19 @@ export class OptionController extends BaseController {
    */
   @Put(':id')
   @Authorized()
-  @RamAuthorized(Actions.Option.Update)
+  @RamAuthorized(OptionAction.Update)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Option model',
-    type: () => createResponseSuccessType({ data: Boolean }, 'UpdateOptionModelSuccessResp'),
+    type: () => createResponseSuccessType({}, 'UpdateOptionModelSuccessResp'),
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body('model') input: UpdateOptionDto,
+    @Body() model: UpdateOptionDto,
     @User() requestUser: RequestUser,
   ) {
-    const reault = await this.optionDataSource.update(id, input, requestUser);
-    return this.success({
-      data: reault,
-    });
+    await this.optionDataSource.update(id, model, requestUser);
+    return this.success();
   }
 
   /**
@@ -132,16 +145,23 @@ export class OptionController extends BaseController {
    */
   @Delete(':id')
   @Authorized()
-  @RamAuthorized(Actions.Option.Delete)
+  @RamAuthorized(OptionAction.Delete)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Option model',
-    type: () => createResponseSuccessType({ data: Boolean }, 'DeleteOptionModelSuccessResp'),
+    type: () => createResponseSuccessType({}, 'DeleteOptionModelSuccessResp'),
   })
-  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
-    const reault = await this.optionDataSource.delete(id, requestUser);
-    return this.success({
-      data: reault,
-    });
+  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser, @I18n() i18n: I18nContext) {
+    const result = await this.optionDataSource.delete(id, requestUser);
+    if (result) {
+      return this.success();
+    } else {
+      return this.faild(
+        await i18n.tv('options.controller.option_does_not_exist', `Option "${id}" does not exist！`, {
+          args: { id },
+        }),
+        400,
+      );
+    }
   }
 }

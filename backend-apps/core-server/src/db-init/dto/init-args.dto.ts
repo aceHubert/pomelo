@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsLocale, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { InitArgs } from '@/sequelize-datasources/interfaces';
+import { InitArgs } from '@pomelo/datasource';
 
 export class InitArgsDto implements Omit<InitArgs, 'siteUrl'> {
   /**

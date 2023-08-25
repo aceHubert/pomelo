@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsInt, IsEnum } from 'class-validator';
-import { TemplateStatus } from '@/orm-entities/interfaces/template.interface';
+import { TemplateStatus } from '@pomelo/datasource';
 
 export class BulkUpdateTemplateStatusDto {
   /**

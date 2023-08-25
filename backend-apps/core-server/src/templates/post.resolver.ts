@@ -1,14 +1,22 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Parent, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Anonymous, Authorized, RamAuthorized } from 'nestjs-identity';
-import { Taxonomy, Taxonomy as TaxonomyEnum, TemplateStatus, TemplateType } from '@/orm-entities/interfaces';
-import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
+import { Fields, User, RequestUser } from '@pomelo/shared';
+import {
+  TemplateDataSource,
+  TermTaxonomyDataSource,
+  PagedTemplateArgs,
+  TemplateOptionArgs,
+  Taxonomy,
+  Taxonomy as TaxonomyEnum,
+  TemplateStatus,
+  TemplateType,
+} from '@pomelo/datasource';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { Anonymous, Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { PostTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
-import { TemplateDataSource, TermTaxonomyDataSource } from '@/sequelize-datasources/datasources';
-import { PagedTemplateArgs, TemplateOptionArgs } from '@/sequelize-datasources/interfaces';
 import { TermTaxonomy } from '../term-taxonomy/models/term-taxonomy.model';
 import { TaxonomyFieldResolver } from './base.resolver';
 import { NewPostTemplateInput } from './dto/new-template.input';
@@ -148,7 +156,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     );
   }
 
-  @RamAuthorized(Actions.PostTemplate.PagedList)
+  @RamAuthorized(PostTemplateAction.PagedList)
   @Query((returns) => PagedPostTemplate, { description: 'Get paged post templates.' })
   async postTemplates(
     @Args() args: PagedPostTemplateArgs,
@@ -183,7 +191,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     };
   }
 
-  @RamAuthorized(Actions.PostTemplate.Create)
+  @RamAuthorized(PostTemplateAction.Create)
   @Mutation((returns) => PostTemplate, { description: 'Create a new post template.' })
   async createPostTempate(
     @Args('model', { type: () => NewPostTemplateInput }) model: NewPostTemplateInput,
@@ -220,7 +228,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     };
   }
 
-  @RamAuthorized(Actions.PostTemplate.Update)
+  @RamAuthorized(PostTemplateAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update post template (must not be in "trash" status).' })
   async updatePostTemplate(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,

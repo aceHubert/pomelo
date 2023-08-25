@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsNotEmpty, IsInt } from 'class-validator';
-import { TermTaxonomyArgs } from '@/sequelize-datasources/interfaces';
+import { TermTaxonomyArgs } from '@pomelo/datasource';
 
 export abstract class TermTaxonomyArgsValidator implements TermTaxonomyArgs {
   @IsOptional()

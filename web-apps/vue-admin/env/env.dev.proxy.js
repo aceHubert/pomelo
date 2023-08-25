@@ -28,7 +28,5 @@
     mergeClaims: true,
   };
 
-  env.microApps = [];
-
   window._ENV = env;
 })(this);

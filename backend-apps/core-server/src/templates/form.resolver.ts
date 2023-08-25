@@ -1,14 +1,22 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Anonymous, Authorized, RamAuthorized } from 'nestjs-identity';
-import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
+import { Fields, User, RequestUser } from '@pomelo/shared';
+import {
+  TemplateDataSource,
+  TermTaxonomyDataSource,
+  PagedTemplateArgs,
+  TemplateOptionArgs,
+  Taxonomy,
+  Taxonomy as TaxonomyEnum,
+  TemplateStatus,
+  TemplateType,
+} from '@pomelo/datasource';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { Anonymous, Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { FormTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
-import { TemplateDataSource, TermTaxonomyDataSource } from '@/sequelize-datasources/datasources';
-import { Taxonomy, Taxonomy as TaxonomyEnum, TemplateStatus, TemplateType } from '@/orm-entities/interfaces';
-import { PagedTemplateArgs, TemplateOptionArgs } from '@/sequelize-datasources/interfaces';
 import { createTaxonomyFieldResolver } from './base.resolver';
 import { NewFormTemplateInput } from './dto/new-template.input';
 import { UpdateFormTemplateInput } from './dto/update-template.input';
@@ -97,7 +105,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     return;
   }
 
-  @RamAuthorized(Actions.FormTemplate.PagedList)
+  @RamAuthorized(FormTemplateAction.PagedList)
   @Query((returns) => PagedFormTemplate, { description: 'Get paged form templates.' })
   async formTemplates(
     @Args() args: PagedFormTemplateArgs,
@@ -127,7 +135,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     };
   }
 
-  @RamAuthorized(Actions.FormTemplate.Create)
+  @RamAuthorized(FormTemplateAction.Create)
   @Mutation((returns) => FormTemplate, { description: 'Create a new form template.' })
   async createFormTemplate(
     @Args('model', { type: () => NewFormTemplateInput }) model: NewFormTemplateInput,
@@ -163,7 +171,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     };
   }
 
-  @RamAuthorized(Actions.FormTemplate.Update)
+  @RamAuthorized(FormTemplateAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update form template (must not be in "trash" status).' })
   async updateFormTemplate(
     @Args('id', { type: () => ID, description: 'Form id' }) id: number,

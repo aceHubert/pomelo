@@ -1,5 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { OptionAutoload } from '@/orm-entities/interfaces/options.interface';
+import { OptionAutoload } from '@pomelo/datasource';
 
 @ObjectType({ description: 'Option model' })
 export class Option {

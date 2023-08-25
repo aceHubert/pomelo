@@ -1,5 +1,5 @@
 import { IsString, IsDefined, IsOptional, IsEnum } from 'class-validator';
-import { OptionAutoload } from '@/orm-entities/interfaces/options.interface';
+import { OptionAutoload } from '@pomelo/datasource';
 
 export abstract class NewOptionValidator {
   @IsDefined()

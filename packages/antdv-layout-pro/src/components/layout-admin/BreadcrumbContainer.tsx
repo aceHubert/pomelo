@@ -1,0 +1,136 @@
+import { defineComponent, ref, provide, inject, toRef } from 'vue-demi';
+import { Space } from 'ant-design-vue';
+import { useEffect, useConfigProvider } from '../../shared';
+import { isVueComponent } from '../../utils';
+import { Breadcrumb } from '../breadcrumb';
+
+// Types
+import type { Ref, PropType, InjectionKey } from 'vue-demi';
+import type { DefineComponent, BreadcrumbConfig } from '../../types';
+import type { BreadcrumbItem } from '../breadcrumb';
+
+/**
+ * 面包屑项（['_route',  BreadcrumbConfig, DefineComponent<any>]）
+ * 预设置面包屑：
+ * _route：当前路由面包屑
+ */
+export type PresetBreadcrumbItem = BreadcrumbConfig | DefineComponent<any> | '_route';
+
+export type BreadcrumbProp =
+  | boolean
+  | PresetBreadcrumbItem[]
+  | ((routeBreadcrumbs: BreadcrumbConfig[]) => Exclude<PresetBreadcrumbItem, String>[]);
+
+const BreadcrumbProviderInjectKey: InjectionKey<Ref<BreadcrumbConfig[]>> = Symbol('BreadcrumbProvider');
+
+const BreadcrumbContainerInjectKey: InjectionKey<{
+  setBreadcrumb: (breadcrumb: Array<BreadcrumbItem | DefineComponent<any>>) => void;
+}> = Symbol('NestedBreadcrumbContainer');
+
+/**
+ * 提供路由面包屑数据给 BreadcrumbContainer 使用
+ */
+export const BreadcrumbProvider = defineComponent({
+  name: 'BreadcrumbProvider',
+  props: {
+    breadcrumb: {
+      type: Array as PropType<BreadcrumbConfig[]>,
+      required: true,
+    },
+  },
+  setup(props, { slots }) {
+    provide(BreadcrumbProviderInjectKey, toRef(props, 'breadcrumb'));
+
+    return () => slots.default?.();
+  },
+});
+
+/**
+ * 面包屑容器
+ * 如果嵌套使用时，只显示最外层的面包屑
+ */
+export const BreadcrumbContainer = defineComponent({
+  name: 'BreadcrumbContainer',
+  props: {
+    /**
+     * 传入的面包屑数据, 默认值：true
+     * 当为 true 时，使用路由的面包屑数据
+     * 当为 false 时，不显示面包屑
+     */
+    breadcrumb: {
+      type: [Boolean, Array, Function] as PropType<BreadcrumbProp>,
+      default: true,
+    },
+  },
+  setup(props, { slots }) {
+    const configProvider = useConfigProvider();
+
+    const injectBreadcrumb = inject(BreadcrumbProviderInjectKey, ref([]));
+    const nestedContainer = inject(BreadcrumbContainerInjectKey, void 0);
+
+    const currentBreadcrumbs = ref<Array<BreadcrumbItem | DefineComponent<any>>>([]);
+
+    useEffect(() => {
+      if (nestedContainer) {
+        nestedContainer.setBreadcrumb(getBreadcrumbs(props.breadcrumb));
+      } else {
+        currentBreadcrumbs.value = getBreadcrumbs(props.breadcrumb);
+      }
+    }, [() => props.breadcrumb, injectBreadcrumb]);
+
+    provide(
+      BreadcrumbContainerInjectKey,
+      nestedContainer ?? {
+        setBreadcrumb: (breadcrumb) => {
+          currentBreadcrumbs.value = breadcrumb;
+        },
+      },
+    );
+
+    function getBreadcrumbs(config: BreadcrumbProp) {
+      let breadcrumbs: Array<BreadcrumbConfig | DefineComponent<any>> = [];
+      if (typeof config === 'boolean') {
+        breadcrumbs = config ? injectBreadcrumb.value : [];
+      } else if (Array.isArray(config)) {
+        breadcrumbs = config.reduce((prev, curr) => {
+          switch (curr) {
+            case '_route':
+              prev.push(...injectBreadcrumb.value);
+              break;
+            default:
+              prev.push(curr);
+              break;
+          }
+          return prev;
+        }, [] as Array<BreadcrumbConfig | DefineComponent<any>>);
+      } else if (typeof config === 'function') {
+        breadcrumbs = config([...injectBreadcrumb.value]);
+      }
+
+      return breadcrumbs.map((item) => {
+        if (isVueComponent(item)) return item;
+
+        const { label, path } = item;
+        return {
+          label: typeof label === 'function' ? label((...args) => configProvider.i18nRender(...args)) : label,
+          to: path,
+          isLink: !!path && path.substring(0, path.indexOf('?')) !== location.pathname, // exclude query string
+        };
+      });
+    }
+
+    return () =>
+      nestedContainer ? (
+        slots.default?.()
+      ) : (
+        <div class="breadcrumb-container">
+          <Space class="py-3">
+            {slots.prefix?.()}
+            <Breadcrumb items={currentBreadcrumbs.value}></Breadcrumb>
+            {slots.suffix?.()}
+          </Space>
+          {slots.default?.()}
+        </div>
+      );
+  },
+});

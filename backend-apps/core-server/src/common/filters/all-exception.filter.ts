@@ -4,15 +4,7 @@ import { BaseError as SequelizeBaseError, DatabaseError as SequelizeDatabaseErro
 import { GraphQLError } from 'graphql';
 import { getI18nContextFromArgumentsHost } from 'nestjs-i18n';
 import { Request, Response } from 'express';
-import { UnauthorizedError } from 'express-jwt';
 import { InvalidPackageNameError, InvalidPackageVersionError } from 'query-registry';
-import {
-  SyntaxError,
-  UserInputError,
-  ValidationError,
-  AuthenticationError,
-  ForbiddenError,
-} from '../utils/errors.util';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -72,54 +64,35 @@ export class AllExceptionFilter implements ExceptionFilter {
    * 从 Error 获取返回的 http code
    * @param exception Error
    */
-  private getHttpCodeFromError(exception: Error): number {
-    return exception instanceof SyntaxError || // 代码内主动抛出的 SyntaxError 转换成 http 400
-      exception instanceof UserInputError // 代码内主动抛出的 UserInputError 转换成 http 400
-      ? HttpStatus.BAD_REQUEST
-      : exception instanceof UnauthorizedError || // express-jwt UnauthorizedError 转换成 http 401
-        exception instanceof AuthenticationError // 代码内主动抛出的 AuthenticationError 转换成 http 401
-      ? HttpStatus.UNAUTHORIZED
-      : exception instanceof ForbiddenError // 代码内主动抛出的 ForbiddenError 转换成 http 403
-      ? HttpStatus.FORBIDDEN
-      : exception instanceof ValidationError || // 代码内主动抛出的 ValidationError 转换成 http 405
-        exception instanceof InvalidPackageNameError ||
-        exception instanceof InvalidPackageVersionError //  query-registry InvalidPackageNameError/InvalidPackageVersionError 转换成 http 405
-      ? HttpStatus.METHOD_NOT_ALLOWED
-      : exception instanceof HttpException // 如果是 Http 错误，直接获取 status code
+  private getHttpCodeFromError(exception: Error | { status?: number }): number {
+    return exception instanceof HttpException // 如果是 Http 错误，直接获取 status code
       ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR; // 否则返回 500
+      : exception instanceof InvalidPackageNameError || exception instanceof InvalidPackageVersionError //  query-registry InvalidPackageNameError/InvalidPackageVersionError 转换成 http 405
+      ? HttpStatus.METHOD_NOT_ALLOWED
+      : (exception as { status?: number }).status ?? HttpStatus.INTERNAL_SERVER_ERROR; // 否则返回 500
   }
 
   /**
    * 从 Error 获取 graphql 的 extensions.code
    * @param exception Error
    */
-  private getGraphqlCodeFromError(exception: Error) {
+  private getGraphqlCodeFromError(exception: Error | { status?: number }) {
     return exception instanceof HttpException
       ? getFromHttpStatus(exception.getStatus())
-      : exception instanceof SyntaxError // 代码内主动抛出的 SyntaxError 转换成 GRAPHQL_PARSE_FAILED
-      ? 'GRAPHQL_PARSE_FAILED'
-      : exception instanceof ValidationError || // 代码内主动抛出的 ValidationError 转换成 GRAPHQL_VALIDATION_FAILED
-        exception instanceof InvalidPackageNameError ||
-        exception instanceof InvalidPackageVersionError //  query-registry InvalidPackageNameError/InvalidPackageVersionError 转换成 GRAPHQL_VALIDATION_FAILED
-      ? 'GRAPHQL_VALIDATION_FAILED'
-      : exception instanceof UserInputError // 代码内主动抛出的 UserInputError 转换成 BAD_USER_INPUT
-      ? 'BAD_USER_INPUT'
-      : exception instanceof UnauthorizedError || // express-jwt UnauthorizedError 转换成 UNAUTHENTICATED
-        exception instanceof AuthenticationError // 代码内主动抛出的 AuthenticationError 转换成 UNAUTHENTICATED
-      ? 'UNAUTHENTICATED'
-      : exception instanceof ForbiddenError // 代码内主动抛出的 ForbiddenError 转换成 FORBIDDEN
-      ? 'FORBIDDEN'
-      : exception instanceof SequelizeDatabaseError // 将 database error 转换成 DATABASE_ERROR
-      ? 'DATABASE_ERROR'
-      : 'INTERNAL_SERVER_ERROR'; // 否则返回INTERNAL_SERVER_ERROR
+      : exception instanceof InvalidPackageNameError || exception instanceof InvalidPackageVersionError //  query-registry InvalidPackageNameError/InvalidPackageVersionError 转换成 METHOD_NOT_ALLOWED
+      ? 'METHOD_NOT_ALLOWED'
+      : getFromHttpStatus((exception as { status?: number }).status ?? HttpStatus.INTERNAL_SERVER_ERROR);
 
     function getFromHttpStatus(status: number) {
       switch (status) {
+        case 400:
+          return 'BAD_USER_INPUT';
         case 401:
           return 'UNAUTHENTICATED';
         case 403:
           return 'FORBIDDEN';
+        case 405:
+          return 'METHOD_NOT_ALLOWED';
         default:
           return 'INTERNAL_SERVER_ERROR';
       }

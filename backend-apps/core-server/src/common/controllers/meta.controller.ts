@@ -1,4 +1,5 @@
 import { camelCase, lowerCase, upperFirst, words } from 'lodash';
+import { Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
 import {
   applyDecorators,
@@ -12,12 +13,21 @@ import {
   ParseIntPipe,
   ParseArrayPipe,
   Type,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
-import { Anonymous, RamAuthorized } from 'nestjs-identity';
-import { MetaDataSource } from '@/sequelize-datasources/interfaces';
-import { createResponseSuccessType } from '../utils/swagger-type.util';
-import { BaseController } from './base.controller';
+import {
+  ApiOperation,
+  ApiQuery,
+  ApiBody,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+} from '@nestjs/swagger';
+import { Anonymous } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { BaseController, createResponseSuccessType } from '@pomelo/shared';
+import { MetaDataSource } from '@pomelo/datasource';
 import { NewMetaDto } from './dto/new-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';
 
@@ -80,8 +90,13 @@ export function createMetaController<
       description: `${_descriptionName} meta model`,
       type: () => createResponseSuccessType({ data: metaModelRespType }, `${_upperFirstModelName}MetaModelSuccessResp`),
     })
-    async getMeta(@Param('id', ParseIntPipe) id: number) {
+    @ApiNoContentResponse({ description: `${_descriptionName} meta not found` })
+    async getMeta(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res: Response) {
       const result = await this.metaDataSource.getMeta(id, ['id', 'metaKey', 'metaValue']);
+
+      if (result === undefined) {
+        res.status(HttpStatus.NO_CONTENT);
+      }
 
       return this.success({
         data: result,
@@ -125,7 +140,7 @@ export function createMetaController<
     @ApiOperation({ summary: `Create a new ${_descriptionName} meta.` })
     @ApiAuth()
     @ApiBody({ type: () => newMetaDtoType })
-    @ApiOkResponse({
+    @ApiCreatedResponse({
       description: `${_descriptionName} meta model`,
       type: () => createResponseSuccessType({ data: metaModelRespType }, `${_upperFirstModelName}MetaModelSuccessResp`),
     })
@@ -144,7 +159,7 @@ export function createMetaController<
     @ApiOperation({ summary: `Create bulk of ${_descriptionName} metas.` })
     @ApiAuth()
     @ApiBody({ type: () => [NewMetaDto] })
-    @ApiOkResponse({
+    @ApiCreatedResponse({
       description: `${_descriptionName} meta models`,
       type: () =>
         createResponseSuccessType({ data: [metaModelRespType] }, `${_upperFirstModelName}MetaModelsSuccessResp`),

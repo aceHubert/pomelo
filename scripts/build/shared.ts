@@ -1,0 +1,11 @@
+import path from 'path';
+import { cwd } from './constants';
+
+export const getConfigs = (name) => {
+  try {
+    const module = require.resolve(path.resolve(cwd, name));
+    return require(module);
+  } catch {
+    return {};
+  }
+};

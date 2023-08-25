@@ -1,4 +1,5 @@
-import { ApiTags, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ApiTags, ApiQuery, ApiBody, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import {
   Controller,
   Param,
@@ -13,21 +14,23 @@ import {
   ValidationPipe,
   Body,
   Delete,
+  Res,
   HttpStatus,
 } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ModuleRef } from '@nestjs/core';
-import { Authorized, Anonymous, RamAuthorized } from 'nestjs-identity';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
-import { ApiAuth } from '@/common/decorators/api-auth.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
-import { QueryRequired } from '@/common/decorators/query-required.decorator';
-import { ParseQueryPipe } from '@/common/pipes/parse-query.pipe';
+import { Authorized, Anonymous } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { ApiAuth, User, ParseQueryPipe, QueryRequired, createResponseSuccessType, RequestUser } from '@pomelo/shared';
+import {
+  TemplateDataSource,
+  PagedTemplateArgs,
+  TemplateOptionArgs,
+  Taxonomy,
+  TemplateStatus,
+} from '@pomelo/datasource';
+import { TemplateAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
-import { Taxonomy, TemplateStatus } from '@/orm-entities/interfaces';
-import { TemplateDataSource } from '@/sequelize-datasources/datasources';
-import { PagedTemplateArgs, TemplateOptionArgs } from '@/sequelize-datasources/interfaces';
 import { NewTemplateMetaDto } from './dto/new-template-meta.dto';
 import { PagedBaseTemplateQueryDto, BaseTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewTemplateDto } from './dto/new-template.dto';
@@ -94,21 +97,24 @@ export class TemplateController extends createMetaController(
    * get template count by status
    */
   @Get('count/:type/by/status')
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Count by status',
-    type: () => createResponseSuccessType({ data: TemplateStatusCount }, 'TemplateCountByStatusModelSuccessResp'),
+    type: () => createResponseSuccessType({ data: [TemplateStatusCount] }, 'TemplateCountByStatusModelSuccessResp'),
   })
-  getCountByStatus(@Param('type') type: string, @User() requestUser: RequestUser) {
-    return this.templateDataSource.getCountByStatus(type, requestUser);
+  async getCountByStatus(@Param('type') type: string, @User() requestUser: RequestUser) {
+    const result = await this.templateDataSource.getCountByStatus(type, requestUser);
+    return this.success({
+      data: result,
+    });
   }
 
   /**
    * Get template count by self
    */
   @Get('count/:type/by/self')
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiQuery({
     name: 'includeTrash',
@@ -120,19 +126,22 @@ export class TemplateController extends createMetaController(
     description: 'Count',
     type: () => createResponseSuccessType({ data: Number }, 'TemplateCountBySelfModelSuccessResp'),
   })
-  getCountBySelf(
+  async getCountBySelf(
     @Param('type') type: string,
     @Query('includeTrash') includeTrash: boolean,
     @User() requestUser: RequestUser,
   ) {
-    return this.templateDataSource.getCountBySelf(type, !!includeTrash, requestUser);
+    const result = await this.templateDataSource.getCountBySelf(type, !!includeTrash, requestUser);
+    return this.success({
+      data: result,
+    });
   }
 
   /**
    * Get template count by day
    */
   @Get('count/:type/by/day')
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiQuery({
     name: 'month',
@@ -143,17 +152,20 @@ export class TemplateController extends createMetaController(
   })
   @ApiOkResponse({
     description: 'Count by day',
-    type: () => createResponseSuccessType({ data: TemplateDayCount }, 'TemplateCountByDayModelSuccessResp'),
+    type: () => createResponseSuccessType({ data: [TemplateDayCount] }, 'TemplateCountByDayModelSuccessResp'),
   })
-  getCountByDay(@QueryRequired('month') month: string, @Param('type') type: string) {
-    return this.templateDataSource.getCountByDay(month, type);
+  async getCountByDay(@QueryRequired('month') month: string, @Param('type') type: string) {
+    const result = await this.templateDataSource.getCountByDay(month, type);
+    return this.success({
+      data: result,
+    });
   }
 
   /**
    * Get template count by month
    */
   @Get('count/:type/by/month')
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiQuery({
     name: 'year',
@@ -171,28 +183,34 @@ export class TemplateController extends createMetaController(
   })
   @ApiOkResponse({
     description: 'Count by month',
-    type: () => createResponseSuccessType({ data: TemplateMonthCount }, 'TemplateCountByMonthModelSuccessResp'),
+    type: () => createResponseSuccessType({ data: [TemplateMonthCount] }, 'TemplateCountByMonthModelSuccessResp'),
   })
-  getCountByMonth(
+  async getCountByMonth(
     @Query('months', ParseIntPipe) months: number,
     @Query('year') year: string,
     @Param('type') type: string,
   ) {
-    return this.templateDataSource.getCountByMonth({ months, year }, type);
+    const result = await this.templateDataSource.getCountByMonth({ months, year }, type);
+    return this.success({
+      data: result,
+    });
   }
 
   /**
    * Get template count by year
    */
   @Get('count/:type/by/year')
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Count by year',
-    type: () => createResponseSuccessType({ data: TemplateYearCount }, 'TemplateCountByYearModelSuccessResp'),
+    type: () => createResponseSuccessType({ data: [TemplateYearCount] }, 'TemplateCountByYearModelSuccessResp'),
   })
-  getCountByYear(@Param('type') type: string) {
-    return this.templateDataSource.getCountByYear(type);
+  async getCountByYear(@Param('type') type: string) {
+    const result = await this.templateDataSource.getCountByYear(type);
+    return this.success({
+      data: result,
+    });
   }
 
   /**
@@ -211,10 +229,14 @@ export class TemplateController extends createMetaController(
     description: 'Template model',
     type: () => createResponseSuccessType({ data: TemplateWithMetasModelResp }, 'TemplateModelSuccessResp'),
   })
+  @ApiNoContentResponse({
+    description: 'Template not found',
+  })
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     @User() requestUser: RequestUser,
+    @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.templateDataSource.get(
       id,
@@ -223,26 +245,28 @@ export class TemplateController extends createMetaController(
       requestUser,
     );
 
-    if (result) {
-      let metas;
-      if (metaKeys?.length) {
-        metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
-      }
-      return this.success({
-        data: {
-          ...result,
-          metas,
-        },
-      });
+    let metas;
+    if (result && metaKeys?.length) {
+      metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
     }
-    return this.success();
+
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+
+    return this.success({
+      data: {
+        ...result,
+        metas,
+      },
+    });
   }
 
   /**
    * Get paged template model
    */
   @Get()
-  @RamAuthorized(Actions.BaseTemplate.PagedList)
+  @RamAuthorized(TemplateAction.PagedList)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged template models',
@@ -275,10 +299,9 @@ export class TemplateController extends createMetaController(
    * Create template
    */
   @Post()
-  @RamAuthorized(Actions.BaseTemplate.Create)
+  @RamAuthorized(TemplateAction.Create)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: 'Template model',
     type: () => createResponseSuccessType({ data: TemplateModelResp }, 'TemplateModelSuccessResp'),
   })
@@ -306,7 +329,7 @@ export class TemplateController extends createMetaController(
    * Update template
    */
   @Put(':id')
-  @RamAuthorized(Actions.FormTemplate.Update)
+  @RamAuthorized(TemplateAction.Update)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -325,7 +348,7 @@ export class TemplateController extends createMetaController(
    * Update template name (must not be in "trash" status)
    */
   @Patch(':id/name')
-  @RamAuthorized(Actions.BaseTemplate.UpdateName)
+  @RamAuthorized(TemplateAction.UpdateName)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: '"true" if success or "false" if template does not exist or name ',
@@ -339,10 +362,10 @@ export class TemplateController extends createMetaController(
   ) {
     const result = await this.templateDataSource.updateName(id, name, requestUser);
     if (result) {
-      return this.success({});
+      return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_is_not_exists', `Template "${id}" does not exist！`, {
+        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -354,7 +377,7 @@ export class TemplateController extends createMetaController(
    * Update template status (must not be in "trash" status)
    */
   @Patch(':id/status')
-  @RamAuthorized(Actions.BaseTemplate.UpdateStatus)
+  @RamAuthorized(TemplateAction.UpdateStatus)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: '"true" if success or "false" if template does not exist',
@@ -368,10 +391,10 @@ export class TemplateController extends createMetaController(
   ) {
     const result = await this.templateDataSource.updateStatus(id, status, requestUser);
     if (result) {
-      return this.success({});
+      return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_is_not_exists', `Template "${id}" does not exist！`, {
+        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -383,22 +406,22 @@ export class TemplateController extends createMetaController(
    * Update the bulk of templates' status (must not be in "trash" status)
    */
   @Patch('status/bulk')
-  @RamAuthorized(Actions.BaseTemplate.BulkUpdateStatus)
+  @RamAuthorized(TemplateAction.BulkUpdateStatus)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
-    type: () => createResponseSuccessType({ data: Boolean }, 'BulkUpdateTemplateStatusModelSuccessResp'),
+    type: () => createResponseSuccessType({}, 'BulkUpdateTemplateStatusModelSuccessResp'),
   })
   async bulkUpdateStatus(@Body() model: BulkUpdateTemplateStatusDto, @User() requestUser: RequestUser) {
     await this.templateDataSource.bulkUpdateStatus(model.templateIds, model.status, requestUser);
-    return this.success({});
+    return this.success();
   }
 
   /**
    * Restore template (must be in "trash" status)
    */
   @Patch(':id/restore')
-  @RamAuthorized(Actions.BaseTemplate.Restore)
+  @RamAuthorized(TemplateAction.Restore)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -407,10 +430,10 @@ export class TemplateController extends createMetaController(
   async restore(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser, @I18n() i18n: I18nContext) {
     const result = await this.templateDataSource.restore(id, requestUser);
     if (result) {
-      return this.success({});
+      return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_is_not_exists', `Template "${id}" does not exist！`, {
+        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -422,7 +445,7 @@ export class TemplateController extends createMetaController(
    * Restore the bulk of templates (must be in "trash" status)
    */
   @Patch('restore/bulk')
-  @RamAuthorized(Actions.BaseTemplate.BulkRestore)
+  @RamAuthorized(TemplateAction.BulkRestore)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({ type: () => [Number], description: 'Template ids' })
   @ApiOkResponse({
@@ -431,14 +454,14 @@ export class TemplateController extends createMetaController(
   })
   async bulkRestore(@Body() ids: number[], @User() requestUser: RequestUser) {
     await this.templateDataSource.bulkRestore(ids, requestUser);
-    return this.success({});
+    return this.success();
   }
 
   /**
    * Delete template permanently (must be in "trash" status)
    */
   @Delete(':id')
-  @RamAuthorized(Actions.BaseTemplate.Delete)
+  @RamAuthorized(TemplateAction.Delete)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -447,10 +470,10 @@ export class TemplateController extends createMetaController(
   async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser, @I18n() i18n: I18nContext) {
     const result = await this.templateDataSource.delete(id, requestUser);
     if (result) {
-      return this.success({});
+      return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_is_not_exists', `Template "${id}" does not exist！`, {
+        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -462,7 +485,7 @@ export class TemplateController extends createMetaController(
    * Delete the bulk of templates permanently (must be in "trash" status)'
    */
   @Delete('/bulk')
-  @RamAuthorized(Actions.BaseTemplate.BulkDelete)
+  @RamAuthorized(TemplateAction.BulkDelete)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({ type: () => [Number], description: 'Template ids' })
   @ApiOkResponse({
@@ -471,6 +494,6 @@ export class TemplateController extends createMetaController(
   })
   async bulkDelete(@Body() ids: number[], @User() requestUser: RequestUser) {
     await this.templateDataSource.bulkDelete(ids, requestUser);
-    return this.success({});
+    return this.success();
   }
 }

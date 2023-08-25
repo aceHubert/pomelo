@@ -1,5 +1,5 @@
-import { GraphQLScalarType, Kind } from 'graphql';
 import moment from 'moment';
+import { GraphQLScalarType, Kind } from 'graphql';
 
 export const GraphQLMomentISODateTime = new GraphQLScalarType({
   name: 'MomentDatetime',

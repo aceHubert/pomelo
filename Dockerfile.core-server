@@ -27,8 +27,8 @@ COPY --from=deploy /app/backend/dist /app/backend/dist
 COPY --from=deploy /app/backend/.env* /app/backend/
 COPY --from=deploy /app/backend/package*.json /app/backend/
 COPY --from=deploy /app/package*.json /app/
-COPY --from=deploy /app/packages/nestjs-jwt/dist /app/packages/nestjs-jwt/dist
-COPY --from=deploy /app/packages/nestjs-jwt/package*.json /app/packages/nestjs-jwt/
+COPY --from=deploy /app/packages/nestjs-oidc/dist /app/packages/nestjs-oidc/dist
+COPY --from=deploy /app/packages/nestjs-oidc/package*.json /app/packages/nestjs-oidc/
 COPY --from=deploy /app/node_modules /app/node_modules/
 
 WORKDIR /app

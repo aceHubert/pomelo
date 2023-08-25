@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { createRouter } from 'vue2-helpers/vue-router';
 import VueMeta from 'vue-meta';
-import { RouterChild } from '@/layouts/modules';
+import { RouterChild } from '@/layouts/components';
 
 // Types
 import type { MetaInfo, MetaInfoComputed } from 'vue-meta/types/vue-meta';

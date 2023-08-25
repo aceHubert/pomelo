@@ -1,14 +1,22 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Anonymous, Authorized, RamAuthorized } from 'nestjs-identity';
-import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
+import { Fields, User, RequestUser } from '@pomelo/shared';
+import {
+  TemplateDataSource,
+  TermTaxonomyDataSource,
+  PagedTemplateArgs,
+  TemplateOptionArgs,
+  Taxonomy,
+  Taxonomy as TaxonomyEnum,
+  TemplateStatus,
+  TemplateType,
+} from '@pomelo/datasource';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { Anonymous, Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { PageTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
-import { TemplateDataSource, TermTaxonomyDataSource } from '@/sequelize-datasources/datasources';
-import { Taxonomy, Taxonomy as TaxonomyEnum, TemplateStatus, TemplateType } from '@/orm-entities/interfaces';
-import { PagedTemplateArgs, TemplateOptionArgs } from '@/sequelize-datasources/interfaces';
 import { createTaxonomyFieldResolver } from './base.resolver';
 import { NewPageTemplateInput } from './dto/new-template.input';
 import { UpdatePageTemplateInput } from './dto/update-template.input';
@@ -127,7 +135,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     return;
   }
 
-  @RamAuthorized(Actions.PageTemplate.PagedList)
+  @RamAuthorized(PageTemplateAction.PagedList)
   @Query((returns) => PagedPageTemplate, { description: 'Get paged page templates.' })
   async pageTemplates(
     @Args() args: PagedPageTemplateArgs,
@@ -157,7 +165,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     };
   }
 
-  @RamAuthorized(Actions.PageTemplate.Create)
+  @RamAuthorized(PageTemplateAction.Create)
   @Mutation((returns) => PageTemplate, { description: 'Create a new page template.' })
   async createPageTempate(
     @Args('model', { type: () => NewPageTemplateInput }) model: NewPageTemplateInput,
@@ -194,7 +202,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     };
   }
 
-  @RamAuthorized(Actions.PageTemplate.Update)
+  @RamAuthorized(PageTemplateAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update page template (must not be in "trash" status).' })
   async updatePageTemplate(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,

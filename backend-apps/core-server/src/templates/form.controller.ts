@@ -1,4 +1,5 @@
-import { ApiTags, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ApiTags, ApiQuery, ApiOkResponse, ApiNoContentResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import {
   Controller,
   Scope,
@@ -10,18 +11,14 @@ import {
   Put,
   ParseIntPipe,
   ParseArrayPipe,
+  Res,
   HttpStatus,
 } from '@nestjs/common';
-import { Authorized, Anonymous, RamAuthorized } from 'nestjs-identity';
-import { BaseController } from '@/common/controllers/base.controller';
-import { ApiAuth } from '@/common/decorators/api-auth.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
-import { ParseQueryPipe } from '@/common/pipes/parse-query.pipe';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
-import { Taxonomy, TemplateType } from '@/orm-entities/interfaces';
-import { TemplateDataSource } from '@/sequelize-datasources/datasources';
-import { PagedTemplateArgs, TemplateOptionArgs } from '@/sequelize-datasources/interfaces';
+import { BaseController, ApiAuth, ParseQueryPipe, User, RequestUser, createResponseSuccessType } from '@pomelo/shared';
+import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
+import { Authorized, Anonymous } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { FormTemplateAction } from '@/common/actions';
 import { PagedFormTemplateQueryDto, FormTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewFormTemplateDto } from './dto/new-template.dto';
 import {
@@ -88,10 +85,12 @@ export class FormTemplateController extends BaseController {
     description: 'From template model',
     type: () => createResponseSuccessType({ data: FormTemplateWithMetasModelResp }, 'FormTemplateModelSuccessResp'),
   })
+  @ApiNoContentResponse({ description: 'Form template not found' })
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     @User() requestUser: RequestUser,
+    @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.templateDataSource.get(
       id,
@@ -100,28 +99,30 @@ export class FormTemplateController extends BaseController {
       requestUser,
     );
 
-    if (result) {
-      let metas;
-      if (metaKeys?.length) {
-        metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'metaKey', 'metaValue']);
-      }
-      const { content, ...restData } = result;
-      return this.success({
-        data: {
-          ...restData,
-          schema: content,
-          metas,
-        },
-      });
+    let metas;
+    if (result && metaKeys?.length) {
+      metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
-    return this.success();
+
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+
+    const { content, ...restData } = result || {};
+    return this.success({
+      data: {
+        ...restData,
+        schema: content,
+        metas,
+      },
+    });
   }
 
   /**
    * Get paged form template model
    */
   @Get()
-  @RamAuthorized(Actions.FormTemplate.PagedList)
+  @RamAuthorized(FormTemplateAction.PagedList)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged from template models',
@@ -154,10 +155,9 @@ export class FormTemplateController extends BaseController {
    * Create form template
    */
   @Post()
-  @RamAuthorized(Actions.FormTemplate.Create)
+  @RamAuthorized(FormTemplateAction.Create)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: 'From template model',
     type: () => createResponseSuccessType({ data: FormTemplateModelResp }, 'FormTemplateModelSuccessResp'),
   })
@@ -184,7 +184,7 @@ export class FormTemplateController extends BaseController {
    * Update form template
    */
   @Put(':id')
-  @RamAuthorized(Actions.FormTemplate.Update)
+  @RamAuthorized(FormTemplateAction.Update)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -204,7 +204,7 @@ export class FormTemplateController extends BaseController {
    * Delete form template permanently
    */
   // @Delete(':id')
-  // @RamAuthorized(Actions.FormTemplate.Delete)
+  // @RamAuthorized(FormTemplateAction.Delete)
   // @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   // @ApiOkResponse({
   //   description: 'no data content',
@@ -214,6 +214,6 @@ export class FormTemplateController extends BaseController {
   // @ApiForbiddenResponse()
   // async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
   //   await this.templateDataSource.delete(id, requestUser);
-  //   return this.success({});
+  //   return this.success();
   // }
 }

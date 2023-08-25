@@ -2,16 +2,23 @@ import DataLoader from 'dataloader';
 import { upperFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
-import { Authorized, Anonymous, RamAuthorized } from 'nestjs-identity';
-import { Taxonomy as TaxonomyEnum, Taxonomy, TemplateStatus } from '@/orm-entities/interfaces';
-import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
-import { BaseResolver } from '@/common/resolvers/base.resolver';
+import { Authorized, Anonymous } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { BaseResolver, Fields, User, RequestUser } from '@pomelo/shared';
+import {
+  TemplateDataSource,
+  TermTaxonomyDataSource,
+  PagedTemplateArgs,
+  TemplateOptionArgs,
+  TermTaxonomyModel,
+  Taxonomy as TaxonomyEnum,
+  Taxonomy,
+  TemplateStatus,
+} from '@pomelo/datasource';
+import { TemplateAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
-import { TemplateDataSource, TermTaxonomyDataSource } from '@/sequelize-datasources/datasources';
-import { PagedTemplateArgs, TemplateOptionArgs, TermTaxonomyModel } from '@/sequelize-datasources/interfaces';
 import { TermTaxonomy } from '../term-taxonomy/models/term-taxonomy.model';
 import { NewTemplateInput } from './dto/new-template.input';
 import { NewTemplateMetaInput } from './dto/new-template-meta.input';
@@ -185,7 +192,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.get(id, void 0, this.getFieldNames(fields.fieldsByTypeName.Template), requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @Query((returns) => [TemplateStatusCount], { description: 'Get template count by status.' })
   templateCountByStatus(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
@@ -194,7 +201,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.getCountByStatus(type, requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @Query((returns) => Int, { description: 'Get template count by self.' })
   templateCountBySelf(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
@@ -205,7 +212,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.getCountBySelf(type, includeTrash, requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @Query((returns) => [TemplateDayCount], { description: 'Get template count by day.' })
   templateCountByDay(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
@@ -214,7 +221,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.getCountByDay(month, type);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @Query((returns) => [TemplateMonthCount], { description: 'Get template count by month.' })
   templateCountByMonth(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
@@ -229,13 +236,13 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.getCountByMonth({ year, months }, type);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Counts)
+  @RamAuthorized(TemplateAction.Counts)
   @Query((returns) => [TemplateYearCount], { description: 'Get template count by year.' })
   templateCountByYear(@Args('type', { type: () => String, description: 'Template type' }) type: string) {
     return this.templateDataSource.getCountByYear(type);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.PagedList)
+  @RamAuthorized(TemplateAction.PagedList)
   @Query((returns) => PagedTemplate, { description: 'Get paged templates.' })
   templates(
     @Args() args: PagedBaseTemplateArgs,
@@ -260,7 +267,7 @@ export class TemplateResolver extends createMetaResolver(
     );
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Create)
+  @RamAuthorized(TemplateAction.Create)
   @Mutation((returns) => Template, { description: 'Create a new template.' })
   async createTemplate(
     @Args('model', { type: () => NewTemplateInput }) model: NewTemplateInput,
@@ -299,7 +306,7 @@ export class TemplateResolver extends createMetaResolver(
     };
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Update)
+  @RamAuthorized(TemplateAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update template (must not be in "trash" status).' })
   async updateTemplate(
     @Args('id', { type: () => ID, description: 'Form id' }) id: number,
@@ -323,7 +330,7 @@ export class TemplateResolver extends createMetaResolver(
     return result;
   }
 
-  @RamAuthorized(Actions.BaseTemplate.UpdateStatus)
+  @RamAuthorized(TemplateAction.UpdateStatus)
   @Mutation((returns) => Boolean, {
     description: 'Update template stauts (must not be in "trash" status)',
   })
@@ -335,7 +342,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.updateStatus(id, status, requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.BulkUpdateStatus)
+  @RamAuthorized(TemplateAction.BulkUpdateStatus)
   @Mutation((returns) => Boolean, {
     description: `Update the bulk of templates' status (must not be in "trash" status)`,
   })
@@ -347,7 +354,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.bulkUpdateStatus(ids, status, requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Restore)
+  @RamAuthorized(TemplateAction.Restore)
   @Mutation((returns) => Boolean, { description: 'Restore template (must be in "trash" status)' })
   restoreTemplate(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
@@ -356,7 +363,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.restore(id, requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.BulkRestore)
+  @RamAuthorized(TemplateAction.BulkRestore)
   @Mutation((returns) => Boolean, { description: 'Restore the bulk of templates (must be in "trash" status)' })
   bulkRestoreTemplate(
     @Args('ids', { type: () => [ID!], description: 'Tempalte ids' }) ids: number[],
@@ -365,7 +372,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.bulkRestore(ids, requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.Delete)
+  @RamAuthorized(TemplateAction.Delete)
   @Mutation((returns) => Boolean, {
     description: 'Delete template permanently (must be in "trash" status).',
   })
@@ -376,7 +383,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.delete(id, requestUser);
   }
 
-  @RamAuthorized(Actions.BaseTemplate.BulkDelete)
+  @RamAuthorized(TemplateAction.BulkDelete)
   @Mutation((returns) => Boolean, {
     description: 'Delete the bulk of templates permanently (must be in "trash" status).',
   })

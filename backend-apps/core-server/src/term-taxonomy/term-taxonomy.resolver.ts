@@ -1,14 +1,13 @@
 import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
-import { Anonymous, Authorized, RamAuthorized } from 'nestjs-identity';
+import { Fields, User, RequestUser } from '@pomelo/shared';
+import { TermTaxonomyDataSource, TermTaxonomyModel, Taxonomy } from '@pomelo/datasource';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { Anonymous, Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
-import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { User } from '@/common/decorators/user.decorator';
-import { Actions } from '@/common/ram-actions';
-import { TermTaxonomyDataSource } from '@/sequelize-datasources/datasources';
-import { Taxonomy } from '@/orm-entities/interfaces';
-import { TermTaxonomyModel } from '@/sequelize-datasources/interfaces';
+import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyInput } from './dto/new-term-taxonomy.input';
 import { NewTermTaxonomyMetaInput } from './dto/new-term-taxonomy-meta.input';
 import { NewTermRelationshipInput } from './dto/new-term-relationship.input';
@@ -51,11 +50,11 @@ export class TermTaxonomyResolver extends createMetaResolver(
   termTaxonomy(
     @Args('id', { type: () => ID, description: 'Term taxonomy id' }) id: number,
     @Fields() fields: ResolveTree,
-  ): Promise<TermTaxonomy | null> {
+  ): Promise<TermTaxonomy | undefined> {
     return this.termTaxonomyDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy));
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.List)
+  @RamAuthorized(TermTaxonomyAction.List)
   @Query((returns) => [TermTaxonomy!], { description: 'Get term taxonomy list.' })
   termTaxonomies(@Args() args: TermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
     return this.termTaxonomyDataSource
@@ -74,7 +73,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
       );
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.CategoryList)
+  @RamAuthorized(TermTaxonomyAction.CategoryList)
   @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
   categoryTermTaxonomies(
     @Args() args: CategoryTermTaxonomyArgs,
@@ -96,7 +95,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
       );
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.TagList)
+  @RamAuthorized(TermTaxonomyAction.TagList)
   @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
   tagTermTaxonomies(@Args() args: TagTermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
     return this.termTaxonomyDataSource
@@ -123,7 +122,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
     return this.cascadeLoader.load({ parentId, fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy) });
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.ListByObjectId)
+  @RamAuthorized(TermTaxonomyAction.ListByObjectId)
   @Query((returns) => [TermTaxonomy!], { description: 'Get term taxonomies by objectId.' })
   termTaxonomiesByObjectId(
     @Args() args: TermTaxonomyByObjectIdArgs,
@@ -135,7 +134,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
     );
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.Create)
+  @RamAuthorized(TermTaxonomyAction.Create)
   @Mutation((returns) => TermTaxonomy, { description: 'Create a new term taxonomy.' })
   createTermTaxonomy(
     @Args('model', { type: () => NewTermTaxonomyInput }) model: NewTermTaxonomyInput,
@@ -144,7 +143,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
     return this.termTaxonomyDataSource.create(model, requestUser);
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.CreateRelationship)
+  @RamAuthorized(TermTaxonomyAction.CreateRelationship)
   @Mutation((returns) => TermRelationship, { description: 'Create a new term relationship.' })
   createTermRelationship(
     @Args('model', { type: () => NewTermRelationshipInput }) model: NewTermRelationshipInput,
@@ -153,7 +152,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
     return this.termTaxonomyDataSource.createRelationship(model, requestUser);
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.Update)
+  @RamAuthorized(TermTaxonomyAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update term taxonomy.' })
   updateTermTaxonomy(
     @Args('id', { type: () => ID, description: 'Term id' }) id: number,
@@ -162,19 +161,19 @@ export class TermTaxonomyResolver extends createMetaResolver(
     return this.termTaxonomyDataSource.update(id, model);
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.Delete)
+  @RamAuthorized(TermTaxonomyAction.Delete)
   @Mutation((returns) => Boolean, { description: 'Delete term taxonomy permanently (include term relationship).' })
   deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<boolean> {
     return this.termTaxonomyDataSource.delete(id);
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.BulkDelete)
+  @RamAuthorized(TermTaxonomyAction.BulkDelete)
   @Mutation((returns) => Boolean, { description: 'Delete term taxonomies permanently (include term relationship).' })
   bulkDeleteTermTaxonomy(@Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[]): Promise<boolean> {
     return this.termTaxonomyDataSource.bulkDelete(ids);
   }
 
-  @RamAuthorized(Actions.TermTaxonomy.DeleteRelationship)
+  @RamAuthorized(TermTaxonomyAction.DeleteRelationship)
   @Mutation((returns) => Boolean, { description: 'Delete term relationship permanently.' })
   deleteTermRelationship(
     @Args('objectId', { type: () => ID, description: 'Object id' }) objectId: number,

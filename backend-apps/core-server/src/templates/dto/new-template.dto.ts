@@ -1,6 +1,6 @@
 import { IsDefined, IsString, IsJSON } from 'class-validator';
 import { PickType } from '@nestjs/swagger';
-import { TemplateStatus } from '@/orm-entities/interfaces';
+import { TemplateStatus } from '@pomelo/datasource';
 import { NewTemplateValidator } from './new-template.validator';
 
 export class NewTemplateDto extends NewTemplateValidator {

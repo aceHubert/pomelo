@@ -1,0 +1,1 @@
+export { IRAMActionDefine } from './IRAMActionDefine';

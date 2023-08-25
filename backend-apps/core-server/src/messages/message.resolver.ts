@@ -1,5 +1,5 @@
 import { Resolver, Subscription } from '@nestjs/graphql';
-import { Authorized } from 'nestjs-identity';
+import { Authorized } from 'nestjs-authorization';
 import { MessageSubscriotion } from './models/message.model';
 import { MessageService } from './message.service';
 

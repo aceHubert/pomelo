@@ -1,11 +1,12 @@
 import { Resolver, Args, Query } from '@nestjs/graphql';
-import { BaseResolver } from '@/common/resolvers/base.resolver';
-import { Authorized } from 'nestjs-identity';
-import { RamAuthorized, Actions } from '@/common/ram-actions';
+import { BaseResolver } from '@pomelo/shared';
+import { Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
 import { ObsUploadSignedUrlModel, ObsPostUploadSignatureModel } from './models/hw-cloud.modal';
+import { Action } from './action';
 
 // Types
-import type { HWCloudObsService } from './obs.service';
+import type { ObsService } from './obs.service';
 import type {
   ObsCreateUploadSignedUrlOptionsArgs,
   ObsCreatePostUploadSignatureOptionsArgs,
@@ -13,32 +14,32 @@ import type {
 
 @Authorized()
 @Resolver()
-export class ObsFileResolver extends BaseResolver {
-  constructor(private readonly hwCloudObsService: HWCloudObsService) {
+export class ObsResolver extends BaseResolver {
+  constructor(private readonly obsService: ObsService) {
     super();
   }
 
   /**
    * Get huawei cloud obs "PUT" methos upload signed url
    */
-  @RamAuthorized(Actions.Resources.Obs.UploadSignedUrl)
+  @RamAuthorized(Action.UploadSignedUrl)
   @Query((returns) => ObsUploadSignedUrlModel, {
     nullable: true,
     description: 'Signed url.',
   })
   hwCloudObsUploadSignedUrl(@Args() args: ObsCreateUploadSignedUrlOptionsArgs): ObsUploadSignedUrlModel {
-    return this.hwCloudObsService.createUploadSignedUrl(args);
+    return this.obsService.createUploadSignedUrl(args);
   }
 
   /**
    * Get huawei cloud obs "POST" method upload signed url
    */
-  @RamAuthorized(Actions.Resources.Obs.UploadSignedUrl)
+  @RamAuthorized(Action.UploadSignedUrl)
   @Query((returns) => ObsPostUploadSignatureModel, {
     nullable: true,
     description: 'Signed url.',
   })
   hwCloudObsPostUploadSignature(@Args() args: ObsCreatePostUploadSignatureOptionsArgs): ObsPostUploadSignatureModel {
-    return this.hwCloudObsService.createPostUploadSignature(args);
+    return this.obsService.createPostUploadSignature(args);
   }
 }

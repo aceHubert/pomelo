@@ -1,5 +1,5 @@
 import { ref, reactive, computed, provide, onMounted, onBeforeUnmount } from '@vue/composition-api';
-import { createMediaQueryDispatcher } from '@pomelo/shared-web';
+import { createMediaQueryDispatcher } from '@ace-util/core';
 import { DeviceType } from '@/types';
 
 // screen and (max-width: 1087.99px)

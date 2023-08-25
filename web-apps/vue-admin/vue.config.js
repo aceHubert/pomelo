@@ -1,5 +1,7 @@
 const path = require('path');
 const fs = require('fs');
+const { defineConfig } = require('@vue/cli-service');
+const { NormalModuleReplacementPlugin } = require('webpack');
 const CompressionPlugin = require('compression-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
@@ -7,9 +9,6 @@ const terser = require('terser');
 const CKEditorWebpackPlugin = require('@ckeditor/ckeditor5-dev-webpack-plugin');
 const { styles } = require('@ckeditor/ckeditor5-dev-utils');
 const getCdnConfig = require('./build.cdn');
-
-// Types
-const { defineConfig } = require('@vue/cli-service');
 
 const getEnv = (key, defaultValue) => process.env[key] ?? defaultValue;
 const isEnv = (env) => process.env.NODE_ENV === env;
@@ -62,7 +61,15 @@ module.exports = defineConfig({
           }
         : {},
   },
-  transpileDependencies: ['@vue-async/*', '@formily-portal/*', /ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/],
+  transpileDependencies: [
+    'antd-layout-pro',
+    '@ace-fetch/*',
+    '@ace-util/*',
+    '@vue-async/*',
+    '@pomelo/*',
+    '@formily-portal/*',
+    /ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/,
+  ],
   chainWebpack: (config) => {
     // https://webpack.js.org/configuration/devtool/#development
     config.when(isEnv('development'), (config) => config.devtool('cheap-source-map'));
@@ -186,52 +193,55 @@ module.exports = defineConfig({
         // 开发环境下 formily designable 使用 src
         ...(!isProd
           ? {
-              '@pomelo/shared-web': path.resolve(__dirname, '../packages/shared-web/src'),
-              '@formily/antdv$': path.resolve(__dirname, '../.submodules/formily-antdv/packages/components/src'),
-              '@formily/antdv/esm': path.resolve(__dirname, '../.submodules/formily-antdv/packages/components/src'),
+              '@pomelo/shared-web': path.resolve(__dirname, '../../packages/shared-web/src'),
+              '@formily/antdv$': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
+              '@formily/antdv/esm': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
               '@formily/antdv-designable': path.resolve(
                 __dirname,
-                '../.submodules/formily-antdv/packages/designable/src',
+                '../../.submodules/formily-antdv/packages/designable/src',
               ),
               '@formily/antdv-prototypes': path.resolve(
                 __dirname,
-                '../.submodules/formily-antdv/packages/prototypes/src',
+                '../../.submodules/formily-antdv/packages/prototypes/src',
               ),
-              '@formily/antdv-renderer': path.resolve(__dirname, '../.submodules/formily-antdv/packages/renderer/src'),
-              '@formily/antdv-setters': path.resolve(__dirname, '../.submodules/formily-antdv/packages/setters/src'),
+              '@formily/antdv-renderer': path.resolve(
+                __dirname,
+                '../../.submodules/formily-antdv/packages/renderer/src',
+              ),
+              '@formily/antdv-setters': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/setters/src'),
               '@formily/antdv-settings-form': path.resolve(
                 __dirname,
-                '../.submodules/formily-antdv/packages/settings-form/src',
+                '../../.submodules/formily-antdv/packages/settings-form/src',
               ),
-              '@formily/vant$': path.resolve(__dirname, '../.submodules/formily-vant/packages/components/src'),
-              '@formily/vant/esm': path.resolve(__dirname, '../.submodules/formily-vant/packages/components/src'),
+              '@formily/vant$': path.resolve(__dirname, '../../.submodules/formily-vant/packages/components/src'),
+              '@formily/vant/esm': path.resolve(__dirname, '../../.submodules/formily-vant/packages/components/src'),
               '@formily/vant-prototypes': path.resolve(
                 __dirname,
-                '../.submodules/formily-vant/packages/prototypes/src',
+                '../../.submodules/formily-vant/packages/prototypes/src',
               ),
               '@formily-portal/antdv$': path.resolve(
                 __dirname,
-                '../.submodules/formily-portal-antdv/packages/components/src',
+                '../../.submodules/formily-portal-antdv/packages/components/src',
               ),
               '@formily-portal/antdv/esm': path.resolve(
                 __dirname,
-                '../.submodules/formily-portal-antdv/packages/components/src',
+                '../../.submodules/formily-portal-antdv/packages/components/src',
               ),
               '@formily-portal/antdv-prototypes': path.resolve(
                 __dirname,
-                '../.submodules/formily-portal-antdv/packages/prototypes/src',
+                '../../.submodules/formily-portal-antdv/packages/prototypes/src',
               ),
               '@formily-portal/vant$': path.resolve(
                 __dirname,
-                '../.submodules/formily-portal-vant/packages/components/src',
+                '../../.submodules/formily-portal-vant/packages/components/src',
               ),
               '@formily-portal/vant/esm': path.resolve(
                 __dirname,
-                '../.submodules/formily-portal-vant/packages/components/src',
+                '../../.submodules/formily-portal-vant/packages/components/src',
               ),
               '@formily-portal/vant-prototypes': path.resolve(
                 __dirname,
-                '../.submodules/formily-portal-vant/packages/prototypes/src',
+                '../../.submodules/formily-portal-vant/packages/prototypes/src',
               ),
             }
           : {}),
@@ -304,6 +314,17 @@ module.exports = defineConfig({
           ...cdnConfig.externals,
         };
 
+        // ignore external css files
+        const resourceRegExp = new RegExp(`(${Object.keys(cdnConfig.externals).join('|')})\\/[\\w\\W]+\\.css$`);
+        config.plugins.push(
+          new NormalModuleReplacementPlugin(resourceRegExp, (result) => {
+            result.request = result.request.replace(
+              result.request.split('!').find((item) => resourceRegExp.test(item)),
+              path.resolve(__dirname, 'webpack.empty.css'),
+            );
+          }),
+        );
+
         // inject cdn resources to index.html.
         config.plugins.push(
           new HtmlWebpackTagsPlugin({
@@ -344,7 +365,7 @@ module.exports = defineConfig({
         lessOptions: {
           javascriptEnabled: true,
           modifyVars: {
-            hack: 'true;@import "./src/assets/styles/fn.less";',
+            hack: 'true;@import "./src/assets/styles/variables.less";',
           },
         },
       },

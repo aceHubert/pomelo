@@ -1,5 +1,5 @@
 import { IsOptional, IsDefined, IsString, IsEnum, MaxLength } from 'class-validator';
-import { TemplateStatus } from '@/orm-entities/interfaces/template.interface';
+import { TemplateStatus } from '@pomelo/datasource';
 
 export abstract class NewTemplateValidator {
   @IsDefined()

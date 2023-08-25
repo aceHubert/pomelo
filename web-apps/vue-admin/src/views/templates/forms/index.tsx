@@ -1,9 +1,10 @@
+import moment from 'moment';
 import { lowerCase } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { Button, Card, Icon, Tag, Popconfirm, TreeSelect } from 'ant-design-vue';
+import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { formatDate, trailingSlash } from '@pomelo/shared-web';
-import { SearchForm, AsyncTable } from '@/components';
+import { trailingSlash } from '@ace-util/core';
 import { useFormApi, TemplateStatus } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
 import { useDeviceMixin, useLocationMixin } from '@/mixins';
@@ -11,9 +12,9 @@ import { useTemplateMixin } from '../mixins/index.mixin';
 import classes from './styles/index.module.less';
 
 // typed
+import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
 import type { PagedFormTemplateQuery, PagedFormTemplateItem } from '@/fetch/graphql';
 import type { User } from '@/auth/user-manager';
-import type { DataSourceFn, Column } from '@/components/async-table/AsyncTable';
 import type { BulkActions } from '../mixins/index.mixin';
 import type { ActionCapability } from '../components/design-layout/DesignLayout';
 
@@ -168,7 +169,7 @@ export default defineComponent({
             </p>
             <p class="mb-0">
               <span class="text--secondary">{i18n.tv('page_templates.create_at_label', '创建时间')}：</span>
-              {formatDate(record.createdAt, 'L', i18n.locale)}
+              {moment(record.createdAt).locale(i18n.locale).format('L')}
             </p>
           </div>
         );
@@ -328,7 +329,8 @@ export default defineComponent({
           dataIndex: 'createdAt',
           align: 'center',
           width: 160,
-          customRender: (_: any, record: PagedFormTemplateItem) => formatDate(record.createdAt, 'L', i18n.locale),
+          customRender: (_: any, record: PagedFormTemplateItem) =>
+            moment(record.createdAt).locale(i18n.locale).format('L'),
         },
         (deviceMixin.isDesktop || deviceMixin.isTablet) && {
           title: '',

@@ -1,0 +1,52 @@
+@import '../../styles/themes/index';
+@import '../../styles/mixins/text-overflow';
+
+@avatar-dropdown-prefix-cls: ~'@{ant-prefix}-avatar-dropdown';
+
+.@{avatar-dropdown-prefix-cls} {
+  &__wrapper{
+    max-width: 100%;
+    display: flex;
+  }
+
+  &-avatar__wrapper{
+    display: flex;
+    flex: none;
+    cursor: pointer;
+  }
+  
+  &__avatar {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  &-name__wrapper{
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__name {
+    margin-bottom: 0;
+    font-weight: bold;
+    .textOverflow();
+  }
+
+  &__description{
+    margin-top: 4px;
+    .textOverflow();
+  }
+
+  &-overlay {
+    .@{ant-prefix}-popover-inner-content{
+      padding: 0;
+    }
+
+    &__menu {
+      border-right: none;
+
+      .@{ant-prefix}-menu-item {
+        min-width: 120px;
+      }
+    }
+  }
+}

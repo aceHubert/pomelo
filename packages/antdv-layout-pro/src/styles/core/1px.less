@@ -1,0 +1,65 @@
+/* 1px */
+@import '../mixins/set-onepx';
+
+.bdr {
+  &-all,
+  &-t,
+  &-b,
+  &-tb,
+  &-l,
+  &-r {
+    position: relative;
+  }
+
+  &-all {
+    border: none !important;
+
+    &:before {
+      .setLine(@border-color-base);
+    }
+  }
+
+  &-t {
+    border-top: none !important;
+
+    &:before {
+      .setTopLine(@border-color-base);
+    }
+  }
+
+  &-b {
+    border-bottom: none !important;
+
+    &:after {
+      .setBottomLine(@border-color-base);
+    }
+  }
+
+  &-tb {
+    border-top: none !important;
+    border-bottom: none !important;
+
+    &:before {
+      .setTopLine(@border-color-base);
+    }
+    &:after {
+      .setBottomLine(@border-color-base);
+    }
+  }
+
+  &-l {
+    border-left: none !important;
+
+    &:before {
+      .setLeftLine(@border-color-base);
+    }
+  }
+
+  &-r {
+    border-right: none !important;
+
+    &:after {
+      .setRightLine(@border-color-base);
+    }
+  }
+}

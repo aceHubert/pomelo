@@ -1,5 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { TemplatePlatform, TemplateStatus } from '@/orm-entities/interfaces';
+import { TemplatePlatform, TemplateStatus } from '@pomelo/datasource';
 
 registerEnumType(TemplatePlatform, {
   name: 'TemplatePlatform',

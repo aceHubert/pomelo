@@ -1,0 +1,68 @@
+{
+  "name": "antdv-layout-pro",
+  "description": "Layout by vue-design-vue",
+  "version": "0.1.0-alpha.0",
+  "author": "Hubert<hubert@lejian.com>",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "license": "MIT",
+  "files": [
+    "lib",
+    "esm",
+    "dist",
+    "types"
+  ],
+  "exports": {
+    ".": {
+      "import": "./esm/index.js",
+      "require": "./lib/index.js"
+    },
+    "./*": {
+      "import": "./esm/*",
+      "require": "./lib/*",
+      "default": {
+        "import": "./esm/*/index.js",
+        "require": "./lib/*/index.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "run -T rimraf -rf lib esm dist && yarn build:version && run -T ts-node --transpileOnly --cwdMode ../../scripts/build",
+    "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
+    "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
+    "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
+    "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
+    "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
+  },
+  "dependencies": {
+    "@ace-util/core": "^0.1.0",
+    "@iconfu/svg-inject": "^1.2.3",
+    "jsoneditor": "^9.5.6",
+    "lodash.debounce": "^4.0.8",
+    "mavon-editor": "^2.10.4",
+    "path-to-regexp": "^3.2.0",
+    "vue-color": "^2.8.1",
+    "vue-quill-editor": "^3.0.6"
+  },
+  "devDependencies": {
+    "@types/lodash.debounce": "^4.0.7",
+    "babel-preset-vca-jsx": "^0.3.6",
+    "vue-demi": "^*",
+    "vue-router": "^3.5.0"
+  },
+  "peerDependencies": {
+    "@vue/composition-api": "^1.0.0",
+    "vue": "^2.6.0 || ^3.0.0",
+    "vue-router": "^3.5.0 || >=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/composition-api": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "yarn@3.1.0"
+}

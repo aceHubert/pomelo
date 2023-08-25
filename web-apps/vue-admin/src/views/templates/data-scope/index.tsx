@@ -1,19 +1,19 @@
 import { lowerCase } from 'lodash-es';
+import moment from 'moment';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { TreeSelect, Button, Card, Tag, Popconfirm } from 'ant-design-vue';
-import { formatDate } from '@pomelo/shared-web';
+import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { useTemplateApi, TemplateStatus } from '@/fetch/graphql';
-import { SearchForm, AsyncTable } from '@/components';
 import { useI18n, useUserManager } from '@/hooks';
 import { useDeviceMixin, useLocationMixin } from '@/mixins';
 import { useTemplateMixin } from '../mixins/index.mixin';
 import { TemplateType } from './constants';
 
 // Types
+import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
 import type { PagedTemplateQuery, PagedTemplateItem } from '@/fetch/graphql';
 import type { User } from '@/auth/user-manager';
-import type { DataSourceFn, Column } from '@/components/async-table/AsyncTable';
 import type { BulkActions } from '../mixins/index.mixin';
 
 enum RouteQueryKey {
@@ -136,7 +136,7 @@ export default defineComponent({
             </p>
             <p class="mb-0">
               <span class="text--secondary">{i18n.tv('page_templates.create_at_label', '创建时间')}：</span>
-              {formatDate(record.createdAt, 'L', i18n.locale)}
+              {moment(record.createdAt).locale(i18n.locale).format('L')}
             </p>
           </div>
         );
@@ -258,7 +258,7 @@ export default defineComponent({
           dataIndex: 'createdAt',
           align: 'center',
           width: 160,
-          customRender: (_: any, record: PagedTemplateItem) => formatDate(record.createdAt, 'L', i18n.locale),
+          customRender: (_: any, record: PagedTemplateItem) => moment(record.createdAt).locale(i18n.locale).format('L'),
         },
         (deviceMixin.isDesktop || deviceMixin.isTablet) && {
           title: '',

@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { OptionAutoload } from '@/orm-entities/interfaces/options.interface';
+import { OptionAutoload } from '@pomelo/datasource';
 
 export class OptionResp {
   /**

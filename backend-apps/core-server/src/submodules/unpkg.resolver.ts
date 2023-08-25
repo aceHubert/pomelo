@@ -1,5 +1,5 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
-import { BaseResolver } from '@/common/resolvers/base.resolver';
+import { BaseResolver } from '@pomelo/shared';
 import { UnpkgSubModuleService } from './unpkg.service';
 import { PagedSubModuleArgs } from './dto/paged-sub-module.args';
 import { SubModuleModel, SubModuleManifestModel, PagedSubModuleModel } from './models/submodule.model';

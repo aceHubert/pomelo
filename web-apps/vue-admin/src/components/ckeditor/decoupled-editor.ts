@@ -38,7 +38,7 @@ import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
 import UploadAdapter from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapter';
 
-export default class DecoupledEditor extends DecoupledEditorBase {}
+export class DecoupledEditor extends DecoupledEditorBase {}
 
 // Plugins to include in the build.
 // @ts-ignore

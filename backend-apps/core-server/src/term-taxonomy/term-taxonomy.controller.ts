@@ -1,15 +1,12 @@
 import { ModuleRef } from '@nestjs/core';
-import { ApiTags, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiBody, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { Controller, Scope, Param, Body, Get, Post, Put, Query, Delete, HttpStatus } from '@nestjs/common';
-import { Anonymous, Authorized, RamAuthorized } from 'nestjs-identity';
+import { ParseQueryPipe, ApiAuth, User, RequestUser, createResponseSuccessType } from '@pomelo/shared';
+import { TermTaxonomyDataSource, Taxonomy } from '@pomelo/datasource';
+import { Anonymous, Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
 import { createMetaController } from '@/common/controllers/meta.controller';
-import { ApiAuth } from '@/common/decorators/api-auth.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
-import { ParseQueryPipe } from '@/common/pipes/parse-query.pipe';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
-import { TermTaxonomyDataSource } from '@/sequelize-datasources/datasources';
-import { Taxonomy } from '@/orm-entities/interfaces';
+import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyMetaDto } from './dto/new-term-taxonomy-meta.dto';
 import { NewTermTaxonomyDto } from './dto/new-term-taxonomy.dto';
 import { UpdateTermTaxonomyDto } from './dto/update-term-taxonomy.dto';
@@ -47,7 +44,7 @@ export class TermTaxonomyController extends createMetaController(
    * Get category taxonomy list
    */
   @Get('categories')
-  @RamAuthorized(Actions.TermTaxonomy.CategoryList)
+  @RamAuthorized(TermTaxonomyAction.CategoryList)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Term taxonomy models',
@@ -72,7 +69,7 @@ export class TermTaxonomyController extends createMetaController(
    * Get tag taxonomy list
    */
   @Get('tags')
-  @RamAuthorized(Actions.TermTaxonomy.TagList)
+  @RamAuthorized(TermTaxonomyAction.TagList)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Term taxonomy models',
@@ -97,7 +94,7 @@ export class TermTaxonomyController extends createMetaController(
    * Get term taxonomy list
    */
   @Get()
-  @RamAuthorized(Actions.TermTaxonomy.List)
+  @RamAuthorized(TermTaxonomyAction.List)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Term taxonomy models',
@@ -148,10 +145,9 @@ export class TermTaxonomyController extends createMetaController(
    * Create term taxonomy
    */
   @Post()
-  @RamAuthorized(Actions.TermTaxonomy.Create)
+  @RamAuthorized(TermTaxonomyAction.Create)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: 'Term taxonomy model',
     type: () => createResponseSuccessType({ data: TermTaxonomyModelResp }),
   })
@@ -166,9 +162,9 @@ export class TermTaxonomyController extends createMetaController(
    * Create relationship between term taxonomy and object(Form, Page, etc...)
    */
   @Post(':id/objects/:objectId')
-  @RamAuthorized(Actions.TermTaxonomy.CreateRelationship)
+  @RamAuthorized(TermTaxonomyAction.CreateRelationship)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     description: 'Term taxonomy relationship model',
     type: () => createResponseSuccessType({ data: TermRelationshipModelResp }),
   })
@@ -187,7 +183,7 @@ export class TermTaxonomyController extends createMetaController(
    * Update term taxonomy by id
    */
   @Put(':id')
-  @RamAuthorized(Actions.TermTaxonomy.Update)
+  @RamAuthorized(TermTaxonomyAction.Update)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: '"true" if success',
@@ -195,14 +191,14 @@ export class TermTaxonomyController extends createMetaController(
   })
   async update(@Param('id') id: number, @Body() input: UpdateTermTaxonomyDto) {
     await this.termTaxonomyDataSource.update(id, input);
-    return this.success({});
+    return this.success();
   }
 
   /**
    * Delete term taxonomy by id
    */
   @Delete(':id')
-  @RamAuthorized(Actions.TermTaxonomy.Delete)
+  @RamAuthorized(TermTaxonomyAction.Delete)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -210,14 +206,14 @@ export class TermTaxonomyController extends createMetaController(
   })
   async delete(@Param('id') id: number) {
     await this.termTaxonomyDataSource.delete(id);
-    return this.success({});
+    return this.success();
   }
 
   /**
    * Delete bulk of term taxonomies
    */
   @Delete('/bulk')
-  @RamAuthorized(Actions.TermTaxonomy.BulkDelete)
+  @RamAuthorized(TermTaxonomyAction.BulkDelete)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({ type: () => [Number], description: 'term taxonomy ids' })
   @ApiOkResponse({
@@ -226,14 +222,14 @@ export class TermTaxonomyController extends createMetaController(
   })
   async bulkDelete(@Body() ids: number[]) {
     await this.termTaxonomyDataSource.bulkDelete(ids);
-    return this.success({});
+    return this.success();
   }
 
   /**
    * Delete relationship between term taxonomy and object(Form, Page, etc...)
    */
   @Delete(':id/objects/:objectId')
-  @RamAuthorized(Actions.TermTaxonomy.DeleteRelationship)
+  @RamAuthorized(TermTaxonomyAction.DeleteRelationship)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -241,6 +237,6 @@ export class TermTaxonomyController extends createMetaController(
   })
   async deleteRelationship(@Param('id') termTaxonomyId: number, @Param('objectId') objectId: number) {
     await this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
-    return this.success({});
+    return this.success();
   }
 }

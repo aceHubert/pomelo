@@ -1,13 +1,11 @@
 const path = require('path');
 const fs = require('fs');
+const { defineConfig } = require('@vue/cli-service');
 const CompressionPlugin = require('compression-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
 const terser = require('terser');
 const getCdnConfig = require('./build.cdn');
-
-// Types
-const { defineConfig } = require('@vue/cli-service');
 
 const getEnv = (key, defaultValue) => process.env[key] ?? defaultValue;
 const isEnv = (env) => process.env.NODE_ENV === env;
@@ -64,7 +62,7 @@ module.exports = defineConfig({
           }
         : {},
   },
-  transpileDependencies: ['@vue-async/*', '@formily-portal/*'],
+  transpileDependencies: ['@ace-fetch/*', '@ace-util/*', '@vue-async/*', '@pomelo/*', '@formily-portal/*'],
   chainWebpack(config) {
     // https://webpack.js.org/configuration/devtool/#development
     config.when(isEnv('development'), (config) => config.devtool('cheap-source-map'));

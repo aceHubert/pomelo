@@ -1,0 +1,29 @@
+@import '../../styles/themes/index';
+
+@locale-dropdown-prefix-cls: ~'@{ant-prefix}-locale-dropdown';
+
+.@{locale-dropdown-prefix-cls} {
+  &__wrapper{ 
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  &-overlay {
+    .@{ant-prefix}-popover-inner-content{
+      padding: 0;
+    }
+
+    &__menu {
+      border-right: none;
+
+      .@{ant-prefix}-menu-item {
+        min-width: 100px;
+
+        .flag-icon {
+          margin-right: 5px;
+          height: 14px;
+        }
+      }
+    }
+  }
+}

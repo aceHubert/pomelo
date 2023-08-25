@@ -1,4 +1,5 @@
-import { ApiTags, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ApiTags, ApiQuery, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import {
   Controller,
   Scope,
@@ -10,18 +11,14 @@ import {
   Put,
   ParseIntPipe,
   ParseArrayPipe,
+  Res,
   HttpStatus,
 } from '@nestjs/common';
-import { Authorized, Anonymous, RamAuthorized } from 'nestjs-identity';
-import { BaseController } from '@/common/controllers/base.controller';
-import { ApiAuth } from '@/common/decorators/api-auth.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
-import { ParseQueryPipe } from '@/common/pipes/parse-query.pipe';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
-import { Taxonomy, TemplateType } from '@/orm-entities/interfaces';
-import { TemplateDataSource } from '@/sequelize-datasources/datasources';
-import { PagedTemplateArgs, TemplateOptionArgs } from '@/sequelize-datasources/interfaces';
+import { BaseController, ParseQueryPipe, ApiAuth, User, RequestUser, createResponseSuccessType } from '@pomelo/shared';
+import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
+import { Authorized, Anonymous } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { PageTemplateAction } from '@/common/actions';
 import { PageTemplateOptionQueryDto, PagedPageTemplateQueryDto } from './dto/template-query.dto';
 import { NewPageTemplateDto } from './dto/new-template.dto';
 import {
@@ -105,10 +102,12 @@ export class PageTemplateController extends BaseController {
     description: 'Page template model',
     type: () => createResponseSuccessType({ data: PageTemplateModelResp }, 'PageTemplateModelSuccessResp'),
   })
+  @ApiNoContentResponse({ description: 'Page template not found' })
   async getByName(
     @Param('name') name: string,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     @User() requestUser: RequestUser,
+    @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.templateDataSource.getByName(
       name,
@@ -117,21 +116,23 @@ export class PageTemplateController extends BaseController {
       requestUser,
     );
 
-    if (result) {
-      let metas;
-      if (metaKeys?.length) {
-        metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
-      }
-      const { content, ...restData } = result;
-      return this.success({
-        data: {
-          ...restData,
-          schema: content,
-          metas,
-        },
-      });
+    let metas;
+    if (result && metaKeys?.length) {
+      metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
-    return this.success();
+
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+
+    const { content, ...restData } = result || {};
+    return this.success({
+      data: {
+        ...restData,
+        schema: content,
+        metas,
+      },
+    });
   }
 
   /**
@@ -150,10 +151,12 @@ export class PageTemplateController extends BaseController {
     description: 'Page template model',
     type: () => createResponseSuccessType({ data: PageTemplateWithMetasModelResp }, 'PageTemplateModelSuccessResp'),
   })
+  @ApiNoContentResponse({ description: 'Page template not found' })
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     @User() requestUser: RequestUser,
+    @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.templateDataSource.get(
       id,
@@ -162,28 +165,30 @@ export class PageTemplateController extends BaseController {
       requestUser,
     );
 
-    if (result) {
-      let metas;
-      if (metaKeys?.length) {
-        metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'metaKey', 'metaValue']);
-      }
-      const { content, ...restData } = result;
-      return this.success({
-        data: {
-          ...restData,
-          schema: content,
-          metas,
-        },
-      });
+    let metas;
+    if (result && metaKeys?.length) {
+      metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
-    return this.success();
+
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+
+    const { content, ...restData } = result || {};
+    return this.success({
+      data: {
+        ...restData,
+        schema: content,
+        metas,
+      },
+    });
   }
 
   /**
    * Get paged page template model
    */
   @Get()
-  @RamAuthorized(Actions.PageTemplate.PagedList)
+  @RamAuthorized(PageTemplateAction.PagedList)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged pages template models',
@@ -216,10 +221,9 @@ export class PageTemplateController extends BaseController {
    * Create page template
    */
   @Post()
-  @RamAuthorized(Actions.PageTemplate.Create)
+  @RamAuthorized(PageTemplateAction.Create)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: 'Page template model',
     type: () => createResponseSuccessType({ data: PageTemplateModelResp }, 'PageTemplateModelSuccessResp'),
   })
@@ -247,7 +251,7 @@ export class PageTemplateController extends BaseController {
    * Update page template
    */
   @Put(':id')
-  @RamAuthorized(Actions.PageTemplate.Update)
+  @RamAuthorized(PageTemplateAction.Update)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -267,7 +271,7 @@ export class PageTemplateController extends BaseController {
    * Delete page template permanently
    */
   // @Delete(':id')
-  // @RamAuthorized(Actions.PageTemplate.Delete)
+  // @RamAuthorized(PageTemplateAction.Delete)
   // @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   // @ApiOkResponse({
   //   description: 'no data content',
@@ -277,6 +281,6 @@ export class PageTemplateController extends BaseController {
   // @ApiForbiddenResponse()
   // async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
   //   await this.templateDataSource.delete(id, requestUser);
-  //   return this.success({});
+  //   return this.success();
   // }
 }

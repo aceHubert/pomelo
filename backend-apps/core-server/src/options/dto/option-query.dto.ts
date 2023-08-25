@@ -1,4 +1,4 @@
-import { OptionAutoload } from '@/orm-entities/interfaces/options.interface';
+import { OptionAutoload } from '@pomelo/datasource';
 import { OptionArgsValidator } from './option-args.validator';
 
 /**

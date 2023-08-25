@@ -1,5 +1,5 @@
 import { ApiProperty, OmitType, PickType, IntersectionType } from '@nestjs/swagger';
-import { TemplateStatus } from '@/orm-entities/interfaces';
+import { TemplateStatus } from '@pomelo/datasource';
 import { PagedTempateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
 
 class PagedTemplateQueryDto extends PagedTempateArgsValidator {

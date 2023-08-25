@@ -1,0 +1,25 @@
+{
+  "name": "@pomelo/datasource",
+  "description": "pomelo datasource.",
+  "version": "0.1.0-alpha.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
+    "build": "run -T rimraf dist && run -T tsc --project tsconfig.json"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "lodash": "^4.17.21",
+    "mysql2": "^2.3.3",
+    "sequelize": "^6.19.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "yarn@3.1.0"
+}

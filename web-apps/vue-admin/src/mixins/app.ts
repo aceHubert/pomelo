@@ -1,10 +1,9 @@
 import { ref, shallowRef, reactive, computed } from '@vue/composition-api';
 import tinycolor from 'tinycolor2';
-import { warn } from '@pomelo/shared-web';
-import { useEffect } from '@/components';
-import { useI18n } from '@/hooks';
+import { warn } from '@ace-util/core';
+import { useI18n, useEffect } from '@/hooks';
 import { useAppStore } from '@/store';
-import { Layout, ContentWidth, Theme } from '@/types';
+import { Theme } from '@/types';
 
 // Types
 import type { Locale } from 'ant-design-vue/types/locale-provider';
@@ -96,26 +95,6 @@ export const useAppMixin = () => {
     () => primaryColor.value,
   );
 
-  const layoutType = computed(() => appStore.layout.type);
-  const hasHeader = computed(() => layoutType.value !== Layout.NoHeader);
-  const isMixedMenu = computed(() => layoutType.value === Layout.MixedMenu);
-  const hasTopMenu = computed(() => layoutType.value === Layout.TopMenu || layoutType.value === Layout.MixedMenu);
-  const hasSiderMenu = computed(
-    () =>
-      layoutType.value === Layout.NoHeader ||
-      layoutType.value === Layout.SiderMenu ||
-      layoutType.value === Layout.MixedMenu,
-  );
-  const fixedHeader = computed(() => appStore.layout.fixedHeader);
-  const fixSiderbar = computed(() => appStore.layout.fixSiderbar);
-  const sideCollapsed = computed(() => appStore.layout.sideCollapsed);
-  const contentWidth = computed(() =>
-    layoutType.value === Layout.SiderMenu ? ContentWidth.Fluid : appStore.layout.contentWidth,
-  );
-  const colorWeak = computed(() => appStore.layout.colorWeak);
-  const autoHideHeader = computed(() => appStore.layout.autoHideHeader);
-  const multiTab = computed(() => appStore.layout.multiTab);
-
   /**
    * 加载 antd 语言文件
    * 全部语言被打包进来了
@@ -148,19 +127,8 @@ export const useAppMixin = () => {
     isLight,
     isRealLight,
     primaryColor,
-    layoutType,
-    isMixedMenu,
-    hasHeader,
-    hasTopMenu,
-    hasSiderMenu,
-    fixedHeader,
-    fixSiderbar,
-    sideCollapsed,
-    contentWidth,
-    colorWeak,
-    autoHideHeader,
-    multiTab,
     supportLanguages,
+    ...appStore.layout,
     setTheme: appStore.setTheme,
     resetTheme: appStore.resetTheme,
     setThemeChangedDisabled: appStore.setThemeChangedDisabled,

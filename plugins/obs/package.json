@@ -1,37 +1,26 @@
 {
-  "name": "@pomelo-plugin/obs",
-  "description": "华为云 OBS 上传",
-  "version": "0.1.0",
-  "private": true,
-  "main": "lib/index.js",
-  "module": "esm/index.js",
-  "types": "types/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./types/index.d.ts",
-      "import": "./esm/index.js",
-      "require": "./lib/index.js"
-    },
-    "./*": {
-      "types": "./types/*",
-      "import": "./esm/*",
-      "require": "./lib/*",
-      "default": {
-        "types": "./types/*/index.d.ts",
-        "import": "./esm/*/index.js",
-        "require": "./lib/*/index.js"
-      }
-    }
-  },
+  "name": "@pomelo/plugin-obs",
+  "description": "nestjs obs connect",
+  "version": "0.1.0-alpha.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "serve": "run -T tsc --project tsconfig.build.json --module es2015 --declaration --declarationDir types --outDir esm --watch",
-    "build": "run -T rimraf -rf lib esm dist types && yarn build:cjs && yarn build:esm && yarn build:types",
-    "build:cjs": "run -T tsc --project tsconfig.build.json",
-    "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
-    "build:types": "run -T tsc --project tsconfig.types.json"
+    "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
+    "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "esdk-obs-nodejs": "^3.21.6"
+    "esdk-obs-nodejs": "^3.21.6",
+    "nestjs-ram-authorization": "workspace:^"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^8.2.3 || ^9.0.0",
+    "@nestjs/core": "^8.2.3 || ^9.0.0",
+    "@nestjs/graphql": "^10.0.0 || ^11.0.0",
+    "@pomelo/shared": "workspace:^",
+    "nestjs-authorization": "workspace:^"
   },
   "packageManager": "yarn@3.1.0"
 }

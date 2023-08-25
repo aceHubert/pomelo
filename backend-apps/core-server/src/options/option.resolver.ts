@@ -1,10 +1,11 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
-import { BaseResolver } from '@/common/resolvers/base.resolver';
-import { Fields, ResolveTree } from '@/common/decorators/field.decorator';
-import { Authorized } from 'nestjs-identity';
-import { User } from '@/common/decorators/user.decorator';
-import { OptionDataSource } from '@/sequelize-datasources/datasources';
+import { Authorized } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { BaseResolver, User, Fields, RequestUser } from '@pomelo/shared';
+import { OptionDataSource } from '@pomelo/datasource';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { OptionAction } from '@/common/actions';
 import { NewOptionInput } from './dto/new-option.input';
 import { OptionArgs } from './dto/option.args';
 import { UpdateOptionInput } from './dto/update-option.input';
@@ -17,7 +18,7 @@ export class OptionResolver extends BaseResolver {
   }
 
   @Query((returns) => Option, { nullable: true, description: 'Get option.' })
-  option(@Args('id', { type: () => ID }) id: number, @Fields() fields: ResolveTree): Promise<Option | null> {
+  option(@Args('id', { type: () => ID }) id: number, @Fields() fields: ResolveTree): Promise<Option | undefined> {
     return this.optionDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.Option));
   }
 
@@ -26,6 +27,8 @@ export class OptionResolver extends BaseResolver {
     return this.optionDataSource.getOptionValue(name);
   }
 
+  @Authorized()
+  @RamAuthorized(OptionAction.List)
   @Query((returns) => [Option], { description: 'Get options.' })
   options(@Args() args: OptionArgs, @Fields() fields: ResolveTree): Promise<Option[]> {
     return this.optionDataSource.getList(args, this.getFieldNames(fields.fieldsByTypeName.Option));
@@ -37,6 +40,7 @@ export class OptionResolver extends BaseResolver {
   }
 
   @Authorized()
+  @RamAuthorized(OptionAction.Create)
   @Mutation((returns) => Option, { description: 'Create a new option.' })
   createOption(
     @Args('model', { type: () => NewOptionInput }) model: NewOptionInput,
@@ -46,6 +50,7 @@ export class OptionResolver extends BaseResolver {
   }
 
   @Authorized()
+  @RamAuthorized(OptionAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update option.' })
   updateOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,
@@ -56,6 +61,7 @@ export class OptionResolver extends BaseResolver {
   }
 
   @Authorized()
+  @RamAuthorized(OptionAction.Delete)
   @Mutation((returns) => Boolean, { description: 'Delete option permanently.' })
   deleteOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,

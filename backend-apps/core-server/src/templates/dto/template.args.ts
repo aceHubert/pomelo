@@ -1,5 +1,5 @@
 import { Field, ArgsType, Int, IntersectionType, OmitType, PickType } from '@nestjs/graphql';
-import { TemplateStatus } from '@/orm-entities/interfaces/template.interface';
+import { TemplateStatus } from '@pomelo/datasource';
 import { PagedTempateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
 
 @ArgsType()

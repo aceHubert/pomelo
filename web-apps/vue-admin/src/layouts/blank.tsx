@@ -1,34 +1,26 @@
 import { upperFirst, kebabCase } from 'lodash-es';
-import { defineComponent, toRef } from '@vue/composition-api';
+import { defineComponent, toRef, type Ref } from '@vue/composition-api';
+import { ConfigProvider } from 'antdv-layout-pro';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
-import { useI18n } from '@/hooks';
-import { ConfigProvider, Spin, expose, ANT_PREFIX_CLS } from '@/components';
+import { useI18n, expose } from '@/hooks';
+import { Spin, ANT_PREFIX_CLS } from '@/components';
 import { loadingRef } from '@/shared';
-import { Theme, DeviceType } from '@/types';
-import { RouterView } from './modules';
+import { RouterView } from './components';
 import classes from './styles/blank.module.less';
-
-// Types
-import type { Ref } from '@vue/composition-api';
 
 export default defineComponent({
   name: 'BlankLayout',
   head() {
-    const device = (this.device as Ref<DeviceType>).value ?? DeviceType.Desktop;
-    const theme = (this.theme as Ref<Theme>).value ?? Theme.Light;
     const themeVars = (this.themeVars as Ref<Record<string, string>>).value ?? {};
     let cssText = '';
     for (const key in themeVars) {
       cssText += `--theme-${kebabCase(key)}: ${themeVars[key]};`;
     }
-    cssText = `:root {${cssText}}`;
+    cssText = `body {${cssText}}`;
     return {
-      bodyAttrs: {
-        class: `theme-${theme} is-${device}`,
-      },
       style: [
         {
-          vmid: 'theme-vars',
+          vmid: 'pomelo-theme-vars',
           cssText,
         },
       ],
@@ -40,38 +32,37 @@ export default defineComponent({
     const i18n = useI18n();
 
     expose({
-      device: toRef(deviceMixin, 'device'),
-      theme: toRef(appMixin, 'theme'),
       themeVars: toRef(appMixin, 'themeVars'),
     });
 
-    const renderContent = () => {
-      return (
-        <div
-          id="layout-blank"
-          class={[classes.layoutContentWrapper, classes[`contentWidth${upperFirst(appMixin.contentWidth)}`]]}
-        >
-          <Spin
-            class={classes.layoutContentLoading}
-            spinning={loadingRef.value}
-            tip={i18n.tv('common.tips.loading_text', 'Loading...')}
-          ></Spin>
-          <RouterView />
-        </div>
-      );
-    };
-
     return () => (
       <ConfigProvider
-        attrs={{
-          locale: appMixin.antLocales,
-          prefixCls: ANT_PREFIX_CLS,
-        }}
+        locale={appMixin.antLocales}
+        prefixCls={ANT_PREFIX_CLS}
         theme={appMixin.theme}
         device={deviceMixin.device}
-        i18nRender={(...args) => i18n.tv(...args) as string}
+        i18nRender={(...args: Parameters<typeof i18n.tv>) => i18n.tv(...args) as string}
       >
-        {renderContent()}
+        {
+          // device 变化重新渲染导致 wujie Vue组件初始化使用 Promise 执行$refs找不到问题
+          deviceMixin.device && (
+            <div
+              class={[
+                classes.layoutContentWrapper,
+                `is-${deviceMixin.device}`,
+                `theme-${appMixin.theme}`,
+                classes[`contentWidth${upperFirst(appMixin.contentWidth)}`],
+              ]}
+            >
+              <Spin
+                class={classes.layoutContentLoading}
+                spinning={loadingRef.value}
+                tip={i18n.tv('common.tips.loading_text', 'Loading...')}
+              ></Spin>
+              <RouterView />
+            </div>
+          )
+        }
       </ConfigProvider>
     );
   },

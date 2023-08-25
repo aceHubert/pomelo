@@ -5,10 +5,10 @@ import { OBS_OPTIONS } from './constants';
 
 // Types
 import type { Readable } from 'stream';
-import type { ObsOptions } from './interfaces/file-options.interface';
+import type { ObsOptions } from './interfaces/obs-options.interface';
 
 @Injectable()
-export class HWCloudObsService {
+export class ObsService {
   // private readonly logger = new Logger(HWCloudObsService.name, { timestamp: true });
   private _obsClient: ObsClient | null = null;
 

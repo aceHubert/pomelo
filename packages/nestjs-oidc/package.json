@@ -1,0 +1,35 @@
+{
+  "name": "nestjs-oidc",
+  "version": "0.0.1-alpha.0",
+  "description": "nestjs openid connect.",
+  "author": "Hubert<yi.xiang@live.com>",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
+    "build": "run -T rimraf dist && run -T tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^8.0.0",
+    "jwks-rsa": "^2.1.4",
+    "node-fetch": "2"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^8.2.3 || ^9.0.0",
+    "@nestjs/core": "^8.2.3 || ^9.0.0",
+    "express-jwt": "^7.7.0",
+    "express-unless": "^2.1.1"
+  },
+  "peerDependenciesMeta": {
+    "express-jwt": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "yarn@3.1.0"
+}

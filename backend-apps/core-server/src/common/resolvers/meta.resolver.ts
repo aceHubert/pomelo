@@ -3,10 +3,10 @@ import { camelCase, lowerCase, upperFirst, words } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Type } from '@nestjs/common';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
-import { RamAuthorized } from 'nestjs-identity';
-import { MetaDataSource } from '@/sequelize-datasources/interfaces';
-import { Fields, ResolveTree } from '../decorators/field.decorator';
-import { BaseResolver } from './base.resolver';
+import { BaseResolver, Fields } from '@pomelo/shared';
+import { MetaDataSource } from '@pomelo/datasource';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { RamAuthorized } from 'nestjs-ram-authorization';
 import { NewMetaInput } from './dto/new-meta.input';
 import { Meta } from './models/meta.model';
 

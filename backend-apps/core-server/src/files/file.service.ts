@@ -5,10 +5,9 @@ import * as path from 'path';
 import moment from 'moment';
 import Jimp from 'jimp';
 import { Inject, Injectable } from '@nestjs/common';
-import { normalizeRoutePath, addStartingSlash, stripEndingSlash } from '@/common/utils/normalize-route-path.util';
-import { OptionKeys, MediaMetaKeys } from '@/sequelize-datasources/utils/keys.util';
-import { MediaDataSource } from '@/sequelize-datasources/datasources';
-import { MediaMetaModel } from '@/sequelize-datasources/interfaces';
+import { RequestUser } from '@pomelo/shared';
+import { MediaDataSource, MediaMetaModel, OptionPresetKeys, MediaMetaPresetKeys } from '@pomelo/datasource';
+import { normalizeRoutePath, foregoingSlash, stripTrailingSlash } from '@/common/utils/path.util';
 import { FileOptions } from './interfaces/file-options.interface';
 import { FileUploadOptions } from './interfaces/file-upload-options.interface';
 import { ImageScaleData } from './interfaces/image-metadata.interface';
@@ -123,8 +122,10 @@ export class FileService {
    * 显示到前端的Url地址（siteUrl/staticPrefix/path）
    */
   async getURI(path: string) {
-    const siteUrl = await this.mediaDataSource.getOption(OptionKeys.SiteUrl);
-    return (siteUrl ? stripEndingSlash(siteUrl) : '') + stripEndingSlash(this.staticPrefix) + normalizeRoutePath(path);
+    const siteUrl = await this.mediaDataSource.getOption(OptionPresetKeys.SiteUrl);
+    return (
+      (siteUrl ? stripTrailingSlash(siteUrl) : '') + stripTrailingSlash(this.staticPrefix) + normalizeRoutePath(path)
+    );
   }
 
   /**
@@ -188,12 +189,16 @@ export class FileService {
           scaled && imageScaleDatas.push({ ...scaled, name: 'scaled' });
 
           // other sizes
-          const mediumWidth = parseInt((await this.mediaDataSource.getOption(OptionKeys.MediumSizeWidth))!);
-          const mediumHeight = parseInt((await this.mediaDataSource.getOption(OptionKeys.MediumSizeHeight))!);
-          const largeWidth = parseInt((await this.mediaDataSource.getOption(OptionKeys.LargeSizeWidth))!);
-          const largeHeight = parseInt((await this.mediaDataSource.getOption(OptionKeys.LargeSizeHeight))!);
-          const mediumLargeWidth = parseInt((await this.mediaDataSource.getOption(OptionKeys.MediumLargeSizeWidth))!);
-          const mediumLargeHeight = parseInt((await this.mediaDataSource.getOption(OptionKeys.MediumLargeSizeHeight))!);
+          const mediumWidth = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.MediumSizeWidth))!);
+          const mediumHeight = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.MediumSizeHeight))!);
+          const largeWidth = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.LargeSizeWidth))!);
+          const largeHeight = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.LargeSizeHeight))!);
+          const mediumLargeWidth = parseInt(
+            (await this.mediaDataSource.getOption(OptionPresetKeys.MediumLargeSizeWidth))!,
+          );
+          const mediumLargeHeight = parseInt(
+            (await this.mediaDataSource.getOption(OptionPresetKeys.MediumLargeSizeHeight))!,
+          );
           const resizeArr = [
             { name: 'large', width: largeWidth, height: largeHeight, quality: 80 },
             { name: 'medium-large', width: mediumLargeWidth, height: mediumLargeHeight, quality: 70 },
@@ -223,19 +228,23 @@ export class FileService {
           originalFileName: originalFileName,
           extension,
           mimeType: options.mimeType,
-          path: addStartingSlash(path.relative(this.dest, filePath)),
+          path: foregoingSlash(path.relative(this.dest, filePath)),
         },
         requestUser,
       );
 
       mediaMetas = await this.mediaDataSource.bulkCreateMeta(media.id, [
         {
-          metaKey: MediaMetaKeys.Matedata,
+          metaKey: MediaMetaPresetKeys.Matedata,
           metaValue: JSON.stringify(metaDatas),
         },
       ]);
     } else if (this.isImageScaleable(media.mimeType)) {
-      mediaMetas = await this.mediaDataSource.getMetas(media.id, [MediaMetaKeys.Matedata], ['metaKey', 'metaValue']);
+      mediaMetas = await this.mediaDataSource.getMetas(
+        media.id,
+        [MediaMetaPresetKeys.Matedata],
+        ['metaKey', 'metaValue'],
+      );
     }
     const fileName = `${media.originalFileName}${media.extension}`;
     return {
@@ -245,7 +254,7 @@ export class FileService {
       },
       ...(mediaMetas
         ? mediaMetas.reduce((prev, meta) => {
-            if (meta.metaKey === MediaMetaKeys.Matedata) {
+            if (meta.metaKey === MediaMetaPresetKeys.Matedata) {
               const metadatas = JSON.parse(meta.metaValue!) as Dictionary<any>;
               // resized 图片
               metadatas.imageScales &&
@@ -273,9 +282,9 @@ export class FileService {
     dest: string | ((opts: { width: number; height: number }) => string),
     quality = 70,
   ): Promise<Omit<ImageScaleData, 'name'>> {
-    const width = parseInt((await this.mediaDataSource.getOption(OptionKeys.ThumbnailSizeWidth)) || '150');
-    const height = parseInt((await this.mediaDataSource.getOption(OptionKeys.ThumbnailSizeHeight)) || '150');
-    const crop = await this.mediaDataSource.getOption<'0' | '1'>(OptionKeys.ThumbnailCrop);
+    const width = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeWidth)) || '150');
+    const height = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeHeight)) || '150');
+    const crop = await this.mediaDataSource.getOption<'0' | '1'>(OptionPresetKeys.ThumbnailCrop);
     if (typeof image === 'string') {
       image = await Jimp.create(image);
     } else {
@@ -297,7 +306,7 @@ export class FileService {
     return {
       width: imageWidth,
       height: imageHeight,
-      path: addStartingSlash(path.relative(this.dest, dest)),
+      path: foregoingSlash(path.relative(this.dest, dest)),
     };
   }
 
@@ -336,7 +345,7 @@ export class FileService {
       return {
         width: imageWidth,
         height: imageHeight,
-        path: addStartingSlash(path.relative(this.dest, dest)),
+        path: foregoingSlash(path.relative(this.dest, dest)),
       };
     }
     return;

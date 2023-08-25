@@ -3,11 +3,14 @@
   "compilerOptions": {
     "target": "es2018",
     "lib": ["ES2018", "ESNext.AsyncIterable"],
-    "baseUrl": "./",
-    "skipLibCheck": true,
+    "baseUrl": ".",
+    // "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["src/**/*"]
+  "include": ["./src/**/*.ts"]
 }

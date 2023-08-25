@@ -1,12 +1,9 @@
-import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import { ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
 import { Controller, Post, Scope, UseInterceptors, UploadedFile, UploadedFiles, HttpStatus } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { Authorized } from 'nestjs-identity';
-import { BaseController } from '@/common/controllers/base.controller';
-import { User } from '@/common/decorators/user.decorator';
-import { ApiAuth } from '@/common/decorators/api-auth.decorator';
-import { createResponseSuccessType, describeType } from '@/common/utils/swagger-type.util';
+import { Authorized } from 'nestjs-authorization';
+import { BaseController, User, ApiAuth, createResponseSuccessType, describeType, RequestUser } from '@pomelo/shared';
 import { FileService } from './file.service';
 import { FileModelResp } from './resp/file-model.resp';
 
@@ -27,7 +24,7 @@ export class FileController extends BaseController {
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     description: 'From template options',
     type: () =>
       createResponseSuccessType(
@@ -65,7 +62,7 @@ export class FileController extends BaseController {
   @Post('upload-multi')
   @UseInterceptors(FilesInterceptor('files'))
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
+  @ApiCreatedResponse({
     description: 'From template options',
     type: () =>
       createResponseSuccessType(

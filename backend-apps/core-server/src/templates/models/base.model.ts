@@ -1,8 +1,8 @@
 import { Field, ObjectType, ID, OmitType, PickType } from '@nestjs/graphql';
-// import { FieldAuthorized, UserRole } from 'nestjs-identity';
+import { TemplateStatus } from '@pomelo/datasource';
+// import { FieldAuthorized, UserRole } from 'nestjs-authorization';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
-import { TemplateStatus } from '@/orm-entities/interfaces';
 
 @ObjectType({ description: 'Template model' })
 export class Template {

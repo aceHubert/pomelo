@@ -17,7 +17,6 @@ Vue.config.productionTip = false;
 // Plugins
 import optionsPlugin from './plugins/options';
 import pubSubMessagePlugin from './plugins/pubsub-messages';
-import microAppPlugin from './plugins/micro-app';
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {
@@ -65,10 +64,6 @@ async function createApp() {
 
   if (typeof pubSubMessagePlugin === 'function') {
     await pubSubMessagePlugin(app, inject);
-  }
-
-  if (typeof microAppPlugin === 'function') {
-    await microAppPlugin(app, inject);
   }
 
   return {

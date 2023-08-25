@@ -1,5 +1,5 @@
 import { reactive } from '@vue/composition-api';
-import { isAbsoluteUrl, absoluteGo } from '@pomelo/shared-web';
+import { isAbsoluteUrl, absoluteGo } from '@ace-util/core';
 import { useRouter } from 'vue2-helpers/vue-router';
 
 // types

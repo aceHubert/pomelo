@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { OptionAutoload } from '@/orm-entities/interfaces/options.interface';
+import { OptionAutoload } from '@pomelo/datasource';
 import { NewOptionValidator } from './new-option.validator';
 
 @InputType({ description: 'New option inpupt' })
@@ -15,5 +15,5 @@ export class NewOptionInput extends NewOptionValidator {
     defaultValue: OptionAutoload.No,
     description: 'Is option load automatically in application start (default: no)',
   })
-  autoload?: OptionAutoload;
+  autoload!: OptionAutoload;
 }

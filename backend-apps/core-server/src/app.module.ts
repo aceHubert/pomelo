@@ -12,17 +12,18 @@ import { PubSub } from 'graphql-subscriptions';
 import {
   I18nModule,
   I18nMiddleware,
+  I18nService,
   QueryResolver,
   HeaderResolver,
   AcceptLanguageResolver,
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
-import { JwtModule, JwtService, JwtMiddleware } from 'nestjs-jwt';
-import { AuthorizedGuard } from 'nestjs-identity';
+import { OidcModule, OidcService, OidcMiddleware } from 'nestjs-oidc';
+import { AuthorizedGuard } from 'nestjs-authorization';
+import { SequelizeModule } from '@pomelo/datasource';
+import { ObsModule } from '@pomelo/plugin-obs';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
-import { EntityModule } from './sequelize-entities/entity.module';
-import { DataSourceModule } from './sequelize-datasources/datasource.module';
 import { FileModule } from './files/file.module';
 import { MessageModule } from './messages/message.module';
 import { DbInitModule } from './db-init/db-init.module';
@@ -88,7 +89,7 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
       ],
       inject: [ConfigService],
     }),
-    JwtModule.forRootAsync({
+    OidcModule.forRootAsync({
       isGlobal: true,
       useFactory: (config: ConfigService) => {
         const isDebug = config.get<boolean>('auth.debug', false);
@@ -116,7 +117,7 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      useFactory: (config: ConfigService, jwt: JwtService) => {
+      useFactory: (config: ConfigService, jwt: OidcService) => {
         const isDebug = config.get<boolean>('graphql.debug', false);
         const graphqlPath = config.get<string>('graphql.path', '/graphql');
         const graphqlSubscriptionPath = config.get<string>('graphql.subscription_path', '/graphql');
@@ -194,7 +195,7 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
           },
         };
       },
-      inject: [ConfigService, JwtService],
+      inject: [ConfigService, OidcService],
     }),
     // SubModuleModule.forRootAsync({
     //   useFactory: (config: ConfigService) => ({
@@ -207,15 +208,14 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
     //   }),
     //   inject: [ConfigService],
     // }),
-    EntityModule.registerAsync({
-      useFactory: (config: ConfigService) => ({
+    SequelizeModule.registerAsync({
+      useFactory: (config: ConfigService, i18n: I18nService) => ({
+        isGlobal: true,
         connection: config.getOrThrow('database.connection'),
         tablePrefix: config.get('database.tablePrefix', ''),
+        translate: i18n.tv.bind(i18n),
       }),
-      inject: [ConfigService],
-    }),
-    DataSourceModule.forFeature({
-      isGlobal: true,
+      inject: [ConfigService, I18nService],
     }),
     MessageModule.forRoot({
       isGlobal: true,
@@ -230,6 +230,14 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
           path.join(config.get('content', path.join(process.cwd(), '../content')), '/upload'),
         ),
         limit: config.get('upload.limit'),
+      }),
+      inject: [ConfigService],
+    }),
+    ObsModule.forRootAsync({
+      useFactory: (config: ConfigService) => ({
+        accessKey: config.get('OBS_ACCESS_KEY', ''),
+        secretKey: config.get('OBS_SECRET_KEY', ''),
+        endpoint: config.get('OBS_ENDPOINT', ''),
       }),
       inject: [ConfigService],
     }),
@@ -270,7 +278,7 @@ export class AppModule implements NestModule {
     const graphqlPath = this.configService.get<string>('graphql.path', '/graphql');
 
     consumer
-      .apply(I18nMiddleware, JwtMiddleware)
+      .apply(I18nMiddleware, OidcMiddleware)
       // exclude routes
       // .exclude()
       .forRoutes(`${globalPrefixUri}${graphqlPath.substring(1)}`, `${globalPrefixUri}api/*`);

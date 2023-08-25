@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import tinycolor from 'tinycolor2';
-import { ref, shallowRef, watchEffect } from '@vue/composition-api';
+import { ref, shallowRef } from '@vue/composition-api';
 import { i18n } from '@/i18n';
 import { defaultSettings } from '@/configs/settings.config';
 import { STORAGE_PREFIX } from './utils';
@@ -119,11 +119,6 @@ export const useAppStore = defineStore(
       }
     };
 
-    watchEffect(() => {
-      // 初始设置 i18n 的 locale
-      setLocale(locale.value);
-    });
-
     //#endregion
 
     return {
@@ -152,6 +147,10 @@ export const useAppStore = defineStore(
     persist: {
       key: `${STORAGE_PREFIX}/app-store`,
       paths: ['layout', 'color', 'locale'],
+      afterRestore: (ctx) => {
+        // 初始设置 locale (从缓存中读取)
+        ctx.store.setLocale(ctx.store.locale);
+      },
     },
   },
 );

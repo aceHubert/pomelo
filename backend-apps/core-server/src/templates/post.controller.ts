@@ -1,4 +1,5 @@
-import { ApiTags, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ApiTags, ApiQuery, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import {
   Controller,
   Scope,
@@ -10,18 +11,14 @@ import {
   Put,
   ParseIntPipe,
   ParseArrayPipe,
+  Res,
   HttpStatus,
 } from '@nestjs/common';
-import { Authorized, Anonymous, RamAuthorized } from 'nestjs-identity';
-import { BaseController } from '@/common/controllers/base.controller';
-import { ApiAuth } from '@/common/decorators/api-auth.decorator';
-import { Actions } from '@/common/ram-actions';
-import { User } from '@/common/decorators/user.decorator';
-import { ParseQueryPipe } from '@/common/pipes/parse-query.pipe';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
-import { Taxonomy, TemplateType } from '@/orm-entities/interfaces';
-import { TemplateDataSource } from '@/sequelize-datasources/datasources';
-import { PagedTemplateArgs, TemplateOptionArgs } from '@/sequelize-datasources/interfaces';
+import { BaseController, ParseQueryPipe, ApiAuth, User, RequestUser, createResponseSuccessType } from '@pomelo/shared';
+import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
+import { Authorized, Anonymous } from 'nestjs-authorization';
+import { RamAuthorized } from 'nestjs-ram-authorization';
+import { PostTemplateAction } from '@/common/actions';
 import { PostTemplateOptionQueryDto, PagedPostTemplateQueryDto } from './dto/template-query.dto';
 import { NewPostTemplateDto } from './dto/new-template.dto';
 import { UpdatePostTemplateDto } from './dto/update-template.dto';
@@ -94,10 +91,12 @@ export class PostTemplateController extends BaseController {
     description: 'Post template model',
     type: () => createResponseSuccessType({ data: PostTemplateModelResp }, 'PostTemplateModelSuccessResp'),
   })
+  @ApiNoContentResponse({ description: 'Post template not found' })
   async getByName(
     @Param('name') name: string,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     @User() requestUser: RequestUser,
+    @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.templateDataSource.getByName(
       name,
@@ -106,19 +105,21 @@ export class PostTemplateController extends BaseController {
       requestUser,
     );
 
-    if (result) {
-      let metas;
-      if (metaKeys?.length) {
-        metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
-      }
-      return this.success({
-        data: {
-          ...result,
-          metas,
-        },
-      });
+    let metas;
+    if (result && metaKeys?.length) {
+      metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
-    return this.success();
+
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+
+    return this.success({
+      data: {
+        ...result,
+        metas,
+      },
+    });
   }
 
   /**
@@ -137,10 +138,12 @@ export class PostTemplateController extends BaseController {
     description: 'Post template model',
     type: () => createResponseSuccessType({ data: PostTemplateWithMetasModelResp }, 'PostTemplateModelSuccessResp'),
   })
+  @ApiNoContentResponse({ description: 'Post template not found' })
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     @User() requestUser: RequestUser,
+    @Res({ passthrough: true }) res: Response,
   ) {
     const result = await this.templateDataSource.get(
       id,
@@ -149,26 +152,28 @@ export class PostTemplateController extends BaseController {
       requestUser,
     );
 
-    if (result) {
-      let metas;
-      if (metaKeys?.length) {
-        metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
-      }
-      return this.success({
-        data: {
-          ...result,
-          metas,
-        },
-      });
+    let metas;
+    if (result && metaKeys?.length) {
+      metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
     }
-    return this.success();
+
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+
+    return this.success({
+      data: {
+        ...result,
+        metas,
+      },
+    });
   }
 
   /**
    * Get paged post template model
    */
   @Get()
-  @RamAuthorized(Actions.PostTemplate.PagedList)
+  @RamAuthorized(PostTemplateAction.PagedList)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged posts template models',
@@ -206,10 +211,9 @@ export class PostTemplateController extends BaseController {
    * Create post template
    */
   @Post()
-  @RamAuthorized(Actions.PostTemplate.Create)
+  @RamAuthorized(PostTemplateAction.Create)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: 'Post template model',
     type: () => createResponseSuccessType({ data: PostTemplateModelResp }, 'PostTemplateModelSuccessResp'),
   })
@@ -237,7 +241,7 @@ export class PostTemplateController extends BaseController {
    * Update post template
    */
   @Put(':id')
-  @RamAuthorized(Actions.PostTemplate.Update)
+  @RamAuthorized(PostTemplateAction.Update)
   @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
@@ -256,7 +260,7 @@ export class PostTemplateController extends BaseController {
    * Delete post template permanently
    */
   // @Delete(':id')
-  // @RamAuthorized(Actions.PostTemplate.Delete)
+  // @RamAuthorized(PostTemplateAction.Delete)
   // @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   // @ApiOkResponse({
   //   description: 'no data content',
@@ -266,6 +270,6 @@ export class PostTemplateController extends BaseController {
   // @ApiForbiddenResponse()
   // async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
   //   await this.templateDataSource.delete(id, requestUser);
-  //   return this.success({});
+  //   return this.success();
   // }
 }

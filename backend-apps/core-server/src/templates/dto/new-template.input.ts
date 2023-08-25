@@ -1,7 +1,7 @@
-import { Field, InputType, PickType } from '@nestjs/graphql';
 import { IsDefined, IsString, IsJSON } from 'class-validator';
+import { Field, InputType, PickType } from '@nestjs/graphql';
+import { TemplateStatus } from '@pomelo/datasource';
 import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
-import { TemplateStatus } from '@/orm-entities/interfaces';
 import { NewTemplateValidator } from './new-template.validator';
 
 @InputType({ description: 'New template input' })

@@ -1,8 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
-import { DbInitDataSource } from '@/sequelize-datasources/datasources';
-import { InitArgs } from '@/sequelize-datasources/interfaces';
+import { DbInitDataSource, InitArgs } from '@pomelo/datasource';
 
 const lockDbFile = path.join(process.cwd(), 'db.lock');
 

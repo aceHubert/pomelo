@@ -1,69 +1,11 @@
+import { JwtPayload } from 'jsonwebtoken';
+import { ResponseSuccess, ResponseError } from '@pomelo/shared';
+
 declare global {
-  export type JwtPayload = {
-    /*
-     * (issuer)：签发人
-     */
-    iss?: string;
-    /*
-     *  (expiration time)：过期时间
-     */
-    exp?: number;
-    /*
-     * (Not Before)：生效时间
-     */
-    nbf?: number;
-    /*
-     *  (Issued At)：签发时间
-     */
-    iat?: number;
-    /*
-     * (JWT ID)：编号
-     */
-    jti?: string;
-    /*
-     * (subject)：主题
-     */
-    sub?: string;
-    /*
-     * (audience)：受众
-     */
-    aud?: string[];
-    /*
-     * (scope) 授权范围
-     */
-    scope?: string[];
-    /**
-     * (enterprise id) 企业id
-     */
-    eid?: string;
-    /*
-     * (role) 角色权限
-     */
-    role?: string | string[];
-    /*
-     * (ram) 授权策略
-     */
-    ram?: string[];
-  };
-
-  export type RequestUser = JwtPayload & {
-    lang?: string;
-  };
-
   export type ConnectionParams = {
     token?: string;
     lang?: string;
   };
-
-  export type ResponseError = {
-    success: false;
-    statusCode?: number;
-    message: string;
-  };
-
-  export type ResponseSuccess<T extends Record<string, any>> = {
-    success: true;
-  } & T;
 
   export type PagedResponseSuccess<T> = ResponseSuccess<{
     rows: Array<T>;
@@ -77,7 +19,17 @@ declare global {
   /**
    * Type helper for making certain fields of an object optional.
    */
-  export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+  // export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+}
+
+declare module '@pomelo/shared' {
+  export interface UserPayload extends JwtPayload {
+    // extend the payload
+    /**
+     * Role
+     */
+    role: string;
+  }
 }
 
 // 注意: 修改"全局声明"必须在模块内部, 所以至少要有 export{}字样

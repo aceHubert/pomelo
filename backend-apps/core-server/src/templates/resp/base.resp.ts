@@ -1,7 +1,7 @@
 import { ApiResponseProperty, OmitType, PickType } from '@nestjs/swagger';
+import { TemplateStatus } from '@pomelo/datasource';
 import { PagedResponse, Count } from '@/common/controllers/resp/paged.resp';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
-import { TemplateStatus } from '@/orm-entities/interfaces';
 
 export class TemplateModelResp {
   /**
