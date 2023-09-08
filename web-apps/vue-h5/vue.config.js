@@ -121,15 +121,17 @@ module.exports = defineConfig({
           // 开发环境下 formily 使用 src
           ...(!isProd
             ? {
-                '@pomelo/shared-web': path.resolve(__dirname, '../packages/shared-web/src'),
-                '@formily/vant$': path.resolve(__dirname, '../.submodules/formily-vant/packages/components/src'),
+                '@pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+                '@pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+                '@pomelo/shared-web': path.resolve(__dirname, '../../packages/pomelo-shared-web/src'),
+                '@formily/vant$': path.resolve(__dirname, '../../.submodules/formily-vant/packages/components/src'),
                 '@formily/vant-prototypes/esm': path.resolve(
                   __dirname,
-                  '../.submodules/formily-vant/packages/prototypes/src',
+                  '../../.submodules/formily-vant/packages/prototypes/src',
                 ),
                 '@formily-portal/vant$': path.resolve(
                   __dirname,
-                  '../.submodules/formily-portal-vant/packages/components/src',
+                  '../../.submodules/formily-portal-vant/packages/components/src',
                 ),
               }
             : {}),
@@ -235,7 +237,7 @@ module.exports = defineConfig({
         lessOptions: {
           javascriptEnabled: true,
           modifyVars: {
-            hack: 'true;@import "./src/assets/styles/fn.less";',
+            hack: 'true;@import "./src/assets/styles/variables.less";',
           },
         },
       },

@@ -22,7 +22,7 @@ import type { OmitVue } from '@/types';
 
 Vue.use(ABase);
 
-export const ANT_PREFIX_CLS = 'tpl-ops';
+export const ANT_PREFIX_CLS = 'pomelo';
 
 export const message = Amessage;
 // message 修改自定义 less 前缀

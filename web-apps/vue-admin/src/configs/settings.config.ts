@@ -34,11 +34,11 @@ export const defaultSettings: {
   title: (i18nRender: (key: string, fallback: string, args?: any) => string) => i18nRender('site_title', 'Pomelo'),
   logo: `${process.env.BASE_URL}static/images/logo.png`,
   layout: {
-    type: Layout.MixedMenu,
+    type: Layout.SiderMenu,
     contentWidth: ContentWidth.Fluid,
     fixedHeader: true,
     fixSiderbar: true,
-    sideCollapsed: 'auto',
+    sideCollapsed: 'disabled',
     colorWeak: false,
     autoHideHeader: false,
     multiTab: false,

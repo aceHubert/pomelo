@@ -55,12 +55,16 @@
       /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
       "@/*": ["src/*"],
       "@formily/antdv": ["../../.submodules/formily-antdv/packages/components/src"],
-      "@formily/antdv/esm*": ["../../.submodules/formily-antdv/packages/components/src/*"],
+      "@formily/antdv/esm/*": ["../../.submodules/formily-antdv/packages/components/src/*"],
       "@formily/antdv/lib/*": ["../../.submodules/formily-antdv/packages/components/src/*"],
+      "@formily/antdv-prototypes/esm/*": ["../../.submodules/formily-antdv/packages/prototypes/src/*"],
+      "@formily/antdv-prototypes/lib/*": ["../../.submodules/formily-antdv/packages/prototypes/src/*"],
       "@formily/antdv-*": ["../../.submodules/formily-antdv/packages/*/src"],
       "@formily/vant": ["../../.submodules/formily-vant/packages/components/src"],
       "@formily/vant/esm/*": ["../../.submodules/formily-vant/packages/components/src/*"],
       "@formily/vant/lib/*": ["../../.submodules/formily-vant/packages/components/src/*"],
+      "@formily/vant-prototypes/esm/*": ["../../.submodules/formily-vant/packages/prototypes/src/*"],
+      "@formily/vant-prototypes/lib/*": ["../../.submodules/formily-vant/packages/prototypes/src/*"],
       "@formily/vant-*": ["../../.submodules/formily-vant/packages/*/src"],
       "@formily-portal/antdv": ["../../.submodules/formily-portal-antdv/packages/components/src"],
       "@formily-portal/antdv/esm/*": ["../../.submodules/formily-portal-antdv/packages/components/src/*"],
@@ -76,7 +80,12 @@
       "nestjs-oidc": ["../../packages/nestjs-oidc/src"],
       "@pomelo/plugin-*": ["../plugins/*/src", "../../plugins/*/src"],
       "@pomelo/theme-*": ["../themes/*/src", "../../themes/*/src"],
-      "@pomelo/*": ["../packages/*/src", "../../packages/*/src"]
+      "@pomelo/*": [
+        "../packages/*/src",
+        "../../packages/*/src",
+        "../packages/pomelo-*/src",
+        "../../packages/pomelo-*/src"
+      ]
     },
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                       /* List of folders to include type definitions from. */

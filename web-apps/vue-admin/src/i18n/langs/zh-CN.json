@@ -359,7 +359,8 @@
       "review_reject": "内容审核不通过"
     },
     "design_sider": {
-      "settings_title": "设置"
+      "settings_title": "设置",
+      "close_settings_title": "关闭设置"
     }
   }
 }

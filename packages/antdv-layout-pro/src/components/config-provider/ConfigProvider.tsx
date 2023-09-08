@@ -1,6 +1,7 @@
-import { defineComponent } from 'vue-demi';
+import { defineComponent, watch, onMounted, onBeforeUnmount } from 'vue-demi';
 import { ConfigProvider as AntConfigProvider } from 'ant-design-vue';
 import { DeviceType, Theme } from '../../types';
+import { removeClass, addClass } from './util';
 
 // Types
 import type { PropType } from 'vue-demi';
@@ -51,4 +52,35 @@ export default defineComponent({
     },
   },
   watch: { ...getWatch(['theme', 'device', 'i18nRender']) },
+  setup(props) {
+    let dispose: (() => void) | undefined;
+
+    onMounted(() => {
+      let removeClasses: string[] = [],
+        addClasses: string[] = [];
+
+      const unWatch = watch(
+        [() => props.device, () => props.theme],
+        ([device, theme]) => {
+          removeClasses.length && removeClass(document.body, removeClasses.join(' '));
+          addClasses = removeClasses = [`theme-${theme}`, `is-${device}`];
+          addClass(document.body, addClasses.join(' '));
+        },
+        {
+          immediate: true,
+        },
+      );
+
+      dispose = () => {
+        unWatch();
+        removeClass(document.body, removeClasses.join(' '));
+      };
+    });
+
+    onBeforeUnmount(() => {
+      dispose?.();
+    });
+
+    return {};
+  },
 }) as DefineComponent<ConfigProviderProps>;

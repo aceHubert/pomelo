@@ -1,9 +1,10 @@
 import { debounce } from 'lodash-es';
-import { defineComponent, computed, ref, reactive, watch } from '@vue/composition-api';
+import { defineComponent, computed, ref, reactive, watch, onMounted } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { Input, Form, Select, TreeSelect, Divider, Collapse } from 'ant-design-vue';
 import { Modal, message, getObsDisplayUrl } from '@/components';
 import { usePostApi, useResApi, formatError, TemplateStatus } from '@/fetch/graphql';
+import { useDeviceMixin } from '@/mixins';
 import { useI18n, useUserManager } from '@/hooks';
 import { DesignLayout, DocumentEditor } from '../components';
 import { useDesignMixin } from '../mixins/design.mixin';
@@ -14,6 +15,7 @@ import type { ActionStatus, ActionCapability } from '../components/design-layout
 
 export default defineComponent({
   name: 'PostDesign',
+  layout: 'blank',
   head() {
     return {
       title: this.$tv('page_templates.posts.design.page_title', '内容设计') as string,
@@ -45,6 +47,7 @@ export default defineComponent({
     const postApi = usePostApi();
     const resApi = useResApi();
     const designMixin = useDesignMixin();
+    const deviceMixin = useDeviceMixin();
 
     // #region data scopes 新增、修改、查询
     const isAddMode = computed(() => route.name === 'post-add');
@@ -328,6 +331,12 @@ export default defineComponent({
     };
 
     // #endregion
+
+    onMounted(() => {
+      if (deviceMixin.isDesktop) {
+        siderCollapsedRef.value = false;
+      }
+    });
 
     return {
       editorProps,

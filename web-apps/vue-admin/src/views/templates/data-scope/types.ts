@@ -1,4 +1,4 @@
-import type { FetchClient } from '@vue-async/fetch';
+import type { FetchClient } from '@ace-fetch/core';
 import type { ClauseValueType } from './constants';
 
 export type ClauseField = {

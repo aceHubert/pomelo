@@ -82,10 +82,6 @@ export type DesignLayoutProps = {
    * sider/drawer 标题，默认："设置"
    */
   siderTitle?: string;
-  /**
-   * sider bar 主题，默认：'light'
-   */
-  siderTheme?: 'light' | 'dark';
 };
 
 export default defineComponent({
@@ -109,7 +105,7 @@ export default defineComponent({
     const prefixCls = 'design-layout';
     const headerHeightRef = ref(48);
     const siderWidthRef = ref(300);
-    const siderCollapsedRef = ref(props.siderCollapsed ?? true);
+    const siderCollapsedRef = ref(props.siderCollapsed ?? !deviceMixin.isDesktop);
 
     watch(
       () => props.siderCollapsed,
@@ -399,10 +395,14 @@ export default defineComponent({
                     {slots.siderContent && (
                       <Tooltip
                         placement="bottom"
-                        title={props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')}
+                        title={
+                          !siderCollapsedRef.value
+                            ? i18n.tv('page_templates.design_sider.close_settings_title', '关闭设置')
+                            : props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')
+                        }
                       >
-                        <Button disabled={!siderCollapsedRef.value} onClick={() => (siderCollapsedRef.value = false)}>
-                          <Icon type="setting"></Icon>
+                        <Button onClick={() => (siderCollapsedRef.value = !siderCollapsedRef.value)}>
+                          <Icon type={!siderCollapsedRef.value ? 'close' : 'setting'}></Icon>
                         </Button>
                       </Tooltip>
                     )}
@@ -446,7 +446,6 @@ export default defineComponent({
           class={`${prefixCls}-sider`}
           width={siderWidthRef.value}
           collapsedWidth={0}
-          theme={props.siderTheme || 'light'}
           collapsed={useDrawer ? false : siderCollapsedRef.value}
         >
           <Card

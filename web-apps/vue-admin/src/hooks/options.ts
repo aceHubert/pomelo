@@ -1,5 +1,5 @@
 import { getCurrentInstance, toRef } from '@vue/composition-api';
-import { warn } from '@pomelo/shared-web';
+import { warn } from '@ace-util/core';
 
 // Types
 import type { Ref } from '@vue/composition-api';

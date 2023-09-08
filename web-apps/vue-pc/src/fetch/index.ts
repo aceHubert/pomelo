@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import { hasIn } from 'lodash-es';
 import axios from 'axios';
-import { FetchVuePlugin, createFetch } from '@vue-async/fetch';
-import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@vue-async/fetch-axios';
+import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
+import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@ace-fetch/axios';
 import { loadingRef, errorRef, SharedError } from '@/shared';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
@@ -67,7 +67,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
         }
       })
       .catch(() => {
-        userManager.signIn();
+        userManager.signin();
         return new Promise(() => {}); // 阻止向下执行
       });
   }

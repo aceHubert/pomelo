@@ -6,8 +6,7 @@
   &__toolbar {
     .ck {
       &.ck-toolbar {
-        border: none;
-        border-bottom: 1px solid @border-color-base;
+        border-width: 0 0 1px 0;
       }
     }
   }
@@ -21,7 +20,7 @@
     &__wrapper {
       margin: 0 auto;
       max-width: 1180px;
-      background-color: white;
+      background-color: var(--component-background, @component-background);
     }
 
     &__title {
@@ -40,7 +39,7 @@
         background-color: transparent;
 
         &:focus-visible {
-          border-bottom-color: var(--ck-color-focus-border, @primary-color);
+          border-bottom-color: @var-primary;
           outline: none;
         }
 
@@ -54,7 +53,7 @@
       .sub-line {
         margin-top: 1em;
         margin-bottom: 0;
-        color: @text-secondary;
+        color: var(--text-secondary, @text-color-secondary);
         font-size: @font-size-xs;
       }
     }

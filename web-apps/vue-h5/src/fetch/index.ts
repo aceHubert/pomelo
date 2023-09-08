@@ -2,8 +2,8 @@ import Vue from 'vue';
 import { hasIn } from 'lodash-es';
 import { ref, reactive } from '@vue/composition-api';
 import axios from 'axios';
-import { FetchVuePlugin, createFetch } from '@vue-async/fetch';
-import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@vue-async/fetch-axios';
+import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
+import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@ace-fetch/axios';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
 
@@ -27,6 +27,7 @@ axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) =
 
   if (SUPPORTS_CORS) {
     return {
+      params,
       headers: {
         ...headers,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -66,7 +67,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
         }
       })
       .catch(() => {
-        userManager.signIn();
+        userManager.signin();
         return new Promise(() => {});
       });
   }

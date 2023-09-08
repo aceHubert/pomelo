@@ -1,6 +1,6 @@
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { Button, Input, InputNumber, Select, Checkbox, DatePicker, Tooltip } from 'ant-design-vue';
-import { warn, promisify, equals } from '@pomelo/shared-web';
+import { warn, promisify, equals } from '@ace-util/core';
 import { message } from '@/components';
 import { useI18n } from '@/hooks';
 import { ClauseOperator, ClauseLogical, GroupState, ClauseValueType } from '../constants';
@@ -798,6 +798,7 @@ export default defineComponent({
                     'page_templates.data_scopes.components.clause_form.tips.group_to_selected_items',
                     '对所选子句进行分组',
                   )}
+                  placement="right"
                 >
                   <Button
                     type="link"
@@ -830,12 +831,13 @@ export default defineComponent({
                       'page_templates.data_scopes.components.clause_form.tips.insert_new_row',
                       '插入新的筛选器行',
                     )}
+                    placement="right"
                   >
                     <Button
                       type="link"
                       size="small"
                       icon="plus"
-                      class="gray--text red--text__hover"
+                      class="gray--text hover:primary--text"
                       onClick={() => this.handleInsertClause(clause)}
                     ></Button>
                   </Tooltip>
@@ -844,12 +846,13 @@ export default defineComponent({
                       'page_templates.data_scopes.components.clause_form.tips.remove_current_row',
                       '删除此筛选器行',
                     )}
+                    placement="right"
                   >
                     <Button
                       type="link"
                       size="small"
                       icon="close"
-                      class="gray--text red--text__hover"
+                      class="gray--text hover:primary--text"
                       onClick={() => this.handleRemoveClause(clause)}
                     ></Button>
                   </Tooltip>
@@ -860,6 +863,7 @@ export default defineComponent({
                       'page_templates.data_scopes.components.clause_form.tips.group_checkbox',
                       '切换筛选子句的分组',
                     )}
+                    placement="right"
                   >
                     <input type="checkbox" name="ckb-group" vModel={this.checkedClauses} value={clauseIndex} />
                   </Tooltip>
@@ -872,6 +876,7 @@ export default defineComponent({
                           'page_templates.data_scopes.components.clause_form.tips.ungroup_current_items',
                           '取消子句分组',
                         )}
+                        placement="right"
                       >
                         <Button
                           type="link"
@@ -922,7 +927,7 @@ export default defineComponent({
                   </Select>
                 </td>
                 <td class="value">
-                  {Array.isArray(clause._field?._allowedValues) ? (
+                  {clause._field?._allowedValues?.length ? (
                     <Select vModel={clause.value} size="small" style="max-width: 170px" placeholder="请选择">
                       {clause._field?._allowedValues.map((item) => (
                         <Select.Option key={item.value}>{item.label}</Select.Option>

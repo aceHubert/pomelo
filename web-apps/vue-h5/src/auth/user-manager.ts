@@ -3,94 +3,55 @@ export interface Profile {
   [claimKey: string]: any;
 }
 
-export interface UserSettings {
-  id_token: string;
-  session_state: string;
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  scope: string;
-  profile: Profile;
-  expires_at: number;
-  state: any;
-}
-
 export class User {
-  id_token: string;
-  session_state?: string;
-  access_token: string;
-  refresh_token?: string;
-  token_type: string;
-  scope: string;
-  profile: Profile;
-  expires_at: number;
-  state: any;
+  readonly access_token: string;
+  readonly profile: Profile;
+  expires_at?: number;
 
-  constructor(user: UserSettings) {
-    this.id_token = user.id_token;
-    this.session_state = user.session_state;
-    this.access_token = user.access_token;
-    this.refresh_token = user.refresh_token;
-    this.token_type = user.token_type;
-    this.scope = user.scope;
-    this.profile = user.profile;
-    this.expires_at = user.expires_at;
-    this.state = user.state;
+  constructor({ access_token, profile, expires_at }: { access_token: string; profile: Profile; expires_at?: number }) {
+    this.access_token = access_token;
+    this.profile = profile;
+    this.expires_at = expires_at;
   }
 
   get expires_in() {
+    if (this.expires_at === void 0) {
+      return void 0;
+    }
     const now = parseInt(String(Date.now() / 1000));
     return now < this.expires_at ? this.expires_at - now : 0;
   }
 
+  set expires_in(value) {
+    if (value !== void 0) {
+      this.expires_at = Math.floor(value) + Date.now() / 1000;
+    }
+  }
+
   get expired() {
-    const now = parseInt(String(Date.now() / 1000));
-    return now > this.expires_at;
-  }
-
-  get scopes() {
-    return this.scope.split(' ').map((item) => item.trim());
+    const expires_in = this.expires_in;
+    if (expires_in === void 0) {
+      return void 0;
+    }
+    return expires_in <= 0;
   }
 }
 
-export interface UserManager {
-  getUser(): Promise<User | null>;
-  signIn(): Promise<void>;
-  signinSilent(): Promise<User | null>;
-  signOut(): Promise<void>;
-}
-
-export abstract class UserManagerCreator {
-  /**
-   * 用户管理
-   */
-  public abstract userManager: UserManager;
-
+/**
+ * 用户管理基类
+ * TODO: 考虑一下用 interface 还是 abstract class
+ */
+export interface UserManager<SigninArgs = any, SignoutArgs = any, U extends User = User> {
   /**
    * 获取用户
    */
-  public getUser() {
-    return this.userManager.getUser();
-  }
-
+  getUser(): Promise<U | null>;
   /**
-   * 触发跳转到授权页面
+   * 触发跳转到授权页面, 并确保登录完成后跳转到当前页面
    */
-  public signIn() {
-    return this.userManager.signIn();
-  }
-
-  /**
-   * 触发静态授权请求（如iframe）
-   */
-  public signinSilent() {
-    return this.userManager.signinSilent();
-  }
-
+  signin(args?: SigninArgs): Promise<void>;
   /**
    * 触发跳转到结束会话页
    */
-  public signOut() {
-    return this.userManager.signOut();
-  }
+  signout(args?: SignoutArgs): Promise<void>;
 }

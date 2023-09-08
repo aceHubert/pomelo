@@ -1,5 +1,5 @@
-@import '../../styles/mixins/index';
-@import '../../styles/themes/index';
+@import '~@pomelo/theme/lib/mixins/index';
+@import '../../style/themes/index';
 
 @search-from-prefix-cls: ~'@{ant-prefix}-search-form';
 
@@ -35,7 +35,7 @@
     }
   
     &__item-link {
-      color: @text-color;
+      color: var(e(--text-primary), @text-color) ;
 
       &.active,&:hover,&:active {
         color: @var-primary;

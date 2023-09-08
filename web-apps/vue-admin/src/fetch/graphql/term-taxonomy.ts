@@ -63,9 +63,15 @@ export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
       $parentId: ID
       $group: Int
       $objectId: ID! = 0
+      $includeDefault: Boolean! = false
       $withMine: Boolean! = false
     ) {
-      categories: categoryTermTaxonomies(keyword: $keyword, group: $group, parentId: $parentId) {
+      categories: categoryTermTaxonomies(
+        keyword: $keyword
+        group: $group
+        parentId: $parentId
+        includeDefault: $includeDefault
+      ) {
         id
         name
         slug
@@ -82,7 +88,14 @@ export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
   ` as TypedQueryDocumentNode<
     { categories: Omit<TermTaxonomyModel, 'taxonomy'>[]; myCategories?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
     | { keyword?: string; group?: number; parentId?: number }
-    | { keyword?: string; group?: number; parentId?: number; objectId: string; withMine: true }
+    | {
+        keyword?: string;
+        group?: number;
+        parentId?: number;
+        objectId: string;
+        includeDefault?: boolean;
+        withMine?: true;
+      }
   >,
   getTags: gql`
     query getTagTermTaxonomies($keyword: String, $group: Int, $objectId: ID! = 0, $withMine: Boolean! = false) {

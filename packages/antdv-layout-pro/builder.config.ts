@@ -7,13 +7,12 @@ export const BuilderConfig: IBuilderConfig = {
   externals: {
     'ant-design-vue/lib': 'antd',
   },
-  style: {
-    input: ['src/style.ts', 'src/styles/index.ts'],
+  filename: 'index',
+  postcssOptions: {
     use: {
       less: {
         modifyVars: {
           'root-entry-name': 'default',
-          hack: 'true;@import "./src/styles/themes/index.less";',
         },
       },
     },

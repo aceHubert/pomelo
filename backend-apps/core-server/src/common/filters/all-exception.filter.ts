@@ -12,7 +12,7 @@ export class AllExceptionFilter implements ExceptionFilter {
 
   async catch(exception: Error, host: ArgumentsHost) {
     // log
-    this.logger.error(exception);
+    this.logger.error(exception, exception.stack);
 
     const type = host.getType<GqlContextType>();
     const i18n = getI18nContextFromArgumentsHost(host);
@@ -42,15 +42,17 @@ export class AllExceptionFilter implements ExceptionFilter {
     } else if (type === 'graphql') {
       // 将非 ApolloError 转换在 ApolloError
       if (!(exception instanceof GraphQLError)) {
+        const extensions: Record<string, any> = {
+          code: this.getGraphqlCodeFromError(exception),
+        };
         // @ts-expect-error code doesn't export type
         if (exception instanceof SequelizeDatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
           // 当出现表不存在错误时，提示要初始化数据库, 并设置 extensions.dbInitRequired = true
-          (exception as Error & { extensions?: Record<string, any> }).extensions = {
-            dbInitRequired: true,
-          };
+          extensions['dbInitRequired'] = true;
         }
-        return new GraphQLError(exception.message, null, null, null, null, exception, {
-          code: this.getGraphqlCodeFromError(exception),
+        return new GraphQLError(exception.message, {
+          originalError: exception,
+          extensions,
         });
       }
       return exception;

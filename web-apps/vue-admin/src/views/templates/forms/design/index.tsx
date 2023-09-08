@@ -1,5 +1,5 @@
 import { debounce } from 'lodash-es';
-import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
+import { defineComponent, ref, reactive, computed, watch, onMounted } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { createDesigner, GlobalRegistry, ScreenType } from '@designable/core';
 import { transformToTreeNode, transformToSchema } from '@designable/formily-transformer';
@@ -24,10 +24,12 @@ import {
 } from '@formily/antdv-designable';
 import { SettingsForm } from '@formily/antdv-settings-form';
 import { Divider, Collapse, Icon, Form, Input, TreeSelect } from 'ant-design-vue';
-import { jsonSerializeReviver, jsonDeserializeReviver, obsUpload, obsFormatDisplayUrl } from '@pomelo/shared-web';
+import { warn, jsonSerializeReviver, jsonDeserializeReviver } from '@ace-util/core';
+import { obsUpload, obsFormatDisplayUrl } from '@pomelo/shared-web';
 import { Modal, message } from '@/components';
 import { useFormApi, useResApi, formatError, TemplateStatus } from '@/fetch/graphql';
 import { useI18n, useUserManager } from '@/hooks';
+import { useDeviceMixin } from '@/mixins';
 import { DesignLayout } from '../../components';
 import { useDesignMixin } from '../../mixins/design.mixin';
 import { ResourceWidgets, ComponentWidget, PreviewWidget, SchemaEditorWidget } from './widgets';
@@ -66,6 +68,7 @@ GlobalRegistry.registerDesignerLocales({
 
 export default defineComponent({
   name: 'FormDesign',
+  layout: 'blank-light',
   props: {
     id: { type: String },
   },
@@ -110,6 +113,7 @@ export default defineComponent({
     const formApi = useFormApi();
     const resApi = useResApi();
     const designMixin = useDesignMixin();
+    const deviceMixin = useDeviceMixin();
 
     GlobalRegistry.setDesignerLanguage(i18n.locale || 'en-US');
 
@@ -179,6 +183,7 @@ export default defineComponent({
         }
 
         engine.setCurrentTree(newTreeNode || transformToTreeNode({}));
+        engine.workbench.currentWorkspace.history.clear();
         engine.workbench.currentWorkspace.operation.hover.clear();
         engine.workbench.currentWorkspace.operation.selection.select(engine.getCurrentTree());
       }
@@ -280,6 +285,30 @@ export default defineComponent({
           designMixin.category.treeData = treeData;
           designMixin.category.selectKeys = categories.map(({ id, name }) => ({ value: id, label: name }));
         });
+
+        engine.workbench.currentWorkspace.history.clear();
+        // treenode changed
+        engine.subscribeWith(
+          [
+            'append:node',
+            'insert:after',
+            'insert:before',
+            'insert:children',
+            'drop:node',
+            'prepend:node',
+            'remove:node',
+            'update:children',
+            'wrap:node',
+            'update:node:props',
+            'history:goto',
+            'history:undo',
+            'history:redo',
+          ],
+          (payload) => {
+            warn(process.env.NODE_ENV === 'production', payload.type);
+            actionStatus.changed = true;
+          },
+        );
       } else {
         message.error({
           content: '表单不存在',
@@ -290,11 +319,6 @@ export default defineComponent({
       }
       return form;
     };
-
-    // treenode changed
-    engine.subscribeWith(['from:node', 'update:node:props', 'update:children'], () => {
-      actionStatus.changed = true;
-    });
 
     watch(
       () => props.id,
@@ -606,6 +630,12 @@ export default defineComponent({
         headers,
       };
     };
+
+    onMounted(() => {
+      if (deviceMixin.isDesktop) {
+        siderCollapsedRef.value = false;
+      }
+    });
 
     return {
       engine,

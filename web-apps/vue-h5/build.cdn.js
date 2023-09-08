@@ -70,14 +70,14 @@ const cdnConfig = {
     { packageName: 'moment', path: '/locale/zh-cn.js' },
     { packageName: 'moment', path: '/locale/en-gb.js' },
     {
-      packageName: '@vue-async/fetch',
-      variableName: ['VueAsync', 'Fetch'],
-      path: '/dist/fetch.umd.production.js',
+      packageName: '@ace-fetch/core',
+      variableName: ['AceFetch', 'Core'],
+      path: '/dist/index.umd.production.js',
     },
     {
-      packageName: '@vue-async/fetch-axios',
-      variableName: ['VueAsync', 'FetchAxios'],
-      path: '/dist/fetch-axios.umd.production.js',
+      packageName: '@ace-fetch/axios',
+      variableName: ['AceFetch', 'Axios'],
+      path: '/dist/index-axios.umd.production.js',
     },
     // 打开必须调用，不然会阻止 vue-router hook
     // {

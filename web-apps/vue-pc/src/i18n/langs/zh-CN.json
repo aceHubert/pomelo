@@ -18,21 +18,27 @@
     "index": {
       "not_found_text": "未找到页面！",
       "schema_error_text": "页面配置错误！",
-      "render_error_text": "页面渲染错误！"
+      "render_error_text": "页面渲染错误！",
+      "contact_administrator_tips": "请联系管理员。",
+      "load_error_text": "页面加载错误！"
     }
   },
   "form_template": {
     "index": {
       "not_found_text": "未找到表单！",
       "schema_error_text": "表单配置错误！",
-      "render_error_text": "表单渲染错误！"
+      "render_error_text": "表单渲染错误！",
+      "load_error_text": "表单加载错误！",
+      "contact_administrator_tips": "请联系管理员。"
     }
   },
   "post_template": {
     "index": {
       "not_found_text": "未找到内容！",
       "schema_error_text": "内容配置错误！",
-      "render_error_text": "内容渲染错误！"
+      "render_error_text": "内容渲染错误！",
+      "contact_administrator_tips": "请联系管理员。",
+      "load_error_text": "内容加载错误！"
     }
   }
 }

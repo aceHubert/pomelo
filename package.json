@@ -63,7 +63,7 @@
     "cli-color": "^2.0.3",
     "compression-webpack-plugin": "^10.0.0",
     "concurrently": "^7.3.0",
-    "copy-webpack-plugin": "^11.0.0",
+    "copy-webpack-plugin": "^9.0.0",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog-zh": "^0.0.2",
     "eslint": "^8.0.1",
@@ -78,6 +78,8 @@
     "grunt": "^1.5.3",
     "grunt-cli": "^1.4.3",
     "grunt-contrib-clean": "^2.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-less": "^3.0.0",
     "grunt-run": "^0.8.1",
     "grunt-submodule": "^0.1.0-rc3",
     "html-webpack-tags-plugin": "^3.0.2",
@@ -90,6 +92,7 @@
     "lint-staged": "^10.0.7",
     "nodemon": "^2.0.21",
     "postcss-less": "^6.0.0",
+    "postcss-loader": "^6.0.0",
     "postcss-pxtorem": "^6.0.0",
     "prettier": "^2.7.1",
     "rimraf": "^3.0.2",
@@ -105,19 +108,23 @@
     "rollup-plugin-terser": "^5.1.2",
     "rollup-plugin-typescript2": "^0.27.0",
     "semver": "^7.5.1",
+    "stylelint": "^15.10.3",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-config-standard": "^34.0.0",
     "terser": "^5.14.2",
     "ts-jest": "^27.1.2",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.7.0",
     "typescript": "^4.1.5",
     "vue": "^2.6.10",
-    "vue-template-compiler": "~2.6.10",
+    "vue-template-compiler": "^2.6.10",
     "yorkie": "^2.0.0"
   },
   "resolutions": {
     "vue": "~2.6.x",
     "vue-server-renderer": "~2.6.x",
-    "vue-template-compiler": "~2.6.x"
+    "vue-template-compiler": "~2.6.x",
+    "webpack": "5.82.1"
   },
   "config": {
     "commitizen": {

@@ -21,8 +21,9 @@ import {
 } from 'nestjs-i18n';
 import { OidcModule, OidcService, OidcMiddleware } from 'nestjs-oidc';
 import { AuthorizedGuard } from 'nestjs-authorization';
+import { RamAuthorizationModule } from 'nestjs-ram-authorization';
 import { SequelizeModule } from '@pomelo/datasource';
-import { ObsModule } from '@pomelo/plugin-obs';
+// import { ObsModule } from '@pomelo/plugin-obs';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { FileModule } from './files/file.module';
 import { MessageModule } from './messages/message.module';
@@ -115,6 +116,9 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
       },
       inject: [ConfigService],
     }),
+    RamAuthorizationModule.forRoot({
+      serviceName: 'basic',
+    }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       useFactory: (config: ConfigService, jwt: OidcService) => {
@@ -197,18 +201,8 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
       },
       inject: [ConfigService, OidcService],
     }),
-    // SubModuleModule.forRootAsync({
-    //   useFactory: (config: ConfigService) => ({
-    //     keywords: config.get('submodule.keywords', []),
-    //     registry: config.get('submodule.registry'),
-    //     mirrors: config.get('submodule.mirrors'),
-    //     cached: config.get('submodule.cached', false),
-    //     bucket: config.get('submodule.bucket', ''),
-    //     prefix: config.get('submodule.prefix'),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
     SequelizeModule.registerAsync({
+      isGlobal: true,
       useFactory: (config: ConfigService, i18n: I18nService) => ({
         isGlobal: true,
         connection: config.getOrThrow('database.connection'),
@@ -233,14 +227,25 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
       }),
       inject: [ConfigService],
     }),
-    ObsModule.forRootAsync({
-      useFactory: (config: ConfigService) => ({
-        accessKey: config.get('OBS_ACCESS_KEY', ''),
-        secretKey: config.get('OBS_SECRET_KEY', ''),
-        endpoint: config.get('OBS_ENDPOINT', ''),
-      }),
-      inject: [ConfigService],
-    }),
+    // ObsModule.forRootAsync({
+    //   useFactory: (config: ConfigService) => ({
+    //     accessKey: config.get('OBS_ACCESS_KEY', ''),
+    //     secretKey: config.get('OBS_SECRET_KEY', ''),
+    //     endpoint: config.get('OBS_ENDPOINT', ''),
+    //   }),
+    //   inject: [ConfigService],
+    // }),
+    // SubModuleModule.forRootAsync({
+    //   useFactory: (config: ConfigService) => ({
+    //     keywords: config.get('submodule.keywords', []),
+    //     registry: config.get('submodule.registry'),
+    //     mirrors: config.get('submodule.mirrors'),
+    //     cached: config.get('submodule.cached', false),
+    //     bucket: config.get('submodule.bucket', ''),
+    //     prefix: config.get('submodule.prefix'),
+    //   }),
+    //   inject: [ConfigService],
+    // }),
     DbInitModule,
     OptionModule,
     TermTaxonomyModule,

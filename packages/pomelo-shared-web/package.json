@@ -5,30 +5,34 @@
   "private": true,
   "main": "lib/index.js",
   "module": "esm/index.js",
-  "types": "types/index.d.ts",
+  "license": "MIT",
+  "files": [
+    "lib",
+    "esm",
+    "dist"
+  ],
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
       "import": "./esm/index.js",
       "require": "./lib/index.js"
     },
     "./*": {
-      "types": "./types/*",
       "import": "./esm/*",
       "require": "./lib/*",
       "default": {
-        "types": "./types/*/index.d.ts",
         "import": "./esm/*/index.js",
         "require": "./lib/*/index.js"
       }
     }
   },
   "scripts": {
-    "serve": "run -T tsc --project tsconfig.build.json --module es2015 --declaration --declarationDir types --outDir esm --watch",
-    "build": "run -T rimraf -rf lib esm dist types && yarn build:cjs && yarn build:esm && yarn build:types",
-    "build:cjs": "run -T tsc --project tsconfig.build.json",
-    "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
-    "build:types": "run -T tsc --project tsconfig.types.json"
+    "build": "run -T rimraf -rf lib esm dist && yarn build:version && run -T ts-node --transpileOnly --cwdMode ../../scripts/build",
+    "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
+    "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
+    "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
+    "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
+    "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
   "devDependencies": {
     "@ace-fetch/core": "^0.2.0",

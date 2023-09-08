@@ -101,7 +101,11 @@ module.exports = {
             position: 'after',
           },
           {
-            pattern: '../**/*.less',
+            pattern: '*.+(less|scss|sass)',
+            patternOptions: {
+              matchBase: true,
+              nocomment: true,
+            },
             group: 'object',
             position: 'after',
           },

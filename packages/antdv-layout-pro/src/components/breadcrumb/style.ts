@@ -2,4 +2,4 @@
 import 'ant-design-vue/lib/breadcrumb/style';
 
 // self
-import '../../styles/index.less';
+import '../../style/index.less';

@@ -62,7 +62,6 @@ module.exports = defineConfig({
         : {},
   },
   transpileDependencies: [
-    'antd-layout-pro',
     '@ace-fetch/*',
     '@ace-util/*',
     '@vue-async/*',
@@ -74,8 +73,38 @@ module.exports = defineConfig({
     // https://webpack.js.org/configuration/devtool/#development
     config.when(isEnv('development'), (config) => config.devtool('cheap-source-map'));
 
-    // ckeditor5
     const svgRule = config.module.rule('svg');
+    // Remove regular svg config from root rules list
+    config.module.rules.delete('svg');
+    config.module
+      .rule('svg')
+      // Use svg component rule
+      .oneOf('svg_as_component')
+      .resourceQuery(/inline/)
+      .test(/\.(svg)(\?.*)?$/)
+      .use('babel-loader')
+      .loader('babel-loader')
+      .end()
+      .use('vue-svg-loader')
+      .loader('vue-svg-loader')
+      .options({
+        svgo: {
+          plugins: [
+            { prefixIds: true },
+            { cleanupIDs: true },
+            { convertShapeToPath: false },
+            { convertStyleToAttrs: true },
+          ],
+        },
+      })
+      .end()
+      .end()
+      // Otherwise use original svg rule
+      .oneOf('svg_as_regular')
+      .merge(svgRule.toConfig())
+      .end();
+
+    // ckeditor5
     svgRule.exclude.add(path.join(__dirname, 'node_modules', '@ckeditor'));
     config.module
       .rule('cke-svg')
@@ -119,6 +148,12 @@ module.exports = defineConfig({
             name: 'chunk-antdv', // split ant-design-vue into a single package
             priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
             test: /[\\/]node_modules[\\/]_?ant-design-vue(.*)/, // in order to adapt to cnpm
+            chunks: 'all',
+          },
+          'antdv-Layout': {
+            name: 'chunk-antdv-layout', // split antdv-layout-pro into a single package
+            priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
+            test: /[\\/]node_modules[\\/]_?antdv-layout-pro(.*)/, // in order to adapt to cnpm
             chunks: 'all',
           },
           'formily-antdv': {
@@ -193,7 +228,10 @@ module.exports = defineConfig({
         // 开发环境下 formily designable 使用 src
         ...(!isProd
           ? {
-              '@pomelo/shared-web': path.resolve(__dirname, '../../packages/shared-web/src'),
+              'antdv-layout-pro': path.resolve(__dirname, '../../packages/antdv-layout-pro/src'),
+              '@pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+              '@pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+              '@pomelo/shared-web': path.resolve(__dirname, '../../packages/pomelo-shared-web/src'),
               '@formily/antdv$': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
               '@formily/antdv/esm': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
               '@formily/antdv-designable': path.resolve(
@@ -332,15 +370,6 @@ module.exports = defineConfig({
             scripts: cdnConfig.scripts,
             publicPath: cdnConfig.cdnRegistry,
             append: false,
-          }),
-        );
-
-        config.plugins.push(
-          new HtmlWebpackTagsPlugin({
-            links: cdnConfig.append.links,
-            scripts: cdnConfig.append.scripts,
-            publicPath: cdnConfig.cdnRegistry,
-            append: true,
           }),
         );
       }

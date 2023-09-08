@@ -2,7 +2,7 @@ import { ModuleRef } from '@nestjs/core';
 import { ApiTags, ApiBody, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { Controller, Scope, Param, Body, Get, Post, Put, Query, Delete, HttpStatus } from '@nestjs/common';
 import { ParseQueryPipe, ApiAuth, User, RequestUser, createResponseSuccessType } from '@pomelo/shared';
-import { TermTaxonomyDataSource, Taxonomy } from '@pomelo/datasource';
+import { OptionDataSource, TermTaxonomyDataSource, Taxonomy, OptionPresetKeys } from '@pomelo/datasource';
 import { Anonymous, Authorized } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
 import { createMetaController } from '@/common/controllers/meta.controller';
@@ -36,6 +36,7 @@ export class TermTaxonomyController extends createMetaController(
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly termTaxonomyDataSource: TermTaxonomyDataSource,
+    private readonly optionDataSource: OptionDataSource,
   ) {
     super(moduleRef);
   }
@@ -51,7 +52,12 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
   })
   async getCategoryList(@Query(ParseQueryPipe) query: CategoryTermTaxonomyQueryDto) {
-    const result = await this.termTaxonomyDataSource.getList({ ...query, taxonomy: Taxonomy.Category }, [
+    let excludes: number[] | undefined;
+    if (query.includeDefault !== true) {
+      const defaultCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultCategory);
+      excludes = [Number(defaultCategoryId)];
+    }
+    const result = await this.termTaxonomyDataSource.getList({ ...query, excludes, taxonomy: Taxonomy.Category }, [
       'id',
       'name',
       'slug',

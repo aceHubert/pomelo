@@ -33,6 +33,7 @@ export interface SequelizeOptionsFactory {
 }
 
 export interface SequelizeAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  isGlobal?: boolean;
   useExisting?: Type<SequelizeOptionsFactory>;
   useClass?: Type<SequelizeOptionsFactory>;
   useFactory?: (...args: any[]) => Promise<Omit<SequelizeOptions, 'isGlobal'>> | Omit<SequelizeOptions, 'isGlobal'>;

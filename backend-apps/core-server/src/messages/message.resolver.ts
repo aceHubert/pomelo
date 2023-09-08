@@ -1,9 +1,7 @@
 import { Resolver, Subscription } from '@nestjs/graphql';
-import { Authorized } from 'nestjs-authorization';
 import { MessageSubscriotion } from './models/message.model';
 import { MessageService } from './message.service';
 
-@Authorized()
 @Resolver()
 export class MessageResolver {
   constructor(private readonly messageService: MessageService) {}

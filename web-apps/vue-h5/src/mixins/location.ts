@@ -1,8 +1,8 @@
 import { reactive } from '@vue/composition-api';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { isAbsoluteUrl, absoluteGo } from '@pomelo/shared-web';
+import { isAbsoluteUrl, absoluteGo } from '@ace-util/core';
 
-// types
+// Types
 import type { Route, RawLocation } from 'vue-router';
 
 export const useLocationMixin = () => {

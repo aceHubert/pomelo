@@ -7,5 +7,5 @@ import 'ant-design-vue/lib/menu/style';
 import 'ant-design-vue/lib/spin/style';
 
 // self
-import '../../styles/index.less';
+import '../../style/index.less';
 import './style.less';

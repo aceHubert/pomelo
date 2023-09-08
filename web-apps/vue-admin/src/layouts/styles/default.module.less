@@ -1,4 +1,4 @@
-@import 'antdv-layout-pro/styles/mixins/index';
+@import '@pomelo/theme/lib/mixins/index';
 
 .layout-wrapper {
   :global {
@@ -26,7 +26,7 @@
 
     .copyright {
       font-size: 14px;
-      color: @text-color-secondary;
+      color: var(--text-secondary, @text-color-secondary);
     }
   }
 }

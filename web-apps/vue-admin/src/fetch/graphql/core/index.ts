@@ -14,7 +14,7 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { onError } from '@apollo/client/link/error';
 import { createClient } from 'graphql-ws';
 import { hasIn } from 'lodash-es';
-import { getEnv } from '@pomelo/shared-web';
+import { getEnv } from '@ace-util/core';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
 import { loadingRef, errorRef, SharedError } from '@/shared';
@@ -60,7 +60,13 @@ function formatError(err: Error) {
     let graphQLErrors = err.graphQLErrors;
     const networkError = err.networkError;
     // https://www.apollographql.com/docs/react/api/link/apollo-link-error/#:~:text=An%20error%20is%20passed%20as%20a%20networkError%20if,the%20case%20of%20a%20failing%20HTTP%20status%20code.
-    if (!graphQLErrors?.length && networkError && isServerError(networkError) && networkError.result.errors) {
+    if (
+      !graphQLErrors?.length &&
+      networkError &&
+      isServerError(networkError) &&
+      typeof networkError.result !== 'string' &&
+      networkError.result.errors
+    ) {
       graphQLErrors = networkError.result.errors;
     }
 
@@ -127,7 +133,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
   // 重试登录，refresh token 重新获取 access token，如果再不成功则退出重新登录
   const tryLogin = () => {
     return promiseToObservable(userManager.signinSilent(), () => {
-      userManager.signIn();
+      userManager.signin();
     }).flatMap((user) => {
       const headers = {
         ...operation.getContext().headers,
@@ -139,6 +145,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
       return forward(operation);
     });
   };
+
   if (graphQLErrors) {
     if (
       graphQLErrors.some(
@@ -158,12 +165,15 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
   if (networkError) {
     if (isServerError(networkError) || isServerParseError(networkError)) {
       const statusCode = networkError.statusCode;
-
       if (statusCode === 401) {
         return tryLogin();
       } else if (statusCode === 500) {
         // 需要初始化(以 http code 返回，中间件优先于graphql resolver执行时产生的错误)
-        if (isServerError(networkError) && networkError.result.dbInitRequired) {
+        if (
+          isServerError(networkError) &&
+          typeof networkError.result !== 'string' &&
+          networkError.result.dbInitRequired
+        ) {
           errorRef.value = new SharedError('表不存在，或需要初始化数据库！');
         }
       }

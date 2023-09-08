@@ -1,3 +1,5 @@
+// style dependencies
+
 // self
-import '../../styles/index.less';
+import '../../style/index.less';
 import './style.less';

@@ -8,7 +8,7 @@ import { buildRootStyle } from './build-root-style';
 import { buildLibrary } from './build-library';
 import { buildUmd } from './build-umd';
 import { fixDepsPaths } from './fix-deps-paths';
-import { cwd } from './constants';
+import { cwd, builderConfigs } from './constants';
 
 const getRootPackage = async () => {
   try {
@@ -31,7 +31,7 @@ const searchPackages = async () => {
   const root = await getRootPackage();
   const workspaces = root.workspaces || [];
   const packages: string[] = [];
-  workspaces.forEach((pattern) => {
+  workspaces.forEach((pattern: string) => {
     const results = glob.sync(pattern, { cwd });
     results.forEach((filename) => {
       try {
@@ -46,9 +46,9 @@ const searchPackages = async () => {
   return packages;
 };
 
-const cleanupPackage = (pattern) => {
+const cleanupPackage = (pattern: string) => {
   return new Promise((resolve, reject) => {
-    rimraf(path.resolve(`${pattern}/{esm,lib,dist}`), (err) => {
+    rimraf(path.resolve(`${pattern}/{esm,lib,dist}`), (err: Error) => {
       if (err) return reject(err);
       resolve(0);
     });
@@ -66,7 +66,12 @@ const cleanupPackages = async () => {
 };
 
 const buildPackage = async () => {
-  await buildRootStyle();
+  builderConfigs.rootStyle !== false &&
+    (await buildRootStyle(
+      builderConfigs.rootStyle?.pattern,
+      builderConfigs.rootStyle?.dist,
+      builderConfigs.rootStyle?.root,
+    ));
   await copyStyleFiles();
   await buildLibrary();
   await buildUmd();

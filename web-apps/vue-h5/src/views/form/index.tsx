@@ -1,14 +1,15 @@
 import { defineComponent, ref, computed, watch } from '@vue/composition-api';
 import { createForm } from '@formily/core';
 import { createSchemaField, FragmentComponent } from '@formily/vue';
+import { Skeleton, Loading, Dialog } from 'vant';
 import * as Vant from '@formily/vant';
 import { Form, Submit } from '@formily/vant';
-import { Text } from '@formily/vant-prototypes/esm/components/Text';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { Loading, Dialog } from 'vant';
-import { getActiveFetch } from '@vue-async/fetch';
+import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
-import { useTemplateApi, jsonDeserializeReviver, warn } from '@pomelo/shared-web';
+import { jsonDeserializeReviver, warn } from '@ace-util/core';
+import { useTemplateApi } from '@pomelo/shared-web';
+import { Result } from '@/components';
 import { useI18n } from '@/hooks';
 import { useLocationMixin } from '@/mixins';
 import {
@@ -23,6 +24,16 @@ import {
 // Types
 import type { FormTemplateWithMetasModel } from '@pomelo/shared-web';
 import type { SchemaVueComponents } from '@formily/vue';
+
+export const Text = defineComponent({
+  props: ['mode', 'value', 'content'],
+  setup(props, { attrs }) {
+    const TagName = props.mode === 'normal' || !props.mode ? 'div' : props.mode;
+    return () => {
+      return <TagName attrs={attrs}>{props.value || props.content}</TagName>;
+    };
+  },
+});
 
 const form = createForm();
 const { SchemaField } = createSchemaField({
@@ -91,9 +102,14 @@ export default defineComponent({
 
     const renderError = ref<false | string>(false);
 
+    // page title
     const pageTitle = computed(() => {
       const { $error, $loading, $result } = formRes;
-      return $error || $loading ? '' : $result!.title;
+      return $loading
+        ? ''
+        : $error
+        ? i18n.tv('form.page_load_error_title', '表单加载错误')
+        : $result?.title ?? i18n.tv('form.page_not_found_title', '未找到表单');
     });
 
     // stylesheets
@@ -182,22 +198,31 @@ export default defineComponent({
     return (
       <FragmentComponent>
         {$loading ? (
-          <div class="loading text-center py-10">{this.$tv('common.tips.loading', '加载中')}</div>
+          <Skeleton title row={3} />
         ) : $error ? (
-          <div class="error--text text-center py-10">{$error.message}</div>
+          <Result
+            status="error"
+            title={this.$tv('form_template.index.load_error_text', '表单加载错误！') as string}
+            subTitle={$error.message}
+          ></Result>
         ) : !formData ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('form_template.index.not_found_text', '未找到表单！')}
-          </div>
+          <Result
+            status="error"
+            title="404"
+            subTitle={this.$tv('form_template.index.not_found_text', '未找到表单！') as string}
+          ></Result>
         ) : isConfigInvalid() ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('form_template.index.schema_error_text', '表单配置错误！')}
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('form_template.index.schema_error_text', '表单配置错误！') as string}
+            subTitle={this.$tv('form_template.index.contact_administrator_tips', '请联系管理员。') as string}
+          ></Result>
         ) : this.renderError ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('form_template.index.render_error_text', '表单渲染错误！')}
-            <p>{this.renderError}</p>
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('form_template.index.render_error_text', '表单渲染错误！') as string}
+            subTitle={this.renderError}
+          ></Result>
         ) : (
           <suspense>
             <Form attrs={formData.schema.form} style={formData.schema.form?.style} form={form}>
@@ -209,6 +234,9 @@ export default defineComponent({
                   loading={this.submiting}
                   loadingText={this.$tv('common.btn_text.submit', '提交')}
                   onSubmit={this.onSubmit}
+                  onSubmitFailed={(errors) => {
+                    console.log(errors);
+                  }}
                 >
                   {this.$tv('common.btn_text.submit', '提交')}
                 </Submit>
@@ -217,9 +245,11 @@ export default defineComponent({
             <div style="text-align:center" slot="fallback">
               <Loading />
             </div>
-            <div class="error--text text-center py-10" slot="error">
-              {this.$tv('page_template.index.render_error_text', '表单渲染错误！')}
-            </div>
+            <Result
+              slot="error"
+              status="error"
+              title={this.$tv('form_template.index.render_error_text', '表单渲染错误！') as string}
+            ></Result>
           </suspense>
         )}
       </FragmentComponent>

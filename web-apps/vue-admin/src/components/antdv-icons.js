@@ -44,11 +44,13 @@ export { default as PlusOutline } from '@ant-design/icons/lib/outline/PlusOutlin
 export { default as PlusSquareOutline } from '@ant-design/icons/lib/outline/PlusSquareOutline';
 export { default as QuestionCircleOutline } from '@ant-design/icons/lib/outline/QuestionCircleOutline';
 export { default as RightOutline } from '@ant-design/icons/lib/outline/RightOutline';
+export { default as SearchOutline } from '@ant-design/icons/lib/outline/SearchOutline';
+export { default as SettingOutline } from '@ant-design/icons/lib/outline/SettingOutline';
 export { default as SmileOutline } from '@ant-design/icons/lib/outline/SmileOutline';
 export { default as StarOutline } from '@ant-design/icons/lib/outline/StarOutline';
 export { default as StarFill } from '@ant-design/icons/lib/fill/StarFill';
-export { default as SettingOutline } from '@ant-design/icons/lib/outline/SettingOutline';
 export { default as TagsOutline } from '@ant-design/icons/lib/outline/TagsOutline';
 export { default as TableOutline } from '@ant-design/icons/lib/outline/TableOutline';
 export { default as UpOutline } from '@ant-design/icons/lib/outline/UpOutline';
 export { default as WarningOutline } from '@ant-design/icons/lib/outline/WarningOutline';
+export { default as WarningFill } from '@ant-design/icons/lib/fill/WarningFill';

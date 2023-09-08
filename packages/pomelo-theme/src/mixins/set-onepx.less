@@ -1,0 +1,70 @@
+// border 1px problem
+
+._setLineCommon() {
+  position: absolute;
+  box-sizing: border-box;
+  content: ' ';
+  pointer-events: none;
+}
+
+.setLine(@color: @border-color-base) {
+  ._setLineCommon();
+  left: 0;
+  top: 0;
+  width: 200%;
+  height: 200%;
+  border: 1px solid @color;
+  color: @color;
+  transform-origin: left top;
+  transform: scale(0.5);
+}
+
+.setTopLine(@color: @border-color-base) {
+  ._setLineCommon();
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 1px;
+  border-top: 1px solid @color;
+  color: @color;
+  transform-origin: 0 0;
+  transform: scaleY(0.5);
+}
+
+.setBottomLine(@color: @border-color-base) {
+  ._setLineCommon();
+  content: ' ';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  height: 1px;
+  border-bottom: 1px solid @color;
+  color: @color;
+  transform-origin: 0 100%;
+  transform: scaleY(0.5);
+}
+
+.setLeftLine(@color: @border-color-base) {
+  ._setLineCommon();
+  left: 0;
+  top: 0;
+  width: 1px;
+  bottom: 0;
+  border-left: 1px solid @color;
+  color: @color;
+  transform-origin: 0 0;
+  transform: scaleX(0.5);
+}
+
+.setRightLine(@color: @border-color-base) {
+  ._setLineCommon();
+  right: 0;
+  top: 0;
+  width: 1px;
+  bottom: 0;
+  border-right: 1px solid @color;
+  color: @color;
+  transform-origin: 100% 0;
+  transform: scaleX(0.5);
+}

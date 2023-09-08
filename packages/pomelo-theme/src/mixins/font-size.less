@@ -1,0 +1,13 @@
+// font-size
+
+.fontSize(@fontSize,@designDpr:1) {
+  font-size: (@fontSize / @designDpr);
+
+  [data-dpr='2'] & {
+    font-size: (@fontSize / @designDpr * 2);
+  }
+
+  [data-dpr='3'] & {
+    font-size: (@fontSize / @designDpr * 3);
+  }
+}

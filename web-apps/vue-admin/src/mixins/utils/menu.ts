@@ -1,6 +1,6 @@
 import { omit } from 'lodash-es';
 import pathToRegexp from 'path-to-regexp';
-import { warn } from '@pomelo/shared-web';
+import { warn } from '@ace-util/core';
 
 // types
 import type { Key, RegExpOptions, ParseOptions } from 'path-to-regexp';

@@ -3,7 +3,7 @@ import glob from 'glob';
 import fs from 'fs-extra';
 import { cwd } from './constants';
 
-const createStyleFile = (files) => {
+const createStyleFile = (files: string[]) => {
   return `// auto generated code
 ${files
   .map((filepath) => {

@@ -146,10 +146,12 @@ export const useAppStore = defineStore(
   {
     persist: {
       key: `${STORAGE_PREFIX}/app-store`,
-      paths: ['layout', 'color', 'locale'],
+      paths: ['layout', 'theme', 'locale'],
       afterRestore: (ctx) => {
         // 初始设置 locale (从缓存中读取)
         ctx.store.setLocale(ctx.store.locale);
+        ctx.store.setTheme(ctx.store.theme);
+        ctx.store.setLayout(ctx.store.layout);
       },
     },
   },

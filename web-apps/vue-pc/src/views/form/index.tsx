@@ -1,14 +1,14 @@
 import { defineComponent, ref, computed, watch } from '@vue/composition-api';
 import { createForm } from '@formily/core';
 import { createSchemaField } from '@formily/vue';
-import * as Antdv from '@formily/antdv';
+import { Card, Rate, Result, Skeleton } from 'ant-design-vue';
 import { Form, FormButtonGroup, Submit } from '@formily/antdv';
-import { Text } from '@formily/antdv-prototypes/esm/components/Text';
-import { Card, Rate } from 'ant-design-vue';
+import * as Antdv from '@formily/antdv';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { getActiveFetch } from '@vue-async/fetch';
+import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
-import { useTemplateApi, jsonDeserializeReviver, warn } from '@pomelo/shared-web';
+import { jsonDeserializeReviver, warn } from '@ace-util/core';
+import { useTemplateApi } from '@pomelo/shared-web';
 import { Spin, Modal } from '@/components';
 import { useI18n } from '@/hooks';
 import { useLocationMixin } from '@/mixins';
@@ -25,6 +25,16 @@ import classes from './index.module.less';
 // Types
 import type { SchemaVueComponents } from '@formily/vue';
 import type { FormTemplateWithMetasModel } from '@pomelo/shared-web';
+
+export const Text = defineComponent({
+  props: ['mode', 'value', 'content'],
+  setup(props, { attrs }) {
+    const TagName = props.mode === 'normal' || !props.mode ? 'div' : props.mode;
+    return () => {
+      return <TagName attrs={attrs}>{props.value || props.content}</TagName>;
+    };
+  },
+});
 
 const form = createForm();
 const { SchemaField } = createSchemaField({
@@ -98,7 +108,11 @@ export default defineComponent({
     // page title
     const pageTitle = computed(() => {
       const { $error, $loading, $result } = formRes;
-      return $error || $loading ? '' : $result!.title;
+      return $loading
+        ? ''
+        : $error
+        ? i18n.tv('form.page_load_error_title', '表单加载错误')
+        : $result?.title ?? i18n.tv('form.page_not_found_title', '未找到表单');
     });
 
     // stylesheets
@@ -187,28 +201,44 @@ export default defineComponent({
     return (
       <div class={classes.container}>
         {$loading ? (
-          <div class="loading text-center py-10">{this.$tv('common.tips.loading', '加载中')}</div>
+          <Skeleton active />
         ) : $error ? (
-          <div class="error--text text-center py-10">{$error.message}</div>
+          <Result
+            status="error"
+            title={this.$tv('form_template.index.load_error_text', '表单加载错误！')}
+            subTitle={$error.message}
+          ></Result>
         ) : !formData ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('form_template.index.not_found_text', '未找到表单！')}
-          </div>
+          <Result
+            status="error"
+            title="404"
+            subTitle={this.$tv('form_template.index.not_found_text', '未找到表单！')}
+          ></Result>
         ) : isConfigInvalid() ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('form_template.index.schema_error_text', '表单配置错误！')}
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('form_template.index.schema_error_text', '表单配置错误！')}
+            subTitle={this.$tv('form_template.index.contact_administrator_tips', '请联系管理员。')}
+          ></Result>
         ) : this.renderError ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('page_template.index.render_error_text', '表单渲染错误！')}
-            <p>{this.renderError}</p>
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('page_template.index.render_error_text', '表单渲染错误！')}
+            subTitle={this.renderError}
+          ></Result>
         ) : (
           <suspense>
             <Form attrs={formData.schema.form} style={formData.schema.form?.style} form={form}>
               <SchemaField schema={formData.schema.schema}></SchemaField>
               <FormButtonGroup align-form-item>
-                <Submit shape="round" loading={this.submiting} onSubmit={this.onSubmit}>
+                <Submit
+                  shape="round"
+                  loading={this.submiting}
+                  onSubmit={this.onSubmit}
+                  onSubmitFailed={(errors) => {
+                    console.log(errors);
+                  }}
+                >
                   {this.$tv('common.btn_text.submit', '提交')}
                 </Submit>
                 {/* <Reset validate forceClear>
@@ -219,9 +249,11 @@ export default defineComponent({
             <div class="text-center py-10" slot="fallback">
               <Spin />
             </div>
-            <div class="error--text text-center py-10" slot="error">
-              {this.$tv('page_template.index.render_error_text', '表单渲染错误！')}
-            </div>
+            <Result
+              slot="error"
+              status="error"
+              title={this.$tv('page_template.index.render_error_text', '表单渲染错误！')}
+            ></Result>
           </suspense>
         )}{' '}
       </div>

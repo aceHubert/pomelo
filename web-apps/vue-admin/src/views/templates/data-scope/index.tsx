@@ -109,7 +109,7 @@ export default defineComponent({
 
     // 加载分类树
     templateMixin.category.selectKey = Number((route.query[RouteQueryKey.CategoryId] as string) || '') || '';
-    templateMixin.getCategories({}).then((treeData) => {
+    templateMixin.getCategories().then((treeData) => {
       templateMixin.category.treeData = treeData;
     });
 

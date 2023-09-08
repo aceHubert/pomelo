@@ -1,3 +1,8 @@
+import IconContent from '@/assets/icons/content.svg?inline';
+import IconDesign from '@/assets/icons/design.svg?inline';
+import IconComponent from '@/assets/icons/component.svg?inline';
+import IconScope from '@/assets/icons/scope.svg?inline';
+
 // Types
 import type { MenuConfig } from '@/types';
 
@@ -13,7 +18,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
   {
     key: 'content-root',
     title: (i18nRender) => i18nRender('menu.content-root', '内容'),
-    icon: 'build',
+    icon: IconContent,
     position: 'top',
     children: [
       {
@@ -26,14 +31,13 @@ export const getDefaultMenus = (): MenuConfig[] => [
         key: 'template-root',
         title: (i18nRender) => i18nRender('menu.content.template', '模版'),
         redirect: '/pages',
-        icon: 'build',
+        icon: IconDesign,
         position: 'top',
         children: [
           {
             key: 'pages-root',
             title: (i18nRender) => i18nRender('menu.content.pages', '页面'),
             redirect: '/pages',
-            icon: 'build',
             position: 'side',
             children: [
               {
@@ -66,7 +70,6 @@ export const getDefaultMenus = (): MenuConfig[] => [
             key: 'forms-root',
             title: (i18nRender) => i18nRender('menu.content.forms', '表单'),
             redirect: '/forms',
-            icon: 'build',
             position: 'side',
             children: [
               {
@@ -99,7 +102,6 @@ export const getDefaultMenus = (): MenuConfig[] => [
             key: 'posts-root',
             title: (i18nRender) => i18nRender('menu.content.posts', '内容'),
             redirect: '/posts',
-            icon: 'build',
             position: 'side',
             children: [
               {
@@ -132,14 +134,13 @@ export const getDefaultMenus = (): MenuConfig[] => [
             key: 'data-scope-root',
             title: (i18nRender) => i18nRender('menu.content.data-scope', '数据范围'),
             redirect: '/data-scope',
-            icon: 'build',
             position: 'side',
             children: [
               {
                 key: 'data-scope',
                 title: (i18nRender) => i18nRender('menu.content.data-scope_index', '数据范围管理'),
                 path: '/data-scope',
-                icon: 'table',
+                icon: IconScope,
                 position: 'side',
                 children: [
                   {
@@ -167,7 +168,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
         key: 'submodules-root',
         title: (i18nRender) => i18nRender('menu.content.submodules', '模块'),
         redirect: '/submodules',
-        icon: 'build',
+        icon: IconComponent,
         position: 'top',
         children: [
           {

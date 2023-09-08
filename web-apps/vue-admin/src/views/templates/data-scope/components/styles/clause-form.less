@@ -11,7 +11,7 @@
 
 .clause {
   &--header {
-    color: rgba(0, 0, 0, 0.55);
+    color: var(e(--text-secondary), @text-color-secondary);
 
     th {
       text-align: left;
@@ -38,7 +38,7 @@
 
   .group {
     border-left: 1px solid;
-    border-left-color: rgba(200, 200, 200, 1);
+    border-left-color: @border-color-split;
     width: 1px;
 
     &--cat-0 {
@@ -63,13 +63,11 @@
   }
 
   .group-start {
-    border-top: 1px solid;
-    border-top-color: rgba(200, 200, 200, 1);
+    border-top: 1px solid @border-color-split;
   }
 
   .group-end {
-    border-bottom: 1px solid;
-    border-bottom-color: rgba(200, 200, 200, 1);
+    border-bottom: 1px solid @border-color-split;
   }
 
   .group-placeholder {

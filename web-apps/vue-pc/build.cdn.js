@@ -70,12 +70,12 @@ const cdnConfig = {
     { packageName: 'moment', path: '/locale/zh-cn.js' },
     { packageName: 'moment', path: '/locale/en-gb.js' },
     {
-      packageName: '@vue-async/fetch',
+      packageName: '@ace-fetch/core',
       variableName: ['VueAsync', 'Fetch'],
       path: '/dist/fetch.umd.production.js',
     },
     {
-      packageName: '@vue-async/fetch-axios',
+      packageName: '@ace-fetch/axios',
       variableName: ['VueAsync', 'FetchAxios'],
       path: '/dist/fetch-axios.umd.production.js',
     },

@@ -1,4 +1,4 @@
-import { upperFirst, kebabCase } from 'lodash-es';
+import { upperFirst } from 'lodash-es';
 import { defineComponent, toRef, type Ref } from '@vue/composition-api';
 import { ConfigProvider } from 'antdv-layout-pro';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
@@ -14,7 +14,7 @@ export default defineComponent({
     const themeVars = (this.themeVars as Ref<Record<string, string>>).value ?? {};
     let cssText = '';
     for (const key in themeVars) {
-      cssText += `--theme-${kebabCase(key)}: ${themeVars[key]};`;
+      cssText += `--theme-${key}: ${themeVars[key]} !important;`;
     }
     cssText = `body {${cssText}}`;
     return {
@@ -46,14 +46,7 @@ export default defineComponent({
         {
           // device 变化重新渲染导致 wujie Vue组件初始化使用 Promise 执行$refs找不到问题
           deviceMixin.device && (
-            <div
-              class={[
-                classes.layoutContentWrapper,
-                `is-${deviceMixin.device}`,
-                `theme-${appMixin.theme}`,
-                classes[`contentWidth${upperFirst(appMixin.contentWidth)}`],
-              ]}
-            >
+            <div class={[classes.layoutContentWrapper, classes[`contentWidth${upperFirst(appMixin.contentWidth)}`]]}>
               <Spin
                 class={classes.layoutContentLoading}
                 spinning={loadingRef.value}

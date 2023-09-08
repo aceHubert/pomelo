@@ -9,5 +9,5 @@ import 'ant-design-vue/lib/space/style';
 import 'ant-design-vue/lib/tooltip/style';
 
 // self
-import '../../styles/index.less';
+import '../../style/index.less';
 import './style.less';

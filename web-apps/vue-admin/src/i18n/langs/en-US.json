@@ -80,35 +80,35 @@
     "content-root": "Content",
     "content": {
       "taxonomy": "Taxonomy",
-      "template": "Templates",
+      "template": "Template",
       "pages": "Page",
       "pages_design": "Page design",
-      "pages_index": "Page management",
+      "pages_index": "Pages",
       "pages_add": "New page",
       "forms": "Form",
       "forms_design": "Form design",
-      "forms_index": "Form management",
+      "forms_index": "Forms",
       "forms_add": "New form",
-      "posts": "Content",
-      "posts_index": "Content Management",
-      "posts_design": "Content Design",
-      "posts_add": "New Content",
+      "posts": "Post",
+      "posts_index": "Posts",
+      "posts_design": "Post design",
+      "posts_add": "New Post",
       "data-scope": "Data scope",
+      "data-scope_index": "Data scopes",
       "data-scope_add": "New data scope",
       "data-scope_design": "Data scope design",
-      "data-scope_index": "Data scope management",
-      "submodules": "Modules",
-      "submodules_index": "Module management",
+      "submodules": "Module",
+      "submodules_index": "Modules",
       "submodules_details": "Module details"
     }
   },
   "components": {
     "search_form": {
-      "bulk_apply_btn_text": "Apply",
-      "bulk_apply_btn_tips": "Exec bulk operation",
       "row_count": "{count} Row(s)",
       "keyword_placeholder": "Search",
-      "bulk_action_placeholder": "Bulk operations"
+      "bulk_action_placeholder": "Bulk operations",
+      "bulk_apply_btn_text": "Apply",
+      "bulk_apply_btn_tips": "Exec bulk operation"
     },
     "async_table": {
       "selected": "Checked",
@@ -355,7 +355,8 @@
       "review_reject": "Content is not approved to publish"
     },
     "design_sider": {
-      "settings_title": "Settings"
+      "settings_title": "Settings",
+      "close_settings_title": "Close"
     }
   }
 }

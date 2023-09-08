@@ -2,7 +2,13 @@ import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
 import { Fields, User, RequestUser } from '@pomelo/shared';
-import { TermTaxonomyDataSource, TermTaxonomyModel, Taxonomy } from '@pomelo/datasource';
+import {
+  OptionDataSource,
+  TermTaxonomyDataSource,
+  TermTaxonomyModel,
+  Taxonomy,
+  OptionPresetKeys,
+} from '@pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { Anonymous, Authorized } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
@@ -29,6 +35,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly termTaxonomyDataSource: TermTaxonomyDataSource,
+    private readonly optionDataSource: OptionDataSource,
   ) {
     super(moduleRef);
     this.cascadeLoader = new DataLoader(async (keys) => {
@@ -75,12 +82,20 @@ export class TermTaxonomyResolver extends createMetaResolver(
 
   @RamAuthorized(TermTaxonomyAction.CategoryList)
   @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
-  categoryTermTaxonomies(
+  async categoryTermTaxonomies(
     @Args() args: CategoryTermTaxonomyArgs,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy[]> {
+    let excludes: number[] | undefined;
+    if (args.includeDefault !== true) {
+      const defaultCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultCategory);
+      excludes = [Number(defaultCategoryId)];
+    }
     return this.termTaxonomyDataSource
-      .getList({ ...args, taxonomy: Taxonomy.Category }, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
+      .getList(
+        { ...args, excludes, taxonomy: Taxonomy.Category },
+        this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+      )
       .then((terms) =>
         terms.map((term) =>
           // 级联查询将参数传给 children

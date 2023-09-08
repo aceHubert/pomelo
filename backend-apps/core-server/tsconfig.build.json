@@ -4,5 +4,8 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "declaration": false,
+    "paths": {
+      "@/*": ["src/*"]
+    }
   }
 }

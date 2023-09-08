@@ -287,13 +287,14 @@ export default defineComponent({
                     {props.rowCount && props.rowCount > 0 && props.bulkAcitonOptions?.length ? (
                       <Form.Item>
                         <Space>
-                          <Select vModel={bulkAciton.value} style="min-width:120px;">
-                            <Select.Option value="">
-                              {configProvider.i18nRender(
-                                `${props.i18nKeyPrefix}.bulk_action_placeholder`,
-                                'Bulk actions',
-                              )}
-                            </Select.Option>
+                          <Select
+                            vModel={bulkAciton.value}
+                            placeholder={configProvider.i18nRender(
+                              `${props.i18nKeyPrefix}.bulk_action_placeholder`,
+                              'Bulk actions',
+                            )}
+                            style="min-width:120px;"
+                          >
                             {props.bulkAcitonOptions.map((option) => (
                               <Select.Option value={option.value}>{option.label}</Select.Option>
                             ))}

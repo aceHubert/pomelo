@@ -1,3 +1,4 @@
+import type { RollupOptions } from 'rollup';
 import type { PostCSSPluginConf } from 'rollup-plugin-postcss';
 
 export interface IBuilderConfig {
@@ -10,10 +11,22 @@ export interface IBuilderConfig {
   targetLibEsDir?: string;
   //是否打包全量类型文件
   bundleDts?: boolean;
+  // output 文件名, default: package.json name
+  filename?: string;
+  rootStyle?:
+    | false
+    | {
+        // golb pattern, default: ./**/*/style.{ts,js}
+        pattern?: string;
+        // output file name, default: style.ts
+        dist?: string;
+        // root path, default: ./src
+        root?: string;
+      };
   //样式文件编译配置
-  style?: Omit<PostCSSPluginConf, 'extract' | 'minimize' | 'sourceMap' | 'use'> & {
-    // style input js/ts file(s)
-    input?: string | string[];
+  postcssOptions?: Omit<PostCSSPluginConf, 'extract' | 'use'> & {
     use?: { [key in 'sass' | 'stylus' | 'less']?: any };
   };
+  //额外的Rollup配置
+  rollupOptions?: RollupOptions[];
 }

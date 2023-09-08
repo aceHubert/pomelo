@@ -1,5 +1,4 @@
 import VueCompositionApi, { createApp, h } from '@vue/composition-api';
-import { FetchVuePlugin } from '@vue-async/fetch';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
 import { afetch } from './fetch';
 import { i18n } from './i18n';
@@ -18,7 +17,6 @@ const app = createApp({
 });
 
 app.use(VueCompositionApi);
-app.use(FetchVuePlugin);
 app.use(ResourceManagerVuePlugin, { mode: 'visible' });
 
 app.config.productionTip = false;

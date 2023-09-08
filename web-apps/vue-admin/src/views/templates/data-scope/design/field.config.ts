@@ -26,7 +26,7 @@ export const FieldConfig: ClauseFieldConfig = [
   },
   { valueType: ClauseValueType.DateTime, fieldName: 'User.Birthday', id: 5, label: '出生日期' },
   { valueType: ClauseValueType.Int32, fieldName: 'User.Age', id: 6, label: '年龄' },
-  { valueType: ClauseValueType.Byte, fieldName: 'User.MarrieStatus', id: 7, label: '婚否' },
+  { valueType: ClauseValueType.Boolean, fieldName: 'User.MarrieStatus', id: 7, label: '婚否' },
   { valueType: ClauseValueType.Byte, fieldName: 'User.WorkStatus', id: 10, label: '在职状态' },
   { valueType: ClauseValueType.DateTime, fieldName: 'User.EmploymentDate', id: 11, label: '入职日期' },
 ];

@@ -1,7 +1,10 @@
+import moment from 'moment';
 import { defineComponent, ref, computed, watch } from '@vue/composition-api';
+import { Result, Skeleton } from 'ant-design-vue';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { createResource } from '@vue-async/resource-manager';
-import { useTemplateApi, formatDate, warn } from '@pomelo/shared-web';
+import { warn } from '@ace-util/core';
+import { useTemplateApi } from '@pomelo/shared-web';
 import { useI18n } from '@/hooks';
 import { TemplateStyleLinkMetaKey, TemplateStyleCssTextMetaKey } from '../constants';
 import classes from './index.module.less';
@@ -35,8 +38,8 @@ export default defineComponent({
     };
   },
   setup() {
-    const route = useRoute();
     const i18n = useI18n();
+    const route = useRoute();
     const templateApi = useTemplateApi();
 
     // post /p/:id
@@ -64,7 +67,11 @@ export default defineComponent({
     // page title
     const pageTitle = computed(() => {
       const { $error, $loading, $result } = postRes;
-      return $error || $loading ? '' : $result?.title || '';
+      return $loading
+        ? ''
+        : $error
+        ? i18n.tv('post.page_load_error_title', '内容加载错误')
+        : $result?.title ?? i18n.tv('post.page_not_found_title', '未找到内容');
     });
 
     // description meta
@@ -95,7 +102,6 @@ export default defineComponent({
       pageDescription,
       links,
       cssText,
-      locale: i18n.locale,
       renderError,
     };
   },
@@ -114,27 +120,38 @@ export default defineComponent({
     return (
       <div class={classes.container}>
         {$loading ? (
-          <div class="loading text-center py-10">{this.$tv('common.tips.loading', '加载中')}</div>
+          <Skeleton active />
         ) : $error ? (
-          <div class="error--text text-center py-10">{$error.message}</div>
+          <Result
+            status="error"
+            title={this.$tv('post_template.index.load_error_text', '内容加载错误！')}
+            subTitle={$error.message}
+          ></Result>
         ) : !postData ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('post_template.index.not_found_text', '内容不存在！')}
-          </div>
+          <Result
+            status="error"
+            title="404"
+            subTitle={this.$tv('post_template.index.not_found_text', '内容不存在！')}
+          ></Result>
         ) : isConfigInvalid() ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('post_template.index.schema_error_text', '内容配置错误！')}
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('post_template.index.schema_error_text', '内容配置错误！')}
+            subTitle={this.$tv('post_template.index.contact_administrator_tips', '请联系管理员。')}
+          ></Result>
         ) : this.renderError ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('post_template.index.render_error_text', '内容渲染错误！')}
-            <p>{this.renderError}</p>
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('post_template.index.render_error_text', '内容渲染错误！')}
+            subTitle={this.renderError}
+          ></Result>
         ) : (
           [
             <div class={classes.title}>
               <p class={classes.titleMainLine}>{postData.title}</p>
-              <p class={classes.titleSubLine}>{formatDate(postData.createdAt, 'L HH:mm', this.locale)}</p>
+              <p class={classes.titleSubLine}>
+                {moment(postData.createdAt).locale(this.$i18n.locale).format('L HH:mm')}
+              </p>
             </div>,
             <div class={['ck-content', classes.content]} domPropsInnerHTML={postData.content}></div>,
           ]

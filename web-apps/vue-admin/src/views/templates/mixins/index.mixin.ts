@@ -7,7 +7,7 @@ import { useTemplateApi, useTermTaxonomyApi, TemplateStatus, formatError } from 
 
 // Types
 import type { PagedTemplateItem, TemplateStatusCountItem, TemplateMonthCountItem } from '@/fetch/graphql';
-import type { StatusOption, BulkAcitonOption } from '@/components/search-form/SearchForm';
+import type { StatusOption, BulkAcitonOption } from 'antdv-layout-pro/components/search-form/SearchForm';
 
 export type AsyncTreeData = {
   id: string | number;
@@ -178,16 +178,23 @@ export const useTemplateMixin = () => {
       | {
           parentId?: string | number;
           isLeaf?: boolean;
-        } = { parentId: 0, isLeaf: false },
+          includeDefault?: boolean;
+        } = { parentId: 0, isLeaf: false, includeDefault: false },
   ): Promise<(AsyncTreeData & { slug: string })[]> => {
     const inSearchMode = typeof query === 'string';
-    const keyword = inSearchMode ? query : void 0;
+    const {
+      isLeaf,
+      ...variables
+    }: {
+      keyword?: string;
+      parentId?: string | number;
+      isLeaf?: boolean;
+      includeDefault?: boolean;
+    } = inSearchMode ? { keyword: query, isLeaf: true } : query;
+
     return termTaxonomyApi
       .getCategories({
-        variables: {
-          keyword,
-          parentId: inSearchMode ? void 0 : query.parentId,
-        },
+        variables,
       })
       .then(({ categories }) =>
         categories.map((item) => ({
@@ -196,7 +203,7 @@ export const useTemplateMixin = () => {
           title: item.name,
           slug: item.slug,
           value: item.id,
-          isLeaf: inSearchMode ? void 0 : query.isLeaf,
+          isLeaf,
         })),
       );
   };

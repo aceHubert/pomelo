@@ -23,6 +23,12 @@ export class TermTaxonomyQueryDto extends TermTaxonomyArgsValidator {
   group?: number;
 }
 
-export class CategoryTermTaxonomyQueryDto extends OmitType(TermTaxonomyQueryDto, ['taxonomy'] as const) {}
+export class CategoryTermTaxonomyQueryDto extends OmitType(TermTaxonomyQueryDto, ['taxonomy'] as const) {
+  /**
+   * Include default category
+   * @default false
+   */
+  includeDefault?: boolean;
+}
 
 export class TagTermTaxonomyQueryDto extends OmitType(TermTaxonomyQueryDto, ['taxonomy', 'parentId'] as const) {}

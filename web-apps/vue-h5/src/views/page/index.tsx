@@ -1,12 +1,15 @@
 import { defineComponent, ref, computed, watch } from '@vue/composition-api';
 import { createSchemaField, FragmentComponent } from '@formily/vue';
 import { Space } from '@formily/vant';
-import { Loading } from 'vant';
+import { Skeleton, Loading } from 'vant';
 import * as Vant from '@formily-portal/vant';
 import { Page } from '@formily-portal/vant';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { createResource } from '@vue-async/resource-manager';
-import { useTemplateApi, jsonDeserializeReviver, warn } from '@pomelo/shared-web';
+import { jsonDeserializeReviver, warn } from '@ace-util/core';
+import { useTemplateApi } from '@pomelo/shared-web';
+import { Result } from '@/components';
+import { useI18n } from '@/hooks';
 import { TemplateSchemaMobileMetaKey, TemplateStyleLinkMetaKey, TemplateStyleCssTextMetaKey } from '../constants';
 
 // Types
@@ -43,12 +46,15 @@ export default defineComponent({
     };
   },
   setup() {
+    const i18n = useI18n();
     const route = useRoute();
     const templateApi = useTemplateApi();
 
     const pageRes = createResource(async ({ id, name }: { id?: string; name: string }) => {
       const metaKeys = [TemplateSchemaMobileMetaKey, TemplateStyleLinkMetaKey, TemplateStyleCssTextMetaKey];
-      let promise: Promise<{ data: PageTemplateWithMetasModel | undefined }>;
+      let promise: Promise<{ data: PageTemplateWithMetasModel | undefined }> = Promise.resolve({
+        data: undefined,
+      });
       if (id) {
         // from /p/:id
         promise = templateApi.getPage({
@@ -57,7 +63,7 @@ export default defineComponent({
             metaKeys,
           },
         });
-      } else {
+      } else if (name) {
         // from fallback
         promise = templateApi.getPageByName({
           params: {
@@ -94,7 +100,11 @@ export default defineComponent({
     // page title
     const pageTitle = computed(() => {
       const { $error, $loading, $result } = pageRes;
-      return $error || $loading ? '' : $result?.title || '';
+      return $loading
+        ? ''
+        : $error
+        ? i18n.tv('page.page_load_error_title', '页面加载错误')
+        : $result?.title ?? i18n.tv('page.page_not_found_title', '未找到页面');
     });
 
     // stylesheets
@@ -138,22 +148,31 @@ export default defineComponent({
     return (
       <FragmentComponent>
         {$loading ? (
-          <div class="loading text-center py-10">{this.$tv('common.tips.loading', '加载中')}</div>
+          <Skeleton title row={3} />
         ) : $error ? (
-          <div class="error--text text-center py-10">{$error.message}</div>
+          <Result
+            status="error"
+            title={this.$tv('page_template.index.load_error_text', '页面加载错误！') as string}
+            subTitle={$error.message}
+          ></Result>
         ) : !pageData ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('page_template.index.not_found_text', '未找到页面！')}
-          </div>
+          <Result
+            status="error"
+            title="404"
+            subTitle={this.$tv('page_template.index.not_found_text', '未找到页面！') as string}
+          ></Result>
         ) : isConfigInvalid() ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('page_template.index.schema_error_text', '页面配置错误！')}
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('page_template.index.schema_error_text', '页面配置错误！') as string}
+            subTitle={this.$tv('page_template.index.contact_administrator_tips', '请联系管理员。') as string}
+          ></Result>
         ) : this.renderError ? (
-          <div class="error--text text-center py-10">
-            {this.$tv('page_template.index.render_error_text', '页面渲染错误！')}
-            <p>{this.renderError}</p>
-          </div>
+          <Result
+            status="error"
+            title={this.$tv('page_template.index.render_error_text', '页面渲染错误！') as string}
+            subTitle={this.renderError}
+          ></Result>
         ) : (
           <suspense>
             <Page attrs={pageData.schema.page} style={pageData.schema.page?.style}>
@@ -162,9 +181,11 @@ export default defineComponent({
             <div style="text-align:center" slot="fallback">
               <Loading />
             </div>
-            <div class="error--text text-center py-10" slot="error">
-              {this.$tv('page_template.index.render_error_text', '页面渲染错误！')}
-            </div>
+            <Result
+              slot="error"
+              status="error"
+              title={this.$tv('page_template.index.render_error_text', '页面渲染错误！') as string}
+            ></Result>
           </suspense>
         )}
       </FragmentComponent>

@@ -4,7 +4,7 @@ import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
 import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
 import { getContextObject } from './utils/get-context-object.util';
-import { AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
+import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
 import { User } from './types';
 
 /**
@@ -45,8 +45,18 @@ export class AuthorizedGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    // 如果匿名，则直接返回
+    // @Anonymous() decorator, return true
     if (anonymous === true) {
+      return true;
+    }
+
+    const authorized = this.reflector.getAllAndOverride<boolean>(AUTHORIZATION_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // no @Authorized() decorator, return true
+    if (authorized !== true) {
       return true;
     }
 

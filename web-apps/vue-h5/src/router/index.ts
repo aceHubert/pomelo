@@ -15,22 +15,20 @@ Vue.use(VueMeta, {
 
 const routes: Array<RouteConfig> = [
   {
-    path: '/',
-    name: 'home',
-    component: () => import(/* webpackChunkName: "home" */ '../views/home'),
-  },
-  {
-    path: '/f/:id',
+    path: '/f/:id(\\d+)',
+    alias: ['/forms/:id(\\d+)'],
     name: 'form',
     component: () => import(/* webpackChunkName: "form" */ '../views/form'),
   },
   {
-    path: '/p/:id',
+    path: '/p/:id(\\d+)',
+    alias: ['/posts/:id(\\d+)'],
     name: 'post',
     component: () => import(/* webpackChunkName: "post" */ '../views/post'),
   },
   {
     path: '/:id(\\d+)',
+    alias: ['/pages/:id(\\d+)'],
     name: 'page',
     component: () => import(/* webpackChunkName: "page" */ '../views/page'),
   },

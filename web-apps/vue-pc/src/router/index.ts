@@ -15,11 +15,6 @@ Vue.use(VueMeta, {
 
 const routes: Array<RouteConfig> = [
   {
-    path: '/',
-    name: 'home',
-    component: () => import(/* webpackChunkName: "home" */ '../views/home'),
-  },
-  {
     path: '/f/:id',
     name: 'form',
     component: () => import(/* webpackChunkName: "form" */ '../views/form'),

@@ -7,13 +7,16 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
   </head>
   <body>
     <script src="https://www.unpkg.com/oidc-client@1.11.5/dist/oidc-client.min.js"></script>
     <script>
-      window.Oidc || document.write('<script src="./static/js/oidc-client.min.js"><\/script>')
-      new Oidc.UserManager().signinSilentCallback()
+      // fallback to local oidc-client.min.js
+      window.Oidc || document.write('<script src="./static/js/oidc-client.min.js"><\/script>');
+    </script>
+    <script>
+      new Oidc.UserManager().signinSilentCallback();
     </script>
   </body>
 </html>

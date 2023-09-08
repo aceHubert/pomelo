@@ -6,12 +6,14 @@ import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 import multiEntry from '@rollup/plugin-multi-entry';
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
-import postcss from 'rollup-plugin-postcss';
-import NpmImport from 'less-plugin-npm-import';
-import ignoreImport from 'rollup-plugin-ignore-import';
 import externalGlobals from 'rollup-plugin-external-globals';
 import dts from 'rollup-plugin-dts';
 import css from 'rollup-plugin-import-css';
+import ignoreImport from 'rollup-plugin-ignore-import';
+import postcss from 'rollup-plugin-postcss';
+import NpmImport from 'less-plugin-npm-import';
+import Autoprefix from 'less-plugin-autoprefix';
+import CleanCSS from 'less-plugin-clean-css';
 import { rollup } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
 import { paramCase } from 'param-case';
@@ -20,7 +22,7 @@ import { DEFAULT_EXTENSIONS } from '@babel/core';
 import { cwd, pkg, builderConfigs } from './constants';
 
 // Types
-import type { OutputOptions, RollupOptions } from 'rollup';
+import type { OutputOptions, RollupOptions, WarningHandlerWithDefault } from 'rollup';
 
 const extensions = [...DEFAULT_EXTENSIONS, '.ts', '.tsx'];
 
@@ -98,17 +100,17 @@ const createEnvPlugin = (env = 'development') => {
 
 export const buildUmd = async () => {
   const { name, filename, moduleName, rootName } = parseName();
-  function onwarn(warning, warn) {
+  const onwarn: WarningHandlerWithDefault = (warning, warn) => {
     // ignoer 'this' rewrite with 'undefined' warn
     if (warning.code === 'THIS_IS_UNDEFINED') return;
     warn(warning); // this requires Rollup 0.46
-  }
+  };
   const configs: RollupOptions[] = [
     {
       input: 'src/index.ts',
       output: {
         format: 'umd',
-        file: path.resolve(cwd, `dist/${filename}.umd.development.js`),
+        file: path.resolve(cwd, `dist/${builderConfigs.filename ?? filename}.umd.development.js`),
         name: rootName,
         sourcemap: true,
         exports: 'named',
@@ -128,16 +130,18 @@ export const buildUmd = async () => {
       onwarn,
     },
     {
-      input: ['src/index.ts'].concat(
-        builderConfigs.style?.input
-          ? typeof builderConfigs.style?.input === 'string'
-            ? [builderConfigs.style?.input]
-            : builderConfigs.style?.input
-          : [],
-      ),
+      input:
+        builderConfigs.rootStyle !== false
+          ? [
+              'src/index.ts',
+              builderConfigs.rootStyle?.dist
+                ? path.join(builderConfigs.rootStyle.root ?? 'src', builderConfigs.rootStyle.dist)
+                : 'src/style.ts',
+            ]
+          : 'src/index.ts',
       output: {
         format: 'umd',
-        file: path.resolve(cwd, `dist/${filename}.umd.production.js`),
+        file: path.resolve(cwd, `dist/${builderConfigs.filename ?? filename}.umd.production.js`),
         name: rootName,
         sourcemap: true,
         exports: 'named',
@@ -149,19 +153,26 @@ export const buildUmd = async () => {
       plugins: [
         multiEntry(),
         postcss(
-          merge(builderConfigs.style ?? {}, {
-            extract: path.resolve(cwd, `dist/${moduleName}.css`),
-            minimize: true,
-            sourceMap: true,
-            use: {
-              less: {
-                plugins: [new NpmImport({ prefix: '~' })],
-                javascriptEnabled: true,
+          merge(
+            {
+              extract: path.resolve(cwd, `dist/${builderConfigs.filename ?? moduleName}.css`),
+              minimize: true,
+              sourceMap: true,
+              use: {
+                less: {
+                  plugins: [
+                    new NpmImport({ prefix: '~' }),
+                    new Autoprefix({ browsers: ['> 1%', 'last 2 versions', 'not ie <= 8'] }),
+                    new CleanCSS({ compatibility: 'ie9,-properties.merging' }),
+                  ],
+                  javascriptEnabled: true,
+                },
+                sass: {},
+                stylus: {},
               },
-              sass: {},
-              stylus: {},
             },
-          }),
+            builderConfigs.postcssOptions ?? {},
+          ),
         ),
         ...presets(),
         terser(),
@@ -170,6 +181,17 @@ export const buildUmd = async () => {
       onwarn,
     },
   ];
+
+  if (builderConfigs.rollupOptions) {
+    configs.push(
+      ...builderConfigs.rollupOptions.map((config) => ({
+        ...config,
+        plugins: [...(config.plugins || []), ...presets()],
+        onwarn,
+      })),
+    );
+  }
+
   if (builderConfigs.bundleDts) {
     configs.push(
       {

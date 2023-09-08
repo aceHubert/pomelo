@@ -1,6 +1,6 @@
 import Vue from 'vue';
-import { createRouter } from 'vue2-helpers/vue-router';
 import VueMeta from 'vue-meta';
+import { createRouter } from 'vue2-helpers/vue-router';
 import { RouterChild } from '@/layouts/components';
 
 // Types
@@ -44,18 +44,12 @@ export const router = createRouter({
           name: 'form-add',
           path: 'add',
           component: () => import(/* webpackChunkName: "forms" */ '../views/templates/forms/design'),
-          meta: {
-            layout: 'blank',
-          },
         },
         {
           name: 'form-edit',
           path: ':id/edit',
           component: () => import(/* webpackChunkName: "forms" */ '../views/templates/forms/design'),
           props: (route) => ({ id: route.params.id }),
-          meta: {
-            layout: 'blank',
-          },
         },
       ],
     },
@@ -72,18 +66,12 @@ export const router = createRouter({
           name: 'page-add',
           path: 'add',
           component: () => import(/* webpackChunkName: "pages" */ '../views/templates/pages/design'),
-          meta: {
-            layout: 'blank',
-          },
         },
         {
           name: 'page-edit',
           path: ':id/edit',
           component: () => import(/* webpackChunkName: "pages" */ '../views/templates/pages/design'),
           props: (route) => ({ id: route.params.id }),
-          meta: {
-            layout: 'blank',
-          },
         },
       ],
     },
@@ -100,18 +88,12 @@ export const router = createRouter({
           name: 'post-add',
           path: 'add',
           component: () => import(/* webpackChunkName: "posts" */ '../views/templates/posts/design'),
-          meta: {
-            layout: 'blank',
-          },
         },
         {
           name: 'post-edit',
           path: ':id/edit',
           component: () => import(/* webpackChunkName: "posts" */ '../views/templates/posts/design'),
           props: (route) => ({ id: route.params.id }),
-          meta: {
-            layout: 'blank',
-          },
         },
       ],
     },
@@ -161,22 +143,6 @@ export const router = createRouter({
       ],
     },
     {
-      name: 'signin',
-      path: '/signin',
-      component: () => import(/* webpackChunkName: "common" */ '../views/signin'),
-      meta: {
-        layout: 'blank',
-      },
-    },
-    {
-      name: 'signin-silent',
-      path: '/signin-silent',
-      component: () => import(/* webpackChunkName: "common" */ '../views/signin/silent'),
-      meta: {
-        layout: 'blank',
-      },
-    },
-    {
       name: 'signout',
       path: '/signout',
     },
@@ -193,13 +159,13 @@ const AnonymousRouteNames = ['signin', 'session-timeout'];
 router.beforeEach((to, from, next) => {
   const userManager = router.app.$userManager;
   if (to.name === 'signout') {
-    userManager.signOut();
+    userManager.signout();
   } else if ((to.name && AnonymousRouteNames.includes(to.name)) || to.meta?.anonymous === true) {
     next();
   } else {
     userManager.getUser().then(function (user) {
       if (user === null || user.expired) {
-        userManager.signIn(true);
+        userManager.signin({ noInteractive: true });
       } else {
         next();
         // if (user.profile.ut !== '1') {

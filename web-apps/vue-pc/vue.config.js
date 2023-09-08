@@ -62,7 +62,14 @@ module.exports = defineConfig({
           }
         : {},
   },
-  transpileDependencies: ['@ace-fetch/*', '@ace-util/*', '@vue-async/*', '@pomelo/*', '@formily-portal/*'],
+  transpileDependencies: [
+    'antdv-layout-pro',
+    '@ace-fetch/*',
+    '@ace-util/*',
+    '@vue-async/*',
+    '@pomelo/*',
+    '@formily-portal/*',
+  ],
   chainWebpack(config) {
     // https://webpack.js.org/configuration/devtool/#development
     config.when(isEnv('development'), (config) => config.devtool('cheap-source-map'));
@@ -122,15 +129,18 @@ module.exports = defineConfig({
           // 开发环境下 formily 使用 src
           ...(!isProd
             ? {
-                '@pomelo/shared-web': path.resolve(__dirname, '../packages/shared-web/src'),
-                '@formily/antdv$': path.resolve(__dirname, '../.submodules/formily-antdv/packages/components/src'),
+                'antdv-layout-pro': path.resolve(__dirname, '../../packages/antdv-layout-pro/src'),
+                '@pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+                '@pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+                '@pomelo/shared-web': path.resolve(__dirname, '../../packages/pomelo-shared-web/src'),
+                '@formily/antdv$': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
                 '@formily/antdv-prototypes/esm': path.resolve(
                   __dirname,
-                  '../.submodules/formily-antdv/packages/prototypes/src',
+                  '../../.submodules/formily-antdv/packages/prototypes/src',
                 ),
                 '@formily-portal/antdv$': path.resolve(
                   __dirname,
-                  '../.submodules/formily-portal-antdv/packages/components/src',
+                  '../../.submodules/formily-portal-antdv/packages/components/src',
                 ),
               }
             : {}),
@@ -221,7 +231,7 @@ module.exports = defineConfig({
         lessOptions: {
           javascriptEnabled: true,
           modifyVars: {
-            hack: 'true;@import "./src/assets/styles/fn.less";',
+            hack: 'true;@import "./src/assets/styles/variables.less";',
           },
         },
       },

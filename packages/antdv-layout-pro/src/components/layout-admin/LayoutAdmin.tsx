@@ -568,7 +568,7 @@ export default defineComponent({
                     classname: 'flex-auto',
                     subMenuOpenDelay: 0.3,
                     mode: 'inline',
-                    theme: 'dark',
+                    theme: configProvider.theme === Theme.RealLight ? 'light' : 'dark',
                     inlineCollapsed: topMenuInSideCollaspsed.value,
                     selectedKeys: layoutMixin.currTopMenuKey ? [layoutMixin.currTopMenuKey] : [],
                     onMenuClick: ({ key }: { key: string }) => {
@@ -719,7 +719,7 @@ export default defineComponent({
               </div>
             ) : null}
             {/* header actions */}
-            {slots.headerActions && <div class={`${prefixCls}-header-right`}>{slots.headerActions?.()}</div>}
+            {slots.headerActions && <div class="header-right">{slots.headerActions?.()}</div>}
           </div>
         </Layout.Header>
       );
@@ -804,8 +804,6 @@ export default defineComponent({
         <Layout
           class={[
             `${prefixCls}__wrapper`,
-            `theme-${configProvider.theme}`,
-            `is-${configProvider.device}`,
             {
               'flex-column': isMobile.value,
             },
@@ -822,10 +820,7 @@ export default defineComponent({
           </Layout>
         </Layout>
       ) : (
-        <Layout
-          class={[`${prefixCls}__wrapper`, `theme-${configProvider.theme}`, `is-${configProvider.device}`]}
-          key="without-header"
-        >
+        <Layout class={`${prefixCls}__wrapper`} key="without-header">
           {renderSider()}
           <Layout>
             {renderContent()}

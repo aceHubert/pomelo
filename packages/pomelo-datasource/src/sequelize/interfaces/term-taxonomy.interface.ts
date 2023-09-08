@@ -32,6 +32,7 @@ export interface TermTaxonomyArgs {
   parentId?: number;
   keyword?: string;
   group?: number;
+  excludes?: number[];
 }
 
 /**

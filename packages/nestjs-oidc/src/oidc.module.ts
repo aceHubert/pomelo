@@ -39,9 +39,7 @@ export class OidcModule implements NestModule {
       providers: [
         {
           provide: OIDC_OPTIONS,
-          useFactory: async () => {
-            this.adjustOptions(restOptions);
-          },
+          useFactory: async () => this.adjustOptions(restOptions),
         },
       ],
     };

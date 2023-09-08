@@ -4,6 +4,7 @@ import { warn } from '@ace-util/core';
 import { useI18n, useEffect } from '@/hooks';
 import { useAppStore } from '@/store';
 import { Theme } from '@/types';
+import { colorPalette } from './utils/colorPalette';
 
 // Types
 import type { Locale } from 'ant-design-vue/types/locale-provider';
@@ -14,32 +15,92 @@ const AntLocales: Record<string, () => Promise<Locale>> = {
   'en-US': () => import('ant-design-vue/lib/locale/en_US').then((data) => data.default || data),
 };
 
-const genColor = (colorInput: tinycolor.ColorInput) => {
-  const color = tinycolor(colorInput);
-  const { h, s, l } = color.toHsl();
+/**
+ * generate primary color
+ * @param colorInput color input
+ * @param isDark is dark theme
+ * @param mixColor mix component background color
+ */
+const genColor = (colorInput: tinycolor.ColorInput, isDark = false) => {
+  const base = tinycolor(colorInput);
+  const { h, s, l } = base.toHsl();
 
-  const base = color.toHexString();
-  const dark = tinycolor({
-    h,
-    s: (s - 0.2) * 100,
-    l: (l - 0.1) * 100,
-  }).toHexString();
-  const darker = tinycolor({ h, s, l: 20 }).toHexString();
-  const light = tinycolor({
-    h,
-    s: (s - 0.2) * 100,
-    l: (l + 0.35) * 100,
-  }).toHexString();
-  const lighter = tinycolor({ h, s, l: 96 }).toHexString();
-  const shadowColor = color.clone().setAlpha(0.3).toString();
-  return {
-    base,
-    light,
-    lighter,
-    dark,
-    darker,
-    shadowColor,
-  };
+  if (!isDark) {
+    const lighter = tinycolor({ h, s, l: 96 });
+    const light = tinycolor({
+      h,
+      s: (s - 0.2) * 100,
+      l: (l + 0.35) * 100,
+    });
+    const dark = tinycolor({
+      h,
+      s: (s - 0.2) * 100,
+      l: (l - 0.1) * 100,
+    });
+    const darker = tinycolor({ h, s, l: 20 });
+    const shadowColor = base.clone().setAlpha(0.3).toString();
+
+    return {
+      base: base.toHexString(),
+      lighter: lighter.toHexString(),
+      light: light.toHexString(),
+      dark: dark.toHexString(),
+      darker: darker.toHexString(),
+      lighten5: colorPalette(base, 1),
+      lighten4: colorPalette(base, 2),
+      lighten3: colorPalette(base, 3),
+      lighten2: colorPalette(base, 4),
+      lighten1: colorPalette(base, 5),
+      darken1: colorPalette(base, 7),
+      darken2: colorPalette(base, 8),
+      darken3: colorPalette(base, 9),
+      darken4: colorPalette(base, 10),
+      'shadow-color': shadowColor,
+    };
+  } else {
+    const lighter = tinycolor({
+      h,
+      s,
+      l: (l - 0.1) * 100,
+    });
+    const light = tinycolor({
+      h,
+      s: (s - 0.2) * 100,
+      l: (l - 0.1) * 100,
+    });
+    const dark = tinycolor({
+      h,
+      s: (s - 0.2) * 100,
+      l: (l + 0.1) * 100,
+    });
+    const darker = tinycolor({
+      h,
+      s,
+      l: (l + 0.35) * 100,
+    });
+    const shadowColor = base.clone().setAlpha(0.3).toString();
+    const mixColor = '#141414';
+    const mix = (color: tinycolor.ColorInput, weight: number) =>
+      tinycolor.lessMix(color, mixColor, weight).toHexString();
+
+    return {
+      base: base.toHexString(),
+      lighter: mix(lighter, 75),
+      light: mix(light, 75),
+      dark: mix(dark, 90),
+      darker: mix(darker, 90),
+      lighten5: mix(colorPalette(base, 8), 15),
+      lighten4: mix(colorPalette(base, 7), 25),
+      lighten3: mix(base, 30),
+      lighten2: mix(base, 45),
+      lighten1: mix(base, 65),
+      darken1: mix(colorPalette(base, 5), 90),
+      darken2: mix(colorPalette(base, 4), 95),
+      darken3: mix(colorPalette(base, 3), 97),
+      darken4: mix(colorPalette(base, 2), 98),
+      'shadow-color': shadowColor,
+    };
+  }
 };
 
 /**
@@ -68,32 +129,33 @@ export const useAppMixin = () => {
 
   const supportLanguages = computed(() => appStore.supportLanguages);
 
+  const primaryColor = computed(() => appStore.primaryColor);
   const theme = computed(() => appStore.theme);
   const isDark = computed(() => theme.value === Theme.Dark);
   const isLight = computed(() => !isDark.value);
   const isRealLight = computed(() => theme.value === Theme.RealLight);
   const themeChangeDisabled = ref(() => appStore.themeChangeDisabled);
   const themeVars = shallowRef({});
+  const getThemeVars = (theme: Theme) => {
+    const colors = genColor(primaryColor.value || '#1890ff', theme === Theme.Dark);
+    return Object.keys(colors).reduce(
+      (prev, key) => {
+        if (key === 'base') {
+          prev['primary'] = colors[key];
+          return prev;
+        }
+        prev[`primary-${key}`] = colors[key];
+        return prev;
+      },
+      {
+        random: Math.random(),
+      },
+    );
+  };
 
-  const primaryColor = computed(() => appStore.primaryColor);
-  useEffect(
-    () => {
-      if (primaryColor.value) {
-        const colors = genColor(primaryColor.value);
-        themeVars.value = {
-          primary: colors.base,
-          primaryLight: colors.light,
-          primaryLighter: colors.lighter,
-          primaryDark: colors.dark,
-          primaryDarker: colors.darker,
-          random: Math.random(),
-        };
-      } else {
-        themeVars.value = {};
-      }
-    },
-    () => primaryColor.value,
-  );
+  useEffect(() => {
+    themeVars.value = getThemeVars(theme.value);
+  }, [primaryColor, theme]);
 
   /**
    * 加载 antd 语言文件
@@ -129,6 +191,7 @@ export const useAppMixin = () => {
     primaryColor,
     supportLanguages,
     ...appStore.layout,
+    getThemeVars,
     setTheme: appStore.setTheme,
     resetTheme: appStore.resetTheme,
     setThemeChangedDisabled: appStore.setThemeChangedDisabled,

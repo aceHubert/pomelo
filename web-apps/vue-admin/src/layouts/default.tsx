@@ -1,4 +1,3 @@
-import { kebabCase } from 'lodash-es';
 import { defineComponent, ref, computed, toRef, onMounted, nextTick } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { isAbsoluteUrl } from '@ace-util/core';
@@ -9,6 +8,9 @@ import { useUserManager, useI18n, expose } from '@/hooks';
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
 import { loadingRef } from '@/shared';
 import { getDefaultMenus } from '@/configs/menu.config';
+import IconDarkTheme from '@/assets/icons/dark-theme.svg?inline';
+import IconLightTheme from '@/assets/icons/light-theme.svg?inline';
+import { Theme } from '@/types';
 import { RouterView } from './components';
 import classes from './styles/default.module.less';
 
@@ -22,7 +24,7 @@ export default defineComponent({
     const themeVars = (this.themeVars as Ref<Record<string, string>>).value ?? {};
     let cssText = '';
     for (const key in themeVars) {
-      cssText += `--theme-${kebabCase(key)}: ${themeVars[key]};`;
+      cssText += `--theme-${key}: ${themeVars[key]} !important;`;
     }
     cssText = `body {${cssText}}`;
     return {
@@ -215,12 +217,29 @@ export default defineComponent({
                   ]
                 }
                 sideCollapsed={appMixin.sideCollapsed}
+                sideCollapsedMouseAnimationDisabled
+                menuTriggerImmediately={false}
                 loading={loadingRef.value}
                 loadingText={i18n.tv('common.tips.loading_text', 'Loading...') as string}
                 class={classes.layoutWrapper}
                 scopedSlots={{
                   headerActions: () => (
                     <Space size="middle">
+                      <Tooltip placement="bottom" title={i18n.tv('layout_default.switch_theme_title', '切换主题')}>
+                        <span
+                          onClick={() =>
+                            appMixin.setTheme(
+                              appMixin.theme === Theme.Dark
+                                ? Theme.RealLight
+                                : appMixin.theme === Theme.RealLight
+                                ? Theme.Light
+                                : Theme.Dark,
+                            )
+                          }
+                        >
+                          <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
+                        </span>
+                      </Tooltip>
                       <LocaleDropdown
                         locale={i18n.locale}
                         supportLanguages={appMixin.supportLanguages}
@@ -245,6 +264,23 @@ export default defineComponent({
                       <div id="_popoverContainer"></div>
                       <Space direction="vertical" align="center" size="middle">
                         {collapsed && (
+                          <Tooltip placement="right" title={i18n.tv('layout_default.switch_theme_title', '切换主题')}>
+                            <span
+                              onClick={() =>
+                                appMixin.setTheme(
+                                  appMixin.theme === Theme.Dark
+                                    ? Theme.RealLight
+                                    : appMixin.theme === Theme.RealLight
+                                    ? Theme.Light
+                                    : Theme.Dark,
+                                )
+                              }
+                            >
+                              <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
+                            </span>
+                          </Tooltip>
+                        )}
+                        {collapsed && (
                           <LocaleDropdown
                             // class={['d-block pt-4', { 'text-center': collaspsed }]}
                             locale={i18n.locale}
@@ -257,6 +293,7 @@ export default defineComponent({
                             onChange={handleLocaleChange}
                           />
                         )}
+
                         <AvatarDropdown
                           src={currentUser.value?.photo}
                           avatarProps={{
@@ -272,6 +309,26 @@ export default defineComponent({
                               ? undefined
                               : () => (
                                   <Space vShow={!collapsed}>
+                                    <Tooltip
+                                      placement="top"
+                                      title={i18n.tv('layout_default.switch_theme_title', '切换主题')}
+                                    >
+                                      <span
+                                        onClick={() =>
+                                          appMixin.setTheme(
+                                            appMixin.theme === Theme.Dark
+                                              ? Theme.RealLight
+                                              : appMixin.theme === Theme.RealLight
+                                              ? Theme.Light
+                                              : Theme.Dark,
+                                          )
+                                        }
+                                      >
+                                        <Icon
+                                          component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme}
+                                        />
+                                      </span>
+                                    </Tooltip>
                                     <LocaleDropdown
                                       // class={['d-block pt-4', { 'text-center': collapsed }]}
                                       locale={i18n.locale}
@@ -285,22 +342,26 @@ export default defineComponent({
                                       onChange={handleLocaleChange}
                                     />
                                     <Tooltip
-                                      onClick={() =>
-                                        Modal.confirm({
-                                          title: i18n.tv(`layout_default.signout.dialog.title`, '确认'),
-                                          content: i18n.tv(`layout_default.signout.dialog.content`, '确认退出吗?'),
-                                          okText: i18n.tv(`layout_default.signout.dialog.ok_text`, '是') as string,
-                                          cancelText: i18n.tv(
-                                            `layout_default.signout.dialog.cancel_text`,
-                                            '否',
-                                          ) as string,
-                                          onOk: () => handleActionClick(AvatarDropdownAction.SignOut),
-                                          // onCancel() {},
-                                        })
-                                      }
+                                      placement="topRight"
+                                      title={i18n.tv('layout_default.signout.tooltip', '退出登录')}
                                     >
-                                      <Icon type="logout" />
-                                      <span slot="title">{i18n.tv('layout_default.signout.tooltip', '退出登录')}</span>
+                                      <span
+                                        onClick={() =>
+                                          Modal.confirm({
+                                            title: i18n.tv(`layout_default.signout.dialog.title`, '确认'),
+                                            content: i18n.tv(`layout_default.signout.dialog.content`, '确认退出吗?'),
+                                            okText: i18n.tv(`layout_default.signout.dialog.ok_text`, '是') as string,
+                                            cancelText: i18n.tv(
+                                              `layout_default.signout.dialog.cancel_text`,
+                                              '否',
+                                            ) as string,
+                                            onOk: () => handleActionClick(AvatarDropdownAction.SignOut),
+                                            // onCancel() {},
+                                          })
+                                        }
+                                      >
+                                        <Icon type="logout" />
+                                      </span>
                                     </Tooltip>
                                   </Space>
                                 ),

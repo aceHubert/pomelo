@@ -1,4 +1,4 @@
-import { promisify } from '@pomelo/shared-web';
+import { promisify } from '@ace-util/core';
 
 export interface Options {
   uploadAction: string;

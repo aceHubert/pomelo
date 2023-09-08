@@ -1,6 +1,6 @@
 import { defineComponent, ref, onMounted } from '@vue/composition-api';
 import { Skeleton, Tabs, Icon } from 'ant-design-vue';
-import { MarkdownRender } from '@/components';
+import { MarkdownInput } from 'antdv-layout-pro';
 import { useSubmoduleApi } from '@/fetch/graphql';
 import classes from './styles/details.module.less';
 
@@ -62,7 +62,7 @@ export default defineComponent({
                     <Icon type="file-markdown" />
                     Readme
                   </span>
-                  <MarkdownRender source={subModule.value.readme || ''}></MarkdownRender>
+                  <MarkdownInput value={subModule.value.readme || ''} />
                 </Tabs.TabPane>
               </Tabs>
             </div>

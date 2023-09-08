@@ -15,21 +15,27 @@
     "index": {
       "not_found_text": "Page not found!",
       "schema_error_text": "Page configuration error!",
-      "render_error_text": "Page rendering error!"
+      "render_error_text": "Page rendering error!",
+      "load_error_text": "Page loading error!",
+      "contact_administrator_tips": "Please contact the administrator."
     }
   },
   "form_template": {
     "index": {
       "not_found_text": "Form not found!",
       "render_error_text": "Form rendering error!",
-      "schema_error_text": "Form configuration error!"
+      "schema_error_text": "Form configuration error!",
+      "contact_administrator_tips": "Please contact the administrator.",
+      "load_error_text": "Form loading error!"
     }
   },
   "post_template": {
     "index": {
       "not_found_text": "Content not found!",
       "render_error_text": "Content rendering error!",
-      "schema_error_text": "Content configuration error!"
+      "schema_error_text": "Content configuration error!",
+      "contact_administrator_tips": "Please contact the administrator.",
+      "load_error_text": "Content loading error!"
     }
   }
 }

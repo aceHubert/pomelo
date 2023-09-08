@@ -139,7 +139,7 @@ export class Request {
     }, {} as Dictionary<any>) as RegistApi<C>;
   }
 
-  sentQuery<TData = any, TVariables = OperationVariables, Result = TData>({
+  sentQuery<TData = any, TVariables extends OperationVariables = OperationVariables, Result = TData>({
     loading = false,
     catchError = false,
     onSuccess,
@@ -184,7 +184,12 @@ export class Request {
       });
   }
 
-  sentMutate<TData = any, TVariables = OperationVariables, TContext = DefaultContext, Result = TData>({
+  sentMutate<
+    TData = any,
+    TVariables extends OperationVariables = OperationVariables,
+    TContext extends Record<string, any> = DefaultContext,
+    Result = TData,
+  >({
     loading = false,
     catchError = false,
     onSuccess,
@@ -229,7 +234,7 @@ export class Request {
       });
   }
 
-  sentSubscribe<TData = any, TVariables = OperationVariables>({
+  sentSubscribe<TData = any, TVariables extends OperationVariables = OperationVariables>({
     onData,
     onError,
     onComplete,

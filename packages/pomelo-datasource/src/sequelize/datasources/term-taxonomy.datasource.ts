@@ -68,7 +68,6 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       };
       fields.push('parentId');
     }
-
     if (!fields.includes('id')) {
       // 主键(meta/children 查询)
       fields.push('id');
@@ -88,6 +87,11 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
     }
     if (!isUndefined(_query.group)) {
       where['group'] = _query.group;
+    }
+    if (_query.excludes) {
+      where['id'] = {
+        [Op.notIn]: _query.excludes,
+      };
     }
 
     return this.models.TermTaxonomy.findAll({

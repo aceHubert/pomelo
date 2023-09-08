@@ -1,6 +1,6 @@
 import { h } from '@vue/composition-api';
 import { Divider } from 'ant-design-vue';
-import { getArrayFromOverloadedRest } from '@pomelo/shared-web';
+import { getArrayFromOverloadedRest } from '@ace-util/core';
 
 /**
  * add divider between actions

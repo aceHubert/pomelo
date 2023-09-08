@@ -1,2 +1,2 @@
-export * from './balloon-editor';
-export * from './decoupled-editor';
+export { default as BalloonEditor } from './balloon-editor';
+export { default as DecoupledEditor } from './decoupled-editor';

@@ -136,7 +136,7 @@ export default defineComponent({
 
     // 加载分类树
     templateMixin.category.selectKey = Number((route.query[RouteQueryKey.CategoryId] as string) || '') || '';
-    templateMixin.getCategories({}).then((treeData) => {
+    templateMixin.getCategories({ includeDefault: true }).then((treeData) => {
       templateMixin.category.treeData = treeData;
     });
 
@@ -395,7 +395,7 @@ export default defineComponent({
               treeData={templateMixin.categoryTreeData.value}
               showSearch
               treeDataSimpleMode
-              treeNodeFilterProp="label"
+              treeNodeFilterProp="title"
               dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
               style="width:120px"
               placeholder={i18n.tv('page_templates.category_placeholder', '请选择分类')}

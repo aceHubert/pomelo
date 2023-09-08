@@ -1,7 +1,7 @@
+import moment from 'moment';
 import { defineComponent } from '@vue/composition-api';
 import CKEditor from '@ckeditor/ckeditor5-vue2';
 import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
-import { formatDate } from '@pomelo/shared-web';
 import { ObsUploadAdapterPlugin } from '@/components/ckeditor/plugins/obs-upload-adapter';
 import { useI18n } from '@/hooks';
 import './index.less';
@@ -62,7 +62,11 @@ export default defineComponent({
                   value={props.title}
                   onInput={(e: any) => onUpdateTitle?.(e.target.value)}
                 />
-                <p class="sub-line">{formatDate(Date.now(), 'L HH:mm', props.locale)}</p>
+                <p class="sub-line">
+                  {moment(Date.now())
+                    .locale(props.locale || 'en-US')
+                    .format('L HH:mm')}
+                </p>
               </div>
               <div class={`${prefixCls}-document__content`}>
                 <CKEditor.component

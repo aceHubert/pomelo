@@ -5,13 +5,14 @@ import {
   SequelizeOptionsFactory,
 } from './interfaces/sequelize-options.interface';
 import * as DataSources from './datasources';
+import { SequelizeService } from './sequelize.service';
 import { SEQUELIZE_OPTIONS } from './constants';
 
 const dataSourceProviders = Object.values(DataSources);
 
 @Module({
-  providers: dataSourceProviders,
-  exports: dataSourceProviders,
+  providers: [...dataSourceProviders, SequelizeService],
+  exports: [...dataSourceProviders, SequelizeService],
 })
 export class SequelizeModule {
   private static readonly logger = new Logger(SequelizeModule.name, { timestamp: true });
@@ -36,6 +37,7 @@ export class SequelizeModule {
   static registerAsync(options: SequelizeAsyncOptions): DynamicModule {
     return {
       module: SequelizeModule,
+      global: options.isGlobal,
       imports: options.imports || [],
       providers: this.createAsyncProviders(options),
     };

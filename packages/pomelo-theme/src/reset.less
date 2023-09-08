@@ -1,0 +1,35 @@
+// reset
+
+body {
+  color: var(--text-primary, @text-color);
+  background-color: var(--body-background, @body-background);
+}
+
+input[type='checkbox'] {
+  accent-color: @var-primary;
+}
+
+a {
+  color: var(--color-link, @link-color);
+
+  &:hover {
+    color: var(--color-link-hover, @link-hover-color);
+  }
+
+  &:active {
+    color: var(--color-link-active, @link-active-color);
+  }
+
+  &[disabled] {
+    color: var(--color-disabled, @disabled-color);
+  }
+}
+
+caption {
+  color: var(--text-secondary, @text-color-secondary);
+}
+
+::selection {
+  color: var(--text-inverse, @text-color-inverse);
+  background: @var-primary;
+}

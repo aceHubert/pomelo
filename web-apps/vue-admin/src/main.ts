@@ -7,16 +7,15 @@ import { afetch } from '@/fetch';
 import { i18n } from './i18n';
 import { pinia } from './store';
 import { router } from './router';
+import optionsPlugin from './plugins/options';
+import pubSubMessagePlugin from './plugins/pubsub-messages';
 import App from './App';
 import './auth';
+import './tinycolor2.extend';
 import './assets/styles/index.less';
 
 Vue.use(VueCompositionApi);
 Vue.config.productionTip = false;
-
-// Plugins
-import optionsPlugin from './plugins/options';
-import pubSubMessagePlugin from './plugins/pubsub-messages';
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {

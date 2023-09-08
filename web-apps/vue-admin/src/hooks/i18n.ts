@@ -1,5 +1,5 @@
 import { getCurrentInstance } from '@vue/composition-api';
-import { warn } from '@pomelo/shared-web';
+import { warn } from '@ace-util/core';
 
 // Types
 import type { IVueI18n } from 'vue-i18n';

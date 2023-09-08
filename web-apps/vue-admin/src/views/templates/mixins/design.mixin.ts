@@ -232,9 +232,9 @@ export const useDesignMixin = () => {
     (
       values: string[],
       labels: any[],
-      extra: { checked: boolean; triggerNode: { dataRef: AsyncTreeData }; triggerValue: string },
+      extra: { checked: boolean; triggerNode?: { dataRef: AsyncTreeData }; triggerValue: string },
     ) => {
-      extra.triggerNode.dataRef && set(extra.triggerNode.dataRef, 'selectable', false);
+      extra.triggerNode?.dataRef && set(extra.triggerNode.dataRef, 'selectable', false);
       let promisify;
       if (extra.checked) {
         promisify = termTaxonomyApi
@@ -247,7 +247,7 @@ export const useDesignMixin = () => {
             },
           })
           .then(() => {
-            category.selectKeys.push({ value: extra.triggerValue, label: extra.triggerNode.dataRef.title });
+            category.selectKeys.push({ value: extra.triggerValue, label: extra.triggerNode!.dataRef.title });
           });
       } else {
         promisify = termTaxonomyApi
@@ -266,7 +266,7 @@ export const useDesignMixin = () => {
           message.error(err.message);
         })
         .finally(() => {
-          extra.triggerNode.dataRef && set(extra.triggerNode.dataRef, 'selectable', true);
+          extra.triggerNode?.dataRef && set(extra.triggerNode?.dataRef, 'selectable', true);
         });
     };
   // #endregion

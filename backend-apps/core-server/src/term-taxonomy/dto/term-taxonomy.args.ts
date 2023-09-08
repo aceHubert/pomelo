@@ -20,7 +20,10 @@ export class TermTaxonomyArgs extends TermTaxonomyArgsValidator {
 }
 
 @ArgsType()
-export class CategoryTermTaxonomyArgs extends OmitType(TermTaxonomyArgs, ['taxonomy'] as const) {}
+export class CategoryTermTaxonomyArgs extends OmitType(TermTaxonomyArgs, ['taxonomy'] as const) {
+  @Field((type) => Boolean, { nullable: true, description: 'With default category, default: false' })
+  includeDefault?: boolean;
+}
 
 @ArgsType()
 export class TagTermTaxonomyArgs extends OmitType(TermTaxonomyArgs, ['taxonomy', 'parentId'] as const) {}
