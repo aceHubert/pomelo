@@ -2,9 +2,9 @@ import { trailingSlash } from '@ace-util/core';
 
 export type BeforeUploadFileType = File | Blob | boolean | string;
 
-export type UploadRequestMethod = 'POST' | 'PUT' | 'post' | 'put';
+export type RequestMethod = 'POST' | 'PUT' | 'post' | 'put';
 
-export type UploadRequestHeader = Record<string, string>;
+export type RequestHeader = Record<string, string>;
 
 export interface RcFile extends File {
   uid: string;
@@ -16,11 +16,11 @@ export interface UploadProgressEvent extends Partial<ProgressEvent> {
 
 export interface UploadRequestError extends Error {
   status?: number;
-  method?: UploadRequestMethod;
+  method?: RequestMethod;
   url?: string;
 }
 
-export interface UploadRequestOption<T = any> {
+export interface RequestOption<T = any> {
   onProgress?: (event: UploadProgressEvent) => void;
   onError?: (event: UploadRequestError | ProgressEvent, body?: T) => void;
   onSuccess?: (body: T, xhr?: XMLHttpRequest) => void;
@@ -29,12 +29,11 @@ export interface UploadRequestOption<T = any> {
   file: Exclude<BeforeUploadFileType, File | boolean> | RcFile;
   withCredentials?: boolean;
   action: string;
-  headers?: UploadRequestHeader;
-  method: UploadRequestMethod;
-  displayUrl: string;
+  headers?: RequestHeader;
+  method: RequestMethod;
 }
 
-function getError(option: UploadRequestOption, xhr: XMLHttpRequest) {
+function getError(option: RequestOption, xhr: XMLHttpRequest) {
   const msg = `cannot ${option.method} ${option.action} ${xhr.status}'`;
   const err = new Error(msg) as UploadRequestError;
   err.status = xhr.status;
@@ -46,7 +45,7 @@ function getError(option: UploadRequestOption, xhr: XMLHttpRequest) {
 /**
  * antdv upload component upload to obs
  */
-export function obsUpload(option: UploadRequestOption) {
+export function obsUpload(option: RequestOption) {
   // eslint-disable-next-line no-undef
   const xhr = new XMLHttpRequest();
 
@@ -63,14 +62,18 @@ export function obsUpload(option: UploadRequestOption) {
     option.onError?.(e);
   };
 
+  xhr.ontimeout = (e) => {
+    option.onError?.(e);
+  };
+
   xhr.onload = function onload() {
     // allow success when 2xx status
     // see https://github.com/react-component/upload/issues/34
     if (xhr.status < 200 || xhr.status >= 300) {
-      return option.onError?.(getError(option, xhr), { url: option.displayUrl });
+      return option.onError?.(getError(option, xhr), xhr.response);
     }
 
-    return option.onSuccess?.({ url: option.displayUrl }, xhr);
+    return option.onSuccess?.(xhr.response, xhr);
   };
 
   xhr.open(option.method, option.action, true);
@@ -134,8 +137,8 @@ export function obsUpload(option: UploadRequestOption) {
   };
 }
 
-export const obsPrefix = '//cdn.lejian.com/';
+const defaultPrefix = '//cdn.lejian.com/';
 
-export function obsFormatDisplayUrl(objectKey: string, prefix = obsPrefix) {
+export function obsDisplayUrl(objectKey: string, prefix = defaultPrefix) {
   return trailingSlash(prefix) + objectKey;
 }

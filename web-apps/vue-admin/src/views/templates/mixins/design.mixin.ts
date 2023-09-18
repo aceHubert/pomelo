@@ -1,6 +1,6 @@
 import { ref, reactive, set } from '@vue/composition-api';
 import { message } from '@/components';
-import { Taxonomy, useTemplateApi, useTermTaxonomyApi } from '@/fetch/graphql';
+import { Taxonomy, useTemplateApi, useTermTaxonomyApi, useResApi } from '@/fetch/graphql';
 
 // Types
 import type { NewTemplateInput, NewTemplateMetaInput, UpdateTemplateInput } from '@/fetch/graphql/template';
@@ -25,6 +25,7 @@ export type SelectData = {
 export const useDesignMixin = () => {
   const templateApi = useTemplateApi();
   const termTaxonomyApi = useTermTaxonomyApi();
+  const resApi = useResApi();
 
   /**
    * 获取详情
@@ -382,6 +383,60 @@ export const useDesignMixin = () => {
   };
   // #endregion
 
+  const getCustomUploadRequest =
+    (_objectKeyPrefix = 'templates/docs_') =>
+    async (options: {
+      file: File;
+      method: 'PUT' | 'POST' | 'put' | 'post';
+      withCredentials: boolean;
+      onSuccess: (resp: { url: string }) => void;
+      onError: (err: unknown) => void;
+      onProgress: (event: any) => void;
+    }) => {
+      const { file, withCredentials, onSuccess, onError, onProgress } = options;
+      resApi
+        .uploadFile({
+          variables: {
+            file,
+          },
+          context: {
+            fetchOptions: {
+              withCredentials,
+              onProgress,
+            },
+          },
+        })
+        .then(({ file }) => onSuccess({ url: file.fullPath }))
+        .catch(onError);
+      // upload to obs
+      // const suffix = file.name.substring(file.name.lastIndexOf('.'));
+      // const fileName = Math.random().toString(16).substring(2) + suffix;
+      // const objectKey = `${objectKeyPrefix}${fileName}`;
+      // resApi
+      //   .getObsUploadSignedUrl({
+      //     variables: {
+      //       bucket: 'static-cdn',
+      //       key: objectKey,
+      //       headers: {
+      //         'Content-Type': file.type,
+      //       },
+      //     },
+      //   })
+      //   .then(({ signedUrl: { url, headers } }) => {
+      //     obsUpload({
+      //       file,
+      //       action: url,
+      //       method,
+      //       headers,
+      //       withCredentials,
+      //       onSuccess: () => onSuccess({ url: obsDisplayUrl(objectKey) }),
+      //       onError,
+      //       onProgress,
+      //     });
+      //   })
+      //   .catch(onError);
+    };
+
   return {
     submitingRef,
     category,
@@ -399,5 +454,6 @@ export const useDesignMixin = () => {
     getTags,
     handleTagSelect,
     handleTagDeselect,
+    getCustomUploadRequest,
   };
 };

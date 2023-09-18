@@ -3,11 +3,9 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { Fields, User, RequestUser } from '@pomelo/shared';
 import {
   TemplateDataSource,
-  TermTaxonomyDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
   Taxonomy,
-  Taxonomy as TaxonomyEnum,
   TemplateStatus,
   TemplateType,
 } from '@pomelo/datasource';
@@ -17,35 +15,10 @@ import { RamAuthorized } from 'nestjs-ram-authorization';
 import { FormTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
-import { createTaxonomyFieldResolver } from './base.resolver';
 import { NewFormTemplateInput } from './dto/new-template.input';
 import { UpdateFormTemplateInput } from './dto/update-template.input';
 import { PagedFormTemplateArgs, FormTemplateOptionArgs } from './dto/template.args';
-import { FormTemplate, PagedFormTemplateItem, PagedFormTemplate, FormTemplateOption } from './models/form.model';
-
-@Authorized()
-@Resolver(() => PagedFormTemplateItem)
-export class PagedFormTemplateItemCategoryResolver extends createTaxonomyFieldResolver(PagedFormTemplateItem, {
-  propertyName: 'categories',
-  taxonomy: TaxonomyEnum.Category,
-  description: 'Categories',
-  useDataLoader: true,
-}) {
-  constructor(protected readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
-    super(termTaxonomyDataSource);
-  }
-}
-
-@Resolver(() => FormTemplate)
-export class FormTemplateCategoryResolver extends createTaxonomyFieldResolver(FormTemplate, {
-  propertyName: 'categories',
-  taxonomy: TaxonomyEnum.Category,
-  description: 'Categories',
-}) {
-  constructor(protected readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
-    super(termTaxonomyDataSource);
-  }
-}
+import { FormTemplate, PagedFormTemplate, FormTemplateOption } from './models/form.model';
 
 @Authorized()
 @Resolver(() => FormTemplate)
@@ -142,7 +115,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @User() requestUser: RequestUser,
   ): Promise<FormTemplate> {
     const { schema, ...restInput } = model;
-    const { id, title, author, content, status, createdAt } = await this.templateDataSource.create(
+    const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
       { content: schema, ...restInput },
       TemplateType.Form,
       requestUser,
@@ -167,6 +140,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
       author,
       schema: content,
       status,
+      updatedAt,
       createdAt,
     };
   }

@@ -3,8 +3,7 @@ import { defineRegistApi, gql } from './core';
 // Types
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
 import type {
-  PagedTemplateQuery,
-  PagedTemplateItem,
+  PagedTemplateArgs,
   TempaleModel,
   NewTemplateInput,
   UpdateTemplateInput,
@@ -12,13 +11,14 @@ import type {
 } from './template';
 import type { Paged } from './types';
 
-export interface PagedFormTemplateQuery extends Omit<PagedTemplateQuery, 'type'> {}
+export interface PagedFormTemplateArgs extends Omit<PagedTemplateArgs, 'type' | 'categories'> {}
 
-export interface PagedFormTemplateItem extends Omit<PagedTemplateItem, 'excerpt'> {}
-
-export interface FormTempaleModel extends Omit<TempaleModel, 'type' | 'excerpt' | 'content'> {
+export interface FormTempaleModel
+  extends Pick<TempaleModel, 'id' | 'title' | 'author' | 'status' | 'updatedAt' | 'createdAt' | 'metas'> {
   schema: string;
 }
+
+export interface PagedFormTemplateItem extends Omit<FormTempaleModel, 'schema' | 'metas'> {}
 
 export interface NewFormTemplateInput extends Omit<NewTemplateInput, 'type' | 'excerpt' | 'content'> {
   schema: string;
@@ -56,10 +56,7 @@ export const useFormApi = defineRegistApi('template_form', {
           title
           author
           status
-          categories {
-            id
-            name
-          }
+          updatedAt
           createdAt
         }
         total
@@ -76,7 +73,7 @@ export const useFormApi = defineRegistApi('template_form', {
       statusCounts?: TemplateStatusCountItem[];
       selfCounts?: number;
     },
-    PagedFormTemplateQuery
+    PagedFormTemplateArgs
   >,
   // 获取表单
   get: gql`
@@ -87,10 +84,8 @@ export const useFormApi = defineRegistApi('template_form', {
         schema
         author
         status
-        categories {
-          id
-          name
-        }
+        updatedAt
+        createdAt
         metas(metaKeys: $metaKeys) {
           id
           key: metaKey
@@ -105,8 +100,11 @@ export const useFormApi = defineRegistApi('template_form', {
       form: createFormTemplate(model: $newFormTemplate) {
         id
         title
-        status
         schema
+        author
+        status
+        updatedAt
+        createdAt
         metas {
           id
           key: metaKey

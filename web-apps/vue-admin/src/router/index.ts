@@ -26,9 +26,20 @@ export const router = createRouter({
       },
     },
     {
-      name: 'taxonomy',
-      path: '/taxonomy/:id',
-      component: () => import(/* webpackChunkName: "forms" */ '../views/taxonomy'),
+      name: 'media',
+      path: '/medias',
+      component: () => import(/* webpackChunkName: "medias" */ '../views/media'),
+    },
+    {
+      name: 'category',
+      path: '/categories',
+      component: () => import(/* webpackChunkName: "posts" */ '../views/category'),
+      props: (route) => ({ id: route.params.id }),
+    },
+    {
+      name: 'tag',
+      path: '/tags',
+      component: () => import(/* webpackChunkName: "posts" */ '../views/tag'),
       props: (route) => ({ id: route.params.id }),
     },
     {

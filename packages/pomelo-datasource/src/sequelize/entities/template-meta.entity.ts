@@ -1,9 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import {
-  TemplateMetaAttributes,
-  TemplateMetaMetaCreationAttributes,
-  TemplatePlatform,
-} from '../../entities/template-meta.entity';
+import { TemplateMetaAttributes, TemplateMetaMetaCreationAttributes } from '../../entities/template-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
 export default class TemplateMeta extends Model<TemplateMetaAttributes, TemplateMetaMetaCreationAttributes> {
@@ -14,17 +10,16 @@ export default class TemplateMeta extends Model<TemplateMetaAttributes, Template
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   TemplateMeta.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
       templateId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'Template id',
@@ -48,18 +43,4 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       comment: 'Template metas',
     },
   );
-
-  // mobile meta scope
-  TemplateMeta.addScope(TemplatePlatform.Mobile, {
-    where: {
-      metaKey: TemplatePlatform.Mobile,
-    },
-  });
-
-  // desktop meta scope
-  TemplateMeta.addScope(TemplatePlatform.Desktop, {
-    where: {
-      metaKey: TemplatePlatform.Desktop,
-    },
-  });
 };

@@ -1,25 +1,26 @@
 import moment from 'moment';
 import { lowerCase } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
-import { TreeSelect, Button, Card, Icon, Tag, Popconfirm } from 'ant-design-vue';
+import { Select, Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { useRouter, useRoute } from 'vue2-helpers/vue-router';
+import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
-import { usePageApi, TemplateStatus } from '@/fetch/graphql';
+import { message } from '@/components';
+import { usePageApi, TemplateType, TemplateStatus } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
 import { useDeviceMixin, useLocationMixin } from '@/mixins';
 import { useTemplateMixin } from '../mixins/index.mixin';
-import classes from './styles/index.module.less';
+import classes from './index.module.less';
 
 // typed
 import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
-import type { PagedPageTemplateQuery, PagedPageTemplateItem } from '@/fetch/graphql';
+import type { PagedPageTemplateArgs, PagedPageTemplateItem } from '@/fetch/graphql';
 import type { User } from '@/auth/user-manager';
 import type { BulkActions } from '../mixins/index.mixin';
 import type { ActionCapability } from '../components/design-layout/DesignLayout';
 
 enum RouteQueryKey {
-  CategoryId = 'cid',
+  Date = 'd',
   IsSelf = 'self',
 }
 
@@ -32,15 +33,14 @@ export default defineComponent({
   },
   props: [],
   setup(_props, { refs }) {
-    const router = useRouter();
     const route = useRoute();
     const i18n = useI18n();
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
+    const templateMixin = useTemplateMixin();
     const userManager = useUserManager();
     const siteUrl = useOptions('home');
     const pageApi = usePageApi();
-    const templateMixin = useTemplateMixin();
 
     const currentUser = ref<User>();
 
@@ -53,11 +53,11 @@ export default defineComponent({
     });
 
     // 从 URI 获取搜索参数
-    const searchQuery = computed<Omit<PagedPageTemplateQuery, 'offset' | 'limit' | 'queryStatusCounts'>>(() => {
+    const searchQuery = computed<Omit<PagedPageTemplateArgs, 'offset' | 'limit' | 'queryStatusCounts'>>(() => {
       return {
         ...templateMixin.searchQuery,
         author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUser.value?.profile.sub : void 0,
-        categoryId: Number((route.query[RouteQueryKey.CategoryId] as string) || '') || void 0,
+        date: (route.query[RouteQueryKey.Date] as string) || void 0,
       };
     });
 
@@ -134,51 +134,54 @@ export default defineComponent({
     // 参数变更刷新table
     watch(searchQuery, refreshTable);
 
-    // 加载分类树
-    templateMixin.category.selectKey = Number((route.query[RouteQueryKey.CategoryId] as string) || '') || '';
-    templateMixin.getCategories({ includeDefault: true }).then((treeData) => {
-      templateMixin.category.treeData = treeData;
-    });
+    // 加载月分组
+    templateMixin.monthCount.selectKey = (route.query[RouteQueryKey.Date] as string) || '';
+    templateMixin
+      .getMonthCounts(TemplateType.Page)
+      .then((selectData) => {
+        templateMixin.monthCount.selectData = selectData;
+      })
+      .catch((err) => {
+        message.error(err.message);
+      });
 
     const columns = computed(() => {
-      const baseSiteUrl = trailingSlash(siteUrl.value || '/');
+      const getViewUrl = (record: PagedPageTemplateItem) => {
+        const baseUrl = trailingSlash(siteUrl.value || '/');
+        // TODO: config format url
+
+        return baseUrl + `${record.id}`;
+      };
+
       const renderRowInline = (record: PagedPageTemplateItem) => {
         return (
-          <div>
-            <p class="mb-2">
-              <a href={`${baseSiteUrl}${record.id}`} class={classes.routerLink} target="preview-route">
-                {record.title}
-                <Icon type="link" class={classes.routerLinkIcon} />
-              </a>
-            </p>
-            <p class="mb-1">
-              <span class="text--secondary">{i18n.tv('page_templates.pages.name_label', '自定义路由')}：</span>
-              <a href={`${baseSiteUrl}${record.name}`} class={classes.routerLink} target="preview-route">
-                {record.name}
-                <Icon type="link" class={classes.routerLinkIcon} />
-              </a>
-            </p>
-            {!searchQuery.value.status && (
+          <Descriptions size="small" column={1} class="mt-2">
+            <Descriptions.Item>
+              <span slot="label" class="text--secondary">
+                {i18n.tv('page_templates.author_label', '作者')}
+              </span>
+              {`-`}
+            </Descriptions.Item>
+            <Descriptions.Item>
+              <span slot="label" class="text--secondary">
+                {i18n.tv('page_templates.comment_label', '评论')}
+              </span>
+              {`-`}
+            </Descriptions.Item>
+            <Descriptions.Item>
+              <span slot="label" class="text--secondary">
+                {i18n.tv('page_templates.date_label', '日期')}
+              </span>
               <p class="mb-1">
-                <span class="text--secondary">{i18n.tv('page_templates.status_label', '状态')}：</span>
-                <Tag color={templateMixin.statusTagColors[record.status]}>
-                  {i18n.tv(`page_templates.status_options.${lowerCase(record.status)}`, record.status)}
-                </Tag>
+                {record.status !== TemplateStatus.Publish ? (
+                  i18n.tv('page_templates.updated_at', '最后修改')
+                ) : (
+                  <span>{i18n.tv(`page_templates.status_options.${lowerCase(record.status)}`, record.status)}</span>
+                )}
               </p>
-            )}
-            <p class="mb-1">
-              <span class="text--secondary">{i18n.tv('page_templates.category_label', '分类')}：</span>
-              {record.categories.map((category) => (
-                <router-link to={{ name: 'taxonomy', params: { id: category.id } }} class="mr-2">
-                  {category.name}
-                </router-link>
-              ))}
-            </p>
-            <p class="mb-0">
-              <span class="text--secondary">{i18n.tv('page_templates.create_at_label', '创建时间')}：</span>
-              {moment(record.createdAt).locale(i18n.locale).format('L')}
-            </p>
-          </div>
+              {moment(record.updatedAt).locale(i18n.locale).format('L HH:mm')}
+            </Descriptions.Item>
+          </Descriptions>
         );
       };
 
@@ -197,9 +200,8 @@ export default defineComponent({
                   (record.status === TemplateStatus.Pending &&
                     record.actionCapability.publish &&
                     !record.isSelfContent)) && (
-                  <Button
-                    type="link"
-                    size="small"
+                  <router-link
+                    to={{ name: 'page-edit', params: { id: record.id } }}
                     class={
                       record.status === TemplateStatus.Pending &&
                       record.actionCapability.publish &&
@@ -207,21 +209,18 @@ export default defineComponent({
                         ? 'warning--text'
                         : ''
                     }
-                    onClick={() => router.push({ name: 'page-edit', params: { id: record.id } })}
                   >
                     {record.status === TemplateStatus.Pending &&
                     record.actionCapability.publish &&
                     !record.isSelfContent
                       ? i18n.tv('page_templates.btn_text.review', '审核')
                       : i18n.tv('common.btn_text.edit', '编辑')}
-                  </Button>
+                  </router-link>
                 ),
                 record.isSelfContent && (
-                  <Button
-                    type="link"
-                    size="small"
+                  <a
+                    href="javascript:;"
                     class="danger--text"
-                    loading={record.deleting}
                     onClick={() =>
                       templateMixin.handleDelete(record).then((result) => {
                         if (result) {
@@ -232,17 +231,21 @@ export default defineComponent({
                       })
                     }
                   >
+                    {record.deleting && <Spin />}
                     {record.deleting
                       ? i18n.tv('common.btn_text.in_operation', '操作中')
                       : i18n.tv('page_templates.btn_text.move_to_trush', '放入回收站')}
-                  </Button>
+                  </a>
                 ),
+                <a href={getViewUrl(record) ?? 'javascript:;'} target="preview-route">
+                  {record.status === TemplateStatus.Publish
+                    ? i18n.tv('common.btn_text.view', '查看')
+                    : i18n.tv('common.btn_text.preview', '预览')}
+                </a>,
               ]
             : record.isSelfContent && [
-                <Button
-                  type="link"
-                  size="small"
-                  loading={record.deleting}
+                <a
+                  href="javascript:;"
                   onClick={() =>
                     templateMixin.handleRestore(record).then((result) => {
                       if (result) {
@@ -253,10 +256,11 @@ export default defineComponent({
                     })
                   }
                 >
+                  {record.restoring && <Spin />}
                   {record.restoring
                     ? i18n.tv('common.btn_text.in_operation', '操作中')
                     : i18n.tv('page_templates.btn_text.restore', '重置')}
-                </Button>,
+                </a>,
                 <Popconfirm
                   title={i18n.tv('page_templates.pages.tips.delete_confirm', '确认删除这条页面配置？')}
                   okText="Ok"
@@ -271,11 +275,12 @@ export default defineComponent({
                     })
                   }
                 >
-                  <Button type="link" size="small" class="error--text" loading={record.deleting}>
+                  <a href="javascript:;" class="error--text">
+                    {record.deleting && <Spin />}
                     {record.deleting
                       ? i18n.tv('common.btn_text.in_operation', '操作中')
                       : i18n.tv('common.btn_text.delete', '删除')}
-                  </Button>
+                  </a>
                 </Popconfirm>,
               ]
           : [];
@@ -293,75 +298,60 @@ export default defineComponent({
               deleting?: boolean;
               restoring?: boolean;
             },
-          ) =>
-            deviceMixin.isDesktop ? (
-              <a href={`${baseSiteUrl}${record.id}`} class={classes.routerLink} target="preview-route">
-                {record.title}
-                <Icon type="link" class={classes.routerLinkIcon} />
-              </a>
-            ) : deviceMixin.isTablet ? (
-              renderRowInline(record)
-            ) : (
-              <div>
-                {renderRowInline(record)}
-                <div class="mt-2 mx-n2">{renderActions(record)}</div>
+          ) => {
+            const titleSuffixs: string[] = [];
+            if (record.status !== TemplateStatus.Publish) {
+              titleSuffixs.push(
+                i18n.tv(`page_templates.status_options.${lowerCase(record.status)}`, record.status) as string,
+              );
+            }
+            return (
+              <div class={classes.title}>
+                <router-link
+                  to={{ name: 'page-edit', params: { id: record.id } }}
+                  class={classes.routerLink}
+                  target="preview-route"
+                >
+                  {record.title}
+                  {titleSuffixs.length > 0 && (
+                    <span class="text--secondary font-weight-bold">{` - ${titleSuffixs.join(', ')}`}</span>
+                  )}
+                </router-link>
+                <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>
+                {!deviceMixin.isDesktop && renderRowInline(record)}
               </div>
-            ),
-        },
-        deviceMixin.isDesktop && {
-          title: i18n.tv('page_templates.name_label', '自定义路由'),
-          dataIndex: 'name',
-          width: 160,
-          customRender: (_: any, record: PagedPageTemplateItem) => (
-            <a href={`${baseSiteUrl}${record.name}`} class={classes.routerLink} target="preview-route">
-              {record.name}
-              <Icon type="link" class={classes.routerLinkIcon} />
-            </a>
-          ),
-        },
-        deviceMixin.isDesktop && {
-          title: i18n.tv('page_templates.category_label', '分类'),
-          dataIndex: 'categories',
-          width: 220,
-          customRender: (_: any, record: PagedPageTemplateItem) =>
-            record.categories.map((category) => (
-              <router-link to={{ name: 'taxonomy', params: { id: category.id } }} class="mr-2">
-                {category.name}
-              </router-link>
-            )),
-        },
-        deviceMixin.isDesktop &&
-          !searchQuery.value.status && {
-            title: i18n.tv('page_templates.status_label', '状态'),
-            dataIndex: 'status',
-            align: 'center',
-            width: 100,
-            customRender: (_: any, record: PagedPageTemplateItem) => (
-              <Tag color={templateMixin.statusTagColors[record.status]}>
-                {i18n.tv(`page_templates.status_options.${lowerCase(record.status)}`, record.status)}
-              </Tag>
-            ),
+            );
           },
-        deviceMixin.isDesktop && {
-          title: i18n.tv('page_templates.create_at_label', '创建时间'),
-          dataIndex: 'createdAt',
-          align: 'center',
-          width: 160,
-          customRender: (_: any, record: PagedPageTemplateItem) =>
-            moment(record.createdAt).locale(i18n.locale).format('L'),
         },
-        (deviceMixin.isDesktop || deviceMixin.isTablet) && {
-          title: '',
-          width: 220,
-          customRender: (
-            _: any,
-            record: PagedPageTemplateItem & {
-              actionCapability: Required<ActionCapability>;
-              isSelfContent: boolean;
-              deleting?: boolean;
-              restoring?: boolean;
-            },
-          ) => renderActions(record),
+        deviceMixin.isDesktop && {
+          title: i18n.tv('page_templates.author_label', '作者'),
+          dataIndex: 'author',
+          width: 120,
+          customRender: () => `-`,
+        },
+        deviceMixin.isDesktop && {
+          title: i18n.tv('page_templates.comment_label', '评论'),
+          dataIndex: 'commentCount',
+          width: 80,
+          customRender: () => `-`,
+        },
+        deviceMixin.isDesktop && {
+          title: i18n.tv('page_templates.date_label', '日期'),
+          dataIndex: 'updatedAt',
+          align: 'left',
+          width: 200,
+          customRender: (_: any, record: PagedPageTemplateItem) => (
+            <div>
+              <p class="mb-1">
+                {record.status !== TemplateStatus.Publish ? (
+                  i18n.tv('page_templates.updated_at', '最后修改')
+                ) : (
+                  <span>{i18n.tv(`page_templates.status_options.${lowerCase(record.status)}`, record.status)}</span>
+                )}
+              </p>
+              {moment(record.updatedAt).locale(i18n.locale).format('L HH:mm')}
+            </div>
+          ),
         },
       ].filter(Boolean) as Column[];
     });
@@ -390,22 +380,16 @@ export default defineComponent({
           }
         >
           <template slot="filter">
-            <TreeSelect
-              value={templateMixin.category.selectKey}
-              treeData={templateMixin.categoryTreeData.value}
-              showSearch
-              treeDataSimpleMode
-              treeNodeFilterProp="title"
-              dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
+            <Select
+              value={templateMixin.monthCount.selectKey}
+              options={templateMixin.monthOptions.value}
               style="width:120px"
-              placeholder={i18n.tv('page_templates.category_placeholder', '请选择分类')}
-              searchPlaceholder={i18n.tv('page_templates.category_search_placeholder', '请输入查询分类')}
-              onChange={(value: string) =>
-                locationMixin.updateRouteQuery({ [RouteQueryKey.CategoryId]: value }).then(() => {
-                  templateMixin.category.selectKey = value;
-                })
-              }
-            ></TreeSelect>
+              onChange={(value: string) => {
+                locationMixin.updateRouteQuery({ [RouteQueryKey.Date]: value }).then(() => {
+                  templateMixin.monthCount.selectKey = value;
+                });
+              }}
+            ></Select>
           </template>
         </SearchForm>
         <AsyncTable
@@ -419,6 +403,7 @@ export default defineComponent({
               getCheckboxProps: (record) => ({ props: { disabled: !record.isSelfContent } }),
               onChange: handleSelectChange,
             },
+            rowClassName: () => `${classes.row} ${classes.rowAlign}`,
           }}
           alert
           pageURI

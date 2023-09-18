@@ -1,6 +1,6 @@
 import { defineComponent, ref, watch } from '@vue/composition-api';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { Layout, Drawer, Tooltip, Card, Icon, Button, Dropdown, Menu, Row, Col, Space } from 'ant-design-vue';
+import { Layout, Drawer, Tooltip, Card, Spin, Icon, Button, Dropdown, Menu, Row, Col, Space } from 'ant-design-vue';
 import { useI18n } from '@/hooks';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
 import { TemplateStatus } from '@/fetch/graphql';
@@ -179,9 +179,7 @@ export default defineComponent({
                                 disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
                                 onClick={() => handleAction(Action.ApproveReview)}
                               >
-                                {(props.actionStatus.approvingReview || props.actionStatus.rejectingReview) && (
-                                  <Icon type="loading" />
-                                )}
+                                {(props.actionStatus.approvingReview || props.actionStatus.rejectingReview) && <Spin />}
                                 {i18n.tv('page_templates.btn_text.review_confirm', '审核通过')}
                                 <Menu slot="overlay" onClick={({ key }: { key: Action }) => handleAction(key)}>
                                   <Menu.Item
@@ -259,7 +257,7 @@ export default defineComponent({
                             >
                               {(props.actionStatus.updating ||
                                 props.actionStatus.submitingReview ||
-                                props.actionStatus.savingToDarft) && <Icon type="loading" />}
+                                props.actionStatus.savingToDarft) && <Spin />}
                               {
                                 // 有发布权限可直接修改，否则需要再次审核
                                 props.actionCapability.publish
@@ -278,11 +276,7 @@ export default defineComponent({
                             <Button
                               ghost
                               type="primary"
-                              disabled={
-                                !props.actionStatus.changed ||
-                                props.actionStatus.processing ||
-                                props.actionStatus.disabledActions
-                              }
+                              disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
                               loading={props.actionStatus.savingToDarft}
                               title={i18n.tv('page_templates.btn_tips.switch_to_draft', '修改并保存内容至草稿箱')}
                               onClick={() => handleAction(Action.SwitchToDraft)}
@@ -331,7 +325,7 @@ export default defineComponent({
                           >
                             {(props.actionStatus.publishing ||
                               props.actionStatus.savingToDarft ||
-                              props.actionStatus.submitingReview) && <Icon type="loading" />}
+                              props.actionStatus.submitingReview) && <Spin />}
                             {props.actionCapability.publish
                               ? i18n.tv('page_templates.btn_text.publish', '发布')
                               : i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
@@ -401,8 +395,12 @@ export default defineComponent({
                             : props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')
                         }
                       >
-                        <Button onClick={() => (siderCollapsedRef.value = !siderCollapsedRef.value)}>
-                          <Icon type={!siderCollapsedRef.value ? 'close' : 'setting'}></Icon>
+                        <Button
+                          type={siderCollapsedRef.value ? 'default' : 'primary'}
+                          class="px-2"
+                          onClick={() => (siderCollapsedRef.value = !siderCollapsedRef.value)}
+                        >
+                          <Icon type="setting"></Icon>
                         </Button>
                       </Tooltip>
                     )}
@@ -429,14 +427,29 @@ export default defineComponent({
             title={props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')}
             wrapStyle={{
               top: `${headerHeightRef.value - 1}px`,
+              height: `calc(100vh - ${headerHeightRef.value}px)`,
+            }}
+            drawerStyle={{
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+            headerStyle={{
+              flex: 'none',
             }}
             bodyStyle={{
-              padding: '10px 0',
-              // height: '100vh',
+              padding: 0,
+              flex: '1 1 auto',
+              overflow: 'auto',
             }}
             onClose={() => (siderCollapsedRef.value = !siderCollapsedRef.value)}
           >
-            <Card bordered={false} bodyStyle={{ padding: 0 }} style="border-radius:0;">
+            <Card
+              bordered={false}
+              bodyStyle={{
+                padding: '10px 0',
+              }}
+              style="border-radius:0; height:100%;"
+            >
               {slots.siderContent?.()}
             </Card>
           </Drawer>
@@ -451,8 +464,10 @@ export default defineComponent({
           <Card
             title={props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')}
             bordered={false}
-            bodyStyle={{ padding: '10px 0' }}
-            style="border-radius:0;"
+            headStyle={{ flex: 'none' }}
+            bodyStyle={{ padding: '10px 0', flex: '1 1 auto', overflow: 'auto' }}
+            style="border-radius:0; height:100%;"
+            class="d-flex flex-column"
           >
             <template slot="extra">
               <Icon type="close" onClick={() => (siderCollapsedRef.value = !siderCollapsedRef.value)}></Icon>

@@ -46,6 +46,7 @@
     "@vue-async/resource-manager": "^1.0.16",
     "ant-design-vue": "^1.7.7",
     "antdv-layout-pro": "workspace:^",
+    "apollo-upload-client": "^17.0.0",
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
     "custom-event-polyfill": "^1.0.7",

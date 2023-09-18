@@ -12,6 +12,7 @@ scripts
 node_modules
 vue.config.js
 *.min.js
+src/version.ts
 **/*.less
 **/*.scss
 **/*.sass

@@ -20,7 +20,9 @@
       "update": "Update",
       "upload": "Upload",
       "yes": "Yes",
-      "in_operation": "In operation"
+      "in_operation": "In operation",
+      "view": "View",
+      "preview": "Preview"
     },
     "btn_tips": {
       "go_back": "Go back"
@@ -77,30 +79,38 @@
   },
   "menu": {
     "dashboard": "Dashboard",
-    "content-root": "Content",
-    "content": {
-      "taxonomy": "Taxonomy",
-      "template": "Template",
-      "pages": "Page",
-      "pages_design": "Page design",
-      "pages_index": "Pages",
-      "pages_add": "New page",
-      "forms": "Form",
-      "forms_design": "Form design",
-      "forms_index": "Forms",
-      "forms_add": "New form",
-      "posts": "Post",
-      "posts_index": "Posts",
-      "posts_design": "Post design",
-      "posts_add": "New Post",
-      "data-scope": "Data scope",
-      "data-scope_index": "Data scopes",
-      "data-scope_add": "New data scope",
-      "data-scope_design": "Data scope design",
-      "submodules": "Module",
-      "submodules_index": "Modules",
-      "submodules_details": "Module details"
-    }
+    "post": {
+      "root": "Posts",
+      "index": "All Posts",
+      "design": "Post Design",
+      "new": "Add New",
+      "category": "Categories",
+      "tag": "Tags"
+    },
+    "page": {
+      "root": "Pages",
+      "design": "Page Design",
+      "index": "All Pages",
+      "new": "Add New"
+    },
+    "form": {
+      "root": "Forms",
+      "index": "All Forms",
+      "design": "Form Design",
+      "new": "Add New"
+    },
+    "data-scope": {
+      "root": "Data Scopes",
+      "index": "All Data Scopes",
+      "design": "Data Scope Design",
+      "new": "Add New"
+    },
+    "submodule": {
+      "root": "Modules",
+      "index": "All Modules",
+      "details": "Details"
+    },
+    "settings": "Settings"
   },
   "components": {
     "search_form": {
@@ -147,18 +157,6 @@
       "expand_sidebar": "Expand sidebar"
     }
   },
-  "page_signin": {
-    "page_title": "Log in",
-    "tips": {
-      "no_signin_request_pinding": "No sign-in request pending.",
-      "redirecting": "Jumping...",
-      "server_time_unmatch_error": "The date and time of the current device is incorrect<br/>Please adjust it to the standard Beijing time and re-enter",
-      "waiting": "please wait..."
-    },
-    "silent": {
-      "content": "Signing in..."
-    }
-  },
   "page_session_timeout": {
     "page_title": "Session timeout",
     "title": "OOPS!",
@@ -191,13 +189,13 @@
     "name_label": "Customized route",
     "name_placeholder": "Input customized route",
     "content_placeholder": "Please edit the content",
-    "status_label": "Status",
+    "author_label": "Author",
     "category_label": "Category",
     "category_placeholder": "Select a category (or type a keywork to search)",
     "category_search_placeholder": "Input to search category",
     "tag_label": "Tag",
     "tag_placeholder": "Select a tag (or enter a tag to add)",
-    "create_at_label": "Create at",
+    "comment_label": "Comment",
     "status_options": {
       "all": "All",
       "draft": "Draft",
@@ -208,6 +206,11 @@
       "trash": "Trash",
       "self": "Mine",
       "all_not_include_trash_data_tooltip": "Data not included in the trash status datas"
+    },
+    "template_options": {
+      "default": "Default",
+      "cover": "Cover",
+      "full_width": "Full Width"
     },
     "btn_text": {
       "review": "Review",
@@ -278,7 +281,8 @@
       "content_required": "Content is required!",
       "content_label": "Content",
       "design": {
-        "page_title": "Post Design"
+        "page_title": "Write Post",
+        "view": "View Post"
       },
       "tips": {
         "unsaved_confirm": "Unsaved content will be lost. Do you want to leave the page?",
@@ -357,6 +361,23 @@
     "design_sider": {
       "settings_title": "Settings",
       "close_settings_title": "Close"
-    }
+    },
+    "date_label": "Date",
+    "updated_at": "Last Updated",
+    "fixed_link_label": "Fixed Link",
+    "upload_feature_image_label": "Set feature image",
+    "feature_image_label": "Feature Image",
+    "discussion_label": "Discussion",
+    "allow_comment_label": "Allow comment",
+    "attribute_label": "Post Attributes",
+    "template_label": "Template",
+    "new_category_link_text": "Add New Category",
+    "write_excerpt_label": "Write the excerpt(Optional)",
+    "visibility_label": "Visibility",
+    "publish_set_label": "Publish"
+  },
+  "page_media": {
+    "upload_btn_text": "Click or drag file to this area to upload",
+    "upload_btn_tips": "Support for a single or bulk upload."
   }
 }

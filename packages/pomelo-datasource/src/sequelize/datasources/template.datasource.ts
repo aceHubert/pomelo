@@ -1,15 +1,8 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Includeable, Transaction, Op, Order } from 'sequelize';
-import { ValidationError, ForbiddenError, RequestUser } from '@pomelo/shared';
-import {
-  Taxonomy,
-  TemplateType,
-  TemplateStatus,
-  TemplateOperateStatus,
-  TemplateAttributes,
-  TemplateCreationAttributes,
-} from '../../entities';
+import { UserInputError, ValidationError, ForbiddenError, RequestUser } from '@pomelo/shared';
+import { Taxonomy, TemplateType, TemplateStatus, TemplateOperateStatus, TemplateAttributes } from '../../entities';
 import { UserCapability } from '../utils/user-capability.util';
 import { OptionPresetKeys, TemplateMetaPresetKeys } from '../utils/preset-keys.util';
 import {
@@ -72,7 +65,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param template Tempate
    * @param requestUser 登录用户
    */
-  private async hasEditCapability(template: TemplateAttributes, requestUser: RequestUser) {
+  private async hasEditCapability(
+    template: Pick<TemplateAttributes, 'type' | 'status' | 'author'>,
+    requestUser: RequestUser,
+  ) {
     // 是否有编辑权限
     await this.hasCapability(
       template.type === TemplateType.Post
@@ -136,7 +132,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param template Tempate
    * @param requestUser 登录用户
    */
-  private async hasDeleteCapability(template: TemplateAttributes, requestUser: RequestUser) {
+  private async hasDeleteCapability(
+    template: Pick<TemplateAttributes, 'type' | 'status' | 'author'>,
+    requestUser: RequestUser,
+  ) {
     // 是否有删除文章的权限
     await this.hasCapability(
       template.type === TemplateType.Post
@@ -195,6 +194,34 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }
     }
     return Promise.resolve(true);
+  }
+
+  private async checkOperateStatus(status: TemplateStatus, requestUser: RequestUser) {
+    if (TemplateOperateStatus.includes(status)) {
+      if (status === TemplateStatus.AutoDraft) {
+        throw new UserInputError(
+          await this.translate(
+            'template.datasource.operate_status_autodraft_is_not_allowed',
+            `Status "AutoDraft" is not allowed!`,
+            {
+              lang: requestUser.lang,
+            },
+          ),
+        );
+      }
+      throw new UserInputError(
+        await this.translate(
+          'template.datasource.operate_status_is_not_allowed',
+          `Status "${status}" is not allowed!`,
+          {
+            args: {
+              status,
+            },
+            lang: requestUser.lang,
+          },
+        ),
+      );
+    }
   }
 
   /**
@@ -374,8 +401,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         where,
       });
       if (template) {
-        // 是否有编辑权限
-        await this.hasEditCapability(template, requestUser);
+        // 如果是已发布的状态，可以直接返回
+        if (template.status !== TemplateStatus.Publish) {
+          // 是否有编辑权限
+          await this.hasEditCapability(template, requestUser);
+        }
 
         return template.toJSON<TemplateModel>();
       }
@@ -548,7 +578,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       type,
       status: {
         // 不包含所有的操作时的状态
-        [Op.notIn]: [...Object.values(TemplateOperateStatus)],
+        [Op.notIn]: TemplateOperateStatus,
       },
       [Op.and]: andWhere,
     };
@@ -615,7 +645,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUser 请求的用户
    */
   getCountBySelf(type: string, includeTrashStatus: boolean, requestUser: RequestUser) {
-    const notIn: Array<TemplateOperateStatus | TemplateStatus> = [...Object.values(TemplateOperateStatus)];
+    const notIn: Array<TemplateStatus> = [...TemplateOperateStatus];
     if (!includeTrashStatus) {
       notIn.push(TemplateStatus.Trash);
     }
@@ -666,7 +696,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         type,
         status: {
           // 不包含所有的操作时的状态
-          [Op.notIn]: Object.values(TemplateOperateStatus),
+          [Op.notIn]: [...TemplateOperateStatus],
         },
         [Op.and]: this.sequelize.where(
           // TODO: 只支持 mssql 和 mysql
@@ -729,7 +759,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         type,
         status: {
           // 不包含所有的操作时的状态
-          [Op.notIn]: Object.values(TemplateOperateStatus),
+          [Op.notIn]: TemplateOperateStatus,
         },
         [Op.and]: year
           ? this.sequelize.where(
@@ -804,12 +834,51 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         type,
         status: {
           // 不包含所有的操作时的状态
-          [Op.notIn]: Object.values(TemplateOperateStatus),
+          [Op.notIn]: TemplateOperateStatus,
         },
       },
       // TODO: 只支持 mssql 和 mysql
       group: this.sequelize.getDialect() === 'mssql' ? mssqlYearCol : 'year',
     });
+  }
+
+  /**
+   * 获取修改历史记录数量
+   * @author Hubert
+   * @since 20203-09-14
+   * @param id Template id
+   */
+  getRevisionCount(id: number) {
+    return this.models.Template.count({
+      where: {
+        type: TemplateType.Revision,
+        parentId: id,
+      },
+    });
+  }
+
+  /**
+   * 获取修改历史记录列表
+   * @author Hubert
+   * @since 20203-09-14
+   * @param id Template id
+   * @param fields 返回字段
+   * @param requestUser 请求的用户
+   */
+  async getRevisions(id: number, fields: string[], requestUser: RequestUser) {
+    const template = await this.models.Template.findByPk(id, {
+      attributes: ['id', 'type', 'status', 'author'],
+    });
+    if (!template) return [];
+
+    this.hasEditCapability(template, requestUser);
+    return this.models.Template.findAll({
+      attributes: this.filterFields(fields, this.models.Template),
+      where: {
+        type: TemplateType.Revision,
+        parentId: id,
+      },
+    }).then((templates) => templates.map((template) => template.toJSON<TemplateModel>()));
   }
 
   /**
@@ -893,9 +962,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
       } else {
         // All 时排除 操作状态下的所有状态和 trash 状态
+        // 及操作状态下的所有状态
         andWhere.push({
           status: {
-            [Op.notIn]: [TemplateStatus.Trash],
+            [Op.notIn]: [TemplateStatus.Trash, ...TemplateOperateStatus],
           },
         });
       }
@@ -1005,6 +1075,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     type: string,
     requestUser: RequestUser,
   ): Promise<TemplateModel> {
+    // 不可以是操作状态
+    if (model.status) {
+      await this.checkOperateStatus(model.status, requestUser);
+    }
+
     // 具有编辑权限才可以新建
     await this.hasCapability(
       type === TemplateType.Form
@@ -1033,20 +1108,32 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       );
     }
 
-    const { title, content, status, metas, ...restModel } = model;
-    const creationModel: Omit<TemplateCreationAttributes, 'updatedAt' | 'createdAt'> = {
-      name: await this.fixName((restModel as any).name || title, type), // name 需要取唯一
-      title,
-      content,
-      author: requestUser.sub!,
-      type,
-      excerpt: (restModel as any).excerpt || '', // post
-      status: status || TemplateStatus.Draft, // 默认为 auto draft
-    };
+    const { content, commentStatus, metas, ...restModel } = model;
+    const status = model.status ?? TemplateStatus.AutoDraft; // 默认为 auto draft
+    const name = await this.fixName(((restModel as any).name || model.title) ?? '', type); // name 需要取唯一
+    const title =
+      model.title ?? status === TemplateStatus.AutoDraft
+        ? await this.translate('datasource.template.status.auto_draft', '自动草稿', {
+            lang: requestUser.lang,
+          })
+        : '';
+    const excerpt = (restModel as any).excerpt || ''; // post
 
     const t = await this.sequelize.transaction();
     try {
-      const template = await this.models.Template.create(creationModel, { transaction: t });
+      const template = await this.models.Template.create(
+        {
+          name,
+          title,
+          content: content ?? '',
+          author: requestUser.sub!,
+          type,
+          excerpt,
+          status,
+          commentStatus,
+        },
+        { transaction: t },
+      );
 
       metas?.length &&
         (await this.models.TemplateMeta.bulkCreate(
@@ -1074,7 +1161,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @since 2022-05-01
    * @version 0.0.1
    * @param id Template id/副本 template id
-   * @param model 修改实体模型，可修改字段：'name', 'title', 'content', 'excerpt'(Post), 'status'
+   * @param model 修改实体模型
    * @param requestUser 请求的用户
    */
   async update(
@@ -1082,6 +1169,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     model: UpdateFormTemplateInput | UpdatePageTemplateInput | UpdatePostTemplateInput | UpdateTemplateInput,
     requestUser: RequestUser,
   ): Promise<boolean> {
+    // 不可以是操作状态
+    if (model.status) {
+      await this.checkOperateStatus(model.status, requestUser);
+    }
+
     const template = await this.models.Template.findByPk(id);
     if (template) {
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
@@ -1090,7 +1182,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         throw new ForbiddenError(
           await this.translate(
             'datasource.template.update_trash_forbidden',
-            `Must be "trush" status, use "restore" function first!`,
+            `It is in "trush" status, use "restore" function first!`,
             { lang: requestUser.lang },
           ),
         );
@@ -1126,21 +1218,22 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           await this.storeTrashStatus(id, template.status, t);
         }
 
-        const { title, content, status, ...restModel } = model;
+        const { title, content, status, commentStatus, ...restModel } = model;
         let name, modelName;
+        // name 需要取唯一
         if ((modelName = (restModel as any).name) !== void 0) {
-          // name 需要取唯一
-          const template = await this.models.Template.findByPk(id);
-          template && template.name !== modelName && (name = await this.fixName(modelName, template.type));
+          template.name !== modelName && (name = await this.fixName(modelName, template.type));
         }
 
         await this.models.Template.update(
           {
+            ...restModel,
             name,
             title,
             content,
             excerpt: (restModel as any).excerpt, // post
             status,
+            commentStatus,
           },
           {
             where: { id },
@@ -1148,31 +1241,29 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           },
         );
 
-        // TODO: 暂时不处理变更跟踪
-        // 记录每一次的修改（undefined 是不会产生修改记录，需要区分 null 和 空）
-        // const title = !isUndefined(model.title) && model.title !== template.title ? model.title! : false;
-        // const content = !isUndefined(model.content) && model.content !== template.content ? model.content! : false;
-        // const excerpt =
-        // template.type === TemplateType.Template &&
-        //   !isUndefined((model as UpdateTemplateInput).excerpt) &&
-        //   (model as UpdateTemplateInput).excerpt !== template.excerpt
-        //     ? (model as UpdateTemplateInput).excerpt!
-        //     : false;
-        // if (title || content || excerpt) {
-        //   await this.models.Template.create(
-        //     {
-        //       title: title || template.title,
-        //       content: content || template.content,
-        //       excerpt: excerpt || template.excerpt,
-        //       author: requestUser.id,
-        //       name: `${id}-revision`,
-        //       type: TemplateOperateType.Revision,
-        //       status: TemplateOperateStatus.Inherit,
-        //       parentId: id,
-        //     },
-        //     { transaction: t },
-        //   );
-        // }
+        // 记录每一次的修改（undefined 是不会产生修改记录，需要区分 null 和 undefined）
+        const changedTitle = model.title !== void 0 && model.title !== template.title ? model.title! : false;
+        const changedContent = model.content !== void 0 && model.content !== template.content ? model.content! : false;
+        const changedExcerpt =
+          (model as UpdateTemplateInput).excerpt !== void 0 &&
+          (model as UpdateTemplateInput).excerpt !== template.excerpt
+            ? (model as UpdateTemplateInput).excerpt!
+            : false;
+        if (changedTitle || changedContent || changedExcerpt) {
+          await this.models.Template.create(
+            {
+              title: changedTitle || template.title,
+              content: changedContent || template.content,
+              excerpt: changedExcerpt || template.excerpt,
+              author: requestUser.sub!,
+              name: `${id}-revision`,
+              type: TemplateType.Revision,
+              status: TemplateStatus.Inherit,
+              parentId: id,
+            },
+            { transaction: t },
+          );
+        }
 
         await t.commit();
         return true;
@@ -1245,6 +1336,9 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param status 状态
    */
   async updateStatus(id: number, status: TemplateStatus, requestUser: RequestUser): Promise<boolean> {
+    // 不可以是操作状态
+    await this.checkOperateStatus(status, requestUser);
+
     const template = await this.models.Template.findByPk(id);
     if (template) {
       // 状态相同，忽略
@@ -1319,6 +1413,9 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param status 状态
    */
   async bulkUpdateStatus(ids: number[], status: TemplateStatus, requestUser: RequestUser): Promise<true> {
+    // 不可以是操作状态
+    await this.checkOperateStatus(status, requestUser);
+
     const templates = await this.models.Template.findAll({
       where: {
         id: ids,
@@ -1396,6 +1493,27 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       await t.rollback();
       throw err;
     }
+  }
+
+  /**
+   * 更新评论数据
+   * @author Hubert
+   * @since 2022-05-01
+   * @param id Template id
+   * @param count Comment count
+   * @returns
+   */
+  async updateCommentCount(id: number, count: number): Promise<boolean> {
+    return this.models.Template.update(
+      {
+        commentCount: count,
+      },
+      {
+        where: {
+          id,
+        },
+      },
+    ).then(([count]) => count > 0);
   }
 
   /**

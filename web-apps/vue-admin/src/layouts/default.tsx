@@ -178,7 +178,9 @@ export default defineComponent({
         if (user) {
           currentUser.value = {
             name: user.profile.nickname ?? user.profile.accountName ?? '',
-            photo: `${process.env.BASE_URL}static/images/head_default.jpg`,
+            photo: user.profile.picture
+              ? `//demo.res.ihealthinkcare.com/image/head-${user.profile.picture}`
+              : `${process.env.BASE_URL}static/images/head_default.jpg`,
           };
         }
       });
@@ -218,7 +220,6 @@ export default defineComponent({
                 }
                 sideCollapsed={appMixin.sideCollapsed}
                 sideCollapsedMouseAnimationDisabled
-                menuTriggerImmediately={false}
                 loading={loadingRef.value}
                 loadingText={i18n.tv('common.tips.loading_text', 'Loading...') as string}
                 class={classes.layoutWrapper}

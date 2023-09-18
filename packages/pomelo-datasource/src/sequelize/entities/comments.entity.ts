@@ -27,17 +27,16 @@ export default class Comments extends Model<
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   Comments.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
       templateId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         comment: 'Tempate(Post) id',
       },
@@ -88,15 +87,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         comment: 'Client UserAgent',
       },
       parentId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'Parent id',
       },
       userId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.STRING(50),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'User id',

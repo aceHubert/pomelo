@@ -15,11 +15,11 @@ export default class TermTaxonomy extends Model<TermTaxonomyAttributes, TermTaxo
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   TermTaxonomy.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
@@ -45,8 +45,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         comment: 'Description',
       },
       parentId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'Parent id (default: 0)',

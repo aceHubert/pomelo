@@ -2,7 +2,7 @@ import { defineComponent, ref, onMounted } from '@vue/composition-api';
 import { Skeleton, Tabs, Icon } from 'ant-design-vue';
 import { MarkdownInput } from 'antdv-layout-pro';
 import { useSubmoduleApi } from '@/fetch/graphql';
-import classes from './styles/details.module.less';
+import classes from './details.module.less';
 
 // Types
 import type { PropType } from '@vue/composition-api';

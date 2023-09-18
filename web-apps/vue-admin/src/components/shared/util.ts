@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import { trailingSlash } from '@ace-util/core';
 
 /**
  *  sanitize component object
@@ -38,13 +37,4 @@ export function getComponentName(Component): string {
 
   const component = sanitizeComponent(Component);
   return component.options.name;
-}
-
-export const obsPrefix = '//cdn.acehubert.com/';
-
-/**
- * get obs display url
- */
-export function getObsDisplayUrl(objectKey: string, prefix = obsPrefix) {
-  return trailingSlash(prefix) + objectKey;
 }

@@ -5,8 +5,8 @@
 @import (multiple) 'antdv-layout-pro/style/component-reset';
 @import '../../components/index';
 
-// set ckeditor theme
 body {
+  // set ckeditor theme
   --ck-color-text: @text-color;
   --ck-color-toolbar-background: @body-background;
   --ck-color-base-background: @component-background;
@@ -15,7 +15,7 @@ body {
   --ck-color-input-border: @border-color-base;
   --ck-color-button-default-hover-background: @var-primary-lighter;
   --ck-color-button-default-active-background: @var-primary-lighter;
-  --ck-color-button-on-color: @var-primary ;
+  --ck-color-button-on-color: @var-primary;
   --ck-color-button-on-background: @var-primary-lighter;
   --ck-color-button-on-hover-background: @var-primary-light;
   --ck-color-button-on-active-background: @var-primary-light;
@@ -34,6 +34,12 @@ body {
   --ck-focus-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-outer-shadow);
   --ck-focus-disabled-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-disabled-shadow);
   --ck-color-widget-blurred-border: @border-color-base;
+  // set dn-app
+  --dn-brand: var(--theme-primary);
+  --dn-brand-hovering: var(--theme-primary-lighten1);
+  --dn-brand-dragging: var(--theme-primary-lighten5);
+  --dn-brand-dropping: var(--theme-primary-lighten4);
+  --dn-brand-moving: var(--theme-primary-lighten3);
 }
 
 // Dark theme
@@ -46,8 +52,8 @@ body {
   @import (reference) 'variables';
   @root-entry-name: dark;
 
-  // set ckeditor theme
   & {
+    // set ckeditor theme
     --ck-color-text: @text-color;
     --ck-color-toolbar-background: @body-background;
     --ck-color-base-background: @component-background;
@@ -80,5 +86,11 @@ body {
     --ck-focus-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-outer-shadow);
     --ck-focus-disabled-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-disabled-shadow);
     --ck-color-widget-blurred-border: @border-color-base;
+    // set dn-app
+    --dn-brand: var(--theme-primary);
+    --dn-brand-hovering: var(--theme-primary-lighten1);
+    --dn-brand-dragging: var(--theme-primary-lighten5);
+    --dn-brand-dropping: var(--theme-primary-lighten4);
+    --dn-brand-moving: var(--theme-primary-lighten3);
   }
 }

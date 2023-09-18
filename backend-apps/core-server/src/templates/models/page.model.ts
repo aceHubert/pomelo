@@ -9,6 +9,9 @@ export class PageTemplate extends PickType(Template, [
   'title',
   'author',
   'status',
+  'commentStatus',
+  'commentCount',
+  'updatedAt',
   'createdAt',
 ] as const) {
   @Field({ description: 'Schema string JSON' })

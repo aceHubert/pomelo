@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
+    "serve": "run -T concurrently --raw \"tsc --project tsconfig.build.json -watch\"",
     "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json"
   },
   "dependencies": {

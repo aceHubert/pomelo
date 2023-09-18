@@ -3,6 +3,18 @@ import { defineRegistApi, gql } from './core';
 // Types
 import type { TypedQueryDocumentNode, TypedSubscriptionDocumentNode } from './core/request';
 
+export enum OptionAutoload {
+  Yes = 'Yes',
+  No = 'No',
+}
+
+export interface OptionModel {
+  id: string;
+  name: string;
+  value: string;
+  autoload: OptionAutoload;
+}
+
 export type Message =
   | { content: string; to?: string }
   // post review
@@ -23,6 +35,22 @@ export const useBasicApi = defineRegistApi('basic', {
       options: autoloadOptions
     }
   ` as TypedQueryDocumentNode<{ options: Record<string, any> }>,
+  getOption: gql`
+    query getOption($id: ID!) {
+      option(id: $id) {
+        id
+        name: optionName
+        value: optionValue
+        autoload
+      }
+    }
+  ` as TypedQueryDocumentNode<{ option: OptionModel }, { id: number }>,
+  getOptionValue: gql`
+    query getOptionValue($name: String!) {
+      value: optionValue(name: $name)
+    }
+  ` as TypedQueryDocumentNode<{ value: string }, { name: string }>,
+
   // 消息订阅
   onMessage: gql`
     subscription OnMessage {

@@ -1,5 +1,5 @@
 import { debounce } from 'lodash-es';
-import { defineComponent, ref, reactive, computed, watch, onMounted } from '@vue/composition-api';
+import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { createDesigner, GlobalRegistry, ScreenType } from '@designable/core';
 import { onFieldInputValueChange } from '@formily/core';
@@ -22,18 +22,18 @@ import {
   HistoryWidget,
 } from '@formily/antdv-designable';
 import { SettingsForm } from '@formily/antdv-settings-form';
-import { Divider, Collapse, Icon, Form, Input, TreeSelect } from 'ant-design-vue';
+import { Divider, Icon, Form, Input } from 'ant-design-vue';
+import { useConfigProvider } from 'antdv-layout-pro/shared';
+import { Theme } from 'antdv-layout-pro/types';
 import { warn, jsonSerializeReviver, jsonDeserializeReviver } from '@ace-util/core';
-import { obsUpload, obsFormatDisplayUrl } from '@pomelo/shared-web';
 import { Modal, message } from '@/components';
-import { useResApi, formatError, TemplateStatus, usePageApi } from '@/fetch/graphql';
+import { usePageApi, TemplateStatus } from '@/fetch/graphql';
 import { useI18n, useUserManager } from '@/hooks';
-import { useDeviceMixin } from '@/mixins';
 import { DesignLayout } from '../../components';
 import { useDesignMixin } from '../../mixins/design.mixin';
 import { transformToPageSchema, transformToPageTreeNode } from './utils';
 import { ResourceWidgets, ComponentWidget, PreviewWidget, SchemaEditorWidget } from './widgets';
-import classes from '../styles/design.module.less';
+import classes from './index.module.less';
 
 // Types
 import type { TreeNode, ITreeNode } from '@designable/core';
@@ -65,7 +65,7 @@ GlobalRegistry.registerDesignerLocales({
 
 export default defineComponent({
   name: 'PageDesign',
-  layout: 'blank-light',
+  layout: 'blank',
   props: {
     id: String,
   },
@@ -106,11 +106,10 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const i18n = useI18n();
+    const configProvider = useConfigProvider();
     const userManager = useUserManager();
     const pageApi = usePageApi();
-    const resApi = useResApi();
     const designMixin = useDesignMixin();
-    const deviceMixin = useDeviceMixin();
 
     GlobalRegistry.setDesignerLanguage(i18n.locale || 'en-US');
 
@@ -217,7 +216,7 @@ export default defineComponent({
       });
 
       if (page) {
-        const { name, title, schema, status, categories } = page;
+        const { name, title, schema, status } = page;
 
         // edit model
         nameRef.value = name;
@@ -247,12 +246,6 @@ export default defineComponent({
           // 设置当前设计器的值
           engine.screen.type === ScreenType.PC && engine.setCurrentTree(treeNodesCache.pc.value);
         }
-
-        // category
-        designMixin.getCategories().then((treeData) => {
-          designMixin.category.treeData = treeData;
-          designMixin.category.selectKeys = categories.map(({ id, name }) => ({ value: id, label: name }));
-        });
 
         engine.workbench.currentWorkspace.history.clear();
         // treenode changed
@@ -366,7 +359,6 @@ export default defineComponent({
           });
         })
         .catch((err) => {
-          err = formatError(err);
           message.error(`新建失败，${err.message}`);
         });
     };
@@ -406,7 +398,6 @@ export default defineComponent({
           actionStatus.changed = false;
         })
         .catch((err) => {
-          err = formatError(err);
           message.error(`修改失败，${err.message}`);
         })
         .finally(() => {
@@ -552,38 +543,9 @@ export default defineComponent({
     };
     // #endregion
 
-    const getObsUploadAction = async (file: File) => {
-      const suffix = file.name.substring(file.name.lastIndexOf('.'));
-      const fileName = Math.random().toString(16).substring(2) + suffix;
-      const objectKey = `temp/page_${fileName}`;
-      const {
-        signedUrl: { url, headers },
-      } = await resApi.getObsUploadSignedUrl({
-        variables: {
-          bucket: 'static-cdn',
-          key: objectKey,
-          headers: {
-            'Content-Type': file.type,
-          },
-        },
-      });
-
-      // type error, obs 上传要从授权中取参数
-      return {
-        displayUrl: obsFormatDisplayUrl(objectKey),
-        action: url,
-        headers,
-      };
-    };
-
-    onMounted(() => {
-      if (deviceMixin.isDesktop) {
-        siderCollapsedRef.value = false;
-      }
-    });
-
     return {
       engine,
+      theme: configProvider.theme,
       treeNodesCache,
       actionStatus,
       actionCapability,
@@ -598,6 +560,7 @@ export default defineComponent({
       loadCategoryData: designMixin.loadCategoryData,
       handleCategoryChange: designMixin.handleCategoryChange,
       handleCategorySearch: debounce(designMixin.handleCategorySearch, 800),
+      handleUploadRequest: designMixin.getCustomUploadRequest('templates/page_'),
       handleUpdate,
       handelPublish,
       handleMakePrivate,
@@ -606,7 +569,6 @@ export default defineComponent({
       handleSubmitReview,
       handleApproveReview,
       handleRejectReview,
-      getObsUploadAction,
     };
   },
   render() {
@@ -644,31 +606,6 @@ export default defineComponent({
                     }}
                   />
                 </Form.Item>
-                <Divider class="mt-4 mb-0" />
-                <Collapse
-                  bordered={false}
-                  activeKey="statusAndVisibility"
-                  expand-icon-position="right"
-                  class="shades transparent"
-                >
-                  {!this.isAddMode && (
-                    <Collapse.Panel header={this.$tv('page_templates.category_label', '分类')}>
-                      <TreeSelect
-                        value={this.category.selectKeys}
-                        treeData={this.category.treeData}
-                        loadData={this.loadCategoryData.bind(this)}
-                        treeCheckStrictly
-                        showSearch
-                        treeCheckable
-                        treeDataSimpleMode
-                        dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
-                        placeholder={this.$tv('page_templates.category_placeholder', '请选择分类(或输入搜索分类)')}
-                        onSearch={this.handleCategorySearch.bind(this)}
-                        onChange={this.handleCategoryChange(this.id!).bind(this)}
-                      ></TreeSelect>
-                    </Collapse.Panel>
-                  )}
-                </Collapse>
               </Form>
             ),
           },
@@ -683,7 +620,11 @@ export default defineComponent({
           },
         }}
       >
-        <Designer engine={this.engine} class={classes.schemaDesigner}>
+        <Designer
+          engine={this.engine}
+          theme={this.theme === Theme.Dark ? 'dark' : 'light'}
+          class={classes.schemaDesigner}
+        >
           <Workbench>
             <StudioPanel>
               <CompositePanel>
@@ -729,9 +670,8 @@ export default defineComponent({
                 extra={<Icon type="setting" onClick={() => (this.formSettingVisable = !this.formSettingVisable)} />}
               >
                 <SettingsForm
-                  uploadAction={this.getObsUploadAction}
                   uploadMethod="PUT"
-                  uploadCustomRequest={(options: any) => obsUpload({ ...options, ...options.action })}
+                  uploadCustomRequest={(options: any) => this.handleUploadRequest(options)}
                   headers={{}}
                   effects={() => {
                     onFieldInputValueChange('*', (field) => {

@@ -3,11 +3,11 @@ import { Button, Icon, Input, List } from 'ant-design-vue';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { useSubmoduleApi } from '@/fetch/graphql';
 import { useLocationMixin } from '@/mixins';
-import classes from './styles/index.module.less';
+import classes from './index.module.less';
 
 // Types
 import type { PropType } from '@vue/composition-api';
-import type { PagedSubModuleQuery, PagedSubModuleItem } from '@/fetch/graphql';
+import type { PagedSubModuleArgs, PagedSubModuleItem } from '@/fetch/graphql';
 
 export default defineComponent({
   name: 'SubModules',
@@ -31,7 +31,7 @@ export default defineComponent({
       total: 0,
     });
 
-    const getModules = async (query: PagedSubModuleQuery, callback: (rows: PagedSubModuleItem[]) => void) => {
+    const getModules = async (query: PagedSubModuleArgs, callback: (rows: PagedSubModuleItem[]) => void) => {
       const {
         subModules: { rows, total },
       } = await submoduleApi.getPaged({

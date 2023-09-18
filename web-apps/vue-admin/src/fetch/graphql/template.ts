@@ -20,7 +20,18 @@ export enum TemplateStatus {
   Trash = 'Trash', // 垃圾箱
 }
 
-export interface PagedTemplateQuery {
+export enum TemplateCommentStatus {
+  Open = 'Open',
+  Closed = 'Closed',
+}
+
+export enum TemplatePageType {
+  Default = 'default',
+  Cover = 'cover',
+  FullWidth = 'full-width',
+}
+
+export interface PagedTemplateArgs {
   keyword?: string;
   type: string;
   author?: string;
@@ -33,16 +44,24 @@ export interface PagedTemplateQuery {
   querySelfCounts?: boolean;
 }
 
-export interface PagedTemplateItem {
-  id: string;
+export interface TempaleModel {
+  id: number;
   title: string;
   name: string;
   excerpt: string;
+  content: string;
   author: string;
   status: TemplateStatus;
-  categories: Pick<TermTaxonomyModel, 'id' | 'name'>[];
+  type: string;
+  commentStatus: TemplateCommentStatus;
+  commentCount: number;
+  updatedAt: string;
   createdAt: string;
+  categories: Pick<TermTaxonomyModel, 'id' | 'name'>[];
+  metas: Array<Pick<TemplateMetaModel, 'id' | 'key' | 'value'>>;
 }
+
+export interface PagedTemplateItem extends Omit<TempaleModel, 'content' | 'metas'> {}
 
 interface TemplateCountItem {
   count: number;
@@ -64,24 +83,11 @@ export interface TemplateYearCountItem extends TemplateCountItem {
   year: string;
 }
 
-export type TempaleModel = {
-  id: number;
-  title: string;
-  name: string;
-  excerpt: string;
-  content: string;
-  author: string;
-  status: TemplateStatus;
-  type: string;
-  categories: Pick<TermTaxonomyModel, 'id' | 'name'>[];
-  metas: Array<Pick<TemplateMetaModel, 'id' | 'key' | 'value'>>;
-};
-
 export interface NewTemplateInput {
-  title: string;
+  title?: string;
   name?: string;
-  excerpt: string;
-  content: string;
+  excerpt?: string;
+  content?: string;
   status?: TemplateStatus;
   type: string;
   metas?: Pick<NewTemplateMetaInput, 'metaKey' | 'metaValue'>[];
@@ -135,11 +141,14 @@ export const useTemplateApi = defineRegistApi('template', {
           excerpt
           author
           status
+          commentStatus
+          commentCount
+          updatedAt
+          createdAt
           categories {
             id
             name
           }
-          createdAt
         }
         total
       }
@@ -155,7 +164,7 @@ export const useTemplateApi = defineRegistApi('template', {
       statusCounts?: TemplateStatusCountItem[];
       selfCounts?: number;
     },
-    PagedTemplateQuery
+    PagedTemplateArgs
   >,
   // 获取模版
   get: gql`
@@ -163,11 +172,15 @@ export const useTemplateApi = defineRegistApi('template', {
       template(id: $id) {
         id
         title
-        excerpt
         content
+        excerpt
         author
         status
         type
+        commentStatus
+        commentCount
+        updatedAt
+        createdAt
         categories {
           id
           name
@@ -230,10 +243,24 @@ export const useTemplateApi = defineRegistApi('template', {
     mutation create($newTemplate: NewTemplateInput!) {
       template: createTemplate(model: $newTemplate) {
         id
+        name
         title
         excerpt
-        content
+        author
         status
+        commentStatus
+        commentCount
+        updatedAt
+        createdAt
+        categories {
+          id
+          name
+        }
+        metas(metaKeys: $metaKeys) {
+          id
+          key: metaKey
+          value: metaValue
+        }
       }
     }
   ` as TypedMutationDocumentNode<{ template: TempaleModel }, { newTemplate: NewTemplateInput }>,

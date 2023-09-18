@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { AppModule } from './app.module';
 
 declare const module: any;
@@ -32,6 +33,15 @@ async function bootstrap() {
 
   // add grobal prefix
   app.setGlobalPrefix(globalPrefixUri);
+
+  // graphql upload file
+  app.use(
+    configService.get<string>('graphql.path', '/graphql'),
+    graphqlUploadExpress({
+      maxFileSize: configService.get<number>('upload.maxFileSize'),
+      maxFiles: configService.get<number>('upload.maxFiles'),
+    }),
+  );
 
   // swagger
   if (isSwaggerDebug) {

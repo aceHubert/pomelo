@@ -1,13 +1,13 @@
 import { IsDefined, IsString, IsJSON } from 'class-validator';
 import { PickType } from '@nestjs/swagger';
-import { TemplateStatus } from '@pomelo/datasource';
+import { TemplateCommentStatus, TemplateStatus } from '@pomelo/datasource';
 import { NewTemplateValidator } from './new-template.validator';
 
 export class NewTemplateDto extends NewTemplateValidator {
   /**
    * Title
    */
-  title!: string;
+  title?: string;
 
   /**
    * Identity name (generate by title if not provider)
@@ -22,7 +22,7 @@ export class NewTemplateDto extends NewTemplateValidator {
   /**
    * Content
    */
-  content!: string;
+  content?: string;
 
   /**
    * Status, Default: Draft
@@ -33,6 +33,12 @@ export class NewTemplateDto extends NewTemplateValidator {
    * Type
    */
   type!: string;
+
+  /**
+   * Comment status
+   * @default closed
+   */
+  commentStatus?: TemplateCommentStatus;
 }
 
 export class NewFormTemplateDto extends PickType(NewTemplateDto, ['title', 'name', 'status'] as const) {
@@ -45,7 +51,12 @@ export class NewFormTemplateDto extends PickType(NewTemplateDto, ['title', 'name
   schema!: string;
 }
 
-export class NewPageTemplateDto extends PickType(NewTemplateDto, ['title', 'name', 'status'] as const) {
+export class NewPageTemplateDto extends PickType(NewTemplateDto, [
+  'title',
+  'name',
+  'status',
+  'commentStatus',
+] as const) {
   /**
    * Schema
    */
@@ -61,6 +72,7 @@ export class NewPostTemplateDto extends PickType(NewTemplateDto, [
   'excerpt',
   'content',
   'status',
+  'commentStatus',
 ] as const) {
   // something else
 }

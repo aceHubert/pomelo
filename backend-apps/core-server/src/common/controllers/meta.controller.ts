@@ -204,8 +204,9 @@ export function createMetaController<
       @Param(`${_camelCaseModelName}Id`, ParseIntPipe) modelId: number,
       @Param('metaKey') metaKey: string,
       @Body('metaValue') metaValue: string,
+      @Body('createIfNotExists') createIfNotExists?: boolean,
     ) {
-      await this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue);
+      await this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
       return this.success();
     }
 

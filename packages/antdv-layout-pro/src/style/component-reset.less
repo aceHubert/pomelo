@@ -344,7 +344,7 @@
   }
   .button-disabled(@disabled-color; transparent; transparent);
 }
-.@{ant-prefix}-btn {  
+.@{ant-prefix}-btn {
   .btn;
   .btn-default;
 
@@ -524,6 +524,8 @@
 // Card
 // ---
 .@{ant-prefix}-card {
+  .reset-component;
+
   background: @card-background;
 
   &-hoverable {
@@ -537,7 +539,7 @@
   }
 
   &-head {
-    color: @card-head-color;  
+    color: @card-head-color;
     background: @card-head-background;
     border-bottom-color: @border-color-split;
 
@@ -577,7 +579,7 @@
 
       > span {
         &:hover {
-          color: @var-primary;          
+          color: @var-primary;
         }
 
         a:not(.@{ant-prefix}-btn),
@@ -602,7 +604,7 @@
 
   &-meta {
     &-title {
-      color: @card-head-color;    
+      color: @card-head-color;
     }
 
     &-description {
@@ -657,7 +659,7 @@
     &-clear {
       color: @disabled-color;
       background: @component-background;
-    
+
       &:hover {
         color: @text-color-secondary;
       }
@@ -726,16 +728,16 @@
       border-color: @checkbox-color;
     }
 
-    &-checked::after {    
-      border-color: @checkbox-color;     
+    &-checked::after {
+      border-color: @checkbox-color;
     }
 
     &-inner {
       background-color: @checkbox-check-color;
       border-color:  @border-color-base;
-    
+
       &::after {
-        border-color: @checkbox-check-color;      
+        border-color: @checkbox-check-color;
       }
     }
   }
@@ -978,9 +980,9 @@
   }
 
   &-clear {
-    color: @disabled-color;  
+    color: @disabled-color;
     background: @input-bg;
-  
+
     &:hover {
       color: @text-color-secondary;
     }
@@ -1369,7 +1371,7 @@
   }
 
   &-item-label {
-    color: @heading-color;
+    color: @text-color-secondary;
   }
 
   &-item-content {
@@ -1405,8 +1407,8 @@
 
   &-horizontal&-with-text-center,
   &-horizontal&-with-text-left,
-  &-horizontal&-with-text-right {  
-    color: @heading-color; 
+  &-horizontal&-with-text-right {
+    color: @heading-color;
     background: transparent;
     &::before,
     &::after {
@@ -1465,8 +1467,8 @@
   }
 
   &-close {
-    color: @text-color-secondary;   
-    background: transparent;   
+    color: @text-color-secondary;
+    background: transparent;
 
     &:focus,
     &:hover {
@@ -1510,8 +1512,8 @@
     }
 
     &-item,
-    &-submenu-title {     
-      color: @text-color;   
+    &-submenu-title {
+      color: @text-color;
 
       > a {
         color: @text-color;
@@ -1669,7 +1671,7 @@
 }
 .@{ant-prefix}-form{
   .reset-component;
-  .reset-form;  
+  .reset-form;
 }
 
 .@{ant-prefix}-form-item-required::before {
@@ -1852,7 +1854,7 @@
   & when(iscolor(@color) = false) {
     border-color: @color;
     box-shadow: @input-outline-offset @outline-blur-size @outline-width @shadow;
-  } 
+  }
 }
 .disabled(){
   color: @disabled-color;
@@ -1880,7 +1882,7 @@
    .disabled;
   }
 }
-.input-group() {  
+.input-group() {
   &-addon {
     color: @input-color;
     background-color: @input-addon-bg;
@@ -2004,8 +2006,8 @@
     .disabled;
   }
 
-  &-input {   
-    background-color: transparent;   
+  &-input {
+    background-color: transparent;
     .placeholder();
   }
 
@@ -2041,16 +2043,16 @@
   &-sider {
     background: @layout-sider-background;
 
-    &-trigger {  
-      color: @layout-trigger-color;     
+    &-trigger {
+      color: @layout-trigger-color;
       background: @layout-trigger-background;
     }
 
     &-zero-width {
       &-trigger {
-        color: @layout-trigger-color;       
+        color: @layout-trigger-color;
         background: @layout-sider-background;
-      
+
         &:hover {
           background: tint(@layout-sider-background, 10%);
         }
@@ -2059,7 +2061,7 @@
 
     &-light {
       background: @layout-sider-background-light;
-    
+
       .@{ant-prefix}-layout-sider-trigger {
         color: @layout-trigger-color-light;
         background: @layout-trigger-background-light;
@@ -2092,11 +2094,11 @@
     }
 
     &-meta {
-      &-title {      
+      &-title {
         color: @text-color;
         > a {
           color: @text-color;
-         
+
           &:hover {
             color: @var-primary;
           }
@@ -2106,9 +2108,9 @@
         color: @text-color-secondary;
       }
     }
-    &-action {      
+    &-action {
       & > li {
-        color: @text-color-secondary;       
+        color: @text-color-secondary;
       }
       &-split {
         background-color: @border-color-split;
@@ -2143,7 +2145,7 @@
   &-vertical &-item {
     &-meta {
       &-title {
-        color: @heading-color;       
+        color: @heading-color;
       }
     }
   }
@@ -2179,7 +2181,7 @@
     &-menu {
       &-item {
         color: @text-color;
-        
+
         &:hover {
           background-color: @item-hover-bg;
         }
@@ -2293,7 +2295,7 @@
           background: @menu-bg;
           background: ~'@{menu-item-color} \9';
           background-image: linear-gradient(to right, @menu-item-color, @menu-item-color);
-          background-image: ~'none \9';        
+          background-image: ~'none \9';
         }
       }
       > .@{ant-prefix}-menu-submenu-title:hover .@{ant-prefix}-menu-submenu-arrow {
@@ -2318,7 +2320,7 @@
     border-bottom-color: @border-color-split;
 
     > .@{ant-prefix}-menu-item,
-    > .@{ant-prefix}-menu-submenu {   
+    > .@{ant-prefix}-menu-submenu {
       &:hover,
       &-active,
       &-open,
@@ -2347,12 +2349,12 @@
   &-inline {
     .@{ant-prefix}-menu-item {
       &::after {
-        border-right-color: @menu-highlight-color;      
+        border-right-color: @menu-highlight-color;
       }
     }
   }
 
-  &-inline-collapsed {  
+  &-inline-collapsed {
     &-tooltip {
       a {
         color: @text-color-dark;
@@ -2574,7 +2576,7 @@
 // ---
 .@{ant-prefix}-page-header {
   .reset-component;
-  
+
   background-color: @component-background;
 
   &-back {
@@ -2625,12 +2627,12 @@
 
       &:focus,
       &:hover {
-        border-color: @var-primary-lighten5;
+        border-color: @var-primary-darken1;
       }
 
       &:focus a,
       &:hover a {
-        color: @var-primary-lighten5;
+        color: @var-primary-darken1;
       }
     }
   }
@@ -2720,8 +2722,8 @@
 
       a {
         color: @disabled-color;
-        background: transparent;         
-        border: none;      
+        background: transparent;
+        border: none;
       }
 
       &-active {
@@ -3105,7 +3107,7 @@
 // ---
 .@{ant-prefix}-select {
   .reset-component;
-  
+
   > ul > li > a {
     background-color: @component-background;
   }
@@ -3167,14 +3169,14 @@
   }
 
   &-selection--multiple {
-    .@{ant-prefix}-select-selection__choice {    
+    .@{ant-prefix}-select-selection__choice {
       color: @tag-default-color;
       background-color: @tag-default-bg;
       border-color: @border-color-split;
     }
 
     .@{ant-prefix}-select-selection__choice__remove {
-      color: @text-color-secondary;    
+      color: @text-color-secondary;
       &:hover {
         color: @icon-color-hover;
       }
@@ -3190,16 +3192,16 @@
 
 .@{ant-prefix}-select-dropdown {
   .reset-component;
-  
+
   background-color: @select-dropdown-bg;
   box-shadow: @box-shadow-base;
 
   &-menu {
-    &-item-group-title {   
+    &-item-group-title {
       color: @text-color-secondary;
     }
 
-    &-item {    
+    &-item {
       color: @text-color;
       &:hover:not(&-disabled) {
         background-color: @item-hover-bg;
@@ -3229,7 +3231,7 @@
   }
 
   &&--multiple {
-    .@{ant-prefix}-select-dropdown-menu-item {    
+    .@{ant-prefix}-select-dropdown-menu-item {
       &:hover .@{ant-prefix}-select-selected-icon {
         color: fade(@white, 87%);
       }
@@ -3304,7 +3306,7 @@
     background-color: @slider-handle-background-color;
     border-color: @slider-handle-color;
     box-shadow: @slider-handle-shadow;
-   
+
     &:focus {
       border-color: @slider-handle-color-focus;
       box-shadow: 0 0 0 5px @slider-handle-color-focus-shadow;
@@ -3339,7 +3341,7 @@
   &-dot {
     background-color: @component-background;
     border-color: @slider-dot-border-color;
-  
+
     &-active {
       border-color: @slider-dot-border-color-active;
     }
@@ -3462,7 +3464,7 @@
 .@{ant-prefix}-steps-item {
   &-icon {
     border-color: @wait-icon-color;
-   
+
     > .@{ant-prefix}-steps-icon {
       color: @var-primary;
     }
@@ -3641,7 +3643,7 @@
   .reset-component;
 
   &-thead > tr > th {
-    color: @table-header-color;  
+    color: @table-header-color;
     background: @table-header-bg;
     border-bottom-color: @border-color-split;
 
@@ -3655,8 +3657,8 @@
     }
 
     .@{ant-prefix}-table-column-sorter {
-      .@{ant-prefix}-table-column-sorter-inner {       
-        // color: @table-header-icon-color;      
+      .@{ant-prefix}-table-column-sorter-inner {
+        // color: @table-header-icon-color;
 
         .@{ant-prefix}-table-column-sorter-up,
         .@{ant-prefix}-table-column-sorter-down {
@@ -3689,7 +3691,7 @@
         }
       }
 
-      &.@{ant-prefix}-table-column-has-sorters {       
+      &.@{ant-prefix}-table-column-has-sorters {
         &:active {
           .@{ant-prefix}-table-column-sorter-up:not(.on),
           .@{ant-prefix}-table-column-sorter-down:not(.on) {
@@ -3838,7 +3840,7 @@
     //   color: @table-header-icon-color;
     // }
 
-    &-menu {    
+    &-menu {
       background: @component-background;
       box-shadow: @box-shadow-base;
 
@@ -3847,7 +3849,7 @@
       // }
     }
 
-    &-down {    
+    &-down {
       &:hover .@{iconfont-css-prefix}-down {
         color: fade(@white, 60%);
       }
@@ -3886,7 +3888,7 @@
   }
 
   &-fixed-left,
-  &-fixed-right {  
+  &-fixed-right {
     table {
       background: @component-background;
     }
@@ -4223,7 +4225,7 @@
     &[disabled] {
       color: @disabled-color;
       background-color: @input-disabled-bg;
-    
+
       &:hover {
         border-color: @input-border-color;
       }
@@ -4233,7 +4235,7 @@
   &-icon,
   &-clear {
     color: @disabled-color;
-   
+
     .@{ant-prefix}-time-picker-clock-icon {
       color: @disabled-color;
     }
@@ -4378,7 +4380,7 @@
     &-search {
       &-action {
         color: @disabled-color;
-       
+
         .@{iconfont-css-prefix} {
           color: @disabled-color;
           &:hover {
@@ -4525,9 +4527,9 @@
       }
     }
 
-    .@{ant-prefix}-tree-node-content-wrapper {    
+    .@{ant-prefix}-tree-node-content-wrapper {
       color: @text-color;
-      
+
       &:hover {
         background-color: @tree-node-hover-bg;
       }
@@ -4571,7 +4573,7 @@
   li {
     .@{ant-prefix}-select-tree-node-content-wrapper {
       color: @text-color;
-    
+
       &:hover {
         background-color: @item-hover-bg;
       }
@@ -4585,7 +4587,7 @@
           color: @var-primary;
         }
       }
-      &.@{ant-prefix}-select-tree-switcher {     
+      &.@{ant-prefix}-select-tree-switcher {
         &.@{ant-prefix}-select-tree-switcher_open,
         &.@{ant-prefix}-select-tree-switcher_close {
           .@{ant-prefix}-select-switcher-loading-icon {
@@ -4611,8 +4613,8 @@
   .reset-component;
   .@{ant-prefix}-select-dropdown-search {
     background: @component-background;
-   
-    .@{ant-prefix}-select-search__field {     
+
+    .@{ant-prefix}-select-search__field {
       border-color: @border-color-base;
       background: @component-background;
     }
@@ -4692,7 +4694,7 @@
 
     .@{iconfont-css-prefix}-close {
       color: @text-color-secondary;
-     
+
       &:hover {
         color: @text-color;
       }
@@ -4745,7 +4747,7 @@
       .@{iconfont-css-prefix}-download,
       .@{iconfont-css-prefix}-delete {
         color: @text-color-dark;
-       
+
         &:hover {
           color: @text-color-inverse;
         }

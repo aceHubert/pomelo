@@ -101,7 +101,7 @@ export class PostTemplateController extends BaseController {
     const result = await this.templateDataSource.getByName(
       name,
       TemplateType.Post,
-      ['id', 'name', 'title', 'author', 'content', 'excerpt', 'status', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'content', 'excerpt', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -148,7 +148,7 @@ export class PostTemplateController extends BaseController {
     const result = await this.templateDataSource.get(
       id,
       TemplateType.Post,
-      ['id', 'name', 'title', 'author', 'content', 'excerpt', 'status', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'content', 'excerpt', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -198,7 +198,7 @@ export class PostTemplateController extends BaseController {
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
       TemplateType.Post,
-      ['id', 'name', 'title', 'author', 'excerpt', 'status', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'excerpt', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -218,11 +218,8 @@ export class PostTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: PostTemplateModelResp }, 'PostTemplateModelSuccessResp'),
   })
   async create(@Body() input: NewPostTemplateDto, @User() requestUser: RequestUser) {
-    const { id, name, title, author, content, excerpt, status, createdAt } = await this.templateDataSource.create(
-      { ...input, excerpt: input.excerpt || '' },
-      TemplateType.Post,
-      requestUser,
-    );
+    const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
+      await this.templateDataSource.create({ ...input, excerpt: input.excerpt || '' }, TemplateType.Post, requestUser);
     return this.success({
       data: {
         id,
@@ -232,6 +229,9 @@ export class PostTemplateController extends BaseController {
         content,
         excerpt,
         status,
+        commentStatus,
+        commentCount,
+        updatedAt,
         createdAt,
       },
     });

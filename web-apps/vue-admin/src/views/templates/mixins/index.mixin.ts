@@ -3,7 +3,7 @@ import { ref, reactive, computed, watch, set } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { message } from '@/components';
 import { useI18n, useOptions } from '@/hooks';
-import { useTemplateApi, useTermTaxonomyApi, TemplateStatus, formatError } from '@/fetch/graphql';
+import { useTemplateApi, useTermTaxonomyApi, TemplateStatus } from '@/fetch/graphql';
 
 // Types
 import type { PagedTemplateItem, TemplateStatusCountItem, TemplateMonthCountItem } from '@/fetch/graphql';
@@ -270,10 +270,9 @@ export const useTemplateMixin = () => {
           return result;
         })
         .catch((err) => {
-          const error = formatError(err);
           message.error(
-            i18n.tv('page_templates.error.move_to_trash_faild.with_message', `放入回收站失败, ${error.message}！`, {
-              message: error.message,
+            i18n.tv('page_templates.error.move_to_trash_faild.with_message', `放入回收站失败, ${err.message}！`, {
+              message: err.message,
             }) as string,
           );
           return false;
@@ -298,10 +297,9 @@ export const useTemplateMixin = () => {
           return result;
         })
         .catch((err) => {
-          const error = formatError(err);
           message.error(
-            i18n.tv('common.error.delete_faild.with_message', `删除失败, ${error.message}!`, {
-              message: error.message,
+            i18n.tv('common.error.delete_faild.with_message', `删除失败, ${err.message}!`, {
+              message: err.message,
             }) as string,
           );
           return false;
@@ -333,10 +331,9 @@ export const useTemplateMixin = () => {
         return result;
       })
       .catch((err) => {
-        const error = formatError(err);
         message.error(
-          i18n.tv('page_templates.error.restore_faild.with_message', `重置失败，错误：${error.message}！`, {
-            message: error.message,
+          i18n.tv('page_templates.error.restore_faild.with_message', `重置失败，错误：${err.message}！`, {
+            message: err.message,
           }) as string,
         );
         return false;
@@ -392,13 +389,12 @@ export const useTemplateMixin = () => {
         return result;
       })
       .catch((err) => {
-        const error = formatError(err);
         message.error(
-          i18n.tv('common.error.bluk_apply_faild.with_message', `批量操作失败，错误：${error.message}!`, {
-            message: error.message,
+          i18n.tv('common.error.bluk_apply_faild.with_message', `批量操作失败，错误：${err.message}!`, {
+            message: err.message,
           }) as string,
         );
-        message.error(error.message);
+        message.error(err.message);
         return false;
       })
       .finally(() => {

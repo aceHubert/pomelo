@@ -52,5 +52,6 @@ export { default as StarFill } from '@ant-design/icons/lib/fill/StarFill';
 export { default as TagsOutline } from '@ant-design/icons/lib/outline/TagsOutline';
 export { default as TableOutline } from '@ant-design/icons/lib/outline/TableOutline';
 export { default as UpOutline } from '@ant-design/icons/lib/outline/UpOutline';
+export { default as UploadOutline } from '@ant-design/icons/lib/outline/UploadOutline';
 export { default as WarningOutline } from '@ant-design/icons/lib/outline/WarningOutline';
 export { default as WarningFill } from '@ant-design/icons/lib/fill/WarningFill';

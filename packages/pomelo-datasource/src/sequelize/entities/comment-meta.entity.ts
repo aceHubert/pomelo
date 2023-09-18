@@ -10,17 +10,16 @@ export default class CommentMeta extends Model<CommentMetaAttributes, CommentMet
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   CommentMeta.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
       commentId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'Comment id',

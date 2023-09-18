@@ -1,5 +1,5 @@
 import { ApiResponseProperty, OmitType, PickType } from '@nestjs/swagger';
-import { TemplateStatus } from '@pomelo/datasource';
+import { TemplateStatus, TemplateCommentStatus } from '@pomelo/datasource';
 import { PagedResponse, Count } from '@/common/controllers/resp/paged.resp';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 
@@ -51,6 +51,24 @@ export class TemplateModelResp {
    */
   @ApiResponseProperty()
   type!: string;
+
+  /**
+   * Comment status
+   */
+  @ApiResponseProperty()
+  commentStatus!: TemplateCommentStatus;
+
+  /**
+   * Comment count
+   */
+  @ApiResponseProperty()
+  commentCount!: number;
+
+  /**
+   * Latest update time
+   */
+  @ApiResponseProperty()
+  updatedAt!: Date;
 
   /**
    * Created time

@@ -1,0 +1,34 @@
+
+.row {
+  &__align {
+    vertical-align: top;
+  }
+
+  :global {
+    .@{ant-prefix}-descriptions-item-label{
+      vertical-align: top;
+    }
+  }
+}
+
+.title{
+  min-width: 300px;
+}
+
+.router-link {
+  color: inherit;
+}
+
+
+.actions {
+  display: flex;
+
+  :global(.is-desktop) &{
+    display: none;
+  }
+
+  .row:hover & {
+    display: flex;
+  }
+}
+

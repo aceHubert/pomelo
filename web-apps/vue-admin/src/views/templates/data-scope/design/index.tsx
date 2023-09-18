@@ -1,11 +1,11 @@
 import { debounce } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { Button, Card, Dropdown, Form, Input, Menu, TreeSelect, Icon } from 'ant-design-vue';
+import { Button, Card, Dropdown, Form, Input, Menu, Icon } from 'ant-design-vue';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { warn } from '@ace-util/core';
 import { message } from '@/components';
-import { formatError, TemplateStatus } from '@/fetch/graphql';
+import { TemplateStatus } from '@/fetch/graphql';
 import { useDesignMixin } from '../../mixins/design.mixin';
 import { ClauseForm } from '../components';
 import { TemplateType } from '../constants';
@@ -54,15 +54,6 @@ export default Form.create({})(
               // status
               statusRef.value = template.status;
 
-              // category
-              designMixin.getCategories().then((treeData) => {
-                designMixin.category.treeData = treeData;
-                designMixin.category.selectKeys = template.categories.map(({ id, name }) => ({
-                  value: id,
-                  label: name,
-                }));
-              });
-
               // clause
               template.content && (clauseValueRef.value = JSON.parse(template.content));
             } else {
@@ -107,7 +98,6 @@ export default Form.create({})(
                   });
                 })
                 .catch((err) => {
-                  err = formatError(err);
                   message.error(`新建失败，${err.message}`);
                 });
             } else {
@@ -122,7 +112,6 @@ export default Form.create({})(
                   message.success('修改成功');
                 })
                 .catch((err) => {
-                  err = formatError(err);
                   message.error(`修改失败，${err.message}`);
                 });
             }
@@ -173,7 +162,6 @@ export default Form.create({})(
       return {
         isAddMode,
         status: statusRef,
-        category: designMixin.category,
         clauseValue: clauseValueRef,
         invalidClauseValue: invalidClauseValueRef,
         clauseFields,
@@ -199,26 +187,6 @@ export default Form.create({})(
                   },
                 ]}
               />
-            </Form.Item>
-            <Form.Item
-              label={this.$tv('page_templates.category_label', '分类')}
-              wrapperCol={{ sm: 12, md: 6 }}
-              vShow={!this.isAddMode}
-            >
-              <TreeSelect
-                value={this.category.selectKeys}
-                treeData={this.category.treeData}
-                loadData={this.loadCategoryData.bind(this)}
-                treeCheckStrictly
-                showSearch
-                treeCheckable
-                treeDataSimpleMode
-                filterTreeNode={false}
-                dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
-                placeholder={this.$tv('page_templates.category_placeholder', '请选择分类(或输入搜索分类)')}
-                onSearch={this.handleCategorySearch.bind(this)}
-                onChange={this.handleCategoryChange(this.id!).bind(this)}
-              ></TreeSelect>
             </Form.Item>
             <Form.Item
               label={this.$tv('page_templates.data_scopes.design.content_label', '设计')}

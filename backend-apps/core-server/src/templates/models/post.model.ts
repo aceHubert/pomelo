@@ -11,6 +11,9 @@ export class PostTemplate extends PickType(Template, [
   'content',
   'excerpt',
   'status',
+  'commentStatus',
+  'commentCount',
+  'updatedAt',
   'createdAt',
 ] as const) {
   // something else

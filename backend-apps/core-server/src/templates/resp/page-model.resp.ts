@@ -8,6 +8,9 @@ export class PageTemplateModelResp extends PickType(TemplateModelResp, [
   'title',
   'author',
   'status',
+  'commentStatus',
+  'commentCount',
+  'updatedAt',
   'createdAt',
 ] as const) {
   /**

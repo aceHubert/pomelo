@@ -1,6 +1,6 @@
 import {
   ApolloClient,
-  HttpLink,
+  // HttpLink,
   InMemoryCache,
   isApolloError,
   Observable,
@@ -12,86 +12,17 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { onError } from '@apollo/client/link/error';
+import { createUploadLink } from 'apollo-upload-client';
 import { createClient } from 'graphql-ws';
-import { hasIn } from 'lodash-es';
 import { getEnv } from '@ace-util/core';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
 import { loadingRef, errorRef, SharedError } from '@/shared';
-import { Request } from './request';
+import { Request, isServerError, isServerParseError } from './request';
+import { customFetch } from './fetch';
 
 // Types
-import type { ServerError, ServerParseError } from '@apollo/client/core';
 import type { RegistApiDefinition, RegistApi } from './request';
-
-/**
- * 是否是 Server error
- * 如果是 ApolloError，则会判断err.networkError
- */
-function isServerError(err: Error): err is ServerError {
-  return isApolloError(err)
-    ? !!(err.networkError && hasIn(err.networkError, 'statusCode')) && hasIn(err.networkError, 'result')
-    : hasIn(err, 'statusCode') && hasIn(err, 'result');
-}
-
-function isServerParseError(err: Error): err is ServerParseError {
-  return isApolloError(err)
-    ? !!(err.networkError && hasIn(err.networkError, 'statusCode')) && hasIn(err.networkError, 'bodyText')
-    : hasIn(err, 'statusCode') && hasIn(err, 'bodyText');
-}
-
-// graphql error code 对应 http code 关系
-const GraphqlErrorCodes: Dictionary<number> = {
-  BAD_USER_INPUT: 400,
-  UNAUTHENTICATED: 401,
-  FORBIDDEN: 403,
-  VALIDATION_FAILED: 405,
-  INTERNAL_SERVER_ERROR: 500,
-  // 其它错误当成 500 处理
-};
-
-/**
- * 从error 中生成 code 和 message
- * code 在 networkError 中将会是 error.[statusCode], graphQLErrors 中将会是第一条 error.[extensions.code], fallbace: code.500
- * @param err Error
- */
-function formatError(err: Error) {
-  if (isApolloError(err)) {
-    let graphQLErrors = err.graphQLErrors;
-    const networkError = err.networkError;
-    // https://www.apollographql.com/docs/react/api/link/apollo-link-error/#:~:text=An%20error%20is%20passed%20as%20a%20networkError%20if,the%20case%20of%20a%20failing%20HTTP%20status%20code.
-    if (
-      !graphQLErrors?.length &&
-      networkError &&
-      isServerError(networkError) &&
-      typeof networkError.result !== 'string' &&
-      networkError.result.errors
-    ) {
-      graphQLErrors = networkError.result.errors;
-    }
-
-    if (Array.isArray(graphQLErrors) && graphQLErrors.length) {
-      // 第一要包含code的详细信息
-      const extensions = graphQLErrors.find((error) => error.extensions?.code)?.extensions;
-      return {
-        statusCode: extensions ? extensions.statusCode || GraphqlErrorCodes[extensions.code] || 500 : 500,
-        message: graphQLErrors
-          .map((graphQLError) => graphQLError?.message)
-          .filter(Boolean)
-          .join('; '),
-      };
-    } else if (networkError && isServerError(networkError)) {
-      return {
-        statusCode: networkError.statusCode,
-        message: networkError.message,
-      };
-    }
-  }
-  return {
-    statusCode: 500,
-    message: err.message,
-  };
-}
 
 // onErrer retry async refreshToken
 const promiseToObservable = <T>(promise: Promise<T>, error?: (error: Error) => void) =>
@@ -103,11 +34,14 @@ const promiseToObservable = <T>(promise: Promise<T>, error?: (error: Error) => v
     }, error?.bind(subscriber) || subscriber.error.bind(subscriber));
   });
 
-const httpLink = new HttpLink({
+const uploadLink = createUploadLink({
   uri: getEnv('graphqlBase', '/graphql', (window as any)._ENV),
-  // headers: {},
-  // credentials: '',
-  // fetch,
+  headers: {
+    // https://www.apollographql.com/docs/apollo-server/security/cors/#preventing-cross-site-request-forgery-csrf
+    'Apollo-Require-Preflight': 'true',
+  },
+  credentials: 'same-origin',
+  fetch: customFetch,
 });
 
 // set Authorization header
@@ -149,9 +83,7 @@ const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) 
   if (graphQLErrors) {
     if (
       graphQLErrors.some(
-        (err) =>
-          err.extensions?.code &&
-          (err.extensions.statusCode || GraphqlErrorCodes[err.extensions.code as string]) === 401,
+        (err) => err.extensions?.code && (err.extensions.statusCode === 401 || err.extensions.code === 'UNAUTHORIZED'),
       )
     ) {
       return tryLogin();
@@ -206,7 +138,7 @@ const splitLink = split(
     return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
   },
   wsLink,
-  from([errorLink, authLink, httpLink]),
+  from([errorLink, authLink, uploadLink]),
 );
 
 /**
@@ -237,9 +169,8 @@ export const request = new Request(client, {
       loadingRef.value = false;
     };
   },
-  onCatch(err) {
-    const { message, statusCode } = formatError(err);
-    errorRef.value = new SharedError(message, statusCode);
+  onCatch(err: any) {
+    errorRef.value = new SharedError(err.message, err.code);
   },
 });
 
@@ -255,6 +186,6 @@ export const defineRegistApi = <C extends RegistApiDefinition>(id: string, defin
   return useRegistApi as () => RegistApi<C>;
 };
 
-export { gql, formatError, isApolloError, isServerParseError };
+export { gql, isApolloError, isServerParseError };
 
 export default client;

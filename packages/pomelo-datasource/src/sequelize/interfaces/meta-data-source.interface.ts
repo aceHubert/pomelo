@@ -13,7 +13,7 @@ export interface MetaDataSource<MetaReturnType, NewMetaInputType> {
   createMeta(model: NewMetaInputType): Promise<MetaReturnType>;
   bulkCreateMeta(modelId: number, models: NewMetaInput[]): Promise<MetaReturnType[]>;
   updateMeta(id: number, metaValue: string): Promise<boolean>;
-  updateMetaByKey(modelId: number, metaKey: string, metaValue: string): Promise<boolean>;
+  updateMetaByKey(modelId: number, metaKey: string, metaValue: string, createIfNotExists?: boolean): Promise<boolean>;
   deleteMeta(id: number): Promise<boolean>;
   deleteMetaByKey(modelId: number, metaKey: string): Promise<boolean>;
 }

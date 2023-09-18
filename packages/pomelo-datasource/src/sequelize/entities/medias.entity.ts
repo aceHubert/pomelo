@@ -2,6 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import { MediaAttributes, MediaCreationAttributes } from '../../entities/medias.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { MediaMetaPresetKeys } from '../utils/preset-keys.util';
 
 export default class Medias extends Model<
   Omit<MediaAttributes, 'createdAt'>,
@@ -20,11 +21,11 @@ export default class Medias extends Model<
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   Medias.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
@@ -54,8 +55,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         comment: 'File relative path',
       },
       userId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.STRING(50),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'User id',
@@ -85,4 +85,11 @@ export const associate: TableAssociateFunc = function associate(models) {
     constraints: false,
   });
   models.MediaMeta.belongsTo(models.Medias, { foreignKey: 'mediaId', targetKey: 'id', constraints: false });
+
+  models.Medias.hasOne(models.MediaMeta.scope(MediaMetaPresetKeys.Matedata), {
+    foreignKey: 'mediaId',
+    sourceKey: 'id',
+    as: 'MediaMetadata',
+    constraints: false,
+  });
 };

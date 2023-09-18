@@ -112,7 +112,7 @@ export class PageTemplateController extends BaseController {
     const result = await this.templateDataSource.getByName(
       name,
       TemplateType.Page,
-      ['id', 'name', 'title', 'author', 'content', 'status', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -161,7 +161,7 @@ export class PageTemplateController extends BaseController {
     const result = await this.templateDataSource.get(
       id,
       TemplateType.Page,
-      ['id', 'name', 'title', 'author', 'content', 'status', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -229,11 +229,8 @@ export class PageTemplateController extends BaseController {
   })
   async create(@Body() input: NewPageTemplateDto, @User() requestUser: RequestUser) {
     const { schema, ...restDto } = input;
-    const { id, name, title, author, content, status, createdAt } = await this.templateDataSource.create(
-      { content: schema, ...restDto },
-      TemplateType.Page,
-      requestUser,
-    );
+    const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
+      await this.templateDataSource.create({ content: schema, ...restDto }, TemplateType.Page, requestUser);
     return this.success({
       data: {
         id,
@@ -242,6 +239,9 @@ export class PageTemplateController extends BaseController {
         author,
         schema: content,
         status,
+        commentStatus,
+        commentCount,
+        updatedAt,
         createdAt,
       },
     });

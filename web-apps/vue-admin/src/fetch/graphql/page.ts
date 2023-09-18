@@ -3,8 +3,7 @@ import { defineRegistApi, gql } from './core';
 // Types
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
 import type {
-  PagedTemplateQuery,
-  PagedTemplateItem,
+  PagedTemplateArgs,
   TempaleModel,
   NewTemplateInput,
   UpdateTemplateInput,
@@ -12,13 +11,26 @@ import type {
 } from './template';
 import type { Paged } from './types';
 
-export interface PagedPageTemplateQuery extends Omit<PagedTemplateQuery, 'type'> {}
+export interface PagedPageTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {}
 
-export interface PagedPageTemplateItem extends Omit<PagedTemplateItem, 'excerpt'> {}
-
-export interface PageTemplateModel extends Omit<TempaleModel, 'type' | 'excerpt' | 'content'> {
+export interface PageTemplateModel
+  extends Pick<
+    TempaleModel,
+    | 'id'
+    | 'name'
+    | 'title'
+    | 'author'
+    | 'status'
+    | 'commentStatus'
+    | 'commentCount'
+    | 'updatedAt'
+    | 'createdAt'
+    | 'metas'
+  > {
   schema: string;
 }
+
+export interface PagedPageTemplateItem extends Omit<PageTemplateModel, 'schema' | 'metas'> {}
 
 export interface NewPageTemplateInput extends Omit<NewTemplateInput, 'type' | 'excerpt' | 'content'> {
   schema: string;
@@ -53,14 +65,11 @@ export const usePageApi = defineRegistApi('template_page', {
       ) {
         rows {
           id
-          title
           name
+          title
           author
           status
-          categories {
-            id
-            name
-          }
+          updatedAt
           createdAt
         }
         total
@@ -77,22 +86,20 @@ export const usePageApi = defineRegistApi('template_page', {
       statusCounts?: TemplateStatusCountItem[];
       selfCounts?: number;
     },
-    PagedPageTemplateQuery
+    PagedPageTemplateArgs
   >,
   // 获取表单
   get: gql`
     query getPage($id: ID!, $metaKeys: [String!]) {
       page: pageTemplate(id: $id) {
         id
-        title
         name
+        title
         schema
         author
         status
-        categories {
-          id
-          name
-        }
+        updatedAt
+        createdAt
         metas(metaKeys: $metaKeys) {
           id
           key: metaKey
@@ -106,10 +113,13 @@ export const usePageApi = defineRegistApi('template_page', {
     mutation createPage($newPageTemplate: NewPageTemplateInput!) {
       page: createPageTempate(model: $newPageTemplate) {
         id
-        title
         name
-        status
+        title
         schema
+        author
+        status
+        updatedAt
+        createdAt
         metas {
           id
           key: metaKey

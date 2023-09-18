@@ -3,6 +3,7 @@ import 'custom-event-polyfill';
 
 import Vue, { type ComponentOptions } from 'vue';
 import VueCompositionApi from '@vue/composition-api';
+import ResourceManagerVuePlugin from '@vue-async/resource-manager';
 import { afetch } from '@/fetch';
 import { i18n } from './i18n';
 import { pinia } from './store';
@@ -15,6 +16,7 @@ import './tinycolor2.extend';
 import './assets/styles/index.less';
 
 Vue.use(VueCompositionApi);
+Vue.use(ResourceManagerVuePlugin, { mode: 'visible' });
 Vue.config.productionTip = false;
 
 async function createApp() {

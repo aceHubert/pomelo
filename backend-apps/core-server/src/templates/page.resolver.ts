@@ -3,11 +3,9 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { Fields, User, RequestUser } from '@pomelo/shared';
 import {
   TemplateDataSource,
-  TermTaxonomyDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
   Taxonomy,
-  Taxonomy as TaxonomyEnum,
   TemplateStatus,
   TemplateType,
 } from '@pomelo/datasource';
@@ -17,35 +15,10 @@ import { RamAuthorized } from 'nestjs-ram-authorization';
 import { PageTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
-import { createTaxonomyFieldResolver } from './base.resolver';
 import { NewPageTemplateInput } from './dto/new-template.input';
 import { UpdatePageTemplateInput } from './dto/update-template.input';
 import { PagedPageTemplateArgs, PageTemplateOptionArgs } from './dto/template.args';
-import { PageTemplate, PagedPageTemplateItem, PagedPageTemplate, PageTemplateOption } from './models/page.model';
-
-@Authorized()
-@Resolver(() => PagedPageTemplateItem)
-export class PagedPageTemplateItemCategoryResolver extends createTaxonomyFieldResolver(PagedPageTemplateItem, {
-  propertyName: 'categories',
-  taxonomy: TaxonomyEnum.Category,
-  description: 'Categories',
-  useDataLoader: true,
-}) {
-  constructor(protected readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
-    super(termTaxonomyDataSource);
-  }
-}
-
-@Resolver(() => PageTemplate)
-export class PageTemplateCategoryResolver extends createTaxonomyFieldResolver(PageTemplate, {
-  propertyName: 'categories',
-  taxonomy: TaxonomyEnum.Category,
-  description: 'Categories',
-}) {
-  constructor(protected readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
-    super(termTaxonomyDataSource);
-  }
-}
+import { PageTemplate, PagedPageTemplate, PageTemplateOption } from './models/page.model';
 
 @Authorized()
 @Resolver(() => PageTemplate)
@@ -172,11 +145,8 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @User() requestUser: RequestUser,
   ): Promise<PageTemplate> {
     const { schema, ...restInput } = model;
-    const { id, name, title, author, content, status, createdAt } = await this.templateDataSource.create(
-      { content: schema, ...restInput },
-      TemplateType.Page,
-      requestUser,
-    );
+    const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
+      await this.templateDataSource.create({ content: schema, ...restInput }, TemplateType.Page, requestUser);
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
@@ -198,6 +168,9 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       author,
       schema: content,
       status,
+      commentStatus,
+      commentCount,
+      updatedAt,
       createdAt,
     };
   }

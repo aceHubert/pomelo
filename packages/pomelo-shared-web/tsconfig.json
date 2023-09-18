@@ -5,5 +5,5 @@
     "baseUrl": ".",
     "lib": ["esnext", "dom"]
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "../../web-apps/vue-admin/src/components/shared/obs.ts"]
 }

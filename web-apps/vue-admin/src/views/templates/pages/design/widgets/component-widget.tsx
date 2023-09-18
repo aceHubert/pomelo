@@ -111,12 +111,7 @@ export const ComponentWidget = observer(
         }
       });
 
-      return () => (
-        <ComponentTreeWidget
-          components={components.value}
-          style={{ backgroundColor: screen.value.type === ScreenType.Mobile ? '#f1f3f7' : '#f8f9fb' }}
-        />
-      );
+      return () => <ComponentTreeWidget components={components.value} />;
       // {
       //   if (screen.value.type === ScreenType.Mobile) {
       //     return <ComponentTreeWidget components={components.value} />;

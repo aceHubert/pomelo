@@ -1,9 +1,12 @@
 import * as path from 'path';
 import * as fs from 'fs';
+import multer from 'multer';
 import { APP_PIPE, APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer, ValidationPipe } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { MulterModule } from '@nestjs/platform-express';
 import { GraphQLModule } from '@nestjs/graphql';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 import { print, parse, getIntrospectionQuery } from 'graphql';
@@ -43,6 +46,8 @@ import '@/common/extends/i18n.extend';
 // format introspection query same way as apollo tooling do
 const IntrospectionQuery = print(parse(getIntrospectionQuery()));
 
+const defaultContentPath = path.join(process.cwd(), '../content');
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -53,6 +58,15 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
           ? ['.env.production.local', '.env.production', '.env']
           : ['.env.development.local', '.env.development']),
       load: [configuration(process.cwd())],
+    }),
+    ServeStaticModule.forRootAsync({
+      useFactory: (config: ConfigService) => [
+        {
+          rootPath: config.get('content', defaultContentPath),
+          renderPath: /$(uploads|languages)\//i,
+        },
+      ],
+      inject: [ConfigService],
     }),
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
@@ -216,14 +230,26 @@ const IntrospectionQuery = print(parse(getIntrospectionQuery()));
       // TODO: PubSub 是使用内存管理，生产环境需要更换
       pubSub: new PubSub(),
     }),
+    // file upload
+    MulterModule.registerAsync({
+      useFactory: (config: ConfigService) => ({
+        storage: multer.diskStorage({
+          destination: config.get('upload.dest', path.join(config.get('content', defaultContentPath), '/uploads')),
+        }),
+        // config.get('file_storage') === 'disk'
+        //   ? multer.diskStorage({ destination: config.get('file_dest') })
+        //   : multer.memoryStorage(),
+        limits: {
+          fileSize: config.get<number>('upload.maxFileSize'),
+          files: config.get<number>('upload.maxFiles'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
     FileModule.forRootAsync({
       // isGlobal: true,
       useFactory: (config: ConfigService) => ({
-        dist: config.get(
-          'upload.dist',
-          path.join(config.get('content', path.join(process.cwd(), '../content')), '/upload'),
-        ),
-        limit: config.get('upload.limit'),
+        dest: config.get<string>('upload.dest', path.join(config.get('content', defaultContentPath), '/uploads')),
       }),
       inject: [ConfigService],
     }),

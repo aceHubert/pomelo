@@ -20,11 +20,11 @@ export default class Links extends Model<
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   Links.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
@@ -60,8 +60,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         comment: 'Visible ("yes" or "no", default: "yes")',
       },
       userId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.STRING(50),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 1,
         comment: 'User id',

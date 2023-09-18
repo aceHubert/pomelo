@@ -4,8 +4,8 @@ import {
   TemplateCreationAttributes,
   TemplateStatus,
   TemplateType,
+  TemplateCommentStatus,
 } from '../../entities/template.entity';
-import { TemplatePlatform } from '../../entities/template-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
@@ -23,6 +23,8 @@ export default class Template extends Model<
   public status!: TemplateStatus;
   public order!: number;
   public parent?: number;
+  public commentStatus!: TemplateCommentStatus;
+  public commentCount!: number;
 
   // timestamps!
   public readonly createdAt!: Date;
@@ -30,11 +32,11 @@ export default class Template extends Model<
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   Template.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
@@ -82,11 +84,22 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         comment: 'Sort (default: 0)',
       },
       parentId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'Parent id',
+      },
+      commentStatus: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: 'closed',
+        comment: 'Comment status ("open", "closed", default: "closed")',
+      },
+      commentCount: {
+        type: DataTypes.BIGINT(),
+        allowNull: false,
+        defaultValue: 0,
+        comment: 'Comment count (default: 0)',
       },
     },
     {
@@ -112,20 +125,6 @@ export const associate: TableAssociateFunc = function associate(models) {
     constraints: false,
   });
   models.TemplateMeta.belongsTo(models.Template, { foreignKey: 'templateId', targetKey: 'id', constraints: false });
-
-  models.Template.hasOne(models.TemplateMeta.scope(TemplatePlatform.Mobile), {
-    foreignKey: 'templateId',
-    sourceKey: 'id',
-    as: 'TemplateMobileMeta',
-    constraints: false,
-  });
-
-  models.Template.hasOne(models.TemplateMeta.scope(TemplatePlatform.Desktop), {
-    foreignKey: 'templateId',
-    sourceKey: 'id',
-    as: 'TemplateDesktopMeta',
-    constraints: false,
-  });
 
   // Template.id --> TermRelationships.objectId
   models.Template.hasMany(models.TermRelationships, {

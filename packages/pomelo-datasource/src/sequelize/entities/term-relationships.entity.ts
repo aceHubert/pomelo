@@ -12,18 +12,17 @@ export default class TermRelationships extends Model<TermRelationshipAttributes,
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   TermRelationships.init(
     {
       objectId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         primaryKey: true,
         comment: 'Object id (Post, Link, ect...)',
       },
       termTaxonomyId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         primaryKey: true,
         comment: 'Taxonomy id',

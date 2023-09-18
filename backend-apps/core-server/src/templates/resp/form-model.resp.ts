@@ -7,6 +7,7 @@ export class FormTemplateModelResp extends PickType(TemplateModelResp, [
   'title',
   'author',
   'status',
+  'updatedAt',
   'createdAt',
 ] as const) {
   /**

@@ -3,7 +3,14 @@ import { PagedResponse } from '@/common/resolvers/models/paged.model';
 import { Template } from './base.model';
 
 @ObjectType({ description: 'Form template model' })
-export class FormTemplate extends PickType(Template, ['id', 'title', 'author', 'status', 'createdAt'] as const) {
+export class FormTemplate extends PickType(Template, [
+  'id',
+  'title',
+  'author',
+  'status',
+  'updatedAt',
+  'createdAt',
+] as const) {
   @Field({ description: 'Schema string JSON' })
   schema!: string;
 }

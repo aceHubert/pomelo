@@ -110,6 +110,7 @@
     "**/*.spec.js",
     "**/dist/",
     "**/__test__",
+    "src/version.ts",
     "dist",
     "lib",
     "es",

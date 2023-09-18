@@ -241,7 +241,7 @@ export class TemplateController extends createMetaController(
     const result = await this.templateDataSource.get(
       id,
       void 0,
-      ['id', 'name', 'title', 'author', 'excerpt', 'content', 'status', 'type', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'excerpt', 'content', 'status', 'type', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -286,7 +286,7 @@ export class TemplateController extends createMetaController(
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
       type,
-      ['id', 'title', 'author', 'status', 'createdAt'],
+      ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -307,19 +307,20 @@ export class TemplateController extends createMetaController(
   })
   async create(@Body() input: NewTemplateDto, @User() requestUser: RequestUser) {
     const { type, ...restDto } = input;
-    const { id, title, author, excerpt, content, status, createdAt } = await this.templateDataSource.create(
-      { ...restDto, excerpt: restDto.excerpt || '' },
-      type,
-      requestUser,
-    );
+    const { id, title, author, excerpt, content, status, commentStatus, commentCount, updatedAt, createdAt } =
+      await this.templateDataSource.create({ ...restDto, excerpt: restDto.excerpt || '' }, type, requestUser);
     return this.success({
       data: {
         id,
         title,
         author,
-        excerpt,
         content,
+        excerpt,
         status,
+        type,
+        commentStatus,
+        commentCount,
+        updatedAt,
         createdAt,
       },
     });

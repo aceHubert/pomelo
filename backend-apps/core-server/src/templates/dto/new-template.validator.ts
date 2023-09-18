@@ -1,10 +1,10 @@
 import { IsOptional, IsDefined, IsString, IsEnum, MaxLength } from 'class-validator';
-import { TemplateStatus } from '@pomelo/datasource';
+import { TemplateStatus, TemplateCommentStatus } from '@pomelo/datasource';
 
 export abstract class NewTemplateValidator {
-  @IsDefined()
+  @IsOptional()
   @MaxLength(50)
-  abstract title: string;
+  abstract title?: string;
 
   @IsOptional()
   @MaxLength(50)
@@ -14,15 +14,19 @@ export abstract class NewTemplateValidator {
   @MaxLength(250)
   abstract excerpt?: string;
 
-  @IsDefined()
+  @IsOptional()
   @IsString()
-  abstract content: string;
+  abstract content?: string;
 
   @IsOptional()
   @IsEnum(TemplateStatus)
-  status?: TemplateStatus;
+  abstract status?: TemplateStatus;
 
   @IsDefined()
   @IsString()
   abstract type: string;
+
+  @IsOptional()
+  @IsEnum(TemplateCommentStatus)
+  abstract commentStatus?: TemplateCommentStatus;
 }

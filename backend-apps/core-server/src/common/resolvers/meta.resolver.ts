@@ -208,8 +208,13 @@ export function createMetaResolver<
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
       @Args('metaValue', { description: 'Meta value' }) metaValue: string,
+      @Args('createIfNotExists', {
+        nullable: true,
+        description: 'Create meta if metaKey is not exists, default: false',
+      })
+      createIfNotExists?: boolean,
     ) {
-      return this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue);
+      return this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
     }
 
     /**

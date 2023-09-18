@@ -1,5 +1,7 @@
-import { ApolloError } from '@apollo/client/core';
+import { hasIn, snakeCase } from 'lodash-es';
+import { ApolloError, isApolloError } from '@apollo/client/core';
 import { DocumentType, parser } from './parser';
+import codes from './codes.json';
 
 // Types
 import type { DocumentNode } from 'graphql';
@@ -11,6 +13,8 @@ import type {
   MutationOptions,
   SubscriptionOptions,
   DefaultContext,
+  ServerError,
+  ServerParseError,
 } from '@apollo/client/core';
 
 export interface TypedQueryDocumentNode<
@@ -66,7 +70,11 @@ export type LoadingProp = (text?: string) => void | (() => void);
 export interface Options {
   loading: LoadingProp;
   loadingDelay: number;
-  onCatch: (err: Error) => void;
+  onCatch: (err: unknown) => void;
+  /**
+   * graphql error code 对应 http code 关系
+   */
+  graphqlErrorCodes: Dictionary<number>;
 }
 
 export interface RequestOptions<TData, Result = TData> {
@@ -79,7 +87,7 @@ export interface RequestOptions<TData, Result = TData> {
 
 export interface ObserverOptions<TData> {
   onData: (data?: TData | null) => void;
-  onError?: (err: any) => void;
+  onError?: (err: unknown) => void;
   onComplete?: () => void;
 }
 
@@ -110,15 +118,54 @@ export type RegistApi<C extends RegistApiDefinition> = {
     : (options?: RequestOptions<any> & { variables?: any }) => Promise<any>;
 };
 
+/**
+ * 是否是 Server error
+ * 如果是 ApolloError，则会判断err.networkError
+ */
+export function isServerError(err: Error): err is ServerError {
+  return isApolloError(err)
+    ? !!(err.networkError && hasIn(err.networkError, 'statusCode')) && hasIn(err.networkError, 'result')
+    : hasIn(err, 'statusCode') && hasIn(err, 'result');
+}
+
+/**
+ * 是否是 Server parse error
+ */
+export function isServerParseError(err: Error): err is ServerParseError {
+  return isApolloError(err)
+    ? !!(err.networkError && hasIn(err.networkError, 'statusCode')) && hasIn(err.networkError, 'bodyText')
+    : hasIn(err, 'statusCode') && hasIn(err, 'bodyText');
+}
+
+export class GraphQLError extends Error {
+  readonly code: number;
+  readonly originalError?: unknown;
+
+  constructor(message: string, code: number, originalError?: unknown) {
+    super(message);
+    Object.setPrototypeOf(this, GraphQLError.prototype);
+    this.name = 'GraphQLError';
+    this.code = code;
+    this.originalError = originalError;
+  }
+}
+
 export class Request {
-  private defaultOptions: Options;
+  private options: Options;
 
   constructor(private readonly client: ApolloClient<any>, options: Partial<Options> = {}) {
-    const { loading = () => () => {}, loadingDelay = 300, onCatch = () => {} } = options;
-    this.defaultOptions = {
+    const { loading = () => () => {}, loadingDelay = 300, onCatch = () => {}, graphqlErrorCodes } = options;
+
+    this.options = {
       loading,
       loadingDelay,
       onCatch,
+      graphqlErrorCodes:
+        graphqlErrorCodes ??
+        Object.keys(codes).reduce((prev, key) => {
+          prev[snakeCase(codes[key]).toUpperCase()] = Number(key);
+          return prev;
+        }, {} as Dictionary<number>),
     };
   }
 
@@ -146,7 +193,7 @@ export class Request {
     onError,
     ...queryOptions
   }: RequestOptions<TData, Result> & QueryOptions<TVariables, TData>): Promise<Result> {
-    const { loadingDelay, onCatch } = this.defaultOptions;
+    const { loadingDelay, onCatch } = this.options;
 
     const requestPromise = this.client.query(queryOptions);
 
@@ -170,17 +217,18 @@ export class Request {
         if (error) throw error;
 
         stopLoading && stopLoading();
-        return onSuccess ? onSuccess(data) : data;
+        return onSuccess?.(data) ?? data;
       })
       .catch((err) => {
         stopLoading && stopLoading();
+        const error = this.formatError(err);
         if (catchError) {
-          onCatch && onCatch(err);
+          onCatch(error);
           return new Promise(function () {}) as any;
         } else {
-          onError && onError(err);
+          onError?.(error);
         }
-        return Promise.reject(err);
+        throw error;
       });
   }
 
@@ -196,7 +244,7 @@ export class Request {
     onError,
     ...mutationOptions
   }: RequestOptions<TData, Result> & MutationOptions<TData, TVariables, TContext>): Promise<Result> {
-    const { loadingDelay, onCatch } = this.defaultOptions;
+    const { loadingDelay, onCatch } = this.options;
 
     const requestPromise = this.client.mutate(mutationOptions);
 
@@ -220,17 +268,18 @@ export class Request {
         if (errors?.length) throw new ApolloError({ graphQLErrors: errors });
 
         stopLoading && stopLoading();
-        return onSuccess ? onSuccess(data) : data;
+        return onSuccess?.(data) ?? data;
       })
       .catch((err) => {
         stopLoading && stopLoading();
+        const error = this.formatError(err);
         if (catchError) {
-          onCatch && onCatch(err);
+          onCatch(error);
           return new Promise(function () {}) as any;
         } else {
-          onError && onError(err);
+          onError?.(error);
         }
-        return Promise.reject(err);
+        throw error;
       });
   }
 
@@ -244,7 +293,7 @@ export class Request {
 
     const subscription = observer.subscribe({
       next: ({ data }) => onData(data),
-      error: onError,
+      error: (err) => onError?.(this.formatError(err)),
       complete: onComplete,
     });
 
@@ -255,8 +304,46 @@ export class Request {
     if (typeof loading === 'function') {
       return loading();
     } else if (typeof loading === 'boolean' && loading === true) {
-      return this.defaultOptions.loading();
+      return this.options.loading();
     }
     return;
+  }
+
+  /**
+   * 从error 中生成 code 和 message
+   * code 在 networkError 中将会是 error.[statusCode], graphQLErrors 中将会是第一条 error.[extensions.code], fallbace: code.500
+   * @param err Error
+   */
+  private formatError(err: Error) {
+    if (isApolloError(err)) {
+      let graphQLErrors = err.graphQLErrors;
+      const networkError = err.networkError;
+      // https://www.apollographql.com/docs/react/api/link/apollo-link-error/#:~:text=An%20error%20is%20passed%20as%20a%20networkError%20if,the%20case%20of%20a%20failing%20HTTP%20status%20code.
+      if (
+        !graphQLErrors?.length &&
+        networkError &&
+        isServerError(networkError) &&
+        typeof networkError.result !== 'string' &&
+        networkError.result.errors
+      ) {
+        graphQLErrors = networkError.result.errors;
+      }
+
+      if (Array.isArray(graphQLErrors) && graphQLErrors.length) {
+        // 第一要包含code的详细信息
+        const extensions = graphQLErrors.find((error) => error.extensions?.code)?.extensions;
+        return new GraphQLError(
+          graphQLErrors
+            .map((graphQLError) => graphQLError?.message)
+            .filter(Boolean)
+            .join('; '),
+          extensions ? extensions.statusCode || this.options.graphqlErrorCodes[extensions.code] || 500 : 500,
+          err,
+        );
+      } else if (networkError && isServerError(networkError)) {
+        return new GraphQLError(networkError.message, networkError.statusCode, err);
+      }
+    }
+    return new GraphQLError(err.message, 500, err);
   }
 }

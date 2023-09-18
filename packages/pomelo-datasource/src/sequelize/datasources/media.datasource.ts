@@ -4,12 +4,14 @@ import { Injectable } from '@nestjs/common';
 import { ValidationError, RequestUser } from '@pomelo/shared';
 import {
   MediaModel,
+  MediaMetaDataModel,
   MediaMetaModel,
   PagedMediaArgs,
   PagedMediaModel,
   NewMediaInput,
   NewMediaMetaInput,
 } from '../interfaces/media.interface';
+import { MediaMetaPresetKeys } from '../utils/preset-keys.util';
 import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
@@ -23,7 +25,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param id Media Id
    * @param fields 返回的字段
    */
-  get(id: number, fields: string[]): Promise<MediaModel | null> {
+  get(id: number, fields: string[]): Promise<MediaModel | undefined> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
       fields.push('id');
@@ -31,7 +33,23 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
 
     return this.models.Medias.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Medias),
-    }).then((media) => media?.toJSON() as MediaModel);
+      include: {
+        model: this.models.MediaMeta.scope(MediaMetaPresetKeys.Matedata),
+        attributes: ['metaValue'],
+        as: 'MediaMetadata',
+        required: false,
+        duplicating: false,
+      },
+    }).then((media) => {
+      if (media) {
+        const mediaMeta = (media as any).MediaMetadata as MediaMetaModel | undefined;
+        return {
+          ...media.toJSON<MediaModel>(),
+          metaData: mediaMeta?.metaValue ? (JSON.parse(mediaMeta.metaValue) as MediaMetaDataModel) : undefined,
+        };
+      }
+      return;
+    });
   }
 
   /**
@@ -40,7 +58,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param fields 返回的字段
    * @returns
    */
-  getByName(fileName: string, fields: string[]): Promise<MediaModel | null> {
+  getByName(fileName: string, fields: string[]): Promise<MediaModel | undefined> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
       fields.push('id');
@@ -48,10 +66,26 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
 
     return this.models.Medias.findOne({
       attributes: this.filterFields(fields, this.models.Medias),
+      include: {
+        model: this.models.MediaMeta.scope(MediaMetaPresetKeys.Matedata),
+        attributes: ['metaValue'],
+        as: 'MediaMetadata',
+        required: false,
+        duplicating: false,
+      },
       where: {
         fileName,
       },
-    }).then((media) => media?.toJSON() as MediaModel);
+    }).then((media) => {
+      if (media) {
+        const mediaMeta = (media as any).MediaMetadata as MediaMetaModel | undefined;
+        return {
+          ...media.toJSON<MediaModel>(),
+          metaData: mediaMeta?.metaValue ? (JSON.parse(mediaMeta.metaValue) as MediaMetaDataModel) : undefined,
+        };
+      }
+      return;
+    });
   }
 
   /**
@@ -61,12 +95,20 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    */
   getPaged({ offset, limit, ...query }: PagedMediaArgs, fields: string[]): Promise<PagedMediaModel> {
     const { keyword, ...restQuery } = query;
+
     return this.models.Medias.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Medias),
+      include: {
+        model: this.models.MediaMeta.scope(MediaMetaPresetKeys.Matedata),
+        as: 'MediaMetadata',
+        attributes: ['metaValue'],
+        required: false,
+        duplicating: false,
+      },
       where: {
         ...(keyword
           ? {
-              fileName: {
+              originalFileName: {
                 [Op.like]: `%${keyword}%`,
               },
             }
@@ -77,7 +119,13 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       limit,
       order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
-      rows: rows as PagedMediaModel['rows'],
+      rows: rows.map((media) => {
+        const mediaMeta = (media as any).MediaMetadata as MediaMetaModel | undefined;
+        return {
+          ...media.toJSON<MediaModel>(),
+          metaData: mediaMeta?.metaValue ? (JSON.parse(mediaMeta.metaValue) as MediaMetaDataModel) : undefined,
+        };
+      }),
       total,
     }));
   }
@@ -101,7 +149,16 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param model 添加实体模型
    * @param fields 返回的字段
    */
-  async create(model: NewMediaInput, requestUser: RequestUser): Promise<MediaModel> {
+  async create(
+    model: NewMediaInput,
+    metaData: MediaMetaDataModel,
+    requestUser: RequestUser,
+  ): Promise<
+    MediaModel & {
+      metaData: MediaMetaDataModel;
+      metas: MediaMetaModel[];
+    }
+  > {
     if (await this.isExists(model.fileName)) {
       throw new ValidationError(`The media filename "${model.fileName}" has existed!`);
     }
@@ -117,26 +174,52 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
         { transaction: t },
       );
 
-      if (metas && metas.length) {
-        this.models.MediaMeta.bulkCreate(
-          metas.map((meta) => {
-            return {
-              ...meta,
-              mediaId: media.id,
-            };
-          }),
+      const mediaMetas = await this.models.MediaMeta.bulkCreate(
+        [
           {
-            transaction: t,
+            mediaId: media.id,
+            metaKey: MediaMetaPresetKeys.Matedata,
+            metaValue: JSON.stringify(metaData),
           },
-        );
-      }
+          ...(metas?.map((meta) => ({
+            ...meta,
+            mediaId: media.id,
+          })) ?? []),
+        ],
+        {
+          transaction: t,
+        },
+      );
 
       await t.commit();
 
-      return media.toJSON() as MediaModel;
+      return {
+        ...media.toJSON<MediaModel>(),
+        metaData,
+        metas: mediaMetas.filter(({ metaKey }) => metaKey !== MediaMetaPresetKeys.Matedata),
+      };
     } catch (err) {
       await t.rollback();
       throw err;
     }
+  }
+
+  /**
+   * 修改 Metadata
+   * @param mediaId Media Id
+   * @param metaData Metadata
+   */
+  updateMetaData(mediaId: number, metaData: MediaMetaDataModel): Promise<boolean> {
+    return this.models.MediaMeta.update(
+      {
+        metaValue: JSON.stringify(metaData),
+      },
+      {
+        where: {
+          mediaId,
+          metaKey: MediaMetaPresetKeys.Matedata,
+        },
+      },
+    ).then(([count]) => count > 0);
   }
 }

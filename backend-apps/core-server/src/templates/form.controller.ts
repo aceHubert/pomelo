@@ -95,7 +95,7 @@ export class FormTemplateController extends BaseController {
     const result = await this.templateDataSource.get(
       id,
       TemplateType.Form,
-      ['id', 'title', 'author', 'content', 'status', 'createdAt'],
+      ['id', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -142,7 +142,7 @@ export class FormTemplateController extends BaseController {
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
       TemplateType.Form,
-      ['id', 'title', 'author', 'status', 'createdAt'],
+      ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -163,7 +163,7 @@ export class FormTemplateController extends BaseController {
   })
   async create(@Body() input: NewFormTemplateDto, @User() requestUser: RequestUser) {
     const { schema, ...restDto } = input;
-    const { id, title, author, content, status, createdAt } = await this.templateDataSource.create(
+    const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
       { content: schema, ...restDto },
       TemplateType.Form,
       requestUser,
@@ -175,6 +175,7 @@ export class FormTemplateController extends BaseController {
         author,
         schema: content,
         status,
+        updatedAt,
         createdAt,
       },
     });

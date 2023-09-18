@@ -325,21 +325,46 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param metaKey meta key
    * @param metaValue meta value
    */
-  updateMetaByKey(modelId: number, metaKey: string, metaValue: string): Promise<boolean> {
+  updateMetaByKey(modelId: number, metaKey: string, metaValue: string, createIfNotExists = false): Promise<boolean> {
     const fixedKey = this.fixMetaKey(metaKey);
-    return this.metaModel
-      .update(
-        {
-          metaValue,
-        },
-        {
-          where: {
-            [this.metaModelIdFieldName]: modelId,
-            metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
+    if (!createIfNotExists) {
+      return this.metaModel
+        .update(
+          {
+            metaValue,
           },
-        },
-      )
-      .then(([count]) => count > 0);
+          {
+            where: {
+              [this.metaModelIdFieldName]: modelId,
+              metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
+            },
+          },
+        )
+        .then(([count]) => count > 0);
+    }
+    return this.isMetaExists(modelId, metaKey).then((isExists) => {
+      if (!isExists) {
+        // 如果不存在则创建
+        return this.metaModel
+          .create({
+            [this.metaModelIdFieldName]: modelId,
+            metaKey: fixedKey,
+            metaValue,
+          })
+          .then(() => true);
+      }
+      return this.metaModel
+        .update(
+          { metaValue },
+          {
+            where: {
+              [this.metaModelIdFieldName]: modelId,
+              metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
+            },
+          },
+        )
+        .then(([count]) => count > 0);
+    });
   }
 
   /**

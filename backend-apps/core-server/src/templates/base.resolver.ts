@@ -274,11 +274,8 @@ export class TemplateResolver extends createMetaResolver(
     @User() requestUser: RequestUser,
   ): Promise<Template> {
     const { type, ...restInput } = model;
-    const { id, name, title, author, content, excerpt, status, createdAt } = await this.templateDataSource.create(
-      { ...restInput, excerpt: restInput.excerpt || '' },
-      type,
-      requestUser,
-    );
+    const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
+      await this.templateDataSource.create({ ...restInput, excerpt: restInput.excerpt || '' }, type, requestUser);
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
@@ -302,6 +299,9 @@ export class TemplateResolver extends createMetaResolver(
       excerpt,
       status,
       type,
+      commentStatus,
+      commentCount,
+      updatedAt,
       createdAt,
     };
   }

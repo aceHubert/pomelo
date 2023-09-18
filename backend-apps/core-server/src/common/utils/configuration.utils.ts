@@ -117,19 +117,15 @@ export interface ConfigObject {
     /**
      * upload directory
      */
-    dist?: string;
+    dest?: string;
     /**
-     * limit upload file size(KB)
+     * max file size(KB)
      */
-    limit?: number;
+    maxFileSize?: number;
     /**
-     * obs client
+     * max file count
      */
-    obsClient?: {
-      accessKey?: string;
-      secretKey?: string;
-      endpoint?: string;
-    };
+    maxFiles?: number;
   };
   /**
    * sub-module store
@@ -222,13 +218,10 @@ export const configuration: (basePath: string) => ConfigFactory<ConfigObject> = 
       },
     },
     upload: {
-      dist: process.env.UPLOAD_PATH,
-      limit: process.env.UPLOAD_LIMIT !== void 0 ? bytes.parse(process.env.UPLOAD_LIMIT) / 1024 : 1024 * 1024 * 10,
-      obsClient: {
-        accessKey: process.env.HUAWEICLOUD_ACCESS_KEY,
-        secretKey: process.env.HUAWEICLOUD_SECRET_KEY,
-        endpoint: process.env.HUAWEICLOUD_ENDPOINT,
-      },
+      dest: process.env.UPLOAD_PATH,
+      maxFileSize:
+        process.env.UPLOAD_LIMIT !== void 0 ? bytes.parse(process.env.UPLOAD_LIMIT) / 1024 : 1024 * 1024 * 10,
+      maxFiles: process.env.UPLOAD_MAX_FILES !== void 0 ? parseInt(process.env.UPLOAD_MAX_FILES, 10) : 10,
     },
     submodule: {
       keywords:

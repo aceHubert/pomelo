@@ -7,12 +7,7 @@ import { MetaModel, NewMetaInput } from './meta.interface';
 /**
  * Template 返回实体模型
  */
-export interface TemplateModel extends Omit<TemplateAttributes, 'status'> {
-  /**
-   * 状态（不包含内部操作状态）
-   */
-  status: TemplateStatus;
-}
+export interface TemplateModel extends TemplateAttributes {}
 
 /**
  * Paged Template 查询参数
@@ -103,7 +98,9 @@ export interface NewTemplateMetaInput extends NewMetaInput {
  * Template 新建实体模型
  */
 export interface NewTemplateInput
-  extends Pick<TemplateCreationAttributes, 'name' | 'title' | 'excerpt' | 'content' | 'status'> {
+  extends Pick<TemplateCreationAttributes, 'name' | 'excerpt' | 'status' | 'commentStatus'> {
+  title?: string;
+  content?: string;
   /**
    * metaKey 不可以重复
    */
@@ -114,15 +111,16 @@ export interface NewTemplateInput
  * Template 修改实体模型
  */
 export interface UpdateTemplateInput
-  extends Partial<Pick<NewTemplateInput, 'title' | 'name' | 'content' | 'excerpt' | 'status'>> {}
+  extends Partial<Pick<NewTemplateInput, 'title' | 'name' | 'content' | 'excerpt' | 'status' | 'commentStatus'>> {}
 
 /* ----------表单--------------- */
 
 /**
  * Form 新建实体模型
  */
-export interface NewFormTemplateInput
-  extends Pick<TemplateCreationAttributes, 'title' | 'name' | 'content' | 'status'> {
+export interface NewFormTemplateInput extends Pick<TemplateCreationAttributes, 'name' | 'status' | 'commentStatus'> {
+  title?: string;
+  content?: string;
   /**
    * metaKey 不可以重复
    */
@@ -133,15 +131,16 @@ export interface NewFormTemplateInput
  * Form 修改实体模型
  */
 export interface UpdateFormTemplateInput
-  extends Partial<Pick<NewFormTemplateInput, 'title' | 'name' | 'content' | 'status'>> {}
+  extends Partial<Pick<NewFormTemplateInput, 'title' | 'name' | 'content' | 'status' | 'commentStatus'>> {}
 
 /* ----------页面--------------- */
 
 /**
  * Page 新建实体模型
  */
-export interface NewPageTemplateInput
-  extends Pick<TemplateCreationAttributes, 'name' | 'title' | 'content' | 'status'> {
+export interface NewPageTemplateInput extends Pick<TemplateCreationAttributes, 'name' | 'status' | 'commentStatus'> {
+  title?: string;
+  content?: string;
   /**
    * metaKey 不可以重复
    */
@@ -152,7 +151,7 @@ export interface NewPageTemplateInput
  * Page 修改实体模型
  */
 export interface UpdatePageTemplateInput
-  extends Partial<Pick<NewPageTemplateInput, 'title' | 'name' | 'content' | 'status'>> {}
+  extends Partial<Pick<NewPageTemplateInput, 'title' | 'name' | 'content' | 'status' | 'commentStatus'>> {}
 
 /* ----------文章--------------- */
 
@@ -160,7 +159,7 @@ export interface UpdatePageTemplateInput
  * Post 新建实体模型
  */
 export interface NewPostTemplateInput
-  extends Pick<TemplateCreationAttributes, 'title' | 'name' | 'excerpt' | 'content' | 'status'> {
+  extends Pick<TemplateCreationAttributes, 'title' | 'name' | 'excerpt' | 'content' | 'status' | 'commentStatus'> {
   /**
    * metaKey 不可以重复
    */
@@ -171,4 +170,4 @@ export interface NewPostTemplateInput
  * Post 修改实体模型
  */
 export interface UpdatePostTemplateInput
-  extends Partial<Pick<NewPostTemplateInput, 'title' | 'name' | 'excerpt' | 'content' | 'status'>> {}
+  extends Partial<Pick<NewPostTemplateInput, 'title' | 'name' | 'excerpt' | 'content' | 'status' | 'commentStatus'>> {}

@@ -1,4 +1,3 @@
-import { Options } from 'multer';
 import { ModuleMetadata, Type } from '@nestjs/common';
 
 export interface FileOptions {
@@ -12,10 +11,6 @@ export interface FileOptions {
    * @default month
    */
   groupBy?: 'month' | 'year';
-  /**
-   * Limit file max size(KB)
-   */
-  limit?: Options['limits'];
   /**
    * prefix append to static server URL
    * @default uploads

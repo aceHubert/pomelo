@@ -1,6 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import { MediaMetaAttributes, MediaMetaCreationAttributes } from '../../entities/media-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { MediaMetaPresetKeys } from '../utils/preset-keys.util';
 
 export default class MediaMeta extends Model<MediaMetaAttributes, MediaMetaCreationAttributes> {
   public id!: number;
@@ -10,17 +11,16 @@ export default class MediaMeta extends Model<MediaMetaAttributes, MediaMetaCreat
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect();
   MediaMeta.init(
     {
       id: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         autoIncrement: true,
         primaryKey: true,
       },
       mediaId: {
-        // type: DataTypes.BIGINT({ unsigned: true }),
-        type: DataTypes.BIGINT(),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         defaultValue: 0,
         comment: 'Media id',
@@ -47,4 +47,10 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       comment: 'Media metas',
     },
   );
+
+  MediaMeta.addScope(MediaMetaPresetKeys.Matedata, {
+    where: {
+      metaKey: MediaMetaPresetKeys.Matedata,
+    },
+  });
 };

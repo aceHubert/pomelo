@@ -1,14 +1,13 @@
-import multer from 'multer';
 import { Module, Provider, DynamicModule } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
 import { FileOptions, FileAsyncOptions, FileOptionsFactory } from './interfaces/file-options.interface';
-import { FileController } from './file.controller';
+import { FileController, MediaController } from './file.controller';
+import { FileResolver } from './file.resolver';
 import { FileService } from './file.service';
 import { FILE_OPTIONS } from './constants';
 
 @Module({
-  controllers: [FileController],
-  providers: [FileService],
+  controllers: [FileController, MediaController],
+  providers: [FileResolver, FileService],
   exports: [FileService],
 })
 export class FileModule {
@@ -16,15 +15,7 @@ export class FileModule {
     return {
       module: FileModule,
       global: options.isGlobal,
-      imports: [
-        MulterModule.register({
-          storage: multer.diskStorage({ destination: options.dest }),
-          // config.get('file_storage') === 'disk'
-          //   ? multer.diskStorage({ destination: config.get('file_dest') })
-          //   : multer.memoryStorage(),
-          limits: options.limit,
-        }),
-      ],
+
       providers: [
         {
           provide: FILE_OPTIONS,

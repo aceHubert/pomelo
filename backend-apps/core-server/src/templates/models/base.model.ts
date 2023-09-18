@@ -1,5 +1,5 @@
 import { Field, ObjectType, ID, OmitType, PickType } from '@nestjs/graphql';
-import { TemplateStatus } from '@pomelo/datasource';
+import { TemplateStatus, TemplateCommentStatus } from '@pomelo/datasource';
 // import { FieldAuthorized, UserRole } from 'nestjs-authorization';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
@@ -31,6 +31,15 @@ export class Template {
 
   @Field({ description: 'Type' })
   type!: string;
+
+  @Field((type) => TemplateCommentStatus, { description: 'Comment status' })
+  commentStatus!: TemplateCommentStatus;
+
+  @Field({ description: 'Comment count' })
+  commentCount!: number;
+
+  @Field({ description: 'Latest update time' })
+  updatedAt!: Date;
 
   @Field({ description: 'Creation time' })
   createdAt!: Date;

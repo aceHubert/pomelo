@@ -1,8 +1,11 @@
+import { snakeCase } from 'lodash';
+import statuses from 'statuses';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
 import { GqlContextType } from '@nestjs/graphql';
 import { BaseError as SequelizeBaseError, DatabaseError as SequelizeDatabaseError } from 'sequelize';
 import { GraphQLError } from 'graphql';
-import { getI18nContextFromArgumentsHost } from 'nestjs-i18n';
+import { isHttpError } from 'http-errors';
+import { I18nContext, I18nTranslation } from 'nestjs-i18n';
 import { Request, Response } from 'express';
 import { InvalidPackageNameError, InvalidPackageVersionError } from 'query-registry';
 
@@ -15,7 +18,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     this.logger.error(exception, exception.stack);
 
     const type = host.getType<GqlContextType>();
-    const i18n = getI18nContextFromArgumentsHost(host);
+    const i18n = I18nContext.current<I18nTranslation>(host);
     if (type === 'http') {
       const http = host.switchToHttp();
 
@@ -27,7 +30,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       // @ts-expect-error code doesn't export type
       if (exception instanceof SequelizeDatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
         // 当出现表不存在错误时，提示要初始化数据库， 并设置 response.dbInitRequired = true
-        description.message = await i18n.tv('error.no_such_table', 'No such table!');
+        description.message = (await i18n?.tv('error.no_such_table', 'No such table!')) ?? 'No such table!';
         description.dbInitRequired = true;
       }
 
@@ -69,6 +72,8 @@ export class AllExceptionFilter implements ExceptionFilter {
   private getHttpCodeFromError(exception: Error | { status?: number }): number {
     return exception instanceof HttpException // 如果是 Http 错误，直接获取 status code
       ? exception.getStatus()
+      : isHttpError(exception)
+      ? exception.statusCode // 如果是 http-errors 错误，直接获取 statusCode
       : exception instanceof InvalidPackageNameError || exception instanceof InvalidPackageVersionError //  query-registry InvalidPackageNameError/InvalidPackageVersionError 转换成 http 405
       ? HttpStatus.METHOD_NOT_ALLOWED
       : (exception as { status?: number }).status ?? HttpStatus.INTERNAL_SERVER_ERROR; // 否则返回 500
@@ -81,23 +86,14 @@ export class AllExceptionFilter implements ExceptionFilter {
   private getGraphqlCodeFromError(exception: Error | { status?: number }) {
     return exception instanceof HttpException
       ? getFromHttpStatus(exception.getStatus())
+      : isHttpError(exception)
+      ? getFromHttpStatus(exception.statusCode)
       : exception instanceof InvalidPackageNameError || exception instanceof InvalidPackageVersionError //  query-registry InvalidPackageNameError/InvalidPackageVersionError 转换成 METHOD_NOT_ALLOWED
-      ? 'METHOD_NOT_ALLOWED'
+      ? getFromHttpStatus(HttpStatus.METHOD_NOT_ALLOWED)
       : getFromHttpStatus((exception as { status?: number }).status ?? HttpStatus.INTERNAL_SERVER_ERROR);
 
     function getFromHttpStatus(status: number) {
-      switch (status) {
-        case 400:
-          return 'BAD_USER_INPUT';
-        case 401:
-          return 'UNAUTHENTICATED';
-        case 403:
-          return 'FORBIDDEN';
-        case 405:
-          return 'METHOD_NOT_ALLOWED';
-        default:
-          return 'INTERNAL_SERVER_ERROR';
-      }
+      return snakeCase(statuses(status)).toUpperCase();
     }
   }
 

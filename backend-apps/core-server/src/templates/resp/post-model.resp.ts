@@ -10,6 +10,9 @@ export class PostTemplateModelResp extends PickType(TemplateModelResp, [
   'content',
   'excerpt',
   'status',
+  'commentStatus',
+  'commentCount',
+  'updatedAt',
   'createdAt',
 ] as const) {
   // something else

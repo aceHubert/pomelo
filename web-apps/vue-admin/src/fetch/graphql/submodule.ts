@@ -12,7 +12,7 @@ export interface Tag {
   version: string;
 }
 
-export interface PagedSubModuleQuery {
+export interface PagedSubModuleArgs {
   name?: string;
   offset?: number;
   limit?: number;
@@ -48,7 +48,7 @@ export const useSubmoduleApi = defineRegistApi('submodule', {
         description: string;
       }>;
     },
-    PagedSubModuleQuery
+    PagedSubModuleArgs
   >,
   // 获取模块详情
   get: gql`

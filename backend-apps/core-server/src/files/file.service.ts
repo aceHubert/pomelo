@@ -1,16 +1,17 @@
-import { promisify } from 'util';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { promisify } from 'util';
 import moment from 'moment';
 import Jimp from 'jimp';
+import { camelCase } from 'lodash';
 import { Inject, Injectable } from '@nestjs/common';
 import { RequestUser } from '@pomelo/shared';
-import { MediaDataSource, MediaMetaModel, OptionPresetKeys, MediaMetaPresetKeys } from '@pomelo/datasource';
+import { MediaDataSource, MediaMetaDataModel, ImageScaleModel, OptionPresetKeys, MediaModel } from '@pomelo/datasource';
 import { normalizeRoutePath, foregoingSlash, stripTrailingSlash } from '@/common/utils/path.util';
 import { FileOptions } from './interfaces/file-options.interface';
 import { FileUploadOptions } from './interfaces/file-upload-options.interface';
-import { ImageScaleData } from './interfaces/image-metadata.interface';
+import { File, ImageScaleType, ImageScales } from './interfaces/file.interface';
 import { FILE_OPTIONS } from './constants';
 
 const stat = promisify(fs.stat);
@@ -105,13 +106,6 @@ export class FileService {
   }
 
   /**
-   * 是否是图片
-   */
-  private isImage(mimeType: string) {
-    return mimeType.startsWith('image/');
-  }
-
-  /**
    * 是否支持缩放（图片）
    */
   private isImageScaleable(mimeType: string) {
@@ -121,11 +115,21 @@ export class FileService {
   /**
    * 显示到前端的Url地址（siteUrl/staticPrefix/path）
    */
-  async getURI(path: string) {
-    const siteUrl = await this.mediaDataSource.getOption(OptionPresetKeys.SiteUrl);
-    return (
-      (siteUrl ? stripTrailingSlash(siteUrl) : '') + stripTrailingSlash(this.staticPrefix) + normalizeRoutePath(path)
-    );
+  private getDisplayPath(filepath: string, base = '') {
+    return stripTrailingSlash(base) + normalizeRoutePath(path.join(this.staticPrefix, filepath));
+  }
+
+  /**
+   * stream 转 buffer
+   */
+  async stream2Buffer(stream: fs.ReadStream): Promise<Buffer> {
+    return new Promise<Buffer>((resolve, reject) => {
+      const _buf = Array<any>();
+
+      stream.on('data', (chunk) => _buf.push(chunk));
+      stream.on('end', () => resolve(Buffer.concat(_buf)));
+      stream.on('error', (err) => reject(`error converting stream - ${err}`));
+    });
   }
 
   /**
@@ -134,23 +138,29 @@ export class FileService {
    * @param options 文件参数
    * @param requestUser 请求用户
    */
-  async uploadFile(
-    options: FileUploadOptions,
-    requestUser: RequestUser,
-  ): Promise<Dictionary<{ fileName: string; path: string }>> {
+  async uploadFile(options: FileUploadOptions, requestUser: RequestUser): Promise<MediaModel> {
     const md5 = await this.getFileMd5(options.file);
-    let media = await this.mediaDataSource.getByName(md5, ['originalFileName', 'extension', 'mimeType', 'path']);
-    let mediaMetas: MediaMetaModel[] | null = null;
+    let media = await this.mediaDataSource.getByName(md5, [
+      'id',
+      'fileName',
+      'originalFileName',
+      'extension',
+      'mimeType',
+      'path',
+      'createdAt',
+    ]);
+
     if (!media) {
       const extension = path.extname(options.originalName);
       const originalFileName = path.basename(options.originalName, extension);
       const dest = await this.getDest();
       const filePath = path.join(dest, `${md5}${extension}`);
 
-      // 文件不在在
+      // 文件不存在
       if (!(await this.isExists(filePath))) {
         if (typeof options.file === 'string') {
           const content = await readFile(options.file);
+
           await writeFile(filePath, content, 'utf8');
         } else {
           await writeFile(filePath, options.file, 'utf8');
@@ -159,34 +169,41 @@ export class FileService {
 
       const fileStat = await stat(filePath);
 
-      const metaDatas: Dictionary<any> = {
+      const metaData: MediaMetaDataModel = {
         fileSize: fileStat.size,
       };
 
-      if (this.isImage(options.mimeType)) {
+      // 是否支持 Jimp 操作
+      if (Object.keys(Jimp.decoders).includes(options.mimeType)) {
         const image = await Jimp.create(filePath);
-        metaDatas.width = image.getWidth();
-        metaDatas.height = image.getHeight();
+        metaData.width = image.getWidth();
+        metaData.height = image.getHeight();
 
         if (this.isImageScaleable(options.mimeType)) {
-          const imageScaleDatas: ImageScaleData[] = [];
+          const imageScales: ImageScaleModel[] = [];
           // thumbnail
+          const width = await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeWidth);
+          const height = await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeHeight);
+          const crop = await this.mediaDataSource.getOption<'0' | '1'>(OptionPresetKeys.ThumbnailCrop);
           const thumbnail = await this.scaleToThumbnail(
             image,
             (imgOptions) => this.getImageDestWithSuffix(filePath, `${imgOptions.width}x${imgOptions.height}`),
+            width ? parseInt(width) : void 0,
+            height ? parseInt(height) : void 0,
             50,
+            crop === '1',
           );
-          imageScaleDatas.push({ ...thumbnail, name: 'thumbnail' });
+          imageScales.push({ ...thumbnail, name: ImageScaleType.Thumbnail });
 
           // scaled
           const scaled = await this.scaleImage(
             filePath,
-            () => this.getImageDestWithSuffix(filePath, 'scaled'),
+            () => this.getImageDestWithSuffix(filePath, ImageScaleType.Scaled),
             2560,
             1440,
             80,
           );
-          scaled && imageScaleDatas.push({ ...scaled, name: 'scaled' });
+          scaled && imageScales.push({ ...scaled, name: ImageScaleType.Scaled });
 
           // other sizes
           const mediumWidth = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.MediumSizeWidth))!);
@@ -200,9 +217,9 @@ export class FileService {
             (await this.mediaDataSource.getOption(OptionPresetKeys.MediumLargeSizeHeight))!,
           );
           const resizeArr = [
-            { name: 'large', width: largeWidth, height: largeHeight, quality: 80 },
-            { name: 'medium-large', width: mediumLargeWidth, height: mediumLargeHeight, quality: 70 },
-            { name: 'medium', width: mediumWidth, height: mediumHeight, quality: 50 },
+            { name: ImageScaleType.Large, width: largeWidth, height: largeHeight, quality: 80 },
+            { name: ImageScaleType.MediumLarge, width: mediumLargeWidth, height: mediumLargeHeight, quality: 70 },
+            { name: ImageScaleType.Medium, width: mediumWidth, height: mediumHeight, quality: 50 },
           ];
 
           await Promise.all(
@@ -214,11 +231,11 @@ export class FileService {
                 item.height,
                 item.quality,
               );
-              scale && imageScaleDatas.push({ ...scale, name: item.name });
+              scale && imageScales.push({ ...scale, name: item.name });
             }),
           );
 
-          metaDatas.imageScales = imageScaleDatas;
+          metaData.imageScales = imageScales;
         }
       }
 
@@ -230,61 +247,61 @@ export class FileService {
           mimeType: options.mimeType,
           path: foregoingSlash(path.relative(this.dest, filePath)),
         },
+        metaData,
         requestUser,
       );
-
-      mediaMetas = await this.mediaDataSource.bulkCreateMeta(media.id, [
-        {
-          metaKey: MediaMetaPresetKeys.Matedata,
-          metaValue: JSON.stringify(metaDatas),
-        },
-      ]);
-    } else if (this.isImageScaleable(media.mimeType)) {
-      mediaMetas = await this.mediaDataSource.getMetas(
-        media.id,
-        [MediaMetaPresetKeys.Matedata],
-        ['metaKey', 'metaValue'],
-      );
     }
-    const fileName = `${media.originalFileName}${media.extension}`;
+
+    return media;
+  }
+
+  /**
+   * 转换成 FileModel
+   * @param media Media Model
+   * @param metaData Media metadata
+   */
+  async toFileModel(media: MediaModel, metaData?: MediaMetaDataModel): Promise<File> {
+    const siteUrl = await this.mediaDataSource.getOption(OptionPresetKeys.SiteUrl);
+    const fileName = `${media.fileName}${media.extension}`;
+    const { imageScales = [], fileSize, width, height } = metaData ?? { fileSize: 0 };
     return {
       original: {
         fileName,
         path: media.path,
+        fullPath: this.getDisplayPath(media.path, siteUrl),
+        fileSize,
+        width,
+        height,
       },
-      ...(mediaMetas
-        ? mediaMetas.reduce((prev, meta) => {
-            if (meta.metaKey === MediaMetaPresetKeys.Matedata) {
-              const metadatas = JSON.parse(meta.metaValue!) as Dictionary<any>;
-              // resized 图片
-              metadatas.imageScales &&
-                (metadatas.imageScales as ImageScaleData[]).forEach((item) => {
-                  prev[item.name] = {
-                    fileName,
-                    path: item.path,
-                  };
-                });
-              // some else type properties
-            }
-
-            return prev;
-          }, {} as Dictionary<any>)
-        : null),
+      ...imageScales.reduce((prev, scale) => {
+        prev[camelCase(scale.name) as keyof ImageScales] = {
+          fileName,
+          path: scale.path,
+          fullPath: this.getDisplayPath(scale.path, siteUrl),
+          width: scale.width,
+          height: scale.height,
+        };
+        return prev;
+      }, {} as Partial<ImageScales>),
     };
   }
 
   /**
    * 生成略缩图
-   * @param imagePath 源图片路径
+   * @param image 源图片路径或Jimp对象
+   * @param width 宽度
+   * @param height 高度
+   * @param quality 质量，0-100 之间
+   * @param crop 是否裁剪
    */
   async scaleToThumbnail(
     image: string | Jimp,
     dest: string | ((opts: { width: number; height: number }) => string),
+    width = 150,
+    height = 150,
     quality = 70,
-  ): Promise<Omit<ImageScaleData, 'name'>> {
-    const width = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeWidth)) || '150');
-    const height = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeHeight)) || '150');
-    const crop = await this.mediaDataSource.getOption<'0' | '1'>(OptionPresetKeys.ThumbnailCrop);
+    crop = true,
+  ): Promise<Omit<ImageScaleModel, 'name'>> {
     if (typeof image === 'string') {
       image = await Jimp.create(image);
     } else {
@@ -312,10 +329,10 @@ export class FileService {
 
   /**
    * 缩放图片
-   * @param imagePath 源图片路径
+   * @param image 源图片路径或Jimp对象
    * @param width 宽度
    * @param height 高度
-   * @param suffix 图片名称后缀，如果为空则是以 {width}x{height} 作为后缀
+   * @param quality 质量，0-100 之间
    */
   async scaleImage(
     image: string | Jimp,
@@ -323,7 +340,7 @@ export class FileService {
     width: number,
     height: number,
     quality = 70,
-  ): Promise<Omit<ImageScaleData, 'name'> | undefined> {
+  ): Promise<Omit<ImageScaleModel, 'name'> | undefined> {
     if (typeof image === 'string') {
       image = await Jimp.create(image);
     } else {
