@@ -4,8 +4,8 @@ import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { Button, Card, Dropdown, Form, Input, Menu, Icon } from 'ant-design-vue';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { warn } from '@ace-util/core';
+import { TemplateStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
-import { TemplateStatus } from '@/fetch/graphql';
 import { useDesignMixin } from '../../mixins/design.mixin';
 import { ClauseForm } from '../components';
 import { TemplateType } from '../constants';
@@ -225,7 +225,7 @@ export default Form.create({})(
                       {this.status === TemplateStatus.Draft
                         ? this.$tv('page_templates.btn_text.save_and_publish', '保存并发布')
                         : this.status === TemplateStatus.Publish
-                        ? this.$tv('page_templates.btn_text.save_to_draft', '保存至草稿')
+                        ? this.$tv('page_templates.btn_text.save_to_draft', '保存草稿')
                         : null}
                     </Menu.Item>
                   </Menu>

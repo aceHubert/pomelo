@@ -1,9 +1,10 @@
 import { lowerCase } from 'lodash-es';
 import { ref, reactive, computed, watch, set } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
+import { TemplateStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
 import { useI18n, useOptions } from '@/hooks';
-import { useTemplateApi, useTermTaxonomyApi, TemplateStatus } from '@/fetch/graphql';
+import { useTemplateApi, useTermTaxonomyApi } from '@/fetch/graphql';
 
 // Types
 import type { PagedTemplateItem, TemplateStatusCountItem, TemplateMonthCountItem } from '@/fetch/graphql';

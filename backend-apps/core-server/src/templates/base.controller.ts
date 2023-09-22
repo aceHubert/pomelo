@@ -34,8 +34,7 @@ import { createMetaController } from '@/common/controllers/meta.controller';
 import { NewTemplateMetaDto } from './dto/new-template-meta.dto';
 import { PagedBaseTemplateQueryDto, BaseTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewTemplateDto } from './dto/new-template.dto';
-import { UpdateTemplateDto } from './dto/update-template.dto';
-import { BulkUpdateTemplateStatusDto } from './dto/update-template-status.dto';
+import { UpdateTemplateDto, BulkUpdateTemplateStatusDto } from './dto/update-template.dto';
 import {
   TemplateModelResp,
   TemplateOptionResp,
@@ -214,6 +213,66 @@ export class TemplateController extends createMetaController(
   }
 
   /**
+   * Get template model by alias name
+   */
+  @Get(':name/alias')
+  @Anonymous()
+  @ApiQuery({
+    name: 'metaKeys',
+    type: [String],
+    required: false,
+    example: ['mobile', 'desktop'],
+    description: `return specific keys' metas if setted, otherwish no "metas" field return in "data".`,
+  })
+  @ApiOkResponse({
+    description: 'Post template model',
+    type: () => createResponseSuccessType({ data: TemplateModelResp }, 'PostTemplateModelSuccessResp'),
+  })
+  @ApiNoContentResponse({ description: 'Post template not found' })
+  async getByName(
+    @Param('name') name: string,
+    @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
+    @User() requestUser: RequestUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.templateDataSource.getByName(
+      name,
+      void 0,
+      [
+        'id',
+        'name',
+        'title',
+        'author',
+        'excerpt',
+        'content',
+        'status',
+        'type',
+        'commentStatus',
+        'commentCount',
+        'updatedAt',
+        'createdAt',
+      ],
+      requestUser,
+    );
+
+    let metas;
+    if (result && metaKeys?.length) {
+      metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
+    }
+
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+
+    return this.success({
+      data: {
+        ...result,
+        metas,
+      },
+    });
+  }
+
+  /**
    * Get template model by id
    */
   @Get(':id')
@@ -223,7 +282,7 @@ export class TemplateController extends createMetaController(
     type: [String],
     required: false,
     example: ['mobile', 'desktop'],
-    description: `return specific keys' metas if setted, otherwish no "metas" field return in "data".`,
+    description: `return specific keys' metas if setted, otherwish all "metas" field return in "data".`,
   })
   @ApiOkResponse({
     description: 'Template model',
@@ -241,12 +300,25 @@ export class TemplateController extends createMetaController(
     const result = await this.templateDataSource.get(
       id,
       void 0,
-      ['id', 'name', 'title', 'author', 'excerpt', 'content', 'status', 'type', 'updatedAt', 'createdAt'],
+      [
+        'id',
+        'name',
+        'title',
+        'author',
+        'excerpt',
+        'content',
+        'status',
+        'type',
+        'commentStatus',
+        'commentCount',
+        'updatedAt',
+        'createdAt',
+      ],
       requestUser,
     );
 
     let metas;
-    if (result && metaKeys?.length) {
+    if (result) {
       metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
     }
 
@@ -286,7 +358,19 @@ export class TemplateController extends createMetaController(
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
       type,
-      ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
+      [
+        'id',
+        'name',
+        'title',
+        'author',
+        'excerpt',
+        'status',
+        'type',
+        'commentStatus',
+        'commentCount',
+        'updatedAt',
+        'createdAt',
+      ],
       requestUser,
     );
 

@@ -1,9 +1,40 @@
+.feature-image{
+  &-uploader{
+    :global{
+      .@{ant-prefix}-upload-select-picture-card{
+        margin-right: 0;
+        width: 100%;
+      }
+    }
+  }
+
+  &-cover{
+    position: relative;
+
+    &__actions{
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(0,0,0,.5);
+      color: #fff;
+      justify-content: center;
+      display: none;
+    }
+
+    &:hover &__actions{
+      display: flex;
+    }
+  }
+}
+
 .schema-designer {
   height: 100%;
 
   :global {
     .dn-main-panel.root {
-      position: static;
+      position: relative;
     }
   }
 }

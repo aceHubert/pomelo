@@ -1,0 +1,60 @@
+.container {
+  padding-bottom: 100px;
+}
+
+.wrapper {
+  .title-wrapper,
+  .content-wrapper {
+    margin: auto;
+    width: 1200px;
+    max-width: 100%;
+
+    .full-width& {
+      width: 100%;
+      padding-left: 80px;
+      padding-right: 80px;
+    }
+  }
+
+  .title-wrapper {
+    text-align: center;
+    padding-top: 300px;
+    background-image: linear-gradient(to right, @var-primary, @var-primary);
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: auto 300px;
+
+    .title {
+      margin-top: 1em;
+      font-size: 40px;
+    }
+
+    .subtitle {
+      margin-top: 2em;
+      color: var(--text-secondary, @text-color-secondary);
+    }
+
+    .cover& {
+      padding-top: 200px;
+      padding-bottom: 20px;
+      background-size: auto 100%;
+      color: #fff;
+
+      .title {
+        margin-top: 0;
+      }
+
+      .subtitle {
+        color: darken(#fff, 10%);
+      }
+    }
+  }
+
+  .content-wrapper {
+    padding: 30px 20px 0;
+
+    img {
+      max-width: 100%;
+    }
+  }
+}

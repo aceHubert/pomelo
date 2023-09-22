@@ -192,6 +192,21 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.get(id, void 0, this.getFieldNames(fields.fieldsByTypeName.Template), requestUser);
   }
 
+  @Anonymous()
+  @Query((returns) => Template, { nullable: true, description: 'Get post template by alias name.' })
+  templateByName(
+    @Args('name', { type: () => String, description: 'Post name' }) name: string,
+    @Fields() fields: ResolveTree,
+    @User() requestUser?: RequestUser,
+  ): Promise<Template | undefined> {
+    return this.templateDataSource.getByName(
+      name,
+      void 0,
+      this.getFieldNames(fields.fieldsByTypeName.Template),
+      requestUser,
+    );
+  }
+
   @RamAuthorized(TemplateAction.Counts)
   @Query((returns) => [TemplateStatusCount], { description: 'Get template count by status.' })
   templateCountByStatus(

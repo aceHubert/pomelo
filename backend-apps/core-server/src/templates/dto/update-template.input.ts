@@ -8,7 +8,7 @@ import {
 
 @InputType({ description: 'Update input' })
 export class UpdateTemplateInput extends PartialType(
-  PickType(NewTemplateInput, ['title', 'excerpt', 'content', 'status'] as const),
+  PickType(NewTemplateInput, ['name', 'title', 'excerpt', 'content', 'status'] as const),
 ) {}
 
 @InputType({ description: 'Update form input' })

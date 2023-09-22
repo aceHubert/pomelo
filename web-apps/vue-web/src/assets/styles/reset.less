@@ -1,0 +1,99 @@
+@import 'vant/lib/style/reset';
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 10vw;
+}
+
+/* prettier-ignore */
+html body {
+  margin-right: auto;
+  margin-left: auto;
+  min-width: 320Px;
+}
+strong {
+  font-weight: bold;
+}
+/* prettier-ignore */
+body {
+  border-width: 45Px;
+  color: @text-color;
+  background-color: @body-background;
+  font-size: 0.3733333333rem;
+  font-family: @base-font-family;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: @var-primary;
+}
+
+/* prettier-ignore */
+@media screen and (max-width: 320Px) {
+  html {
+    font-size: 32Px;
+  }
+}
+
+/* prettier-ignore */
+@media screen and (min-width: 540px) {
+  html {
+    font-size: 54Px;
+  }
+}
+
+/* prettier-ignore */
+@media screen and (min-width: 1200Px) {
+  html {
+    font-size: 16Px;
+  }
+
+  body{
+    font-size: 14Px;
+  }
+}
+
+// 自定义图标
+[class^='icon-'],
+[class*=' icon-'] {
+  font-family: 'iconfont' !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// vant reset
+
+/* button */
+
+.van-button--disabled {
+  background-color: @gray-5 !important;
+  border-color: @gray-5 !important;
+}
+
+.van-calendar__confirm {
+  background-color: @var-primary !important;
+  border-color: @var-primary !important;
+}
+
+.van-dialog__message {
+  overflow-x: hidden;
+  text-align: left !important;
+  margin: 0 auto;
+  width: max-content;
+  max-width: 100%;
+  flex: none !important;
+}
+.van-radio__icon {
+  padding-left: 1px;
+  // 所有的单选框左侧展示被压了1px
+}

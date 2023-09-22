@@ -56,26 +56,18 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
 
   @Anonymous()
   @Query((returns) => FormTemplate, { nullable: true, description: 'Get form template.' })
-  async formTemplate(
+  formTemplate(
     @Args('id', { type: () => ID, description: 'Form id' }) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<FormTemplate | undefined> {
-    const result = await this.templateDataSource.get(
+    return this.templateDataSource.get(
       id,
       TemplateType.Form,
       // content 不在模型里
       ['content', ...this.getFieldNames(fields.fieldsByTypeName.FormTemplate)],
       requestUser,
     );
-    if (result) {
-      const { content, ...restData } = result;
-      return {
-        ...restData,
-        schema: content,
-      };
-    }
-    return;
   }
 
   @RamAuthorized(FormTemplateAction.PagedList)
@@ -86,7 +78,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @User() requestUser?: RequestUser,
   ): Promise<PagedFormTemplate> {
     const { categoryId, categoryName, ...restArgs } = args;
-    const { rows, total } = await this.templateDataSource.getPaged(
+    return this.templateDataSource.getPaged(
       {
         ...restArgs,
         taxonomies: [
@@ -101,11 +93,6 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
       this.getFieldNames(fields.fieldsByTypeName.PagedFormTemplate.rows.fieldsByTypeName.PagedFormTemplateItem),
       requestUser,
     );
-
-    return {
-      rows,
-      total,
-    };
   }
 
   @RamAuthorized(FormTemplateAction.Create)
@@ -114,9 +101,8 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @Args('model', { type: () => NewFormTemplateInput }) model: NewFormTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<FormTemplate> {
-    const { schema, ...restInput } = model;
     const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
-      { content: schema, ...restInput },
+      model,
       TemplateType.Form,
       requestUser,
     );
@@ -138,7 +124,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
       id,
       title,
       author,
-      schema: content,
+      content,
       status,
       updatedAt,
       createdAt,
@@ -152,8 +138,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @Args('model', { type: () => UpdateFormTemplateInput }) model: UpdateFormTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    const { schema, ...restInput } = model;
-    const result = await this.templateDataSource.update(id, { content: schema, ...restInput }, requestUser);
+    const result = await this.templateDataSource.update(id, model, requestUser);
 
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (result && model.status === TemplateStatus.Pending) {

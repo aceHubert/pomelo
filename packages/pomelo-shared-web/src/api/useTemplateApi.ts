@@ -5,14 +5,22 @@ import { getEnv } from '@ace-util/core';
 // Types
 export enum TemplateStatus {
   Draft = 'Draft', // 草稿
+  Pending = 'Pending', // 等审核
   Publish = 'Publish', // 已发布
+  Private = 'Private', // 私有，暂未使用
+  Future = 'Future', // 定时发布，暂未使用
   Trash = 'Trash', // 垃圾箱
 }
 
-export enum TemplatePlatform {
-  Mobile = 'mobile', // metaKey
-  Desktop = 'desktop', // metaKey
-  Responsive = 'responsive', // default in template table
+export enum TemplatePageType {
+  Default = 'default',
+  Cover = 'cover',
+  FullWidth = 'full-width',
+}
+
+export enum TemplateCommentStatus {
+  Open = 'Open',
+  Closed = 'Closed',
 }
 
 export interface TemplateModel {
@@ -24,28 +32,53 @@ export interface TemplateModel {
   author: string;
   status: TemplateStatus;
   type: string;
+  commentStatus: TemplateCommentStatus;
+  commentCount: number;
+  updatedAt: string;
   createdAt: string;
 }
 
-export interface FormTemplateModel extends Pick<TemplateModel, 'id' | 'title' | 'status' | 'author' | 'createdAt'> {
-  schema: string;
-}
+export interface FormTemplateModel
+  extends Pick<TemplateModel, 'id' | 'title' | 'content' | 'author' | 'status' | 'updatedAt' | 'createdAt'> {}
 
 export interface FormTemplateWithMetasModel extends FormTemplateModel {
   metas?: MetaModel[];
 }
 
 export interface PageTemplateModel
-  extends Pick<TemplateModel, 'id' | 'name' | 'title' | 'status' | 'author' | 'createdAt'> {
-  schema: string;
-}
+  extends Pick<
+    TemplateModel,
+    | 'id'
+    | 'name'
+    | 'title'
+    | 'content'
+    | 'author'
+    | 'status'
+    | 'commentStatus'
+    | 'commentCount'
+    | 'updatedAt'
+    | 'createdAt'
+  > {}
 
 export interface PageTemplateWithMetasModel extends PageTemplateModel {
   metas?: MetaModel[];
 }
 
 export interface PostTemplateModel
-  extends Pick<TemplateModel, 'id' | 'excerpt' | 'content' | 'title' | 'status' | 'author' | 'createdAt'> {}
+  extends Pick<
+    TemplateModel,
+    | 'id'
+    | 'name'
+    | 'title'
+    | 'author'
+    | 'content'
+    | 'excerpt'
+    | 'status'
+    | 'commentStatus'
+    | 'commentCount'
+    | 'updatedAt'
+    | 'createdAt'
+  > {}
 
 export interface PostTemplateWithMetasModel extends PostTemplateModel {
   metas?: MetaModel[];
@@ -57,6 +90,28 @@ export interface MetaModel {
   metaKey: string;
   metaValue: string;
 }
+
+export const TemplateMetaPresetKeys = {
+  CssText: 'css-text',
+  StyleLink: 'style-link',
+  FeatureImage: 'feature-image',
+};
+
+export const PostMetaPresetKeys = {
+  Template: 'template',
+  ...TemplateMetaPresetKeys,
+};
+
+export const FormMetaPresetKeys = {
+  SubmitAction: 'submit.action',
+  SubmitSuccessRedirect: 'submit.success_redirect',
+  SubmitSuccessTips: 'submit.success_tips',
+  ...TemplateMetaPresetKeys,
+};
+
+export const PageMetaPresetKeys = {
+  ...TemplateMetaPresetKeys,
+};
 
 /**
  * prefix 需要注册到window._ENV上

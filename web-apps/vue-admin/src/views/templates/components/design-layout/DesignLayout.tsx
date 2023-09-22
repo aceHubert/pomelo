@@ -1,9 +1,9 @@
 import { defineComponent, ref, watch } from '@vue/composition-api';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { Layout, Drawer, Tooltip, Card, Spin, Icon, Button, Dropdown, Menu, Row, Col, Space } from 'ant-design-vue';
+import { TemplateStatus } from '@pomelo/shared-web';
 import { useI18n } from '@/hooks';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
-import { TemplateStatus } from '@/fetch/graphql';
 import './index.less';
 
 export type ActionStatus = {
@@ -39,7 +39,7 @@ export enum Action {
   Update = 'update',
   // 保存发布内容至草稿
   SwitchToDraft = 'switchToDraft',
-  // 保存至草稿
+  // 保存到草稿
   SaveToDraft = 'saveToDraft',
   // 申请审核
   SubmitReview = 'submitReview',
@@ -215,7 +215,7 @@ export default defineComponent({
                               </Button>,
                             ]
                         : props.isSelfContent
-                        ? // 是自己，可以修改后提交审核和撤销保存至草稿
+                        ? // 是自己，可以修改后提交审核和撤销保存到草稿
                           [
                             <Button
                               disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
@@ -338,7 +338,7 @@ export default defineComponent({
                                   props.actionStatus.disabledActions
                                 }
                               >
-                                {i18n.tv('page_templates.btn_text.save_to_draft', '保存至草稿')}
+                                {i18n.tv('page_templates.btn_text.save_to_draft', '保存草稿')}
                               </Menu.Item>
                             </Menu>
                             <Icon slot="icon" type="down" />
@@ -357,7 +357,7 @@ export default defineComponent({
                             title={i18n.tv('page_templates.btn_tips.save_to_draft', '保存内容至草稿箱')}
                             onClick={() => handleAction(Action.SaveToDraft)}
                           >
-                            {i18n.tv('page_templates.btn_text.save_to_draft', '保存至草稿')}
+                            {i18n.tv('page_templates.btn_text.save_to_draft', '保存草稿')}
                           </Button>,
                           props.actionCapability.publish ? (
                             <Button

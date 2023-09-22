@@ -1,0 +1,30 @@
+import { ref } from '@vue/composition-api';
+import { warn } from '@ace-util/core';
+import { useBasicApi } from '@pomelo/shared-web';
+
+// Types
+import type { Ref } from '@vue/composition-api';
+import type { Plugin } from '@/types';
+
+const optionPlugin: Plugin = async (app, inject) => {
+  const basicApi = useBasicApi(app.afetch);
+
+  const options = ref<Record<string, string>>({});
+
+  try {
+    const { data: values } = await basicApi.getAutoloadOptions();
+    options.value = values;
+  } catch (err) {
+    warn(false, `Options loaded error, ${(err as Error).message}`);
+  }
+
+  inject('config', options);
+};
+
+export default optionPlugin;
+
+declare module 'vue/types/vue' {
+  interface Vue {
+    $config: Ref<Record<string, string>>;
+  }
+}

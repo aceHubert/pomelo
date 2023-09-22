@@ -23,11 +23,7 @@ export class PostTemplate extends PickType(Template, [
 export class PagedPostTemplateItem extends OmitType(PostTemplate, ['content'] as const) {}
 
 @ObjectType({ description: 'Paged post model' })
-export class PagedPostTemplate extends PagedResponse(PagedPostTemplateItem) {
-  // other fields
-}
+export class PagedPostTemplate extends PagedResponse(PagedPostTemplateItem) {}
 
 @ObjectType({ description: 'Post template option model' })
-export class PostTemplateOption extends PickType(PostTemplate, ['id', 'name', 'title'] as const) {
-  // other fields
-}
+export class PostTemplateOption extends PickType(PostTemplate, ['id', 'name', 'title'] as const) {}

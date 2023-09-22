@@ -4,16 +4,7 @@ import { observer } from '@formily/reactive-vue';
 import { FragmentComponent as Fragment } from '@formily/vue';
 import { ResourceWidget, ComponentTreeWidget, useScreen } from '@formily/antdv-designable';
 import { Card, FormGrid, FormCollapse, FormTab, Space } from '@formily/antdv-prototypes';
-import {
-  Field,
-  Page,
-  PageContainer,
-  PageItem,
-  Navbar,
-  Banner,
-  Entry,
-  HtmlContent,
-} from '@formily-portal/antdv-prototypes';
+import { Field, Page, PageContainer, PageItem, Banner, Entry, HtmlContent } from '@formily-portal/antdv-prototypes';
 import { Space as VanSpace } from '@formily/vant-prototypes';
 import {
   Field as VanField,
@@ -23,7 +14,6 @@ import {
   Banner as VanBanner,
   Entry as VanEntry,
   HtmlContent as VanHtmlContent,
-  Tabbar as VanTabbar,
 } from '@formily-portal/vant-prototypes';
 
 export const ResourceWidgets = defineComponent({
@@ -35,12 +25,12 @@ export const ResourceWidgets = defineComponent({
       switch (screen.value.type) {
         case ScreenType.Mobile:
           return {
-            Displays: [VanTabbar, VanBanner, VanEntry, VanHtmlContent],
+            Displays: [VanBanner, VanEntry, VanHtmlContent],
             Layouts: [VanPageContainer, VanPageItem, VanSpace],
           };
         case ScreenType.PC:
           return {
-            Displays: [Navbar, Banner, Entry, HtmlContent],
+            Displays: [Banner, Entry, HtmlContent],
             Layouts: [PageContainer, PageItem, Card, FormGrid, FormCollapse, FormTab, Space],
           };
 
@@ -83,7 +73,6 @@ export const ComponentWidget = observer(
               Banner: VanBanner,
               Entry: VanEntry,
               HtmlContent: VanHtmlContent,
-              Tabbar: VanTabbar,
             };
           case ScreenType.PC:
             return {
@@ -96,7 +85,6 @@ export const ComponentWidget = observer(
               FormCollapse,
               FormTab,
               Space,
-              Navbar,
               Banner,
               Entry,
               HtmlContent,

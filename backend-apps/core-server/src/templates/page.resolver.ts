@@ -62,61 +62,43 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
 
   @Anonymous()
   @Query((returns) => PageTemplate, { nullable: true, description: 'Get page template.' })
-  async pageTemplate(
+  pageTemplate(
     @Args('id', { type: () => ID, description: 'Page id' }) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
-    const result = await this.templateDataSource.get(
+    return this.templateDataSource.get(
       id,
       TemplateType.Page,
-      // content 不在模型里
-      ['content', ...this.getFieldNames(fields.fieldsByTypeName.PageTemplate)],
+      this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
       requestUser,
     );
-    if (result) {
-      const { content, ...restData } = result;
-      return {
-        ...restData,
-        schema: content,
-      };
-    }
-    return;
   }
 
   @Anonymous()
   @Query((returns) => PageTemplate, { nullable: true, description: 'Get page template by alias name.' })
-  async pageTemplateByName(
+  pageTemplateByName(
     @Args('name', { type: () => String, description: 'Page name' }) name: string,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
-    const result = await this.templateDataSource.getByName(
+    return this.templateDataSource.getByName(
       name,
       TemplateType.Page,
-      // content 不在模型里
-      ['content', ...this.getFieldNames(fields.fieldsByTypeName.PageTemplate)],
+      this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
       requestUser,
     );
-    if (result) {
-      const { content, ...restData } = result;
-      return {
-        ...restData,
-        schema: content,
-      };
-    }
-    return;
   }
 
   @RamAuthorized(PageTemplateAction.PagedList)
   @Query((returns) => PagedPageTemplate, { description: 'Get paged page templates.' })
-  async pageTemplates(
+  pageTemplates(
     @Args() args: PagedPageTemplateArgs,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PagedPageTemplate> {
     const { categoryId, categoryName, ...restArgs } = args;
-    const { rows, total } = await this.templateDataSource.getPaged(
+    return this.templateDataSource.getPaged(
       {
         ...restArgs,
         taxonomies: [
@@ -131,11 +113,6 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       this.getFieldNames(fields.fieldsByTypeName.PagedPageTemplate.rows.fieldsByTypeName.PagedPageTemplateItem),
       requestUser,
     );
-
-    return {
-      rows,
-      total,
-    };
   }
 
   @RamAuthorized(PageTemplateAction.Create)
@@ -144,9 +121,8 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Args('model', { type: () => NewPageTemplateInput }) model: NewPageTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<PageTemplate> {
-    const { schema, ...restInput } = model;
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create({ content: schema, ...restInput }, TemplateType.Page, requestUser);
+      await this.templateDataSource.create(model, TemplateType.Page, requestUser);
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
@@ -166,7 +142,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       name,
       title,
       author,
-      schema: content,
+      content,
       status,
       commentStatus,
       commentCount,
@@ -182,8 +158,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Args('model', { type: () => UpdatePageTemplateInput }) model: UpdatePageTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    const { schema, ...restInput } = model;
-    const result = await this.templateDataSource.update(id, { content: schema, ...restInput }, requestUser);
+    const result = await this.templateDataSource.update(id, model, requestUser);
 
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (result && model.status === TemplateStatus.Pending) {

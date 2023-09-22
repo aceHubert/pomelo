@@ -1,4 +1,3 @@
-import { IsDefined, IsString, IsJSON } from 'class-validator';
 import { PickType } from '@nestjs/swagger';
 import { TemplateCommentStatus, TemplateStatus } from '@pomelo/datasource';
 import { NewTemplateValidator } from './new-template.validator';
@@ -41,38 +40,21 @@ export class NewTemplateDto extends NewTemplateValidator {
   commentStatus?: TemplateCommentStatus;
 }
 
-export class NewFormTemplateDto extends PickType(NewTemplateDto, ['title', 'name', 'status'] as const) {
-  /**
-   * Schema
-   */
-  @IsDefined()
-  @IsString()
-  @IsJSON({ message: 'field $property must be a JSON string' })
-  schema!: string;
-}
+export class NewFormTemplateDto extends PickType(NewTemplateDto, ['title', 'content', 'status'] as const) {}
 
 export class NewPageTemplateDto extends PickType(NewTemplateDto, [
-  'title',
   'name',
+  'title',
+  'content',
   'status',
   'commentStatus',
-] as const) {
-  /**
-   * Schema
-   */
-  @IsDefined()
-  @IsString()
-  @IsJSON({ message: 'field $property must be a JSON string' })
-  schema!: string;
-}
+] as const) {}
 
 export class NewPostTemplateDto extends PickType(NewTemplateDto, [
-  'title',
   'name',
+  'title',
   'excerpt',
   'content',
   'status',
   'commentStatus',
-] as const) {
-  // something else
-}
+] as const) {}

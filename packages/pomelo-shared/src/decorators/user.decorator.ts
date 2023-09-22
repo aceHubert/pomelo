@@ -17,5 +17,5 @@ export const User = createParamDecorator((field: keyof RequestUser, context: Exe
     lang: ctx.i18nLang,
   };
 
-  return field ? user[field] : user;
+  return field ? user[field] : ctx.user ? user : void 0;
 });

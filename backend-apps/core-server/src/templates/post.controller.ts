@@ -85,7 +85,7 @@ export class PostTemplateController extends BaseController {
     type: [String],
     required: false,
     example: ['mobile', 'desktop'],
-    description: `return specific keys' metas if setted, otherwish no "metas" field return in "data".`,
+    description: `return specific keys' metas if setted, otherwish all "metas" field return in "data".`,
   })
   @ApiOkResponse({
     description: 'Post template model',
@@ -101,12 +101,24 @@ export class PostTemplateController extends BaseController {
     const result = await this.templateDataSource.getByName(
       name,
       TemplateType.Post,
-      ['id', 'name', 'title', 'author', 'content', 'excerpt', 'status', 'updatedAt', 'createdAt'],
+      [
+        'id',
+        'name',
+        'title',
+        'author',
+        'content',
+        'excerpt',
+        'status',
+        'commentStatus',
+        'commentCount',
+        'updatedAt',
+        'createdAt',
+      ],
       requestUser,
     );
 
     let metas;
-    if (result && metaKeys?.length) {
+    if (result) {
       metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
 
@@ -132,7 +144,7 @@ export class PostTemplateController extends BaseController {
     type: [String],
     required: false,
     example: ['mobile', 'desktop'],
-    description: `return specific keys' metas if setted, otherwish no "metas" field return in "data".`,
+    description: `return specific keys' metas if setted, otherwish all "metas" field return in "data".`,
   })
   @ApiOkResponse({
     description: 'Post template model',
@@ -148,12 +160,24 @@ export class PostTemplateController extends BaseController {
     const result = await this.templateDataSource.get(
       id,
       TemplateType.Post,
-      ['id', 'name', 'title', 'author', 'content', 'excerpt', 'status', 'updatedAt', 'createdAt'],
+      [
+        'id',
+        'name',
+        'title',
+        'author',
+        'content',
+        'excerpt',
+        'status',
+        'commentStatus',
+        'commentCount',
+        'updatedAt',
+        'createdAt',
+      ],
       requestUser,
     );
 
     let metas;
-    if (result && metaKeys?.length) {
+    if (result) {
       metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
     }
 
@@ -198,7 +222,7 @@ export class PostTemplateController extends BaseController {
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
       TemplateType.Post,
-      ['id', 'name', 'title', 'author', 'excerpt', 'status', 'updatedAt', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'excerpt', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
@@ -220,6 +244,7 @@ export class PostTemplateController extends BaseController {
   async create(@Body() input: NewPostTemplateDto, @User() requestUser: RequestUser) {
     const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
       await this.templateDataSource.create({ ...input, excerpt: input.excerpt || '' }, TemplateType.Post, requestUser);
+
     return this.success({
       data: {
         id,

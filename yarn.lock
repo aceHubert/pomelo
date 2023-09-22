@@ -3167,30 +3167,6 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40pomelo%2Fvue-pc%40workspace%3Aweb-apps%2Fvue-pc":
-  version: 0.0.0-use.local
-  resolution: "@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40pomelo%2Fvue-pc%40workspace%3Aweb-apps%2Fvue-pc"
-  dependencies:
-    "@formily/core": ^2.2.2
-    "@formily/grid": ^2.2.2
-    "@formily/json-schema": ^2.2.2
-    "@formily/reactive": ^2.2.2
-    "@formily/reactive-vue": ^2.2.2
-    "@formily/shared": ^2.2.2
-    "@formily/vue": ^2.2.2
-    "@vue-async/resource-manager": ^1.0.15
-    lodash.get: ^4.4.2
-    lodash.kebabcase: ^4.1.1
-    tinycolor2: ^1.6.0
-  peerDependencies:
-    "@vue/composition-api": ^1.4.0
-    vue: ^2.6.0 || >=3.0.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  languageName: node
-  linkType: soft
-
 "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40pomelo%2Fvue-admin%40workspace%3Aweb-apps%2Fvue-admin":
   version: 0.0.0-use.local
   resolution: "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40pomelo%2Fvue-admin%40workspace%3Aweb-apps%2Fvue-admin"
@@ -3230,9 +3206,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40pomelo%2Fvue-h5%40workspace%3Aweb-apps%2Fvue-h5":
+"@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40pomelo%2Fvue-web%40workspace%3Aweb-apps%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40pomelo%2Fvue-h5%40workspace%3Aweb-apps%2Fvue-h5"
+  resolution: "@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40pomelo%2Fvue-web%40workspace%3Aweb-apps%2Fvue-web"
   dependencies:
     "@formily/core": ^2.2.2
     "@formily/grid": ^2.2.2
@@ -3278,18 +3254,6 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40pomelo%2Fvue-pc%40workspace%3Aweb-apps%2Fvue-pc":
-  version: 0.0.0-use.local
-  resolution: "@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40pomelo%2Fvue-pc%40workspace%3Aweb-apps%2Fvue-pc"
-  peerDependencies:
-    "@vue/composition-api": ^1.4.0
-    vue: ^2.6.0 || >=3.0.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  languageName: node
-  linkType: soft
-
 "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40pomelo%2Fvue-admin%40workspace%3Aweb-apps%2Fvue-admin":
   version: 0.0.0-use.local
   resolution: "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40pomelo%2Fvue-admin%40workspace%3Aweb-apps%2Fvue-admin"
@@ -3321,28 +3285,6 @@ __metadata:
 "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40pomelo%2Fvue-admin%40workspace%3Aweb-apps%2Fvue-admin":
   version: 0.0.0-use.local
   resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40pomelo%2Fvue-admin%40workspace%3Aweb-apps%2Fvue-admin"
-  dependencies:
-    "@formily/core": ^2.0.8
-    "@formily/grid": ^2.0.8
-    "@formily/json-schema": ^2.0.8
-    "@formily/reactive": ^2.0.8
-    "@formily/reactive-vue": ^2.0.8
-    "@formily/shared": ^2.0.8
-    "@formily/vue": ^2.0.8
-    portal-vue: ^2.1.7
-    vue-slicksort: ^1.2.0
-  peerDependencies:
-    "@vue/composition-api": ^1.4.0
-    vue: ^2.6.0 || >=3.0.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  languageName: node
-  linkType: soft
-
-"@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40pomelo%2Fvue-pc%40workspace%3Aweb-apps%2Fvue-pc":
-  version: 0.0.0-use.local
-  resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40pomelo%2Fvue-pc%40workspace%3Aweb-apps%2Fvue-pc"
   dependencies:
     "@formily/core": ^2.0.8
     "@formily/grid": ^2.0.8
@@ -3464,9 +3406,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40pomelo%2Fvue-h5%40workspace%3Aweb-apps%2Fvue-h5":
+"@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40pomelo%2Fvue-web%40workspace%3Aweb-apps%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40pomelo%2Fvue-h5%40workspace%3Aweb-apps%2Fvue-h5"
+  resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40pomelo%2Fvue-web%40workspace%3Aweb-apps%2Fvue-web"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -3496,9 +3438,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40pomelo%2Fvue-h5%40workspace%3Aweb-apps%2Fvue-h5":
+"@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40pomelo%2Fvue-web%40workspace%3Aweb-apps%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40pomelo%2Fvue-h5%40workspace%3Aweb-apps%2Fvue-h5"
+  resolution: "@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40pomelo%2Fvue-web%40workspace%3Aweb-apps%2Fvue-web"
   dependencies:
     "@formily/core": ^2.0.12
     "@formily/grid": ^2.0.12
@@ -5262,9 +5204,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pomelo/vue-h5@workspace:web-apps/vue-h5":
+"@pomelo/vue-web@workspace:web-apps/vue-web":
   version: 0.0.0-use.local
-  resolution: "@pomelo/vue-h5@workspace:web-apps/vue-h5"
+  resolution: "@pomelo/vue-web@workspace:web-apps/vue-web"
   dependencies:
     "@ace-fetch/axios": ^0.2.0
     "@ace-fetch/core": ^0.2.0
@@ -5286,6 +5228,7 @@ __metadata:
     "@vue/cli-plugin-typescript": ~5.0.0
     "@vue/cli-plugin-unit-jest": ~5.0.0
     "@vue/cli-service": ~5.0.0
+    ant-design-vue: ^1.7.7
     axios: ^0.27.2
     babel-preset-vca-jsx: ^0.3.6
     core-js: ^3.8.3
@@ -5293,46 +5236,6 @@ __metadata:
     pinia: ^2.0.17
     store: ^2.0.12
     vant: ^2.12.48
-    vue: ^2.6.12
-    vue-i18n: ^8.27.2
-    vue-meta: ^2.4.0
-    vue-router: ^3.5.1
-    vue2-helpers: 1.x
-  languageName: unknown
-  linkType: soft
-
-"@pomelo/vue-pc@workspace:web-apps/vue-pc":
-  version: 0.0.0-use.local
-  resolution: "@pomelo/vue-pc@workspace:web-apps/vue-pc"
-  dependencies:
-    "@ace-fetch/axios": ^0.2.0
-    "@ace-fetch/core": ^0.2.0
-    "@ace-fetch/vue": ^0.2.0
-    "@ace-util/core": ^0.1.0
-    "@formily-portal/antdv": "portal:../../.submodules/formily-portal-antdv/packages/components"
-    "@formily/antdv": "portal:../../.submodules/formily-antdv/packages/components"
-    "@formily/antdv-prototypes": "portal:../../.submodules/formily-antdv/packages/prototypes"
-    "@formily/core": ^2.2.0
-    "@formily/vue": ^2.2.0
-    "@pomelo/shared-web": "workspace:^"
-    "@pomelo/theme": "workspace:^"
-    "@types/store": ^2.0.2
-    "@vue-async/module-loader": ^3.2.2
-    "@vue-async/resource-manager": ^1.0.16
-    "@vue/cli-plugin-babel": ~5.0.0
-    "@vue/cli-plugin-eslint": ~5.0.0
-    "@vue/cli-plugin-router": ~5.0.0
-    "@vue/cli-plugin-typescript": ~5.0.0
-    "@vue/cli-plugin-unit-jest": ~5.0.0
-    "@vue/cli-service": ~5.0.0
-    ant-design-vue: ^1.7.7
-    axios: ^0.27.2
-    babel-preset-vca-jsx: ^0.3.6
-    core-js: ^3.8.3
-    moment: ^2.29.4
-    oidc-client: 1.11.5
-    pinia: ^2.0.17
-    store: ^2.0.12
     vue: ^2.6.12
     vue-i18n: ^8.27.2
     vue-meta: ^2.4.0
@@ -17726,7 +17629,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oidc-client@npm:1.11.5, oidc-client@npm:^1.11.5":
+"oidc-client@npm:^1.11.5":
   version: 1.11.5
   resolution: "oidc-client@npm:1.11.5"
   dependencies:

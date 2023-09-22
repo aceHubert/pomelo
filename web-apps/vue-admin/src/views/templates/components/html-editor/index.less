@@ -1,0 +1,30 @@
+.html-editor {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &__toolbar {
+    .ck {
+      &.ck-toolbar {
+        border-width: 0 0 1px 0;
+      }
+    }
+  }
+
+  &__document {
+    flex: 1 1 auto;
+    overflow: auto;
+  }
+
+  &-document {
+    &__wrapper {
+      margin: 0 auto;
+      max-width: 1180px;
+      background-color: var(--component-background, @component-background);
+    }
+
+    &__content {
+      padding: 0 10px 20px;
+    }
+  }
+}

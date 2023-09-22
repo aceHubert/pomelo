@@ -213,14 +213,14 @@ export class Request {
 
     // 返回 promise
     return requestPromise
-      .then(function ({ data, error }) {
+      .then(({ data, error }) => {
         if (error) throw error;
 
         stopLoading && stopLoading();
         return onSuccess?.(data) ?? data;
       })
       .catch((err) => {
-        stopLoading && stopLoading();
+        stopLoading?.();
         const error = this.formatError(err);
         if (catchError) {
           onCatch(error);
@@ -264,14 +264,14 @@ export class Request {
 
     // 返回 promise
     return requestPromise
-      .then(function ({ data, errors }) {
+      .then(({ data, errors }) => {
         if (errors?.length) throw new ApolloError({ graphQLErrors: errors });
 
-        stopLoading && stopLoading();
+        stopLoading?.();
         return onSuccess?.(data) ?? data;
       })
       .catch((err) => {
-        stopLoading && stopLoading();
+        stopLoading?.();
         const error = this.formatError(err);
         if (catchError) {
           onCatch(error);
@@ -279,6 +279,7 @@ export class Request {
         } else {
           onError?.(error);
         }
+
         throw error;
       });
   }
@@ -333,10 +334,10 @@ export class Request {
         // 第一要包含code的详细信息
         const extensions = graphQLErrors.find((error) => error.extensions?.code)?.extensions;
         return new GraphQLError(
-          graphQLErrors
+          `${err.message}, Errors: ${graphQLErrors
             .map((graphQLError) => graphQLError?.message)
             .filter(Boolean)
-            .join('; '),
+            .join('; ')}`,
           extensions ? extensions.statusCode || this.options.graphqlErrorCodes[extensions.code] || 500 : 500,
           err,
         );

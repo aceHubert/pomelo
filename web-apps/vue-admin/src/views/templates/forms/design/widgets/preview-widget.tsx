@@ -15,21 +15,21 @@ import { useI18n } from '@/hooks';
 
 // Types
 import type { TreeNode } from '@designable/core';
-import type { SchemaVueComponents } from '@formily/vue';
+import type { SchemaComponents } from '@formily/vue';
 
 const AntSchemaFields = createSchemaField({
   components: {
     Card,
     Rate,
     Text,
-    ...(Antdv as SchemaVueComponents),
+    ...(Antdv as SchemaComponents),
   },
 });
 
 const VanSchemaFields = createSchemaField({
   components: {
     Text: VanText,
-    ...(Vant as SchemaVueComponents),
+    ...(Vant as SchemaComponents),
   },
 });
 

@@ -134,7 +134,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         attributes: this.filterFields(fields, this.metaModel),
         where: {
           [this.metaModelIdFieldName]: modelIdOrIds,
-          ...(metaKeys && metaKeys.length
+          ...(metaKeys?.length
             ? {
                 metaKey: flattenDeep(
                   metaKeys.map((metaKey) => [

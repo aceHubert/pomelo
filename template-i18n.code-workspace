@@ -7,10 +7,7 @@
       "path": "web-apps/vue-admin"
     },
     {
-      "path": "web-apps/vue-pc"
-    },
-    {
-      "path": "web-apps/vue-h5"
+      "path": "web-apps/vue-web"
     }
   ],
   "settings": {

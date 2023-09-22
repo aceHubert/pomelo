@@ -1,4 +1,3 @@
-import { IsDefined, IsString, IsJSON } from 'class-validator';
 import { Field, InputType, PickType } from '@nestjs/graphql';
 import { TemplateStatus, TemplateCommentStatus } from '@pomelo/datasource';
 import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
@@ -32,28 +31,22 @@ export class NewTemplateInput extends NewTemplateValidator {
 }
 
 @InputType({ description: 'New form input' })
-export class NewFormTemplateInput extends PickType(NewTemplateInput, ['title', 'name', 'status', 'metas'] as const) {
-  @IsDefined()
-  @IsString()
-  @IsJSON({ message: 'field $property must be a JSON string' })
-  @Field({ description: 'Schema JSON' })
-  schema!: string;
-}
+export class NewFormTemplateInput extends PickType(NewTemplateInput, [
+  'title',
+  'content',
+  'status',
+  'metas',
+] as const) {}
 
 @InputType({ description: 'New page input' })
 export class NewPageTemplateInput extends PickType(NewTemplateInput, [
-  'title',
   'name',
+  'title',
+  'content',
   'status',
   'commentStatus',
   'metas',
-] as const) {
-  @IsDefined()
-  @IsString()
-  @IsJSON({ message: 'field $property must be a JSON string' })
-  @Field({ description: 'Schema JSON' })
-  schema!: string;
-}
+] as const) {}
 
 @InputType({ description: 'New post input' })
 export class NewPostTemplateInput extends PickType(NewTemplateInput, [
@@ -64,6 +57,4 @@ export class NewPostTemplateInput extends PickType(NewTemplateInput, [
   'status',
   'commentStatus',
   'metas',
-] as const) {
-  // something else
-}
+] as const) {}

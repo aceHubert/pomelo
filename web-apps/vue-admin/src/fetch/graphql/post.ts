@@ -1,15 +1,9 @@
 import { defineRegistApi, gql } from './core';
 
 // Types
+import type { TemplatePageType } from '@pomelo/shared-web';
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
-import type {
-  PagedTemplateArgs,
-  TempaleModel,
-  NewTemplateInput,
-  UpdateTemplateInput,
-  TemplateStatusCountItem,
-  TemplatePageType,
-} from './template';
+import type { PagedTemplateArgs, TempateModel, NewTemplateInput, TemplateStatusCountItem } from './template';
 import type { TermTaxonomyModel } from './term-taxonomy';
 import type { Paged } from './types';
 
@@ -19,7 +13,7 @@ export interface PagedPostTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {
 
 export interface PostTemplateModel
   extends Pick<
-    TempaleModel,
+    TempateModel,
     | 'id'
     | 'name'
     | 'title'
@@ -39,14 +33,10 @@ export interface PostTemplateModel
 
 export interface PagedPostTemplateItem extends Omit<PostTemplateModel, 'content' | 'metas'> {}
 
-export interface NewPostTemplateInput extends Omit<NewTemplateInput, 'type'> {}
+export interface NewPostTemplateInput
+  extends Pick<NewTemplateInput, 'title' | 'name' | 'excerpt' | 'content' | 'status' | 'commentStatus' | 'metas'> {}
 
-export interface UpdatePostTemplateInput extends UpdateTemplateInput {}
-
-export const PresetPostMetaKeys = {
-  FeatureImage: 'feature-image',
-  Template: 'template',
-};
+export interface UpdatePostTemplateInput extends Partial<Omit<NewPostTemplateInput, 'metas'>> {}
 
 export const usePostApi = defineRegistApi('template_post', {
   // 分页获取文章
@@ -111,7 +101,7 @@ export const usePostApi = defineRegistApi('template_post', {
   >,
   // 获取文章
   get: gql`
-    query getPost($id: ID!, $metaKeys: [String!] = ["feature-image", "template"]) {
+    query getPost($id: ID!, $metaKeys: [String!]) {
       post: postTemplate(id: $id) {
         id
         name

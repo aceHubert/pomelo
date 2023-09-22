@@ -79,7 +79,7 @@ export class FormTemplateController extends BaseController {
     type: [String],
     required: false,
     example: ['mobile', 'desktop'],
-    description: `return specific keys' metas if setted, otherwish no "metas" field return in "data".`,
+    description: `return specific keys' metas if setted, otherwish all "metas" field return in "data".`,
   })
   @ApiOkResponse({
     description: 'From template model',
@@ -100,7 +100,7 @@ export class FormTemplateController extends BaseController {
     );
 
     let metas;
-    if (result && metaKeys?.length) {
+    if (result) {
       metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
 
@@ -108,11 +108,9 @@ export class FormTemplateController extends BaseController {
       res.status(HttpStatus.NO_CONTENT);
     }
 
-    const { content, ...restData } = result || {};
     return this.success({
       data: {
-        ...restData,
-        schema: content,
+        ...result,
         metas,
       },
     });
@@ -162,9 +160,8 @@ export class FormTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: FormTemplateModelResp }, 'FormTemplateModelSuccessResp'),
   })
   async create(@Body() input: NewFormTemplateDto, @User() requestUser: RequestUser) {
-    const { schema, ...restDto } = input;
     const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
-      { content: schema, ...restDto },
+      input,
       TemplateType.Form,
       requestUser,
     );
@@ -173,7 +170,7 @@ export class FormTemplateController extends BaseController {
         id,
         title,
         author,
-        schema: content,
+        content,
         status,
         updatedAt,
         createdAt,
@@ -193,11 +190,10 @@ export class FormTemplateController extends BaseController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() model: UpdateFormTemplateDto,
+    @Body() input: UpdateFormTemplateDto,
     @User() requestUser: RequestUser,
   ) {
-    const { schema, ...restDto } = model;
-    await this.templateDataSource.update(id, { content: schema, ...restDto }, requestUser);
+    await this.templateDataSource.update(id, input, requestUser);
     return this.success();
   }
 

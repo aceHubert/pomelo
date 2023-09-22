@@ -163,7 +163,7 @@ const pubSubMessagePlugin: Plugin = (app, inject) => {
             }
           }
         },
-        onError: (err) => {
+        onError: (err: any) => {
           warn(process.env.NODE_ENV === 'production', `Message subscription error, ${err.message}!`);
         },
         onComplete: () => {

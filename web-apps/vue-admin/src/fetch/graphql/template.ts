@@ -1,6 +1,7 @@
 import { defineRegistApi, gql } from './core';
 
 // Types
+import type { TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-web';
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
 import type { TermTaxonomyModel } from './term-taxonomy';
 import type { Paged } from './types';
@@ -9,26 +10,6 @@ export enum TemplateType {
   Post = 'Post',
   Page = 'Page',
   Fomr = 'Form',
-}
-
-export enum TemplateStatus {
-  Draft = 'Draft', // 草稿
-  Pending = 'Pending', // 等审核
-  Publish = 'Publish', // 已发布
-  Private = 'Private', // 私有，暂未使用
-  Future = 'Future', // 定时发布，暂未使用
-  Trash = 'Trash', // 垃圾箱
-}
-
-export enum TemplateCommentStatus {
-  Open = 'Open',
-  Closed = 'Closed',
-}
-
-export enum TemplatePageType {
-  Default = 'default',
-  Cover = 'cover',
-  FullWidth = 'full-width',
 }
 
 export interface PagedTemplateArgs {
@@ -44,7 +25,7 @@ export interface PagedTemplateArgs {
   querySelfCounts?: boolean;
 }
 
-export interface TempaleModel {
+export interface TempateModel {
   id: number;
   title: string;
   name: string;
@@ -61,7 +42,7 @@ export interface TempaleModel {
   metas: Array<Pick<TemplateMetaModel, 'id' | 'key' | 'value'>>;
 }
 
-export interface PagedTemplateItem extends Omit<TempaleModel, 'content' | 'metas'> {}
+export interface PagedTemplateItem extends Omit<TempateModel, 'content' | 'metas'> {}
 
 interface TemplateCountItem {
   count: number;
@@ -84,17 +65,18 @@ export interface TemplateYearCountItem extends TemplateCountItem {
 }
 
 export interface NewTemplateInput {
-  title?: string;
   name?: string;
+  title?: string;
   excerpt?: string;
   content?: string;
   status?: TemplateStatus;
   type: string;
+  commentStatus?: TemplateCommentStatus;
   metas?: Pick<NewTemplateMetaInput, 'metaKey' | 'metaValue'>[];
 }
 
 export interface UpdateTemplateInput
-  extends Partial<Pick<NewTemplateInput, 'title' | 'name' | 'excerpt' | 'content' | 'status'>> {}
+  extends Partial<Pick<NewTemplateInput, 'name' | 'title' | 'excerpt' | 'content' | 'status'>> {}
 
 export interface TemplateMetaModel {
   id: number;
@@ -192,7 +174,7 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     }
-  ` as TypedQueryDocumentNode<{ template?: TempaleModel }, { id: number; metaKeys?: string[] }>,
+  ` as TypedQueryDocumentNode<{ template?: TempateModel }, { id: number; metaKeys?: string[] }>,
   // 按状态分组数量
   getCountByStatus: gql`
     query getCountByStatus($type: String!) {
@@ -263,7 +245,7 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     }
-  ` as TypedMutationDocumentNode<{ template: TempaleModel }, { newTemplate: NewTemplateInput }>,
+  ` as TypedMutationDocumentNode<{ template: TempateModel }, { newTemplate: NewTemplateInput }>,
   // 修改模版
   update: gql`
     mutation update($id: ID!, $updateTemplate: UpdateTemplateInput!) {

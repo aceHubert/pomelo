@@ -6,19 +6,14 @@ export class PageTemplateModelResp extends PickType(TemplateModelResp, [
   'id',
   'name',
   'title',
+  'content',
   'author',
   'status',
   'commentStatus',
   'commentCount',
   'updatedAt',
   'createdAt',
-] as const) {
-  /**
-   * Schema
-   */
-  @ApiResponseProperty()
-  schema!: string;
-}
+] as const) {}
 
 export class PageTemplateWithMetasModelResp extends PageTemplateModelResp {
   /**
@@ -28,7 +23,7 @@ export class PageTemplateWithMetasModelResp extends PageTemplateModelResp {
   metas?: Array<TemplateMetaModelResp>;
 }
 
-export class PagedPageTemplateResp extends PagedResponse(OmitType(PageTemplateModelResp, ['schema'] as const)) {
+export class PagedPageTemplateResp extends PagedResponse(OmitType(PageTemplateModelResp, ['content'] as const)) {
   // something else
 }
 

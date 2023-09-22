@@ -389,7 +389,7 @@ export const useDesignMixin = () => {
       file: File;
       method: 'PUT' | 'POST' | 'put' | 'post';
       withCredentials: boolean;
-      onSuccess: (resp: { url: string }) => void;
+      onSuccess: (resp: { path: string; fullPath: string; url: string }) => void;
       onError: (err: unknown) => void;
       onProgress: (event: any) => void;
     }) => {
@@ -406,7 +406,13 @@ export const useDesignMixin = () => {
             },
           },
         })
-        .then(({ file }) => onSuccess({ url: file.fullPath }))
+        .then(({ file }) =>
+          onSuccess({
+            path: file.path,
+            fullPath: file.fullPath,
+            url: file.fullPath, // formily settings-form
+          }),
+        )
         .catch(onError);
       // upload to obs
       // const suffix = file.name.substring(file.name.lastIndexOf('.'));

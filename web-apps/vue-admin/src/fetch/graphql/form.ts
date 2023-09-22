@@ -2,31 +2,19 @@ import { defineRegistApi, gql } from './core';
 
 // Types
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
-import type {
-  PagedTemplateArgs,
-  TempaleModel,
-  NewTemplateInput,
-  UpdateTemplateInput,
-  TemplateStatusCountItem,
-} from './template';
+import type { PagedTemplateArgs, TempateModel, NewTemplateInput, TemplateStatusCountItem } from './template';
 import type { Paged } from './types';
 
 export interface PagedFormTemplateArgs extends Omit<PagedTemplateArgs, 'type' | 'categories'> {}
 
 export interface FormTempaleModel
-  extends Pick<TempaleModel, 'id' | 'title' | 'author' | 'status' | 'updatedAt' | 'createdAt' | 'metas'> {
-  schema: string;
-}
+  extends Pick<TempateModel, 'id' | 'title' | 'content' | 'author' | 'status' | 'updatedAt' | 'createdAt' | 'metas'> {}
 
-export interface PagedFormTemplateItem extends Omit<FormTempaleModel, 'schema' | 'metas'> {}
+export interface PagedFormTemplateItem extends Omit<FormTempaleModel, 'content' | 'metas'> {}
 
-export interface NewFormTemplateInput extends Omit<NewTemplateInput, 'type' | 'excerpt' | 'content'> {
-  schema: string;
-}
+export interface NewFormTemplateInput extends Pick<NewTemplateInput, 'title' | 'content' | 'status' | 'metas'> {}
 
-export interface UpdateFormTemplateInput extends Omit<UpdateTemplateInput, 'excerpt' | 'content'> {
-  schema: string;
-}
+export interface UpdateFormTemplateInput extends Partial<Omit<NewFormTemplateInput, 'metas'>> {}
 
 export const useFormApi = defineRegistApi('template_form', {
   // 分页获取表单
@@ -81,7 +69,7 @@ export const useFormApi = defineRegistApi('template_form', {
       form: formTemplate(id: $id) {
         id
         title
-        schema
+        content
         author
         status
         updatedAt
@@ -100,7 +88,7 @@ export const useFormApi = defineRegistApi('template_form', {
       form: createFormTemplate(model: $newFormTemplate) {
         id
         title
-        schema
+        content
         author
         status
         updatedAt
@@ -115,8 +103,55 @@ export const useFormApi = defineRegistApi('template_form', {
   ` as TypedMutationDocumentNode<{ form: FormTempaleModel }, { newFormTemplate: NewFormTemplateInput }>,
   // 修改表单
   update: gql`
-    mutation updateForm($id: ID!, $updateForm: UpdateFormTemplateInput!) {
+    mutation updateForm(
+      $id: ID!
+      $updateForm: UpdateFormTemplateInput!
+      $submitAction: String!
+      $submitSuccessRedirect: String!
+      $submitSuccessTips: String!
+      $featureImage: String!
+    ) {
       result: updateFormTemplate(id: $id, model: $updateForm)
+      submitActionResult: updateTemplateMetaByKey(
+        templateId: $id
+        metaKey: "submit.action"
+        metaValue: $submitAction
+        createIfNotExists: true
+      )
+      submitSuccessRedirectResult: updateTemplateMetaByKey(
+        templateId: $id
+        metaKey: "submit.success_redirect"
+        metaValue: $submitSuccessRedirect
+        createIfNotExists: true
+      )
+      submitSuccessTipsResult: updateTemplateMetaByKey(
+        templateId: $id
+        metaKey: "submit.success_tips"
+        metaValue: $submitSuccessTips
+        createIfNotExists: true
+      )
+      featureImageResult: updateTemplateMetaByKey(
+        templateId: $id
+        metaKey: "feature-image"
+        metaValue: $featureImage
+        createIfNotExists: true
+      )
     }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; updateForm: UpdateFormTemplateInput }>,
+  ` as TypedMutationDocumentNode<
+    {
+      result: boolean;
+      submitActionResult: boolean;
+      submitSuccessRedirectResult: boolean;
+      submitSuccessTipsResult: boolean;
+      featureImageResult: boolean;
+    },
+    {
+      id: number;
+      updateForm: UpdateFormTemplateInput;
+      submitAction?: string;
+      submitSuccessRedirect?: string;
+      submitSuccessTips?: string;
+      featureImage?: string;
+    }
+  >,
 });

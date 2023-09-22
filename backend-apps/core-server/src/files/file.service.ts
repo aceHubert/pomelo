@@ -113,9 +113,9 @@ export class FileService {
   }
 
   /**
-   * 显示到前端的Url地址（siteUrl/staticPrefix/path）
+   * 显示到前端的Url地址（base/staticPrefix/path）
    */
-  private getDisplayPath(filepath: string, base = '') {
+  private getPath(filepath: string, base = '') {
     return stripTrailingSlash(base) + normalizeRoutePath(path.join(this.staticPrefix, filepath));
   }
 
@@ -267,8 +267,8 @@ export class FileService {
     return {
       original: {
         fileName,
-        path: media.path,
-        fullPath: this.getDisplayPath(media.path, siteUrl),
+        path: this.getPath(media.path),
+        fullPath: this.getPath(media.path, siteUrl),
         fileSize,
         width,
         height,
@@ -276,8 +276,8 @@ export class FileService {
       ...imageScales.reduce((prev, scale) => {
         prev[camelCase(scale.name) as keyof ImageScales] = {
           fileName,
-          path: scale.path,
-          fullPath: this.getDisplayPath(scale.path, siteUrl),
+          path: this.getPath(scale.path),
+          fullPath: this.getPath(scale.path, siteUrl),
           width: scale.width,
           height: scale.height,
         };

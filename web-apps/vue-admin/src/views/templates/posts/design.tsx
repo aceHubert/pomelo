@@ -1,17 +1,33 @@
 import { debounce } from 'lodash-es';
-import { defineComponent, ref, reactive, watch, onMounted } from '@vue/composition-api';
-import { trailingSlash, equals } from '@ace-util/core';
+import { defineComponent, ref, reactive, computed, watch, toRef, onMounted } from '@vue/composition-api';
+import { trailingSlash, isAbsoluteUrl, equals } from '@ace-util/core';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { Checkbox, Input, Form, Select, TreeSelect, Divider, Collapse, Upload, Icon } from 'ant-design-vue';
-import { Modal, message } from '@/components';
 import {
-  usePostApi,
-  useResApi,
+  Button,
+  Checkbox,
+  Input,
+  Form,
+  Select,
+  TreeSelect,
+  Divider,
+  Collapse,
+  Upload,
+  Icon,
+  Space,
+} from 'ant-design-vue';
+import { expose } from 'antdv-layout-pro/shared';
+import {
+  OptionPresetKeys,
   TemplateStatus,
   TemplatePageType,
   TemplateCommentStatus,
-  PresetPostMetaKeys,
-} from '@/fetch/graphql';
+  PostMetaPresetKeys,
+  getFrameworkSchema,
+  toFrameworkContent,
+  type SchemaFramework,
+} from '@pomelo/shared-web';
+import { Modal, message } from '@/components';
+import { usePostApi } from '@/fetch/graphql';
 import { useDeviceMixin } from '@/mixins';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
 import { DesignLayout, DocumentEditor } from '../components';
@@ -19,6 +35,7 @@ import { useDesignMixin } from '../mixins/design.mixin';
 import classes from './design.module.less';
 
 // Types
+import type { Ref } from '@vue/composition-api';
 import type { PostTemplateModel } from '@/fetch/graphql';
 import type { ActionStatus, ActionCapability } from '../components/design-layout/DesignLayout';
 
@@ -31,7 +48,8 @@ export default defineComponent({
     };
   },
   beforeRouteLeave(to, from, next) {
-    if (this.actionStatus.changed) {
+    const unsaved = this.unsavedContent as Ref<boolean>;
+    if (unsaved.value) {
       // Tips: Modal.confirm 会在连续后退中失效
       const confirm = window.confirm(
         this.$tv('page_templates.posts.tips.unsaved_confirm', '未保存内容将会丢失，是否离开页面？') as string,
@@ -54,18 +72,18 @@ export default defineComponent({
     const userManager = useUserManager();
     const designMixin = useDesignMixin();
     const deviceMixin = useDeviceMixin();
-    const homeUrl = useOptions('home');
-    const siteUrl = useOptions('siteurl');
+    const homeUrl = useOptions(OptionPresetKeys.Home);
+    const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const postApi = usePostApi();
-    const resApi = useResApi();
 
     // #region data scopes 新增、修改、查询
     const siderCollapsedRef = ref(true);
-    let cachedPostData = {};
+    const contentFrameworkRef = ref<SchemaFramework>('HTML');
+
     const postData = reactive<
-      Pick<PostTemplateModel, 'title' | 'excerpt' | 'content' | 'status'> & {
+      Pick<PostTemplateModel, 'title' | 'excerpt' | 'status'> & {
         id?: number;
-        fixedLink?: string;
+        content?: any;
         featureImage?: string;
         allowComment?: boolean;
         templatePageType?: TemplatePageType;
@@ -76,14 +94,28 @@ export default defineComponent({
       excerpt: '',
       content: '',
       status: TemplateStatus.Draft,
-      fixedLink: '',
       featureImage: '',
       allowComment: false,
       templatePageType: TemplatePageType.Default,
     });
 
+    const cachedPostData = ref<typeof postData>();
+
     const featureImageUploadingRef = ref(false);
-    const featureDisplayImageRef = ref('');
+    const featureDisplayImageRef = computed(() => {
+      const value = postData.featureImage;
+      if (!value) return undefined;
+      if (isAbsoluteUrl(value)) return value;
+
+      return trailingSlash(siteUrl.value) + (value.startsWith('/') ? value.slice(1) : value);
+    });
+
+    // fixed link
+    const fixedLinkRef = computed(() => {
+      if (!cachedPostData.value) return '';
+      // 使用cache data, 保存后生效
+      return trailingSlash(homeUrl.value) + `p/${cachedPostData.value.id}`;
+    });
 
     const actionStatus = reactive<Required<ActionStatus>>({
       changed: false,
@@ -104,19 +136,17 @@ export default defineComponent({
 
     const isSelfContentRef = ref(false);
 
+    expose({
+      unsavedContent: toRef(actionStatus, 'changed'),
+    });
+
     watch(
       postData,
       (value) => {
-        actionStatus.changed = !equals(cachedPostData, value);
+        actionStatus.changed = !equals(cachedPostData.value, value);
       },
       { deep: true },
     );
-
-    // ckeditor 配置
-    const editorProps = reactive({
-      disabled: false,
-      config: {},
-    });
 
     let postPromise: Promise<PostTemplateModel | undefined>;
     if (!postData.id) {
@@ -169,20 +199,18 @@ export default defineComponent({
         postData.status = status;
         postData.allowComment = commentStatus === TemplateCommentStatus.Open;
 
-        // fixed link
-        const baseUrl = trailingSlash(homeUrl.value);
-        postData.fixedLink = baseUrl + `p/${post.id}`;
+        const { framework } = getFrameworkSchema(content);
+        contentFrameworkRef.value = framework;
+
+        // 其它框架
+        // if(framework){}
 
         // feature image
-        postData.featureImage = metas?.find(({ key }) => key === PresetPostMetaKeys.FeatureImage)?.value ?? '';
-        featureDisplayImageRef.value = postData.featureImage
-          ? trailingSlash(siteUrl.value) +
-            (postData.featureImage.startsWith('/') ? postData.featureImage.substring(1) : postData.featureImage)
-          : postData.featureImage;
+        postData.featureImage = metas?.find(({ key }) => key === PostMetaPresetKeys.FeatureImage)?.value ?? '';
 
         // template page type
         postData.templatePageType =
-          (metas?.find(({ key }) => key === PresetPostMetaKeys.Template)?.value as TemplatePageType) ??
+          (metas?.find(({ key }) => key === PostMetaPresetKeys.Template)?.value as TemplatePageType) ??
           TemplatePageType.Default;
 
         // category
@@ -194,8 +222,9 @@ export default defineComponent({
         designMixin.tag.selectKeys = tags.map(({ id }) => id);
 
         // 缓存最新数据
-        cachedPostData = { ...postData };
+        cachedPostData.value = { ...postData };
 
+        actionStatus.changed = false;
         actionStatus.disabledActions = false;
 
         // TODO: 设置条件管理员权限
@@ -213,29 +242,12 @@ export default defineComponent({
       },
     );
 
-    const onFeatureImageUpload = (file: File) => {
-      return resApi
-        .uploadFile({
-          variables: {
-            file,
-          },
-          loading: () => {
-            featureImageUploadingRef.value = true;
-            return () => {
-              featureImageUploadingRef.value = false;
-            };
-          },
-        })
-        .then(({ file }) => {
-          postData.featureImage = file.path;
-          featureDisplayImageRef.value = file.medium?.fullPath ?? file.fullPath;
-        })
-        .catch((err) => {
-          message.error(`上传失败，${err.message}`);
-        });
-    };
-
     const onSubmit = (status?: TemplateStatus) => {
+      const schema: any = postData.content;
+
+      // 其它框架
+      // if(contentFrameworkRef.value === ''){}
+
       return postApi
         .update({
           variables: {
@@ -243,7 +255,7 @@ export default defineComponent({
             updatePost: {
               title: postData.title,
               excerpt: postData.excerpt,
-              content: postData.content,
+              content: toFrameworkContent(schema, contentFrameworkRef.value),
               status,
               commentStatus: postData.allowComment ? TemplateCommentStatus.Open : TemplateCommentStatus.Closed,
             },
@@ -252,17 +264,15 @@ export default defineComponent({
           },
           loading: () => {
             actionStatus.processing = true;
-            editorProps.disabled = true;
             return () => {
               actionStatus.processing = false;
-              editorProps.disabled = false;
             };
           },
         })
         .then(() => {
           status && (postData.status = status);
           // 缓存最新数据
-          cachedPostData = { ...postData };
+          cachedPostData.value = { ...postData };
           actionStatus.changed = false;
         })
         .catch((err) => {
@@ -314,10 +324,10 @@ export default defineComponent({
     };
 
     // 私有发布，修改post 并将状态修改为 Private
-    const handleMakePrivate = () => {
-      const status = TemplateStatus.Private;
-      onSubmit(status);
-    };
+    // const handleMakePrivate = () => {
+    //   const status = TemplateStatus.Private;
+    //   onSubmit(status);
+    // };
 
     // 提交审核，修改post 并将状态修改为 Pending
     const handleSubmitReview = () => {
@@ -344,56 +354,30 @@ export default defineComponent({
 
     // #endregion
 
+    // 上传图片
+    const handleUploadRequest = designMixin.getCustomUploadRequest('templates/post_');
+
     onMounted(() => {
       if (deviceMixin.isDesktop) {
         siderCollapsedRef.value = false;
       }
     });
 
-    return {
-      editorProps,
-      actionStatus,
-      actionCapability,
-      isSelfContent: isSelfContentRef,
-      siderCollapsed: siderCollapsedRef,
-      featureDisplayImage: featureDisplayImageRef,
-      featureImageUploading: featureImageUploadingRef,
-      postData,
-      category: designMixin.category,
-      tag: designMixin.tag,
-      submiting: designMixin.submitingRef,
-      loadCategoryData: designMixin.loadCategoryData,
-      handleCategoryChange: designMixin.handleCategoryChange,
-      handleCategorySearch: debounce(designMixin.handleCategorySearch, 800),
-      handleTagSelect: designMixin.handleTagSelect,
-      handleTagDeselect: designMixin.handleTagDeselect,
-      onFeatureImageUpload,
-      handleUpdate,
-      handelPublish,
-      handleMakePrivate,
-      handleSaveToDraft,
-      handleSwitchToDraft,
-      handleSubmitReview,
-      handleApproveReview,
-      handleRejectReview,
-    };
-  },
-  render() {
-    return (
+    return () => (
       <DesignLayout
-        status={this.postData.status}
-        actionStatus={this.actionStatus}
-        actionCapability={this.actionCapability}
-        isSelfContent={this.isSelfContent}
-        siderCollapsed={this.siderCollapsed}
+        status={postData.status}
+        actionStatus={actionStatus}
+        actionCapability={actionCapability}
+        isSelfContent={isSelfContentRef.value}
+        siderCollapsed={siderCollapsedRef.value}
         {...{
           scopedSlots: {
             siderContent: () => (
               <Form labelAlign="left" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
-                <Form.Item label={this.$tv('page_templates.visibility_label', '可见性')} class="px-3">
+                <Form.Item label={i18n.tv('page_templates.visibility_label', '可见性')} class="px-3">
                   TODO
                 </Form.Item>
-                <Form.Item label={this.$tv('page_templates.publish_set_label', '发布')} class="px-3">
+                <Form.Item label={i18n.tv('page_templates.publish_set_label', '发布')} class="px-3">
                   TODO
                 </Form.Item>
                 <Divider class="my-0" />
@@ -403,94 +387,119 @@ export default defineComponent({
                   expand-icon-position="right"
                   class="shades transparent"
                 >
-                  {this.fixedLink && (
-                    <Collapse.Panel header={this.$tv('page_templates.fixed_link_label', '固定链接')}>
-                      <p>{this.$tv('page_templates.posts.design.view', '查看文章')}</p>
-                      <a href={this.postData.fixedLink} target="preview-route">
-                        {this.postData.fixedLink}
+                  {!!fixedLinkRef.value && (
+                    <Collapse.Panel header={i18n.tv('page_templates.fixed_link_label', '固定链接')}>
+                      <p>{i18n.tv('page_templates.posts.design.view', '查看文章')}</p>
+                      <a href={fixedLinkRef.value} target="preview-route">
+                        {fixedLinkRef.value}
                         <Icon type="link" class="ml-1" />
                       </a>
                     </Collapse.Panel>
                   )}
-                  <Collapse.Panel header={this.$tv('page_templates.category_label', '分类')}>
+                  <Collapse.Panel header={i18n.tv('page_templates.category_label', '分类')}>
                     <TreeSelect
-                      value={this.category.selectKeys}
-                      treeData={this.category.treeData}
-                      loadData={this.loadCategoryData.bind(this)}
+                      value={designMixin.category.selectKeys}
+                      treeData={designMixin.category.treeData}
+                      loadData={designMixin.loadCategoryData.bind(this)}
                       treeCheckStrictly
                       showSearch
                       treeCheckable
                       treeDataSimpleMode
                       dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
-                      placeholder={this.$tv('page_templates.category_placeholder', '请选择分类(或输入搜索分类)')}
-                      onSearch={this.handleCategorySearch.bind(this)}
-                      onChange={this.handleCategoryChange(this.id!).bind(this)}
+                      placeholder={i18n.tv('page_templates.category_placeholder', '请选择分类(或输入搜索分类)')}
+                      onSearch={debounce(designMixin.handleCategorySearch, 800)}
+                      onChange={designMixin.handleCategoryChange(postData.id!).bind(this)}
                     ></TreeSelect>
                     <router-link to={{ name: 'category' }} class="d-block mt-2">
-                      {this.$tv('page_templates.new_category_link_text', '新建分类')}
+                      {i18n.tv('page_templates.new_category_link_text', '新建分类')}
                     </router-link>
                   </Collapse.Panel>
-                  <Collapse.Panel header={this.$tv('page_templates.tag_label', '标签')}>
+                  <Collapse.Panel header={i18n.tv('page_templates.tag_label', '标签')}>
                     <Select
-                      value={this.tag.selectKeys}
-                      options={this.tag.selectData}
+                      value={designMixin.tag.selectKeys}
+                      options={designMixin.tag.selectData}
                       showSearch
                       mode="tags"
                       dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
-                      placeholder={this.$tv('page_templates.tag_placeholder', '请选择标签(或输入标签添加)')}
-                      onSelect={this.handleTagSelect(this.id!).bind(this)}
-                      onDeselect={this.handleTagDeselect(this.id!).bind(this)}
+                      placeholder={i18n.tv('page_templates.tag_placeholder', '请选择标签(或输入标签添加)')}
+                      onSelect={designMixin.handleTagSelect(postData.id!).bind(this)}
+                      onDeselect={designMixin.handleTagDeselect(postData.id!).bind(this)}
                     ></Select>
                   </Collapse.Panel>
-                  <Collapse.Panel header={this.$tv('page_templates.feature_image_label', '特色图片')}>
+                  <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>
                     <Upload
                       name="feature-image"
                       listType="picture-card"
                       class={classes.featureImageUploader}
                       accept="image/png, image/jpeg"
                       showUploadList={false}
-                      action={(file) => this.onFeatureImageUpload(file)}
+                      disabled={featureImageUploadingRef.value}
+                      method="PUT"
+                      customRequest={(options: any) => handleUploadRequest(options)}
+                      onChange={({ file: { status, response } }) => {
+                        if (status === 'uploading') {
+                          featureImageUploadingRef.value = true;
+                        } else if (status === 'done') {
+                          postData.featureImage = response.path || response.fullPath || response?.url;
+                          featureImageUploadingRef.value = false;
+                        } else {
+                          featureImageUploadingRef.value = false;
+                        }
+                      }}
                     >
-                      {this.featureDisplayImage ? (
-                        <img
-                          src={this.featureDisplayImage}
-                          alt="feature-image"
-                          style="object-fit: contain; width: 100%; max-height: 120px;"
-                        />
+                      {featureDisplayImageRef.value ? (
+                        <div class={classes.featureImageCover}>
+                          <img
+                            src={featureDisplayImageRef.value}
+                            alt="feature-image"
+                            style="object-fit: contain; width: 100%; max-height: 120px;"
+                          />
+                          <Space class={classes.featureImageCoverActions}>
+                            <Button shape="circle" icon="edit" />
+                            <Button
+                              shape="circle"
+                              icon="delete"
+                              vOn:click_prevent_stop={() => (postData.featureImage = '')}
+                            />
+                          </Space>
+                        </div>
                       ) : (
                         <div>
-                          <Icon type={this.featureImageUploading ? 'loading' : 'plus'} />
+                          <Icon type={featureImageUploadingRef.value ? 'loading' : 'plus'} />
                           <div class="text--secondary">
-                            {this.$tv('page_templates.upload_feature_image_label', '设置特色图片')}
+                            {i18n.tv('page_templates.upload_feature_image_label', '设置特色图片')}
                           </div>
                         </div>
                       )}
                     </Upload>
+                    <p class="font-size-xs text--secondary">
+                      {i18n.tv('page_templates.feature_image_tips', '推荐尺寸：1980x300(px)')}
+                    </p>
                   </Collapse.Panel>
-                  <Collapse.Panel header={this.$tv('page_templates.posts.excerpt_label', '摘要')}>
-                    <p>{this.$tv('page_templates.write_excerpt_label', '撰写摘要（选填）')}</p>
+                  <Collapse.Panel header={i18n.tv('page_templates.posts.excerpt_label', '摘要')}>
+                    <p>{i18n.tv('page_templates.write_excerpt_label', '撰写摘要（选填）')}</p>
                     <Input.TextArea
+                      vModel={postData.excerpt}
                       row="3"
-                      placeholder={this.$tv('page_templates.posts.excerpt_placeholder', '请输入内容简介')}
-                      vModel={this.postData.excerpt}
+                      placeholder={i18n.tv('page_templates.posts.excerpt_placeholder', '请输入内容简介')}
                     />
                   </Collapse.Panel>
-                  <Collapse.Panel header={this.$tv('page_templates.discussion_label', '讨论')}>
-                    <Checkbox vModel={this.postData.allowComment}>
-                      {this.$tv('page_templates.allow_comment_label', '允许评论')}
+                  <Collapse.Panel header={i18n.tv('page_templates.discussion_label', '讨论')}>
+                    <Checkbox vModel={postData.allowComment}>
+                      {i18n.tv('page_templates.allow_comment_label', '允许评论')}
                     </Checkbox>
                   </Collapse.Panel>
-                  <Collapse.Panel header={this.$tv('page_templates.attribute_label', '文章属性')}>
-                    <p>{this.$tv('page_templates.template_label', '模版')}</p>
-                    <Select vModel={this.postData.templatePageType}>
+                  <Collapse.Panel header={i18n.tv('page_templates.posts.attribute_label', '文章属性')}>
+                    <p>{i18n.tv('page_templates.template_label', '模版')}</p>
+                    <Select vModel={postData.templatePageType}>
                       <Select.Option value={TemplatePageType.Default}>
-                        {this.$tv('page_templates.template_options.default', '默认模版')}
+                        {i18n.tv('page_templates.template_options.default', '默认模版')}
                       </Select.Option>
                       <Select.Option value={TemplatePageType.Cover}>
-                        {this.$tv('page_templates.template_options.cover', '封面模版')}
+                        {i18n.tv('page_templates.template_options.cover', '封面模版')}
                       </Select.Option>
                       <Select.Option value={TemplatePageType.FullWidth}>
-                        {this.$tv('page_templates.template_options.full_width', '全宽模版')}
+                        {i18n.tv('page_templates.template_options.full_width', '全宽模版')}
                       </Select.Option>
                     </Select>
                   </Collapse.Panel>
@@ -499,35 +508,38 @@ export default defineComponent({
             ),
           },
           on: {
-            update: () => this.handleUpdate(),
-            publish: () => this.handelPublish(),
-            saveToDraft: () => this.handleSaveToDraft(),
-            switchToDraft: () => this.handleSwitchToDraft(),
-            submitReview: () => this.handleSubmitReview(),
-            approveReview: () => this.handleApproveReview(),
-            rejectReview: () => this.handleRejectReview(),
-            'update:siderCollapsed': (collapsed: boolean) => (this.siderCollapsed = collapsed),
+            update: handleUpdate,
+            publish: handelPublish,
+            saveToDraft: handleSaveToDraft,
+            switchToDraft: handleSwitchToDraft,
+            submitReview: handleSubmitReview,
+            approveReview: handleApproveReview,
+            rejectReview: handleRejectReview,
+            'update:siderCollapsed': (collapsed: boolean) => (siderCollapsedRef.value = collapsed),
           },
         }}
       >
-        <DocumentEditor
-          {...{
-            props: {
-              title: this.postData.title,
-              value: this.postData.content,
-              locale: this.$i18n.locale,
-            },
-            attrs: this.editorProps,
-            on: {
-              'update:title': (value: string) => {
-                this.postData.title = value;
+        {contentFrameworkRef.value === 'HTML' ? (
+          <DocumentEditor
+            {...{
+              props: {
+                title: postData.title,
+                value: postData.content,
+                disabled: actionStatus.processing,
               },
-              input: (value: string) => {
-                this.postData.content = value;
+              on: {
+                'update:title': (value: string) => {
+                  postData.title = value;
+                },
+                input: (value: string) => {
+                  postData.content = value;
+                },
               },
-            },
-          }}
-        />
+            }}
+          />
+        ) : (
+          <div>{`设计器类型"${contentFrameworkRef.value}"暂不支持`}</div>
+        )}
       </DesignLayout>
     );
   },

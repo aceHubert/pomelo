@@ -2,23 +2,18 @@ import { defineRegistApi, gql } from './core';
 
 // Types
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
-import type {
-  PagedTemplateArgs,
-  TempaleModel,
-  NewTemplateInput,
-  UpdateTemplateInput,
-  TemplateStatusCountItem,
-} from './template';
+import type { PagedTemplateArgs, TempateModel, NewTemplateInput, TemplateStatusCountItem } from './template';
 import type { Paged } from './types';
 
 export interface PagedPageTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {}
 
 export interface PageTemplateModel
   extends Pick<
-    TempaleModel,
+    TempateModel,
     | 'id'
     | 'name'
     | 'title'
+    | 'content'
     | 'author'
     | 'status'
     | 'commentStatus'
@@ -26,19 +21,14 @@ export interface PageTemplateModel
     | 'updatedAt'
     | 'createdAt'
     | 'metas'
-  > {
-  schema: string;
-}
+  > {}
 
-export interface PagedPageTemplateItem extends Omit<PageTemplateModel, 'schema' | 'metas'> {}
+export interface PagedPageTemplateItem extends Omit<PageTemplateModel, 'content' | 'metas'> {}
 
-export interface NewPageTemplateInput extends Omit<NewTemplateInput, 'type' | 'excerpt' | 'content'> {
-  schema: string;
-}
+export interface NewPageTemplateInput
+  extends Pick<NewTemplateInput, 'name' | 'title' | 'content' | 'status' | 'commentStatus' | 'metas'> {}
 
-export interface UpdatePageTemplateInput extends Omit<UpdateTemplateInput, 'excerpt' | 'content'> {
-  schema: string;
-}
+export interface UpdatePageTemplateInput extends Partial<Omit<NewPageTemplateInput, 'meta'>> {}
 
 export const usePageApi = defineRegistApi('template_page', {
   // 分页获取表单
@@ -69,6 +59,8 @@ export const usePageApi = defineRegistApi('template_page', {
           title
           author
           status
+          commentStatus
+          commentCount
           updatedAt
           createdAt
         }
@@ -88,16 +80,18 @@ export const usePageApi = defineRegistApi('template_page', {
     },
     PagedPageTemplateArgs
   >,
-  // 获取表单
+  // 获取页面
   get: gql`
     query getPage($id: ID!, $metaKeys: [String!]) {
       page: pageTemplate(id: $id) {
         id
         name
         title
-        schema
+        content
         author
         status
+        commentStatus
+        commentCount
         updatedAt
         createdAt
         metas(metaKeys: $metaKeys) {
@@ -115,9 +109,11 @@ export const usePageApi = defineRegistApi('template_page', {
         id
         name
         title
-        schema
+        content
         author
         status
+        commentStatus
+        commentCount
         updatedAt
         createdAt
         metas {
@@ -130,8 +126,17 @@ export const usePageApi = defineRegistApi('template_page', {
   ` as TypedMutationDocumentNode<{ page: PageTemplateModel }, { newPageTemplate: NewPageTemplateInput }>,
   // 修改表单
   update: gql`
-    mutation updatePage($id: ID!, $updatePage: UpdatePageTemplateInput!) {
+    mutation updatePage($id: ID!, $updatePage: UpdatePageTemplateInput!, $featureImage: String!) {
       result: updatePageTemplate(id: $id, model: $updatePage)
+      featureImageResult: updateTemplateMetaByKey(
+        templateId: $id
+        metaKey: "feature-image"
+        metaValue: $featureImage
+        createIfNotExists: true
+      )
     }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; updatePage: UpdatePageTemplateInput }>,
+  ` as TypedMutationDocumentNode<
+    { result: boolean; featureImageResult: boolean },
+    { id: number; updatePage: UpdatePageTemplateInput; featureImage?: string }
+  >,
 });

@@ -161,7 +161,7 @@ export const client = new ApolloClient({
   connectToDevTools: process.env.NODE_ENV === 'development',
 });
 
-// 注册 schema
+// Request instance
 export const request = new Request(client, {
   loading() {
     loadingRef.value = true;

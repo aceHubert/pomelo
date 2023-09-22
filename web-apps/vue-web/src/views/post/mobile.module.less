@@ -1,0 +1,47 @@
+.container {
+  padding-bottom: 50px;
+}
+
+.wrapper {
+  .title-wrapper {
+    text-align: center;
+    padding-top: 200px;
+    background-image: linear-gradient(to right, @var-primary, @var-primary);
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: auto 200px;
+
+    .title {
+      margin-top: 1em;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      margin-top: 1em;
+      color: var(--text-secondary, @text-color-secondary);
+    }
+
+    .cover& {
+      padding-top: 120px;
+      padding-bottom: 20px;
+      background-size: auto 100%;
+      color: #fff;
+
+      .title {
+        margin-top: 0;
+      }
+
+      .subtitle {
+        color: darken(#fff, 10%);
+      }
+    }
+  }
+
+  .content-wrapper {
+    padding: 20px 16px 0;
+
+    img {
+      max-width: 100%;
+    }
+  }
+}

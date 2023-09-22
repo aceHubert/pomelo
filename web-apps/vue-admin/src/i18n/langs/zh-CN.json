@@ -215,10 +215,10 @@
     "btn_text": {
       "review": "审核",
       "save_and_publish": "保存并发布",
-      "save_to_draft": "保存至草稿",
+      "save_to_draft": "保存草稿",
       "restore": "重置",
       "move_to_trush": "放入回收站",
-      "switch_to_draft": "修改并保存至草稿",
+      "switch_to_draft": "保存为草稿",
       "update": "修改",
       "publish": "发布",
       "submit_to_review": "提交审核",
@@ -244,13 +244,13 @@
       "design": {
         "page_title": "表单设计",
         "sider_title": "表单设置",
-        "submit_action_placeholder": "请输入请求地址",
-        "submit_config_label": "请求配置",
-        "submit_action_label": "请求地址",
-        "submit_success_redirect_label": "请求成功跳转地址",
+        "submit_action_placeholder": "请输入地址",
+        "submit_config_label": "提交",
+        "submit_action_label": "地址：",
+        "submit_success_redirect_label": "成功跳转地址：",
         "submit_success_redirect_placeholder": "请输入请求成功跳转地址",
-        "submit_success_tips_placeholder": "请输入请求成功提示文案",
-        "submit_success_tips_label": "请求成功提示文案"
+        "submit_success_tips_label": "成功提示文案：",
+        "submit_success_tips_placeholder": "请输入请求成功提示文案"
       },
       "tips": {
         "unsaved_confirm": "未保存表单配置将会丢失，是否离开页面？",
@@ -262,13 +262,15 @@
       "page_title": "页面列表",
       "design": {
         "page_title": "页面设计",
-        "sider_title": "页面设置"
+        "sider_title": "页面设置",
+        "view": "查看页面"
       },
       "tips": {
         "unsaved_confirm": "未保存页面配置将会丢失，是否离开页面？",
         "unpublishe_confirm": "确认是否将已发布页面配置放入到草稿箱？",
         "delete_confirm": "确认删除这条页面配置？"
-      }
+      },
+      "attribute_label": "页面属性"
     },
     "posts": {
       "page_title": "所有文章",
@@ -286,7 +288,8 @@
         "unsaved_confirm": "未保存内容将会丢失，是否离开页面？",
         "unpublishe_confirm": "确认是否将已发布内容放入到草稿箱？",
         "delete_confirm": "确认删除这条内容配置？"
-      }
+      },
+      "attribute_label": "文章属性"
     },
     "data_scopes": {
       "page_title": "数据范围列表",
@@ -367,12 +370,13 @@
     "feature_image_label": "特色图片",
     "discussion_label": "讨论",
     "allow_comment_label": "允许评论",
-    "attribute_label": "文章属性",
     "template_label": "模版",
     "new_category_link_text": "新建分类",
     "write_excerpt_label": "撰写摘要（选填）",
     "visibility_label": "可见性",
-    "publish_set_label": "发布"
+    "publish_set_label": "发布",
+    "feature_image_tips": "推荐尺寸：1980x300(px)",
+    "set_fixed_link_btn_text": "修改固定链接"
   },
   "page_media": {
     "upload_btn_text": "点击或拖拽至此上传媒体文件",

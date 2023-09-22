@@ -5,17 +5,12 @@ import { TemplateModelResp, TemplateMetaModelResp } from './base.resp';
 export class FormTemplateModelResp extends PickType(TemplateModelResp, [
   'id',
   'title',
+  'content',
   'author',
   'status',
   'updatedAt',
   'createdAt',
-] as const) {
-  /**
-   * Schema
-   */
-  @ApiResponseProperty()
-  schema!: string;
-}
+] as const) {}
 
 export class FormTemplateWithMetasModelResp extends FormTemplateModelResp {
   /**
@@ -25,8 +20,6 @@ export class FormTemplateWithMetasModelResp extends FormTemplateModelResp {
   metas?: Array<TemplateMetaModelResp>;
 }
 
-export class PagedFormTemplateResp extends PagedResponse(OmitType(FormTemplateModelResp, ['schema'] as const)) {
-  // something else
-}
+export class PagedFormTemplateResp extends PagedResponse(OmitType(FormTemplateModelResp, ['content'] as const)) {}
 
 export class FormTemplateOptionResp extends PickType(FormTemplateModelResp, ['id', 'title'] as const) {}

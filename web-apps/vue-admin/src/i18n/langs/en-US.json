@@ -244,13 +244,13 @@
       "design": {
         "page_title": "Form Design",
         "sider_title": "Form Settings",
-        "submit_action_placeholder": "Input submit action",
-        "submit_config_label": "Submit Settings",
-        "submit_action_label": "Action",
-        "submit_success_redirect_label": "Redirect URL when success",
+        "submit_action_placeholder": "Input action",
+        "submit_config_label": "Submit",
+        "submit_action_label": "Action:",
+        "submit_success_redirect_label": "Redirect URL when success:",
         "submit_success_redirect_placeholder": "Input redirect url",
-        "submit_success_tips_placeholder": "Input alert text",
-        "submit_success_tips_label": "Alert text when success"
+        "submit_success_tips_label": "Alert text when success:",
+        "submit_success_tips_placeholder": "Input alert text"
       },
       "tips": {
         "delete_confirm": "Are you sure to delete this form configuration?",
@@ -264,13 +264,15 @@
       "name_placeholder": "Input route alias(Optional)",
       "design": {
         "page_title": "Page Design",
-        "sider_title": "Page Settings"
+        "sider_title": "Page Settings",
+        "view": "View Page"
       },
       "tips": {
         "delete_confirm": "Are you sure to delete this page configuration?",
         "unsaved_confirm": "Unsaved page configuration will be lost. Do you want to leave the page?",
         "unpublishe_confirm": "Are you sure you want to put the published page configuration into the draft box?"
-      }
+      },
+      "attribute_label": "Page Attributes"
     },
     "posts": {
       "page_title": "Posts",
@@ -288,7 +290,8 @@
         "unsaved_confirm": "Unsaved content will be lost. Do you want to leave the page?",
         "unpublishe_confirm": "Are you sure you want to unpublish this post?",
         "delete_confirm": "Are you sure to delete this content configuration?"
-      }
+      },
+      "attribute_label": "Post Attributes"
     },
     "data_scopes": {
       "page_title": "Data Scopes",
@@ -369,12 +372,13 @@
     "feature_image_label": "Feature Image",
     "discussion_label": "Discussion",
     "allow_comment_label": "Allow comment",
-    "attribute_label": "Post Attributes",
     "template_label": "Template",
     "new_category_link_text": "Add New Category",
     "write_excerpt_label": "Write the excerpt(Optional)",
     "visibility_label": "Visibility",
-    "publish_set_label": "Publish"
+    "publish_set_label": "Publish",
+    "feature_image_tips": "Recommended size: 1980x300(px)",
+    "set_fixed_link_btn_text": "Update Fixed Link"
   },
   "page_media": {
     "upload_btn_text": "Click or drag file to this area to upload",

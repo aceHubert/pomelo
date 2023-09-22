@@ -5,8 +5,9 @@ import { trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { TreeSelect, Select, Card, Descriptions, Popconfirm, Spin, Space } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
+import { TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
-import { usePostApi, TemplateType, TemplateStatus, TemplateCommentStatus } from '@/fetch/graphql';
+import { usePostApi, TemplateType } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
 import { useDeviceMixin, useLocationMixin } from '@/mixins';
 import { useTemplateMixin } from '../mixins/index.mixin';
@@ -169,7 +170,7 @@ export default defineComponent({
         const baseUrl = trailingSlash(siteUrl.value || '/');
         // TODO: config format url
 
-        return baseUrl + `p/${record.id}`;
+        return baseUrl + `p/${record.id}#PREVIEW`;
       };
 
       const renderRowInline = (record: PagedPostTemplateItem) => {

@@ -1,12 +1,13 @@
 import moment from 'moment';
 import { lowerCase } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
-import { Card, Descriptions, Popconfirm, Select, Space, Spin } from 'ant-design-vue';
-import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
+import { Card, Descriptions, Popconfirm, Select, Space, Spin } from 'ant-design-vue';
+import { SearchForm, AsyncTable } from 'antdv-layout-pro';
+import { TemplateStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
-import { useFormApi, TemplateType, TemplateStatus } from '@/fetch/graphql';
+import { useFormApi, TemplateType } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
 import { useDeviceMixin, useLocationMixin } from '@/mixins';
 import { useTemplateMixin } from '../mixins/index.mixin';
@@ -150,7 +151,7 @@ export default defineComponent({
         const baseUrl = trailingSlash(siteUrl.value || '/');
         // TODO: config format url
 
-        return baseUrl + `f/${record.id}`;
+        return baseUrl + `f/${record.id}#PREVIEW`;
       };
 
       const renderRowInline = (record: PagedFormTemplateItem) => {

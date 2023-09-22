@@ -35,7 +35,7 @@ export class TemplateModelResp {
   excerpt!: string;
 
   /**
-   * Content(Schema)
+   * Content
    */
   @ApiResponseProperty()
   content!: string;

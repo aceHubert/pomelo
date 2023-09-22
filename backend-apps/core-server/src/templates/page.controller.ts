@@ -96,7 +96,7 @@ export class PageTemplateController extends BaseController {
     type: [String],
     required: false,
     example: ['mobile', 'desktop'],
-    description: `return specific keys' metas if setted, otherwish no "metas" field return in "data".`,
+    description: `return specific keys' metas if setted, otherwish all "metas" field return in "data".`,
   })
   @ApiOkResponse({
     description: 'Page template model',
@@ -112,12 +112,12 @@ export class PageTemplateController extends BaseController {
     const result = await this.templateDataSource.getByName(
       name,
       TemplateType.Page,
-      ['id', 'name', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
     let metas;
-    if (result && metaKeys?.length) {
+    if (result) {
       metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
 
@@ -125,11 +125,9 @@ export class PageTemplateController extends BaseController {
       res.status(HttpStatus.NO_CONTENT);
     }
 
-    const { content, ...restData } = result || {};
     return this.success({
       data: {
-        ...restData,
-        schema: content,
+        ...result,
         metas,
       },
     });
@@ -145,7 +143,7 @@ export class PageTemplateController extends BaseController {
     type: [String],
     required: false,
     example: ['mobile', 'desktop'],
-    description: `return specific keys' metas if setted, otherwish no "metas" field return in "data".`,
+    description: `return specific keys' metas if setted, otherwish all "metas" field return in "data".`,
   })
   @ApiOkResponse({
     description: 'Page template model',
@@ -161,12 +159,12 @@ export class PageTemplateController extends BaseController {
     const result = await this.templateDataSource.get(
       id,
       TemplateType.Page,
-      ['id', 'name', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
+      ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
       requestUser,
     );
 
     let metas;
-    if (result && metaKeys?.length) {
+    if (result) {
       metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'metaKey', 'metaValue']);
     }
 
@@ -174,11 +172,9 @@ export class PageTemplateController extends BaseController {
       res.status(HttpStatus.NO_CONTENT);
     }
 
-    const { content, ...restData } = result || {};
     return this.success({
       data: {
-        ...restData,
-        schema: content,
+        ...result,
         metas,
       },
     });
@@ -228,16 +224,16 @@ export class PageTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: PageTemplateModelResp }, 'PageTemplateModelSuccessResp'),
   })
   async create(@Body() input: NewPageTemplateDto, @User() requestUser: RequestUser) {
-    const { schema, ...restDto } = input;
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create({ content: schema, ...restDto }, TemplateType.Page, requestUser);
+      await this.templateDataSource.create(input, TemplateType.Page, requestUser);
+
     return this.success({
       data: {
         id,
         name,
         title,
         author,
-        schema: content,
+        content,
         status,
         commentStatus,
         commentCount,
@@ -259,11 +255,10 @@ export class PageTemplateController extends BaseController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() model: UpdatePageTemplateDto,
+    @Body() input: UpdatePageTemplateDto,
     @User() requestUser: RequestUser,
   ) {
-    const { schema, ...restDto } = model;
-    await this.templateDataSource.update(id, { content: schema, ...restDto }, requestUser);
+    await this.templateDataSource.update(id, input, requestUser);
     return this.success();
   }
 
