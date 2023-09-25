@@ -1,5 +1,5 @@
 import { upperFirst } from 'lodash-es';
-import { defineComponent, ref, type Ref } from '@vue/composition-api';
+import { defineComponent } from '@vue/composition-api';
 import { ConfigProvider } from 'antdv-layout-pro';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
 import { useI18n, expose } from '@/hooks';
@@ -12,7 +12,7 @@ import classes from './styles/blank.module.less';
 export default defineComponent({
   name: 'BlankLayout',
   head() {
-    const themeVars = (this.themeVars as Ref<Record<string, string>>).value ?? {};
+    const themeVars = (this.themeVars as Record<string, string>) ?? {};
     let cssText = '';
     for (const key in themeVars) {
       cssText += `--theme-${key}: ${themeVars[key]} !important;`;
@@ -33,7 +33,7 @@ export default defineComponent({
     const i18n = useI18n();
 
     expose({
-      themeVars: ref(appMixin.getThemeVars(Theme.Light)),
+      themeVars: appMixin.getThemeVars(Theme.Light),
     });
 
     return () => (

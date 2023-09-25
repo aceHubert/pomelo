@@ -1,4 +1,4 @@
-import { defineComponent, ref, computed, toRef, onMounted, nextTick } from '@vue/composition-api';
+import { defineComponent, ref, computed, onMounted, nextTick, toRef } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { isAbsoluteUrl } from '@ace-util/core';
 import { Icon, Space, Tooltip } from 'ant-design-vue';
@@ -15,13 +15,12 @@ import { RouterView } from './components';
 import classes from './styles/default.module.less';
 
 // Types
-import type { Ref } from '@vue/composition-api';
 import type { MenuConfig, BreadcrumbConfig } from 'antdv-layout-pro/types';
 
 export default defineComponent({
   name: 'DefaultLayout',
   head() {
-    const themeVars = (this.themeVars as Ref<Record<string, string>>).value ?? {};
+    const themeVars = (this.themeVars as Record<string, string>) ?? {};
     let cssText = '';
     for (const key in themeVars) {
       cssText += `--theme-${key}: ${themeVars[key]} !important;`;

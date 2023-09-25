@@ -45,7 +45,6 @@ import { ResourceWidgets, ComponentWidget, PreviewWidget, SchemaEditorWidget } f
 import classes from './index.module.less';
 
 // Types
-import type { Ref } from '@vue/composition-api';
 import type { TreeNode, ITreeNode } from '@designable/core';
 import type { PageTemplateModel } from '@/fetch/graphql';
 import type { ActionStatus, ActionCapability } from '../../components/design-layout/DesignLayout';
@@ -94,8 +93,8 @@ export default defineComponent({
     };
   },
   beforeRouteLeave(to, from, next) {
-    const unsaved = this.unsavedContent as Ref<boolean>;
-    if (unsaved.value) {
+    const unsaved = this.unsavedContent as boolean;
+    if (unsaved) {
       // Tips: Modal.confirm 会在连续后退中失效
       const confirm = window.confirm(
         this.$tv('page_templates.pages.tips.unsaved_confirm', '未保存页面配置将会丢失，是否离开页面？') as string,

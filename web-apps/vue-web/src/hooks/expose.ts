@@ -1,8 +1,9 @@
-import { Vue2, isVue2, getCurrentInstance, ref, isRef, isReactive, isRaw, toRefs, warn } from 'vue-demi';
+import Vue from 'vue';
+import { getCurrentInstance, ref, isRef, isReactive, isRaw, toRefs, warn } from '@vue/composition-api';
 import { hasOwn, proxy, isObject, isPlainObject, isArray, isFunction } from '@ace-util/core';
 
 // Types
-import type { ComponentInstance, Data, Ref } from 'vue-demi';
+import type { ComponentInstance, Data, Ref } from '@vue/composition-api';
 
 function asVmProperty(vm: ComponentInstance, propName: string, propValue: Ref<unknown>) {
   const props = vm.$options.props;
@@ -34,7 +35,7 @@ function customReactive(target: object, seen = new Set()) {
   if (seen.has(target)) return;
   if (!isPlainObject(target) || isRef(target) || isReactive(target) || isRaw(target)) return;
   // @ts-expect-error https://github.com/vuejs/vue/pull/12132
-  const defineReactive = Vue2.util.defineReactive;
+  const defineReactive = Vue.util.defineReactive;
 
   Object.keys(target).forEach((k) => {
     const val = target[k];
@@ -70,8 +71,6 @@ export const expose = (exposed?: Record<string, any>) => {
   const instance = getCurrentInstance();
   if (!instance) {
     throw new Error('expose should be called in setup().');
-  } else if (!isVue2) {
-    throw new Error('expose should be called in Vue2.');
   }
 
   if (instance.exposed) {

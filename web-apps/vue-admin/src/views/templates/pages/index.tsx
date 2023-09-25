@@ -333,7 +333,7 @@ export default defineComponent({
         deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.comment_label', '评论'),
           dataIndex: 'commentCount',
-          width: 80,
+          width: 100,
           customRender: () => `-`,
         },
         deviceMixin.isDesktop && {
