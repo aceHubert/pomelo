@@ -4,7 +4,8 @@ import { defineComponent, ref, reactive, computed, watch } from '@vue/compositio
 import { useRoute } from 'vue2-helpers/vue-router';
 import { Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { useTemplateApi, TemplateStatus } from '@/fetch/graphql';
+import { TemplateStatus } from '@pomelo/shared-web';
+import { useTemplateApi } from '@/fetch/graphql';
 import { useI18n, useUserManager } from '@/hooks';
 import { useDeviceMixin } from '@/mixins';
 import { useTemplateMixin } from '../mixins/index.mixin';
