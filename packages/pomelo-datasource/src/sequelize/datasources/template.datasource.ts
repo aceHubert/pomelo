@@ -244,7 +244,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         },
       ],
       {
-        updateOnDuplicate: ['templateId', 'metaKey'], // mssql not support
+        updateOnDuplicate: ['metaValue'], // mssql not support
         transaction: t,
       },
     );
@@ -283,24 +283,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         ]),
       ),
       {
-        updateOnDuplicate: ['templateId', 'metaKey'], // mssql not support
+        updateOnDuplicate: ['metaValue'], // mssql not support
         transaction: t,
       },
     );
-  }
-
-  /**
-   * [批量]移除 trash 之前的状态
-   * @param templateId Template id
-   */
-  private async deleteStorageTrashStatus(templateId: number | number[], t?: Transaction) {
-    return await this.models.TemplateMeta.destroy({
-      where: {
-        templateId,
-        metaKey: [TemplateMetaPresetKeys.TrashStatus, TemplateMetaPresetKeys.TrashTime],
-      },
-      transaction: t,
-    });
   }
 
   /**
@@ -1533,41 +1519,26 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         metaKey: TemplateMetaPresetKeys.TrashStatus,
       },
     });
-    // 没有历史状态直接返回false
-    if (metaStatus) {
-      const template = await this.models.Template.findByPk(id);
-      if (template) {
-        // 如果状态为非 Trash, 不被允许重置
-        if (template.status !== TemplateStatus.Trash) {
-          throw new ForbiddenError(
-            await this.translate(
-              'datasource.template.restore_forbidden_not_in_trash_status',
-              `Must be in "trush" status!`,
-              { lang: requestUser.lang },
-            ),
-          );
-        }
 
-        // 是否有编辑权限
-        await this.hasEditCapability(template, requestUser);
-
-        const t = await this.sequelize.transaction();
-        try {
-          template.status = metaStatus.metaValue as TemplateStatus;
-          await template.save({
-            transaction: t,
-          });
-
-          await this.deleteStorageTrashStatus(id, t);
-
-          await t.commit();
-          return true;
-        } catch (err) {
-          await t.rollback();
-          throw err;
-        }
+    const template = await this.models.Template.findByPk(id);
+    if (template) {
+      // 如果状态为非 Trash, 不被允许重置
+      if (template.status !== TemplateStatus.Trash) {
+        throw new ForbiddenError(
+          await this.translate(
+            'datasource.template.restore_forbidden_not_in_trash_status',
+            `Must be in "trush" status!`,
+            { lang: requestUser.lang },
+          ),
+        );
       }
-      return false;
+
+      // 是否有编辑权限
+      await this.hasEditCapability(template, requestUser);
+
+      template.status = (metaStatus?.metaValue as TemplateStatus) ?? TemplateStatus.Draft; // 默认恢复为为 draft
+      await template.save();
+      return true;
     }
     return false;
   }
@@ -1619,30 +1590,31 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }),
     );
 
+    const metas = await this.models.TemplateMeta.findAll({
+      attributes: ['templateId', 'metaValue'],
+      where: {
+        templateId: ids,
+        metaKey: TemplateMetaPresetKeys.TrashStatus,
+      },
+    });
+
     const t = await this.sequelize.transaction();
     try {
-      // 注：只修改了有保存回收站之前状态的，其它忽略
-      const metas = await this.models.TemplateMeta.findAll({
-        attributes: ['templateId', 'metaValue'],
-        where: {
-          templateId: ids,
-          metaKey: TemplateMetaPresetKeys.TrashStatus,
-        },
-      });
-
       await Promise.all(
-        metas.map((meta) =>
+        templates.map((template) =>
           this.models.Template.update(
-            { status: meta.metaValue as TemplateStatus },
             {
-              where: { id: meta.templateId },
+              status:
+                (metas.find((meta) => meta.templateId === template.id)?.metaValue as TemplateStatus) ??
+                TemplateStatus.Draft, // 默认恢复为为 draft
+            },
+            {
+              where: { id: template.id },
               transaction: t,
             },
           ),
         ),
       );
-
-      await this.deleteStorageTrashStatus(ids, t);
 
       await t.commit();
       return true;
