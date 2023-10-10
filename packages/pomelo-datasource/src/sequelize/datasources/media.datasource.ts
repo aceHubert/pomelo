@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, RequestUser } from '@pomelo/shared';
@@ -10,6 +10,7 @@ import {
   PagedMediaModel,
   NewMediaInput,
   NewMediaMetaInput,
+  UpdateMediaInput,
 } from '../interfaces/media.interface';
 import { MediaMetaPresetKeys } from '../utils/preset-keys.util';
 import { MetaDataSource } from './meta.datasource';
@@ -94,7 +95,24 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param fields 返回的字段
    */
   getPaged({ offset, limit, ...query }: PagedMediaArgs, fields: string[]): Promise<PagedMediaModel> {
-    const { keyword, ...restQuery } = query;
+    const where: WhereOptions = {};
+    if (query.keyword) {
+      where.originalFileName = {
+        [Op.like]: `%${query.keyword}%`,
+      };
+    }
+
+    if (query.extensions?.length) {
+      where.extension = query.extensions;
+    }
+
+    if (query.mimeTypes?.length) {
+      // jpg/jpeg 同一处理
+      if (query.mimeTypes.includes('image/jpg')) {
+        query.mimeTypes.push('image/jpeg');
+      }
+      where.mimeType = query.mimeTypes;
+    }
 
     return this.models.Medias.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Medias),
@@ -105,16 +123,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
         required: false,
         duplicating: false,
       },
-      where: {
-        ...(keyword
-          ? {
-              originalFileName: {
-                [Op.like]: `%${keyword}%`,
-              },
-            }
-          : null),
-        ...restQuery,
-      },
+      where,
       offset,
       limit,
       order: [['createdAt', 'DESC']],
@@ -201,6 +210,56 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
     } catch (err) {
       await t.rollback();
       throw err;
+    }
+  }
+
+  /**
+   * 修改媒体
+   * @param id Media id
+   * @param model Update model
+   * @param metaData metadata
+   */
+  async update(
+    id: number,
+    model: UpdateMediaInput,
+    metaData: MediaMetaDataModel | undefined,
+    requestUser: RequestUser,
+  ): Promise<boolean> {
+    const t = await this.sequelize.transaction();
+    try {
+      await this.models.Medias.update(
+        {
+          ...model,
+          userId: requestUser.sub!,
+        },
+        {
+          where: {
+            id,
+          },
+          transaction: t,
+        },
+      );
+
+      if (metaData) {
+        await this.models.MediaMeta.update(
+          {
+            metaValue: JSON.stringify(metaData),
+          },
+          {
+            where: {
+              mediaId: id,
+              metaKey: MediaMetaPresetKeys.Matedata,
+            },
+            transaction: t,
+          },
+        );
+      }
+
+      await t.commit();
+      return true;
+    } catch (err) {
+      await t.rollback();
+      return false;
     }
   }
 

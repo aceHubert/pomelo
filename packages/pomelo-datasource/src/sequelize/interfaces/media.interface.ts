@@ -45,6 +45,9 @@ export interface NewMediaInput
   metas?: NewMetaInput[];
 }
 
+export interface UpdateMediaInput
+  extends Partial<Pick<NewMediaInput, 'fileName' | 'originalFileName' | 'extension' | 'mimeType' | 'path'>> {}
+
 export interface NewMediaMetaInput extends NewMetaInput {
   mediaId: number;
 }
