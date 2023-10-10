@@ -79,3 +79,12 @@ export function ensureDirExists(path: string, autoCreate = true) {
     }
   }
 }
+
+/**
+ * check if the path is an external link
+ * @param {string} url url
+ * @returns {boolean} true/false
+ */
+export function isAbsoluteUrl(url: string) {
+  return /^(https?:\/\/|\/\/)[\w.]+\/?/gi.test(url);
+}

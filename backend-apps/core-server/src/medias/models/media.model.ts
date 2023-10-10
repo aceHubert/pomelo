@@ -10,7 +10,7 @@ class FileData {
   @Field({ description: 'File path' })
   path!: string;
 
-  @Field({ description: 'Full file path include siteurl' })
+  @Field({ description: 'Full file path include domain' })
   fullPath!: string;
 
   @Field({ description: 'File size, unit: KB' })

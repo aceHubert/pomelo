@@ -39,7 +39,7 @@ export class MessageResolver {
       return true;
     },
   })
-  message() {
+  onMessage() {
     return this.messageService.asyncIterator();
   }
 }

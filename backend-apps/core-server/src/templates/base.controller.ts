@@ -21,7 +21,15 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { ModuleRef } from '@nestjs/core';
 import { Authorized, Anonymous } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
-import { ApiAuth, User, ParseQueryPipe, QueryRequired, createResponseSuccessType, RequestUser } from '@pomelo/shared';
+import {
+  ApiAuth,
+  User,
+  ParseQueryPipe,
+  ValidatePayloadExistsPipe,
+  QueryRequired,
+  createResponseSuccessType,
+  RequestUser,
+} from '@pomelo/shared';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
@@ -422,7 +430,7 @@ export class TemplateController extends createMetaController(
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() model: UpdateTemplateDto,
+    @Body(ValidatePayloadExistsPipe) model: UpdateTemplateDto,
     @User() requestUser: RequestUser,
   ) {
     await this.templateDataSource.update(id, model, requestUser);

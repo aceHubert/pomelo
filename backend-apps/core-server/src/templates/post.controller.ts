@@ -14,7 +14,15 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import { BaseController, ParseQueryPipe, ApiAuth, User, RequestUser, createResponseSuccessType } from '@pomelo/shared';
+import {
+  BaseController,
+  ParseQueryPipe,
+  ValidatePayloadExistsPipe,
+  ApiAuth,
+  User,
+  RequestUser,
+  createResponseSuccessType,
+} from '@pomelo/shared';
 import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
 import { Authorized, Anonymous } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
@@ -274,7 +282,7 @@ export class PostTemplateController extends BaseController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() model: UpdatePostTemplateDto,
+    @Body(ValidatePayloadExistsPipe) model: UpdatePostTemplateDto,
     @User() requestUser: RequestUser,
   ) {
     await this.templateDataSource.update(id, model, requestUser);

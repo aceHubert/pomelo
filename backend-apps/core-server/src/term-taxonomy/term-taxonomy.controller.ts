@@ -1,7 +1,14 @@
 import { ModuleRef } from '@nestjs/core';
 import { ApiTags, ApiBody, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { Controller, Scope, Param, Body, Get, Post, Put, Query, Delete, HttpStatus } from '@nestjs/common';
-import { ParseQueryPipe, ApiAuth, User, RequestUser, createResponseSuccessType } from '@pomelo/shared';
+import {
+  ParseQueryPipe,
+  ValidatePayloadExistsPipe,
+  ApiAuth,
+  User,
+  RequestUser,
+  createResponseSuccessType,
+} from '@pomelo/shared';
 import { OptionDataSource, TermTaxonomyDataSource, Taxonomy, OptionPresetKeys } from '@pomelo/datasource';
 import { Anonymous, Authorized } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
@@ -195,7 +202,7 @@ export class TermTaxonomyController extends createMetaController(
     description: '"true" if success',
     type: () => createResponseSuccessType({}),
   })
-  async update(@Param('id') id: number, @Body() input: UpdateTermTaxonomyDto) {
+  async update(@Param('id') id: number, @Body(ValidatePayloadExistsPipe) input: UpdateTermTaxonomyDto) {
     await this.termTaxonomyDataSource.update(id, input);
     return this.success();
   }

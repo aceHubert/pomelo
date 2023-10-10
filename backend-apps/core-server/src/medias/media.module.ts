@@ -1,25 +1,30 @@
 import { Module, Provider, DynamicModule } from '@nestjs/common';
-import { FileOptions, FileAsyncOptions, FileOptionsFactory } from './interfaces/file-options.interface';
-import { FileController, MediaController } from './file.controller';
-import { FileResolver } from './file.resolver';
-import { FileService } from './file.service';
-import { FILE_OPTIONS } from './constants';
+import {
+  MediaOptions,
+  FixedMediaOptions,
+  FileAsyncOptions,
+  MediaOptionsFactory,
+} from './interfaces/media-options.interface';
+import { MediaController } from './media.controller';
+import { MediaResolver } from './media.resolver';
+import { MediaService } from './media.service';
+import { MEDIA_OPTIONS } from './constants';
 
 @Module({
-  controllers: [FileController, MediaController],
-  providers: [FileResolver, FileService],
-  exports: [FileService],
+  controllers: [MediaController],
+  providers: [MediaResolver, MediaService],
+  exports: [MediaService],
 })
-export class FileModule {
-  static forRoot(options: FileOptions): DynamicModule {
+export class MediaModule {
+  static forRoot(options: MediaOptions): DynamicModule {
     return {
-      module: FileModule,
+      module: MediaModule,
       global: options.isGlobal,
 
       providers: [
         {
-          provide: FILE_OPTIONS,
-          useValue: options,
+          provide: MEDIA_OPTIONS,
+          useValue: this.fixOptions(options),
         },
       ],
     };
@@ -27,7 +32,7 @@ export class FileModule {
 
   static forRootAsync(options: FileAsyncOptions): DynamicModule {
     return {
-      module: FileModule,
+      module: MediaModule,
       global: options.isGlobal,
       imports: options.imports || [],
       providers: this.createAsyncProviders(options),
@@ -50,21 +55,30 @@ export class FileModule {
   private static createAsyncOptionsProvider(options: FileAsyncOptions): Provider {
     if (options.useFactory) {
       return {
-        provide: FILE_OPTIONS,
+        provide: MEDIA_OPTIONS,
         useFactory: async (...args: any[]) => {
           const config = await options.useFactory!(...args);
-          return config;
+          return this.fixOptions(config);
         },
         inject: options.inject || [],
       };
     }
     return {
-      provide: FILE_OPTIONS,
-      useFactory: async (optionsFactory: FileOptionsFactory) => {
+      provide: MEDIA_OPTIONS,
+      useFactory: async (optionsFactory: MediaOptionsFactory) => {
         const config = await optionsFactory.createFileOptions();
-        return config;
+        return this.fixOptions(config);
       },
       inject: [options.useExisting! || options.useClass!],
+    };
+  }
+
+  private static fixOptions(options: MediaOptions): FixedMediaOptions {
+    const { dest = process.cwd(), groupBy = 'month', staticPrefix = 'uploads' } = options;
+    return {
+      dest,
+      groupBy,
+      staticPrefix,
     };
   }
 }

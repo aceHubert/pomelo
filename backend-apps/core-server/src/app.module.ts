@@ -28,7 +28,7 @@ import { RamAuthorizationModule } from 'nestjs-ram-authorization';
 import { SequelizeModule } from '@pomelo/datasource';
 // import { ObsModule } from '@pomelo/plugin-obs';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
-import { FileModule } from './files/file.module';
+import { MediaModule } from './medias/media.module';
 import { MessageModule } from './messages/message.module';
 import { DbInitModule } from './db-init/db-init.module';
 import { OptionModule } from './options/option.module';
@@ -46,6 +46,7 @@ import '@/common/extends/i18n.extend';
 // format introspection query same way as apollo tooling do
 const IntrospectionQuery = print(parse(getIntrospectionQuery()));
 
+// default content path
 const defaultContentPath = path.join(process.cwd(), '../content');
 
 @Module({
@@ -62,7 +63,7 @@ const defaultContentPath = path.join(process.cwd(), '../content');
     ServeStaticModule.forRootAsync({
       useFactory: (config: ConfigService) => [
         {
-          rootPath: config.get('content', defaultContentPath),
+          rootPath: config.get<string>('contentPath', defaultContentPath),
           renderPath: /$(uploads|languages)\//i,
         },
       ],
@@ -71,10 +72,7 @@ const defaultContentPath = path.join(process.cwd(), '../content');
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const contentPath = path.join(
-          config.get('content', path.join(process.cwd(), '../content')),
-          '/languages/backend',
-        );
+        const contentPath = path.join(config.get<string>('contentPath', defaultContentPath), '/languages/backend');
         if (!fs.existsSync(contentPath)) {
           fs.mkdirSync(contentPath, { recursive: true });
         }
@@ -234,7 +232,10 @@ const defaultContentPath = path.join(process.cwd(), '../content');
     MulterModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         storage: multer.diskStorage({
-          destination: config.get('upload.dest', path.join(config.get('content', defaultContentPath), '/uploads')),
+          destination: config.get(
+            'upload.dest',
+            path.join(config.get<string>('contentPath', defaultContentPath), 'uploads'),
+          ),
         }),
         // config.get('file_storage') === 'disk'
         //   ? multer.diskStorage({ destination: config.get('file_dest') })
@@ -246,10 +247,10 @@ const defaultContentPath = path.join(process.cwd(), '../content');
       }),
       inject: [ConfigService],
     }),
-    FileModule.forRootAsync({
+    MediaModule.forRootAsync({
       // isGlobal: true,
       useFactory: (config: ConfigService) => ({
-        dest: config.get<string>('upload.dest', path.join(config.get('content', defaultContentPath), '/uploads')),
+        dest: config.get('upload.dest', config.get<string>('contentPath', defaultContentPath)),
       }),
       inject: [ConfigService],
     }),

@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 import { merge } from 'lodash';
 import { default as bytes } from 'bytes';
 import { Logger } from '@nestjs/common';
@@ -157,11 +158,18 @@ export interface ConfigObject {
  */
 export const configuration: (basePath: string) => ConfigFactory<ConfigObject> = (basePath) => () => {
   logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'}}`);
+  let contentPath;
+  if (process.env.CONTENT_PATH) {
+    if ((contentPath = process.env.CONTENT_PATH) && fs.existsSync(contentPath)) {
+      // 配置为绝对路径
+    } else if ((contentPath = path.join(process.cwd(), process.env.CONTENT_PATH)) && fs.existsSync(contentPath)) {
+      // 配置为相对路径
+    } else {
+      contentPath = undefined;
+    }
+  }
   let config: ConfigObject = {
-    contentPath:
-      process.env.CONTENT_PATH !== void 0
-        ? path.join(process.cwd(), process.env.CONTENT_PATH)
-        : process.env.CONTENT_PATH,
+    contentPath: contentPath,
     webServer: {
       host: process.env.HOST,
       port: process.env.PORT,

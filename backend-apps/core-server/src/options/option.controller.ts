@@ -10,6 +10,7 @@ import {
   User,
   ApiAuth,
   ParseQueryPipe,
+  ValidatePayloadExistsPipe,
   describeType,
   createResponseSuccessType,
   RequestUser,
@@ -133,7 +134,7 @@ export class OptionController extends BaseController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() model: UpdateOptionDto,
+    @Body(ValidatePayloadExistsPipe) model: UpdateOptionDto,
     @User() requestUser: RequestUser,
   ) {
     await this.optionDataSource.update(id, model, requestUser);
