@@ -1,13 +1,13 @@
-import { defineComponent, ref, computed, onErrorCaptured } from '@vue/composition-api';
-import { warn, promisify, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
+import { defineComponent, ref, computed } from '@vue/composition-api';
+import { promisify, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { createForm } from '@formily/core';
 import { createSchemaField } from '@formily/vue';
-import { Card, Rate, Result, Skeleton } from 'ant-design-vue';
+import { Card, Rate } from 'ant-design-vue';
 import { Form, FormButtonGroup, Submit } from '@formily/antdv';
 import * as Antdv from '@formily/antdv';
 import { OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-web';
 import { useI18n, useOptions } from '@/hooks';
-import { Spin } from '@/components';
+import { Spin, Result } from '@/components';
 import { checkSchemaValid, type IFormilySchema } from './utils';
 import Text from './components/Text';
 import classes from './desktop.module.less';
@@ -88,13 +88,6 @@ export default defineComponent({
       return trailingSlash(siteUrl.value) + (value.startsWith('/') ? value.slice(1) : value);
     });
 
-    const renderError = ref<false | string>(false);
-    onErrorCaptured((err, vm, info) => {
-      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
-      renderError.value = info || err.message;
-      return false;
-    });
-
     const submitingRef = ref(false);
     const handleSubmit = (value: any) => {
       const submit = props.onSubmit || listeners.submit;
@@ -119,31 +112,11 @@ export default defineComponent({
 
     return () => (
       <div class={classes.container}>
-        {props.loading ? (
-          <Skeleton active />
-        ) : props.error ? (
+        {!isSchemaValid.value ? (
           <Result
             status="error"
-            title={i18n.tv('form_template.index.load_error_text', '表单加载错误！')}
-            subTitle={props.error.message}
-          ></Result>
-        ) : !props.content ? (
-          <Result
-            status="error"
-            title="404"
-            subTitle={i18n.tv('form_template.index.not_found_text', '未找到表单！')}
-          ></Result>
-        ) : !isSchemaValid.value ? (
-          <Result
-            status="error"
-            title={i18n.tv('form_template.index.schema_error_text', '表单配置错误！')}
-            subTitle={i18n.tv('form_template.index.contact_administrator_tips', '请联系管理员。')}
-          ></Result>
-        ) : renderError.value ? (
-          <Result
-            status="error"
-            title={i18n.tv('page_template.index.render_error_text', '表单渲染错误！')}
-            subTitle={renderError.value}
+            title={i18n.tv('form_template.index.schema_error_text', '表单配置错误！') as string}
+            subTitle={i18n.tv('form_template.index.contact_administrator_tips', '请联系管理员。') as string}
           ></Result>
         ) : (
           <div class={classes.wrapper}>
@@ -183,7 +156,7 @@ export default defineComponent({
                 <Result
                   slot="error"
                   status="error"
-                  title={i18n.tv('page_template.index.render_error_text', '表单渲染错误！')}
+                  title={i18n.tv('page_template.index.render_error_text', '表单渲染错误！') as string}
                 ></Result>
               </suspense>
             </div>

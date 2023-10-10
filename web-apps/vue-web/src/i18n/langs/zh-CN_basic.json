@@ -1,0 +1,13 @@
+{
+  "name": "简体中文",
+  "description": "简体中文翻译文件包",
+  "site_title": "Pomelo",
+  "common": {
+    "tips": {
+      "loading": "加载中"
+    },
+    "btn_text": {
+      "submit": "提交"
+    }
+  }
+}

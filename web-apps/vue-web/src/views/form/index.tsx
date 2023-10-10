@@ -1,10 +1,11 @@
-import { defineComponent, ref, computed, h } from '@vue/composition-api';
-import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
+import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composition-api';
+import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
 import { useTemplateApi, getFrameworkSchema, OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-web';
 import { Modal } from 'ant-design-vue';
 import { Dialog } from 'vant';
+import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
 import { useLocationMixin, useDeviceMixin } from '@/mixins';
 
@@ -186,32 +187,96 @@ export default defineComponent({
         });
     };
 
+    const renderError = ref<false | string>(false);
+    onErrorCaptured((err, vm, info) => {
+      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
+      renderError.value = info || err.message;
+      return false;
+    });
+
     return () => {
       const { $error, $loading, $result: formData } = formRes;
 
-      return deviceMixin.isDesktop
-        ? h(DesktopForm, {
-            props: {
-              title: formData?.title,
-              content: formData?.schema,
-              metas: metas.value,
-              framework: formData?.framework,
-              loading: $loading,
-              error: $error,
-              onSubmit,
-            },
-          })
-        : h(MobileForm, {
-            props: {
-              title: formData?.title,
-              content: formData?.schema,
-              metas: metas.value,
-              framework: formData?.framework,
-              loading: $loading,
-              error: $error,
-              onSubmit,
-            },
-          });
+      return $loading ? (
+        <div>
+          <SkeletonLoader style={{ width: '100%', height: deviceMixin.isDesktop ? '300px' : '200px' }} />
+          <div class={['mx-auto pt-2', { 'px-4': !deviceMixin.isDesktop }]} style="width: 1180px; max-width: 100%;">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} class="d-flex mt-2">
+                <SkeletonLoader
+                  class="flex-none"
+                  style={{
+                    width: deviceMixin.isDesktop ? '120px' : '70px',
+                    height: '32px',
+                  }}
+                />
+                <SkeletonLoader
+                  class="flex-auto ml-2"
+                  style={{
+                    height: '32px',
+                  }}
+                />
+              </div>
+            ))}
+            <SkeletonLoader
+              class="flex-none mt-5"
+              style={{
+                marginLeft: deviceMixin.isDesktop ? '128px' : '0',
+                width: deviceMixin.isDesktop ? '100px' : '100%',
+                height: '40px',
+                lineHeight: '40px',
+                borderRadius: deviceMixin.isDesktop ? '8px' : '99px',
+                textAlign: 'center',
+                color: 'gray',
+              }}
+            >
+              Submit
+            </SkeletonLoader>
+          </div>
+        </div>
+      ) : $error ? (
+        <Result
+          status="error"
+          title={i18n.tv('form_template.index.load_error_text', '表单加载错误！') as string}
+          subTitle={$error.message}
+        ></Result>
+      ) : !formData?.schema ? (
+        <Result
+          status="error"
+          title="404"
+          subTitle={i18n.tv('form_template.index.not_found_text', '未找到表单！') as string}
+        ></Result>
+      ) : renderError.value ? (
+        <Result
+          status="error"
+          title={i18n.tv('form_template.index.render_error_text', '表单渲染错误！') as string}
+          subTitle={renderError.value}
+        ></Result>
+      ) : deviceMixin.isDesktop ? (
+        h(DesktopForm, {
+          props: {
+            title: formData?.title,
+            content: formData?.schema,
+            metas: metas.value,
+            framework: formData?.framework,
+            loading: $loading,
+            error: $error,
+            onSubmit,
+          },
+        })
+      ) : (
+        h(MobileForm, {
+          props: {
+            title: formData?.title,
+            content: formData?.schema,
+            metas: metas.value,
+            framework: formData?.framework,
+            loading: $loading,
+            error: $error,
+            onSubmit,
+          },
+        })
+      );
     };
   },
 });

@@ -1,7 +1,8 @@
-import { defineComponent, computed, h } from '@vue/composition-api';
-import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
+import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composition-api';
+import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { createResource } from '@vue-async/resource-manager';
 import { useTemplateApi, getFrameworkSchema, OptionPresetKeys, PostMetaPresetKeys } from '@pomelo/shared-web';
+import { SkeletonLoader, Result } from '@/components';
 import { useDeviceMixin } from '@/mixins';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
 
@@ -53,6 +54,7 @@ export default defineComponent({
           id,
         },
       });
+
       if (post) {
         const { schema, framework } = getFrameworkSchema(post.content);
         return {
@@ -128,33 +130,79 @@ export default defineComponent({
       cssText,
     });
 
+    const renderError = ref<false | string>(false);
+    onErrorCaptured((err, vm, info) => {
+      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
+      renderError.value = info || err.message;
+      return false;
+    });
+
     return () => {
       const { $error, $loading, $result: postData } = postRes;
 
-      return deviceMixin.isDesktop
-        ? h(DesktopPost, {
-            props: {
-              title: postData?.title,
-              excerpt: postData?.excerpt,
-              content: postData?.schema,
-              createdAt: postData?.createdAt,
-              metas: metas.value,
-              framework: postData?.framework,
-              loading: $loading,
-              error: $error,
-            },
-          })
-        : h(MobilePost, {
-            props: {
-              title: postData?.title,
-              content: postData?.schema,
-              createdAt: postData?.createdAt,
-              metas: metas.value,
-              framework: postData?.framework,
-              loading: $loading,
-              error: $error,
-            },
-          });
+      return $loading ? (
+        <div>
+          <SkeletonLoader style={{ width: '100%', height: deviceMixin.isDesktop ? '300px' : '200px' }} />
+          <div class={['mx-auto', { 'px-4': !deviceMixin.isDesktop }]} style="width: 1180px; max-width: 100%;">
+            <SkeletonLoader
+              class="mx-auto"
+              style={{
+                width: '260px',
+                height: deviceMixin.isDesktop ? '40px' : '32px',
+                marginTop: deviceMixin.isDesktop ? '40px' : '32px',
+              }}
+            />
+            <SkeletonLoader
+              class="mx-auto"
+              style={{ width: '120px', height: '14px', marginTop: deviceMixin.isDesktop ? '28px' : '14px' }}
+            />
+            <SkeletonLoader
+              style={{ height: '14px', marginLeft: '32px', marginTop: deviceMixin.isDesktop ? '30px' : '20px' }}
+            />
+            <SkeletonLoader style={{ height: '14px', marginTop: '10px' }} />
+            <SkeletonLoader style={{ height: '14px', marginTop: '10px' }} />
+          </div>
+        </div>
+      ) : $error ? (
+        <Result
+          status="error"
+          title={i18n.tv('post_template.index.load_error_text', '内容加载错误！') as string}
+          subTitle={$error.message}
+        ></Result>
+      ) : !postData?.schema ? (
+        <Result
+          status="error"
+          title="404"
+          subTitle={i18n.tv('post_template.index.not_found_text', '内容不存在！') as string}
+        ></Result>
+      ) : renderError.value ? (
+        <Result
+          status="error"
+          title={i18n.tv('post_template.index.render_error_text', '内容渲染错误！') as string}
+          subTitle={renderError.value}
+        ></Result>
+      ) : deviceMixin.isDesktop ? (
+        h(DesktopPost, {
+          props: {
+            title: postData?.title,
+            excerpt: postData?.excerpt,
+            content: postData?.schema,
+            createdAt: postData?.createdAt,
+            metas: metas.value,
+            framework: postData?.framework,
+          },
+        })
+      ) : (
+        h(MobilePost, {
+          props: {
+            title: postData?.title,
+            content: postData?.schema,
+            createdAt: postData?.createdAt,
+            metas: metas.value,
+            framework: postData?.framework,
+          },
+        })
+      );
     };
   },
 });

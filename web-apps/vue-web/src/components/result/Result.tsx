@@ -34,9 +34,7 @@ export default defineComponent({
     return () => (
       <div class="result">
         <div class="result__icon">
-          {slots.icon?.() || (
-            <Icon name={iconMap[props.status].name} color={iconMap[props.status].color} size="2.75rem" />
-          )}
+          {slots.icon?.() || <Icon name={iconMap[props.status].name} color={iconMap[props.status].color} />}
         </div>
         {(slots.title || props.title) && <div class="result__title">{slots.title?.() ?? props.title}</div>}
         {(slots.subTitle || props.subTitle) && (

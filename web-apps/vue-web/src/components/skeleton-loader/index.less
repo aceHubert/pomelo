@@ -1,0 +1,29 @@
+.skeleton-loader{
+  position: relative;
+  overflow: hidden;
+  background-color: #f2f2f2;
+
+  &.rounded{
+    border-radius: 8Px;
+  }
+
+  &.rounded-full{
+    border-radius: 50%;
+  }
+
+  .shimmer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    animation: shimmer 1.4s infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

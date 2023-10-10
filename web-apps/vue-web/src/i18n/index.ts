@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueI18n, { type IVueI18n } from 'vue-i18n';
-import zhCN from './langs/zh-CN.json';
+import zhCN from './langs/zh-CN_basic.json';
 import enUS from './langs/en-US.json';
 
 // Types

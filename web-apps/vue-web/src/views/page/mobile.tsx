@@ -1,8 +1,7 @@
-import { defineComponent, ref, computed, onErrorCaptured } from '@vue/composition-api';
-import { warn } from '@ace-util/core';
+import { defineComponent, computed } from '@vue/composition-api';
 import { createSchemaField, FragmentComponent } from '@formily/vue';
 import { Space } from '@formily/vant';
-import { Skeleton, Loading } from 'vant';
+import { Loading } from 'vant';
 import * as Vant from '@formily-portal/vant';
 import { Page } from '@formily-portal/vant';
 import { Result } from '@/components';
@@ -23,8 +22,6 @@ const { SchemaField } = createSchemaField({
 export interface MobilePageProps {
   content: any;
   framework: SchemaFramework;
-  loading?: boolean;
-  error?: Error;
 }
 
 export default defineComponent({
@@ -32,8 +29,6 @@ export default defineComponent({
   props: {
     content: [],
     framework: { type: String, default: 'FORMILYJS' },
-    loading: Boolean,
-    error: Object,
   },
   setup(props: MobilePageProps) {
     const i18n = useI18n();
@@ -58,41 +53,14 @@ export default defineComponent({
       return true;
     });
 
-    const renderError = ref<false | string>(false);
-    onErrorCaptured((err, vm, info) => {
-      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
-      renderError.value = info || err.message;
-      return false;
-    });
-
     // TODO: 外面不包一层，上面的解构类型错误
     return () => (
       <FragmentComponent>
-        {props.loading ? (
-          <Skeleton title row={3} />
-        ) : props.error ? (
-          <Result
-            status="error"
-            title={i18n.tv('page_template.index.load_error_text', '页面加载错误！') as string}
-            subTitle={props.error.message}
-          ></Result>
-        ) : !props.content ? (
-          <Result
-            status="error"
-            title="404"
-            subTitle={i18n.tv('page_template.index.not_found_text', '未找到页面！') as string}
-          ></Result>
-        ) : !isSchemaValid.value ? (
+        {!isSchemaValid.value ? (
           <Result
             status="error"
             title={i18n.tv('page_template.index.schema_error_text', '页面配置错误！') as string}
             subTitle={i18n.tv('page_template.index.contact_administrator_tips', '请联系管理员。') as string}
-          ></Result>
-        ) : renderError.value ? (
-          <Result
-            status="error"
-            title={i18n.tv('page_template.index.render_error_text', '页面渲染错误！') as string}
-            subTitle={renderError.value}
           ></Result>
         ) : (
           <suspense>

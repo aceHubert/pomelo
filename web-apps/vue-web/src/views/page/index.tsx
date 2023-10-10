@@ -1,5 +1,5 @@
-import { defineComponent, computed, h } from '@vue/composition-api';
-import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
+import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composition-api';
+import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { createResource } from '@vue-async/resource-manager';
 import {
@@ -9,6 +9,7 @@ import {
   OptionPresetKeys,
   PageMetaPresetKeys,
 } from '@pomelo/shared-web';
+import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
 import { useDeviceMixin } from '@/mixins';
 
@@ -178,30 +179,104 @@ export default defineComponent({
       cssText,
     });
 
+    const renderError = ref<false | string>(false);
+    onErrorCaptured((err, vm, info) => {
+      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
+      renderError.value = info || err.message;
+      return false;
+    });
+
     return () => {
       const { $error, $loading, $result: pageData } = pageRes;
 
-      return deviceMixin.isDesktop
-        ? h(DesktopPage, {
-            props: {
-              title: pageData?.title,
-              content: pageData?.schema,
-              metas: metas.value,
-              framework: pageData?.framework,
-              loading: $loading,
-              error: $error,
-            },
-          })
-        : h(MobilePage, {
-            props: {
-              title: pageData?.title,
-              content: pageData?.schema,
-              metas: metas.value,
-              framework: pageData?.framework,
-              loading: $loading,
-              error: $error,
-            },
-          });
+      return $loading ? (
+        <div>
+          <SkeletonLoader style={{ width: '100%', height: deviceMixin.isDesktop ? '300px' : '200px' }} />
+          {deviceMixin.isDesktop ? (
+            <div class="mx-auto" style="width: 1180px; max-width: 100%;">
+              <div class="d-flex flex-wrap justify-content-start mx-n3">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div style="flex: 0 0 20%; padding: 20px 12px">
+                    <SkeletonLoader key={index} style="height: 100px; width: 100%; " />
+                  </div>
+                ))}
+              </div>
+              <div class="mt-2">
+                <SkeletonLoader style=" height: 40px; width: 200px;" />
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <div key={index} class="d-flex mt-6">
+                    <div class="flex-auto pr-4">
+                      <SkeletonLoader style="height: 18px; width: 260px; margin-top: 10px;" />
+                      <SkeletonLoader style="height: 18px; margin-top: 10px;" />
+                      <SkeletonLoader style="height: 18px; margin-top: 10px;" />
+                    </div>
+                    <SkeletonLoader class="flex-none" style="height: 90px; width: 160px;" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div class="px-4">
+              <div class="d-flex flex-wrap justify-content-start mx-n3">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div style="flex: 0 0 25%; padding: 10px 12px">
+                    <SkeletonLoader key={index} type="circle" style="margin: auto; width: 100%; padding-top: 100%;" />
+                  </div>
+                ))}
+              </div>
+              <div class="mt-2">
+                <SkeletonLoader style=" height: 32px; width: 100px;" />
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} class="d-flex mt-4">
+                    <div class="flex-auto pr-4">
+                      <SkeletonLoader style="height: 14px; width: 50%; margin-top: 5px;" />
+                      <SkeletonLoader style="height: 14px; margin-top: 5px;" />
+                      <SkeletonLoader style="height: 14px; margin-top: 5px;" />
+                    </div>
+                    <SkeletonLoader class="flex-none" style="height: 60px; width: 100px;" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : $error ? (
+        <Result
+          status="error"
+          title={i18n.tv('page_template.index.load_error_text', '页面加载错误！') as string}
+          subTitle={$error.message}
+        ></Result>
+      ) : !pageData?.schema ? (
+        <Result
+          status="error"
+          title="404"
+          subTitle={i18n.tv('page_template.index.not_found_text', '未找到页面！') as string}
+        ></Result>
+      ) : renderError.value ? (
+        <Result
+          status="error"
+          title={i18n.tv('page_template.index.render_error_text', '页面渲染错误！') as string}
+          subTitle={renderError.value}
+        ></Result>
+      ) : deviceMixin.isDesktop ? (
+        h(DesktopPage, {
+          props: {
+            title: pageData?.title,
+            content: pageData?.schema,
+            metas: metas.value,
+            framework: pageData?.framework,
+          },
+        })
+      ) : (
+        h(MobilePage, {
+          props: {
+            title: pageData?.title,
+            content: pageData?.schema,
+            metas: metas.value,
+            framework: pageData?.framework,
+          },
+        })
+      );
     };
   },
 });

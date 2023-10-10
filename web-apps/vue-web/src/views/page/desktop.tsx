@@ -1,11 +1,10 @@
-import { defineComponent, ref, computed, onErrorCaptured } from '@vue/composition-api';
-import { warn } from '@ace-util/core';
+import { defineComponent, computed } from '@vue/composition-api';
 import { createSchemaField, FragmentComponent } from '@formily/vue';
-import { Card, Result, Skeleton } from 'ant-design-vue';
+import { Card } from 'ant-design-vue';
 import { FormGrid, FormCollapse, FormTab, Space } from '@formily/antdv';
 import * as Antdv from '@formily-portal/antdv';
 import { Page } from '@formily-portal/antdv';
-import { Spin } from '@/components';
+import { Spin, Result } from '@/components';
 import { useI18n } from '@/hooks';
 import { checkSchemaValid, type IFormilySchema } from '../form/utils';
 
@@ -29,8 +28,6 @@ export interface DesktopPageProps {
   content: any;
   metas: Record<string, string>;
   framework: SchemaFramework;
-  loading?: boolean;
-  error?: Error;
 }
 
 export default defineComponent({
@@ -46,8 +43,6 @@ export default defineComponent({
       type: String,
       default: 'FORMILYJS',
     },
-    loading: Boolean,
-    error: Object,
   },
   setup(props: DesktopPageProps) {
     const i18n = useI18n();
@@ -72,41 +67,14 @@ export default defineComponent({
       return true;
     });
 
-    const renderError = ref<false | string>(false);
-    onErrorCaptured((err, vm, info) => {
-      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
-      renderError.value = info || err.message;
-      return false;
-    });
-
     // TODO: 外面不包一层，上面的解构类型错误
     return () => (
       <FragmentComponent>
-        {props.loading ? (
-          <Skeleton active />
-        ) : props.error ? (
+        {!isSchemaValid.value ? (
           <Result
             status="error"
-            title={i18n.tv('page_template.index.load_error_text', '页面加载错误！')}
-            subTitle={props.error.message}
-          ></Result>
-        ) : !props.content ? (
-          <Result
-            status="error"
-            title="404"
-            subTitle={i18n.tv('page_template.index.not_found_text', '未找到页面！')}
-          ></Result>
-        ) : !isSchemaValid.value ? (
-          <Result
-            status="error"
-            title={i18n.tv('page_template.index.schema_error_text', '页面配置错误！')}
-            subTitle={i18n.tv('page_template.index.contact_administrator_tips', '请联系管理员。')}
-          ></Result>
-        ) : renderError.value ? (
-          <Result
-            status="error"
-            title={i18n.tv('page_template.index.render_error_text', '页面渲染错误！')}
-            subTitle={renderError.value}
+            title={i18n.tv('page_template.index.schema_error_text', '页面配置错误！') as string}
+            subTitle={i18n.tv('page_template.index.contact_administrator_tips', '请联系管理员。') as string}
           ></Result>
         ) : (
           <suspense>
@@ -125,7 +93,7 @@ export default defineComponent({
             <Result
               slot="error"
               status="error"
-              title={i18n.tv('page_template.index.render_error_text', '页面渲染错误！')}
+              title={i18n.tv('page_template.index.render_error_text', '页面渲染错误！') as string}
             ></Result>
           </suspense>
         )}

@@ -1,5 +1,7 @@
 {
   "name": "English",
+  "description": "English Language Pack",
+  "site_title": "Pomelo",
   "common": {
     "tips": {
       "loading": "Loading"
