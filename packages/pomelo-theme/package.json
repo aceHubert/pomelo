@@ -2,7 +2,7 @@
   "name": "@pomelo/theme",
   "description": "Styles",
   "version": "0.1.0-alpha.0",
-  "author": "Hubert<hubert@lejian.com>",
+  "author": "Hubert<yi.xiang@live.cn>",
   "main": "lib/index.js",
   "module": "esm/index.js",
   "license": "MIT",

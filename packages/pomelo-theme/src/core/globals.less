@@ -129,6 +129,9 @@ each(@text-aligns,{
   sm: @font-size-sm;
   md: @font-size-md;
   lg: @font-size-lg;
+  xl: @font-size-xl;
+  xxl: @font-size-xxl;
+  xxxl: @font-size-xxxl;
 };
 
 @line-heights: {
@@ -136,6 +139,9 @@ each(@text-aligns,{
   sm: @line-height-sm;
   md: @line-height-md;
   lg: @line-height-lg;
+  xl: @line-height-xl;
+  xxl: @line-height-xxl;
+  xxxl: @line-height-xxxl;
 };
 
 each(@line-heights,{
@@ -162,7 +168,7 @@ each(@font-sizes,{
 
 // 上面两种的组合
 .font(@key,@fontSize,@lineHeight){
-  .font-@{key}{   
+  .font-@{key}{
     .fontSize(@fontSize);
     line-height: unit(round((@lineHeight/@fontSize), 2));
   }
@@ -225,11 +231,19 @@ each(@flex-wraps,{
   }
 });
 
-@justify-contents: flex-start, flex-end, center, space-between, space-around;
+@justify-contents: start, end, center, space-between, space-around;
 
 each(@justify-contents,{
-  .flex-@{value} {
+  .justify-content-@{value} {
     justify-content: @value !important;
+  }
+});
+
+@align-items: start, end, center, baseline, stretch;
+
+each(@align-items,{
+  .align-items-@{value} {
+    align-items: @value !important;
   }
 });
 
