@@ -326,7 +326,7 @@ export default defineComponent({
                   ) : props.rowCount ? (
                     <Form.Item class={`${prefixCls}-content__count-item`}>
                       <span>
-                        {configProvider.i18nRender(`${props.i18nKeyPrefix}.row_count`, `${props.rowCount} Rows(s)`, {
+                        {configProvider.i18nRender(`${props.i18nKeyPrefix}.row_count`, `${props.rowCount} Row(s)`, {
                           count: props.rowCount,
                         })}
                       </span>
