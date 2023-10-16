@@ -50,7 +50,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
       {
         key: 'posts-add',
         title: (i18nRender) => i18nRender('menu.post.new', '写文章'),
-        path: '/posts/add',
+        path: '/posts/create',
         position: 'side',
         icon: IconAddCell,
       },
@@ -72,7 +72,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
   },
   {
     key: 'medias',
-    title: (i18nRender) => i18nRender('menu.media', '所有媒体'),
+    title: (i18nRender) => i18nRender('menu.medias', '所有媒体'),
     path: '/medias',
     position: 'top',
     icon: IconPictures,
@@ -103,7 +103,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
       {
         key: 'pages-add',
         title: (i18nRender) => i18nRender('menu.page.new', '新建页面'),
-        path: '/pages/add',
+        path: '/pages/create',
         position: 'side',
         icon: IconAddCell,
       },
@@ -135,7 +135,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
       {
         key: 'forms-add',
         title: (i18nRender) => i18nRender('menu.form.new', '新建表单'),
-        path: '/forms/add',
+        path: '/forms/create',
         position: 'side',
         icon: IconAddCell,
       },
@@ -199,7 +199,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
           {
             key: 'data-scope-add',
             title: (i18nRender) => i18nRender('menu.data-scope.new', '新建数据范围'),
-            path: '/data-scope/add',
+            path: '/data-scope/create',
             position: 'side',
           },
         ],

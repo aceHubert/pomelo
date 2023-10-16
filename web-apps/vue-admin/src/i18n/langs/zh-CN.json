@@ -1,5 +1,6 @@
 {
   "name": "简体中文",
+  "description": "仅作为翻译英文使用，引用公共内容添加取 zh-CN_basic.json 文件中",
   "site_title": "Pomelo",
   "common": {
     "btn_text": {
@@ -8,6 +9,7 @@
       "no": "否",
       "cancel": "取消",
       "confirm": "确认",
+      "close": "关闭",
       "create": "新建",
       "edit": "编辑",
       "update": "修改",
@@ -22,7 +24,10 @@
       "back_to_home": "返回主页",
       "in_operation": "操作中",
       "view": "查看",
-      "preview": "预览"
+      "preview": "预览",
+      "select": "选择",
+      "skip": "跳过",
+      "crop": "裁切"
     },
     "btn_tips": {
       "go_back": "返回上一级"
@@ -110,9 +115,17 @@
       "index": "所有模块",
       "details": "模块详情"
     },
-    "settings": "设置"
+    "settings": "设置",
+    "medias": "所有媒体"
   },
   "components": {
+    "layout_admin": {
+      "sider_drawer": {
+        "title": "菜单",
+        "collapse_sidebar": "折叠",
+        "expand_sidebar": "展开"
+      }
+    },
     "search_form": {
       "keyword_placeholder": "搜索",
       "row_count": "{count} 行",
@@ -150,13 +163,6 @@
       "show_more_btn_text": "查看更多"
     }
   },
-  "layout_default": {
-    "sider_drawer": {
-      "title": "菜单",
-      "collapse_sidebar": "折叠",
-      "expand_sidebar": "展开"
-    }
-  },
   "page_session_timeout": {
     "page_title": "会话超时",
     "title": "OOPS!",
@@ -188,7 +194,7 @@
     "title_required": "标题必填！",
     "name_label": "自定义路由",
     "name_placeholder": "请输入自定义路由",
-    "content_placeholder": "请编辑内容",
+    "content_placeholder": "添加内容",
     "author": "作者",
     "category_label": "分类",
     "category_placeholder": "请选择分类",
@@ -360,7 +366,6 @@
       "review_reject": "内容审核不通过"
     },
     "design_sider": {
-      "settings_title": "设置",
       "close_settings_title": "关闭设置"
     },
     "date_label": "日期",
@@ -376,10 +381,48 @@
     "visibility_label": "可见性",
     "publish_set_label": "发布",
     "feature_image_tips": "推荐尺寸：1980x300(px)",
-    "set_fixed_link_btn_text": "修改固定链接"
+    "set_fixed_link_btn_text": "修改固定链接",
+    "feature_image_modal": {
+      "title": "选择特色图片"
+    },
+    "media_modal": {
+      "title": "选择媒体"
+    },
+    "design_settings": {
+      "title": "设置"
+    }
   },
   "page_media": {
-    "upload_btn_text": "点击或拖拽至此上传媒体文件",
-    "upload_btn_tips": "支持单个或批量媒体文件上传。"
+    "upload_dragger_btn_text": "点击或拖拽至此上传媒体文件",
+    "upload_multiple_btn_tips": "支持单个或批量媒体文件上传。",
+    "upload_btn_text": "点击上传媒体文件",
+    "upload_error": "上传失败！",
+    "image_crop": {
+      "replace_true": "替换原始文件",
+      "replace_false": "创建新媒体文件",
+      "result_title": "结果",
+      "result_left": "左",
+      "result_top": "上",
+      "result_width": "宽度",
+      "result_height": "高度"
+    },
+    "select_image": {
+      "original": "原图",
+      "thumbnail": "缩略图",
+      "scaled": "缩放图",
+      "medium": "中等图",
+      "medium_large": "中等大图",
+      "large": "大图"
+    },
+    "file_name": "文件名",
+    "mime_type": "媒体类型",
+    "file_size": "媒体大小",
+    "image_width": "图片宽度",
+    "image_height": "图片高度",
+    "full_path": "媒体地址",
+    "created_at": "创建时间"
+  },
+  "media": {
+    "search_placeholder": "输入\"文件名\"搜索"
   }
 }

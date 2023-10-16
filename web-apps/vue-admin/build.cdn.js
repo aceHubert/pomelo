@@ -7,7 +7,7 @@ const fs = require('fs');
 const resolve = require('resolve');
 
 const cdnConfig = {
-  publicPath: 'https://unpkg.lejian.com',
+  publicPath: 'https://unpkg.zhimg.com',
   links: [
     {
       packageName: 'jsoneditor',

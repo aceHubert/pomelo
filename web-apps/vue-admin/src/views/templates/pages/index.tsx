@@ -5,7 +5,7 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
 import { Select, Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { TemplateStatus } from '@pomelo/shared-web';
+import { OptionPresetKeys, TemplateStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
 import { usePageApi, TemplateType } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
@@ -40,7 +40,7 @@ export default defineComponent({
     const locationMixin = useLocationMixin();
     const templateMixin = useTemplateMixin();
     const userManager = useUserManager();
-    const siteUrl = useOptions('home');
+    const homeUrl = useOptions(OptionPresetKeys.Home);
     const pageApi = usePageApi();
 
     const currentUser = ref<User>();
@@ -148,7 +148,7 @@ export default defineComponent({
 
     const columns = computed(() => {
       const getViewUrl = (record: PagedPageTemplateItem) => {
-        const baseUrl = trailingSlash(siteUrl.value || '/');
+        const baseUrl = trailingSlash(homeUrl.value || '/');
         // TODO: config format url
 
         return baseUrl + `${record.id}#PREVIEW`;
@@ -315,7 +315,7 @@ export default defineComponent({
                 >
                   {record.title}
                   {titleSuffixs.length > 0 && (
-                    <span class="text--secondary font-weight-bold">{` - ${titleSuffixs.join(', ')}`}</span>
+                    <span class="warning--text font-weight-bold">{` - ${titleSuffixs.join(', ')}`}</span>
                   )}
                 </router-link>
                 <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>

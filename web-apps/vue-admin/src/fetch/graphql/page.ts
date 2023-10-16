@@ -104,7 +104,7 @@ export const usePageApi = defineRegistApi('template_page', {
   ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { id: number; metaKeys?: string[] }>,
   // 创建表单
   create: gql`
-    mutation createPage($newPageTemplate: NewPageTemplateInput!) {
+    mutation createPage($newPageTemplate: NewPageTemplateInput! = {}) {
       page: createPageTempate(model: $newPageTemplate) {
         id
         name

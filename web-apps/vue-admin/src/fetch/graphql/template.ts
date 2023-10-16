@@ -9,7 +9,7 @@ import type { Paged } from './types';
 export enum TemplateType {
   Post = 'Post',
   Page = 'Page',
-  Fomr = 'Form',
+  Form = 'Form',
 }
 
 export interface PagedTemplateArgs {

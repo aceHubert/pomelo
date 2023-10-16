@@ -1,5 +1,6 @@
 {
   "name": "English",
+  "description": "English Language Pack",
   "site_title": "Pomelo",
   "common": {
     "btn_text": {
@@ -22,7 +23,11 @@
       "yes": "Yes",
       "in_operation": "In operation",
       "view": "View",
-      "preview": "Preview"
+      "preview": "Preview",
+      "select": "Select",
+      "skip": "Skip",
+      "crop": "Crop",
+      "close": "Close"
     },
     "btn_tips": {
       "go_back": "Go back"
@@ -110,51 +115,52 @@
       "index": "All Modules",
       "details": "Details"
     },
-    "settings": "Settings"
+    "settings": "Settings",
+    "medias": "All Medias"
   },
   "components": {
-    "search_form": {
-      "row_count": "{count} Row(s)",
-      "keyword_placeholder": "Search",
-      "bulk_action_placeholder": "Bulk operations",
-      "bulk_apply_btn_text": "Apply",
-      "bulk_apply_btn_tips": "Exec bulk operation"
-    },
-    "async_table": {
-      "selected": "Checked",
-      "selected_row_count": "{count} Row(s)",
-      "sum": "Sum",
-      "clear": "Clear"
-    },
-    "avatar_dropdown": {
-      "dialog": {
-        "signout": {
-          "title": "@:common.dialog.title.tips",
-          "content": "Are you sure you want to exit?",
-          "ok_text": "@:common.btn_text.ok",
-          "cancel_text": "@:common.btn_text.no"
+    "layout_admin": {
+      "sider_drawer": {
+        "title": "Menu",
+        "collapse_sidebar": "Collapse sidebar",
+        "expand_sidebar": "Expand sidebar"
+      },
+      "search_form": {
+        "row_count": "{count} Row(s)",
+        "keyword_placeholder": "Search",
+        "bulk_action_placeholder": "Bulk operations",
+        "bulk_apply_btn_text": "Apply",
+        "bulk_apply_btn_tips": "Exec bulk operation"
+      },
+      "async_table": {
+        "selected": "Checked",
+        "selected_row_count": "{count} Row(s)",
+        "sum": "Sum",
+        "clear": "Clear"
+      },
+      "avatar_dropdown": {
+        "dialog": {
+          "signout": {
+            "title": "@:common.dialog.title.tips",
+            "content": "Are you sure you want to exit?",
+            "ok_text": "@:common.btn_text.ok",
+            "cancel_text": "@:common.btn_text.no"
+          }
+        },
+        "user": {
+          "profile": "Profile",
+          "settings": "Settings",
+          "signout": "Sign out"
         }
       },
-      "user": {
-        "profile": "Profile",
-        "settings": "Settings",
-        "signout": "Sign out"
+      "message_dropdown": {
+        "item": {
+          "view_link_text": "View",
+          "make_as_read_link_text": "Make as read"
+        },
+        "no_messasge_text": "No new messages!",
+        "show_more_btn_text": "Show more"
       }
-    },
-    "message_dropdown": {
-      "item": {
-        "view_link_text": "View",
-        "make_as_read_link_text": "Make as read"
-      },
-      "no_messasge_text": "No new messages!",
-      "show_more_btn_text": "Show more"
-    }
-  },
-  "layout_default": {
-    "sider_drawer": {
-      "title": "Menu",
-      "collapse_sidebar": "Collapse sidebar",
-      "expand_sidebar": "Expand sidebar"
     }
   },
   "page_session_timeout": {
@@ -188,7 +194,7 @@
     "title_required": "Title is required!",
     "name_label": "Customized route",
     "name_placeholder": "Input customized route",
-    "content_placeholder": "Please edit the content",
+    "content_placeholder": "Add content",
     "author_label": "Author",
     "category_label": "Category",
     "category_placeholder": "Select a category (or type a keywork to search)",
@@ -362,7 +368,6 @@
       "review_reject": "Content is not approved to publish"
     },
     "design_sider": {
-      "settings_title": "Settings",
       "close_settings_title": "Close"
     },
     "date_label": "Date",
@@ -378,10 +383,48 @@
     "visibility_label": "Visibility",
     "publish_set_label": "Publish",
     "feature_image_tips": "Recommended size: 1980x300(px)",
-    "set_fixed_link_btn_text": "Update Fixed Link"
+    "set_fixed_link_btn_text": "Update Fixed Link",
+    "feature_image_modal": {
+      "title": "Select featured image"
+    },
+    "media_modal": {
+      "title": "Select media"
+    },
+    "design_settings": {
+      "title": "Settings"
+    }
   },
   "page_media": {
-    "upload_btn_text": "Click or drag file to this area to upload",
-    "upload_btn_tips": "Support for a single or bulk upload."
+    "upload_dragger_btn_text": "Click or drag file to this area to upload",
+    "upload_multiple_btn_tips": "Support for a single or bulk upload.",
+    "upload_btn_text": "Click to upload media file",
+    "upload_error": "Upload failed!",
+    "image_crop": {
+      "replace_true": "Replace original file",
+      "replace_false": "Create new media files",
+      "result_title": "Result",
+      "result_left": "Left",
+      "result_top": "Top",
+      "result_width": "Width",
+      "result_height": "Height"
+    },
+    "select_image": {
+      "original": "Original",
+      "thumbnail": "Thumbnail",
+      "scaled": "Scaled",
+      "medium": "Medium",
+      "medium_large": "Medium Large",
+      "large": "Large"
+    },
+    "file_name": "File name",
+    "mime_type": "Mimetype",
+    "file_size": "File size",
+    "image_width": "Width",
+    "image_height": "Height",
+    "full_path": "URI",
+    "created_at": "Creation time"
+  },
+  "media": {
+    "search_placeholder": "Search for \"file name\""
   }
 }

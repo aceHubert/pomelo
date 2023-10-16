@@ -1,9 +1,24 @@
 import { defineComponent, ref, watch } from '@vue/composition-api';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { Layout, Drawer, Tooltip, Card, Spin, Icon, Button, Dropdown, Menu, Row, Col, Space } from 'ant-design-vue';
+import {
+  Layout,
+  Drawer,
+  Tooltip,
+  Popover,
+  Card,
+  Spin,
+  Icon,
+  Button,
+  Dropdown,
+  Menu,
+  Row,
+  Col,
+  Space,
+} from 'ant-design-vue';
 import { TemplateStatus } from '@pomelo/shared-web';
 import { useI18n } from '@/hooks';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
+import IconMore from '@/assets/icons/more.svg?inline';
 import './index.less';
 
 export type ActionStatus = {
@@ -167,7 +182,7 @@ export default defineComponent({
               <Col flex={1} class={['text-right']}>
                 {props.actionCapability.operate && (
                   <Space>
-                    {slots.rightPrefixAction?.()}
+                    {slots.actions?.()}
                     {props.status === TemplateStatus.Pending
                       ? // Pending 状态
                         props.actionCapability.publish && !props.isSelfContent
@@ -385,14 +400,13 @@ export default defineComponent({
                             </Button>
                           ),
                         ]}
-                    {slots.rightMiddleAction?.()}
-                    {slots.siderContent && (
+                    {slots.settingsContent && (
                       <Tooltip
                         placement="bottom"
                         title={
                           !siderCollapsedRef.value
                             ? i18n.tv('page_templates.design_sider.close_settings_title', '关闭设置')
-                            : props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')
+                            : props.siderTitle || i18n.tv('page_templates.design_settings.title', '设置')
                         }
                       >
                         <Button
@@ -404,7 +418,16 @@ export default defineComponent({
                         </Button>
                       </Tooltip>
                     )}
-                    {slots.rightAppendAction?.()}
+                    {slots.extraContent && (
+                      <Popover placement="bottomRight">
+                        <Icon
+                          component={IconMore}
+                          class="font-size-xl"
+                          style="vertical-align: middle; cursor:pointer"
+                        />
+                        <template slot="content">{slots.extraContent()}</template>
+                      </Popover>
+                    )}
                   </Space>
                 )}
               </Col>
@@ -424,7 +447,7 @@ export default defineComponent({
             placement="right"
             width={siderWidthRef.value}
             maskClosable
-            title={props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')}
+            title={props.siderTitle || i18n.tv('page_templates.design_settings.title', '设置')}
             wrapStyle={{
               top: `${headerHeightRef.value - 1}px`,
               height: `calc(100vh - ${headerHeightRef.value}px)`,
@@ -450,7 +473,7 @@ export default defineComponent({
               }}
               style="border-radius:0; height:100%;"
             >
-              {slots.siderContent?.()}
+              {slots.settingsContent?.()}
             </Card>
           </Drawer>
         ) : null,
@@ -462,7 +485,7 @@ export default defineComponent({
           collapsed={useDrawer ? false : siderCollapsedRef.value}
         >
           <Card
-            title={props.siderTitle || i18n.tv('page_templates.design_sider.settings_title', '设置')}
+            title={props.siderTitle || i18n.tv('page_templates.design_settings.title', '设置')}
             bordered={false}
             headStyle={{ flex: 'none' }}
             bodyStyle={{ padding: '10px 0', flex: '1 1 auto', overflow: 'auto' }}
@@ -473,7 +496,7 @@ export default defineComponent({
               <Icon type="close" onClick={() => (siderCollapsedRef.value = !siderCollapsedRef.value)}></Icon>
             </template>
 
-            {slots.siderContent?.()}
+            {slots.settingsContent?.()}
           </Card>
         </Layout.Sider>,
       ];
@@ -488,7 +511,7 @@ export default defineComponent({
         {renderHeader()}
         <Layout>
           {renderContent()}
-          {slots.siderContent && renderSider()}
+          {slots.settingsContent && renderSider()}
         </Layout>
       </Layout>
     );

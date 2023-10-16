@@ -1,20 +1,8 @@
 import { debounce } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch, toRef, onMounted } from '@vue/composition-api';
-import { trailingSlash, isAbsoluteUrl, equals } from '@ace-util/core';
+import { trailingSlash, equals } from '@ace-util/core';
 import { useRouter } from 'vue2-helpers/vue-router';
-import {
-  Button,
-  Checkbox,
-  Input,
-  Form,
-  Select,
-  TreeSelect,
-  Divider,
-  Collapse,
-  Upload,
-  Icon,
-  Space,
-} from 'ant-design-vue';
+import { Button, Checkbox, Input, Form, Select, TreeSelect, Divider, Collapse, Icon, Space } from 'ant-design-vue';
 import { expose } from 'antdv-layout-pro/shared';
 import {
   OptionPresetKeys,
@@ -30,6 +18,7 @@ import { Modal, message } from '@/components';
 import { usePostApi } from '@/fetch/graphql';
 import { useDeviceMixin } from '@/mixins';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
+import { MediaList } from '../../media/components';
 import { DesignLayout, DocumentEditor } from '../components';
 import { useDesignMixin } from '../mixins/design.mixin';
 import classes from './design.module.less';
@@ -72,12 +61,11 @@ export default defineComponent({
     const designMixin = useDesignMixin();
     const deviceMixin = useDeviceMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
-    const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const postApi = usePostApi();
 
     // #region data scopes 新增、修改、查询
     const siderCollapsedRef = ref(true);
-    const contentFrameworkRef = ref<SchemaFramework>('HTML');
+    const contentFrameworkRef = ref<Exclude<SchemaFramework, 'FORMILYJS'>>('HTML');
 
     const postData = reactive<
       Pick<PostTemplateModel, 'title' | 'excerpt' | 'status'> & {
@@ -100,13 +88,9 @@ export default defineComponent({
 
     const cachedPostData = ref<typeof postData>();
 
-    const featureImageUploadingRef = ref(false);
-    const featureDisplayImageRef = computed(() => {
-      const value = postData.featureImage;
-      if (!value) return undefined;
-      if (isAbsoluteUrl(value)) return value;
-
-      return trailingSlash(siteUrl.value) + (value.startsWith('/') ? value.slice(1) : value);
+    const featureImage = reactive({
+      modalVisible: false,
+      selected: '',
     });
 
     // fixed link
@@ -353,9 +337,6 @@ export default defineComponent({
 
     // #endregion
 
-    // 上传图片
-    const handleUploadRequest = designMixin.getCustomUploadRequest('templates/post_');
-
     onMounted(() => {
       if (deviceMixin.isDesktop) {
         siderCollapsedRef.value = false;
@@ -371,7 +352,16 @@ export default defineComponent({
         siderCollapsed={siderCollapsedRef.value}
         {...{
           scopedSlots: {
-            siderContent: () => (
+            actions: () => [
+              <a
+                href={`${fixedLinkRef.value}#PREVIEW`}
+                class="primary--text hover:primary-dark--text"
+                target="preview-route"
+              >
+                {i18n.tv('common.btn_text.preview', '预览')}{' '}
+              </a>,
+            ],
+            settingsContent: () => (
               <Form labelAlign="left" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
                 <Form.Item label={i18n.tv('page_templates.visibility_label', '可见性')} class="px-3">
                   TODO
@@ -389,7 +379,7 @@ export default defineComponent({
                   {!!fixedLinkRef.value && (
                     <Collapse.Panel header={i18n.tv('page_templates.fixed_link_label', '固定链接')}>
                       <p>{i18n.tv('page_templates.posts.design.view', '查看文章')}</p>
-                      <a href={fixedLinkRef.value} target="preview-route">
+                      <a href={`${fixedLinkRef.value}#PREVIEW`} target="preview-route">
                         {fixedLinkRef.value}
                         <Icon type="link" class="ml-1" />
                       </a>
@@ -426,35 +416,16 @@ export default defineComponent({
                     ></Select>
                   </Collapse.Panel>
                   <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>
-                    <Upload
-                      name="feature-image"
-                      listType="picture-card"
-                      class={classes.featureImageUploader}
-                      accept="image/png, image/jpeg"
-                      showUploadList={false}
-                      disabled={featureImageUploadingRef.value}
-                      method="PUT"
-                      customRequest={(options: any) => handleUploadRequest(options)}
-                      onChange={({ file: { status, response } }) => {
-                        if (status === 'uploading') {
-                          featureImageUploadingRef.value = true;
-                        } else if (status === 'done') {
-                          postData.featureImage = response.path || response.fullPath || response?.url;
-                          featureImageUploadingRef.value = false;
-                        } else {
-                          featureImageUploadingRef.value = false;
-                        }
-                      }}
-                    >
-                      {featureDisplayImageRef.value ? (
+                    <div class={classes.featureImageSelector} onClick={() => (featureImage.modalVisible = true)}>
+                      {postData.featureImage ? (
                         <div class={classes.featureImageCover}>
                           <img
-                            src={featureDisplayImageRef.value}
+                            src={postData.featureImage}
                             alt="feature-image"
                             style="object-fit: contain; width: 100%; max-height: 120px;"
                           />
                           <Space class={classes.featureImageCoverActions}>
-                            <Button shape="circle" icon="edit" />
+                            <Button shape="circle" icon="select" />
                             <Button
                               shape="circle"
                               icon="delete"
@@ -463,17 +434,37 @@ export default defineComponent({
                           </Space>
                         </div>
                       ) : (
-                        <div>
-                          <Icon type={featureImageUploadingRef.value ? 'loading' : 'plus'} />
+                        <div class={classes.featureImageAdd}>
+                          <Icon type="plus" />
                           <div class="text--secondary">
                             {i18n.tv('page_templates.upload_feature_image_label', '设置特色图片')}
                           </div>
                         </div>
                       )}
-                    </Upload>
+                    </div>
                     <p class="font-size-xs text--secondary">
                       {i18n.tv('page_templates.feature_image_tips', '推荐尺寸：1980x300(px)')}
                     </p>
+                    <Modal
+                      title={i18n.tv('page_templates.feature_image_modal.title', '选择特色图片')}
+                      visible={featureImage.modalVisible}
+                      width={932}
+                      footer={null}
+                      onCancel={() => (featureImage.modalVisible = false)}
+                    >
+                      <MediaList
+                        selectable
+                        accept="image/png,image/jpg"
+                        size="small"
+                        pageSize={9}
+                        showSizeChanger={false}
+                        objectPrefixKey="templates/post_"
+                        onSelect={(path) => {
+                          postData.featureImage = path;
+                          featureImage.modalVisible = false;
+                        }}
+                      />
+                    </Modal>
                   </Collapse.Panel>
                   <Collapse.Panel header={i18n.tv('page_templates.posts.excerpt_label', '摘要')}>
                     <p>{i18n.tv('page_templates.write_excerpt_label', '撰写摘要（选填）')}</p>
@@ -521,9 +512,10 @@ export default defineComponent({
         {contentFrameworkRef.value === 'HTML' ? (
           <DocumentEditor
             {...{
-              props: {
+              attrs: {
                 title: postData.title,
                 value: postData.content,
+                width: postData.templatePageType === TemplatePageType.FullWidth ? '100%' : '1180px',
                 disabled: actionStatus.processing,
               },
               on: {

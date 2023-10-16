@@ -84,7 +84,7 @@ export const useFormApi = defineRegistApi('template_form', {
   ` as TypedQueryDocumentNode<{ form?: FormTempaleModel }, { id: number; metaKeys?: string[] }>,
   // 创建表单
   create: gql`
-    mutation createForm($newFormTemplate: NewFormTemplateInput!) {
+    mutation createForm($newFormTemplate: NewFormTemplateInput! = {}) {
       form: createFormTemplate(model: $newFormTemplate) {
         id
         title

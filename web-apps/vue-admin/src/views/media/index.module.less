@@ -1,3 +1,5 @@
+@import '@pomelo/theme/lib/mixins/index';
+
 .list {
   margin-left: -8px;
   margin-right: -8px;
@@ -45,6 +47,14 @@
   @media screen and (max-width: 540Px) {
     &__item {
       flex: 0 0 50%;
+    }
+  }
+}
+
+.drawer{
+  :global{
+    .@{ant-prefix}-descriptions-item-content{
+      .textOverflowMulti(2);
     }
   }
 }

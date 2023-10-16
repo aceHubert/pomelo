@@ -5,7 +5,7 @@ import { trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { TreeSelect, Select, Card, Descriptions, Popconfirm, Spin, Space } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-web';
+import { OptionPresetKeys, TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
 import { usePostApi, TemplateType } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
@@ -39,7 +39,7 @@ export default defineComponent({
     const route = useRoute();
     const i18n = useI18n();
     const userManager = useUserManager();
-    const siteUrl = useOptions('home');
+    const homeUrl = useOptions(OptionPresetKeys.Home);
     const locationMixin = useLocationMixin();
     const templateMixin = useTemplateMixin();
     const deviceMixin = useDeviceMixin();
@@ -167,7 +167,7 @@ export default defineComponent({
 
     const columns = computed(() => {
       const getViewUrl = (record: PagedPostTemplateItem) => {
-        const baseUrl = trailingSlash(siteUrl.value || '/');
+        const baseUrl = trailingSlash(homeUrl.value || '/');
         // TODO: config format url
 
         return baseUrl + `p/${record.id}#PREVIEW`;
@@ -358,7 +358,7 @@ export default defineComponent({
                 >
                   {record.title}
                   {titleSuffixs.length > 0 && (
-                    <span class="text--secondary font-weight-bold">{` - ${titleSuffixs.join(', ')}`}</span>
+                    <span class="warning--text font-weight-bold">{` - ${titleSuffixs.join(', ')}`}</span>
                   )}
                 </router-link>
                 <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>

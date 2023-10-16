@@ -55,7 +55,6 @@ export const PreviewWidget = defineComponent({
             height: '100%',
             width: '100%',
             overflowY: 'auto',
-            backgroundColor: screen.value.type === ScreenType.Mobile ? '#f1f3f7' : '#fff',
           }}
         >
           {screen.value.type === ScreenType.Mobile ? (

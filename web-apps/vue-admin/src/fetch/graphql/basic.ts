@@ -54,7 +54,7 @@ export const useBasicApi = defineRegistApi('basic', {
   // 消息订阅
   onMessage: gql`
     subscription OnMessage {
-      message {
+      message: onMessage {
         ... on EventMessageSubscriotion {
           eventName
         }

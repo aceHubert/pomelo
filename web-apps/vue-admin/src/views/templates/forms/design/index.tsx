@@ -21,7 +21,7 @@ import {
   HistoryWidget,
 } from '@formily/antdv-designable';
 import { SettingsForm } from '@formily/antdv-settings-form';
-import { Button, Divider, Collapse, Icon, Form, Input, Upload, Space } from 'ant-design-vue';
+import { Button, Divider, Collapse, Icon, Form, Input, Space } from 'ant-design-vue';
 import { useConfigProvider, expose } from 'antdv-layout-pro/shared';
 import { Theme } from 'antdv-layout-pro/types';
 import {
@@ -32,10 +32,11 @@ import {
   toFrameworkContent,
   type SchemaFramework,
 } from '@pomelo/shared-web';
-import { trailingSlash, isAbsoluteUrl, equals, warn } from '@ace-util/core';
+import { trailingSlash, equals, warn } from '@ace-util/core';
 import { Modal, message } from '@/components';
 import { useFormApi } from '@/fetch/graphql';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
+import { MediaList } from '../../../media/components';
 import { DesignLayout } from '../../components';
 import { useDesignMixin } from '../../mixins/design.mixin';
 import { useFormilyMixin } from '../../mixins/formily.mixin';
@@ -113,7 +114,6 @@ export default defineComponent({
     const userManager = useUserManager();
     const designMixin = useDesignMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
-    const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const formApi = useFormApi();
 
     GlobalRegistry.setDesignerLanguage(i18n.locale || 'en-US');
@@ -128,7 +128,7 @@ export default defineComponent({
 
     // #region data scopes 新增、修改、查询
     const siderCollapsedRef = ref(true);
-    const schemaFrameworkRef = ref<SchemaFramework>('FORMILYJS');
+    const schemaFrameworkRef = ref<Exclude<SchemaFramework, 'HTML'>>('FORMILYJS');
 
     const formData = reactive<
       Pick<FormTempaleModel, 'title' | 'content' | 'status'> & {
@@ -150,13 +150,9 @@ export default defineComponent({
     });
     const cachedFormData = ref<typeof formData>();
 
-    const featureImageUploadingRef = ref(false);
-    const featureDisplayImageRef = computed(() => {
-      const value = formData.featureImage;
-      if (!value) return undefined;
-      if (isAbsoluteUrl(value)) return value;
-
-      return trailingSlash(siteUrl.value) + (value.startsWith('/') ? value.slice(1) : value);
+    const featureImage = reactive({
+      modalVisible: false,
+      selected: '',
     });
 
     // fixed link
@@ -256,7 +252,7 @@ export default defineComponent({
       if (schemaFrameworkRef.value === 'FORMILYJS') {
         // treenode changed
         formilyMixin.addTreeNodeChangedEffect((payload) => {
-          warn(process.env.NODE_ENV === 'production', payload.type);
+          warn(process.env.NODE_ENV === 'production', `debugger ${payload.type}`);
           actionStatus.changed = true;
         });
       }
@@ -423,7 +419,16 @@ export default defineComponent({
         siderTitle={i18n.tv('page_templates.forms.design.sider_title', '表单设置') as string}
         {...{
           scopedSlots: {
-            siderContent: () => (
+            actions: () => [
+              <a
+                href={`${fixedLinkRef.value}#PREVIEW`}
+                class="primary--text hover:primary-dark--text"
+                target="preview-route"
+              >
+                {i18n.tv('common.btn_text.preview', '预览')}{' '}
+              </a>,
+            ],
+            settingsContent: () => (
               <Form labelAlign="left" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
                 <Form.Item label={i18n.tv('page_templates.visibility_label', '可见性')} class="px-3">
                   TODO
@@ -476,35 +481,16 @@ export default defineComponent({
                     </Collapse.Panel>
                   )}
                   <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>
-                    <Upload
-                      name="feature-image"
-                      listType="picture-card"
-                      class={classes.featureImageUploader}
-                      accept="image/png, image/jpeg"
-                      showUploadList={false}
-                      disabled={featureImageUploadingRef.value}
-                      method="PUT"
-                      customRequest={(options: any) => handleUploadRequest(options)}
-                      onChange={({ file: { status, response } }) => {
-                        if (status === 'uploading') {
-                          featureImageUploadingRef.value = true;
-                        } else if (status === 'done') {
-                          formData.featureImage = response.path || response.fullPath || response?.url;
-                          featureImageUploadingRef.value = false;
-                        } else {
-                          featureImageUploadingRef.value = false;
-                        }
-                      }}
-                    >
-                      {featureDisplayImageRef.value ? (
+                    <div class={classes.featureImageSelector} onClick={() => (featureImage.modalVisible = true)}>
+                      {formData.featureImage ? (
                         <div class={classes.featureImageCover}>
                           <img
-                            src={featureDisplayImageRef.value}
+                            src={formData.featureImage}
                             alt="feature-image"
                             style="object-fit: contain; width: 100%; max-height: 120px;"
                           />
                           <Space class={classes.featureImageCoverActions}>
-                            <Button shape="circle" icon="edit" />
+                            <Button shape="circle" icon="select" />
                             <Button
                               shape="circle"
                               icon="delete"
@@ -513,17 +499,37 @@ export default defineComponent({
                           </Space>
                         </div>
                       ) : (
-                        <div>
-                          <Icon type={featureImageUploadingRef.value ? 'loading' : 'plus'} />
+                        <div class={classes.featureImageAdd}>
+                          <Icon type="plus" />
                           <div class="text--secondary">
                             {i18n.tv('page_templates.upload_feature_image_label', '设置特色图片')}
                           </div>
                         </div>
                       )}
-                    </Upload>
+                    </div>
                     <p class="font-size-xs text--secondary">
                       {i18n.tv('page_templates.feature_image_tips', '推荐尺寸：1980x300(px)')}
                     </p>
+                    <Modal
+                      title={i18n.tv('page_templates.feature_image_modal.title', '选择特色图片')}
+                      visible={featureImage.modalVisible}
+                      width={932}
+                      footer={null}
+                      onCancel={() => (featureImage.modalVisible = false)}
+                    >
+                      <MediaList
+                        selectable
+                        accept="image/png,image/jpg"
+                        size="small"
+                        pageSize={9}
+                        showSizeChanger={false}
+                        objectPrefixKey="templates/post_"
+                        onSelect={(path) => {
+                          formData.featureImage = path;
+                          featureImage.modalVisible = false;
+                        }}
+                      />
+                    </Modal>
                   </Collapse.Panel>
                   <Collapse.Panel header={i18n.tv('page_templates.title_label', '标题')}>
                     <Input

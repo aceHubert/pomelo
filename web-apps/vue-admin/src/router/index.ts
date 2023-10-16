@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueMeta from 'vue-meta';
 import { createRouter } from 'vue2-helpers/vue-router';
 import { RouterChild } from '@/layouts/components';
+import { Modal } from '@/components';
 
 // Types
 import type { MetaInfo, MetaInfoComputed } from 'vue-meta/types/vue-meta';
@@ -53,7 +54,7 @@ export const router = createRouter({
         },
         {
           name: 'form-add',
-          path: 'add',
+          path: 'create',
           component: () => import(/* webpackChunkName: "forms" */ '../views/templates/forms/design'),
         },
         {
@@ -75,7 +76,7 @@ export const router = createRouter({
         },
         {
           name: 'page-add',
-          path: 'add',
+          path: 'create',
           component: () => import(/* webpackChunkName: "pages" */ '../views/templates/pages/design'),
         },
         {
@@ -97,7 +98,7 @@ export const router = createRouter({
         },
         {
           name: 'post-add',
-          path: 'add',
+          path: 'create',
           component: () => import(/* webpackChunkName: "posts" */ '../views/templates/posts/design'),
         },
         {
@@ -119,7 +120,7 @@ export const router = createRouter({
         },
         {
           name: 'data-scope-add',
-          path: 'add',
+          path: 'create',
           component: () => import(/* webpackChunkName: "data-scope" */ '../views/templates/data-scope/design'),
         },
         {
@@ -168,6 +169,7 @@ export const router = createRouter({
 const AnonymousRouteNames = ['signin', 'session-timeout'];
 
 router.beforeEach((to, from, next) => {
+  Modal.destroyAll();
   const userManager = router.app.$userManager;
   if (to.name === 'signout') {
     userManager.signout();

@@ -1,0 +1,143 @@
+{
+  "name": "简体中文",
+  "description": "简体中文翻译文件包",
+  "site_title": "Pomelo",
+  "common": {
+    "btn_text": {
+      "ok": "是",
+      "yes": "是",
+      "no": "否",
+      "cancel": "取消",
+      "confirm": "确认",
+      "close": "关闭",
+      "create": "新建",
+      "edit": "编辑",
+      "update": "修改",
+      "save": "保存",
+      "delete": "删除",
+      "search": "搜索",
+      "submit": "提交",
+      "reset": "重置",
+      "expand": "展开",
+      "collapse": "收起",
+      "upload": "上传",
+      "back_to_home": "返回主页",
+      "in_operation": "操作中",
+      "view": "查看",
+      "preview": "预览",
+      "select": "选择",
+      "skip": "跳过",
+      "crop": "裁切"
+    },
+    "btn_tips": {
+      "go_back": "返回上一级"
+    },
+    "dialog": {
+      "title": {
+        "tips": "提示",
+        "comfirm": "确认"
+      },
+      "btn": {
+        "ok": "@:common.btn_text.ok",
+        "yes": "@:common.btn_text.yes",
+        "no": "@:common.btn_text.no",
+        "cancel": "@:common.btn_text.cancel",
+        "confirm": "@:common.btn_text.confirm"
+      }
+    },
+    "placeholder": {
+      "input": "请输入{field}",
+      "choose": "请选择{field}",
+      "search": "\"{field}\"模糊搜索"
+    },
+    "search": {
+      "keyword_placeholder": "搜索",
+      "bulk_delete_action_text": "删除"
+    },
+    "tips": {
+      "early_morning": "早上好",
+      "morning": "上午好",
+      "noon": "中午好",
+      "afternoon": "下午好",
+      "evening": "晚上好",
+      "loading_text": "加载中...",
+      "theme": "主题"
+    },
+    "error": {
+      "unauthorized": "抱歉，您没有权限访问此站点。",
+      "page_not_found": "页面未找到！",
+      "internal_error": "系统错误，请稍后重试！",
+      "refresh_token_required": "没有提供可用于刷新的token！",
+      "no_token_provide": "没有提供token！",
+      "no_capability": "抱歉，您没有权限操作此页面！",
+      "load_module_failed": "模块加载失败！",
+      "bulk_row_select_reqrired": "请选择至少一行数据！",
+      "delete_faild": {
+        "default": "删除失败！",
+        "with_message": "删除失败，错误：{message}!"
+      },
+      "bluk_apply_faild": {
+        "default": "批量操作失败!",
+        "with_message": "批量操作失败，错误：{message}!"
+      }
+    }
+  },
+  "components": {
+    "layout_admin": {
+      "sider_drawer": {
+        "title": "菜单",
+        "collapse_sidebar": "折叠",
+        "expand_sidebar": "展开"
+      }
+    },
+    "search_form": {
+      "keyword_placeholder": "搜索",
+      "row_count": "{count} 行",
+      "bulk_action_placeholder": "批量操作",
+      "bulk_apply_btn_tips": "执行批量操作",
+      "bulk_apply_btn_text": "应用"
+    },
+    "async_table": {
+      "sum": "总数",
+      "selected": "选中",
+      "selected_row_count": "{count} 行",
+      "clear": "清除"
+    },
+    "avatar_dropdown": {
+      "user": {
+        "profile": "用户信息",
+        "settings": "设置",
+        "signout": "退出登录"
+      },
+      "dialog": {
+        "signout": {
+          "title": "@:common.dialog.title.tips",
+          "content": "确认退出吗？",
+          "ok_text": "@:common.btn_text.ok",
+          "cancel_text": "@:common.btn_text.no"
+        }
+      }
+    },
+    "message_dropdown": {
+      "item": {
+        "view_link_text": "查看",
+        "make_as_read_link_text": "设置已读"
+      },
+      "no_messasge_text": "没有新消息！",
+      "show_more_btn_text": "查看更多"
+    }
+  },
+  "page_templates": {
+    "status_options": {
+      "all": "所有",
+      "draft": "草稿",
+      "pending": "待审核",
+      "publish": "已发布",
+      "private": "私有",
+      "future": "定时发布",
+      "trash": "回收站",
+      "self": "我的",
+      "all_not_include_trash_data_tooltip": "不包含在草稿箱中的数据"
+    }
+  }
+}

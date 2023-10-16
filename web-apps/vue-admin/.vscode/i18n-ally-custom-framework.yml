@@ -15,9 +15,8 @@ usageMatchRegex:
   # The following example shows how to detect `t("your.i18n.keys")`
   # the `{key}` will be placed by a proper keypath matching regex,
   # you can ignore it and use your own matching rules as well
-  - "[^\\w\\d]tv\\(['\"`]({key})['\"`]"
-  - "[^\\w\\d]t\\(['\"`]({key})['\"`]"
-  - "[^\\w\\d]i18nRender\\(['\"`]({key})['\"`]"
+  - "(?:i18n(?:-\\w+)?[ (\n]\\s*(?:key)?path=|v-t=['\"`{]|(?:this\\.|\\$|i18n\\.|[^\\w\\d])(?:t|tc|te|tv)\\()\\s*['\"`]({key})['\"`]"
+  - "[^\\w\\d]i18nRender\\(\\s*['\"`]({key})['\"`]"
 
 
 # An array of strings containing refactor templates.

@@ -55,7 +55,8 @@ body {
   & {
     // set ckeditor theme
     --ck-color-text: @text-color;
-    --ck-color-toolbar-background: @body-background;
+    --ck-color-link-default: var(--color-link);
+    --ck-color-base-foreground: @body-background;
     --ck-color-base-background: @component-background;
     --ck-color-base-border: @border-color-base;
     --ck-color-labeled-field-label-background: @component-background;
@@ -67,6 +68,7 @@ body {
     --ck-color-button-on-background: #303030;
     --ck-color-button-on-hover-background: #434343;
     --ck-color-button-on-active-background: #434343;
+    --ck-color-button-on-disabled-background: @disabled-color-dark;
     --ck-color-split-button-hover-background: #262626;
     --ck-color-dropdown-panel-background: @component-background;
     --ck-color-dropdown-panel-border: @border-color-split;
@@ -86,6 +88,16 @@ body {
     --ck-focus-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-outer-shadow);
     --ck-focus-disabled-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-disabled-shadow);
     --ck-color-widget-blurred-border: @border-color-base;
+    --ck-color-panel-background: var(--ck-color-base-background);
+    --ck-color-panel-border: var(--ck-color-base-border);
+    --ck-color-toolbar-background: @body-background;
+    --ck-color-toolbar-border: var(--ck-color-base-border);
+    --ck-color-tooltip-background: var(--ck-color-base-text);
+    --ck-color-tooltip-text: @text-color;
+    --ck-color-block-toolbar-button: var(--ck-color-text);
+    --ck-color-resizer: var(--ck-color-focus-border);
+    --ck-clipboard-drop-target-color: var(--ck-color-focus-border);
+    --ck-color-widget-type-around-button-active: var(--ck-color-focus-border);
     // set dn-app
     --dn-brand: var(--theme-primary);
     --dn-brand-hovering: var(--theme-primary-lighten1);

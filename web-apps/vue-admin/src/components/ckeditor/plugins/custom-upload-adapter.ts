@@ -1,12 +1,26 @@
-export function ObsUploadAdapterPlugin(editor: any) {
-  const request = editor.config.get('obsUpload')?.request;
-  if (!request) {
-    return;
+import { Plugin } from 'ckeditor5/src/core';
+import { FileRepository, type FileLoader, type UploadAdapter, type UploadResponse } from 'ckeditor5/src/upload';
+
+export class CustomUploadAdapter extends Plugin {
+  static get requires() {
+    return [FileRepository];
   }
 
-  editor.plugins.get('FileRepository').createUploadAdapter = function (loader) {
-    return new Adapter(loader, request, editor.t.bind(editor));
-  };
+  static get pluginName() {
+    return 'CustomUploadAdapter';
+  }
+
+  init() {
+    // config.get return object if it is function
+    // so can't use get('customUpload.request')
+    const request = (this.editor.config.get('customUpload') as Record<string, any>)?.request;
+    if (!request) {
+      return;
+    }
+    // Register Adapter
+    this.editor.plugins.get('FileRepository').createUploadAdapter = (loader) =>
+      new Adapter(loader, request, this.editor.t);
+  }
 }
 
 /**
@@ -15,18 +29,15 @@ export function ObsUploadAdapterPlugin(editor: any) {
  * @private
  * @implements module:upload/filerepository~UploadAdapter
  */
-class Adapter {
-  loader: any;
+class Adapter implements UploadAdapter {
+  loader: FileLoader;
   request: (
     file: File,
     options: {
       onProgress: (event: { loaded: number; total: number }) => void;
       onAbortPossible: (abortCallback: () => void) => void;
     },
-  ) => Promise<{
-    default: string;
-    [key: string]: string;
-  }>;
+  ) => Promise<UploadResponse>;
   t: (key: string) => string;
   onAbort?: () => void;
 
@@ -34,7 +45,7 @@ class Adapter {
    * Creates a new adapter instance.
    *
    * @param {module:upload/filerepository~FileLoader} loader
-   * @param {module:upload/adapters/obs-upload-adapter~ObsUploadRequest} options
+   * @param {module:upload/adapters/upload-adapter~UploadRequest} request
    * @param {module:utils/locale~Locale#t} t
    */
   constructor(loader, request, t) {
@@ -47,7 +58,7 @@ class Adapter {
     /**
      * The configuration of the adapter.
      *
-     * @member {module:upload/adapters/obs-upload-adapter~ObsUploadRequest} #request
+     * @member {module:upload/adapters/upload-adapter~UploadRequest} #request
      */
     this.request = request;
     /**
@@ -66,7 +77,7 @@ class Adapter {
    */
   upload() {
     return this.loader.file.then((file) =>
-      this.request(file, {
+      this.request(file!, {
         onProgress: (event) => {
           this.loader.uploadTotal = event.total;
           this.loader.uploaded = event.loaded;

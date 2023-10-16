@@ -23,6 +23,19 @@ export interface File {
   mediumLarge?: ScaleImageFileData;
 }
 
+export interface ImageCropOptions {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  replace?: boolean;
+}
+
+export interface FileUploadOptions {
+  fileName?: string;
+  crop?: ImageCropOptions;
+}
+
 export interface PagedMediaArgs {
   keyword?: string;
   extensions?: string[];
@@ -46,8 +59,8 @@ import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/r
 
 export const useResApi = defineRegistApi('resources', {
   uploadFile: gql`
-    mutation uploadFile($file: Upload!) {
-      file: uploadFile(file: $file) {
+    mutation uploadFile($file: Upload!, $options: FileUploadOptionsInput) {
+      file: uploadFile(file: $file, options: $options) {
         id
         originalFileName
         fileName
@@ -89,7 +102,7 @@ export const useResApi = defineRegistApi('resources', {
         }
       }
     }
-  ` as TypedMutationDocumentNode<{ file: Media }, { file: File }>,
+  ` as TypedMutationDocumentNode<{ file: Media }, { file: File; options?: FileUploadOptions }>,
   uploadFiles: gql`
     mutation uploadFiles($files: [Upload!]!) {
       files: uploadFiles(files: $files) {
@@ -135,6 +148,51 @@ export const useResApi = defineRegistApi('resources', {
       }
     }
   ` as TypedMutationDocumentNode<{ files: Media[] }, { files: File[] }>,
+  cropImage: gql`
+    mutation cropImage($id: ID!, $options: ImageCropOptionsInput!) {
+      image: cropImage(id: $id, options: $options) {
+        id
+        originalFileName
+        fileName
+        path
+        fullPath
+        fileSize
+        width
+        height
+        extension
+        mimeType
+        createdAt
+        thumbnail {
+          fileName
+          path
+          fullPath
+          width
+          height
+        }
+        medium {
+          fileName
+          path
+          fullPath
+          width
+          height
+        }
+        mediumLarge {
+          fileName
+          path
+          fullPath
+          width
+          height
+        }
+        large {
+          fileName
+          path
+          fullPath
+          width
+          height
+        }
+      }
+    }
+  ` as TypedMutationDocumentNode<{ image: Media }, { id: string; options: ImageCropOptions }>,
   getPaged: gql`
     query getMedias($offset: Int, $limit: Int, $keyword: String, $extensions: [String!], $mimeTypes: [String!]) {
       medias: medias(
@@ -234,7 +292,6 @@ export const useResApi = defineRegistApi('resources', {
       }
     }
   ` as TypedQueryDocumentNode<{ media: Media }, { id: number }>,
-
   getObsUploadSignedUrl: gql`
     query gethwCloudObsUploadSignedUrl(
       $bucket: String!

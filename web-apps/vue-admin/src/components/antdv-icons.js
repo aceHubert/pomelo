@@ -22,6 +22,7 @@ export { default as EditOutline } from '@ant-design/icons/lib/outline/EditOutlin
 export { default as EditTwoTone } from '@ant-design/icons/lib/twotone/EditTwoTone';
 export { default as ExclamationCircleOutline } from '@ant-design/icons/lib/outline/ExclamationCircleOutline';
 export { default as ExclamationCircleFill } from '@ant-design/icons/lib/fill/ExclamationCircleFill';
+export { default as EyeOutline } from '@ant-design/icons/lib/outline/EyeOutline';
 export { default as FileOutline } from '@ant-design/icons/lib/outline/FileOutline';
 export { default as GlobalOutline } from '@ant-design/icons/lib/outline/GlobalOutline';
 export { default as InfoCircleOutline } from '@ant-design/icons/lib/outline/InfoCircleOutline';
@@ -42,9 +43,11 @@ export { default as MessageTwoTone } from '@ant-design/icons/lib/twotone/Message
 export { default as PaperClipOutline } from '@ant-design/icons/lib/outline/PaperClipOutline';
 export { default as PlusOutline } from '@ant-design/icons/lib/outline/PlusOutline';
 export { default as PlusSquareOutline } from '@ant-design/icons/lib/outline/PlusSquareOutline';
+export { default as ProfileOutline } from '@ant-design/icons/lib/outline/ProfileOutline';
 export { default as QuestionCircleOutline } from '@ant-design/icons/lib/outline/QuestionCircleOutline';
 export { default as RightOutline } from '@ant-design/icons/lib/outline/RightOutline';
 export { default as SearchOutline } from '@ant-design/icons/lib/outline/SearchOutline';
+export { default as SelectOutline } from '@ant-design/icons/lib/outline/SelectOutline';
 export { default as SettingOutline } from '@ant-design/icons/lib/outline/SettingOutline';
 export { default as SmileOutline } from '@ant-design/icons/lib/outline/SmileOutline';
 export { default as StarOutline } from '@ant-design/icons/lib/outline/StarOutline';

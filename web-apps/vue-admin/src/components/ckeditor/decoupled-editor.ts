@@ -13,9 +13,6 @@ import FontFamily from '@ckeditor/ckeditor5-font/src/fontfamily';
 import FontColor from '@ckeditor/ckeditor5-font/src/fontcolor';
 import FontBackgroundColor from '@ckeditor/ckeditor5-font/src/fontbackgroundcolor';
 import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote';
-import CKBox from '@ckeditor/ckeditor5-ckbox/src/ckbox';
-import CKFinder from '@ckeditor/ckeditor5-ckfinder/src/ckfinder';
-import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
 import Heading from '@ckeditor/ckeditor5-heading/src/heading';
 import Image from '@ckeditor/ckeditor5-image/src/image';
 import ImageInsert from '@ckeditor/ckeditor5-image/src/imageinsert';
@@ -24,6 +21,7 @@ import ImageResize from '@ckeditor/ckeditor5-image/src/imageresize';
 import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
+import PictureEditing from '@ckeditor/ckeditor5-image/src/pictureediting';
 import Indent from '@ckeditor/ckeditor5-indent/src/indent';
 import IndentBlock from '@ckeditor/ckeditor5-indent/src/indentblock';
 import Link from '@ckeditor/ckeditor5-link/src/link';
@@ -32,11 +30,16 @@ import ListProperties from '@ckeditor/ckeditor5-list/src/listproperties';
 import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed';
 import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
-import PictureEditing from '@ckeditor/ckeditor5-image/src/pictureediting';
 import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
+import CKBox from '@ckeditor/ckeditor5-ckbox/src/ckbox';
+import CKFinder from '@ckeditor/ckeditor5-ckfinder/src/ckfinder';
+import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
+import EasyImage from '@ckeditor/ckeditor5-easy-image/src/easyimage';
 import UploadAdapter from '@ckeditor/ckeditor5-adapter-ckfinder/src/uploadadapter';
+import { Gallery } from './plugins/gallery';
+import { CustomUploadAdapter } from './plugins/custom-upload-adapter';
 
 export default class DecoupledEditor extends DecoupledEditorBase {}
 
@@ -49,15 +52,12 @@ DecoupledEditor.builtinPlugins = [
   FontFamily,
   FontColor,
   FontBackgroundColor,
-  UploadAdapter,
   Autoformat,
   Bold,
   Italic,
   Strikethrough,
   Underline,
   BlockQuote,
-  CKBox,
-  CKFinder,
   Heading,
   Image,
   ImageInsert,
@@ -78,7 +78,13 @@ DecoupledEditor.builtinPlugins = [
   Table,
   TableToolbar,
   TextTransformation,
+  CKBox,
+  CKFinder,
   CloudServices,
+  UploadAdapter,
+  EasyImage,
+  Gallery,
+  CustomUploadAdapter,
 ];
 
 // Editor configuration.
@@ -86,13 +92,15 @@ DecoupledEditor.builtinPlugins = [
 DecoupledEditor.defaultConfig = {
   toolbar: {
     items: [
+      'undo',
+      `redo`,
+      '|',
       'heading',
       '|',
       'bold',
       'italic',
       'strikethrough',
       'underline',
-      'highlight',
       '|',
       'fontSize',
       'fontFamily',
@@ -112,12 +120,10 @@ DecoupledEditor.defaultConfig = {
       '|',
       'link',
       'blockQuote',
+      'gallery',
       'insertImage',
       'mediaEmbed',
       'insertTable',
-      '|',
-      'undo',
-      `redo`,
     ],
   },
   fontSize: {

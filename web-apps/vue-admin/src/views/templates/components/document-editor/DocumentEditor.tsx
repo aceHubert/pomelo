@@ -9,20 +9,14 @@ export type Editor = {
 };
 
 export type DocumentEditorProps = {
-  value?: string;
   title?: string;
-  placeholder?: string;
-  disabled?: boolean;
 };
 
 export default defineComponent({
   name: 'DocumentEditor',
   inheritAttrs: false,
   props: {
-    value: String,
     title: String,
-    placeholder: String,
-    disabled: Boolean,
   },
   setup(props: DocumentEditorProps, { attrs, listeners }) {
     const prefixCls = 'document-editor';
@@ -34,12 +28,10 @@ export default defineComponent({
       return (
         <HtmlEditor
           {...{
-            props: {
-              value: props.value,
-              placeholder: props.placeholder,
-              disabled: props.disabled,
+            attrs: {
+              type: 'balloon',
+              ...attrs,
             },
-            attrs,
             on: restListeners,
           }}
         >

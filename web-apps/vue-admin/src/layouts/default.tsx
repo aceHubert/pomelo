@@ -122,7 +122,7 @@ export default defineComponent({
     //             title: (i18nRender) => i18nRender('menu.dashboard', '仪表盘'),
     //             path: '/dashboard',
     //             alias: ['/'],
-    //             icon: 'https://cdn.lejian.com/public/icons/dashboard.svg',
+    //             icon: 'dashboard',
     //             position: 'top',
     //           },
     //         ]);
@@ -375,7 +375,7 @@ export default defineComponent({
                     <div class={classes.footerWrapper}>
                       <div class="copyright">
                         Copyright
-                        <Icon type="copyright" /> 2019-{new Date().getFullYear()} <span> LeJian 版权所有 </span>
+                        <Icon type="copyright" /> 2019-{new Date().getFullYear()} <span> Pomelo 版权所有 </span>
                       </div>
                     </div>
                   ),
