@@ -9,16 +9,15 @@ import { OptionPresetKeys, TemplateStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
 import { useFormApi, TemplateType } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
-import { useDeviceMixin, useLocationMixin } from '@/mixins';
-import { useTemplateMixin } from '../mixins/index.mixin';
+import { useDeviceMixin, useLocationMixin, useTemplateMixin } from '@/mixins';
 import classes from './index.module.less';
 
 // typed
 import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
 import type { PagedFormTemplateArgs, PagedFormTemplateItem } from '@/fetch/graphql';
 import type { User } from '@/auth/user-manager';
-import type { BulkActions } from '../mixins/index.mixin';
-import type { ActionCapability } from '../components/design-layout/DesignLayout';
+import type { BulkActions } from '@/mixins/template';
+import type { ActionCapability } from '../post/components/design-layout/DesignLayout';
 
 enum RouteQueryKey {
   Date = 'd',

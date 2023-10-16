@@ -16,16 +16,15 @@ import {
 } from '@pomelo/shared-web';
 import { Modal, message } from '@/components';
 import { usePostApi } from '@/fetch/graphql';
-import { useDeviceMixin } from '@/mixins';
+import { useDeviceMixin, useDesignerMixin } from '@/mixins';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
-import { MediaList } from '../../media/components';
-import { DesignLayout, DocumentEditor } from '../components';
-import { useDesignMixin } from '../mixins/design.mixin';
+import { MediaList } from '../media/components';
+import { DesignLayout, DocumentEditor } from './components';
 import classes from './design.module.less';
 
 // Types
 import type { PostTemplateModel } from '@/fetch/graphql';
-import type { ActionStatus, ActionCapability } from '../components/design-layout/DesignLayout';
+import type { ActionStatus, ActionCapability } from './components/design-layout/DesignLayout';
 
 export default defineComponent({
   name: 'PostDesign',
@@ -58,7 +57,7 @@ export default defineComponent({
     const router = useRouter();
     const i18n = useI18n();
     const userManager = useUserManager();
-    const designMixin = useDesignMixin();
+    const designerMixin = useDesignerMixin();
     const deviceMixin = useDeviceMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
     const postApi = usePostApi();
@@ -169,7 +168,7 @@ export default defineComponent({
         });
     }
 
-    Promise.all([postPromise, designMixin.getCategories(), designMixin.getTags(), userManager.getUser()]).then(
+    Promise.all([postPromise, designerMixin.getCategories(), designerMixin.getTags(), userManager.getUser()]).then(
       ([post, categoryTreeData, tagSelectData, user]) => {
         if (!post) return;
 
@@ -197,12 +196,12 @@ export default defineComponent({
           TemplatePageType.Default;
 
         // category
-        designMixin.category.treeData = categoryTreeData;
-        designMixin.category.selectKeys = categories.map(({ id, name }) => ({ value: id, label: name }));
+        designerMixin.category.treeData = categoryTreeData;
+        designerMixin.category.selectKeys = categories.map(({ id, name }) => ({ value: id, label: name }));
 
         // tag
-        designMixin.tag.selectData = tagSelectData;
-        designMixin.tag.selectKeys = tags.map(({ id }) => id);
+        designerMixin.tag.selectData = tagSelectData;
+        designerMixin.tag.selectKeys = tags.map(({ id }) => id);
 
         // 缓存最新数据
         cachedPostData.value = { ...postData };
@@ -387,17 +386,17 @@ export default defineComponent({
                   )}
                   <Collapse.Panel header={i18n.tv('page_templates.category_label', '分类')}>
                     <TreeSelect
-                      value={designMixin.category.selectKeys}
-                      treeData={designMixin.category.treeData}
-                      loadData={designMixin.loadCategoryData.bind(this)}
+                      value={designerMixin.category.selectKeys}
+                      treeData={designerMixin.category.treeData}
+                      loadData={designerMixin.loadCategoryData.bind(this)}
                       treeCheckStrictly
                       showSearch
                       treeCheckable
                       treeDataSimpleMode
                       dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
                       placeholder={i18n.tv('page_templates.category_placeholder', '请选择分类(或输入搜索分类)')}
-                      onSearch={debounce(designMixin.handleCategorySearch, 800)}
-                      onChange={designMixin.handleCategoryChange(postData.id!).bind(this)}
+                      onSearch={debounce(designerMixin.handleCategorySearch, 800)}
+                      onChange={designerMixin.handleCategoryChange(postData.id!).bind(this)}
                     ></TreeSelect>
                     <router-link to={{ name: 'category' }} class="d-block mt-2">
                       {i18n.tv('page_templates.new_category_link_text', '新建分类')}
@@ -405,14 +404,14 @@ export default defineComponent({
                   </Collapse.Panel>
                   <Collapse.Panel header={i18n.tv('page_templates.tag_label', '标签')}>
                     <Select
-                      value={designMixin.tag.selectKeys}
-                      options={designMixin.tag.selectData}
+                      value={designerMixin.tag.selectKeys}
+                      options={designerMixin.tag.selectData}
                       showSearch
                       mode="tags"
                       dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
                       placeholder={i18n.tv('page_templates.tag_placeholder', '请选择标签(或输入标签添加)')}
-                      onSelect={designMixin.handleTagSelect(postData.id!).bind(this)}
-                      onDeselect={designMixin.handleTagDeselect(postData.id!).bind(this)}
+                      onSelect={designerMixin.handleTagSelect(postData.id!).bind(this)}
+                      onDeselect={designerMixin.handleTagDeselect(postData.id!).bind(this)}
                     ></Select>
                   </Collapse.Panel>
                   <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>

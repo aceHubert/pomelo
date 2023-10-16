@@ -38,17 +38,16 @@ import {
 import { Modal, message } from '@/components';
 import { usePageApi } from '@/fetch/graphql';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
-import { MediaList } from '../../../media/components';
-import { DesignLayout, HtmlEditor } from '../../components';
-import { useDesignMixin } from '../../mixins/design.mixin';
-import { useFormilyMixin } from '../../mixins/formily.mixin';
+import { useDesignerMixin, useFormilyMixin } from '@/mixins';
+import { MediaList } from '../../media/components';
+import { DesignLayout, HtmlEditor } from '../../post/components';
 import { ResourceWidgets, ComponentWidget, PreviewWidget, SchemaEditorWidget } from './widgets';
 import classes from './index.module.less';
 
 // Types
 import type { TreeNode, ITreeNode } from '@designable/core';
 import type { PageTemplateModel } from '@/fetch/graphql';
-import type { ActionStatus, ActionCapability } from '../../components/design-layout/DesignLayout';
+import type { ActionStatus, ActionCapability } from '../../post/components/design-layout/DesignLayout';
 
 GlobalRegistry.registerDesignerLocales({
   'zh-CN': {
@@ -114,7 +113,7 @@ export default defineComponent({
     const i18n = useI18n();
     const configProvider = useConfigProvider();
     const userManager = useUserManager();
-    const designMixin = useDesignMixin();
+    const designerMixin = useDesignerMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
     const pageApi = usePageApi();
 
@@ -411,7 +410,7 @@ export default defineComponent({
     };
     // #endregion
 
-    const handleUploadRequest = designMixin.getCustomUploadRequest('templates/page_');
+    const handleUploadRequest = designerMixin.getCustomUploadRequest('templates/page_');
 
     return () => (
       <DesignLayout

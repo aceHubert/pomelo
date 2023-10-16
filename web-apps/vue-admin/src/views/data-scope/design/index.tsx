@@ -6,7 +6,7 @@ import { getActiveFetch } from '@ace-fetch/vue';
 import { warn } from '@ace-util/core';
 import { TemplateStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
-import { useDesignMixin } from '../../mixins/design.mixin';
+import { useDesignerMixin } from '@/mixins/designer';
 import { ClauseForm } from '../components';
 import { TemplateType } from '../constants';
 import { FieldConfig } from './field.config';
@@ -35,7 +35,7 @@ export default Form.create({})(
       const router = useRouter();
       const route = useRoute();
       const fetch = getActiveFetch();
-      const designMixin = useDesignMixin();
+      const designerMixin = useDesignerMixin();
 
       // #region data scopes 新增、修改、查询
       const isAddMode = computed(() => route.name === 'data-scope-add');
@@ -45,7 +45,7 @@ export default Form.create({})(
         () => props.id,
         async (id) => {
           if (!isAddMode.value) {
-            const template = await designMixin.getDetail(id!);
+            const template = await designerMixin.getDetail(id!);
             if (template && template.type === TemplateType) {
               props.form.setFieldsValue({
                 title: template.title,
@@ -83,7 +83,7 @@ export default Form.create({})(
             const content = JSON.stringify(value);
 
             if (isAddMode.value) {
-              designMixin
+              designerMixin
                 .create({
                   ...values,
                   content,
@@ -92,8 +92,8 @@ export default Form.create({})(
                 })
                 .then(({ id }) => {
                   router.replace({ name: 'data-scope-edit', params: { id: String(id) } }).then(() => {
-                    designMixin.getCategories().then((treeData) => {
-                      designMixin.category.treeData = treeData;
+                    designerMixin.getCategories().then((treeData) => {
+                      designerMixin.category.treeData = treeData;
                     });
                   });
                 })
@@ -101,7 +101,7 @@ export default Form.create({})(
                   message.error(`新建失败，${err.message}`);
                 });
             } else {
-              designMixin
+              designerMixin
                 .update(Number(props.id!), {
                   ...values,
                   content,
@@ -165,11 +165,11 @@ export default Form.create({})(
         clauseValue: clauseValueRef,
         invalidClauseValue: invalidClauseValueRef,
         clauseFields,
-        submiting: designMixin.submitingRef,
-        loadCategoryData: designMixin.loadCategoryData,
+        submiting: designerMixin.submitingRef,
+        loadCategoryData: designerMixin.loadCategoryData,
         getAllowedValues,
-        handleCategorySearch: debounce(designMixin.handleCategorySearch, 800),
-        handleCategoryChange: designMixin.handleCategoryChange,
+        handleCategorySearch: debounce(designerMixin.handleCategorySearch, 800),
+        handleCategoryChange: designerMixin.handleCategoryChange,
         handleSubmit,
       };
     },

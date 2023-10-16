@@ -50,17 +50,17 @@ export const router = createRouter({
         {
           name: 'forms',
           path: '',
-          component: () => import(/* webpackChunkName: "forms" */ '../views/templates/forms'),
+          component: () => import(/* webpackChunkName: "forms" */ '../views/form'),
         },
         {
           name: 'form-add',
           path: 'create',
-          component: () => import(/* webpackChunkName: "forms" */ '../views/templates/forms/design'),
+          component: () => import(/* webpackChunkName: "forms" */ '../views/form/design'),
         },
         {
           name: 'form-edit',
           path: ':id/edit',
-          component: () => import(/* webpackChunkName: "forms" */ '../views/templates/forms/design'),
+          component: () => import(/* webpackChunkName: "forms" */ '../views/form/design'),
           props: (route) => ({ id: route.params.id }),
         },
       ],
@@ -72,17 +72,17 @@ export const router = createRouter({
         {
           name: 'pages',
           path: '',
-          component: () => import(/* webpackChunkName: "pages" */ '../views/templates/pages'),
+          component: () => import(/* webpackChunkName: "pages" */ '../views/page'),
         },
         {
           name: 'page-add',
           path: 'create',
-          component: () => import(/* webpackChunkName: "pages" */ '../views/templates/pages/design'),
+          component: () => import(/* webpackChunkName: "pages" */ '../views/page/design'),
         },
         {
           name: 'page-edit',
           path: ':id/edit',
-          component: () => import(/* webpackChunkName: "pages" */ '../views/templates/pages/design'),
+          component: () => import(/* webpackChunkName: "pages" */ '../views/page/design'),
           props: (route) => ({ id: route.params.id }),
         },
       ],
@@ -94,17 +94,17 @@ export const router = createRouter({
         {
           name: 'posts',
           path: '',
-          component: () => import(/* webpackChunkName: "posts" */ '../views/templates/posts'),
+          component: () => import(/* webpackChunkName: "posts" */ '../views/post'),
         },
         {
           name: 'post-add',
           path: 'create',
-          component: () => import(/* webpackChunkName: "posts" */ '../views/templates/posts/design'),
+          component: () => import(/* webpackChunkName: "posts" */ '../views/post/design'),
         },
         {
           name: 'post-edit',
           path: ':id/edit',
-          component: () => import(/* webpackChunkName: "posts" */ '../views/templates/posts/design'),
+          component: () => import(/* webpackChunkName: "posts" */ '../views/post/design'),
           props: (route) => ({ id: route.params.id }),
         },
       ],
@@ -116,17 +116,17 @@ export const router = createRouter({
         {
           name: 'data-scopes',
           path: '',
-          component: () => import(/* webpackChunkName: "data-scope" */ '../views/templates/data-scope'),
+          component: () => import(/* webpackChunkName: "data-scope" */ '../views/data-scope'),
         },
         {
           name: 'data-scope-add',
           path: 'create',
-          component: () => import(/* webpackChunkName: "data-scope" */ '../views/templates/data-scope/design'),
+          component: () => import(/* webpackChunkName: "data-scope" */ '../views/data-scope/design'),
         },
         {
           name: 'data-scope-edit',
           path: ':id/edit',
-          component: () => import(/* webpackChunkName: "data-scope" */ '../views/templates/data-scope/design'),
+          component: () => import(/* webpackChunkName: "data-scope" */ '../views/data-scope/design'),
           props: (route) => ({ id: route.params.id }),
         },
       ],

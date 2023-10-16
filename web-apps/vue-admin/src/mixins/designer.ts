@@ -4,16 +4,7 @@ import { Taxonomy, useTemplateApi, useTermTaxonomyApi, useResApi } from '@/fetch
 
 // Types
 import type { NewTemplateInput, NewTemplateMetaInput, UpdateTemplateInput } from '@/fetch/graphql/template';
-
-export type AsyncTreeData = {
-  id: string | number;
-  title: any;
-  value: string | number;
-  pId?: string | number;
-  isLeaf?: boolean;
-  checkable?: boolean;
-  selectable?: boolean;
-};
+import type { AsyncTreeData } from './template';
 
 export type SelectData = {
   id: string | number;
@@ -22,7 +13,7 @@ export type SelectData = {
   disabled?: boolean;
 };
 
-export const useDesignMixin = () => {
+export const useDesignerMixin = () => {
   const templateApi = useTemplateApi();
   const termTaxonomyApi = useTermTaxonomyApi();
   const resApi = useResApi();

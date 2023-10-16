@@ -36,17 +36,16 @@ import { trailingSlash, equals, warn } from '@ace-util/core';
 import { Modal, message } from '@/components';
 import { useFormApi } from '@/fetch/graphql';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
-import { MediaList } from '../../../media/components';
-import { DesignLayout } from '../../components';
-import { useDesignMixin } from '../../mixins/design.mixin';
-import { useFormilyMixin } from '../../mixins/formily.mixin';
+import { useDesignerMixin, useFormilyMixin } from '@/mixins';
+import { MediaList } from '../../media/components';
+import { DesignLayout } from '../../post/components';
 import { ResourceWidgets, ComponentWidget, PreviewWidget, SchemaEditorWidget } from './widgets';
 import classes from './index.module.less';
 
 // Types
 import type { TreeNode, ITreeNode } from '@designable/core';
 import type { FormTempaleModel } from '@/fetch/graphql';
-import type { ActionStatus, ActionCapability } from '../../components/design-layout/DesignLayout';
+import type { ActionStatus, ActionCapability } from '../../post/components/design-layout/DesignLayout';
 
 GlobalRegistry.registerDesignerLocales({
   'zh-CN': {
@@ -112,7 +111,7 @@ export default defineComponent({
     const i18n = useI18n();
     const configProvider = useConfigProvider();
     const userManager = useUserManager();
-    const designMixin = useDesignMixin();
+    const designerMixin = useDesignerMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
     const formApi = useFormApi();
 
@@ -406,7 +405,7 @@ export default defineComponent({
     // #endregion
 
     // 上传
-    const handleUploadRequest = designMixin.getCustomUploadRequest('templates/form_');
+    const handleUploadRequest = designerMixin.getCustomUploadRequest('templates/form_');
 
     return () => (
       <DesignLayout

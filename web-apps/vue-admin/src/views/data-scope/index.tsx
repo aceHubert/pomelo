@@ -7,8 +7,7 @@ import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { TemplateStatus } from '@pomelo/shared-web';
 import { useTemplateApi } from '@/fetch/graphql';
 import { useI18n, useUserManager } from '@/hooks';
-import { useDeviceMixin } from '@/mixins';
-import { useTemplateMixin } from '../mixins/index.mixin';
+import { useDeviceMixin, useTemplateMixin } from '@/mixins';
 import { TemplateType } from './constants';
 import classes from './index.module.less';
 
@@ -16,7 +15,7 @@ import classes from './index.module.less';
 import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
 import type { PagedTemplateArgs, PagedTemplateItem } from '@/fetch/graphql';
 import type { User } from '@/auth/user-manager';
-import type { BulkActions } from '../mixins/index.mixin';
+import type { BulkActions } from '../../mixins/template';
 
 enum RouteQueryKey {
   IsSelf = 'self',

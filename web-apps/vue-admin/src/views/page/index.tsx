@@ -1,53 +1,50 @@
 import moment from 'moment';
 import { lowerCase } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
-import { trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { TreeSelect, Select, Card, Descriptions, Popconfirm, Spin, Space } from 'ant-design-vue';
+import { trailingSlash } from '@ace-util/core';
+import { Select, Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { OptionPresetKeys, TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-web';
+import { OptionPresetKeys, TemplateStatus } from '@pomelo/shared-web';
 import { message } from '@/components';
-import { usePostApi, TemplateType } from '@/fetch/graphql';
+import { usePageApi, TemplateType } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
-import { useDeviceMixin, useLocationMixin } from '@/mixins';
-import { useTemplateMixin } from '../mixins/index.mixin';
+import { useDeviceMixin, useLocationMixin, useTemplateMixin } from '@/mixins';
 import classes from './index.module.less';
 
 // typed
 import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
-import type { PagedPostTemplateArgs, PagedPostTemplateItem } from '@/fetch/graphql';
+import type { PagedPageTemplateArgs, PagedPageTemplateItem } from '@/fetch/graphql';
 import type { User } from '@/auth/user-manager';
-import type { BulkActions } from '../mixins/index.mixin';
-import type { ActionCapability } from '../components/design-layout/DesignLayout';
+import type { BulkActions } from '@/mixins/template';
+import type { ActionCapability } from '../post/components/design-layout/DesignLayout';
 
 enum RouteQueryKey {
-  CategoryId = 'cid',
-  TagId = 'tid',
-  IsSelf = 'self',
   Date = 'd',
+  IsSelf = 'self',
 }
 
 export default defineComponent({
-  name: 'PostIndex',
+  name: 'PageIndex',
   head() {
     return {
-      title: this.$tv('page_templates.posts.page_title', '所有文章') as string,
+      title: this.$tv('page_templates.pages.page_title', '页面列表') as string,
     };
   },
   props: [],
   setup(_props, { refs }) {
     const route = useRoute();
     const i18n = useI18n();
-    const userManager = useUserManager();
-    const homeUrl = useOptions(OptionPresetKeys.Home);
+    const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
     const templateMixin = useTemplateMixin();
-    const deviceMixin = useDeviceMixin();
-    const postApi = usePostApi();
+    const userManager = useUserManager();
+    const homeUrl = useOptions(OptionPresetKeys.Home);
+    const pageApi = usePageApi();
 
     const currentUser = ref<User>();
 
-    const postTemplates = reactive({
+    const pageTemplates = reactive({
       loading: false,
       rowCount: 0,
       selectedRowKeys: [] as Array<string | number>,
@@ -56,15 +53,11 @@ export default defineComponent({
     });
 
     // 从 URI 获取搜索参数
-    const searchQuery = computed<
-      Omit<PagedPostTemplateArgs, 'offset' | 'limit' | 'queryStatusCounts' | 'querySelfCounts'>
-    >(() => {
+    const searchQuery = computed<Omit<PagedPageTemplateArgs, 'offset' | 'limit' | 'queryStatusCounts'>>(() => {
       return {
         ...templateMixin.searchQuery,
         author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUser.value?.profile.sub : void 0,
         date: (route.query[RouteQueryKey.Date] as string) || void 0,
-        categoryId: Number((route.query[RouteQueryKey.CategoryId] as string) || '') || void 0,
-        tagId: Number((route.query[RouteQueryKey.TagId] as string) || '') || void 0,
       };
     });
 
@@ -76,30 +69,30 @@ export default defineComponent({
         currentUser.value = user || void 0;
       }
 
-      return postApi
+      return pageApi
         .getPaged({
           variables: {
             ...searchQuery.value,
             offset: size * (page - 1),
             limit: size,
-            queryStatusCounts: postTemplates.queryStatusCounts,
-            querySelfCounts: postTemplates.querySelfCounts,
+            queryStatusCounts: pageTemplates.queryStatusCounts,
+            querySelfCounts: pageTemplates.querySelfCounts,
           },
           catchError: true,
         })
-        .then(({ posts, statusCounts, selfCounts }) => {
-          postTemplates.rowCount = posts.total;
-          if (postTemplates.queryStatusCounts) {
+        .then(({ pages, statusCounts, selfCounts }) => {
+          pageTemplates.rowCount = pages.total;
+          if (pageTemplates.queryStatusCounts) {
             templateMixin.statusCount.value = statusCounts!;
-            postTemplates.queryStatusCounts = false;
+            pageTemplates.queryStatusCounts = false;
           }
-          if (postTemplates.querySelfCounts) {
+          if (pageTemplates.querySelfCounts) {
             templateMixin.selfCount.value = selfCounts!;
-            postTemplates.querySelfCounts = false;
+            pageTemplates.querySelfCounts = false;
           }
 
           return {
-            rows: posts.rows.map((item) => {
+            rows: pages.rows.map((item) => {
               // 设置操作权限
               const actionCapability: Required<ActionCapability> = {
                 operate: false,
@@ -123,7 +116,7 @@ export default defineComponent({
                 isSelfContent: currentUser.value?.profile.sub === item.author,
               };
             }),
-            total: posts.total,
+            total: pages.total,
           };
         });
     };
@@ -135,29 +128,16 @@ export default defineComponent({
 
     // 行选择
     const handleSelectChange = (selectedRowKeys: Array<string | number>) => {
-      postTemplates.selectedRowKeys = selectedRowKeys;
+      pageTemplates.selectedRowKeys = selectedRowKeys;
     };
 
     // 参数变更刷新table
     watch(searchQuery, refreshTable);
 
-    // 加载分类树
-    templateMixin.category.selectKey = Number((route.query[RouteQueryKey.CategoryId] as string) || '') || '';
-    templateMixin
-      .getCategories({
-        includeDefault: true,
-      })
-      .then((treeData) => {
-        templateMixin.category.treeData = treeData;
-      })
-      .catch((err) => {
-        message.error(err.message);
-      });
-
     // 加载月分组
     templateMixin.monthCount.selectKey = (route.query[RouteQueryKey.Date] as string) || '';
     templateMixin
-      .getMonthCounts(TemplateType.Post)
+      .getMonthCounts(TemplateType.Page)
       .then((selectData) => {
         templateMixin.monthCount.selectData = selectData;
       })
@@ -166,14 +146,14 @@ export default defineComponent({
       });
 
     const columns = computed(() => {
-      const getViewUrl = (record: PagedPostTemplateItem) => {
+      const getViewUrl = (record: PagedPageTemplateItem) => {
         const baseUrl = trailingSlash(homeUrl.value || '/');
         // TODO: config format url
 
-        return baseUrl + `p/${record.id}#PREVIEW`;
+        return baseUrl + `${record.id}#PREVIEW`;
       };
 
-      const renderRowInline = (record: PagedPostTemplateItem) => {
+      const renderRowInline = (record: PagedPageTemplateItem) => {
         return (
           <Descriptions size="small" column={1} class="mt-2">
             <Descriptions.Item>
@@ -184,33 +164,9 @@ export default defineComponent({
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {i18n.tv('page_templates.category_label', '分类')}
-              </span>
-              {record.categories.length
-                ? record.categories.map((category) => (
-                    <router-link to={{ name: 'taxonomy', params: { id: category.id } }} class="mr-2">
-                      {category.name}
-                    </router-link>
-                  ))
-                : `-`}
-            </Descriptions.Item>
-            <Descriptions.Item>
-              <span slot="label" class="text--secondary">
-                {i18n.tv('page_templates.tag_label', '标签')}
-              </span>
-              {record.tags.length
-                ? record.tags.map((tag) => (
-                    <router-link to={{ name: 'taxonomy', params: { id: tag.id } }} class="mr-2">
-                      {tag.name}
-                    </router-link>
-                  ))
-                : `-`}
-            </Descriptions.Item>
-            <Descriptions.Item>
-              <span slot="label" class="text--secondary">
                 {i18n.tv('page_templates.comment_label', '评论')}
               </span>
-              {record.commentStatus === TemplateCommentStatus.Closed ? '-' : record.commentCount}
+              {`-`}
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
@@ -230,7 +186,7 @@ export default defineComponent({
       };
 
       const renderActions = (
-        record: PagedPostTemplateItem & {
+        record: PagedPageTemplateItem & {
           actionCapability: Required<ActionCapability>;
           isSelfContent: boolean;
           deleting?: boolean;
@@ -245,7 +201,7 @@ export default defineComponent({
                     record.actionCapability.publish &&
                     !record.isSelfContent)) && (
                   <router-link
-                    to={{ name: 'post-edit', params: { id: record.id } }}
+                    to={{ name: 'page-edit', params: { id: record.id } }}
                     class={
                       record.status === TemplateStatus.Pending &&
                       record.actionCapability.publish &&
@@ -268,8 +224,8 @@ export default defineComponent({
                     onClick={() =>
                       templateMixin.handleDelete(record).then((result) => {
                         if (result) {
-                          postTemplates.queryStatusCounts = true; // 更新状态数量
-                          postTemplates.querySelfCounts = true; // 更新我的数量
+                          pageTemplates.queryStatusCounts = true; // 更新状态数量
+                          pageTemplates.querySelfCounts = true; // 更新我的数量
                           refreshTable();
                         }
                       })
@@ -293,8 +249,8 @@ export default defineComponent({
                   onClick={() =>
                     templateMixin.handleRestore(record).then((result) => {
                       if (result) {
-                        postTemplates.queryStatusCounts = true; // 更新状态数量
-                        postTemplates.querySelfCounts = true; // 更新我的数量
+                        pageTemplates.queryStatusCounts = true; // 更新状态数量
+                        pageTemplates.querySelfCounts = true; // 更新我的数量
                         refreshTable();
                       }
                     })
@@ -306,14 +262,14 @@ export default defineComponent({
                     : i18n.tv('page_templates.btn_text.restore', '重置')}
                 </a>,
                 <Popconfirm
-                  title={i18n.tv('page_templates.posts.tips.delete_confirm', '确认删除这条内容配置？')}
+                  title={i18n.tv('page_templates.pages.tips.delete_confirm', '确认删除这条页面配置？')}
                   okText="Ok"
                   cancelText="No"
                   onConfirm={() =>
                     templateMixin.handleDelete(record).then((result) => {
                       if (result) {
-                        postTemplates.queryStatusCounts = true; // 更新状态数量
-                        postTemplates.querySelfCounts = true; // 更新我的数量
+                        pageTemplates.queryStatusCounts = true; // 更新状态数量
+                        pageTemplates.querySelfCounts = true; // 更新我的数量
                         refreshTable();
                       }
                     })
@@ -336,7 +292,7 @@ export default defineComponent({
           dataIndex: 'title',
           customRender: (
             _: any,
-            record: PagedPostTemplateItem & {
+            record: PagedPageTemplateItem & {
               actionCapability: Required<ActionCapability>;
               isSelfContent: boolean;
               deleting?: boolean;
@@ -352,7 +308,7 @@ export default defineComponent({
             return (
               <div class={classes.title}>
                 <router-link
-                  to={{ name: 'post-edit', params: { id: record.id } }}
+                  to={{ name: 'page-edit', params: { id: record.id } }}
                   class={classes.routerLink}
                   target="preview-route"
                 >
@@ -374,44 +330,17 @@ export default defineComponent({
           customRender: () => `-`,
         },
         deviceMixin.isDesktop && {
-          title: i18n.tv('page_templates.category_label', '分类'),
-          dataIndex: 'categories',
-          width: 220,
-          customRender: (_: any, record: PagedPostTemplateItem) =>
-            record.categories.length
-              ? record.categories.map((category) => (
-                  <router-link to={{ name: 'category', params: { id: category.id } }} class="mr-2">
-                    {category.name}
-                  </router-link>
-                ))
-              : `-`,
-        },
-        deviceMixin.isDesktop && {
-          title: i18n.tv('page_templates.tag_label', '标签'),
-          dataIndex: 'tags',
-          width: 220,
-          customRender: (_: any, record: PagedPostTemplateItem) =>
-            record.tags.length
-              ? record.tags.map((tag) => (
-                  <router-link to={{ name: 'tag', params: { id: tag.id } }} class="mr-2">
-                    {tag.name}
-                  </router-link>
-                ))
-              : `-`,
-        },
-        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.comment_label', '评论'),
           dataIndex: 'commentCount',
           width: 100,
-          customRender: (_: any, record: PagedPostTemplateItem) =>
-            record.commentStatus === TemplateCommentStatus.Closed ? '-' : record.commentCount,
+          customRender: () => `-`,
         },
         deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.date_label', '日期'),
           dataIndex: 'updatedAt',
           align: 'left',
           width: 200,
-          customRender: (_: any, record: PagedPostTemplateItem) => (
+          customRender: (_: any, record: PagedPageTemplateItem) => (
             <div>
               <p class="mb-1">
                 {record.status !== TemplateStatus.Publish ? (
@@ -435,16 +364,16 @@ export default defineComponent({
               field: i18n.tv('page_templates.title_label', '标题'),
             }) as string
           }
-          rowCount={postTemplates.rowCount}
+          rowCount={pageTemplates.rowCount}
           statusOptions={templateMixin.statusOptions.value}
           bulkAcitonOptions={templateMixin.bulkActionOptions.value}
           bulkApplying={templateMixin.bulkApplying.value}
           onBulkApply={(action: BulkActions) =>
-            templateMixin.handleBulkApply(action, postTemplates.selectedRowKeys).then((result) => {
+            templateMixin.handleBulkApply(action, pageTemplates.selectedRowKeys).then((result) => {
               if (result) {
-                postTemplates.selectedRowKeys = []; // 选中的key清除
-                postTemplates.queryStatusCounts = true; // 更新状态数量
-                postTemplates.querySelfCounts = true; // 更新我的数量
+                pageTemplates.selectedRowKeys = []; // 选中的key清除
+                pageTemplates.queryStatusCounts = true; // 更新状态数量
+                pageTemplates.querySelfCounts = true; // 更新我的数量
                 refreshTable();
               }
             })
@@ -461,22 +390,6 @@ export default defineComponent({
                 });
               }}
             ></Select>
-            <TreeSelect
-              value={templateMixin.category.selectKey}
-              treeData={templateMixin.categoryTreeData.value}
-              showSearch
-              treeDataSimpleMode
-              treeNodeFilterProp="label"
-              dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
-              style="width:120px"
-              placeholder={i18n.tv('page_templates.category_placeholder', '请选择分类')}
-              searchPlaceholder={i18n.tv('page_templates.category_search_placeholder', '请输入查询分类')}
-              onChange={(value: string) =>
-                locationMixin.updateRouteQuery({ [RouteQueryKey.CategoryId]: value }).then(() => {
-                  templateMixin.category.selectKey = value;
-                })
-              }
-            ></TreeSelect>
           </template>
         </SearchForm>
         <AsyncTable
@@ -486,7 +399,7 @@ export default defineComponent({
             size: 'small',
             scroll: { x: true, y: 0 },
             rowSelection: {
-              selectedRowKeys: postTemplates.selectedRowKeys,
+              selectedRowKeys: pageTemplates.selectedRowKeys,
               getCheckboxProps: (record) => ({ props: { disabled: !record.isSelfContent } }),
               onChange: handleSelectChange,
             },
