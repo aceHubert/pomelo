@@ -240,7 +240,7 @@ export default defineComponent({
           title={i18n.tv('form_template.index.load_error_text', '表单加载错误！') as string}
           subTitle={$error.message}
         ></Result>
-      ) : !formData?.schema ? (
+      ) : !formData ? (
         <Result
           status="error"
           title="404"
@@ -255,10 +255,10 @@ export default defineComponent({
       ) : deviceMixin.isDesktop ? (
         h(DesktopForm, {
           props: {
-            title: formData?.title,
-            content: formData?.schema,
+            title: formData.title,
+            content: formData.schema,
             metas: metas.value,
-            framework: formData?.framework,
+            framework: formData.framework,
             loading: $loading,
             error: $error,
             onSubmit,
@@ -267,10 +267,10 @@ export default defineComponent({
       ) : (
         h(MobileForm, {
           props: {
-            title: formData?.title,
-            content: formData?.schema,
+            title: formData.title,
+            content: formData.schema,
             metas: metas.value,
-            framework: formData?.framework,
+            framework: formData.framework,
             loading: $loading,
             error: $error,
             onSubmit,

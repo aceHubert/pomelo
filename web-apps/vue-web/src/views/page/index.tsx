@@ -246,7 +246,7 @@ export default defineComponent({
           title={i18n.tv('page_template.index.load_error_text', '页面加载错误！') as string}
           subTitle={$error.message}
         ></Result>
-      ) : !pageData?.schema ? (
+      ) : !pageData ? (
         <Result
           status="error"
           title="404"
@@ -261,19 +261,19 @@ export default defineComponent({
       ) : deviceMixin.isDesktop ? (
         h(DesktopPage, {
           props: {
-            title: pageData?.title,
-            content: pageData?.schema,
+            title: pageData.title,
+            content: pageData.schema,
             metas: metas.value,
-            framework: pageData?.framework,
+            framework: pageData.framework,
           },
         })
       ) : (
         h(MobilePage, {
           props: {
-            title: pageData?.title,
-            content: pageData?.schema,
+            title: pageData.title,
+            content: pageData.schema,
             metas: metas.value,
-            framework: pageData?.framework,
+            framework: pageData.framework,
           },
         })
       );

@@ -169,7 +169,7 @@ export default defineComponent({
           title={i18n.tv('post_template.index.load_error_text', '内容加载错误！') as string}
           subTitle={$error.message}
         ></Result>
-      ) : !postData?.schema ? (
+      ) : !postData ? (
         <Result
           status="error"
           title="404"
