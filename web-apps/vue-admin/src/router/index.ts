@@ -158,11 +158,6 @@ export const router = createRouter({
       name: 'signout',
       path: '/signout',
     },
-    {
-      name: 'session-timeout',
-      path: '/session-timeout',
-      component: () => import(/* webpackChunkName: "common" */ '../views/session-timeout'),
-    },
   ],
 });
 

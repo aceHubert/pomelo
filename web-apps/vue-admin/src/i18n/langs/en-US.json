@@ -1,7 +1,7 @@
 {
   "name": "English",
   "description": "English Language Pack",
-  "site_title": "Pomelo",
+  "site_title": "Pomelo Admin",
   "common": {
     "btn_text": {
       "back_to_home": "return to home page",
@@ -118,6 +118,11 @@
     "settings": "Settings",
     "medias": "All Medias"
   },
+  "session_timeout_confirm": {
+    "title": "OOPS!",
+    "content": "Session timeout, need to sign in.",
+    "ok_text": "Sign in"
+  },
   "components": {
     "layout_admin": {
       "sider_drawer": {
@@ -162,12 +167,6 @@
         "show_more_btn_text": "Show more"
       }
     }
-  },
-  "page_session_timeout": {
-    "page_title": "Session timeout",
-    "title": "OOPS!",
-    "info": "Session timeout, need to sign in.",
-    "log_back_in": "Sign in"
   },
   "page_dashboard": {
     "title": "Dashboard",

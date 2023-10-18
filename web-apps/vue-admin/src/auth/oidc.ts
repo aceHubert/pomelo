@@ -1,4 +1,6 @@
 import Oidc from 'oidc-client';
+import { Modal } from '@/components';
+import { i18n } from '../i18n';
 
 // Types
 import type { User as OidcUser, UserManager as OidcUserManager, UserManagerSettings } from 'oidc-client';
@@ -8,6 +10,7 @@ import type { SigninArgs, SigninRedirectArgs, SigninSilentArgs, SignoutArgs, Sig
 export const RedirectKey = 'oidc.redirect';
 export const EidKey = 'oidc.eid';
 export const XEidKey = 'oidc.x-eid';
+export const IgnoreRoutes = ['/signin', '/signout', '/internal-access-only'];
 
 const innerSigninSilent = Oidc.UserManager.prototype.signinSilent;
 Object.defineProperties(Oidc.UserManager.prototype, {
@@ -15,7 +18,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
     value: function (redirectUrl?: string) {
       if (redirectUrl) {
         localStorage.setItem(RedirectKey, redirectUrl);
-      } else if (['/signin', '/session-timeout', '/internal-access-only'].indexOf(location.pathname) === -1) {
+      } else if (IgnoreRoutes.indexOf(location.pathname) === -1) {
         localStorage.setItem(RedirectKey, location.href);
       }
     },
@@ -113,7 +116,13 @@ Object.defineProperties(Oidc.UserManager.prototype, {
           });
         });
       } else {
-        location.replace('/session-timeout');
+        Modal.confirm({
+          icon: 'logout',
+          title: i18n.tv('session_timeout_confirm.title', 'OOPS!'),
+          content: i18n.tv('session_timeout_confirm.content', '登录会话已超时，需要您重新登录。'),
+          okText: i18n.tv('session_timeout_confirm.ok_text', '重新登录') as string,
+          onOk: () => this.signin({ noInteractive: true }),
+        });
         return Promise.resolve(() => {});
       }
     },
