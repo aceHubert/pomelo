@@ -57,7 +57,11 @@ export const useLayoutMixin = () => {
    */
   const siderMenus = computed(() => {
     const menu = menuKeyMap.value.get(currSiderMenuKey.value);
-    if (menu?.position === 'side') {
+    if (menu?.parent?.key && menu?.position === 'sub') {
+      return (menuKeyMap.value.get(menu.parent.key)?.children ?? [])
+        .filter((item) => item.display !== false)
+        .map(({ children: _, ...restItem }) => restItem);
+    } else {
       return (function filter(menus: MenuConfig[] = []): MenuConfig[] {
         return menus
           .filter((menu) => menu.position === 'side')
@@ -67,10 +71,6 @@ export const useLayoutMixin = () => {
             children: children?.length ? filter(children) : [],
           }));
       })((!currTopMenuKey.value ? menus.value : menuKeyMap.value.get(currTopMenuKey.value)?.children) ?? []);
-    } else if (menu?.parent?.key && menu?.position === 'sub') {
-      return (menuKeyMap.value.get(menu.parent.key)?.children ?? [])
-        .filter((item) => item.display !== false)
-        .map(({ children: _, ...restItem }) => restItem);
     }
     return [];
   });
@@ -87,18 +87,33 @@ export const useLayoutMixin = () => {
     return null;
   });
 
+  const setTopCurrMenuKey = (key?: string) => {
+    if (currTopMenuKey.value === key) return;
+    currTopMenuKey.value = key;
+  };
+
+  const setSiderCurrMenuKey = (key: string) => {
+    if (currSiderMenuKey.value === key) return;
+    currSiderMenuKey.value = key;
+  };
+
+  const setSiderMenuOpenKeys = (openKeys: string[]) => {
+    siderMenuOpenKeys.value = openKeys;
+  };
+
+  // breadcrumb
+  const menuBreadcrumbs = ref<Array<BreadcrumbConfig>>([]);
+  const setMenuBreadcrumb = (list: Array<BreadcrumbConfig>) => {
+    menuBreadcrumbs.value = list;
+  };
+
   // 更新菜单/面包屑状态
   let cachedPath: string | undefined;
   const currentMatchPath = ref('');
 
-  /**
-   * 设置路由路径，通过路径计算面包屑及菜单形式等
-   * 默认监听当前路由 path 变化
-   */
-  const setPath = (path: string) => {
-    cachedPath = path;
+  const getMatchedPath = (path: string) => {
     const pathWithoutQuery = path.split('?')[0];
-    currentMatchPath.value = menuPathMap.value.has(path) // full path is equal to menu path
+    return menuPathMap.value.has(path) // full path is equal to menu path
       ? path
       : menuPathMap.value.get(pathWithoutQuery) // path without query is equal to menu path
       ? pathWithoutQuery
@@ -111,6 +126,52 @@ export const useLayoutMixin = () => {
               (regex) => regex.test(path.split('?')[0]), // path without query is matched by alias regex
             ),
         )?.[0] || matchNoRegistPageParentPath(path, menuPathMap.value);
+  };
+
+  const getTopMenuKey = (key: string) => {
+    const parent = menuKeyMap.value.get(key)?.parent;
+
+    if (parent?.position === 'top') {
+      return parent.key;
+    } else if (parent) {
+      return getTopMenuKey(parent.key);
+    }
+    return key;
+  };
+
+  /**
+   * 设置路由路径，通过路径计算面包屑及菜单形式等
+   * 默认监听当前路由 path 变化
+   */
+  const setPath = (path: string, immediately = true) => {
+    const matchedPath = getMatchedPath(path);
+    if (immediately) {
+      cachedPath = path;
+      if (currentMatchPath.value === matchedPath) {
+        // 恢复 topMenu 选中状态
+        const currentMatched = menuPathMap.value.get(matchedPath);
+        if (!currentMatched) return;
+
+        setTopCurrMenuKey(getTopMenuKey(currentMatched.key));
+      } else {
+        currentMatchPath.value = getMatchedPath(path);
+      }
+    } else {
+      // 选中 topMenu，待选择 siderMenu
+      const nextMatched = menuPathMap.value.get(matchedPath);
+      if (!nextMatched) return;
+
+      setTopCurrMenuKey(getTopMenuKey(nextMatched.key));
+    }
+  };
+
+  /**
+   * 设置菜单
+   */
+  const setMenus = (menuConfig: MenuConfig[]) => {
+    menus.value = menuConfig;
+    // 当手动设置后，需要使用 setPath 重新计算菜单状态
+    cachedPath && setPath(cachedPath);
   };
 
   /**
@@ -194,35 +255,6 @@ export const useLayoutMixin = () => {
     return { path: pathDefine, resolved: false };
   };
 
-  /**
-   * 设置菜单
-   */
-  const setMenus = (menuConfig: MenuConfig[]) => {
-    menus.value = menuConfig;
-    // 当手动设置后，需要使用 setPath 重新计算菜单状态
-    cachedPath && setPath(cachedPath);
-  };
-
-  const setTopCurrMenuKey = (key?: string) => {
-    if (currTopMenuKey.value === key) return;
-    currTopMenuKey.value = key;
-  };
-
-  const setSiderCurrMenuKey = (key: string) => {
-    if (currSiderMenuKey.value === key) return;
-    currSiderMenuKey.value = key;
-  };
-
-  const setSiderMenuOpenKeys = (openKeys: string[]) => {
-    siderMenuOpenKeys.value = openKeys;
-  };
-
-  // breadcrumb
-  const menuBreadcrumbs = ref<Array<BreadcrumbConfig>>([]);
-  const setMenuBreadcrumb = (list: Array<BreadcrumbConfig>) => {
-    menuBreadcrumbs.value = list;
-  };
-
   useEffect(() => {
     const currentPath = currentMatchPath.value;
     if (currentPath) {
@@ -233,17 +265,7 @@ export const useLayoutMixin = () => {
       if (!currentMatched) return;
 
       // topMenu
-      const topMenu = (function getTopMenu(key: string): string | undefined {
-        const parent = menuKeyMap.value.get(key)?.parent;
-
-        if (parent?.position === 'top') {
-          return parent.key;
-        } else if (parent) {
-          return getTopMenu(parent.key);
-        }
-        return;
-      })(currentMatched.key);
-      setTopCurrMenuKey(topMenu);
+      setTopCurrMenuKey(getTopMenuKey(currentMatched.key));
 
       // siderMenu
       const siderMenuOpenKeys = (function getSiderMenuOpenKeys(key: string, result: string[] = []): string[] {

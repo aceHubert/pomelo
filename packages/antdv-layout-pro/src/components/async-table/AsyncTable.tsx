@@ -459,7 +459,7 @@ export default defineComponent({
             <template slot="message">
               <span style="margin-right: 12px">
                 {configProvider.i18nRender(`${props.i18nKeyPrefix}.selected`, 'Selected')}:&nbsp;
-                <a style="font-weight: 600">
+                <strong class="primary--text">
                   {configProvider.i18nRender(
                     `${props.i18nKeyPrefix}.selected_row_count`,
                     `${selectedRow.items.length} Row(s)`,
@@ -467,7 +467,7 @@ export default defineComponent({
                       count: selectedRow.items.length,
                     },
                   )}
-                </a>
+                </strong>
               </span>
               {needTotalItems}
               {clearItem}

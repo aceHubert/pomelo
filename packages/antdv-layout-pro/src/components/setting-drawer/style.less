@@ -3,5 +3,79 @@
 @setting-drawer-prefix-cls: ~'@{ant-prefix}-setting-drawer';
 
 .@{setting-drawer-prefix-cls} {
-  position: relative;
+  &__title {
+    margin-bottom: 12px;
+    color: var(--text-primary, @text-color);
+    font-size: 14px;
+    line-height: 22px;
+  }
+
+  &__block-checkbox {
+    display: flex;
+  }
+
+  &-block-checkbox__item {
+    margin-right: 16px;
+    position: relative;
+    border-radius: 4px;
+    cursor: pointer;
+
+    img {
+      width: 48px;
+    }
+
+    .selected-icon {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      padding-top: 15px;
+      padding-left: 24px;
+      height: 100%;
+      color: @var-primary;
+      font-size: 14px;
+      font-weight: 700;
+    }
+  }
+
+  &__block-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    float: left;
+    cursor: pointer;
+    margin-right: 8px;
+    padding-left: 0px;
+    padding-right: 0px;
+    text-align: center;
+    color: #fff;
+    font-weight: 700;
+
+    i {
+      font-size: 14px;
+    }
+  }
+
+  &__handle {
+    position: absolute;
+    top: 240px;
+    background: @var-primary;
+    width: 48px;
+    height: 48px;
+    right: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 1001;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 4px 0 0 4px;
+
+    i {
+      color: rgb(255, 255, 255);
+      font-size: 20px;
+    }
+  }
 }
