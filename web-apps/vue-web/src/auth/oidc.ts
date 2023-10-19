@@ -90,32 +90,28 @@ Object.defineProperties(Oidc.UserManager.prototype, {
   // otherwise, redirect to user center to sign in
   signin: {
     value: function (this: OidcUserManager, args: SigninArgs = {}) {
-      const { noInteractive, redirect_uri, ...restArgs } = args;
+      const { redirect_uri, ...restArgs } = args;
       this.saveRedirect(redirect_uri);
-      if (noInteractive) {
-        return this.getUser().then((user: any) => {
-          const removeUser = user ? this.removeUser() : Promise.resolve();
-          return Promise.all([this.getExtraQueryParams(user), removeUser]).then(([extraQueryParams]) => {
-            const $signIn = () =>
-              this.signinRedirect({
-                ...restArgs,
-                extraQueryParams: {
-                  ...restArgs.extraQueryParams,
-                  ...extraQueryParams,
-                },
-              });
 
-            // TODO: 以其它方式登录
-            // 如微信、钉钉、飞书等
+      return this.getUser().then((user: any) => {
+        const removeUser = user ? this.removeUser() : Promise.resolve();
+        return Promise.all([this.getExtraQueryParams(user), removeUser]).then(([extraQueryParams]) => {
+          const $signIn = () =>
+            this.signinRedirect({
+              ...restArgs,
+              extraQueryParams: {
+                ...restArgs.extraQueryParams,
+                ...extraQueryParams,
+              },
+            });
 
-            // 跳转登录
-            return $signIn();
-          });
+          // TODO: 以其它方式登录
+          // 如微信、钉钉、飞书等
+
+          // 跳转登录
+          return $signIn();
         });
-      } else {
-        location.replace('/session-timeout');
-        return Promise.resolve(() => {});
-      }
+      });
     },
     writable: false,
     enumerable: false,

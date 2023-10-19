@@ -96,6 +96,6 @@ export type SigninSilentArgs = IFrameWindowParams & ExtraSigninRequestArgs;
 
 export type SignoutRedirectArgs = RedirectParams & ExtraSignoutRequestArgs;
 
-export type SigninArgs = SigninRedirectArgs & { noInteractive?: boolean };
+export type SigninArgs = SigninRedirectArgs;
 
 export type SignoutArgs = SignoutRedirectArgs;

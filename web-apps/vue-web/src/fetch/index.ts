@@ -25,7 +25,8 @@ axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) =
     .then((user) => user?.access_token)
     .catch(() => '');
 
-  if (!token && location.hash === '#PREVIEW') {
+  // 从管理端预览打开
+  if (!token && window.name === 'preview') {
     token = await userManager
       .signinSilent()
       .then((user) => user?.access_token)
