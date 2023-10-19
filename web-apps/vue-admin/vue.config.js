@@ -35,6 +35,55 @@ module.exports = defineConfig({
   publicPath,
   assetsDir: assetsPath,
   productionSourceMap: false,
+  pwa: {
+    name: 'Pomelo Admin',
+    themeColor: '#ffffff',
+    msTileColor: '#e94709',
+    appleMobileWebAppCapable: 'yes',
+    appleMobileWebAppStatusBarStyle: 'black',
+    iconPaths: {
+      faviconSVG: `${assetsPath}/icons/favicon.svg?v2`,
+      favicon32: `${assetsPath}/icons/favicon-32x32.png`,
+      favicon16: `${assetsPath}/icons/favicon-16x16.png`,
+      appleTouchIcon: `${assetsPath}/icons/apple-touch-icon.png`,
+      maskIcon: `${assetsPath}/icons/safari-pinned-tab.svg`,
+      msTileImage: `${assetsPath}/icons/mstile-144x144.png`,
+    },
+    manifestOptions: {
+      short_name: 'Pomelo',
+      icons: [
+        {
+          src: `${assetsPath}/icons/android-chrome-192x192.png`,
+          sizes: '192x192',
+          type: 'image/png',
+        },
+        {
+          src: `${assetsPath}/icons/android-chrome-512x512.png`,
+          sizes: '512x512',
+          type: 'image/png',
+        },
+        {
+          src: `${assetsPath}/icons/maskable-192x192.png`,
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+        {
+          src: `${assetsPath}/icons/maskable-512x512.png`,
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+      ],
+    },
+    workboxPluginMode: 'InjectManifest',
+    workboxOptions: {
+      // importScripts: ['https://storage.googleapis.com/workbox-cdn/releases/5.1.4/workbox-sw.js'],
+      // exclude: [/\.html$/],//html不进行service Worker缓存
+      // 自定义 Service Worker 文件的位置
+      swSrc: './src/service-worker.js',
+    },
+  },
   devServer: {
     host: devHost,
     port: devPort,

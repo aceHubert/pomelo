@@ -168,6 +168,18 @@
       "show_more_btn_text": "查看更多"
     }
   },
+  "layout_default": {
+    "page_style_setting_title": "显示设置",
+    "signout": {
+      "tooltip": "退出登录",
+      "dialog": {
+        "title": "确认",
+        "content": "确认退出吗?",
+        "ok_text": "是",
+        "cancel_text": "否"
+      }
+    }
+  },
   "page_dashboard": {
     "title": "仪表盘",
     "alert": {
@@ -389,9 +401,14 @@
     },
     "design_settings": {
       "title": "设置"
+    },
+    "setting_header": {
+      "display": "显示设置：",
+      "designer": "设计器："
     }
   },
   "page_media": {
+    "search_placeholder": "输入\"文件名\"搜索",
     "upload_dragger_btn_text": "点击或拖拽至此上传媒体文件",
     "upload_multiple_btn_tips": "支持单个或批量媒体文件上传。",
     "upload_btn_text": "点击上传媒体文件",
@@ -420,8 +437,5 @@
     "image_height": "图片高度",
     "full_path": "媒体地址",
     "created_at": "创建时间"
-  },
-  "media": {
-    "search_placeholder": "输入\"文件名\"搜索"
   }
 }

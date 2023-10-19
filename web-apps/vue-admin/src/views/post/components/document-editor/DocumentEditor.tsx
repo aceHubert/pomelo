@@ -10,6 +10,7 @@ export type Editor = {
 
 export type DocumentEditorProps = {
   title?: string;
+  fullwidth?: boolean;
 };
 
 export default defineComponent({
@@ -17,6 +18,7 @@ export default defineComponent({
   inheritAttrs: false,
   props: {
     title: String,
+    fullwidth: Boolean,
   },
   setup(props: DocumentEditorProps, { attrs, listeners }) {
     const prefixCls = 'document-editor';
@@ -27,9 +29,11 @@ export default defineComponent({
     return () => {
       return (
         <HtmlEditor
+          class={[prefixCls, { [`${prefixCls}--fullwidth`]: props.fullwidth }]}
           {...{
             attrs: {
               type: 'balloon',
+              width: props.fullwidth ? '100%' : '1180px',
               ...attrs,
             },
             on: restListeners,

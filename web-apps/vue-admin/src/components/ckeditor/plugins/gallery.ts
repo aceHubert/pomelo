@@ -30,14 +30,12 @@ export class Gallery extends Plugin {
         const selectionAttributes = Object.fromEntries(selection.getAttributes());
         open({ accept: imageTypes?.map((type) => `image/${type}`).join(',') }, (url) => {
           const selectedElement = selection.getSelectedElement();
-          let imageElement;
           if (selectedElement && imageUtils.isImage(selectedElement)) {
             const position = this.editor.model.createPositionAfter(selectedElement);
-            imageElement = imageUtils.insertImage({ ...selectionAttributes, src: url }, position);
+            imageUtils.insertImage({ ...selectionAttributes, src: url }, position);
           } else {
-            imageElement = imageUtils.insertImage({ ...selectionAttributes, src: url });
+            imageUtils.insertImage({ ...selectionAttributes, src: url });
           }
-          imageUtils.setImageNaturalSizeAttributes(imageElement);
         });
       });
 

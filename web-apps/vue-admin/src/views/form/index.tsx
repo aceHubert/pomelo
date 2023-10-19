@@ -150,7 +150,7 @@ export default defineComponent({
         const baseUrl = trailingSlash(siteUrl.value || '/');
         // TODO: config format url
 
-        return baseUrl + `f/${record.id}#PREVIEW`;
+        return baseUrl + `f/${record.id}`;
       };
 
       const renderRowInline = (record: PagedFormTemplateItem) => {
@@ -195,6 +195,7 @@ export default defineComponent({
                     record.actionCapability.publish &&
                     !record.isSelfContent)) && (
                   <router-link
+                    custom
                     to={{ name: 'form-edit', params: { id: record.id } }}
                     class={
                       record.status === TemplateStatus.Pending &&
@@ -203,13 +204,18 @@ export default defineComponent({
                         ? 'warning--text'
                         : ''
                     }
-                  >
-                    {record.status === TemplateStatus.Pending &&
-                    record.actionCapability.publish &&
-                    !record.isSelfContent
-                      ? i18n.tv('page_templates.btn_text.review', '审核')
-                      : i18n.tv('common.btn_text.edit', '编辑')}
-                  </router-link>
+                    scopedSlots={{
+                      default: ({ href }) => (
+                        <a href={href} target="designer">
+                          {record.status === TemplateStatus.Pending &&
+                          record.actionCapability.publish &&
+                          !record.isSelfContent
+                            ? i18n.tv('page_templates.btn_text.review', '审核')
+                            : i18n.tv('common.btn_text.edit', '编辑')}
+                        </a>
+                      ),
+                    }}
+                  ></router-link>
                 ),
                 record.isSelfContent && (
                   <a
@@ -231,7 +237,7 @@ export default defineComponent({
                       : i18n.tv('page_templates.btn_text.move_to_trush', '放入回收站')}
                   </a>
                 ),
-                <a href={getViewUrl(record) ?? 'javascript:;'} target="preview-route">
+                <a href={getViewUrl(record)} target="preview">
                   {record.status === TemplateStatus.Publish
                     ? i18n.tv('common.btn_text.view', '查看')
                     : i18n.tv('common.btn_text.preview', '预览')}
@@ -301,16 +307,20 @@ export default defineComponent({
             }
             return (
               <div class={classes.title}>
-                <router-link
-                  to={{ name: 'post-edit', params: { id: record.id } }}
-                  class={classes.routerLink}
-                  target="preview-route"
-                >
-                  {record.title}
+                <p class="mb-0 d-flex">
+                  <a
+                    href={getViewUrl(record)}
+                    class={[classes.titleLink, 'text-ellipsis']}
+                    title={record.title}
+                    style="flex: 0 1 auto;"
+                    target="preview"
+                  >
+                    {record.title}
+                  </a>
                   {titleSuffixs.length > 0 && (
-                    <span class="warning--text font-weight-bold">{` - ${titleSuffixs.join(', ')}`}</span>
+                    <span class="warning--text font-weight-bold pl-1 flex-none">{`- ${titleSuffixs.join(', ')}`}</span>
                   )}
-                </router-link>
+                </p>
                 <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>
                 {!deviceMixin.isDesktop && renderRowInline(record)}
               </div>

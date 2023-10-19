@@ -1,8 +1,22 @@
 import { defineComponent, ref, computed, onMounted, nextTick, toRef } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { isAbsoluteUrl } from '@ace-util/core';
-import { Icon, Space, Tooltip } from 'ant-design-vue';
-import { ConfigProvider, LayoutAdmin, AvatarDropdown, AvatarDropdownAction, LocaleDropdown } from 'antdv-layout-pro';
+import { Icon, Space, Tooltip, Spin } from 'ant-design-vue';
+import {
+  ConfigProvider,
+  LayoutAdmin,
+  AvatarDropdown,
+  AvatarDropdownAction,
+  LocaleDropdown,
+  SettingDrawer,
+} from 'antdv-layout-pro';
+import {
+  Theme,
+  type MenuConfig,
+  type BreadcrumbConfig,
+  type LayoutType,
+  type ContentWidth,
+} from 'antdv-layout-pro/types';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
 import { useUserManager, useI18n, expose } from '@/hooks';
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
@@ -10,12 +24,8 @@ import { loadingRef } from '@/shared';
 import { getDefaultMenus } from '@/configs/menu.config';
 import IconDarkTheme from '@/assets/icons/dark-theme.svg?inline';
 import IconLightTheme from '@/assets/icons/light-theme.svg?inline';
-import { Theme } from '@/types';
 import { RouterView } from './components';
 import classes from './styles/default.module.less';
-
-// Types
-import type { MenuConfig, BreadcrumbConfig } from 'antdv-layout-pro/types';
 
 export default defineComponent({
   name: 'DefaultLayout',
@@ -50,6 +60,7 @@ export default defineComponent({
 
     const currentUser = ref<{ name: string; photo: string }>();
     const menus = ref<MenuConfig[]>([]);
+    const settingDrawerVisible = ref(false);
 
     /**
      * serialize menu from server
@@ -198,220 +209,229 @@ export default defineComponent({
           !!deviceMixin.device &&
             // 用户登录后再显示 Layout
             currentUser.value && (
-              <LayoutAdmin
-                logo={appMixin.siteLogo}
-                title={appMixin.siteTitle}
-                menus={menus.value}
-                layoutType={appMixin.type}
-                contentWidth={appMixin.contentWidth}
-                fixedHeader={appMixin.fixedHeader}
-                fixSiderbar={appMixin.fixSiderbar}
-                autoHideHeader={appMixin.autoHideHeader}
-                multiTab={
-                  appMixin.multiTab && [
-                    {
-                      path: '/dashboard',
-                      fullPath: '/dashboard',
-                      title: '仪表盘',
-                      closable: false,
-                    },
-                  ]
-                }
-                sideCollapsed={appMixin.sideCollapsed}
-                sideCollapsedMouseAnimationDisabled
-                loading={loadingRef.value}
-                loadingText={i18n.tv('common.tips.loading_text', 'Loading...') as string}
-                class={classes.layoutWrapper}
-                scopedSlots={{
-                  headerActions: () => (
-                    <Space size="middle">
-                      <Tooltip placement="bottom" title={i18n.tv('layout_default.switch_theme_title', '切换主题')}>
-                        <span
-                          onClick={() =>
-                            appMixin.setTheme(
-                              appMixin.theme === Theme.Dark
-                                ? Theme.RealLight
-                                : appMixin.theme === Theme.RealLight
-                                ? Theme.Light
-                                : Theme.Dark,
-                            )
-                          }
-                        >
-                          <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
-                        </span>
-                      </Tooltip>
-                      <LocaleDropdown
-                        locale={i18n.locale}
-                        supportLanguages={appMixin.supportLanguages}
-                        placement="bottom"
-                        onChange={handleLocaleChange}
-                      />
-                      <AvatarDropdown
-                        style="max-width: 120px;"
-                        name={currentUser.value?.name}
-                        src={currentUser.value?.photo}
-                        placement="bottomRight"
-                        onAction={handleActionClick}
-                        scopedSlots={{
-                          menuItems: () => [],
-                        }}
-                      />
-                    </Space>
-                  ),
-                  siderActions: (collapsed) => (
-                    <div class="pt-3 pb-5 px-3 bdr-t">
-                      {/* Popover container 在 body 中会导致上面的 onMouseleaver 事件触发 */}
-                      <div id="_popoverContainer"></div>
-                      <Space direction="vertical" align="center" size="middle">
-                        {collapsed && (
-                          <Tooltip placement="right" title={i18n.tv('layout_default.switch_theme_title', '切换主题')}>
-                            <span
-                              onClick={() =>
-                                appMixin.setTheme(
-                                  appMixin.theme === Theme.Dark
-                                    ? Theme.RealLight
-                                    : appMixin.theme === Theme.RealLight
-                                    ? Theme.Light
-                                    : Theme.Dark,
-                                )
-                              }
-                            >
-                              <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
-                            </span>
-                          </Tooltip>
-                        )}
-                        {collapsed && (
-                          <LocaleDropdown
-                            // class={['d-block pt-4', { 'text-center': collaspsed }]}
-                            locale={i18n.locale}
-                            supportLanguages={appMixin.supportLanguages}
-                            placement="rightBottom"
-                            arrowPointAtCenter
-                            scopedSlots={{
-                              default: (locale) => locale.shortName ?? locale.name,
-                            }}
-                            onChange={handleLocaleChange}
-                          />
-                        )}
+              <div>
+                <LayoutAdmin
+                  class={classes.layoutWrapper}
+                  logo={appMixin.siteLogo}
+                  title={appMixin.siteTitle}
+                  menus={menus.value}
+                  layoutType={appMixin.layout.type}
+                  contentWidth={appMixin.layout.contentWidth}
+                  fixedHeader={appMixin.layout.fixedHeader}
+                  fixSiderbar={appMixin.layout.fixSiderbar}
+                  autoHideHeader={appMixin.layout.autoHideHeader}
+                  colorWeak={appMixin.layout.colorWeak}
+                  multiTab={
+                    appMixin.layout.multiTab && [
+                      {
+                        path: '/dashboard',
+                        fullPath: '/dashboard',
+                        title: '仪表盘',
+                        closable: false,
+                      },
+                    ]
+                  }
+                  sideCollapsed={appMixin.layout.sideCollapsed}
+                  initRouteChange={(callback) => {
+                    // 子应用路由变更使用 replaceState 时触发菜单更新
+                    const listener = () => {
+                      nextTick(() => {
+                        callback(router.resolve(location.pathname + location.search).href);
+                      });
+                    };
+                    window.addEventListener('replaceState', listener, false);
 
+                    return () => {
+                      window.removeEventListener('replaceState', listener, false);
+                    };
+                  }}
+                  scopedSlots={{
+                    headerActions: () => (
+                      <Space size="middle">
+                        <Tooltip
+                          placement="bottom"
+                          title={i18n.tv('layout_default.page_style_setting_title', '显示设置')}
+                        >
+                          <span onClick={() => (settingDrawerVisible.value = !settingDrawerVisible.value)}>
+                            <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
+                          </span>
+                        </Tooltip>
+                        <LocaleDropdown
+                          locale={i18n.locale}
+                          supportLanguages={appMixin.supportLanguages}
+                          placement="bottom"
+                          onChange={handleLocaleChange}
+                        />
                         <AvatarDropdown
+                          style="max-width: 120px;"
+                          name={currentUser.value?.name}
                           src={currentUser.value?.photo}
-                          avatarProps={{
-                            size: collapsed ? 'small' : 'default',
-                          }}
-                          popoverDisabled={!collapsed}
-                          placement="rightBottom"
+                          placement="bottomRight"
+                          onAction={handleActionClick}
                           scopedSlots={{
-                            name: collapsed
-                              ? undefined
-                              : () => <span vShow={!collapsed}>{currentUser.value?.name}</span>,
-                            description: collapsed
-                              ? undefined
-                              : () => (
-                                  <Space vShow={!collapsed}>
-                                    <Tooltip
-                                      placement="top"
-                                      title={i18n.tv('layout_default.switch_theme_title', '切换主题')}
-                                    >
-                                      <span
-                                        onClick={() =>
-                                          appMixin.setTheme(
-                                            appMixin.theme === Theme.Dark
-                                              ? Theme.RealLight
-                                              : appMixin.theme === Theme.RealLight
-                                              ? Theme.Light
-                                              : Theme.Dark,
-                                          )
-                                        }
-                                      >
-                                        <Icon
-                                          component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme}
-                                        />
-                                      </span>
-                                    </Tooltip>
-                                    <LocaleDropdown
-                                      // class={['d-block pt-4', { 'text-center': collapsed }]}
-                                      locale={i18n.locale}
-                                      supportLanguages={appMixin.supportLanguages}
-                                      placement="topRight"
-                                      arrowPointAtCenter
-                                      getPopupContainer={() =>
-                                        // TIPS: refs 获取不到
-                                        document.getElementById('_popoverContainer') ?? document.body
-                                      }
-                                      onChange={handleLocaleChange}
-                                    />
-                                    <Tooltip
-                                      placement="topRight"
-                                      title={i18n.tv('layout_default.signout.tooltip', '退出登录')}
-                                    >
-                                      <span
-                                        onClick={() =>
-                                          Modal.confirm({
-                                            title: i18n.tv(`layout_default.signout.dialog.title`, '确认'),
-                                            content: i18n.tv(`layout_default.signout.dialog.content`, '确认退出吗?'),
-                                            okText: i18n.tv(`layout_default.signout.dialog.ok_text`, '是') as string,
-                                            cancelText: i18n.tv(
-                                              `layout_default.signout.dialog.cancel_text`,
-                                              '否',
-                                            ) as string,
-                                            onOk: () => handleActionClick(AvatarDropdownAction.SignOut),
-                                            // onCancel() {},
-                                          })
-                                        }
-                                      >
-                                        <Icon type="logout" />
-                                      </span>
-                                    </Tooltip>
-                                  </Space>
-                                ),
                             menuItems: () => [],
                           }}
                         />
                       </Space>
-                    </div>
-                  ),
-                  footer: () => (
-                    <div class={classes.footerWrapper}>
-                      <div class="copyright">
-                        Copyright
-                        <Icon type="copyright" /> 2019-{new Date().getFullYear()} <span> Pomelo 版权所有 </span>
-                      </div>
-                    </div>
-                  ),
-                }}
-                onMenuClick={({ resolved }) => handleMenuClick(resolved.path)}
-                onBreadcrumbChange={(breadcrumb) => {
-                  menuBreadcrumbs.value = breadcrumb.map(({ path, ...rest }) => ({
-                    ...rest,
-                    // replaceState 导制vue-router 与当前实际路由不一致，push/replace 时重复路由 UI 不刷新；
-                    // 增加临时方案 query 增加随机数解决 isSameRotue 问题
-                    path:
-                      path &&
-                      `${path}${path.indexOf('?') >= 0 ? '&' : '?'}_t=${parseInt(String(Math.random() * 1000000))}`,
-                  }));
-                }}
-                onInitRouteChange={(callback) => {
-                  // 子应用路由变更使用 replaceState 时触发菜单更新
-                  const listener = () => {
-                    nextTick(() => {
-                      callback(router.resolve(location.pathname + location.search).href);
-                    });
-                  };
-                  window.addEventListener('replaceState', listener, false);
+                    ),
+                    siderActions: (collapsed) => (
+                      <div class="pt-3 pb-5 px-3 bdr-t">
+                        {/* Popover container 在 body 中会导致上面的 onMouseleaver 事件触发 */}
+                        <div id="_popoverContainer"></div>
+                        <Space direction="vertical" align="center" size="middle">
+                          {collapsed && (
+                            <Tooltip
+                              placement="right"
+                              title={i18n.tv('layout_default.page_style_setting_title', '显示设置')}
+                            >
+                              <span onClick={() => (settingDrawerVisible.value = !settingDrawerVisible.value)}>
+                                <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
+                              </span>
+                            </Tooltip>
+                          )}
+                          {collapsed && (
+                            <LocaleDropdown
+                              // class={['d-block pt-4', { 'text-center': collaspsed }]}
+                              locale={i18n.locale}
+                              supportLanguages={appMixin.supportLanguages}
+                              placement="rightBottom"
+                              arrowPointAtCenter
+                              scopedSlots={{
+                                default: (locale) => locale.shortName ?? locale.name,
+                              }}
+                              onChange={handleLocaleChange}
+                            />
+                          )}
 
-                  return () => {
-                    window.removeEventListener('replaceState', listener, false);
-                  };
-                }}
-              >
-                <LayoutAdmin.BreadcrumbProvider breadcrumb={menuBreadcrumbs.value}>
-                  {/* 在嵌套模式下显示最后一个 */}
-                  <LayoutAdmin.BreadcrumbContainer breadcrumb={!disablePageBreadcrumb.value}>
-                    <RouterView></RouterView>
-                  </LayoutAdmin.BreadcrumbContainer>
-                </LayoutAdmin.BreadcrumbProvider>
-              </LayoutAdmin>
+                          <AvatarDropdown
+                            src={currentUser.value?.photo}
+                            avatarProps={{
+                              size: collapsed ? 'small' : 'default',
+                            }}
+                            popoverDisabled={!collapsed}
+                            placement="rightBottom"
+                            scopedSlots={{
+                              name: collapsed
+                                ? undefined
+                                : () => <span vShow={!collapsed}>{currentUser.value?.name}</span>,
+                              description: collapsed
+                                ? undefined
+                                : () => (
+                                    <Space vShow={!collapsed}>
+                                      <Tooltip
+                                        placement="top"
+                                        title={i18n.tv('layout_default.page_style_setting_title', '显示设置')}
+                                      >
+                                        <span
+                                          onClick={() => (settingDrawerVisible.value = !settingDrawerVisible.value)}
+                                        >
+                                          <Icon
+                                            component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme}
+                                          />
+                                        </span>
+                                      </Tooltip>
+                                      <LocaleDropdown
+                                        // class={['d-block pt-4', { 'text-center': collapsed }]}
+                                        locale={i18n.locale}
+                                        supportLanguages={appMixin.supportLanguages}
+                                        placement="topRight"
+                                        arrowPointAtCenter
+                                        getPopupContainer={() =>
+                                          // TIPS: refs 获取不到
+                                          document.getElementById('_popoverContainer') ?? document.body
+                                        }
+                                        onChange={handleLocaleChange}
+                                      />
+                                      <Tooltip
+                                        placement="topRight"
+                                        title={i18n.tv('layout_default.signout.tooltip', '退出登录')}
+                                      >
+                                        <span
+                                          onClick={() =>
+                                            Modal.confirm({
+                                              title: i18n.tv(`layout_default.signout.dialog.title`, '确认'),
+                                              content: i18n.tv(`layout_default.signout.dialog.content`, '确认退出吗?'),
+                                              okText: i18n.tv(`layout_default.signout.dialog.ok_text`, '是') as string,
+                                              cancelText: i18n.tv(
+                                                `layout_default.signout.dialog.cancel_text`,
+                                                '否',
+                                              ) as string,
+                                              onOk: () => handleActionClick(AvatarDropdownAction.SignOut),
+                                              // onCancel() {},
+                                            })
+                                          }
+                                        >
+                                          <Icon type="logout" />
+                                        </span>
+                                      </Tooltip>
+                                    </Space>
+                                  ),
+                              menuItems: () => [],
+                            }}
+                          />
+                        </Space>
+                      </div>
+                    ),
+                    footer: () => (
+                      <div class={classes.footerWrapper}>
+                        <div class="copyright">
+                          Copyright
+                          <Icon type="copyright" /> 2019-{new Date().getFullYear()} <span> Pomelo 版权所有 </span>
+                        </div>
+                      </div>
+                    ),
+                  }}
+                  onMenuClick={(next) => handleMenuClick(next)}
+                  onBreadcrumbChange={(breadcrumb) => {
+                    menuBreadcrumbs.value = breadcrumb.map(({ path, ...rest }) => ({
+                      ...rest,
+                      // replaceState 导制vue-router 与当前实际路由不一致，push/replace 时重复路由 UI 不刷新；
+                      // 增加临时方案 query 增加随机数解决 isSameRotue 问题
+                      path:
+                        path &&
+                        `${path}${path.indexOf('?') >= 0 ? '&' : '?'}_t=${parseInt(String(Math.random() * 1000000))}`,
+                    }));
+                  }}
+                >
+                  <LayoutAdmin.BreadcrumbProvider breadcrumb={menuBreadcrumbs.value}>
+                    {/* 在嵌套模式下显示最后一个 */}
+                    <LayoutAdmin.BreadcrumbContainer breadcrumb={!disablePageBreadcrumb.value}>
+                      <Spin
+                        class={classes.loading}
+                        spinning={loadingRef.value}
+                        tip={i18n.tv('common.tips.loading_text', 'Loading...') as string}
+                      ></Spin>
+                      <RouterView></RouterView>
+                    </LayoutAdmin.BreadcrumbContainer>
+                  </LayoutAdmin.BreadcrumbProvider>
+                </LayoutAdmin>
+                <SettingDrawer
+                  vModel={settingDrawerVisible.value}
+                  invisibleHandle
+                  theme={appMixin.theme}
+                  primaryColor={appMixin.primaryColor}
+                  layout={appMixin.layout.type}
+                  contentWidth={appMixin.layout.contentWidth}
+                  fixedHeader={appMixin.layout.fixedHeader}
+                  fixSiderbar={appMixin.layout.fixSiderbar}
+                  autoHideHeader={appMixin.layout.autoHideHeader}
+                  colorWeak={appMixin.layout.colorWeak}
+                  multiTab={appMixin.layout.multiTab}
+                  {...{
+                    on: {
+                      'update:theme': (value: Theme) => appMixin.setTheme(value),
+                      'update:primaryColor': (value: string) => appMixin.setPrimaryColor(value),
+                      'update:layout': (value: LayoutType) => appMixin.setLayout({ type: value }),
+                      'update:contentWidth': (value: ContentWidth) => appMixin.setLayout({ contentWidth: value }),
+                      'update:fixedHeader': (value: boolean) => appMixin.setLayout({ fixedHeader: value }),
+                      'update:fixSiderbar': (value: boolean) => appMixin.setLayout({ fixSiderbar: value }),
+                      'update:autoHideHeader': (value: boolean) => appMixin.setLayout({ autoHideHeader: value }),
+                      'update:colorWeak': (value: boolean) => appMixin.setLayout({ colorWeak: value }),
+                      'update:multiTab': (value: boolean) => appMixin.setLayout({ multiTab: value }),
+                    },
+                  }}
+                />
+              </div>
             )
         }
       </ConfigProvider>

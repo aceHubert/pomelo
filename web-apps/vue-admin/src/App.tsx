@@ -7,7 +7,6 @@ import { useAppStore } from '@/store';
 const layouts = {
   _default: () => import(/* webpackChunkName: "layouts" */ './layouts/default'),
   _blank: () => import(/* webpackChunkName: "layouts" */ './layouts/blank'),
-  '_blank-light': () => import(/* webpackChunkName: "layouts" */ './layouts/blank-light'),
 };
 
 export default defineComponent({

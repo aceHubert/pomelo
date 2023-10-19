@@ -95,6 +95,7 @@ export const TemplateMetaPresetKeys = {
   CssText: 'css-text',
   StyleLink: 'style-link',
   FeatureImage: 'feature-image',
+  SettingsDisplay: 'settings-display',
 };
 
 export const PostMetaPresetKeys = {

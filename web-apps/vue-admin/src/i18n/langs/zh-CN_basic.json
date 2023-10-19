@@ -125,6 +125,57 @@
       },
       "no_messasge_text": "没有新消息！",
       "show_more_btn_text": "查看更多"
+    },
+    "setting_drawer": {
+      "preset_colors": {
+        "daybreak_blue": "拂晓蓝",
+        "dust_red": "薄暮红",
+        "volcano": "火山",
+        "sunset_orange": "日暮橙",
+        "cyan": "明青",
+        "polar_green": "极光绿",
+        "geek_blue": "极客蓝",
+        "golden_purple": "酱紫"
+      },
+      "page_style": {
+        "title": "页面风格",
+        "reallight": "亮色菜单模式",
+        "light": "暗色菜单模式",
+        "dark": "黑暗模式"
+      },
+      "primary_color": {
+        "title": "主题色"
+      },
+      "navigation_mode": {
+        "title": "导航模式",
+        "mixed_menu": "混合菜单模式",
+        "sider_menu": "侧边菜单模式",
+        "top_menu": "顶部菜单模式"
+      },
+      "content_width": {
+        "title": "内容区域宽度",
+        "fixed": "固定",
+        "fluid": "流式"
+      },
+      "fixed_header": {
+        "title": "固定顶部"
+      },
+      "auto_hide_header": {
+        "title": "下划隐藏顶部",
+        "tooltip": "固定顶部时有效"
+      },
+      "fixed_sidebar": {
+        "title": "固定侧边栏"
+      },
+      "other_settings": {
+        "title": "其他设置"
+      },
+      "weak_mode": {
+        "title": "弱视模式"
+      },
+      "multi_tab": {
+        "title": "多标签模式"
+      }
     }
   },
   "page_templates": {

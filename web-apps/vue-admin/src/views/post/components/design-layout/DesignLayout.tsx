@@ -1,5 +1,4 @@
 import { defineComponent, ref, watch } from '@vue/composition-api';
-import { useRouter } from 'vue2-helpers/vue-router';
 import {
   Layout,
   Drawer,
@@ -112,7 +111,6 @@ export default defineComponent({
     siderTheme: String,
   },
   setup(props, { emit, slots }) {
-    const router = useRouter();
     const i18n = useI18n();
     const appMixin = useAppMixin();
     const deviceMixin = useDeviceMixin();
@@ -168,21 +166,21 @@ export default defineComponent({
             <Row gutter={16} type="flex" justify="space-between">
               <Col flex={0}>
                 <Space>
-                  <a
+                  {/* <a
                     href="javascript:;"
                     class="logo"
                     title={i18n.tv('common.btn_tips.go_back', '返回上一级')}
                     onClick={() => router.back()}
-                  >
-                    {renderLogo()}
-                  </a>
-                  {slots.leftAction?.()}
+                  > */}
+                  {renderLogo()}
+                  {/* </a> */}
+                  {slots.leftActions?.()}
                 </Space>
               </Col>
               <Col flex={1} class={['text-right']}>
                 {props.actionCapability.operate && (
                   <Space>
-                    {slots.actions?.()}
+                    {slots.rightActions?.()}
                     {props.status === TemplateStatus.Pending
                       ? // Pending 状态
                         props.actionCapability.publish && !props.isSelfContent

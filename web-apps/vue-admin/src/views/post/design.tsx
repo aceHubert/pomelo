@@ -2,7 +2,19 @@ import { debounce } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch, toRef, onMounted } from '@vue/composition-api';
 import { trailingSlash, equals } from '@ace-util/core';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { Button, Checkbox, Input, Form, Select, TreeSelect, Divider, Collapse, Icon, Space } from 'ant-design-vue';
+import {
+  Button,
+  Checkbox,
+  Radio,
+  Input,
+  Form,
+  Select,
+  TreeSelect,
+  Divider,
+  Collapse,
+  Icon,
+  Space,
+} from 'ant-design-vue';
 import { expose } from 'antdv-layout-pro/shared';
 import {
   OptionPresetKeys,
@@ -15,9 +27,10 @@ import {
   type SchemaFramework,
 } from '@pomelo/shared-web';
 import { Modal, message } from '@/components';
-import { usePostApi } from '@/fetch/graphql';
+import { useTemplateApi, usePostApi } from '@/fetch/graphql';
 import { useDeviceMixin, useDesignerMixin } from '@/mixins';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
+import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
 import { MediaList } from '../media/components';
 import { DesignLayout, DocumentEditor } from './components';
 import classes from './design.module.less';
@@ -25,6 +38,16 @@ import classes from './design.module.less';
 // Types
 import type { PostTemplateModel } from '@/fetch/graphql';
 import type { ActionStatus, ActionCapability } from './components/design-layout/DesignLayout';
+
+enum Settings {
+  FixedLink = 'fixedLink',
+  Category = 'category',
+  Tag = 'tag',
+  FeatureImage = 'featureImage',
+  Excerpt = 'excerpt',
+  Comment = 'comment',
+  Attribute = 'attribute',
+}
 
 export default defineComponent({
   name: 'PostDesign',
@@ -60,11 +83,27 @@ export default defineComponent({
     const designerMixin = useDesignerMixin();
     const deviceMixin = useDeviceMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
+    const templateApi = useTemplateApi();
     const postApi = usePostApi();
 
     // #region data scopes 新增、修改、查询
     const siderCollapsedRef = ref(true);
-    const contentFrameworkRef = ref<Exclude<SchemaFramework, 'FORMILYJS'>>('HTML');
+
+    const schemaFrameworkOptions = computed(() => [{ label: 'HTML', value: 'HTML' }]);
+    const schemaFrameworkRef = ref<Exclude<SchemaFramework, 'FORMILYJS'>>(
+      schemaFrameworkOptions.value[0].value as SchemaFramework,
+    );
+
+    const settingsDisplayOptions = computed(() => [
+      { label: i18n.tv('page_templates.fixed_link_label', '固定链接'), value: Settings.FixedLink },
+      { label: i18n.tv('page_templates.category_label', '分类'), value: Settings.Category },
+      { label: i18n.tv('page_templates.tag_label', '标签'), value: Settings.Tag },
+      { label: i18n.tv('page_templates.feature_image_label', '特色图片'), value: Settings.FeatureImage },
+      { label: i18n.tv('page_templates.posts.excerpt_label', '摘要'), value: Settings.Excerpt },
+      { label: i18n.tv('page_templates.discussion_label', '讨论'), value: Settings.Comment },
+      { label: i18n.tv('page_templates.posts.attribute_label', '文章属性'), value: Settings.Attribute },
+    ]);
+    const settingsDisplayRef = ref<Settings[]>(settingsDisplayOptions.value.map(({ value }) => value));
 
     const postData = reactive<
       Pick<PostTemplateModel, 'title' | 'excerpt' | 'status'> & {
@@ -86,6 +125,7 @@ export default defineComponent({
     });
 
     const cachedPostData = ref<typeof postData>();
+    const cacheContentData: Record<string, string> = {};
 
     const featureImage = reactive({
       modalVisible: false,
@@ -182,7 +222,7 @@ export default defineComponent({
         postData.allowComment = commentStatus === TemplateCommentStatus.Open;
 
         const { framework } = getFrameworkSchema(content);
-        contentFrameworkRef.value = framework;
+        schemaFrameworkRef.value = framework;
 
         // 其它框架
         // if(framework){}
@@ -203,6 +243,14 @@ export default defineComponent({
         designerMixin.tag.selectData = tagSelectData;
         designerMixin.tag.selectKeys = tags.map(({ id }) => id);
 
+        // settings display
+        let settingsDisplay;
+        if (
+          (settingsDisplay = metas?.find(({ key }) => key === PostMetaPresetKeys.SettingsDisplay)?.value) !== void 0
+        ) {
+          settingsDisplayRef.value = settingsDisplay.split(',');
+        }
+
         // 缓存最新数据
         cachedPostData.value = { ...postData };
 
@@ -221,6 +269,24 @@ export default defineComponent({
         }
 
         isSelfContentRef.value = user?.profile.sub === post.author;
+
+        // cache content when schema framework changed
+        watch(schemaFrameworkRef, (value, old) => {
+          cacheContentData[old] = postData.content;
+          postData.content = cacheContentData[value] || '';
+        });
+
+        // save settings to sever
+        watch(settingsDisplayRef, (value) => {
+          templateApi.updateMetaByKey({
+            variables: {
+              templateId: postData.id!,
+              metaKey: PostMetaPresetKeys.SettingsDisplay,
+              metaValue: value.join(','),
+              createIfNotExists: true,
+            },
+          });
+        });
       },
     );
 
@@ -237,7 +303,7 @@ export default defineComponent({
             updatePost: {
               title: postData.title,
               excerpt: postData.excerpt,
-              content: toFrameworkContent(schema, contentFrameworkRef.value),
+              content: toFrameworkContent(schema, schemaFrameworkRef.value),
               status,
               commentStatus: postData.allowComment ? TemplateCommentStatus.Open : TemplateCommentStatus.Closed,
             },
@@ -351,15 +417,6 @@ export default defineComponent({
         siderCollapsed={siderCollapsedRef.value}
         {...{
           scopedSlots: {
-            actions: () => [
-              <a
-                href={`${fixedLinkRef.value}#PREVIEW`}
-                class="primary--text hover:primary-dark--text"
-                target="preview-route"
-              >
-                {i18n.tv('common.btn_text.preview', '预览')}{' '}
-              </a>,
-            ],
             settingsContent: () => (
               <Form labelAlign="left" labelCol={{ span: 8 }} wrapperCol={{ span: 16 }}>
                 <Form.Item label={i18n.tv('page_templates.visibility_label', '可见性')} class="px-3">
@@ -375,125 +432,159 @@ export default defineComponent({
                   expand-icon-position="right"
                   class="shades transparent"
                 >
-                  {!!fixedLinkRef.value && (
+                  {settingsDisplayRef.value.includes(Settings.FixedLink) && (
                     <Collapse.Panel header={i18n.tv('page_templates.fixed_link_label', '固定链接')}>
                       <p>{i18n.tv('page_templates.posts.design.view', '查看文章')}</p>
-                      <a href={`${fixedLinkRef.value}#PREVIEW`} target="preview-route">
+                      <a href={`${fixedLinkRef.value}`} class={classes.fixedLink} target="preview">
                         {fixedLinkRef.value}
-                        <Icon type="link" class="ml-1" />
+                        <Icon component={IconLinkExternal} class="ml-1" />
                       </a>
                     </Collapse.Panel>
                   )}
-                  <Collapse.Panel header={i18n.tv('page_templates.category_label', '分类')}>
-                    <TreeSelect
-                      value={designerMixin.category.selectKeys}
-                      treeData={designerMixin.category.treeData}
-                      loadData={designerMixin.loadCategoryData.bind(this)}
-                      treeCheckStrictly
-                      showSearch
-                      treeCheckable
-                      treeDataSimpleMode
-                      dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
-                      placeholder={i18n.tv('page_templates.category_placeholder', '请选择分类(或输入搜索分类)')}
-                      onSearch={debounce(designerMixin.handleCategorySearch, 800)}
-                      onChange={designerMixin.handleCategoryChange(postData.id!).bind(this)}
-                    ></TreeSelect>
-                    <router-link to={{ name: 'category' }} class="d-block mt-2">
-                      {i18n.tv('page_templates.new_category_link_text', '新建分类')}
-                    </router-link>
-                  </Collapse.Panel>
-                  <Collapse.Panel header={i18n.tv('page_templates.tag_label', '标签')}>
-                    <Select
-                      value={designerMixin.tag.selectKeys}
-                      options={designerMixin.tag.selectData}
-                      showSearch
-                      mode="tags"
-                      dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
-                      placeholder={i18n.tv('page_templates.tag_placeholder', '请选择标签(或输入标签添加)')}
-                      onSelect={designerMixin.handleTagSelect(postData.id!).bind(this)}
-                      onDeselect={designerMixin.handleTagDeselect(postData.id!).bind(this)}
-                    ></Select>
-                  </Collapse.Panel>
-                  <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>
-                    <div class={classes.featureImageSelector} onClick={() => (featureImage.modalVisible = true)}>
-                      {postData.featureImage ? (
-                        <div class={classes.featureImageCover}>
-                          <img
-                            src={postData.featureImage}
-                            alt="feature-image"
-                            style="object-fit: contain; width: 100%; max-height: 120px;"
-                          />
-                          <Space class={classes.featureImageCoverActions}>
-                            <Button shape="circle" icon="select" />
-                            <Button
-                              shape="circle"
-                              icon="delete"
-                              vOn:click_prevent_stop={() => (postData.featureImage = '')}
+                  {settingsDisplayRef.value.includes(Settings.Category) && (
+                    <Collapse.Panel header={i18n.tv('page_templates.category_label', '分类')}>
+                      <TreeSelect
+                        value={designerMixin.category.selectKeys}
+                        treeData={designerMixin.category.treeData}
+                        loadData={designerMixin.loadCategoryData.bind(this)}
+                        treeCheckStrictly
+                        showSearch
+                        treeCheckable
+                        treeDataSimpleMode
+                        dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
+                        placeholder={i18n.tv('page_templates.category_placeholder', '请选择分类(或输入搜索分类)')}
+                        onSearch={debounce(designerMixin.handleCategorySearch, 800)}
+                        onChange={designerMixin.handleCategoryChange(postData.id!).bind(this)}
+                      ></TreeSelect>
+                      <router-link to={{ name: 'category' }} class="d-block mt-2">
+                        {i18n.tv('page_templates.new_category_link_text', '新建分类')}
+                      </router-link>
+                    </Collapse.Panel>
+                  )}
+                  {settingsDisplayRef.value.includes(Settings.Tag) && (
+                    <Collapse.Panel header={i18n.tv('page_templates.tag_label', '标签')}>
+                      <Select
+                        value={designerMixin.tag.selectKeys}
+                        options={designerMixin.tag.selectData}
+                        showSearch
+                        mode="tags"
+                        dropdownStyle={{ maxHeight: '400px', overflow: 'auto' }}
+                        placeholder={i18n.tv('page_templates.tag_placeholder', '请选择标签(或输入标签添加)')}
+                        onSelect={designerMixin.handleTagSelect(postData.id!).bind(this)}
+                        onDeselect={designerMixin.handleTagDeselect(postData.id!).bind(this)}
+                      ></Select>
+                    </Collapse.Panel>
+                  )}
+                  {settingsDisplayRef.value.includes(Settings.FeatureImage) && (
+                    <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>
+                      <div class={classes.featureImageSelector} onClick={() => (featureImage.modalVisible = true)}>
+                        {postData.featureImage ? (
+                          <div class={classes.featureImageCover}>
+                            <img
+                              src={postData.featureImage}
+                              alt="feature-image"
+                              style="object-fit: contain; width: 100%; max-height: 120px;"
                             />
-                          </Space>
-                        </div>
-                      ) : (
-                        <div class={classes.featureImageAdd}>
-                          <Icon type="plus" />
-                          <div class="text--secondary">
-                            {i18n.tv('page_templates.upload_feature_image_label', '设置特色图片')}
+                            <Space class={classes.featureImageCoverActions}>
+                              <Button shape="circle" icon="select" />
+                              <Button
+                                shape="circle"
+                                icon="delete"
+                                vOn:click_prevent_stop={() => (postData.featureImage = '')}
+                              />
+                            </Space>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                    <p class="font-size-xs text--secondary">
-                      {i18n.tv('page_templates.feature_image_tips', '推荐尺寸：1980x300(px)')}
-                    </p>
-                    <Modal
-                      title={i18n.tv('page_templates.feature_image_modal.title', '选择特色图片')}
-                      visible={featureImage.modalVisible}
-                      width={932}
-                      footer={null}
-                      onCancel={() => (featureImage.modalVisible = false)}
-                    >
-                      <MediaList
-                        selectable
-                        accept="image/png,image/jpg"
-                        size="small"
-                        pageSize={9}
-                        showSizeChanger={false}
-                        objectPrefixKey="templates/post_"
-                        onSelect={(path) => {
-                          postData.featureImage = path;
-                          featureImage.modalVisible = false;
-                        }}
+                        ) : (
+                          <div class={classes.featureImageAdd}>
+                            <Icon type="plus" />
+                            <div class="text--secondary">
+                              {i18n.tv('page_templates.upload_feature_image_label', '设置特色图片')}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <p class="font-size-xs text--secondary">
+                        {i18n.tv('page_templates.feature_image_tips', '推荐尺寸：1980x300(px)')}
+                      </p>
+                      <Modal
+                        title={i18n.tv('page_templates.feature_image_modal.title', '选择特色图片')}
+                        visible={featureImage.modalVisible}
+                        width={932}
+                        footer={null}
+                        onCancel={() => (featureImage.modalVisible = false)}
+                      >
+                        <MediaList
+                          selectable
+                          accept="image/png,image/jpg"
+                          size="small"
+                          pageSize={9}
+                          showSizeChanger={false}
+                          objectPrefixKey="templates/post_"
+                          onSelect={(path) => {
+                            postData.featureImage = path;
+                            featureImage.modalVisible = false;
+                          }}
+                        />
+                      </Modal>
+                    </Collapse.Panel>
+                  )}
+                  {settingsDisplayRef.value.includes(Settings.Excerpt) && (
+                    <Collapse.Panel header={i18n.tv('page_templates.posts.excerpt_label', '摘要')}>
+                      <p>{i18n.tv('page_templates.write_excerpt_label', '撰写摘要（选填）')}</p>
+                      <Input.TextArea
+                        vModel={postData.excerpt}
+                        row="3"
+                        placeholder={i18n.tv('page_templates.posts.excerpt_placeholder', '请输入内容简介')}
                       />
-                    </Modal>
-                  </Collapse.Panel>
-                  <Collapse.Panel header={i18n.tv('page_templates.posts.excerpt_label', '摘要')}>
-                    <p>{i18n.tv('page_templates.write_excerpt_label', '撰写摘要（选填）')}</p>
-                    <Input.TextArea
-                      vModel={postData.excerpt}
-                      row="3"
-                      placeholder={i18n.tv('page_templates.posts.excerpt_placeholder', '请输入内容简介')}
-                    />
-                  </Collapse.Panel>
-                  <Collapse.Panel header={i18n.tv('page_templates.discussion_label', '讨论')}>
-                    <Checkbox vModel={postData.allowComment}>
-                      {i18n.tv('page_templates.allow_comment_label', '允许评论')}
-                    </Checkbox>
-                  </Collapse.Panel>
-                  <Collapse.Panel header={i18n.tv('page_templates.posts.attribute_label', '文章属性')}>
-                    <p>{i18n.tv('page_templates.template_label', '模版')}</p>
-                    <Select vModel={postData.templatePageType}>
-                      <Select.Option value={TemplatePageType.Default}>
-                        {i18n.tv('page_templates.template_options.default', '默认模版')}
-                      </Select.Option>
-                      <Select.Option value={TemplatePageType.Cover}>
-                        {i18n.tv('page_templates.template_options.cover', '封面模版')}
-                      </Select.Option>
-                      <Select.Option value={TemplatePageType.FullWidth}>
-                        {i18n.tv('page_templates.template_options.full_width', '全宽模版')}
-                      </Select.Option>
-                    </Select>
-                  </Collapse.Panel>
+                    </Collapse.Panel>
+                  )}
+                  {settingsDisplayRef.value.includes(Settings.Comment) && (
+                    <Collapse.Panel header={i18n.tv('page_templates.discussion_label', '讨论')}>
+                      <Checkbox vModel={postData.allowComment}>
+                        {i18n.tv('page_templates.allow_comment_label', '允许评论')}
+                      </Checkbox>
+                    </Collapse.Panel>
+                  )}
+                  {settingsDisplayRef.value.includes(Settings.Attribute) && (
+                    <Collapse.Panel header={i18n.tv('page_templates.posts.attribute_label', '文章属性')}>
+                      <p>{i18n.tv('page_templates.template_label', '模版')}</p>
+                      <Select vModel={postData.templatePageType}>
+                        <Select.Option value={TemplatePageType.Default}>
+                          {i18n.tv('page_templates.template_options.default', '默认模版')}
+                        </Select.Option>
+                        <Select.Option value={TemplatePageType.Cover}>
+                          {i18n.tv('page_templates.template_options.cover', '封面模版')}
+                        </Select.Option>
+                        <Select.Option value={TemplatePageType.FullWidth}>
+                          {i18n.tv('page_templates.template_options.full_width', '全宽模版')}
+                        </Select.Option>
+                      </Select>
+                    </Collapse.Panel>
+                  )}
                 </Collapse>
               </Form>
+            ),
+            extraContent: () => (
+              <div style="width: 220px">
+                <p class="font-weight-bold mb-2">{i18n.tv('page_templates.setting_header.designer', '设计器：')}</p>
+                <Radio.Group vModel={schemaFrameworkRef.value}>
+                  {schemaFrameworkOptions.value.map((option) => (
+                    <Radio value={option.value} class="d-block line-height-lg">
+                      {option.label}
+                    </Radio>
+                  ))}
+                </Radio.Group>
+                <p class="font-weight-bold mb-2 mt-3">
+                  {i18n.tv('page_templates.setting_header.display', '显示设置：')}
+                </p>
+                <Checkbox.Group vModel={settingsDisplayRef.value}>
+                  {settingsDisplayOptions.value.map((option) => (
+                    <Checkbox value={option.value} class="d-block line-height-lg ml-0">
+                      {option.label}
+                    </Checkbox>
+                  ))}
+                </Checkbox.Group>
+              </div>
             ),
           },
           on: {
@@ -508,13 +599,13 @@ export default defineComponent({
           },
         }}
       >
-        {contentFrameworkRef.value === 'HTML' ? (
+        {schemaFrameworkRef.value === 'HTML' ? (
           <DocumentEditor
             {...{
               attrs: {
                 title: postData.title,
                 value: postData.content,
-                width: postData.templatePageType === TemplatePageType.FullWidth ? '100%' : '1180px',
+                fullwidth: postData.templatePageType === TemplatePageType.FullWidth,
                 disabled: actionStatus.processing,
               },
               on: {
@@ -528,7 +619,7 @@ export default defineComponent({
             }}
           />
         ) : (
-          <div>{`设计器类型"${contentFrameworkRef.value}"暂不支持`}</div>
+          <div>{`设计器类型"${schemaFrameworkRef.value}"暂不支持`}</div>
         )}
       </DesignLayout>
     );

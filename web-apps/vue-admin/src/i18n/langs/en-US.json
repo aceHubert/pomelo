@@ -123,48 +123,15 @@
     "content": "Session timeout, need to sign in.",
     "ok_text": "Sign in"
   },
-  "components": {
-    "layout_admin": {
-      "sider_drawer": {
-        "title": "Menu",
-        "collapse_sidebar": "Collapse sidebar",
-        "expand_sidebar": "Expand sidebar"
-      },
-      "search_form": {
-        "row_count": "{count} Row(s)",
-        "keyword_placeholder": "Search",
-        "bulk_action_placeholder": "Bulk operations",
-        "bulk_apply_btn_text": "Apply",
-        "bulk_apply_btn_tips": "Exec bulk operation"
-      },
-      "async_table": {
-        "selected": "Checked",
-        "selected_row_count": "{count} Row(s)",
-        "sum": "Sum",
-        "clear": "Clear"
-      },
-      "avatar_dropdown": {
-        "dialog": {
-          "signout": {
-            "title": "@:common.dialog.title.tips",
-            "content": "Are you sure you want to exit?",
-            "ok_text": "@:common.btn_text.ok",
-            "cancel_text": "@:common.btn_text.no"
-          }
-        },
-        "user": {
-          "profile": "Profile",
-          "settings": "Settings",
-          "signout": "Sign out"
-        }
-      },
-      "message_dropdown": {
-        "item": {
-          "view_link_text": "View",
-          "make_as_read_link_text": "Make as read"
-        },
-        "no_messasge_text": "No new messages!",
-        "show_more_btn_text": "Show more"
+  "layout_default": {
+    "page_style_setting_title": "Display Settings",
+    "signout": {
+      "tooltip": "Sign out",
+      "dialog": {
+        "title": "Confirm",
+        "content": "Are you sure you want to sign out?",
+        "ok_text": ":common.btn_text.yes",
+        "cancel_text": ":common.btn_text.no"
       }
     }
   },
@@ -391,9 +358,14 @@
     },
     "design_settings": {
       "title": "Settings"
+    },
+    "setting_header": {
+      "display": "Display:",
+      "designer": "Designer:"
     }
   },
   "page_media": {
+    "search_placeholder": "Search for \"file name\"",
     "upload_dragger_btn_text": "Click or drag file to this area to upload",
     "upload_multiple_btn_tips": "Support for a single or bulk upload.",
     "upload_btn_text": "Click to upload media file",
@@ -422,8 +394,5 @@
     "image_height": "Height",
     "full_path": "URI",
     "created_at": "Creation time"
-  },
-  "media": {
-    "search_placeholder": "Search for \"file name\""
   }
 }

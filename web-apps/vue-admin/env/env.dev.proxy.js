@@ -26,6 +26,7 @@
     // will revoke (reference) access tokens at logout time
     revokeAccessTokenOnSignout: true,
     mergeClaims: true,
+    monitorSession: false,
   };
 
   window._ENV = env;

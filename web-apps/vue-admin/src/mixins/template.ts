@@ -57,7 +57,7 @@ export const useTemplateMixin = () => {
   // 状态 Tag 背景色
   const statusTagColors: Record<TemplateStatus, string> = {
     [TemplateStatus.Draft]: '#808080',
-    [TemplateStatus.Pending]: '#e94709',
+    [TemplateStatus.Pending]: '#fa541c',
     [TemplateStatus.Publish]: '#87d068',
     [TemplateStatus.Private]: '#87d068',
     [TemplateStatus.Future]: '#108ee9',

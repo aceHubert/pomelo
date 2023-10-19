@@ -33,6 +33,7 @@ import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefrom
 import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation';
+import CodeBlock from '@ckeditor/ckeditor5-code-block/src/codeblock';
 import CKBox from '@ckeditor/ckeditor5-ckbox/src/ckbox';
 import CKFinder from '@ckeditor/ckeditor5-ckfinder/src/ckfinder';
 import CloudServices from '@ckeditor/ckeditor5-cloud-services/src/cloudservices';
@@ -78,6 +79,7 @@ DecoupledEditor.builtinPlugins = [
   Table,
   TableToolbar,
   TextTransformation,
+  CodeBlock,
   CKBox,
   CKFinder,
   CloudServices,
@@ -119,12 +121,17 @@ DecoupledEditor.defaultConfig = {
       'numberedList',
       '|',
       'link',
+      'codeBlock',
       'blockQuote',
       'gallery',
       'insertImage',
       'mediaEmbed',
       'insertTable',
     ],
+  },
+  indentBlock: {
+    offset: 1,
+    unit: 'em',
   },
   fontSize: {
     options: [9, 10, 12, 14, 18, 22, 28],

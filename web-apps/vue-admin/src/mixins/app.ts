@@ -1,9 +1,9 @@
 import { ref, shallowRef, reactive, computed } from '@vue/composition-api';
 import tinycolor from 'tinycolor2';
+import { Theme } from 'antdv-layout-pro/types';
 import { warn } from '@ace-util/core';
 import { useI18n, useEffect } from '@/hooks';
 import { useAppStore } from '@/store';
-import { Theme } from '@/types';
 import { colorPalette } from './utils/colorPalette';
 
 // Types
@@ -127,6 +127,7 @@ export const useAppMixin = () => {
       : appStore.siteTitle,
   );
 
+  const layout = computed(() => appStore.layout);
   const supportLanguages = computed(() => appStore.supportLanguages);
 
   const primaryColor = computed(() => appStore.primaryColor);
@@ -189,8 +190,8 @@ export const useAppMixin = () => {
     isLight,
     isRealLight,
     primaryColor,
+    layout,
     supportLanguages,
-    ...appStore.layout,
     getThemeVars,
     setTheme: appStore.setTheme,
     resetTheme: appStore.resetTheme,

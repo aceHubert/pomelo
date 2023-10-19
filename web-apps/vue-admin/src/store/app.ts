@@ -6,7 +6,8 @@ import { defaultSettings } from '@/configs/settings.config';
 import { STORAGE_PREFIX } from './utils';
 
 // Types
-import type { LocaleConfig, LayoutConfig, ColorConfig, Theme } from '@/types';
+import type { LayoutConfig, ColorConfig, Theme } from 'antdv-layout-pro/types';
+import type { LocaleConfig } from '@/types';
 
 export const useAppStore = defineStore(
   'app',
@@ -16,7 +17,7 @@ export const useAppStore = defineStore(
 
     //#region layout
 
-    // 布局（标题，Logo等）
+    // 布局（菜单模式，固定头部，固定侧边栏等）
     const layout = shallowRef({ ...defaultSettings.layout });
 
     // 主题（主题色，dark/light 模式等）
@@ -146,11 +147,12 @@ export const useAppStore = defineStore(
   {
     persist: {
       key: `${STORAGE_PREFIX}/app-store`,
-      paths: ['layout', 'theme', 'locale'],
+      paths: ['layout', 'theme', 'primaryColor', 'locale'],
       afterRestore: (ctx) => {
         // 初始设置 locale (从缓存中读取)
         ctx.store.setLocale(ctx.store.locale);
         ctx.store.setTheme(ctx.store.theme);
+        ctx.store.setPrimaryColor(ctx.store.primaryColor);
         ctx.store.setLayout(ctx.store.layout);
       },
     },

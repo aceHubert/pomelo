@@ -300,10 +300,23 @@ export const useTemplateApi = defineRegistApi('template', {
     { newMeta: { templateId: number; metaKey: string; metaValue: string } }
   >,
   updateMetaByKey: gql`
-    mutation updateTemplateMetaByKey($templateId: ID!, $metaKey: String!, $metaValue: String!) {
-      result: updateTemplateMetaByKey(templateId: $templateId, metaKey: $metaKey, metaValue: $metaValue)
+    mutation updateTemplateMetaByKey(
+      $templateId: ID!
+      $metaKey: String!
+      $metaValue: String!
+      $createIfNotExists: Boolean! = false
+    ) {
+      result: updateTemplateMetaByKey(
+        templateId: $templateId
+        metaKey: $metaKey
+        metaValue: $metaValue
+        createIfNotExists: $createIfNotExists
+      )
     }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { templateId: number; metaKey: string; metaValue: string }>,
+  ` as TypedMutationDocumentNode<
+    { result: boolean },
+    { templateId: number; metaKey: string; metaValue: string; createIfNotExists?: boolean }
+  >,
   updateMeta: gql`
     mutation updateTemplateMeta($id: ID!, $metaValue: String!) {
       result: updateTemplateMeta(id: $id, metaValue: $metaValue)

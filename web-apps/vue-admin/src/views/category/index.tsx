@@ -4,7 +4,7 @@ import { useI18n } from '@/hooks';
 import classes from './index.module.less';
 
 export default defineComponent({
-  name: ' Category',
+  name: 'TaxonomyCategory',
   head() {
     return {
       title: this.$tv('page_category.title', '类别') as string,

@@ -1,7 +1,7 @@
-import { Layout, Theme, ContentWidth } from '@/types';
+import { LayoutType, Theme, ContentWidth, type LayoutConfig, type ColorConfig } from 'antdv-layout-pro/types';
 
 // Types
-import type { LayoutConfig, ColorConfig, LocaleConfig } from '@/types';
+import type { LocaleConfig } from '@/types';
 
 export const defaultSettings: {
   /**
@@ -31,10 +31,11 @@ export const defaultSettings: {
 } = {
   // pwa: false,
   // iconfontUrl: '',
-  title: (i18nRender: (key: string, fallback: string, args?: any) => string) => i18nRender('site_title', 'Pomelo'),
+  title: (i18nRender: (key: string, fallback: string, args?: any) => string) =>
+    i18nRender('site_title', 'Pomelo Admin'),
   logo: `${process.env.BASE_URL}static/images/logo.png`,
   layout: {
-    type: Layout.SiderMenu,
+    type: LayoutType.SiderMenu,
     contentWidth: ContentWidth.Fluid,
     fixedHeader: true,
     fixSiderbar: true,
@@ -45,7 +46,7 @@ export const defaultSettings: {
   },
   color: {
     theme: Theme.Light,
-    primaryColor: '#e94709',
+    primaryColor: '#FA541C',
   },
   language: {
     locale: 'zh-CN',

@@ -319,7 +319,7 @@ export default defineComponent({
             <Input.Search
               style="width: 220px;"
               defaultValue={keyword.value}
-              placeholder={i18n.tv('media.search_placeholder', '输入"文件名"搜索')}
+              placeholder={i18n.tv('page_media.search_placeholder', '输入"文件名"搜索')}
               onSearch={(val) => {
                 keyword.value = val;
                 refresh(true);
