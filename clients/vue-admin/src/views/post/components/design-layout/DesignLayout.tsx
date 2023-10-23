@@ -181,206 +181,154 @@ export default defineComponent({
                 {props.actionCapability.operate && (
                   <Space>
                     {slots.rightActions?.()}
-                    {props.status === TemplateStatus.Pending
-                      ? // Pending 状态
-                        props.actionCapability.publish && !props.isSelfContent
-                        ? // 有发布权限并且不是自己，可以审核
-                          deviceMixin.isMobile
-                          ? [
-                              <Dropdown.Button
-                                type="primary"
-                                disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                                onClick={() => handleAction(Action.ApproveReview)}
-                              >
-                                {(props.actionStatus.approvingReview || props.actionStatus.rejectingReview) && <Spin />}
-                                {i18n.tv('page_templates.btn_text.review_confirm', '审核通过')}
-                                <Menu slot="overlay" onClick={({ key }: { key: Action }) => handleAction(key)}>
-                                  <Menu.Item
-                                    key={Action.RejectReview}
-                                    disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                                  >
-                                    <span class="danger--text">
-                                      {i18n.tv('page_templates.btn_text.review_reject', '审核不通过')}
-                                    </span>
-                                  </Menu.Item>
-                                </Menu>
-                                <Icon slot="icon" type="down" />
-                              </Dropdown.Button>,
-                            ]
-                          : [
-                              <Button
-                                type="danger"
-                                disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                                loading={props.actionStatus.rejectingReview}
-                                title={i18n.tv('page_templates.btn_tips.review_reject', '内容审核不通过')}
-                                onClick={() => handleAction(Action.RejectReview)}
-                              >
-                                {i18n.tv('page_templates.btn_text.review_reject', '审核不通过')}
-                              </Button>,
-                              <Button
-                                type="primary"
-                                disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                                loading={props.actionStatus.approvingReview}
-                                title={i18n.tv('page_templates.btn_tips.review_confirm', '内容审核通过')}
-                                onClick={() => handleAction(Action.ApproveReview)}
-                              >
-                                {i18n.tv('page_templates.btn_text.review_confirm', '审核通过')}
-                              </Button>,
-                            ]
-                        : props.isSelfContent
-                        ? // 是自己，可以修改后提交审核和撤销保存到草稿
-                          [
-                            <Button
-                              disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                              loading={props.actionStatus.submitingReview}
-                              title={i18n.tv('page_templates.btn_tips.switch_to_draft', '修改并保存内容至草稿箱')}
-                              onClick={() => handleAction(Action.SwitchToDraft)}
-                            >
-                              {i18n.tv('page_templates.btn_text.switch_to_draft', '保存修改至草稿')}
-                            </Button>,
-                            <Button
-                              type="primary"
-                              disabled={
-                                !props.actionStatus.changed ||
-                                props.actionStatus.processing ||
-                                props.actionStatus.disabledActions
-                              }
-                              loading={props.actionStatus.submitingReview}
-                              title={i18n.tv('page_templates.btn_tips.submit_to_review', '提交内容审核')}
-                              onClick={() => handleAction(Action.SubmitReview)}
-                            >
-                              {i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
-                            </Button>,
-                          ]
-                        : null
-                      : props.status === TemplateStatus.Publish || props.status === TemplateStatus.Private
-                      ? // Publish 或 Private 状态
-                        deviceMixin.isMobile
-                        ? [
-                            <Dropdown.Button
-                              type="primary"
-                              disabled={
-                                !props.actionStatus.changed ||
-                                props.actionStatus.processing ||
-                                props.actionStatus.disabledActions
-                              }
-                              onClick={() =>
-                                handleAction(props.actionCapability.publish ? Action.Update : Action.SubmitReview)
-                              }
-                            >
-                              {(props.actionStatus.updating ||
-                                props.actionStatus.submitingReview ||
-                                props.actionStatus.savingToDarft) && <Spin />}
-                              {
-                                // 有发布权限可直接修改，否则需要再次审核
-                                props.actionCapability.publish
-                                  ? i18n.tv('page_templates.btn_text.update', '修改')
-                                  : i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')
-                              }
-                              <Menu slot="overlay" onClick={({ key }: { key: Action }) => handleAction(key)}>
-                                <Menu.Item key={Action.SwitchToDraft}>
-                                  {i18n.tv('page_templates.btn_text.switch_to_draft', '保存修改至草稿')}
-                                </Menu.Item>
-                              </Menu>
-                              <Icon slot="icon" type="down" />
-                            </Dropdown.Button>,
-                          ]
-                        : [
-                            <Button
-                              ghost
-                              type="primary"
-                              disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                              loading={props.actionStatus.savingToDarft}
-                              title={i18n.tv('page_templates.btn_tips.switch_to_draft', '修改并保存内容至草稿箱')}
-                              onClick={() => handleAction(Action.SwitchToDraft)}
-                            >
-                              {i18n.tv('page_templates.btn_text.switch_to_draft', '保存修改至草稿')}
-                            </Button>,
-                            // 有发布权限可直接修改，否则需要再次审核
-                            props.actionCapability.publish ? (
-                              <Button
-                                type="primary"
-                                disabled={
-                                  !props.actionStatus.changed ||
-                                  props.actionStatus.processing ||
-                                  props.actionStatus.disabledActions
-                                }
-                                loading={props.actionStatus.updating}
-                                title={i18n.tv('page_templates.btn_tips.update', '保存修改内容')}
-                                onClick={() => handleAction(Action.Update)}
-                              >
-                                {i18n.tv('page_templates.btn_text.update', '修改')}
-                              </Button>
-                            ) : (
-                              <Button
-                                type="primary"
-                                disabled={
-                                  !props.actionStatus.changed ||
-                                  props.actionStatus.processing ||
-                                  props.actionStatus.disabledActions
-                                }
-                                loading={props.actionStatus.submitingReview}
-                                title={i18n.tv('page_templates.btn_tips.submit_to_review', '提交审核内容')}
-                                onClick={() => handleAction(Action.SubmitReview)}
-                              >
-                                {i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
-                              </Button>
-                            ),
-                          ]
-                      : deviceMixin.isMobile
-                      ? [
+                    {props.status === TemplateStatus.Pending ? (
+                      // Pending 状态
+                      props.actionCapability.publish && !props.isSelfContent ? (
+                        // 有发布权限并且不是自己，可以审核
+                        deviceMixin.isMobile ? (
                           <Dropdown.Button
                             type="primary"
                             disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                            onClick={() =>
-                              handleAction(props.actionCapability.publish ? Action.Publish : Action.SubmitReview)
-                            }
+                            onClick={() => handleAction(Action.ApproveReview)}
                           >
-                            {(props.actionStatus.publishing ||
-                              props.actionStatus.savingToDarft ||
-                              props.actionStatus.submitingReview) && <Spin />}
-                            {props.actionCapability.publish
-                              ? i18n.tv('page_templates.btn_text.publish', '发布')
-                              : i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
+                            {(props.actionStatus.approvingReview || props.actionStatus.rejectingReview) && <Spin />}
+                            {i18n.tv('page_templates.btn_text.review_confirm', '审核通过')}
                             <Menu slot="overlay" onClick={({ key }: { key: Action }) => handleAction(key)}>
                               <Menu.Item
-                                key={Action.SaveToDraft}
-                                disabled={
-                                  !props.actionStatus.changed ||
-                                  props.actionStatus.processing ||
-                                  props.actionStatus.disabledActions
-                                }
+                                key={Action.RejectReview}
+                                disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
                               >
-                                {i18n.tv('page_templates.btn_text.save_to_draft', '保存草稿')}
+                                <span class="danger--text">
+                                  {i18n.tv('page_templates.btn_text.review_reject', '审核不通过')}
+                                </span>
                               </Menu.Item>
                             </Menu>
                             <Icon slot="icon" type="down" />
-                          </Dropdown.Button>,
-                        ]
-                      : [
+                          </Dropdown.Button>
+                        ) : (
+                          [
+                            <Button
+                              type="danger"
+                              disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
+                              loading={props.actionStatus.rejectingReview}
+                              title={i18n.tv('page_templates.btn_tips.review_reject', '内容审核不通过')}
+                              onClick={() => handleAction(Action.RejectReview)}
+                            >
+                              {i18n.tv('page_templates.btn_text.review_reject', '审核不通过')}
+                            </Button>,
+                            <Button
+                              type="primary"
+                              disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
+                              loading={props.actionStatus.approvingReview}
+                              title={i18n.tv('page_templates.btn_tips.review_confirm', '内容审核通过')}
+                              onClick={() => handleAction(Action.ApproveReview)}
+                            >
+                              {i18n.tv('page_templates.btn_text.review_confirm', '审核通过')}
+                            </Button>,
+                          ]
+                        )
+                      ) : props.isSelfContent ? (
+                        // 是自己，可以修改后提交审核和撤销保存到草稿
+                        [
                           <Button
-                            ghost
+                            disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
+                            loading={props.actionStatus.submitingReview}
+                            title={i18n.tv('page_templates.btn_tips.switch_to_draft', '修改并保存内容至草稿箱')}
+                            onClick={() => handleAction(Action.SwitchToDraft)}
+                          >
+                            {i18n.tv('page_templates.btn_text.switch_to_draft', '保存修改至草稿')}
+                          </Button>,
+                          <Button
                             type="primary"
                             disabled={
                               !props.actionStatus.changed ||
                               props.actionStatus.processing ||
                               props.actionStatus.disabledActions
                             }
-                            loading={props.actionStatus.savingToDarft}
-                            title={i18n.tv('page_templates.btn_tips.save_to_draft', '保存内容至草稿箱')}
-                            onClick={() => handleAction(Action.SaveToDraft)}
+                            loading={props.actionStatus.submitingReview}
+                            title={i18n.tv('page_templates.btn_tips.submit_to_review', '提交内容审核')}
+                            onClick={() => handleAction(Action.SubmitReview)}
                           >
-                            {i18n.tv('page_templates.btn_text.save_to_draft', '保存草稿')}
+                            {i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
                           </Button>,
+                        ]
+                      ) : null
+                    ) : props.status === TemplateStatus.Publish || props.status === TemplateStatus.Private ? (
+                      // Publish 或 Private 状态
+                      deviceMixin.isMobile ? (
+                        !props.actionStatus.changed ||
+                        props.actionStatus.processing ||
+                        props.actionStatus.disabledActions ? (
+                          <Dropdown.Button type="primary" onClick={() => handleAction(Action.SwitchToDraft)}>
+                            {(props.actionStatus.updating ||
+                              props.actionStatus.submitingReview ||
+                              props.actionStatus.savingToDarft) && <Spin />}
+                            {i18n.tv('page_templates.btn_text.switch_to_draft', '保存修改至草稿')}
+                            <Menu slot="overlay" onClick={({ key }: { key: Action }) => handleAction(key)}>
+                              <Menu.Item
+                                key={props.actionCapability.publish ? Action.Update : Action.SubmitReview}
+                                disabled
+                              >
+                                {
+                                  // 有发布权限可直接修改，否则需要再次审核
+                                  props.actionCapability.publish
+                                    ? i18n.tv('page_templates.btn_text.update', '修改')
+                                    : i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')
+                                }
+                              </Menu.Item>
+                            </Menu>
+                            <Icon slot="icon" type="down" />
+                          </Dropdown.Button>
+                        ) : (
+                          <Dropdown.Button
+                            type="primary"
+                            onClick={() =>
+                              handleAction(props.actionCapability.publish ? Action.Update : Action.SubmitReview)
+                            }
+                          >
+                            {(props.actionStatus.updating ||
+                              props.actionStatus.submitingReview ||
+                              props.actionStatus.savingToDarft) && <Spin />}
+                            {
+                              // 有发布权限可直接修改，否则需要再次审核
+                              props.actionCapability.publish
+                                ? i18n.tv('page_templates.btn_text.update', '修改')
+                                : i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')
+                            }
+                            <Menu slot="overlay" onClick={({ key }: { key: Action }) => handleAction(key)}>
+                              <Menu.Item key={Action.SwitchToDraft}>
+                                {i18n.tv('page_templates.btn_text.switch_to_draft', '保存修改至草稿')}
+                              </Menu.Item>
+                            </Menu>
+                            <Icon slot="icon" type="down" />
+                          </Dropdown.Button>
+                        )
+                      ) : (
+                        [
+                          <Button
+                            ghost
+                            type="primary"
+                            disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
+                            loading={props.actionStatus.savingToDarft}
+                            title={i18n.tv('page_templates.btn_tips.switch_to_draft', '修改并保存内容至草稿箱')}
+                            onClick={() => handleAction(Action.SwitchToDraft)}
+                          >
+                            {i18n.tv('page_templates.btn_text.switch_to_draft', '保存修改至草稿')}
+                          </Button>,
+                          // 有发布权限可直接修改，否则需要再次审核
                           props.actionCapability.publish ? (
                             <Button
                               type="primary"
-                              disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
-                              loading={props.actionStatus.publishing}
-                              title={i18n.tv('page_templates.btn_tips.publish', '发布内容')}
-                              onClick={() => handleAction(Action.Publish)}
+                              disabled={
+                                !props.actionStatus.changed ||
+                                props.actionStatus.processing ||
+                                props.actionStatus.disabledActions
+                              }
+                              loading={props.actionStatus.updating}
+                              title={i18n.tv('page_templates.btn_tips.update', '保存修改内容')}
+                              onClick={() => handleAction(Action.Update)}
                             >
-                              {i18n.tv('page_templates.btn_text.publish', '发布')}
+                              {i18n.tv('page_templates.btn_text.update', '修改')}
                             </Button>
                           ) : (
                             <Button
@@ -391,13 +339,85 @@ export default defineComponent({
                                 props.actionStatus.disabledActions
                               }
                               loading={props.actionStatus.submitingReview}
-                              title={i18n.tv('page_templates.btn_tips.submit_to_review', '提交内容审核')}
+                              title={i18n.tv('page_templates.btn_tips.submit_to_review', '提交审核内容')}
                               onClick={() => handleAction(Action.SubmitReview)}
                             >
                               {i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
                             </Button>
                           ),
-                        ]}
+                        ]
+                      )
+                    ) : deviceMixin.isMobile ? (
+                      <Dropdown.Button
+                        type="primary"
+                        disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
+                        onClick={() =>
+                          handleAction(props.actionCapability.publish ? Action.Publish : Action.SubmitReview)
+                        }
+                      >
+                        {(props.actionStatus.publishing ||
+                          props.actionStatus.savingToDarft ||
+                          props.actionStatus.submitingReview) && <Spin />}
+                        {props.actionCapability.publish
+                          ? i18n.tv('page_templates.btn_text.publish', '发布')
+                          : i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
+                        <Menu slot="overlay" onClick={({ key }: { key: Action }) => handleAction(key)}>
+                          <Menu.Item
+                            key={Action.SaveToDraft}
+                            disabled={
+                              !props.actionStatus.changed ||
+                              props.actionStatus.processing ||
+                              props.actionStatus.disabledActions
+                            }
+                          >
+                            {i18n.tv('page_templates.btn_text.save_to_draft', '保存草稿')}
+                          </Menu.Item>
+                        </Menu>
+                        <Icon slot="icon" type="down" />
+                      </Dropdown.Button>
+                    ) : (
+                      [
+                        <Button
+                          ghost
+                          type="primary"
+                          disabled={
+                            !props.actionStatus.changed ||
+                            props.actionStatus.processing ||
+                            props.actionStatus.disabledActions
+                          }
+                          loading={props.actionStatus.savingToDarft}
+                          title={i18n.tv('page_templates.btn_tips.save_to_draft', '保存内容至草稿箱')}
+                          onClick={() => handleAction(Action.SaveToDraft)}
+                        >
+                          {i18n.tv('page_templates.btn_text.save_to_draft', '保存草稿')}
+                        </Button>,
+                        props.actionCapability.publish ? (
+                          <Button
+                            type="primary"
+                            disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
+                            loading={props.actionStatus.publishing}
+                            title={i18n.tv('page_templates.btn_tips.publish', '发布内容')}
+                            onClick={() => handleAction(Action.Publish)}
+                          >
+                            {i18n.tv('page_templates.btn_text.publish', '发布')}
+                          </Button>
+                        ) : (
+                          <Button
+                            type="primary"
+                            disabled={
+                              !props.actionStatus.changed ||
+                              props.actionStatus.processing ||
+                              props.actionStatus.disabledActions
+                            }
+                            loading={props.actionStatus.submitingReview}
+                            title={i18n.tv('page_templates.btn_tips.submit_to_review', '提交内容审核')}
+                            onClick={() => handleAction(Action.SubmitReview)}
+                          >
+                            {i18n.tv('page_templates.btn_text.submit_to_review', '提交审核')}
+                          </Button>
+                        ),
+                      ]
+                    )}
                     {slots.settingsContent && (
                       <Tooltip
                         placement="bottom"

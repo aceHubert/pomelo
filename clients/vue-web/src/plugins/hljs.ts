@@ -1,0 +1,25 @@
+import hljs from 'highlight.js/lib/core';
+import css from 'highlight.js/lib/languages/css';
+import javascript from 'highlight.js/lib/languages/javascript';
+import typescript from 'highlight.js/lib/languages/typescript';
+import cpp from 'highlight.js/lib/languages/cpp';
+import csharp from 'highlight.js/lib/languages/csharp';
+import java from 'highlight.js/lib/languages/java';
+import php from 'highlight.js/lib/languages/php';
+import python from 'highlight.js/lib/languages/python';
+import ruby from 'highlight.js/lib/languages/ruby';
+import json from 'highlight.js/lib/languages/json';
+import xml from 'highlight.js/lib/languages/xml';
+import 'highlight.js/styles/github.css';
+
+hljs.registerLanguage('css', css);
+hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('cpp', cpp);
+hljs.registerLanguage('csharp', csharp);
+hljs.registerLanguage('java', java);
+hljs.registerLanguage('php', php);
+hljs.registerLanguage('python', python);
+hljs.registerLanguage('ruby', ruby);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('xml', xml);

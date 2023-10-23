@@ -12,6 +12,7 @@ import './assets/styles/index.less';
 
 // Plugins
 import optionsPlugin from './plugins/options';
+import hljsPlugin from './plugins/hljs';
 
 Vue.use(VueCompositionApi);
 Vue.use(ResourceManagerVuePlugin, { mode: 'visible' });
@@ -58,6 +59,10 @@ async function createApp() {
 
   if (typeof optionsPlugin === 'function') {
     await optionsPlugin(app, inject);
+  }
+
+  if (typeof hljsPlugin === 'function') {
+    await hljsPlugin(app, inject);
   }
 
   return {

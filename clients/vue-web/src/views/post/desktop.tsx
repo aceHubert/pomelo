@@ -1,5 +1,6 @@
 import moment from 'moment';
-import { defineComponent, computed } from '@vue/composition-api';
+import hljs from 'highlight.js/lib/core';
+import { defineComponent, computed, onMounted } from '@vue/composition-api';
 import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { OptionPresetKeys, PostMetaPresetKeys, TemplatePageType } from '@pomelo/shared-web';
 import { useI18n, useOptions } from '@/hooks';
@@ -47,6 +48,12 @@ export default defineComponent({
 
     const template = computed(() => {
       return (props.metas[PostMetaPresetKeys.Template] as TemplatePageType) ?? TemplatePageType.Default;
+    });
+
+    onMounted(() => {
+      document.querySelectorAll('pre code').forEach((el) => {
+        hljs.highlightElement(el as HTMLElement);
+      });
     });
 
     return () => (
