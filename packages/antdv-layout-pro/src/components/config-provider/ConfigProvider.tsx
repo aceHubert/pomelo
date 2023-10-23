@@ -1,7 +1,7 @@
 import { defineComponent, watch, onMounted, onBeforeUnmount } from 'vue-demi';
 import { ConfigProvider as AntConfigProvider } from 'ant-design-vue';
 import { DeviceType, Theme } from '../../types';
-import { removeClass, addClass } from './util';
+import { removeClass, addClass, genColor, addCssText, removeCssText } from './utils';
 
 // Types
 import type { PropType } from 'vue-demi';
@@ -20,6 +20,7 @@ export type ConfigProviderProps = {
   transformCellText?: Function;
   renderEmpty: Function;
   theme: Theme;
+  primaryColor: string;
   device: DeviceType;
   i18nRender: (key: string, fallback: string, values?: Record<string, any>) => string;
 };
@@ -42,6 +43,10 @@ export default defineComponent({
       type: String,
       default: Theme.Light,
     },
+    primaryColor: {
+      type: String,
+      default: '#1890ff',
+    },
     device: {
       type: String,
       default: DeviceType.Desktop,
@@ -51,19 +56,19 @@ export default defineComponent({
       default: (key: string, fallback: string) => fallback,
     },
   },
-  watch: { ...getWatch(['theme', 'device', 'i18nRender']) },
+  watch: { ...getWatch(['theme', 'primaryColor', 'device', 'i18nRender']) },
   setup(props) {
     let dispose: (() => void) | undefined;
 
     onMounted(() => {
-      let removeClasses: string[] = [],
-        addClasses: string[] = [];
+      let removeClasses: string[] = [];
+      const styleProviderId = 'style-provider';
 
-      const unWatch = watch(
+      const unWatchToggleClass = watch(
         [() => props.device, () => props.theme],
         ([device, theme]) => {
           removeClasses.length && removeClass(document.body, removeClasses.join(' '));
-          addClasses = removeClasses = [`theme-${theme}`, `is-${device}`];
+          const addClasses = (removeClasses = [`theme-${theme}`, `is-${device}`]);
           addClass(document.body, addClasses.join(' '));
         },
         {
@@ -71,9 +76,30 @@ export default defineComponent({
         },
       );
 
+      const unWatchCssVariable = watch(
+        [() => props.primaryColor, () => props.theme],
+        ([primaryColor, theme]) => {
+          const colors = genColor(primaryColor, theme === Theme.Dark);
+          addCssText(
+            `:root .theme-${theme} {\n${Object.keys(colors)
+              .map((key) =>
+                key === 'base' ? `  --theme-primary: ${colors[key]};` : `  --theme-${key}: ${colors[key]};`,
+              )
+              .concat([`  --theme-random: ${Math.random()};`])
+              .join('\n')}\n}`,
+            styleProviderId,
+          );
+        },
+        {
+          immediate: true,
+        },
+      );
+
       dispose = () => {
-        unWatch();
+        unWatchToggleClass();
+        unWatchCssVariable();
         removeClass(document.body, removeClasses.join(' '));
+        removeCssText(styleProviderId);
       };
     });
 

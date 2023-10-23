@@ -41,19 +41,16 @@
 
 .primary-vars() {
   primary: @primary-color;
-  primary-light: @primary-light-color;
-  primary-lighter: @primary-lighter-color;
-  primary-dark: @primary-dark-color;
-  primary-darker: @primary-darker-color;
-  primary-lighten5: @primary-1;
-  primary-lighten4: @primary-2;
-  primary-lighten3: @primary-3;
-  primary-lighten2: @primary-4;
-  primary-lighten1: @primary-5;
-  primary-darken1: @primary-7;
-  primary-darken2: @primary-8;
-  primary-darken3: @primary-9;
-  primary-darken4: @primary-10;
+  primary-1: @primary-1;
+  primary-2: @primary-2;
+  primary-3: @primary-3;
+  primary-4: @primary-4;
+  primary-5: @primary-5;
+  primary-6: @primary-6;
+  primary-7: @primary-7;
+  primary-8: @primary-8;
+  primary-9: @primary-9;
+  primary-10: @primary-10;
 }
 
 each(.primary-vars(), {
@@ -168,7 +165,7 @@ each(.text-vars(), {
   lighten-4: @red-2;
   lighten-3: @red-3;
   lighten-2: @red-4;
-  base: @red-base;
+  base: @red-6;
   lighten-1: @red-5;
   darken-1: @red-7;
   darken-2: @red-8;
@@ -254,6 +251,19 @@ each(.text-vars(), {
   darken-4: @gold-10;
 };
 
+@primary:{
+  lighten-5: @var-primary-1;
+  lighten-4: @var-primary-2;
+  lighten-3: @var-primary-3;
+  lighten-2: @var-primary-4;
+  lighten-1: @var-primary-5;
+  base: @var-primary-6;
+  darken-1: @var-primary-7;
+  darken-2: @var-primary-8;
+  darken-3: @var-primary-9;
+  darken-4: @var-primary-10;
+}
+
 @grey: {
   lighten-5: @grey-1;
   lighten-4: @grey-2;
@@ -277,7 +287,7 @@ each(.text-vars(), {
 };
 
 @selector-colors: pink, magenta, red, volcano, orange, yellow, gold, cyan, lime, green, blue, geekblue,
-  purple, grey, gray, shades;
+  purple, primary, grey, gray, shades;
 
 each(@selector-colors, .(@root-value) {
     each(@@root-value, .(@value, @key) {

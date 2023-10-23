@@ -11,7 +11,6 @@ import { pinia } from './store';
 import { router } from './router';
 import App from './App';
 import './auth';
-import './tinycolor2.extend';
 import './registerServiceWorker';
 import './assets/styles/index.less';
 

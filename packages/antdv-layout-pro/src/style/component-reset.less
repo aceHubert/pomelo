@@ -261,7 +261,7 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 }
-.button-variant-primary(@color, @background: @var-primary, @background-hover: @var-primary-dark, @background-active: @var-primary-darker) {
+.button-variant-primary(@color, @background: @var-primary, @background-hover: @var-primary-5, @background-active: @var-primary-7) {
   .button-color(@color; @background; @background);
 
   text-shadow: @btn-text-shadow;
@@ -279,7 +279,7 @@ h1, h2, h3, h4, h5, h6 {
 
   .button-disabled();
 }
-.button-variant-other(@color, @background, @border, @color-hover: @var-primary-dark, @color-active: @var-primary-darker) {
+.button-variant-other(@color, @background, @border, @color-hover: @var-primary-5, @color-active: @var-primary-7) {
   .button-color(@color, @background, @border);
 
   &:hover,
@@ -292,7 +292,7 @@ h1, h2, h3, h4, h5, h6 {
   }
   .button-disabled();
 }
-.button-variant-ghost(@color: @var-primary, @border: @color, @color-hover: @var-primary-dark, @color-active: @var-primary-darker) {
+.button-variant-ghost(@color: @var-primary, @border: @color, @color-hover: @var-primary-5, @color-active: @var-primary-7) {
   .button-color(@color, transparent, @border);
 
   &:hover,
@@ -480,7 +480,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     &:active {
-      background: @var-primary-lighten4;
+      background: @var-primary-2;
     }
   }
 
@@ -500,7 +500,7 @@ h1, h2, h3, h4, h5, h6 {
 
   &-fullscreen .@{ant-prefix}-fullcalendar-month-panel-selected-cell .@{ant-prefix}-fullcalendar-month,
   &-fullscreen .@{ant-prefix}-fullcalendar-selected-day .@{ant-prefix}-fullcalendar-date {
-    background: @var-primary-lighten5;
+    background: @var-primary-1;
   }
 
   &-fullscreen .@{ant-prefix}-fullcalendar-month-panel-selected-cell .@{ant-prefix}-fullcalendar-value,
@@ -1025,7 +1025,7 @@ h1, h2, h3, h4, h5, h6 {
 
     &:active {
       color: @text-color-inverse;
-      background: @var-primary-lighten1;
+      background: @var-primary-5;
     }
   }
 
@@ -1035,7 +1035,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   &-selected-day &-date {
-    background: @var-primary-lighten4;
+    background: @var-primary-2;
   }
 
   &-last-month-cell &-date,
@@ -1130,7 +1130,7 @@ h1, h2, h3, h4, h5, h6 {
     :not(.@{ant-prefix}-calendar-next-month-btn-day) {
     .@{ant-prefix}-calendar-date {
       color: @var-primary;
-      background: @var-primary-lighten4;
+      background: @var-primary-2;
       border-color: @var-primary;
     }
   }
@@ -1353,10 +1353,10 @@ h1, h2, h3, h4, h5, h6 {
 .@{ant-prefix}-calendar-week-number {
   .@{ant-prefix}-calendar-body tr {
     &:hover {
-      background: @var-primary-lighten5;
+      background: @var-primary-1;
     }
     &.@{ant-prefix}-calendar-active-week {
-      background: @var-primary-lighten4;
+      background: @var-primary-2;
     }
     .@{ant-prefix}-calendar-selected-day .@{ant-prefix}-calendar-date,
     .@{ant-prefix}-calendar-selected-day:hover .@{ant-prefix}-calendar-date {
@@ -1850,7 +1850,7 @@ h1, h2, h3, h4, h5, h6 {
 .hover(@color: @input-hover-border-color) {
   border-color: @color;
 }
-.active(@color: @var-primary-lighten1, @shadow: @var-primary-lighten3) {
+.active(@color: @var-primary-5, @shadow: @var-primary-3) {
   & when(iscolor(@color)) {
     border-color: ~`colorPalette('@{color}', 5) `;
     box-shadow: @input-outline-offset @outline-blur-size @outline-width fade(@color, 20%);
@@ -2631,12 +2631,12 @@ h1, h2, h3, h4, h5, h6 {
 
       &:focus,
       &:hover {
-        border-color: @var-primary-darken1;
+        border-color: @var-primary-7;
       }
 
       &:focus a,
       &:hover a {
-        color: @var-primary-darken1;
+        color: @var-primary-7;
       }
     }
   }
@@ -2669,7 +2669,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     &:hover a {
-      border-color: @var-primary-lighten5;
+      border-color: @var-primary-1;
     }
 
     .@{ant-prefix}-pagination-item-link {
@@ -2916,7 +2916,7 @@ h1, h2, h3, h4, h5, h6 {
 
 // Raido
 // ---
-@radio-focus-shadow: 0 0 0 3px @var-primary-lighten1;
+@radio-focus-shadow: 0 0 0 3px @var-primary-5;
 @radio-button-focus-shadow: @radio-focus-shadow;
 .@{ant-prefix}-radio-group {
   .reset-component;
@@ -3633,7 +3633,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   &:focus {
-    box-shadow: 0 0 0 2px @var-primary-lighten1;
+    box-shadow: 0 0 0 2px @var-primary-5;
   }
 
   &-checked {
@@ -3819,7 +3819,7 @@ h1, h2, h3, h4, h5, h6 {
       .@{ant-prefix}-dropdown-submenu-contain-selected {
         .@{ant-prefix}-dropdown-menu-submenu-title::after {
           color: @var-primary;
-          text-shadow: 0 0 2px @var-primary-lighten4;
+          text-shadow: 0 0 2px @var-primary-2;
         }
       }
     }
@@ -4158,7 +4158,7 @@ h1, h2, h3, h4, h5, h6 {
       background-color: @var-primary;
     }
     &:active {
-      background-color: @var-primary-darken1;
+      background-color: @var-primary-7;
     }
   }
 }
@@ -4422,7 +4422,7 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes transferHighlightIn {
   0% {
-    background: @var-primary-lighten4;
+    background: @var-primary-2;
   }
   100% {
     background: transparent;
@@ -4582,7 +4582,7 @@ h1, h2, h3, h4, h5, h6 {
         background-color: @item-hover-bg;
       }
       &.@{ant-prefix}-select-tree-node-selected {
-        background-color: @var-primary-lighten4;
+        background-color: @var-primary-2;
       }
     }
     span {
@@ -4649,16 +4649,16 @@ h1, h2, h3, h4, h5, h6 {
     border-color:  @border-color-base;
 
     &.@{ant-prefix}-upload-drag-hover:not(.@{ant-prefix}-upload-disabled) {
-      border-color: @var-primary-darken1;
+      border-color: @var-primary-7;
     }
 
     &:not(.@{ant-prefix}-upload-disabled):hover {
-      border-color: @var-primary-lighten1;
+      border-color: @var-primary-5;
     }
 
     p.@{ant-prefix}-upload-drag-icon {
       .@{iconfont-css-prefix} {
-        color: @var-primary-lighten1;
+        color: @var-primary-5;
       }
     }
     p.@{ant-prefix}-upload-text {

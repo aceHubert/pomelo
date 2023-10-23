@@ -6457,6 +6457,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.8
+  resolution: "@types/lodash.clonedeep@npm:4.5.8"
+  dependencies:
+    "@types/lodash": "*"
+  checksum: 7779674a1a4458c14b4c4a90424c94e48f433d4e506a254854899df3099f9b6c33ba5c63324016f077372682c5add9c8729796519c95e4dd210f7205f8108b27
+  languageName: node
+  linkType: hard
+
 "@types/lodash.debounce@npm:^4.0.7":
   version: 4.0.7
   resolution: "@types/lodash.debounce@npm:4.0.7"
@@ -8087,13 +8096,16 @@ __metadata:
     "@ace-util/core": ^0.1.0
     "@iconfu/svg-inject": ^1.2.3
     "@pomelo/theme": "workspace:^"
+    "@types/lodash.clonedeep": ^4.5.0
     "@types/lodash.debounce": ^4.0.7
     ant-design-vue: ^1.7.7
     babel-preset-vca-jsx: ^0.3.6
     jsoneditor: ^9.5.6
+    lodash.clonedeep: ^4.5.0
     lodash.debounce: ^4.0.8
     mavon-editor: ^2.10.4
     path-to-regexp: ^3.2.0
+    tinycolor2: ^1.6.0
     vue-color: ^2.8.1
     vue-demi: ^*
     vue-quill-editor: ^3.0.6

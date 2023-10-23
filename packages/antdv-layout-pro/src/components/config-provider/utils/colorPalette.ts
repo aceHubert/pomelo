@@ -22,6 +22,7 @@ const getHue = function (hsv: ColorFormats.HSV, i: number, isLight: boolean) {
   }
   return Math.round(hue);
 };
+
 const getSaturation = function (hsv: ColorFormats.HSV, i: number, isLight: boolean) {
   let saturation;
   if (isLight) {
@@ -42,6 +43,7 @@ const getSaturation = function (hsv: ColorFormats.HSV, i: number, isLight: boole
   }
   return Math.round(saturation);
 };
+
 const getValue = function (hsv: ColorFormats.HSV, i: number, isLight: boolean) {
   if (isLight) {
     return Math.round(hsv.v * 100) + brightnessStep1 * i;

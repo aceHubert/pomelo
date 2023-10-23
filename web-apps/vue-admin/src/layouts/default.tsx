@@ -1,4 +1,4 @@
-import { defineComponent, ref, computed, onMounted, nextTick, toRef } from '@vue/composition-api';
+import { defineComponent, ref, computed, onMounted, nextTick } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { isAbsoluteUrl } from '@ace-util/core';
 import { Icon, Space, Tooltip, Spin } from 'ant-design-vue';
@@ -18,7 +18,7 @@ import {
   type ContentWidth,
 } from 'antdv-layout-pro/types';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
-import { useUserManager, useI18n, expose } from '@/hooks';
+import { useUserManager, useI18n } from '@/hooks';
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
 import { loadingRef } from '@/shared';
 import { getDefaultMenus } from '@/configs/menu.config';
@@ -29,22 +29,6 @@ import classes from './styles/default.module.less';
 
 export default defineComponent({
   name: 'DefaultLayout',
-  head() {
-    const themeVars = (this.themeVars as Record<string, string>) ?? {};
-    let cssText = '';
-    for (const key in themeVars) {
-      cssText += `--theme-${key}: ${themeVars[key]} !important;`;
-    }
-    cssText = `body {${cssText}}`;
-    return {
-      style: [
-        {
-          vmid: 'pomelo-theme-vars',
-          cssText,
-        },
-      ],
-    };
-  },
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -53,10 +37,6 @@ export default defineComponent({
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
     const userManager = useUserManager();
-
-    expose({
-      themeVars: toRef(appMixin, 'themeVars'),
-    });
 
     const currentUser = ref<{ name: string; photo: string }>();
     const menus = ref<MenuConfig[]>([]);
@@ -201,6 +181,7 @@ export default defineComponent({
         locale={appMixin.antLocales}
         prefixCls={ANT_PREFIX_CLS}
         theme={appMixin.theme}
+        primaryColor={appMixin.primaryColor}
         device={deviceMixin.device}
         i18nRender={(...args: Parameters<typeof i18n.tv>) => i18n.tv(...args) as string}
       >
@@ -260,6 +241,9 @@ export default defineComponent({
                           locale={i18n.locale}
                           supportLanguages={appMixin.supportLanguages}
                           placement="bottom"
+                          scopedSlots={{
+                            default: (locale) => locale.shortName ?? locale.name,
+                          }}
                           onChange={handleLocaleChange}
                         />
                         <AvatarDropdown
@@ -267,10 +251,10 @@ export default defineComponent({
                           name={currentUser.value?.name}
                           src={currentUser.value?.photo}
                           placement="bottomRight"
-                          onAction={handleActionClick}
                           scopedSlots={{
                             menuItems: () => [],
                           }}
+                          onAction={handleActionClick}
                         />
                       </Space>
                     ),

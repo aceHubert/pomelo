@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import {
   defineComponent,
   getCurrentInstance,
@@ -231,9 +232,9 @@ export default defineComponent({
     }, [() => configProvider.device, () => props.sideCollapsed]);
 
     useEffect(() => {
-      let fixedMenus = props.menus.map((item) => ({ ...item }));
+      let fixedMenus = cloneDeep(props.menus);
       if (props.layoutType === LayoutType.TopMenu) {
-        // trade sideMenus as topMenus in topMenu mode
+        // trade side as top in topMenu mode
         fixedMenus = (function format(menus) {
           return menus.map((menu) => {
             if (menu.children?.length) {
