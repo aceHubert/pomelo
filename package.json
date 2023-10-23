@@ -4,17 +4,11 @@
   "private": true,
   "scripts": {
     "postinstall": "yarn workspaces foreach -vptR --from 'nestjs-oidc' --from '@pomelo/shared-web' run build",
-    "serve": "concurrently 'yarn serve:core-server' 'yarn serve:h5' 'yarn serve:pc' 'yarn serve:admin'",
-    "serve:h5": "yarn workspace @pomelo/portal-h5 run serve",
-    "serve:pc": "yarn workspace @pomelo/portal-pc run serve",
-    "serve:admin": "yarn workspace @pomelo/admin-web run serve",
-    "serve:core-server": "yarn workspace @pomelo/core-server start:webpack",
-    "start:core-server": "yarn workspace @pomelo/core-server start:prod",
+    "serve:vue-clients": "concurrently 'yarn workspace @pomelo/vue-web run serve' 'yarn workspace @pomelo/vue-admin run serve'",
+    "start:core-server": "yarn workspace @pomelo/core-server start:webpack",
     "build": "yarn workspaces foreach -vptR --from '@pomelo/*' run build",
     "build:core-server": "yarn workspaces foreach -vptR --from '@pomelo/core-server' run build",
-    "build:admin": "yarn workspaces foreach -vptR --from '@pomelo/admin-web' run build",
-    "build:portal": "yarn workspaces foreach -vptR --from '@pomelo/portal-*' run build",
-    "build:prod-web": "yarn workspaces foreach -vptR --from '@pomelo/admin-web' --from '@pomelo/portal-*' run build",
+    "build:vue-clients": "yarn workspaces foreach -vptR --from '@pomelo/vue-web' --from '@pomelo/vue-admin' run build",
     "build:submodules": "grunt --verbose",
     "build:submodules:formily-antdv": "grunt build:formily-antdv --verbose",
     "build:submodules:formily-vant": "grunt build:formily-vant --verbose",
@@ -137,8 +131,8 @@
     "pre-commit": "lint-staged"
   },
   "workspaces": [
-    "web-apps/**",
-    "backend-apps/**",
+    "clients/**",
+    "servers/**",
     "plugins/**",
     "themes/**",
     "packages/**"

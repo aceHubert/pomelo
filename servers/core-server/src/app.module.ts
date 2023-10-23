@@ -72,7 +72,7 @@ const defaultContentPath = path.join(process.cwd(), '../content');
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const contentPath = path.join(config.get<string>('contentPath', defaultContentPath), '/languages/backend');
+        const contentPath = path.join(config.get<string>('contentPath', defaultContentPath), '/languages/core-server');
         if (!fs.existsSync(contentPath)) {
           fs.mkdirSync(contentPath, { recursive: true });
         }

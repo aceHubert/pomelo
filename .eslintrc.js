@@ -172,7 +172,7 @@ module.exports = {
       },
     },
     {
-      files: ['web-apps/**/*.{ts,tsx}'],
+      files: ['clients/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
       },
@@ -184,14 +184,6 @@ module.exports = {
       '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
     'import/resolver': {
-      // typescript: {
-      //   project: [
-      //     'admin-web/tsconfig.json',
-      //     'portal-h5/tsconfig.json',
-      //     'portal-pc/tsconfig.json',
-      //     'packages/*/tsconfig.json',
-      //   ],
-      // },
       node: {
         extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
       },

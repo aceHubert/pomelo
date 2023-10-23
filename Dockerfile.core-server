@@ -7,7 +7,7 @@ ARG BUILD_OPTION="core-server"
 RUN set -ex && pwd && ls && yarn install --mode=skip-build && yarn build:${BUILD_OPTION} && ls
 
 FROM swr.cn-east-3.myhuaweicloud.com/lejian-system/node:16.14.0-alpine AS deploy
-COPY --from=builder /app/backend-apps /app/backend/
+COPY --from=builder /app/server /app/server/
 COPY --from=builder /app/yarn.lock /app/
 COPY --from=builder /app/package*.json /app/
 COPY --from=builder /app/packages /app/packages/
@@ -23,9 +23,9 @@ FROM swr.cn-east-3.myhuaweicloud.com/lejian-system/node:16.0.0-alpine3.13
 # copy content file
 COPY --from=builder /app/content /app/content/
 # copy runtime file
-COPY --from=deploy /app/backend/dist /app/backend/dist
-COPY --from=deploy /app/backend/.env* /app/backend/
-COPY --from=deploy /app/backend/package*.json /app/backend/
+COPY --from=deploy /app/server/dist /app/server/dist
+COPY --from=deploy /app/server/.env* /app/server/
+COPY --from=deploy /app/server/package*.json /app/server/
 COPY --from=deploy /app/package*.json /app/
 COPY --from=deploy /app/packages/nestjs-oidc/dist /app/packages/nestjs-oidc/dist
 COPY --from=deploy /app/packages/nestjs-oidc/package*.json /app/packages/nestjs-oidc/
@@ -41,5 +41,5 @@ RUN npm install -g pm2
 #   npm install -g pm2
 
 EXPOSE 3000
-CMD ["pm2", "start", "dist/main.js", "--cwd", "backend", "--no-daemon"]
-# CMD ["yarn", "workspace", "@pomelo/backend", "start:prod"]
+CMD ["pm2", "start", "dist/main.js", "--cwd", "server", "--no-daemon"]
+# CMD ["yarn", "workspace", "@pomelo/core-server", "start:prod"]
