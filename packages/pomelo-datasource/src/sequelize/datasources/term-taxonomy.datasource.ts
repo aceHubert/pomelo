@@ -2,7 +2,7 @@ import { isUndefined } from 'lodash';
 import { Model, WhereOptions, Transaction, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, RequestUser } from '@pomelo/shared';
+import { ValidationError, RequestUser } from '@pomelo/shared-server';
 import { TermTaxonomyAttributes } from '../../entities';
 import {
   TermTaxonomyMetaModel,

@@ -23,6 +23,7 @@
   "peerDependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
+    "@pomelo/shared-server": "workspace:^",
     "mysql2": "^2.3.3"
   },
   "publishConfig": {

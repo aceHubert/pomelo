@@ -9,7 +9,7 @@ import { Authorized } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { MediaDataSource } from '@pomelo/datasource';
-import { Fields, User, RequestUser } from '@pomelo/shared';
+import { Fields, User, RequestUser } from '@pomelo/shared-server';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { isAbsoluteUrl } from '@/common/utils/path.util';
 import { MediaAction } from '@/common/actions';

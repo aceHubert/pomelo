@@ -2,7 +2,7 @@ import { kebabCase, isEmpty } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
-import { RequestUser, ForbiddenError } from '@pomelo/shared';
+import { RequestUser, ForbiddenError } from '@pomelo/shared-server';
 import { OptionAutoload } from '../../entities/options.entity';
 import { SequelizeService } from '../../sequelize/sequelize.service';
 import { UserCapability } from '../utils/user-capability.util';

@@ -1,7 +1,7 @@
 import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
-import { Fields, User, RequestUser } from '@pomelo/shared';
+import { Fields, User, RequestUser } from '@pomelo/shared-server';
 import {
   OptionDataSource,
   TermTaxonomyDataSource,

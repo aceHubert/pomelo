@@ -1,5 +1,5 @@
 import { JwtPayload } from 'jsonwebtoken';
-import { ResponseSuccess, ResponseError } from '@pomelo/shared';
+import { ResponseSuccess, ResponseError } from '@pomelo/shared-server';
 
 declare global {
   export type ConnectionParams = {
@@ -22,7 +22,7 @@ declare global {
   // export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 }
 
-declare module '@pomelo/shared' {
+declare module '@pomelo/shared-server' {
   export interface UserPayload extends JwtPayload {
     // extend the payload
     /**

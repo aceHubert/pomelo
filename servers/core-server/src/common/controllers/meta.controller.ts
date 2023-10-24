@@ -26,7 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { Anonymous } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
-import { BaseController, createResponseSuccessType } from '@pomelo/shared';
+import { BaseController, createResponseSuccessType } from '@pomelo/shared-server';
 import { MetaDataSource } from '@pomelo/datasource';
 import { NewMetaDto } from './dto/new-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';

@@ -1,5 +1,5 @@
 import { Resolver, Args, Query } from '@nestjs/graphql';
-import { BaseResolver } from '@pomelo/shared';
+import { BaseResolver } from '@pomelo/shared-server';
 import { Authorized } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
 import { ObsUploadSignedUrlModel, ObsPostUploadSignatureModel } from './models/hw-cloud.modal';

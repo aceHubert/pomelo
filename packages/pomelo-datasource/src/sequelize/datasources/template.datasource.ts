@@ -1,7 +1,7 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Includeable, Transaction, Op, Order } from 'sequelize';
-import { UserInputError, ValidationError, ForbiddenError, RequestUser } from '@pomelo/shared';
+import { UserInputError, ValidationError, ForbiddenError, RequestUser } from '@pomelo/shared-server';
 import { Taxonomy, TemplateType, TemplateStatus, TemplateOperateStatus, TemplateAttributes } from '../../entities';
 import { UserCapability } from '../utils/user-capability.util';
 import { OptionPresetKeys, TemplateMetaPresetKeys } from '../utils/preset-keys.util';

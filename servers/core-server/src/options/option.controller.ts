@@ -14,7 +14,7 @@ import {
   describeType,
   createResponseSuccessType,
   RequestUser,
-} from '@pomelo/shared';
+} from '@pomelo/shared-server';
 import { OptionAction } from '@/common/actions';
 import { OptionQueryDto } from './dto/option-query.dto';
 import { NewOptionDto } from './dto/new-option.dto';

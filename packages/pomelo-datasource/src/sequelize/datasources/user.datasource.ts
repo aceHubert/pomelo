@@ -5,7 +5,7 @@ import { isEmail, isPhoneNumber } from 'class-validator';
 import { WhereOptions, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenError, ValidationError, RequestUser } from '@pomelo/shared';
+import { ForbiddenError, ValidationError, RequestUser } from '@pomelo/shared-server';
 import { UserStatus, UserAttributes, UserRole } from '../../entities';
 import { UserCapability } from '../utils/user-capability.util';
 import { UserMetaPresetKeys } from '../utils/preset-keys.util';

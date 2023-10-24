@@ -1,7 +1,7 @@
 import { lowerFirst, flattenDeep, groupBy } from 'lodash';
 import { ModelStatic, Model, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
-import { UserInputError, ValidationError, RuntimeError } from '@pomelo/shared';
+import { UserInputError, ValidationError, RuntimeError } from '@pomelo/shared-server';
 import { MetaModel, NewMetaInput } from '../interfaces/meta.interface';
 import { MetaDataSource as IMetaDataSource } from '../interfaces/meta-data-source.interface';
 import { BaseDataSource } from './base.datasource';

@@ -15,11 +15,16 @@
     "esdk-obs-nodejs": "^3.21.6",
     "nestjs-ram-authorization": "workspace:^"
   },
+  "devDependencies": {
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "@nestjs/graphql": "^11.0.0"
+  },
   "peerDependencies": {
-    "@nestjs/common": "^8.2.3 || ^9.0.0",
-    "@nestjs/core": "^8.2.3 || ^9.0.0",
-    "@nestjs/graphql": "^10.0.0 || ^11.0.0",
-    "@pomelo/shared": "workspace:^",
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "@nestjs/graphql": "^11.0.0",
+    "@pomelo/shared-server": "workspace:^",
     "nestjs-authorization": "workspace:^"
   },
   "packageManager": "yarn@3.1.0"

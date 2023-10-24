@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, RequestUser } from '@pomelo/shared';
+import { ValidationError, RequestUser } from '@pomelo/shared-server';
 import { UserCapability } from '../utils/user-capability.util';
 import { OptionModel, OptionArgs, NewOptionInput, UpdateOptionInput } from '../interfaces/option.interface';
 import { BaseDataSource } from './base.datasource';

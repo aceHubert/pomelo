@@ -5,7 +5,7 @@ import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '
 import { Authorized, Anonymous } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { BaseResolver, Fields, User, RequestUser } from '@pomelo/shared';
+import { BaseResolver, Fields, User, RequestUser } from '@pomelo/shared-server';
 import {
   TemplateDataSource,
   TermTaxonomyDataSource,

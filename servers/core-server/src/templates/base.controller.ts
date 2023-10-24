@@ -29,7 +29,7 @@ import {
   QueryRequired,
   createResponseSuccessType,
   RequestUser,
-} from '@pomelo/shared';
+} from '@pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,

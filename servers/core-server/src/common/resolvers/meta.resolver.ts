@@ -3,7 +3,7 @@ import { camelCase, lowerCase, upperFirst, words } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Type } from '@nestjs/common';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
-import { BaseResolver, Fields } from '@pomelo/shared';
+import { BaseResolver, Fields } from '@pomelo/shared-server';
 import { MetaDataSource } from '@pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { RamAuthorized } from 'nestjs-ram-authorization';

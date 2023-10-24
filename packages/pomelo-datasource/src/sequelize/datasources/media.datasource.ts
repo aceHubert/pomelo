@@ -1,7 +1,7 @@
 import { Op, WhereOptions } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, RequestUser } from '@pomelo/shared';
+import { ValidationError, RequestUser } from '@pomelo/shared-server';
 import {
   MediaModel,
   MediaMetaDataModel,

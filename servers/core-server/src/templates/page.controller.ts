@@ -22,7 +22,7 @@ import {
   User,
   RequestUser,
   createResponseSuccessType,
-} from '@pomelo/shared';
+} from '@pomelo/shared-server';
 import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
 import { Authorized, Anonymous } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';

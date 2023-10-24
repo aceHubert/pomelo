@@ -1,2 +1,0 @@
-# @pomelo/shared
-

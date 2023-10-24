@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Parent, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Fields, User, RequestUser } from '@pomelo/shared';
+import { Fields, User, RequestUser } from '@pomelo/shared-server';
 import {
   TemplateDataSource,
   TermTaxonomyDataSource,

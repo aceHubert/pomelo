@@ -1,5 +1,5 @@
 {
-  "name": "@pomelo/shared",
+  "name": "@pomelo/shared-server",
   "description": "Nodejs shared context",
   "version": "0.1.0-alpha.0",
   "main": "dist/index.js",
@@ -14,7 +14,7 @@
   "devDependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^10.0.0",
+    "@nestjs/graphql": "^11.0.0",
     "@nestjs/swagger": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
@@ -24,7 +24,7 @@
   "peerDependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^10.0.0 || ^11.0.0",
+    "@nestjs/graphql": "^11.0.0",
     "@nestjs/swagger": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",

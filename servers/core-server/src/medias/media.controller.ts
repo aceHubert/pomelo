@@ -30,7 +30,7 @@ import {
   createResponseSuccessType,
   describeType,
   RequestUser,
-} from '@pomelo/shared';
+} from '@pomelo/shared-server';
 import { isAbsoluteUrl } from '@/common/utils/path.util';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { MediaAction } from '@/common/actions';

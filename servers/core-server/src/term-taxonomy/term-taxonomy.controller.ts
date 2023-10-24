@@ -8,7 +8,7 @@ import {
   User,
   RequestUser,
   createResponseSuccessType,
-} from '@pomelo/shared';
+} from '@pomelo/shared-server';
 import { OptionDataSource, TermTaxonomyDataSource, Taxonomy, OptionPresetKeys } from '@pomelo/datasource';
 import { Anonymous, Authorized } from 'nestjs-authorization';
 import { RamAuthorized } from 'nestjs-ram-authorization';

@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { RequestUser } from '@pomelo/shared';
+import { RequestUser } from '@pomelo/shared-server';
 import { UserCapability } from '../utils/user-capability.util';
 import {
   CommentModel,
