@@ -2,12 +2,18 @@ import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composi
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
-import { useTemplateApi, getFrameworkSchema, OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-web';
+import {
+  useTemplateApi,
+  getFrameworkSchema,
+  OptionPresetKeys,
+  FormMetaPresetKeys,
+  useLocationMixin,
+  useDeviceType,
+} from '@pomelo/shared-client';
 import { Modal } from 'ant-design-vue';
 import { Dialog } from 'vant';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
-import { useLocationMixin, useDeviceMixin } from '@/mixins';
 
 const MobileForm = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopForm = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -39,10 +45,10 @@ export default defineComponent({
   },
   setup(props) {
     const i18n = useI18n();
-    const deviceMixin = useDeviceMixin();
-    const localtionMixin = useLocationMixin();
     const fetch = getActiveFetch();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
+    const deviceType = useDeviceType();
+    const localtionMixin = useLocationMixin();
     const templateApi = useTemplateApi();
 
     // from /f/:id
@@ -150,7 +156,7 @@ export default defineComponent({
         .then(() => {
           // redirect
           let alert: Promise<any>;
-          if (deviceMixin.isMobile) {
+          if (deviceType.isMobile) {
             alert = Dialog.alert({
               title: i18n.tv('form_template.index.submit_success_title', '提示') as string,
               message: submitSuccessTips,
@@ -173,7 +179,7 @@ export default defineComponent({
           });
         })
         .catch((err) => {
-          if (deviceMixin.isMobile) {
+          if (deviceType.isMobile) {
             Dialog.alert({
               title: i18n.tv('form_template.index.submit_failed_title', '提交失败') as string,
               message: err.message,
@@ -199,14 +205,14 @@ export default defineComponent({
 
       return $loading ? (
         <div>
-          <SkeletonLoader style={{ width: '100%', height: deviceMixin.isDesktop ? '300px' : '200px' }} />
-          <div class={['mx-auto pt-2', { 'px-4': !deviceMixin.isDesktop }]} style="width: 1180px; max-width: 100%;">
+          <SkeletonLoader style={{ width: '100%', height: deviceType.isDesktop ? '300px' : '200px' }} />
+          <div class={['mx-auto pt-2', { 'px-4': !deviceType.isDesktop }]} style="width: 1180px; max-width: 100%;">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} class="d-flex mt-2">
                 <SkeletonLoader
                   class="flex-none"
                   style={{
-                    width: deviceMixin.isDesktop ? '120px' : '70px',
+                    width: deviceType.isDesktop ? '120px' : '70px',
                     height: '32px',
                   }}
                 />
@@ -221,11 +227,11 @@ export default defineComponent({
             <SkeletonLoader
               class="flex-none mt-5"
               style={{
-                marginLeft: deviceMixin.isDesktop ? '128px' : '0',
-                width: deviceMixin.isDesktop ? '100px' : '100%',
+                marginLeft: deviceType.isDesktop ? '128px' : '0',
+                width: deviceType.isDesktop ? '100px' : '100%',
                 height: '40px',
                 lineHeight: '40px',
-                borderRadius: deviceMixin.isDesktop ? '8px' : '99px',
+                borderRadius: deviceType.isDesktop ? '8px' : '99px',
                 textAlign: 'center',
                 color: 'gray',
               }}
@@ -252,7 +258,7 @@ export default defineComponent({
           title={i18n.tv('form_template.index.render_error_text', '表单渲染错误！') as string}
           subTitle={renderError.value}
         ></Result>
-      ) : deviceMixin.isDesktop ? (
+      ) : deviceType.isDesktop ? (
         h(DesktopForm, {
           props: {
             title: formData.title,

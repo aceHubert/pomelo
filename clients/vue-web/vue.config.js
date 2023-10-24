@@ -131,7 +131,7 @@ module.exports = defineConfig({
             ? {
                 '@pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
                 '@pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
-                '@pomelo/shared-web': path.resolve(__dirname, '../../packages/pomelo-shared-web/src'),
+                '@pomelo/shared-client': path.resolve(__dirname, '../../packages/pomelo-shared-client/src'),
                 '@formily/antdv$': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
                 '@formily-portal/antdv$': path.resolve(
                   __dirname,

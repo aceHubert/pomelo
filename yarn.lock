@@ -5364,33 +5364,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@pomelo/shared-server@workspace:^, @pomelo/shared-server@workspace:packages/pomelo-shared-server":
+"@pomelo/shared-client@workspace:^, @pomelo/shared-client@workspace:packages/pomelo-shared-client":
   version: 0.0.0-use.local
-  resolution: "@pomelo/shared-server@workspace:packages/pomelo-shared-server"
-  dependencies:
-    "@nestjs/common": ^9.0.0
-    "@nestjs/core": ^9.0.0
-    "@nestjs/graphql": ^11.0.0
-    "@nestjs/swagger": ^6.0.0
-    class-transformer: ^0.5.1
-    class-validator: ^0.13.2
-    graphql: ^16.0.0
-    graphql-parse-resolve-info: ^4.12.0
-  peerDependencies:
-    "@nestjs/common": ^9.0.0
-    "@nestjs/core": ^9.0.0
-    "@nestjs/graphql": ^11.0.0
-    "@nestjs/swagger": ^6.0.0
-    class-transformer: ^0.5.1
-    class-validator: ^0.13.2
-    graphql: ^16.0.0
-    graphql-parse-resolve-info: ^4.12.0
-  languageName: unknown
-  linkType: soft
-
-"@pomelo/shared-web@workspace:^, @pomelo/shared-web@workspace:packages/pomelo-shared-web":
-  version: 0.0.0-use.local
-  resolution: "@pomelo/shared-web@workspace:packages/pomelo-shared-web"
+  resolution: "@pomelo/shared-client@workspace:packages/pomelo-shared-client"
   dependencies:
     "@ace-fetch/core": ^0.2.0
     "@ace-fetch/vue": ^0.2.0
@@ -5414,6 +5390,30 @@ __metadata:
   peerDependenciesMeta:
     "@vue/composition-api":
       optional: true
+  languageName: unknown
+  linkType: soft
+
+"@pomelo/shared-server@workspace:^, @pomelo/shared-server@workspace:packages/pomelo-shared-server":
+  version: 0.0.0-use.local
+  resolution: "@pomelo/shared-server@workspace:packages/pomelo-shared-server"
+  dependencies:
+    "@nestjs/common": ^9.0.0
+    "@nestjs/core": ^9.0.0
+    "@nestjs/graphql": ^11.0.0
+    "@nestjs/swagger": ^6.0.0
+    class-transformer: ^0.5.1
+    class-validator: ^0.13.2
+    graphql: ^16.0.0
+    graphql-parse-resolve-info: ^4.12.0
+  peerDependencies:
+    "@nestjs/common": ^9.0.0
+    "@nestjs/core": ^9.0.0
+    "@nestjs/graphql": ^11.0.0
+    "@nestjs/swagger": ^6.0.0
+    class-transformer: ^0.5.1
+    class-validator: ^0.13.2
+    graphql: ^16.0.0
+    graphql-parse-resolve-info: ^4.12.0
   languageName: unknown
   linkType: soft
 
@@ -5460,7 +5460,7 @@ __metadata:
     "@formily/vant": "portal:../../.submodules/formily-vant/packages/components"
     "@formily/vant-prototypes": "portal:../../.submodules/formily-vant/packages/prototypes"
     "@formily/vue": ^2.2.0
-    "@pomelo/shared-web": "workspace:^"
+    "@pomelo/shared-client": "workspace:^"
     "@sentry/browser": ^6.13.3
     "@sentry/integrations": ^6.13.3
     "@types/highlight.js": ^10.1.0
@@ -5524,7 +5524,7 @@ __metadata:
     "@formily/vant": "portal:../../.submodules/formily-vant/packages/components"
     "@formily/vant-prototypes": "portal:../../.submodules/formily-vant/packages/prototypes"
     "@formily/vue": ^2.2.0
-    "@pomelo/shared-web": "workspace:^"
+    "@pomelo/shared-client": "workspace:^"
     "@pomelo/theme": "workspace:^"
     "@types/store": ^2.0.2
     "@vue-async/module-loader": ^3.2.2

@@ -1,6 +1,6 @@
-import { ref, reactive, computed, provide, onMounted, onBeforeUnmount } from '@vue/composition-api';
+import { ref, reactive, computed, provide, Ref, InjectionKey, onMounted, onBeforeUnmount } from 'vue-demi';
 import { createMediaQueryDispatcher } from '@ace-util/core';
-import { DeviceType } from '@/types';
+import { DeviceType } from '../types';
 
 // screen and (max-width: 1087.99px)
 const defaultQueries = {
@@ -9,21 +9,23 @@ const defaultQueries = {
   [DeviceType.Mobile]: 'screen and (max-width: 576px)',
 };
 
-export const DEVICE_INJECT_KEY = '__DEVICE__';
-export const IS_MOBILE_INJECT_KEY = '__IS_MOBILE__';
-export const IS_DESKTOP_INJECT_KEY = '__IS_DESKTOP__';
-export const IS_TABLET_INJECT_KEY = '__IS_TABLET__';
+export const DEVICE_TYPE_INJECT_KEY: InjectionKey<Ref<DeviceType>> = Symbol('__DEVICE_TYPE__');
 
-export const useDeviceMixin = (queries = defaultQueries) => {
+/**
+ * 设备类型
+ * 在 root 上引用后，在children component中可以使用 inject (useDeviceType) 获取
+ * default queries:
+ *  Desktop: > 1200px
+ *  Tablet: 576px - 1199px
+ *  Mobile: < 576px
+ */
+export const useDeviceMixin = (queries: Record<DeviceType, string> = defaultQueries) => {
   const device = ref(DeviceType.Desktop);
   const isMobile = computed(() => device.value === DeviceType.Mobile);
   const isDesktop = computed(() => device.value === DeviceType.Desktop);
   const isTablet = computed(() => device.value === DeviceType.Tablet);
 
-  provide(DEVICE_INJECT_KEY, device);
-  provide(IS_MOBILE_INJECT_KEY, isMobile);
-  provide(IS_DESKTOP_INJECT_KEY, isDesktop);
-  provide(IS_TABLET_INJECT_KEY, isTablet);
+  provide(DEVICE_TYPE_INJECT_KEY, device);
 
   let enquireJs!: ReturnType<typeof createMediaQueryDispatcher>;
   onMounted(() => {

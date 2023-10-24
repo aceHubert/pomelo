@@ -10,7 +10,7 @@ import { checkSchemaValid, type IFormilySchema } from '../form/utils';
 
 // Types
 import type { SchemaComponents } from '@formily/vue';
-import type { SchemaFramework } from '@pomelo/shared-web';
+import type { SchemaFramework } from '@pomelo/shared-client';
 
 const { SchemaField } = createSchemaField({
   components: {

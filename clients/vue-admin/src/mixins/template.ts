@@ -1,7 +1,7 @@
 import { lowerCase } from 'lodash-es';
 import { ref, reactive, computed, watch, set } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { TemplateStatus } from '@pomelo/shared-web';
+import { TemplateStatus } from '@pomelo/shared-client';
 import { message } from '@/components';
 import { useI18n, useOptions } from '@/hooks';
 import { useTemplateApi, useTermTaxonomyApi } from '@/fetch/graphql';

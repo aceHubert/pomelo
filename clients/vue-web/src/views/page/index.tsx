@@ -8,13 +8,13 @@ import {
   getFrameworkSchema,
   OptionPresetKeys,
   PageMetaPresetKeys,
-} from '@pomelo/shared-web';
+  useDeviceType,
+} from '@pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
-import { useDeviceMixin } from '@/mixins';
 
 // Types
-import type { PageTemplateWithMetasModel } from '@pomelo/shared-web';
+import type { PageTemplateWithMetasModel } from '@pomelo/shared-client';
 
 const MobilePage = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopPage = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -51,9 +51,9 @@ export default defineComponent({
   setup(props) {
     const i18n = useI18n();
     const route = useRoute();
-    const deviceMixin = useDeviceMixin();
-    const basicApi = useBasicApi();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
+    const deviceType = useDeviceType();
+    const basicApi = useBasicApi();
     const templateApi = useTemplateApi();
 
     const pageRes = createResource(async ({ id, name }: { id?: number; name: string }) => {
@@ -191,8 +191,8 @@ export default defineComponent({
 
       return $loading ? (
         <div>
-          <SkeletonLoader style={{ width: '100%', height: deviceMixin.isDesktop ? '300px' : '200px' }} />
-          {deviceMixin.isDesktop ? (
+          <SkeletonLoader style={{ width: '100%', height: deviceType.isDesktop ? '300px' : '200px' }} />
+          {deviceType.isDesktop ? (
             <div class="mx-auto" style="width: 1180px; max-width: 100%;">
               <div class="d-flex flex-wrap justify-content-start mx-n3">
                 {Array.from({ length: 8 }).map((_, index) => (
@@ -258,7 +258,7 @@ export default defineComponent({
           title={i18n.tv('page_template.index.render_error_text', '页面渲染错误！') as string}
           subTitle={renderError.value}
         ></Result>
-      ) : deviceMixin.isDesktop ? (
+      ) : deviceType.isDesktop ? (
         h(DesktopPage, {
           props: {
             title: pageData.title,

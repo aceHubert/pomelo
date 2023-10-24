@@ -1,5 +1,6 @@
-@import '~ant-design-vue/lib/style/themes/default';
-@import '~@pomelo/theme/lib/themes/default';
+@import 'ant-design-vue/lib/style/themes/default';
+
+@ant-prefix: ~'pomelo'; // ant input-password/model 不能适配
 
 @text-selection-bg: @var-primary;
 @icon-color-hover: fade(@base-color, 75%);

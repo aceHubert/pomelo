@@ -42,7 +42,7 @@
     "@formily/vant": "portal:../../.submodules/formily-vant/packages/components",
     "@formily/vant-prototypes": "portal:../../.submodules/formily-vant/packages/prototypes",
     "@formily/vue": "^2.2.0",
-    "@pomelo/shared-web": "workspace:^",
+    "@pomelo/shared-client": "workspace:^",
     "@sentry/browser": "^6.13.3",
     "@sentry/integrations": "^6.13.3",
     "@vue-async/module-loader": "^3.2.2",

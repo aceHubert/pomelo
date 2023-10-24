@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "lib": ["esnext", "dom"]
-  },
-  "include": ["src/**/*.ts", "tests/**/*.ts"]
-}

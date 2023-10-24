@@ -34,7 +34,7 @@ import {
   getFrameworkSchema,
   toFrameworkContent,
   type SchemaFramework,
-} from '@pomelo/shared-web';
+} from '@pomelo/shared-client';
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePageApi } from '@/fetch/graphql';
 import { useI18n, useUserManager, useOptions } from '@/hooks';

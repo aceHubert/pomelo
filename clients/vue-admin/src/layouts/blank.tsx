@@ -1,7 +1,8 @@
 import { upperFirst } from 'lodash-es';
 import { defineComponent } from '@vue/composition-api';
 import { ConfigProvider } from 'antdv-layout-pro';
-import { useAppMixin, useDeviceMixin } from '@/mixins';
+import { useDeviceMixin } from '@pomelo/shared-client';
+import { useAppMixin } from '@/mixins';
 import { useI18n } from '@/hooks';
 import { Spin, ANT_PREFIX_CLS } from '@/components';
 import { loadingRef } from '@/shared';

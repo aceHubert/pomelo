@@ -5,16 +5,16 @@ import { createSchemaField, FragmentComponent } from '@formily/vue';
 import { Loading } from 'vant';
 import * as Vant from '@formily/vant';
 import { Form, Submit } from '@formily/vant';
-import { OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-web';
+import { OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-client';
 import { useI18n, useOptions } from '@/hooks';
 import { Result } from '@/components';
 import { checkSchemaValid, type IFormilySchema } from './utils';
-import Text from './components/Text';
+import { Text } from './components';
 import classes from './mobile.module.less';
 
 // Types
 import type { SchemaComponents } from '@formily/vue';
-import type { SchemaFramework } from '@pomelo/shared-web';
+import type { SchemaFramework } from '@pomelo/shared-client';
 
 const form = createForm();
 const { SchemaField } = createSchemaField({
@@ -132,6 +132,7 @@ export default defineComponent({
                       <Submit
                         round
                         block
+                        type="primary"
                         loading={submitingRef.value}
                         loadingText={i18n.tv('common.btn_text.submit', '提交')}
                         onSubmit={handleSubmit}

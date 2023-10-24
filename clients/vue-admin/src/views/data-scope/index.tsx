@@ -4,10 +4,10 @@ import { defineComponent, ref, reactive, computed, watch } from '@vue/compositio
 import { useRoute } from 'vue2-helpers/vue-router';
 import { Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { TemplateStatus } from '@pomelo/shared-web';
+import { TemplateStatus, useDeviceType } from '@pomelo/shared-client';
 import { useTemplateApi } from '@/fetch/graphql';
 import { useI18n, useUserManager } from '@/hooks';
-import { useDeviceMixin, useTemplateMixin } from '@/mixins';
+import { useTemplateMixin } from '@/mixins';
 import { TemplateType } from './constants';
 import classes from './index.module.less';
 
@@ -32,7 +32,7 @@ export default defineComponent({
   setup(_props, { refs }) {
     const route = useRoute();
     const i18n = useI18n();
-    const deviceMixin = useDeviceMixin();
+    const deviceType = useDeviceType();
     const userManager = useUserManager();
     const templateApi = useTemplateApi();
     const templateMixin = useTemplateMixin();
@@ -214,17 +214,17 @@ export default defineComponent({
                 {record.title}
               </router-link>
               <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>
-              {!deviceMixin.isDesktop && renderRowInline(record)}
+              {!deviceType.isDesktop && renderRowInline(record)}
             </div>
           ),
         },
-        deviceMixin.isDesktop && {
+        deviceType.isDesktop && {
           title: i18n.tv('page_templates.author_label', '作者'),
           dataIndex: 'author',
           width: 200,
           customRender: () => `-`,
         },
-        deviceMixin.isDesktop && {
+        deviceType.isDesktop && {
           title: i18n.tv('page_templates.date_label', '日期'),
           dataIndex: 'updatedAt',
           align: 'left',
@@ -246,7 +246,7 @@ export default defineComponent({
     });
 
     return () => (
-      <Card bordered={false} size={deviceMixin.isMobile ? 'small' : 'default'}>
+      <Card bordered={false} size={deviceType.isMobile ? 'small' : 'default'}>
         <SearchForm
           keywordPlaceholder={
             i18n.tv('common.placeholder.search', '"标题"模糊搜索', {

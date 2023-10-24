@@ -1,6 +1,6 @@
 {
-  "name": "@pomelo/shared-web",
-  "description": "web 端 shared 内容",
+  "name": "@pomelo/shared-client",
+  "description": "Client shared context",
   "version": "0.1.0",
   "private": true,
   "main": "lib/index.js",
@@ -34,17 +34,35 @@
     "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
+  "dependencies": {
+    "@ace-util/core": "^0.1.0",
+    "tinycolor2": "^1.6.0",
+    "vue2-helpers": "1.x"
+  },
   "devDependencies": {
     "@ace-fetch/core": "^0.2.0",
     "@ace-fetch/vue": "^0.2.0",
     "@ace-util/core": "^0.1.0",
-    "pinia": "^2.0.17"
+    "ant-design-vue": "^1.7.7",
+    "babel-preset-vca-jsx": "^0.3.6",
+    "pinia": "^2.0.17",
+    "vue-demi": "^*",
+    "vue-router": "^3.5.0"
   },
   "peerDependencies": {
     "@ace-fetch/core": "^0.2.0",
     "@ace-fetch/vue": "^0.2.0",
     "@ace-util/core": "^0.1.0",
-    "pinia": "^2.0.0"
+    "@vue/composition-api": "^1.0.0",
+    "ant-design-vue": "^1.7.7",
+    "pinia": "^2.0.0",
+    "vue": "^2.6.0 || ^3.0.0",
+    "vue-router": "^3.5.0 || >=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/composition-api": {
+      "optional": true
+    }
   },
   "packageManager": "yarn@3.1.0"
 }

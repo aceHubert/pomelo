@@ -1,6 +1,6 @@
 import { ref } from '@vue/composition-api';
 import { warn } from '@ace-util/core';
-import { useBasicApi } from '@pomelo/shared-web';
+import { useBasicApi } from '@pomelo/shared-client';
 
 // Types
 import type { Ref } from '@vue/composition-api';

@@ -5,16 +5,16 @@ import { createSchemaField } from '@formily/vue';
 import { Card, Rate } from 'ant-design-vue';
 import { Form, FormButtonGroup, Submit } from '@formily/antdv';
 import * as Antdv from '@formily/antdv';
-import { OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-web';
+import { OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-client';
 import { useI18n, useOptions } from '@/hooks';
 import { Spin, Result } from '@/components';
 import { checkSchemaValid, type IFormilySchema } from './utils';
-import Text from './components/Text';
+import { Text } from './components';
 import classes from './desktop.module.less';
 
 // Types
 import type { SchemaComponents } from '@formily/vue';
-import type { SchemaFramework } from '@pomelo/shared-web';
+import type { SchemaFramework } from '@pomelo/shared-client';
 
 const form = createForm();
 const { SchemaField } = createSchemaField({
@@ -135,6 +135,7 @@ export default defineComponent({
                     <SchemaField schema={schema.value.schema}></SchemaField>
                     <FormButtonGroup align-form-item>
                       <Submit
+                        type="primary"
                         shape="round"
                         loading={submitingRef.value}
                         onSubmit={handleSubmit}
@@ -142,9 +143,6 @@ export default defineComponent({
                       >
                         {i18n.tv('common.btn_text.submit', '提交')}
                       </Submit>
-                      {/* <Reset validate forceClear>
-                {i18n.tv('common.btn_text.reset', '重置')}
-              </Reset> */}
                     </FormButtonGroup>
                   </Form>
                 ) : (

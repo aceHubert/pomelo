@@ -2,12 +2,12 @@ import moment from 'moment';
 import hljs from 'highlight.js/lib/core';
 import { defineComponent, computed, onMounted } from '@vue/composition-api';
 import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
-import { OptionPresetKeys, PostMetaPresetKeys, TemplatePageType } from '@pomelo/shared-web';
+import { OptionPresetKeys, PostMetaPresetKeys, TemplatePageType } from '@pomelo/shared-client';
 import { useI18n, useOptions } from '@/hooks';
 import classes from './mobile.module.less';
 
 // Types
-import type { SchemaFramework } from '@pomelo/shared-web';
+import type { SchemaFramework } from '@pomelo/shared-client';
 
 export interface MobilePostProps {
   title: string;

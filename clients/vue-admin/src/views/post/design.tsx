@@ -24,11 +24,12 @@ import {
   PostMetaPresetKeys,
   getFrameworkSchema,
   toFrameworkContent,
+  useDeviceType,
   type SchemaFramework,
-} from '@pomelo/shared-web';
+} from '@pomelo/shared-client';
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePostApi } from '@/fetch/graphql';
-import { useDeviceMixin, useDesignerMixin } from '@/mixins';
+import { useDesignerMixin } from '@/mixins';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
 import { MediaList } from '../media/components';
@@ -80,9 +81,9 @@ export default defineComponent({
     const router = useRouter();
     const i18n = useI18n();
     const userManager = useUserManager();
-    const designerMixin = useDesignerMixin();
-    const deviceMixin = useDeviceMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
+    const deviceType = useDeviceType();
+    const designerMixin = useDesignerMixin();
     const templateApi = useTemplateApi();
     const postApi = usePostApi();
 
@@ -403,7 +404,7 @@ export default defineComponent({
     // #endregion
 
     onMounted(() => {
-      if (deviceMixin.isDesktop) {
+      if (deviceType.isDesktop) {
         siderCollapsedRef.value = false;
       }
     });

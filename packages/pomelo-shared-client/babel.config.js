@@ -8,6 +8,13 @@ module.exports = (api) => {
           modules: api.env(['es']) ? false : api.env(['cjs']) ? 'commonjs' : 'auto',
         },
       ],
+      'vca-jsx',
+      [
+        '@vue/babel-preset-jsx',
+        {
+          // compositionAPI: true,
+        },
+      ],
       '@babel/preset-typescript',
     ],
     plugins: ['@babel/transform-runtime'],

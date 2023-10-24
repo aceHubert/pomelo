@@ -1,7 +1,7 @@
 import { defineRegistApi, gql } from './core';
 
 // Types
-import type { TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-web';
+import type { TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-client';
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
 import type { TermTaxonomyModel } from './term-taxonomy';
 import type { Paged } from './types';

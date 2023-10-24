@@ -1,4 +1,4 @@
-import { reactive } from '@vue/composition-api';
+import { reactive } from 'vue-demi';
 import { isAbsoluteUrl, absoluteGo } from '@ace-util/core';
 import { useRouter } from 'vue2-helpers/vue-router';
 
@@ -13,9 +13,9 @@ export const useLocationMixin = () => {
    * @param query
    * @param option
    */
-  function updateRouteQuery(query: Dictionary<string | undefined>, replace?: boolean): Promise<Route>;
+  function updateRouteQuery(query: Record<string, string | undefined>, replace?: boolean): Promise<Route>;
   function updateRouteQuery(
-    query: Dictionary<string | undefined>,
+    query: Record<string, string | undefined>,
     options: {
       replace?: boolean;
       onComplete?: (route: Route) => void;
@@ -23,7 +23,7 @@ export const useLocationMixin = () => {
     },
   ): void;
   function updateRouteQuery(
-    query: Dictionary<string | undefined>,
+    query: Record<string, string | undefined>,
     options:
       | boolean
       | {

@@ -5,11 +5,11 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
 import { Select, Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { OptionPresetKeys, TemplateStatus } from '@pomelo/shared-web';
+import { OptionPresetKeys, TemplateStatus, useLocationMixin, useDeviceType } from '@pomelo/shared-client';
 import { message } from '@/components';
 import { usePageApi, TemplateType } from '@/fetch/graphql';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
-import { useDeviceMixin, useLocationMixin, useTemplateMixin } from '@/mixins';
+import { useTemplateMixin } from '@/mixins';
 import classes from './index.module.less';
 
 // typed
@@ -35,7 +35,7 @@ export default defineComponent({
   setup(_props, { refs }) {
     const route = useRoute();
     const i18n = useI18n();
-    const deviceMixin = useDeviceMixin();
+    const deviceType = useDeviceType();
     const locationMixin = useLocationMixin();
     const templateMixin = useTemplateMixin();
     const userManager = useUserManager();
@@ -328,24 +328,24 @@ export default defineComponent({
                   )}
                 </p>
                 <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>
-                {!deviceMixin.isDesktop && renderRowInline(record)}
+                {!deviceType.isDesktop && renderRowInline(record)}
               </div>
             );
           },
         },
-        deviceMixin.isDesktop && {
+        deviceType.isDesktop && {
           title: i18n.tv('page_templates.author_label', '作者'),
           dataIndex: 'author',
           width: 120,
           customRender: () => `-`,
         },
-        deviceMixin.isDesktop && {
+        deviceType.isDesktop && {
           title: i18n.tv('page_templates.comment_label', '评论'),
           dataIndex: 'commentCount',
           width: 100,
           customRender: () => `-`,
         },
-        deviceMixin.isDesktop && {
+        deviceType.isDesktop && {
           title: i18n.tv('page_templates.date_label', '日期'),
           dataIndex: 'updatedAt',
           align: 'left',
@@ -367,7 +367,7 @@ export default defineComponent({
     });
 
     return () => (
-      <Card bordered={false} size={deviceMixin.isMobile ? 'small' : 'default'}>
+      <Card bordered={false} size={deviceType.isMobile ? 'small' : 'default'}>
         <SearchForm
           keywordPlaceholder={
             i18n.tv('common.placeholder.search', '"标题"模糊搜索', {

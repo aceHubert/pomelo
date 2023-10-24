@@ -17,9 +17,10 @@ import {
   type LayoutType,
   type ContentWidth,
 } from 'antdv-layout-pro/types';
+import { useDeviceMixin, useLocationMixin } from '@pomelo/shared-client';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
 import { useUserManager, useI18n } from '@/hooks';
-import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
+import { useAppMixin } from '@/mixins';
 import { loadingRef } from '@/shared';
 import { getDefaultMenus } from '@/configs/menu.config';
 import IconDarkTheme from '@/assets/icons/dark-theme.svg?inline';
