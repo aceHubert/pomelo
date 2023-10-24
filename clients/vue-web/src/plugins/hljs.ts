@@ -9,6 +9,7 @@ import php from 'highlight.js/lib/languages/php';
 import python from 'highlight.js/lib/languages/python';
 import ruby from 'highlight.js/lib/languages/ruby';
 import json from 'highlight.js/lib/languages/json';
+import yaml from 'highlight.js/lib/languages/yaml';
 import xml from 'highlight.js/lib/languages/xml';
 import 'highlight.js/styles/github.css';
 
@@ -22,4 +23,5 @@ hljs.registerLanguage('php', php);
 hljs.registerLanguage('python', python);
 hljs.registerLanguage('ruby', ruby);
 hljs.registerLanguage('json', json);
+hljs.registerLanguage('yaml', yaml);
 hljs.registerLanguage('xml', xml);

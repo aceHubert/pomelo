@@ -199,7 +199,7 @@ module.exports = defineConfig({
             test: /[\\/]node_modules[\\/]_?ant-design-vue(.*)/, // in order to adapt to cnpm
             chunks: 'all',
           },
-          'antdv-Layout': {
+          'antdv-layout': {
             name: 'chunk-antdv-layout', // split antdv-layout-pro into a single package
             priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
             test: /[\\/]node_modules[\\/]_?antdv-layout-pro(.*)/, // in order to adapt to cnpm

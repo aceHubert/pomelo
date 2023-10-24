@@ -172,6 +172,7 @@ BalloonEditor.defaultConfig = {
       { language: 'python', label: 'Python' },
       { language: 'ruby', label: 'Ruby' },
       { language: 'json', label: 'JSON' },
+      { language: 'yaml', label: 'YAML' },
       { language: 'xml', label: 'XML' },
     ],
   },
