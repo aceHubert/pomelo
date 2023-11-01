@@ -2,8 +2,8 @@ import DataLoader from 'dataloader';
 import { upperFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
-import { Authorized, Anonymous } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Authorized, Anonymous } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { BaseResolver, Fields, User, RequestUser } from '@pomelo/shared-server';
 import {
@@ -189,7 +189,7 @@ export class TemplateResolver extends createMetaResolver(
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<Template | undefined> {
-    return this.templateDataSource.get(id, void 0, this.getFieldNames(fields.fieldsByTypeName.Template), requestUser);
+    return this.templateDataSource.get(id, 'NONE', this.getFieldNames(fields.fieldsByTypeName.Template), requestUser);
   }
 
   @Anonymous()
@@ -201,7 +201,7 @@ export class TemplateResolver extends createMetaResolver(
   ): Promise<Template | undefined> {
     return this.templateDataSource.getByName(
       name,
-      void 0,
+      'NONE',
       this.getFieldNames(fields.fieldsByTypeName.Template),
       requestUser,
     );

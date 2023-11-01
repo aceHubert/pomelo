@@ -1,6 +1,6 @@
 {
-  "name": "nestjs-ram-authorization",
-  "description": "nestjs ram authorization.",
+  "name": "@pomelo/authorization",
+  "description": "Pomelo Identity Guard and Decorator.",
   "version": "0.1.0-alpha.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,6 +21,7 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/graphql": "^11.0.0",
+    "@pomelo/shared-server": "workspace:^",
     "graphql-parse-resolve-info": "^4.12.0"
   },
   "publishConfig": {

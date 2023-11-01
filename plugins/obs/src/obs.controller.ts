@@ -1,8 +1,8 @@
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Controller, Query, Get, HttpStatus } from '@nestjs/common';
+import { Authorized } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { ApiAuth, BaseController, ParseQueryPipe, createResponseSuccessType } from '@pomelo/shared-server';
-import { Authorized } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
 import { ObsUploadSignedUrlResp, ObsPostUploadSignatureResp } from './resp/hw-cloud.resp';
 import { Action } from './action';
 

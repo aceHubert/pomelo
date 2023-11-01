@@ -24,8 +24,8 @@ import {
   createResponseSuccessType,
 } from '@pomelo/shared-server';
 import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
-import { Authorized, Anonymous } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Authorized, Anonymous } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { PostTemplateAction } from '@/common/actions';
 import { PostTemplateOptionQueryDto, PagedPostTemplateQueryDto } from './dto/template-query.dto';
 import { NewPostTemplateDto } from './dto/new-template.dto';
@@ -127,7 +127,7 @@ export class PostTemplateController extends BaseController {
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(result.id, metaKeys, ['id', 'metaKey', 'metaValue']);
+      metas = await this.templateDataSource.getMetas(result.id, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
     }
 
     if (result === undefined) {
@@ -186,7 +186,12 @@ export class PostTemplateController extends BaseController {
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
+      metas = await this.templateDataSource.getMetas(id, metaKeys ?? 'ALL', [
+        'id',
+        'templateId',
+        'metaKey',
+        'metaValue',
+      ]);
     }
 
     if (result === undefined) {

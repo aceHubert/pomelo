@@ -19,8 +19,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { Authorized } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Authorized } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { MediaDataSource } from '@pomelo/datasource';
 import {
   User,
@@ -452,7 +452,7 @@ export class MediaController extends createMetaController(
     { metaData, ...model }: UpdateMediaDto,
     @User() user: RequestUser,
   ) {
-    await this.mediaDataSource.update(id, model, metaData, user);
+    await this.mediaDataSource.update(id, model, metaData ?? 'NONE', user);
     return this.success();
   }
 }

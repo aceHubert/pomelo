@@ -23,10 +23,11 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { OidcModule, OidcService, OidcMiddleware } from 'nestjs-oidc';
-import { AuthorizedGuard } from 'nestjs-authorization';
-import { RamAuthorizationModule } from 'nestjs-ram-authorization';
+import { AuthorizedGuard } from '@pomelo/authorization';
+import { RamAuthorizationModule } from '@pomelo/ram-authorization';
 import { SequelizeModule } from '@pomelo/datasource';
 // import { ObsModule } from '@pomelo/plugin-obs';
+import { configuration } from './common/utils/configuration.utils';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
 import { MessageModule } from './messages/message.module';
@@ -35,7 +36,6 @@ import { OptionModule } from './options/option.module';
 import { TermTaxonomyModule } from './term-taxonomy/term-taxonomy.module';
 import { TemplateModule } from './templates/template.module';
 // import { SubModuleModule } from './submodules/submodules.module';
-import { configuration } from './common/utils/configuration.utils';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -306,13 +306,13 @@ export class AppModule implements NestModule {
   constructor(private readonly configService: ConfigService) {}
 
   configure(consumer: MiddlewareConsumer) {
-    const globalPrefixUri = this.configService.get<string>('webServer.globalPrefixUri', '/');
+    const globalPrefixUri = this.configService.get<string>('webServer.globalPrefixUri', '');
     const graphqlPath = this.configService.get<string>('graphql.path', '/graphql');
 
     consumer
       .apply(I18nMiddleware, OidcMiddleware)
       // exclude routes
       // .exclude()
-      .forRoutes(`${globalPrefixUri}${graphqlPath.substring(1)}`, `${globalPrefixUri}api/*`);
+      .forRoutes(`${globalPrefixUri}${graphqlPath}`, `${globalPrefixUri}/api/*`);
   }
 }

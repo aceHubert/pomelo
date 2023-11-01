@@ -19,8 +19,8 @@ import {
 } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ModuleRef } from '@nestjs/core';
-import { Authorized, Anonymous } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Authorized, Anonymous } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import {
   ApiAuth,
   User,
@@ -245,7 +245,7 @@ export class TemplateController extends createMetaController(
   ) {
     const result = await this.templateDataSource.getByName(
       name,
-      void 0,
+      'NONE',
       [
         'id',
         'name',
@@ -307,7 +307,7 @@ export class TemplateController extends createMetaController(
   ) {
     const result = await this.templateDataSource.get(
       id,
-      void 0,
+      'NONE',
       [
         'id',
         'name',
@@ -327,7 +327,12 @@ export class TemplateController extends createMetaController(
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'templateId', 'metaKey', 'metaValue']);
+      metas = await this.templateDataSource.getMetas(id, metaKeys ?? 'ALL', [
+        'id',
+        'templateId',
+        'metaKey',
+        'metaValue',
+      ]);
     }
 
     if (result === undefined) {

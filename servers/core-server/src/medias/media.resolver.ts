@@ -5,8 +5,8 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { FileUpload } from 'graphql-upload/Upload.js';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
-import { Authorized } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Authorized } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { MediaDataSource } from '@pomelo/datasource';
 import { Fields, User, RequestUser } from '@pomelo/shared-server';
@@ -351,6 +351,6 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @User()
     requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.mediaDataSource.update(id, model, metaData, requestUser);
+    return this.mediaDataSource.update(id, model, metaData ?? 'NONE', requestUser);
   }
 }

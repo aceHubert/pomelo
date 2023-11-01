@@ -6,12 +6,11 @@ import { WhereOptions, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenError, ValidationError, RequestUser } from '@pomelo/shared-server';
-import { UserStatus, UserAttributes, UserRole } from '../../entities';
-import { UserCapability } from '../utils/user-capability.util';
-import { UserMetaPresetKeys } from '../utils/preset-keys.util';
+import { UserStatus, UserAttributes } from '../../entities';
+import { UserRole, UserCapability } from '../../utils/user-capability.util';
+import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
 import {
   UserModel,
-  UserSimpleModel,
   UserWithRoleModel,
   UserMetaModel,
   PagedUserArgs,
@@ -29,6 +28,17 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
+   * 根据 Id 获取用户
+   * 只显示公开信息，id, niceName, displayName, email, mobile, url
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(optional)]
+   * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
+   * @param fields 返回的字段
+   */
+  async get(id: number, fields: string[]): Promise<UserModel | null>;
+  /**
    * 根据 Id 获取用户（不包含登录密码）
    * @author Hubert
    * @since 2020-10-01
@@ -37,44 +47,30 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
    * @param fields 返回的字段
    */
-  async get(id: number | null, fields: string[], requestUser: RequestUser): Promise<UserModel | null> {
-    // 查询非自己时，需要权限验证
-    if (id && String(id) !== String(requestUser.sub!)) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+  async get(id: number | null, fields: string[], requestUser: RequestUser): Promise<UserModel | null>;
+  async get(id: number | null, fields: string[], requestUser?: RequestUser): Promise<UserModel | null> {
+    if (requestUser) {
+      // 查询非自己时，需要权限验证
+      if (id && String(id) !== String(requestUser.sub!)) {
+        await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+      } else {
+        id = parseInt(requestUser.sub!);
+      }
+      // 排除登录密码
+      fields = fields.filter((field) => field !== 'loginPwd');
     } else {
-      id = parseInt(requestUser.sub!);
+      // 只显示公开信息
+      fields = fields.filter((field) => ['id', 'niceName', 'displayName', 'email', 'mobile', 'url'].includes(field));
     }
-
-    // 排除登录密码
-    fields = fields.filter((field) => field !== 'loginPwd');
 
     // 主键
     if (!fields.includes('id')) {
       fields.push('id');
     }
 
-    return this.models.Users.findByPk(id, {
+    return this.models.Users.findByPk(id!, {
       attributes: this.filterFields(fields, this.models.Users),
     }).then((user) => user?.toJSON() as any as UserModel);
-  }
-
-  /**
-   * 根据 Id 获取用户
-   * 实段：id, displayName, email
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @access none
-   * @param id 用户 Id（null返回请求用户的实体）
-   * @param fields 返回的字段
-   */
-  async getSimpleInfo(id: number, fields: string[]): Promise<UserSimpleModel | null> {
-    // 过滤掉敏感字段
-    fields = fields.filter((field) => ['id', 'displayName', 'email'].includes(field));
-
-    return this.models.Users.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.Users),
-    }).then((user) => user?.toJSON() as UserSimpleModel);
   }
 
   /**
@@ -114,6 +110,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           : query.userRole;
     }
 
+    // 排除登录密码
+    fields = fields.filter((field) => field !== 'loginPwd');
+
     return this.models.Users.findAndCountAll({
       attributes: this.filterFields(fields, this.models.Users),
       include: [
@@ -121,7 +120,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           model: this.models.UserMeta,
           as: 'UserMetas',
           where: {
-            metaKey: `${this.tablePrefix}${UserMetaPresetKeys.UserRole}`,
+            metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
           },
           required: false,
           duplicating: false,
@@ -144,7 +143,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 获取用户角色
+   * 获取用户角色权限
    * @param userId 用户 Id
    */
   async getRole(userId: number): Promise<UserRole | null> {
@@ -153,7 +152,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       attributes: ['metaValue'],
       where: {
         userId,
-        metaKey: `${this.tablePrefix}${UserMetaPresetKeys.UserRole}`,
+        metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
       },
     });
     return role?.metaValue as UserRole;
@@ -191,7 +190,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           model: this.models.UserMeta,
           as: 'UserMetas',
           where: {
-            metaKey: `${this.tablePrefix}${UserMetaPresetKeys.UserRole}`,
+            metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
           },
           required: false,
           duplicating: false,
@@ -268,7 +267,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async create(model: NewUserInput, requestUser: RequestUser): Promise<UserModel> {
     await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
 
-    if (await this.isLoginNameExists(model.loginName)) {
+    if (model.loginName && (await this.isLoginNameExists(model.loginName))) {
       throw new ValidationError(
         await this.translate('datasource.user.username_unique_required', 'Username is reqiured to be unique!', {
           lang: requestUser.lang,
@@ -276,7 +275,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       );
     }
 
-    if (await this.isEmailExists(model.email)) {
+    if (model.email && (await this.isEmailExists(model.email))) {
       throw new ValidationError(
         await this.translate('datasource.user.email_unique_required', `Email is reqiured to be unique!`, {
           lang: requestUser.lang,
@@ -292,17 +291,17 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       );
     }
 
-    const { loginName, loginPwd, firstName, lastName, avator, description, userRole, locale, ...rest } = model;
-
     const t = await this.sequelize.transaction();
     try {
       const user = await this.models.Users.create(
         {
-          ...rest,
-          loginName,
-          loginPwd: md5(loginPwd),
-          niceName: loginName,
-          displayName: loginName,
+          loginName: model.loginName,
+          loginPwd: md5(model.loginPwd),
+          niceName: model.loginName,
+          displayName: model.loginName,
+          mobile: model.mobile,
+          email: model.email,
+          url: model.url,
         },
         { transaction: t },
       );
@@ -311,42 +310,42 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.NickName,
-          metaValue: loginName,
+          metaValue: model.loginName,
         },
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.FirstName,
-          metaValue: firstName || '',
+          metaValue: model.firstName || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.LastName,
-          metaValue: lastName || '',
+          metaValue: model.lastName || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.Avatar,
-          metaValue: avator || '',
+          metaValue: model.avator || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.Description,
-          metaValue: description || '',
+          metaValue: model.description || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.Locale,
-          metaValue: locale || '',
+          metaValue: model.locale || '',
         },
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.AdminColor,
-          metaValue: '{}',
+          metaValue: 'default',
         },
         {
           userId: user.id,
-          metaKey: `${this.tablePrefix}${UserMetaPresetKeys.UserRole}`,
-          metaValue: userRole,
+          metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
+          metaValue: model.userCapabilities,
         },
       ];
       // 添加元数据
@@ -408,7 +407,17 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         );
       }
 
-      const { nickName, firstName, lastName, avator, description, adminColor, userRole, locale, ...updateUser } = model;
+      const {
+        nickName,
+        firstName,
+        lastName,
+        avator,
+        description,
+        adminColor,
+        userCapabilities,
+        locale,
+        ...updateUser
+      } = model;
       const t = await this.sequelize.transaction();
       try {
         await this.models.Users.update(updateUser, {
@@ -416,13 +425,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           transaction: t,
         });
 
-        if (!isUndefined(userRole)) {
+        if (!isUndefined(userCapabilities)) {
           await this.models.UserMeta.update(
-            { metaValue: userRole === 'none' ? '' : userRole },
+            { metaValue: userCapabilities === 'none' ? '' : userCapabilities },
             {
               where: {
                 userId: id,
-                metaKey: `${this.tablePrefix}${UserMetaPresetKeys.UserRole}`,
+                metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
               },
               transaction: t,
             },
@@ -732,10 +741,10 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access None
    * @param loginName 登录名/邮箱/手机号码
    * @param loginPwd 登录密码
-   * @param region Specific region for phone number check
    */
-  async verifyUser(loginName: string, loginPwd: string, region?: CountryCode): Promise<boolean> {
-    const count = await this.models.Users.count({
+  async verifyUser(loginName: string, loginPwd: string): Promise<false | UserModel> {
+    const region = await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
+    const user = await this.models.Users.findOne({
       where: {
         [Op.or]: [
           { loginName },
@@ -746,7 +755,11 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         status: UserStatus.Enable,
       },
     });
+    if (!user) return false;
 
-    return count > 0;
+    // 排除登录密码
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { loginPwd: pwd, ...restUser } = user.toJSON() as any;
+    return restUser as UserModel;
   }
 }

@@ -12,20 +12,23 @@
     "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "esdk-obs-nodejs": "^3.21.6",
-    "nestjs-ram-authorization": "workspace:^"
+    "esdk-obs-nodejs": "^3.21.6"
   },
   "devDependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^11.0.0"
+    "@nestjs/graphql": "^11.0.0",
+    "@pomelo/authorization": "workspace:^",
+    "@pomelo/ram-authorization": "workspace:^",
+    "@pomelo/shared-server": "workspace:^"
   },
   "peerDependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/graphql": "^11.0.0",
-    "@pomelo/shared-server": "workspace:^",
-    "nestjs-authorization": "workspace:^"
+    "@pomelo/authorization": "workspace:^",
+    "@pomelo/ram-authorization": "workspace:^",
+    "@pomelo/shared-server": "workspace:^"
   },
   "packageManager": "yarn@3.1.0"
 }

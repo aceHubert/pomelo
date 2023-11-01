@@ -2,12 +2,16 @@ import { kebabCase, isEmpty } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
-import { RequestUser, ForbiddenError } from '@pomelo/shared-server';
+import { RequestUser, ForbiddenError, jsonSafelyParse } from '@pomelo/shared-server';
 import { OptionAutoload } from '../../entities/options.entity';
 import { SequelizeService } from '../../sequelize/sequelize.service';
-import { UserCapability } from '../utils/user-capability.util';
+import { UserCapability, UserRole, UserRoles } from '../../utils/user-capability.util';
 import { SequelizeOptions } from '../interfaces/sequelize-options.interface';
 import { SEQUELIZE_OPTIONS } from '../constants';
+import { OptionPresetKeys } from '../../utils/preset-keys.util';
+
+// TODO: 设置为可配置
+const roleKey = 'role';
 
 export abstract class BaseDataSource implements OnModuleInit {
   private __AUTOLOAD_OPTIONS__: Record<string, string> = {}; // Autoload options 缓存
@@ -153,15 +157,14 @@ export abstract class BaseDataSource implements OnModuleInit {
     requestUser: RequestUser,
     callbackOrThrow?: true | ((error: Error | null) => void),
   ): Promise<boolean | void> {
-    // const userRoleCapabilities =
-    //   requestUser && requestUser.role ? (await this.userRoles)[requestUser.role].capabilities : [];
+    const userRoles =
+      jsonSafelyParse<UserRoles>((await this.getOption(OptionPresetKeys.UserRoles))!) ?? ({} as UserRoles);
+    const userRole = requestUser[roleKey] as UserRole | undefined;
+    const userRoleCapabilities = userRole ? userRoles[userRole].capabilities : [];
 
-    // const result = Boolean(
-    //   userRoleCapabilities.length && userRoleCapabilities.some((userCapability) => userCapability === capability),
-    // );
-
-    // TODO: 具体权限控制, 通过scope判断数据权限
-    const result = true;
+    const result = Boolean(
+      userRoleCapabilities.length && userRoleCapabilities.some((userCapability) => userCapability === capability),
+    );
 
     if (callbackOrThrow) {
       const callback =
@@ -216,6 +219,7 @@ export abstract class BaseDataSource implements OnModuleInit {
         | R
         | undefined;
 
+      // 如果没有，找不带前缀的参数
       if (value === void 0) {
         value = options.find((option) => option.optionName === optionName)?.optionValue as R | undefined;
       }

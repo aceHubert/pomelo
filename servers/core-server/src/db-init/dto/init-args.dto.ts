@@ -1,8 +1,28 @@
-import { IsNotEmpty, IsLocale, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsLocale, IsUrl, IsEmail, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { InitArgs } from '@pomelo/datasource';
 
 export class InitArgsDto implements Omit<InitArgs, 'siteUrl'> {
+  /**
+   * Site title
+   */
+  @IsNotEmpty({ message: 'field $property is required' })
+  title!: string;
+
+  /**
+   * Admin initial password
+   */
+  @IsNotEmpty({ message: 'field $property is required' })
+  @MinLength(6, { message: 'field $property must be at least 6 characters long' })
+  password!: string;
+
+  /**
+   * Admin initial email
+   */
+  @IsNotEmpty({ message: 'field $property is required' })
+  @IsEmail({}, { message: 'field $property must be a email address' })
+  email!: string;
+
   /**
    * Home url
    */

@@ -1,4 +1,5 @@
-import { UserAttributes, UserCreationAttributes, UserStatus, UserRole } from '../../entities';
+import { UserAttributes, UserCreationAttributes, UserStatus } from '../../entities';
+import { UserRole } from '../../utils/user-capability.util';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 
@@ -8,15 +9,10 @@ import { MetaModel, NewMetaInput } from './meta.interface';
 export interface UserModel extends Omit<UserAttributes, 'loginPwd'> {}
 
 /**
- * 用户基本信息（不包含敏感信息字段）
- */
-export interface UserSimpleModel extends Pick<UserAttributes, 'id' | 'displayName' | 'email'> {}
-
-/**
  * 用户实体（包含角色）
  */
 export interface UserWithRoleModel extends UserModel {
-  userRole?: UserRole;
+  userCapabilities?: UserRole;
 }
 
 /**
@@ -56,7 +52,7 @@ export interface NewUserInput
   lastName?: string;
   avator?: string;
   description?: string;
-  userRole: UserRole;
+  userCapabilities: UserRole;
   locale?: string;
   /**
    * metaKey 不可以重复
@@ -82,6 +78,6 @@ export interface UpdateUserInput
   status?: UserStatus;
   nickName?: string;
   adminColor?: string;
-  userRole?: UserRole | 'none';
+  userCapabilities?: UserRole | 'none';
   locale?: string | null;
 }

@@ -4,6 +4,8 @@ export interface UserPayload {
    * User id.
    */
   sub?: string;
+
+  [key: string]: any;
 }
 
 export type RequestUser = UserPayload & {

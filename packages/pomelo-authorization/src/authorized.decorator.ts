@@ -8,7 +8,7 @@ import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from '.
  * Warning：if roles parameter is not setted, it will bypasses role checking.
  * if roles parameter is setted, checking user's role is in settings,
  * if user is not authorized, return 401 error, if user's role is not in settings, return 403 error.
- * @param roles 角色
+ * @param roles 角色权限
  */
 export function Authorized(roles: string[]): ClassDecorator & MethodDecorator;
 export function Authorized(...roles: string[]): ClassDecorator & MethodDecorator;

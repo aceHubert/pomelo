@@ -6,7 +6,7 @@ import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nest
 import { BaseResolver, Fields } from '@pomelo/shared-server';
 import { MetaDataSource } from '@pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { NewMetaInput } from './dto/new-meta.input';
 import { Meta } from './models/meta.model';
 
@@ -51,7 +51,7 @@ export function createMetaFieldResolver<
           // 所有调用的 metaKeys 和 fields 都是相同的
           const results = await this.metaDataSource.getMetas(
             keys.map((key) => key.modelId),
-            keys[0].metaKeys,
+            keys[0].metaKeys ?? 'ALL',
             keys[0].fields,
           );
           return keys.map(({ modelId }) => results[modelId] || []);
@@ -139,7 +139,7 @@ export function createMetaResolver<
     ) {
       return this.metaDataSource.getMetas(
         modelId,
-        metaKeys,
+        metaKeys ?? 'ALL',
         this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]),
       );
     }

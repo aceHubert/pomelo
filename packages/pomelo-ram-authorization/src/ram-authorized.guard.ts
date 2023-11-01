@@ -1,8 +1,8 @@
 import { Reflector } from '@nestjs/core';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { RequestUser } from '@pomelo/shared-server';
 import { getContextObject } from './utils/get-context-object.util';
 import { RAM_AUTHORIZATION_ACTION_KEY } from './constants';
-import { User } from './types';
 
 /**
  * 是否有用户授权策略
@@ -17,7 +17,7 @@ export class RamAuthorizedGuard implements CanActivate {
       throw Error(`context type: ${context.getType()} not supported`);
     }
 
-    const user: User | null = ctx.user;
+    const user: RequestUser | null = ctx.user;
 
     const action = this.reflector.getAllAndOverride<string>(RAM_AUTHORIZATION_ACTION_KEY, [
       context.getHandler(),
@@ -41,9 +41,13 @@ export class RamAuthorizedGuard implements CanActivate {
    * @param rams 策略
    * @returns
    */
-  private hasRamPermission(_user: User, _action: string): boolean {
-    // const hasRam = (userRams: string[]) => rams.some((ram) => userRams.includes(ram));
-    // return Boolean(user.ram && hasRam(user.ram));
-    return true;
+  private hasRamPermission(user: RequestUser, action: string): boolean {
+    const hasRam = (userRams: string[]): boolean => {
+      // TODO: RAM 策略判断
+      // rams.some((ram) => userRams.includes(ram))
+      console.log('ram check', userRams, action);
+      return true;
+    };
+    return Boolean(user.rams && hasRam(user.rams));
   }
 }

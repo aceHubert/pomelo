@@ -12,8 +12,8 @@ import {
   TemplateType,
 } from '@pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Anonymous, Authorized } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { PostTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';

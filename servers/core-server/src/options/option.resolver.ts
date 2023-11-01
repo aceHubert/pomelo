@@ -1,9 +1,9 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
-import { Authorized } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
-import { BaseResolver, User, Fields, RequestUser } from '@pomelo/shared-server';
+import { Authorized } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { OptionDataSource } from '@pomelo/datasource';
+import { BaseResolver, User, Fields, RequestUser } from '@pomelo/shared-server';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { OptionAction } from '@/common/actions';
 import { NewOptionInput } from './dto/new-option.input';

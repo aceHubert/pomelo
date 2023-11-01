@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { RequestUser } from '@pomelo/shared-server';
-import { UserCapability } from '../utils/user-capability.util';
+import { UserCapability } from '../../utils/user-capability.util';
 import { LinkModel, PagedLinkModel, PagedLinkArgs, NewLinkInput, UpdateLinkInput } from '../interfaces/link.interface';
 import { BaseDataSource } from './base.datasource';
 

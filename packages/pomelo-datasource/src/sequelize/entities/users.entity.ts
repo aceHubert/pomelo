@@ -14,15 +14,12 @@ export default class Users
 
   public id!: number;
   public loginName!: string;
-  /**
-   *  set 时密码会自动处理md5加密
-   */
   public loginPwd!: string;
   public niceName!: string;
   public displayName!: string;
-  public mobile!: string | null;
+  public mobile!: string;
   public email!: string;
-  public url!: string | null;
+  public url!: string;
   public status!: UserStatus;
 
   // timestamps!
@@ -64,6 +61,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       mobile: {
         type: DataTypes.STRING(50),
+        allowNull: false,
         unique: true,
         comment: 'Mobile number',
       },
@@ -75,6 +73,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       url: {
         type: DataTypes.STRING(200),
+        allowNull: false,
         comment: 'Home URL address',
       },
       status: {

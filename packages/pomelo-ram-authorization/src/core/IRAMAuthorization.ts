@@ -1,4 +1,4 @@
-import { User } from '../types';
+import { RequestUser } from '@pomelo/shared-server';
 
 /// <summary>
 /// Authorization the user action.
@@ -10,5 +10,5 @@ export interface IRAMAuthorization {
   /// <param name="user">The user.</param>
   /// <param name="actionName">The action name.</param>
   /// <returns></returns>
-  isPermited(user: User, actionName: string): Promise<boolean>;
+  isPermited(user: RequestUser, actionName: string): Promise<boolean>;
 }

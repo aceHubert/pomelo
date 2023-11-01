@@ -14,6 +14,11 @@ export enum AuthType {
 
 export interface ConfigObject {
   /**
+   * Debug mode
+   * @default process.env.NODE_ENV !== 'production'
+   */
+  debug?: boolean;
+  /**
    * directory to content path that
    * save translations, uploads etc...
    */
@@ -156,104 +161,102 @@ export interface ConfigObject {
 /**
  * @nextjs/config load
  */
-export const configuration: (basePath: string) => ConfigFactory<ConfigObject> = (basePath) => () => {
-  logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'}}`);
-  let contentPath;
-  if (process.env.CONTENT_PATH) {
-    if ((contentPath = process.env.CONTENT_PATH) && fs.existsSync(contentPath)) {
-      // 配置为绝对路径
-    } else if ((contentPath = path.join(process.cwd(), process.env.CONTENT_PATH)) && fs.existsSync(contentPath)) {
-      // 配置为相对路径
-    } else {
-      contentPath = undefined;
+export const configuration =
+  (basePath: string): ConfigFactory<ConfigObject> =>
+  () => {
+    logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'}}`);
+    let contentPath;
+    if (process.env.CONTENT_PATH) {
+      if ((contentPath = process.env.CONTENT_PATH) && fs.existsSync(contentPath)) {
+        // 配置为绝对路径
+      } else if ((contentPath = path.join(process.cwd(), process.env.CONTENT_PATH)) && fs.existsSync(contentPath)) {
+        // 配置为相对路径
+      } else {
+        contentPath = undefined;
+      }
     }
-  }
-  let config: ConfigObject = {
-    contentPath: contentPath,
-    webServer: {
-      host: process.env.HOST,
-      port: process.env.PORT,
-      globalPrefixUri: process.env.GLOBAL_PREFIX_URI,
-      cors:
-        process.env.CORS === 'true' || process.env.CORS_ORIGIN
-          ? process.env.CORS_ORIGIN
-            ? {
-                origin: process.env.CORS_ORIGIN.split('|').map((origin) => origin.trim()),
-                credentials: true, // support withCredentials
-              }
-            : true
-          : false,
-    },
-    swagger: {
-      debug:
-        process.env.SWAGGER_DEBUG !== void 0
-          ? process.env.SWAGGER_DEBUG === 'true'
-          : process.env.NODE_ENV !== 'production',
-      path: process.env.SWAGGER_PATH,
-    },
-    graphql: {
-      debug:
-        process.env.GRAPHQL_DEBUG !== void 0
-          ? process.env.GRAPHQL_DEBUG === 'true'
-          : process.env.NODE_ENV !== 'production',
-      path: process.env.GRAPHQL_PATH,
-      subscription_path: process.env.GRAPHQL_SUBSCRIPTION_PATH,
-    },
-    database: {
-      connection: process.env.DATABASE_CONNECTION
-        ? process.env.DATABASE_CONNECTION
-        : {
-            database: process.env.DATABASE_NAME,
-            username: process.env.DATABASE_USERNAME,
-            password: process.env.DATABASE_PASSWORD,
-            dialect: process.env.DATABASE_DIALECT || 'mysql',
-            host: process.env.DATABASE_HOST || 'localhost',
-            port: process.env.DATABASE_PORT || 3306,
-            charset: process.env.DATABASE_CHARSET || 'utf8',
-            collate: process.env.DATABASE_COLLATE || '',
-          },
-      tablePrefix: process.env.TABLE_PREFIX,
-    },
-    auth: {
-      debug:
-        process.env.AUTH_DEBUG !== void 0 ? process.env.AUTH_DEBUG === 'true' : process.env.NODE_ENV !== 'production',
-      type: process.env.AUTH_TYPE as AuthType,
-      endpoint: process.env.AUTH_ENDPOINT,
-      jwksRsa: {
-        requestsPerMinute: parseInt(process.env.AUTH_JWKSRAS_REQUESTS_PER_MINUTE as string, 10) || 5,
-        cache: process.env.AUTH_JWKSRAS_CACHE === 'true',
-        rateLimit: process.env.AUTH_JWKSRAS_RATE_LIMIT === 'true',
+    const debugMode =
+      process.env.DEBUG !== void 0 ? process.env.DEBUG === 'true' : process.env.NODE_ENV !== 'production';
+    let config: ConfigObject = {
+      debug: debugMode,
+      contentPath: contentPath,
+      webServer: {
+        host: process.env.HOST,
+        port: process.env.PORT,
+        globalPrefixUri: process.env.GLOBAL_PREFIX_URI,
+        cors:
+          process.env.CORS === 'true' || process.env.CORS_ORIGIN
+            ? process.env.CORS_ORIGIN
+              ? {
+                  origin: process.env.CORS_ORIGIN.split('|').map((origin) => origin.trim()),
+                  credentials: true, // support withCredentials
+                }
+              : true
+            : false,
       },
-    },
-    upload: {
-      dest: process.env.UPLOAD_PATH,
-      maxFileSize:
-        process.env.UPLOAD_LIMIT !== void 0 ? bytes.parse(process.env.UPLOAD_LIMIT) / 1024 : 1024 * 1024 * 10,
-      maxFiles: process.env.UPLOAD_MAX_FILES !== void 0 ? parseInt(process.env.UPLOAD_MAX_FILES, 10) : 10,
-    },
-    submodule: {
-      keywords:
-        process.env.SUBMODULE_KEYWORDS !== void 0
-          ? process.env.SUBMODULE_KEYWORDS.split('|').map((keyword) => keyword.trim())
-          : [],
-      registry: process.env.SUBMODULE_REGISTRY,
-      mirrors:
-        process.env.SUBMODULE_MIRRORS !== void 0
-          ? process.env.SUBMODULE_MIRRORS.split('|').map((mirror) => mirror.trim())
-          : [],
-      cache: process.env.SUBMODULE_CACHE === 'true',
-    },
-  };
+      swagger: {
+        debug: process.env.SWAGGER_DEBUG !== void 0 ? process.env.SWAGGER_DEBUG === 'true' : debugMode,
+        path: process.env.SWAGGER_PATH,
+      },
+      graphql: {
+        debug: process.env.GRAPHQL_DEBUG !== void 0 ? process.env.GRAPHQL_DEBUG === 'true' : debugMode,
+        path: process.env.GRAPHQL_PATH,
+        subscription_path: process.env.GRAPHQL_SUBSCRIPTION_PATH,
+      },
+      database: {
+        connection: process.env.DATABASE_CONNECTION
+          ? process.env.DATABASE_CONNECTION
+          : {
+              database: process.env.DATABASE_NAME,
+              username: process.env.DATABASE_USERNAME,
+              password: process.env.DATABASE_PASSWORD,
+              dialect: process.env.DATABASE_DIALECT || 'mysql',
+              host: process.env.DATABASE_HOST || 'localhost',
+              port: process.env.DATABASE_PORT || 3306,
+              charset: process.env.DATABASE_CHARSET || 'utf8',
+              collate: process.env.DATABASE_COLLATE || '',
+            },
+        tablePrefix: process.env.TABLE_PREFIX,
+      },
+      auth: {
+        debug: process.env.AUTH_DEBUG !== void 0 ? process.env.AUTH_DEBUG === 'true' : debugMode,
+        type: process.env.AUTH_TYPE as AuthType,
+        endpoint: process.env.AUTH_ENDPOINT,
+        jwksRsa: {
+          requestsPerMinute: parseInt(process.env.AUTH_JWKSRAS_REQUESTS_PER_MINUTE as string, 10) || 5,
+          cache: process.env.AUTH_JWKSRAS_CACHE === 'true',
+          rateLimit: process.env.AUTH_JWKSRAS_RATE_LIMIT === 'true',
+        },
+      },
+      upload: {
+        dest: process.env.UPLOAD_PATH,
+        maxFileSize:
+          process.env.UPLOAD_LIMIT !== void 0 ? bytes.parse(process.env.UPLOAD_LIMIT) / 1024 : 1024 * 1024 * 10,
+        maxFiles: process.env.UPLOAD_MAX_FILES !== void 0 ? parseInt(process.env.UPLOAD_MAX_FILES, 10) : 10,
+      },
+      submodule: {
+        keywords:
+          process.env.SUBMODULE_KEYWORDS !== void 0
+            ? process.env.SUBMODULE_KEYWORDS.split('|').map((keyword) => keyword.trim())
+            : [],
+        registry: process.env.SUBMODULE_REGISTRY,
+        mirrors:
+          process.env.SUBMODULE_MIRRORS !== void 0
+            ? process.env.SUBMODULE_MIRRORS.split('|').map((mirror) => mirror.trim())
+            : [],
+        cache: process.env.SUBMODULE_CACHE === 'true',
+      },
+    };
 
-  // merge config from file
-  if (process.env.CONFIG_FILE) {
-    logger.log(`Merge config file from "${process.env.CONFIG_FILE}"`);
-    const fileConfig = getFromFile(path.join(basePath, process.env.CONFIG_FILE));
-    // TODO: Class validator
-    config = merge(config, fileConfig);
-  }
-  return config;
-};
+    // merge config from file
+    if (process.env.CONFIG_FILE) {
+      logger.log(`Merge config file from "${process.env.CONFIG_FILE}"`);
+      const fileConfig = getFromFile(path.join(basePath, process.env.CONFIG_FILE));
+      // TODO: Class validator
+      config = merge(config, fileConfig);
+    }
+    return config;
+  };
 
 /**
  * file config

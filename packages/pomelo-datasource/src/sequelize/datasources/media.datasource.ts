@@ -12,7 +12,7 @@ import {
   NewMediaMetaInput,
   UpdateMediaInput,
 } from '../interfaces/media.interface';
-import { MediaMetaPresetKeys } from '../utils/preset-keys.util';
+import { MediaMetaPresetKeys } from '../../utils/preset-keys.util';
 import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
@@ -222,7 +222,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   async update(
     id: number,
     model: UpdateMediaInput,
-    metaData: MediaMetaDataModel | undefined,
+    metaData: MediaMetaDataModel | 'NONE',
     requestUser: RequestUser,
   ): Promise<boolean> {
     const t = await this.sequelize.transaction();
@@ -240,7 +240,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
         },
       );
 
-      if (metaData) {
+      if (metaData !== 'NONE') {
         await this.models.MediaMeta.update(
           {
             metaValue: JSON.stringify(metaData),

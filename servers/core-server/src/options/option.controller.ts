@@ -2,9 +2,9 @@ import { Response } from 'express';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import { Controller, Query, Param, Body, Get, Post, Put, Delete, ParseIntPipe, Res, HttpStatus } from '@nestjs/common';
 import { OptionDataSource } from '@pomelo/datasource';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { Authorized } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Authorized } from '@pomelo/authorization';
 import {
   BaseController,
   User,

@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { AppModule } from './app.module';
 
@@ -11,12 +12,12 @@ declare const module: any;
 const logger = new Logger('Main', { timestamp: true });
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
   const host = configService.get<string>('webServer.host', '');
   const port = configService.get<number>('webServer.port', 3000);
-  const globalPrefixUri = configService.get<string>('webServer.globalPrefixUri', '/');
+  const globalPrefixUri = configService.get<string>('webServer.globalPrefixUri', '');
   const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
   const isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
   const swaggerPath = configService.get<string>('swagger.path', '/doc');
@@ -65,7 +66,7 @@ async function bootstrap() {
 
   await app.listen(port, host);
   logger.log(`Application is running on: ${await app.getUrl()}`);
-  logger.log(`Application's global prefix uri is: ${globalPrefixUri} `);
+  globalPrefixUri && logger.log(`Application's global prefix uri is: ${globalPrefixUri} `);
   logger.log(`Application is enable cors: ${!!cors}`);
   isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${swaggerPath}`);
   isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${graphqlPath}`);

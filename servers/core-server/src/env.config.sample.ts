@@ -33,7 +33,7 @@ export default defineConfig({
       // database collate
       collate: '',
     },
-    tablePrefix: 't_',
+    tablePrefix: 'po_',
   },
   // Swagger
   swagger: {

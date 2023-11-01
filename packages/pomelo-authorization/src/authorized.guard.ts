@@ -1,11 +1,14 @@
 import { Reflector } from '@nestjs/core';
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { RequestUser } from '@pomelo/shared-server';
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
 import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
 import { getContextObject } from './utils/get-context-object.util';
 import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
-import { User } from './types';
+
+// TODO: 设置为可配置
+const roleKey = 'role';
 
 /**
  * 判断是否是登录状态和验证角色权限
@@ -21,7 +24,7 @@ export class AuthorizedGuard implements CanActivate {
     }
 
     const type = context.getType<GqlContextType>();
-    const user: User | null = ctx.user;
+    const user: RequestUser | null = ctx.user;
 
     // graphql 判断返回实体字段是否有权限
     if (type === 'graphql') {
@@ -61,7 +64,7 @@ export class AuthorizedGuard implements CanActivate {
     }
 
     // method 覆写 class 权限
-    const roles = this.reflector.getAllAndOverride<string[]>(AUTHORIZATION_ROLE_KEY, [
+    const capabilities = this.reflector.getAllAndOverride<string[]>(AUTHORIZATION_ROLE_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -69,7 +72,7 @@ export class AuthorizedGuard implements CanActivate {
     if (!user) {
       // 没有的提供 token, return 401
       throw new UnauthorizedException(`Access denied, You don't have permission for this action!`);
-    } else if (roles?.length && !this.hasRolePermission(user, roles)) {
+    } else if (capabilities?.length && !this.hasRolePermission(user, capabilities)) {
       // false return 403
       throw new ForbiddenException(`Access denied, You don't have capability for this action!`);
     }
@@ -81,7 +84,7 @@ export class AuthorizedGuard implements CanActivate {
    * 获取 Graphql Output fields 的角色权限
    * @param info GraphQLResolveInfo
    */
-  private resolveGraphqlOutputFieldsRoles(info: GraphQLResolveInfo): { [field: string]: string[] } {
+  resolveGraphqlOutputFieldsRoles(info: GraphQLResolveInfo): { [field: string]: string[] } {
     const parsedResolveInfoFragment = parse(info, { keepRoot: false, deep: true });
 
     if (!parsedResolveInfoFragment) {
@@ -129,14 +132,16 @@ export class AuthorizedGuard implements CanActivate {
   /**
    * 判断用户角色是否在提供的角色内
    * @param user 用户
-   * @param roles 角色，如果用户色值有值但提供的角色长度为0，会直接返回true
+   * @param roles 角色权限，如果用户色值有值但提供的角色长度为0，会直接返回true
    */
-  private hasRolePermission(user: User, roles: string[]): boolean {
+  hasRolePermission(user: RequestUser, roles: string[]): boolean {
     if (!roles.length) {
-      return true; // 空 array 表示没有限制(如：@Authorized())
+      // 空 array 表示没有限制(如：@Authorized())
+      return true;
     } else {
-      const userRoles = user.role ? (Array.isArray(user.role) ? user.role : [user.role]) : [];
-      return Boolean(userRoles.length && roles.some((role) => userRoles.includes(role)));
+      // @Authorized(['admin', 'editor'])
+      const userRole = user[roleKey] as string | undefined;
+      return Boolean(userRole && roles.some((role) => userRole === role));
     }
   }
 }

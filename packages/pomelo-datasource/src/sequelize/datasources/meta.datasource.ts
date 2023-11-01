@@ -105,24 +105,20 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * 根据实体 ID 获取元数据
    * 如果 metaKeys 为空或长度为0，则会返回所有非私有（$前缀）的的数据
    * @param modelId 实体 Id
-   * @param metaKeys 过滤的字段(不需要添加 table 前缀，会自动匹配到带有前缀的数据)
+   * @param metaKeys 过滤的字段(不需要添加 table 前缀会自动匹配到带有前缀的数据, ALL 为所有)
    * @param fields 返回字段
    */
-  getMetas(modelId: number, metaKeys: string[] | undefined, fields: string[]): Promise<MetaReturnType[]>;
+  getMetas(modelId: number, metaKeys: string[] | 'ALL', fields: string[]): Promise<MetaReturnType[]>;
   /**
    * 根据实体 id 数组获取元数据，返回对象
    * @param modelId 实体 Id 数组
-   * @param metaKeys 过滤的字段(不需要添加 table 前缀，会自动匹配到带有前缀的数据)
+   * @param metaKeys 过滤的字段(不需要添加 table 前缀会自动匹配到带有前缀的数据, ALL 为所有)
    * @param fields 返回字段
    */
-  getMetas(
-    modelId: number[],
-    metaKeys: string[] | undefined,
-    fields: string[],
-  ): Promise<Record<number, MetaReturnType[]>>;
+  getMetas(modelId: number[], metaKeys: string[] | 'ALL', fields: string[]): Promise<Record<number, MetaReturnType[]>>;
   getMetas(
     modelIdOrIds: number | number[],
-    metaKeys: string[] | undefined,
+    metaKeys: string[] | 'ALL',
     fields: string[],
   ): Promise<MetaReturnType[] | Record<string, MetaReturnType[]>> {
     // 用于在查询多个Id的情况下后面的分组
@@ -134,19 +130,19 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         attributes: this.filterFields(fields, this.metaModel),
         where: {
           [this.metaModelIdFieldName]: modelIdOrIds,
-          ...(metaKeys?.length
+          ...(metaKeys === 'ALL'
             ? {
+                metaKey: {
+                  [Op.notLike]: '$%',
+                },
+              }
+            : {
                 metaKey: flattenDeep(
                   metaKeys.map((metaKey) => [
                     this.fixMetaKey(metaKey),
                     `${this.tablePrefix}${this.fixMetaKey(metaKey)}`,
                   ]),
                 ),
-              }
-            : {
-                metaKey: {
-                  [Op.notLike]: '$%',
-                },
               }),
         },
       })

@@ -10,8 +10,8 @@ import {
   OptionPresetKeys,
 } from '@pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Anonymous, Authorized } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyInput } from './dto/new-term-taxonomy.input';

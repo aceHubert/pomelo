@@ -1,7 +1,7 @@
 import { Model, DataTypes } from 'sequelize';
 import { MediaMetaAttributes, MediaMetaCreationAttributes } from '../../entities/media-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { MediaMetaPresetKeys } from '../utils/preset-keys.util';
+import { MediaMetaPresetKeys } from '../../utils/preset-keys.util';
 
 export default class MediaMeta extends Model<MediaMetaAttributes, MediaMetaCreationAttributes> {
   public id!: number;

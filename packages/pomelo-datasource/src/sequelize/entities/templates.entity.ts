@@ -9,7 +9,7 @@ import {
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
-export default class Template extends Model<
+export default class Templates extends Model<
   Omit<TemplateAttributes, 'updatedAt' | 'createdAt'>,
   Omit<TemplateCreationAttributes, 'updatedAt' | 'createdAt'>
 > {
@@ -33,7 +33,7 @@ export default class Template extends Model<
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
   const isMysql = sequelize.getDialect();
-  Template.init(
+  Templates.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -104,7 +104,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
     },
     {
       sequelize,
-      tableName: `${prefix}template`,
+      tableName: `${prefix}templates`,
       indexes: [
         { name: 'author', fields: ['author'] },
         { name: 'type', fields: ['type'] },
@@ -118,16 +118,16 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 // 关联
 export const associate: TableAssociateFunc = function associate(models) {
   // Template.id <--> TemplateMeta.templateId
-  models.Template.hasMany(models.TemplateMeta, {
+  models.Templates.hasMany(models.TemplateMeta, {
     foreignKey: 'templateId',
     sourceKey: 'id',
     as: 'TemplateMetas',
     constraints: false,
   });
-  models.TemplateMeta.belongsTo(models.Template, { foreignKey: 'templateId', targetKey: 'id', constraints: false });
+  models.TemplateMeta.belongsTo(models.Templates, { foreignKey: 'templateId', targetKey: 'id', constraints: false });
 
   // Template.id --> TermRelationships.objectId
-  models.Template.hasMany(models.TermRelationships, {
+  models.Templates.hasMany(models.TermRelationships, {
     foreignKey: 'objectId',
     sourceKey: 'id',
     constraints: false,

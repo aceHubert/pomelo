@@ -1,6 +1,6 @@
 {
   "name": "@pomelo/datasource",
-  "description": "pomelo datasource.",
+  "description": "Pomelo Datasource.",
   "version": "0.1.0-alpha.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

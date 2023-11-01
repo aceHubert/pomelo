@@ -5,7 +5,7 @@ import Medias from '../entities/medias.entity';
 import MediaMeta from '../entities/media-meta.entity';
 import Links from '../entities/links.entity';
 import TemplateMeta from '../entities/template-meta.entity';
-import Template from '../entities/template.entity';
+import Templates from '../entities/templates.entity';
 import Opitons from '../entities/options.entity';
 import TermTaxonomy from '../entities/term-taxonomy.entity';
 import TermTaxonomyMeta from '../entities/term-taxonomy-meta.entity';
@@ -15,7 +15,7 @@ import UserMeta from '../entities/user-meta.entity';
 
 export type Models = {
   Options: ModelStatic<Opitons>;
-  Template: ModelStatic<Template>;
+  Templates: ModelStatic<Templates>;
   TemplateMeta: ModelStatic<TemplateMeta>;
   Comments: ModelStatic<Comments>;
   CommentMeta: ModelStatic<CommentMeta>;

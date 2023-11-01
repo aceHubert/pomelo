@@ -34,14 +34,15 @@ export class AllExceptionFilter implements ExceptionFilter {
         description.dbInitRequired = true;
       }
 
-      response.status(status).json(
-        Object.assign({}, description, {
-          statusCode: status,
-          timestamp: new Date().toISOString(),
-          path: request.url,
-        }),
-      );
-      return;
+      const responseData = Object.assign({}, description, {
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      });
+      if (responseData.message && Array.isArray(responseData.message)) {
+        responseData.message = responseData.message.join('; ');
+      }
+      return response.status(status).json(responseData);
     } else if (type === 'graphql') {
       // 将非 ApolloError 转换在 ApolloError
       if (!(exception instanceof GraphQLError)) {

@@ -7,10 +7,17 @@ export interface SequelizeOptions {
    */
   isGlobal?: boolean;
 
+  /**
+   * database connection
+   */
   connection:
     | string
     | (Pick<Options, 'host' | 'port' | 'dialect' | 'database' | 'username' | 'password'> &
         Pick<ModelOptions, 'charset' | 'collate'>);
+
+  /**
+   * table prefix
+   */
   tablePrefix?: string;
 
   /**

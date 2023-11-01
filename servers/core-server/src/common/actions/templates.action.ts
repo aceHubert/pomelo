@@ -1,4 +1,4 @@
-import { IRAMActionDefine } from 'nestjs-ram-authorization';
+import { IRAMActionDefine } from '@pomelo/ram-authorization';
 
 export class TemplateAction implements IRAMActionDefine {
   static readonly PagedList = 'template.paged.list';

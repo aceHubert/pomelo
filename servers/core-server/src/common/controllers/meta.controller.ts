@@ -24,8 +24,8 @@ import {
   ApiCreatedResponse,
   ApiNoContentResponse,
 } from '@nestjs/swagger';
-import { Anonymous } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Anonymous } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { BaseController, createResponseSuccessType } from '@pomelo/shared-server';
 import { MetaDataSource } from '@pomelo/datasource';
 import { NewMetaDto } from './dto/new-meta.dto';
@@ -125,7 +125,7 @@ export function createMetaController<
       @Param(`${_camelCaseModelName}Id`, ParseIntPipe) modelId: number,
       @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     ) {
-      const result = await this.metaDataSource.getMetas(modelId, metaKeys, ['id', 'metaKey', 'metaValue']);
+      const result = await this.metaDataSource.getMetas(modelId, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
 
       return this.success({
         data: result,

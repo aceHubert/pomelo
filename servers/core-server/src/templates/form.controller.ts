@@ -24,8 +24,8 @@ import {
   createResponseSuccessType,
 } from '@pomelo/shared-server';
 import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
-import { Authorized, Anonymous } from 'nestjs-authorization';
-import { RamAuthorized } from 'nestjs-ram-authorization';
+import { Authorized, Anonymous } from '@pomelo/authorization';
+import { RamAuthorized } from '@pomelo/ram-authorization';
 import { FormTemplateAction } from '@/common/actions';
 import { PagedFormTemplateQueryDto, FormTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewFormTemplateDto } from './dto/new-template.dto';
@@ -109,7 +109,7 @@ export class FormTemplateController extends BaseController {
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(id, metaKeys, ['id', 'metaKey', 'metaValue']);
+      metas = await this.templateDataSource.getMetas(id, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
     }
 
     if (result === undefined) {
