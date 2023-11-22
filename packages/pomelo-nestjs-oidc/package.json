@@ -1,0 +1,55 @@
+{
+  "name": "@ace-pomelo/nestjs-oidc",
+  "version": "0.0.1-alpha.1",
+  "description": "nestjs openid connect.",
+  "author": "Hubert<yi.xiang@live.com>",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
+    "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json",
+    "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
+    "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
+    "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
+    "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
+    "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
+  },
+  "dependencies": {
+    "@nestjs/jwt": "^10.0.1",
+    "@nestjs/passport": "^9.0.0",
+    "@types/uuid": "^9.0.7",
+    "axios": "^0.27.2",
+    "cookie": "^0.5.0",
+    "express-session": "^1.17.3",
+    "flatted": "^3.2.6",
+    "openid-client": "^4.9.0",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.1",
+    "querystring": "^0.2.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "@types/cookie": "^0.5.4",
+    "@types/express-session": "^1.17.10",
+    "@types/mongodb": "^4.0.6",
+    "@types/passport": "^1.0.9",
+    "@types/passport-jwt": "^3.0.13"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "@nestjs/graphql": "^11.0.0",
+    "@types/mongodb": "^4.0.6",
+    "connect-mongo": "4.6.0",
+    "graphql": "^16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "yarn@3.1.0"
+}
