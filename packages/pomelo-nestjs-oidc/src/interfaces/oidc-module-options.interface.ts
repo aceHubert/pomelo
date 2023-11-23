@@ -49,10 +49,10 @@ export type OidcModuleOptions = {
   externalIdps?: ExternalIdps;
 
   /**
-   * Disable to register Login Middleware & Controller
+   * Disable to register Login Controllers
    * @default false
    */
-  disableLoginRedirect?: boolean;
+  disableController?: boolean;
 
   isGlobal?: boolean;
 } & XOR<
@@ -87,8 +87,8 @@ export interface ExternalIdps {
 
 export interface OidcOptionsFactory {
   createModuleConfig():
-    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableLoginRedirect'>>
-    | Omit<OidcModuleOptions, 'isGlobal' | 'disableLoginRedirect'>;
+    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>>
+    | Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>;
 }
 
 export interface OidcModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
@@ -97,13 +97,13 @@ export interface OidcModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> 
    * Disable to register Login Middleware & Controller
    * @default false
    */
-  disableLoginRedirect?: boolean;
+  disableController?: boolean;
   useExisting?: Type<OidcOptionsFactory>;
   useClass?: Type<OidcOptionsFactory>;
   useFactory?: (
     ...args: any[]
   ) =>
-    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableLoginRedirect'>>
-    | Omit<OidcModuleOptions, 'isGlobal' | 'disableLoginRedirect'>;
+    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>>
+    | Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>;
   inject?: any[];
 }

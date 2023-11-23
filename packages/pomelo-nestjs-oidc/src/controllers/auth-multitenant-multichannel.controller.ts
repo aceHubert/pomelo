@@ -1,6 +1,6 @@
 import { Controller, Get, Next, Param, Req, Res, Header } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { IsAvailableRouteForMultitenant, Public, CurrentUser } from '../decorators';
+import { IsAvailableRouteForMultitenant, CurrentUser } from '../decorators';
 import { Params, User } from '../interfaces';
 import { OidcService } from '../oidc.service';
 
@@ -15,7 +15,6 @@ export class AuthMultitenantMultiChannelController {
     return user?.profile ?? { isGuest: true };
   }
 
-  @Public()
   @Get('/login')
   login(
     @Req() req: Request,
@@ -26,7 +25,6 @@ export class AuthMultitenantMultiChannelController {
     this.oidcService.login(req, res, next, params);
   }
 
-  @Public()
   @Get('/logout')
   async logout(@Req() req: Request, @Res() res: Response, @Param() params: Params) {
     this.oidcService.logout(req, res, params);
@@ -37,7 +35,6 @@ export class AuthMultitenantMultiChannelController {
     this.oidcService.refreshToken(req, res, params);
   }
 
-  @Public()
   @Get('/loggedout')
   loggedOut(@Req() req: Request, @Res() res: Response, @Param() params: Params) {
     this.oidcService.loggedOut(req, res, params);

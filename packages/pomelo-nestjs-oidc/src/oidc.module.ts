@@ -1,5 +1,5 @@
 import { APP_GUARD } from '@nestjs/core';
-import { Inject, DynamicModule, MiddlewareConsumer, Module, NestModule, Provider, RequestMethod } from '@nestjs/common';
+import { DynamicModule, MiddlewareConsumer, Module, NestModule, Provider, RequestMethod } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import {
   AuthMultitenantMultiChannelController,
@@ -10,7 +10,7 @@ import {
 } from './controllers';
 import { GuestTokenGuard, TokenGuard, TenancyGuard } from './guards';
 import { OidcModuleAsyncOptions, OidcModuleOptions, OidcOptionsFactory } from './interfaces';
-import { UserMiddleware, LoginMiddleware, LoginRedirectMiddleware } from './middlewares';
+import { UserMiddleware, LoginMiddleware } from './middlewares';
 import { UserInfoService } from './userinfo.service';
 import { ClaimsService } from './claims.service';
 import { OidcService } from './oidc.service';
@@ -35,34 +35,19 @@ import { SessionSerializer } from './utils/session.serializer';
   exports: [OIDC_MODULE_OPTIONS, UserInfoService, ClaimsService, OidcService],
 })
 export class OidcModule implements NestModule {
-  constructor(@Inject(OIDC_MODULE_OPTIONS) private readonly options: OidcModuleOptions) {}
-
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(UserMiddleware)
       .exclude({ path: '/user', method: RequestMethod.GET })
       .forRoutes({ path: '*', method: RequestMethod.ALL });
 
-    if (this.options.disableLoginRedirect !== true) {
-      consumer
-        .apply(LoginMiddleware)
-        .forRoutes(
-          { path: '/login', method: RequestMethod.ALL },
-          { path: '/:tenantId/login', method: RequestMethod.ALL },
-          { path: '/:tenantId/:channelType/login', method: RequestMethod.ALL },
-        );
-
-      consumer
-        .apply(LoginRedirectMiddleware)
-        .exclude(
-          { path: '/login', method: RequestMethod.ALL },
-          { path: '/:tenantId/login', method: RequestMethod.ALL },
-          { path: '/:tenantId/:channelType/login', method: RequestMethod.ALL },
-          { path: '/login/callback', method: RequestMethod.ALL },
-          { path: '/tenant-switch-warn', method: RequestMethod.ALL },
-        )
-        .forRoutes({ path: '*', method: RequestMethod.ALL });
-    }
+    consumer
+      .apply(LoginMiddleware)
+      .forRoutes(
+        { path: '/login', method: RequestMethod.ALL },
+        { path: '/:tenantId/login', method: RequestMethod.ALL },
+        { path: '/:tenantId/:channelType/login', method: RequestMethod.ALL },
+      );
   }
 
   static forRoot({ isGlobal, ...options }: OidcModuleOptions): DynamicModule {
@@ -76,7 +61,7 @@ export class OidcModule implements NestModule {
         },
       ],
       controllers:
-        options.disableLoginRedirect === true
+        options.disableController === true
           ? []
           : [
               AuthController,
@@ -95,7 +80,7 @@ export class OidcModule implements NestModule {
       imports: options.imports,
       providers: [...this.createAsyncProviders(options)],
       controllers:
-        options.disableLoginRedirect === true
+        options.disableController === true
           ? []
           : [
               AuthController,
@@ -126,7 +111,7 @@ export class OidcModule implements NestModule {
         provide: OIDC_MODULE_OPTIONS,
         useFactory: async (...args: any[]) =>
           mergeDefaults({
-            disableLoginRedirect: options.disableLoginRedirect,
+            disableController: options.disableController,
             ...(await options.useFactory!(...args)),
           }),
         inject: options.inject || [],
@@ -136,7 +121,7 @@ export class OidcModule implements NestModule {
       provide: OIDC_MODULE_OPTIONS,
       useFactory: async (optionsFactory: OidcOptionsFactory) =>
         mergeDefaults({
-          disableLoginRedirect: options.disableLoginRedirect,
+          disableController: options.disableController,
           ...(await optionsFactory.createModuleConfig()),
         }),
       inject: [options.useExisting! || options.useClass!],

@@ -1,12 +1,9 @@
 import { Controller, Get, Header, Next, Param, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { IsAvailableRouteForMultitenant } from '../decorators';
+import { IsAvailableRouteForMultitenant, CurrentUser } from '../decorators';
 import { Params, User } from '../interfaces';
-import { CurrentUser } from '../decorators/current-user.decorator';
-import { Public } from '../decorators/public.decorator';
 import { OidcService } from '../oidc.service';
 
-@Public()
 @IsAvailableRouteForMultitenant(false)
 @Controller()
 export class AuthController {

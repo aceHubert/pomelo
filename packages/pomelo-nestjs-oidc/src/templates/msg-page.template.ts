@@ -131,8 +131,7 @@ export function renderMsgPage(context: {
               <h1 class="title">${context.title}</h1>
               ${!!context.subtitle ? `<h2 class="subtitle">${context.subtitle}</h2>` : ''}
               ${!!context.description ? `<p class="description">${context.description}</p>` : ''}
-              <br />
-              <div id="actions" style="text-align: ${context.actionsAlign ?? 'right'}">
+              <div id="actions" style="text-align: ${context.actionsAlign ?? 'left'}">
                 ${
                   context.backLabel
                     ? `<button class='action-button ${

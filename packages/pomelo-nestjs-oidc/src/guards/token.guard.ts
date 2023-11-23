@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { OidcService } from '../oidc.service';
+import { AUTHORIZATION_KEY } from '../oidc.constants';
 import { hasDecorator } from '../utils/has-decorator';
 import { getContextObject } from '../utils/get-context-object';
 
@@ -15,9 +16,10 @@ export class TokenGuard implements CanActivate {
       throw Error(`context type: ${context.getType()} not supported`);
     }
 
-    const isPublic = hasDecorator('isPublic', context, this.reflector);
+    const authorized = hasDecorator(AUTHORIZATION_KEY, context, this.reflector);
 
-    if (isPublic) return true;
+    // no @Authorized() decorator, return true
+    if (authorized !== true) return true;
 
     if (ctx.isAuthenticated()) {
       if (ctx.user.expired) {

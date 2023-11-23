@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { IsAvailableRouteForMultitenant, Public } from '../decorators';
+import { IsAvailableRouteForMultitenant } from '../decorators';
 import { Params } from '../interfaces';
 import { renderMsgPage } from '../templates';
 import { OidcService } from '../oidc.service';
@@ -11,7 +11,6 @@ export class TenantSwitchController {
   constructor(public oidcService: OidcService) {}
 
   @Get('/tenant-switch-warn')
-  @Public()
   getTenantSwitchWarn(@Req() req: Request, @Res() res: Response) {
     const query = req.query;
 
