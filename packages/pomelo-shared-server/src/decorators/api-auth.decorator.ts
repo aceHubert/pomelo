@@ -11,7 +11,7 @@ import {
 /**
  * awagger auth decorator collection
  */
-export function ApiAuth(
+export function ApiAuthCreate(
   type: 'basic' | 'bearer' | 'cookie' | 'oauth2' | MethodDecorator,
   responses?: (HttpStatus | ApiResponseOptions)[],
 ): MethodDecorator {

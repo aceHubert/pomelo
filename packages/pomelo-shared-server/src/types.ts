@@ -1,14 +1,14 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UserPayload {
+export interface AccountClaims {
   /**
    * User id.
    */
-  sub?: string;
+  sub: string;
 
   [key: string]: any;
 }
 
-export type RequestUser = UserPayload & {
+export type RequestUser = AccountClaims & {
   /**
    * Request language.
    */

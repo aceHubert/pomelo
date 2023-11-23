@@ -14,7 +14,7 @@ export const User = createParamDecorator((field: keyof RequestUser, context: Exe
 
   const user: RequestUser = {
     ...ctx.user,
-    lang: ctx.i18nLang,
+    lang: ctx.i18nLang, // nestjs-i18n
   };
 
   return field ? user[field] : ctx.user ? user : void 0;
