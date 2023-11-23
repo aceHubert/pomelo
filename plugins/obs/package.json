@@ -1,5 +1,5 @@
 {
-  "name": "@pomelo/plugin-obs",
+  "name": "@ace-pomelo/plugin-obs",
   "description": "nestjs obs connect",
   "version": "0.1.0-alpha.0",
   "main": "dist/index.js",
@@ -15,20 +15,20 @@
     "esdk-obs-nodejs": "^3.21.6"
   },
   "devDependencies": {
+    "@ace-pomelo/authorization": "workspace:^",
+    "@ace-pomelo/ram-authorization": "workspace:^",
+    "@ace-pomelo/shared-server": "workspace:^",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^11.0.0",
-    "@pomelo/authorization": "workspace:^",
-    "@pomelo/ram-authorization": "workspace:^",
-    "@pomelo/shared-server": "workspace:^"
+    "@nestjs/graphql": "^11.0.0"
   },
   "peerDependencies": {
+    "@ace-pomelo/authorization": "workspace:^",
+    "@ace-pomelo/ram-authorization": "workspace:^",
+    "@ace-pomelo/shared-server": "workspace:^",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^11.0.0",
-    "@pomelo/authorization": "workspace:^",
-    "@pomelo/ram-authorization": "workspace:^",
-    "@pomelo/shared-server": "workspace:^"
+    "@nestjs/graphql": "^11.0.0"
   },
   "packageManager": "yarn@3.1.0"
 }

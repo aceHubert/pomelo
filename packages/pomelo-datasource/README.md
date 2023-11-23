@@ -1,2 +1,2 @@
-# @pomelo/datasource
+# @ace-pomelo/datasource
 > Pomelo Datasource

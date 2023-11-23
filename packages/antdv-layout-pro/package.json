@@ -37,9 +37,9 @@
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
   "dependencies": {
+    "@ace-pomelo/theme": "workspace:^",
     "@ace-util/core": "^0.1.0",
     "@iconfu/svg-inject": "^1.2.3",
-    "@pomelo/theme": "workspace:^",
     "jsoneditor": "^9.5.6",
     "lodash.clonedeep": "^4.5.0",
     "lodash.debounce": "^4.0.8",

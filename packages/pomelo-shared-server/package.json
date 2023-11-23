@@ -1,5 +1,5 @@
 {
-  "name": "@pomelo/shared-server",
+  "name": "@ace-pomelo/shared-server",
   "description": "Nodejs shared context",
   "version": "0.1.0-alpha.0",
   "main": "dist/index.js",

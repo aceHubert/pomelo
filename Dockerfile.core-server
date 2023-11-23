@@ -17,7 +17,7 @@ COPY --from=builder /app/.yarnrc.yml /app/
 WORKDIR /app
 ENV NODE_ENV=production
 # 安装 Nodejs 运行时文件
-RUN yarn workspaces focus --production @pomelo/core-server
+RUN yarn workspaces focus --production @ace-pomelo/core-server
 
 FROM swr.cn-east-3.myhuaweicloud.com/lejian-system/node:16.0.0-alpine3.13
 # copy content file
@@ -42,4 +42,4 @@ RUN npm install -g pm2
 
 EXPOSE 3000
 CMD ["pm2", "start", "dist/main.js", "--cwd", "server", "--no-daemon"]
-# CMD ["yarn", "workspace", "@pomelo/core-server", "start:prod"]
+# CMD ["yarn", "workspace", "@ace-pomelo/core-server", "start:prod"]

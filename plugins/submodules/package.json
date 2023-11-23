@@ -1,5 +1,5 @@
 {
-  "name": "@pomelo/plugin-submodules",
+  "name": "@ace-pomelo/plugin-submodules",
   "description": "pomelo submodules management",
   "version": "0.1.0-alpha.0",
   "main": "dist/index.js",
@@ -11,22 +11,21 @@
     "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
     "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@ace-pomelo/authorization": "workspace:^",
+    "@ace-pomelo/ram-authorization": "workspace:^",
+    "@ace-pomelo/shared-server": "workspace:^",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^11.0.0",
-    "@pomelo/authorization": "workspace:^",
-    "@pomelo/ram-authorization": "workspace:^",
-    "@pomelo/shared-server": "workspace:^"
+    "@nestjs/graphql": "^11.0.0"
   },
   "peerDependencies": {
+    "@ace-pomelo/authorization": "workspace:^",
+    "@ace-pomelo/ram-authorization": "workspace:^",
+    "@ace-pomelo/shared-server": "workspace:^",
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
-    "@nestjs/graphql": "^11.0.0",
-    "@pomelo/authorization": "workspace:^",
-    "@pomelo/ram-authorization": "workspace:^",
-    "@pomelo/shared-server": "workspace:^"
+    "@nestjs/graphql": "^11.0.0"
   },
   "packageManager": "yarn@3.1.0"
 }

@@ -76,12 +76,9 @@
       "@formily-portal/vant-*": ["../../.submodules/formily-portal-vant/packages/*/src"],
       "antdv-layout-pro": ["../../packages/antdv-layout-pro/src"],
       "antdv-layout-pro/*": ["../../packages/antdv-layout-pro/src/*"],
-      "nestjs-oidc": ["../../packages/nestjs-oidc/src"],
-      "@pomelo/authorization": ["../../packages/pomelo-authorization/src"],
-      "@pomelo/ram-authorization": ["../../packages/pomelo-ram-authorization/src"],
-      "@pomelo/plugin-*": ["../plugins/*/src", "../../plugins/*/src"],
-      "@pomelo/theme-*": ["../themes/*/src", "../../themes/*/src"],
-      "@pomelo/*": [
+      "@ace-pomelo/plugin-*": ["../plugins/*/src", "../../plugins/*/src"],
+      "@ace-pomelo/theme-*": ["../themes/*/src", "../../themes/*/src"],
+      "@ace-pomelo/*": [
         "../packages/*/src",
         "../../packages/*/src",
         "../packages/pomelo-*/src",

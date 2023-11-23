@@ -1,4 +1,4 @@
-import { IRAMActionDefine } from '@pomelo/ram-authorization';
+import { IRAMActionDefine } from '@ace-pomelo/ram-authorization';
 
 export class Action implements IRAMActionDefine {
   static UploadSignedUrl = 'resource.obs.upload.signedurl';

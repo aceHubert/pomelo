@@ -5,6 +5,7 @@
     "lib": ["ES2018", "ESNext.AsyncIterable"],
     "baseUrl": ".",
     "skipLibCheck": true,
+    "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,

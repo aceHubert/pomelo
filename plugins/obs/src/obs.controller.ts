@@ -1,8 +1,8 @@
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Controller, Query, Get, HttpStatus } from '@nestjs/common';
-import { Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
-import { ApiAuth, BaseController, ParseQueryPipe, createResponseSuccessType } from '@pomelo/shared-server';
+import { Authorized } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { ApiAuthCreate, BaseController, ParseQueryPipe, createResponseSuccessType } from '@ace-pomelo/shared-server';
 import { ObsUploadSignedUrlResp, ObsPostUploadSignatureResp } from './resp/hw-cloud.resp';
 import { Action } from './action';
 
@@ -23,7 +23,7 @@ export class ObsController extends BaseController {
    */
   @Get('upload-signed-url')
   @RamAuthorized(Action.UploadSignedUrl)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Signed url',
     type: () => createResponseSuccessType({ data: ObsUploadSignedUrlResp }, 'ObsUploadSignedUrlModelSuccessResp'),
@@ -40,7 +40,7 @@ export class ObsController extends BaseController {
    */
   @Get('post-upload-signature')
   @RamAuthorized(Action.PostUpladSignature)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Signature',
     type: () =>

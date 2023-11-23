@@ -1,7 +1,7 @@
 import { Resolver, Args, Query } from '@nestjs/graphql';
-import { Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
-import { BaseResolver } from '@pomelo/shared-server';
+import { Authorized } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { BaseResolver } from '@ace-pomelo/shared-server';
 import { ObsUploadSignedUrlModel, ObsPostUploadSignatureModel } from './models/hw-cloud.modal';
 import { Action } from './action';
 

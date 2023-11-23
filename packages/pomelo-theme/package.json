@@ -1,7 +1,7 @@
 {
-  "name": "@pomelo/theme",
-  "description": "Styles",
-  "version": "0.1.0-alpha.0",
+  "name": "@ace-pomelo/theme",
+  "description": "Pomelo Styles",
+  "version": "0.1.0-alpha.1",
   "author": "Hubert<yi.xiang@live.cn>",
   "main": "lib/index.js",
   "module": "esm/index.js",

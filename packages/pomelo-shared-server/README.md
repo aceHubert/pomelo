@@ -1,2 +1,2 @@
-# @pomelo/shared-server
-
+# @ace-pomelo/shared-server
+> Pomelo Server Shared Library
