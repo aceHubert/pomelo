@@ -1,0 +1,31 @@
+// out: true
+
+@import 'variables.less';
+
+:root {
+  --bs-body-font-size: 14px;
+  --bs-primary: var(--theme-primary);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--theme-primary);
+  --bs-btn-border-color: var(--theme-primary);
+  --bs-btn-hover-bg: var(--theme-primary-5);
+  --bs-btn-hover-border-color: var(--theme-primary-5);
+  --bs-btn-focus-shadow-rgb: var(--theme-primary);
+  --bs-btn-active-bg: var(--theme-primary-7);
+  --bs-btn-active-border-color: var(--theme-primary-7);
+  --bs-btn-disabled-bg: var(--theme-primary);
+  --bs-btn-disabled-border-color: var(--theme-primary);
+}
+
+.form-control:focus,
+.form-check-input:focus {
+  border-color: var(--theme-primary-3);
+  box-shadow: 0 0 0 0.25rem var(--theme-primary-1);
+}
+
+.form-check-input:checked {
+  background-color: var(--theme-primary);
+  border-color: var(--theme-primary);
+}

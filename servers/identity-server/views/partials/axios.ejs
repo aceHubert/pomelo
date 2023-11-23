@@ -1,0 +1,25 @@
+<script src="//unpkg.com/promise-polyfill@8/dist/polyfill.min.js"></script>
+<script src="//unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+<script>
+  var SUPPORTS_CORS = 'withCredentials' in new XMLHttpRequest();
+  axios.defaults.withCredentials = SUPPORTS_CORS;
+  axios.defaults.timeout = 100000;
+
+  axios.interceptors.response.use(
+    function (response) {
+      var data = response.data || {};
+      if (data.success === false) {
+        return Promise.reject(new Error(data.message));
+      }
+      return response;
+    },
+    function (error) {
+      if (!error.response) return Promise.reject(error);
+
+      var response = error.response;
+      var data = response.data || {};
+      var message = data.message === null || data.message === undefined ? error.message : data.message;
+      return Promise.reject(new Error(message?.length > 100 ? message.substring(0, 100) + '...' : message));
+    },
+  );
+</script>

@@ -1,0 +1,78 @@
+/* stylelint-disable no-duplicate-selectors */
+/* stylelint-disable */
+/* stylelint-disable declaration-bang-space-before,no-duplicate-selectors,string-no-newline */
+body {
+  height: 100vh;
+  margin: 0;
+}
+.container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  height: 100vh;
+  width: 80vw;
+  margin: 0 auto;
+}
+.container > div {
+  margin: 100px 3% 3%;
+}
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--text-primary, rgba(0, 0, 0, 0.85));
+}
+.subtitle {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 21px;
+  color: var(--text-secondary, rgba(0, 0, 0, 0.45));
+}
+.description {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 21px;
+}
+span {
+  font-weight: 500;
+}
+pre {
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+#actions {
+  margin-top: 32px;
+}
+.action-button {
+  background-color: var(--theme-primary);
+  color: var(--text-inverse);
+  border-radius: 6px;
+  min-width: 64px;
+  line-height: 36px;
+  padding: 0 16px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+.action-button + .action-button {
+  margin-left: 12px;
+}
+.action-button.secondary {
+  color: var(--text-primary);
+  background-color: #eeeeee;
+}
+@media screen and (max-width: 768px) {
+  body {
+    background-size: 60%;
+  }
+  .container {
+    width: 100%;
+  }
+  .container > div {
+    margin: 20px 16px;
+  }
+}

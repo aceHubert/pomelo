@@ -1,0 +1,41 @@
+// out: true
+
+@import 'variables.less';
+
+#app {
+  min-height: 100vh;
+  // background: linear-gradient(153deg, #ffffff 0%, #f2f2f2 100%);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.wrapper {
+  margin: auto;
+  padding: 40px 30px 30px;
+  max-width: 500px;
+}
+
+form {
+  margin-top: 20px;
+}
+
+// #footer {
+//   position: absolute;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+// }
+
+@media screen and (min-width: 576px) and (min-height: 768px) {
+  .wrapper {
+    width: 500px;
+    background-color: #fff;
+    box-shadow: @box-shadow-base;
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+  }
+}

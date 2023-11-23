@@ -1,0 +1,41 @@
+<link rel="stylesheet" href="/style/login.css" />
+<div id="app">
+  <div class="wrapper">
+    <div class="mb-2 pb-2 border-bottom">
+      <h1 class="title">Confirm</h1>
+      <p class="text--secondary mb-0">to sign in to <strong><%= new URL(params.redirect_uri).host %></strong></p>
+    </div>
+    <p><strong><%= clientName %></strong> want to access your account.</p>
+    <form action="/login/<%= uid %>/confirm" method="POST" autocomplete="off">
+      <%
+      const missingScopes = new Set(details.missingOIDCScope);
+      const msgMap = new Map([
+        ['openid', 'Your account identifier'],
+        ['offline_access', 'Keep connected to your account'],
+        ['profile', 'Your profile information (name, email, phone, ...)'],
+        ['capabilities', 'Your role and permissions'],
+        ['email', 'Your email address'],
+        ['phone', 'Your phone number'],
+      ]);
+
+      if (missingScopes.size > 0) {
+      %>
+        <p><strong>Requested access:</strong></p>
+
+        <ul>
+          <% for (const scope of missingScopes) { %>
+            <li><%= msgMap.has(scope) ? msgMap.get(scope) : scope %></li>
+          <% } %>
+        </ul>
+
+      <% } %>
+
+      <div class="text-end mt-4">
+        <a href="/login/<%= uid %>/abort" class="btn btn-light">Cancel</a>
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </div>
+    </form>
+  </div>
+  <%- include('partials/footer') %>
+</div>
+<%- contentFor('title') %> Confirm
