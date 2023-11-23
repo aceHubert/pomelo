@@ -9,12 +9,12 @@ import {
   OptionPresetKeys,
   PageMetaPresetKeys,
   useDeviceType,
-} from '@pomelo/shared-client';
+} from '@ace-pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
 
 // Types
-import type { PageTemplateWithMetasModel } from '@pomelo/shared-client';
+import type { PageTemplateWithMetasModel } from '@ace-pomelo/shared-client';
 
 const MobilePage = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopPage = () => import(/* webpackChunkName: "desktop" */ './desktop');

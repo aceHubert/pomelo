@@ -334,10 +334,12 @@ export class Request {
         // 第一要包含code的详细信息
         const extensions = graphQLErrors.find((error) => error.extensions?.code)?.extensions;
         return new GraphQLError(
-          `${err.message}, Errors: ${graphQLErrors
-            .map((graphQLError) => graphQLError?.message)
-            .filter(Boolean)
-            .join('; ')}`,
+          graphQLErrors.length === 1
+            ? graphQLErrors[0].message || err.message
+            : `Errors: ${graphQLErrors
+                .map((graphQLError) => graphQLError?.message)
+                .filter(Boolean)
+                .join('; ')}`,
           extensions ? extensions.statusCode || this.options.graphqlErrorCodes[extensions.code] || 500 : 500,
           err,
         );

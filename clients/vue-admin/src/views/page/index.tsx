@@ -5,17 +5,16 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
 import { Select, Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { OptionPresetKeys, TemplateStatus, useLocationMixin, useDeviceType } from '@pomelo/shared-client';
+import { OptionPresetKeys, TemplateStatus, useLocationMixin, useDeviceType } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
-import { usePageApi, TemplateType } from '@/fetch/graphql';
+import { usePageApi, TemplateType } from '@/fetch/apis';
 import { useI18n, useOptions, useUserManager } from '@/hooks';
 import { useTemplateMixin } from '@/mixins';
 import classes from './index.module.less';
 
 // typed
 import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
-import type { PagedPageTemplateArgs, PagedPageTemplateItem } from '@/fetch/graphql';
-import type { User } from '@/auth/user-manager';
+import type { PagedPageTemplateArgs, PagedPageTemplateItem } from '@/fetch/apis';
 import type { BulkActions } from '@/mixins/template';
 import type { ActionCapability } from '../post/components/design-layout/DesignLayout';
 
@@ -42,7 +41,8 @@ export default defineComponent({
     const homeUrl = useOptions(OptionPresetKeys.Home);
     const pageApi = usePageApi();
 
-    const currentUser = ref<User>();
+    const currentUserId = ref<string>();
+    const currentUserRole = ref<string>();
 
     const pageTemplates = reactive({
       loading: false,
@@ -56,7 +56,7 @@ export default defineComponent({
     const searchQuery = computed<Omit<PagedPageTemplateArgs, 'offset' | 'limit' | 'queryStatusCounts'>>(() => {
       return {
         ...templateMixin.searchQuery,
-        author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUser.value?.profile.sub : void 0,
+        author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUserId.value : void 0,
         date: (route.query[RouteQueryKey.Date] as string) || void 0,
       };
     });
@@ -64,9 +64,10 @@ export default defineComponent({
     // 加载数据
     const loadData: DataSourceFn = async ({ page, size }) => {
       // 加载数据前确保用户 id 已存在
-      if (!currentUser.value) {
+      if (!currentUserId.value) {
         const user = await userManager.getUser();
-        currentUser.value = user || void 0;
+        currentUserId.value = user?.profile.sub;
+        currentUserRole.value = user?.profile.role;
       }
 
       return pageApi
@@ -100,12 +101,12 @@ export default defineComponent({
               };
 
               // TODO: 设置条件管理员权限
-              if (currentUser.value?.profile.role?.includes('isp.admin')) {
+              if (currentUserRole.value === 'administrator') {
                 actionCapability.operate = true;
                 actionCapability.publish = true;
               } else {
                 // 只能操作自己的
-                if (currentUser.value?.profile.sub === item.author) {
+                if (currentUserId.value === item.author) {
                   actionCapability.operate = true;
                 }
               }
@@ -113,7 +114,7 @@ export default defineComponent({
               return {
                 ...item,
                 actionCapability,
-                isSelfContent: currentUser.value?.profile.sub === item.author,
+                isSelfContent: currentUserId.value === item.author,
               };
             }),
             total: pages.total,

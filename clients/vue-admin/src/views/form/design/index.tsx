@@ -27,14 +27,13 @@ import { Theme } from 'antdv-layout-pro/types';
 import {
   TemplateStatus,
   OptionPresetKeys,
-  FormMetaPresetKeys,
   getFrameworkSchema,
   toFrameworkContent,
   type SchemaFramework,
-} from '@pomelo/shared-client';
+} from '@ace-pomelo/shared-client';
 import { trailingSlash, equals, warn } from '@ace-util/core';
 import { Modal, message } from '@/components';
-import { useTemplateApi, useFormApi } from '@/fetch/graphql';
+import { useTemplateApi, useFormApi, FormMetaPresetKeys } from '@/fetch/apis';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
 import { useDesignerMixin, useFormilyMixin } from '@/mixins';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
@@ -45,7 +44,7 @@ import classes from './index.module.less';
 
 // Types
 import type { TreeNode, ITreeNode } from '@designable/core';
-import type { FormTempaleModel } from '@/fetch/graphql';
+import type { FormTemplateModel } from '@/fetch/apis';
 import type { ActionStatus, ActionCapability } from '../../post/components/design-layout/DesignLayout';
 
 GlobalRegistry.registerDesignerLocales({
@@ -85,12 +84,12 @@ export default defineComponent({
         // 使用默认 prefixCls 以避免与 layout 冲突
         // {
         //   id: 'ant-design-vue@1.7.8',
-        //   href: '//www.unpkg.com/ant-design-vue@1.7.8/dist/antd.min.css',
+        //   href: '//unpkg.com/ant-design-vue@1.7.8/dist/antd.min.css',
         //   rel: 'stylesheet',
         // },
         // {
         //   id: 'vant@2.12.53',
-        //   href: '//www.unpkg.com/vant@2.12.53/lib/index.css',
+        //   href: '//unpkg.com/vant@2.12.53/lib/index.css',
         //   rel: 'stylesheet',
         // },
       ],
@@ -147,7 +146,7 @@ export default defineComponent({
     const settingsDisplayRef = ref<Settings[]>(settingsDisplayOptions.value.map(({ value }) => value));
 
     const formData = reactive<
-      Pick<FormTempaleModel, 'title' | 'content' | 'status'> & {
+      Pick<FormTemplateModel, 'title' | 'content' | 'status'> & {
         id?: number;
         submitAction?: string;
         submitSuccessRedirect?: string;
@@ -210,7 +209,7 @@ export default defineComponent({
       { deep: true },
     );
 
-    let formPromise: Promise<FormTempaleModel | undefined>;
+    let formPromise: Promise<FormTemplateModel | undefined>;
     if (!formData.id) {
       // 新建自动草稿
       formPromise = formApi
@@ -296,7 +295,7 @@ export default defineComponent({
       actionStatus.disabledActions = false;
 
       // TODO: 设置条件管理员权限
-      if (user?.profile.role?.includes('isp.admin')) {
+      if (user?.profile.role === 'administrator') {
         actionCapability.operate = true;
         actionCapability.publish = true;
       } else {

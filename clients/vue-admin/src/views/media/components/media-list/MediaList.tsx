@@ -1,11 +1,11 @@
 import { defineComponent, getCurrentInstance, reactive, ref } from '@vue/composition-api';
 import { expose, useConfigProvider, useEffect } from 'antdv-layout-pro/shared';
-import { Input, Button, Space, Radio, Icon, Spin, Progress, Card, Upload, Pagination } from 'ant-design-vue';
+import { Input, Button, Space, Radio, Icon, Spin, Progress, Card, Upload, Pagination, Empty } from 'ant-design-vue';
 import { Cropper } from 'vue-advanced-cropper';
 import { createResource } from '@vue-async/resource-manager';
 import { message, Modal } from '@/components';
 import { useI18n } from '@/hooks';
-import { useResApi } from '@/fetch/graphql';
+import { useResApi } from '@/fetch/apis';
 import FileUnknownSvg from '@/assets/icons/file-unknown-fill.svg';
 import { useUpload } from '@/mixins';
 import { formatFileSize } from '../../utils/format';
@@ -14,7 +14,7 @@ import './index.less';
 // Types
 import type { OmitVue } from 'antdv-layout-pro/types';
 import type { Pagination as PaginationProps } from 'ant-design-vue/types/pagination';
-import type { Media } from '@/fetch/graphql';
+import type { Media } from '@/fetch/apis';
 
 export interface MediaListProps {
   keyword?: string;
@@ -97,10 +97,9 @@ export default defineComponent({
       if (!medias) return;
 
       // 如果当前页面包含已存在的文件，移除
-      medias.rows.splice(
-        medias.rows.findIndex((row) => file.fileName === row.fileName),
-        1,
-      );
+      const existsIndex = medias.rows.findIndex((row) => file.fileName === row.fileName);
+      existsIndex >= 0 && medias.rows.splice(existsIndex, 1);
+
       // 插入到第一个
       medias.rows.unshift(file);
     };
@@ -198,11 +197,8 @@ export default defineComponent({
                   })
                   .then(({ image }) => {
                     if (cropImageReplace.value) {
-                      $mediasRes.$result?.rows?.splice(
-                        $mediasRes.$result?.rows.findIndex((row) => media.id === row.id),
-                        1,
-                        image,
-                      );
+                      const existsIndex = $mediasRes.$result?.rows.findIndex((row) => media.id === row.id) ?? -1;
+                      existsIndex >= 0 && $mediasRes.$result?.rows?.splice(existsIndex, 1, image);
                     } else {
                       $mediasRes.$result?.rows?.unshift(image);
                     }
@@ -366,7 +362,7 @@ export default defineComponent({
                 </Upload>
               </div>
             )}
-            {medias &&
+            {medias?.rows.length ? (
               medias.rows.map((media) => (
                 <div class={`${prefixCls}-item`} onClick={() => emit('itemClick', media)}>
                   <Card hoverable size="small">
@@ -414,7 +410,14 @@ export default defineComponent({
                     )}
                   </Space>
                 </div>
-              ))}
+              ))
+            ) : !props.showUploader ? (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={i18n.tv('page_media.empty_list_description', '没有媒体文件！')}
+                class="mx-auto"
+              />
+            ) : null}
           </div>
           <div class="text-right mt-2">
             <Pagination

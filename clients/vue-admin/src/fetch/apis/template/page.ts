@@ -1,15 +1,15 @@
-import { defineRegistApi, gql } from './core';
+import { defineRegistApi, gql } from '../../graphql';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
-import type { PagedTemplateArgs, TempateModel, NewTemplateInput, TemplateStatusCountItem } from './template';
-import type { Paged } from './types';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
+import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
+import type { Paged } from '../types';
 
 export interface PagedPageTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {}
 
 export interface PageTemplateModel
   extends Pick<
-    TempateModel,
+    TemplateModel,
     | 'id'
     | 'name'
     | 'title'

@@ -1,10 +1,10 @@
-import { defineRegistApi, gql } from './core';
+import { defineRegistApi, gql } from '../../graphql';
 
 // Types
-import type { TemplateStatus, TemplateCommentStatus } from '@pomelo/shared-client';
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
-import type { TermTaxonomyModel } from './term-taxonomy';
-import type { Paged } from './types';
+import type { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
+import type { TermTaxonomyModel } from '../term-taxonomy';
+import type { Paged } from '../types';
 
 export enum TemplateType {
   Post = 'Post',
@@ -25,7 +25,7 @@ export interface PagedTemplateArgs {
   querySelfCounts?: boolean;
 }
 
-export interface TempateModel {
+export interface TemplateModel {
   id: number;
   title: string;
   name: string;
@@ -42,7 +42,7 @@ export interface TempateModel {
   metas: Array<Pick<TemplateMetaModel, 'id' | 'key' | 'value'>>;
 }
 
-export interface PagedTemplateItem extends Omit<TempateModel, 'content' | 'metas'> {}
+export interface PagedTemplateItem extends Omit<TemplateModel, 'content' | 'metas'> {}
 
 interface TemplateCountItem {
   count: number;
@@ -90,6 +90,29 @@ export interface NewTemplateMetaInput {
   metaKey: string;
   metaValue: string;
 }
+
+export const TemplateMetaPresetKeys = {
+  CssText: 'css-text',
+  StyleLink: 'style-link',
+  FeatureImage: 'feature-image',
+  SettingsDisplay: 'settings-display',
+};
+
+export const PostMetaPresetKeys = {
+  Template: 'template',
+  ...TemplateMetaPresetKeys,
+};
+
+export const FormMetaPresetKeys = {
+  SubmitAction: 'submit.action',
+  SubmitSuccessRedirect: 'submit.success_redirect',
+  SubmitSuccessTips: 'submit.success_tips',
+  ...TemplateMetaPresetKeys,
+};
+
+export const PageMetaPresetKeys = {
+  ...TemplateMetaPresetKeys,
+};
 
 export const useTemplateApi = defineRegistApi('template', {
   // 分页获取模版
@@ -174,7 +197,7 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     }
-  ` as TypedQueryDocumentNode<{ template?: TempateModel }, { id: number; metaKeys?: string[] }>,
+  ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
   // 按状态分组数量
   getCountByStatus: gql`
     query getCountByStatus($type: String!) {
@@ -245,7 +268,7 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     }
-  ` as TypedMutationDocumentNode<{ template: TempateModel }, { newTemplate: NewTemplateInput }>,
+  ` as TypedMutationDocumentNode<{ template: TemplateModel }, { newTemplate: NewTemplateInput }>,
   // 修改模版
   update: gql`
     mutation update($id: ID!, $updateTemplate: UpdateTemplateInput!) {
@@ -335,3 +358,7 @@ export const useTemplateApi = defineRegistApi('template', {
     }
   ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
 });
+
+export * from './post';
+export * from './page';
+export * from './form';

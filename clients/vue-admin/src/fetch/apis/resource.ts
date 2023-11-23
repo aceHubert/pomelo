@@ -1,4 +1,4 @@
-import { defineRegistApi, gql } from './core';
+import { defineRegistApi, gql } from '../graphql';
 
 // Types
 import type { Paged } from './types';
@@ -55,9 +55,9 @@ export interface Media extends Omit<File, 'original'>, FileData {
 export interface PagedMedia extends Paged<Media> {}
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
 
-export const useResApi = defineRegistApi('resources', {
+export const useResApi = defineRegistApi('resource', {
   uploadFile: gql`
     mutation uploadFile($file: Upload!, $options: FileUploadOptionsInput) {
       file: uploadFile(file: $file, options: $options) {

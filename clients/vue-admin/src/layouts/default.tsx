@@ -17,9 +17,9 @@ import {
   type LayoutType,
   type ContentWidth,
 } from 'antdv-layout-pro/types';
-import { useDeviceMixin, useLocationMixin } from '@pomelo/shared-client';
+import { OptionPresetKeys, useDeviceMixin, useLocationMixin } from '@ace-pomelo/shared-client';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
-import { useUserManager, useI18n } from '@/hooks';
+import { useUserManager, useI18n, useOptions } from '@/hooks';
 import { useAppMixin } from '@/mixins';
 import { loadingRef } from '@/shared';
 import { getDefaultMenus } from '@/configs/menu.config';
@@ -34,6 +34,7 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const i18n = useI18n();
+    const homeUrl = useOptions(OptionPresetKeys.Home);
     const appMixin = useAppMixin();
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
@@ -168,10 +169,11 @@ export default defineComponent({
       userManager.getUser().then(async (user) => {
         if (user) {
           currentUser.value = {
-            name: user.profile.nickname ?? user.profile.accountName ?? '',
-            photo: user.profile.picture
-              ? `//demo.res.ihealthinkcare.com/image/head-${user.profile.picture}`
-              : `${process.env.BASE_URL}static/images/head_default.jpg`,
+            name: user.profile.name ?? user.profile.display_name ?? '',
+            photo:
+              user.profile.picture ?? user.profile.avatar
+                ? `${homeUrl}${user.profile.picture ?? user.profile.avatar}`
+                : `${process.env.BASE_URL}static/images/head_default.jpg`,
           };
         }
       });
@@ -353,6 +355,7 @@ export default defineComponent({
                                   ),
                               menuItems: () => [],
                             }}
+                            onAction={handleActionClick}
                           />
                         </Space>
                       </div>

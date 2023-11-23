@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from './core';
+import { defineRegistApi, gql } from '../graphql';
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
 
-export enum Taxonomy {
+export enum PresetTaxonomy {
   Category = 'Category',
   Tag = 'Tag',
 }
@@ -11,7 +11,7 @@ export type TermTaxonomyModel = {
   id: string;
   name: string;
   slug: string;
-  taxonomy: string;
+  taxonomy: PresetTaxonomy | string;
   description: string;
   parentId: number;
   group: number;

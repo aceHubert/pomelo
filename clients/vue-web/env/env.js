@@ -4,11 +4,12 @@
 
   var env = window._ENV || {};
 
-  env.apiBase = 'https://tpl.acehubert.com/api';
+  env.apiBase = 'https://server.pomelo.com/api';
+  env.graphqlBase = 'https://server.pomelo.com/graphql';
+  env.graphqlSubscriptionBase = 'wss://server.pomelo.com/graphql';
 
   env.oidc = {
-    authority: 'https://auth.acehubert.com/',
-    // authority: 'http://localhost:5000/',
+    authority: 'https://auth.pomelo.com/',
     client_id: clientId,
     redirect_uri: baseUrl + '/signin.html',
     post_logout_redirect_uri: baseUrl,
@@ -19,11 +20,12 @@
     silent_redirect_uri: baseUrl + '/signin-silent.html',
     // these two will be done dynamically from the buttons clicked, but are
     // needed if you want to use the silent_renew
-    response_type: 'id_token token',
-    scope: 'openid profile base cp umsg',
+    response_type: 'code',
+    scope: 'openid profile offline_access',
     // will revoke (reference) access tokens at logout time
     revokeAccessTokenOnSignout: true,
     mergeClaims: true,
+    monitorSession: true,
   };
 
   window._ENV = env;

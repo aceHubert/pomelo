@@ -1,7 +1,7 @@
-import { defineRegistApi, gql } from './core';
+import { defineRegistApi, gql } from '../graphql';
 
 // Types
-import type { TypedQueryDocumentNode, TypedSubscriptionDocumentNode } from './core/request';
+import type { TypedQueryDocumentNode, TypedSubscriptionDocumentNode } from '../graphql';
 
 export enum OptionAutoload {
   Yes = 'Yes',
@@ -34,7 +34,7 @@ export const useBasicApi = defineRegistApi('basic', {
     query getAutoloadOptions {
       options: autoloadOptions
     }
-  ` as TypedQueryDocumentNode<{ options: Record<string, any> }>,
+  ` as TypedQueryDocumentNode<{ options: Record<string, string> }>,
   getOption: gql`
     query getOption($id: ID!) {
       option(id: $id) {

@@ -6,8 +6,7 @@ import { defaultSettings } from '@/configs/settings.config';
 import { STORAGE_PREFIX } from './utils';
 
 // Types
-import type { LayoutConfig, ColorConfig, Theme } from 'antdv-layout-pro/types';
-import type { LocaleConfig } from '@/types';
+import type { LayoutConfig, ColorConfig, LocaleConfig, Theme } from 'antdv-layout-pro/types';
 
 export const useAppStore = defineStore(
   'app',

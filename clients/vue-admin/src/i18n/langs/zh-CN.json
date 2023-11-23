@@ -408,6 +408,7 @@
     }
   },
   "page_media": {
+    "page_title": "媒体库",
     "search_placeholder": "输入\"文件名\"搜索",
     "upload_dragger_btn_text": "点击或拖拽至此上传媒体文件",
     "upload_multiple_btn_tips": "支持单个或批量媒体文件上传。",
@@ -436,6 +437,7 @@
     "image_width": "图片宽度",
     "image_height": "图片高度",
     "full_path": "媒体地址",
-    "created_at": "创建时间"
+    "created_at": "创建时间",
+    "empty_list_description": "没有媒体文件！"
   }
 }

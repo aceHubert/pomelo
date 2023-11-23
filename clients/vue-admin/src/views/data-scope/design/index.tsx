@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { Button, Card, Dropdown, Form, Input, Menu, Icon } from 'ant-design-vue';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { warn } from '@ace-util/core';
-import { TemplateStatus } from '@pomelo/shared-client';
+import { TemplateStatus } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
 import { useDesignerMixin } from '@/mixins/designer';
 import { ClauseForm } from '../components';

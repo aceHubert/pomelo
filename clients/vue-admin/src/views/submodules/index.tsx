@@ -1,13 +1,13 @@
 import { defineComponent, ref, reactive, watch } from '@vue/composition-api';
 import { Button, Icon, Input, List } from 'ant-design-vue';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { useSubmoduleApi } from '@/fetch/graphql';
-import { useLocationMixin } from '@/mixins';
+import { useLocationMixin } from '@ace-pomelo/shared-client';
+import { useSubmoduleApi } from '@/fetch/apis';
 import classes from './index.module.less';
 
 // Types
 import type { PropType } from '@vue/composition-api';
-import type { PagedSubModuleArgs, PagedSubModuleItem } from '@/fetch/graphql';
+import type { PagedSubModuleArgs, PagedSubModuleItem } from '@/fetch/apis';
 
 export default defineComponent({
   name: 'SubModules',

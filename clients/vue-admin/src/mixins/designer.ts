@@ -1,9 +1,9 @@
 import { ref, reactive, set } from '@vue/composition-api';
 import { message } from '@/components';
-import { Taxonomy, useTemplateApi, useTermTaxonomyApi, useResApi } from '@/fetch/graphql';
+import { PresetTaxonomy, useTemplateApi, useTermTaxonomyApi, useResApi } from '@/fetch/apis';
 
 // Types
-import type { NewTemplateInput, NewTemplateMetaInput, UpdateTemplateInput } from '@/fetch/graphql/template';
+import type { NewTemplateInput, NewTemplateMetaInput, UpdateTemplateInput } from '@/fetch/apis';
 import type { AsyncTreeData } from './template';
 
 export type SelectData = {
@@ -329,7 +329,7 @@ export const useDesignerMixin = () => {
           variables: {
             model: {
               name: value,
-              taxonomy: Taxonomy.Tag,
+              taxonomy: PresetTaxonomy.Tag,
               objectId: templateId,
               description: 'automatic add',
             },

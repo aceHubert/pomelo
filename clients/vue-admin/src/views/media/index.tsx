@@ -3,22 +3,23 @@ import { computed, defineComponent, ref } from '@vue/composition-api';
 import { Icon, Progress, Spin, Drawer, Descriptions, Upload } from 'ant-design-vue';
 import { createResource } from '@vue-async/resource-manager';
 import { useRoute } from 'vue2-helpers/vue-router';
+import { useLocationMixin } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
 import { useI18n } from '@/hooks';
-import { useLocationMixin, useUpload } from '@/mixins';
-import { useResApi } from '@/fetch/graphql';
+import { useUpload } from '@/mixins';
+import { useResApi } from '@/fetch/apis';
 import { MediaList } from './components';
 import { formatFileSize } from './utils/format';
 import classes from './index.module.less';
 
 // Types
-import type { Media } from '@/fetch/graphql';
+import type { Media } from '@/fetch/apis';
 
 export default defineComponent({
   name: 'Media',
   head() {
     return {
-      title: this.$tv('page_media.title', '所有媒体') as string,
+      title: this.$tv('page_media.page_title', '媒体库') as string,
     };
   },
   setup(_, { refs }) {

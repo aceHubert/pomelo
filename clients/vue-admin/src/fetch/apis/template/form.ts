@@ -1,16 +1,16 @@
-import { defineRegistApi, gql } from './core';
+import { defineRegistApi, gql } from '../../graphql';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
-import type { PagedTemplateArgs, TempateModel, NewTemplateInput, TemplateStatusCountItem } from './template';
-import type { Paged } from './types';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
+import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
+import type { Paged } from '../types';
 
 export interface PagedFormTemplateArgs extends Omit<PagedTemplateArgs, 'type' | 'categories'> {}
 
-export interface FormTempaleModel
-  extends Pick<TempateModel, 'id' | 'title' | 'content' | 'author' | 'status' | 'updatedAt' | 'createdAt' | 'metas'> {}
+export interface FormTemplateModel
+  extends Pick<TemplateModel, 'id' | 'title' | 'content' | 'author' | 'status' | 'updatedAt' | 'createdAt' | 'metas'> {}
 
-export interface PagedFormTemplateItem extends Omit<FormTempaleModel, 'content' | 'metas'> {}
+export interface PagedFormTemplateItem extends Omit<FormTemplateModel, 'content' | 'metas'> {}
 
 export interface NewFormTemplateInput extends Pick<NewTemplateInput, 'title' | 'content' | 'status' | 'metas'> {}
 
@@ -81,7 +81,7 @@ export const useFormApi = defineRegistApi('template_form', {
         }
       }
     }
-  ` as TypedQueryDocumentNode<{ form?: FormTempaleModel }, { id: number; metaKeys?: string[] }>,
+  ` as TypedQueryDocumentNode<{ form?: FormTemplateModel }, { id: number; metaKeys?: string[] }>,
   // 创建表单
   create: gql`
     mutation createForm($newFormTemplate: NewFormTemplateInput! = {}) {
@@ -100,7 +100,7 @@ export const useFormApi = defineRegistApi('template_form', {
         }
       }
     }
-  ` as TypedMutationDocumentNode<{ form: FormTempaleModel }, { newFormTemplate: NewFormTemplateInput }>,
+  ` as TypedMutationDocumentNode<{ form: FormTemplateModel }, { newFormTemplate: NewFormTemplateInput }>,
   // 修改表单
   update: gql`
     mutation updateForm(

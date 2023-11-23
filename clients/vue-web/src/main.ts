@@ -7,7 +7,7 @@ import { i18n } from './i18n';
 import { router } from './router';
 import { pinia } from './store';
 import App from './App';
-import '@pomelo/theme/lib/index.less';
+import '@ace-pomelo/theme/lib/index.less';
 import './assets/styles/index.less';
 
 // Plugins

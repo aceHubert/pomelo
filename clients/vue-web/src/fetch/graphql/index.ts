@@ -186,6 +186,7 @@ export const defineRegistApi = <C extends RegistApiDefinition>(id: string, defin
   return useRegistApi as () => RegistApi<C>;
 };
 
-export { gql, isApolloError, isServerParseError };
-
 export default client;
+export { gql, isApolloError, isServerParseError };
+export { default as codes } from './codes.json';
+export { TypedQueryDocumentNode, TypedMutationDocumentNode, TypedSubscriptionDocumentNode } from './request';

@@ -21,7 +21,7 @@ const devPort = Number(getEnv('DEV_PORT', 3000));
 const isMock = getEnv('MOCK') === 'true';
 const isProxy = isMock || getEnv('PROXY') === 'true';
 const isHttps = getEnv('HTTPS') === 'true';
-const proxyTarget = (to = 'http://localhost:5010') =>
+const proxyTarget = (to = 'http://localhost:5002') =>
   isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to;
 
 // env file
@@ -114,7 +114,7 @@ module.exports = defineConfig({
     '@ace-fetch/*',
     '@ace-util/*',
     '@vue-async/*',
-    '@pomelo/*',
+    '@ace-pomelo/*',
     '@formily-portal/*',
     /ckeditor5-[^/\\]+[/\\]src[/\\].+\.js$/,
   ],
@@ -278,9 +278,9 @@ module.exports = defineConfig({
         ...(!isProd
           ? {
               'antdv-layout-pro': path.resolve(__dirname, '../../packages/antdv-layout-pro/src'),
-              '@pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
-              '@pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
-              '@pomelo/shared-client': path.resolve(__dirname, '../../packages/pomelo-shared-client/src'),
+              '@ace-pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+              '@ace-pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
+              '@ace-pomelo/shared-client': path.resolve(__dirname, '../../packages/pomelo-shared-client/src'),
               '@formily/antdv$': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
               '@formily/antdv/esm': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
               '@formily/antdv-designable': path.resolve(

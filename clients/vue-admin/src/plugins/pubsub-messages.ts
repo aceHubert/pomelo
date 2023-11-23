@@ -1,12 +1,12 @@
 import { reactive } from '@vue/composition-api';
 import { warn } from '@ace-util/core';
-import { useBasicApi } from '@/fetch/graphql';
+import { useBasicApi } from '@/fetch/apis';
 import { notification } from '@/components/antdv-helper';
 
 // Types
 import type { UnwrapRef } from '@vue/composition-api';
 import type { Plugin, MessageConfig } from '@/types';
-import type { Message } from '@/fetch/graphql';
+import type { Message } from '@/fetch/apis';
 
 const pubSubMessagePlugin: Plugin = (app, inject) => {
   const basicApi = useBasicApi();

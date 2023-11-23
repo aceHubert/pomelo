@@ -21,14 +21,13 @@ import {
   TemplateStatus,
   TemplatePageType,
   TemplateCommentStatus,
-  PostMetaPresetKeys,
   getFrameworkSchema,
   toFrameworkContent,
   useDeviceType,
   type SchemaFramework,
-} from '@pomelo/shared-client';
+} from '@ace-pomelo/shared-client';
 import { Modal, message } from '@/components';
-import { useTemplateApi, usePostApi } from '@/fetch/graphql';
+import { useTemplateApi, usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
 import { useDesignerMixin } from '@/mixins';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
@@ -37,7 +36,7 @@ import { DesignLayout, DocumentEditor } from './components';
 import classes from './design.module.less';
 
 // Types
-import type { PostTemplateModel } from '@/fetch/graphql';
+import type { PostTemplateModel } from '@/fetch/apis';
 import type { ActionStatus, ActionCapability } from './components/design-layout/DesignLayout';
 
 enum Settings {
@@ -259,7 +258,7 @@ export default defineComponent({
         actionStatus.disabledActions = false;
 
         // TODO: 设置条件管理员权限
-        if (user?.profile.role?.includes('isp.admin')) {
+        if (user?.profile.role === 'administrator') {
           actionCapability.operate = true;
           actionCapability.publish = true;
         } else {

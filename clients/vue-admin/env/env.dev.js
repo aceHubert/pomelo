@@ -4,13 +4,12 @@
 
   var env = window._ENV || {};
 
-  env.apiBase = 'https://localhost:5010/api';
-  env.graphqlBase = 'https://localhost:5010/graphql';
-  env.graphqlSubscriptionBase = 'ws://localhost:5010/graphql';
+  env.apiBase = 'https://localhost:5002/api';
+  env.graphqlBase = 'https://localhost:5002/graphql';
+  env.graphqlSubscriptionBase = 'ws://localhost:5002/graphql';
 
   env.oidc = {
-    authority: 'https://demo.login.ihealthinkcare.com/',
-    // authority: 'http://localhost:5000/',
+    authority: 'http://localhost:5001/',
     client_id: clientId,
     redirect_uri: baseUrl + '/signin.html',
     post_logout_redirect_uri: baseUrl,
@@ -22,7 +21,7 @@
     // these two will be done dynamically from the buttons clicked, but are
     // needed if you want to use the silent_renew
     response_type: 'id_token token',
-    scope: 'openid profile base sp res points cp umsg',
+    scope: 'openid profile offline_access',
     // will revoke (reference) access tokens at logout time
     revokeAccessTokenOnSignout: true,
     mergeClaims: true,

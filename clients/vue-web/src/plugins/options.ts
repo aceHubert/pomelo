@@ -1,18 +1,18 @@
 import { ref } from '@vue/composition-api';
 import { warn } from '@ace-util/core';
-import { useBasicApi } from '@pomelo/shared-client';
+import { useBasicApi } from '@/fetch/apis';
 
 // Types
 import type { Ref } from '@vue/composition-api';
 import type { Plugin } from '@/types';
 
 const optionPlugin: Plugin = async (app, inject) => {
-  const basicApi = useBasicApi(app.afetch);
+  const basicApi = useBasicApi();
 
   const options = ref<Record<string, string>>({});
 
   try {
-    const { data: values } = await basicApi.getAutoloadOptions();
+    const { options: values } = await basicApi.getAutoloadOptions();
     options.value = values;
   } catch (err) {
     warn(false, `Options loaded error, ${(err as Error).message}`);

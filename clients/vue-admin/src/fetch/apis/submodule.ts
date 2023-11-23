@@ -1,5 +1,5 @@
-import { defineRegistApi, gql } from './core';
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
+import { defineRegistApi, gql } from '../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
 import type { Paged } from './types';
 
 export interface Version {

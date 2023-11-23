@@ -7,7 +7,7 @@ import {
   OptionPresetKeys,
   PostMetaPresetKeys,
   useDeviceType,
-} from '@pomelo/shared-client';
+} from '@ace-pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
 

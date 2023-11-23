@@ -1,7 +1,11 @@
-import { LayoutType, Theme, ContentWidth, type LayoutConfig, type ColorConfig } from 'antdv-layout-pro/types';
-
-// Types
-import type { LocaleConfig } from '@/types';
+import {
+  LayoutType,
+  Theme,
+  ContentWidth,
+  type LayoutConfig,
+  type ColorConfig,
+  type LocaleConfig,
+} from 'antdv-layout-pro/types';
 
 export const defaultSettings: {
   /**

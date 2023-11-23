@@ -365,6 +365,7 @@
     }
   },
   "page_media": {
+    "page_title": "Medias",
     "search_placeholder": "Search for \"file name\"",
     "upload_dragger_btn_text": "Click or drag file to this area to upload",
     "upload_multiple_btn_tips": "Support for a single or bulk upload.",
@@ -393,6 +394,7 @@
     "image_width": "Width",
     "image_height": "Height",
     "full_path": "URI",
-    "created_at": "Creation time"
+    "created_at": "Creation time",
+    "empty_list_description": "No media files!"
   }
 }

@@ -1,12 +1,12 @@
 import { defineComponent, ref, onMounted } from '@vue/composition-api';
 import { Skeleton, Tabs, Icon } from 'ant-design-vue';
 import { MarkdownInput } from 'antdv-layout-pro';
-import { useSubmoduleApi } from '@/fetch/graphql';
+import { useSubmoduleApi } from '@/fetch/apis';
 import classes from './details.module.less';
 
 // Types
 import type { PropType } from '@vue/composition-api';
-import type { SubModuleItem } from '@/fetch/graphql';
+import type { SubModuleItem } from '@/fetch/apis';
 
 export default defineComponent({
   name: 'SubModuleDetails',

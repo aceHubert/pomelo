@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import VueMeta from 'vue-meta';
+import { userManager } from '@/auth';
 
 // Types
 import type { RouteConfig } from 'vue-router';
@@ -52,6 +53,21 @@ export const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes,
+});
+
+router.beforeEach(async (to, from, next) => {
+  // 从管理端预览打开预览页面时，先尝试登录
+  if (window.name === 'preview' && !(await userManager.getUser())) {
+    await userManager
+      .signinSilent()
+      .catch(() => '')
+      .finally(() => {
+        next();
+      });
+  } else {
+    // console.log('beforeEach', to, from);
+    next();
+  }
 });
 
 declare module 'vue/types/options' {

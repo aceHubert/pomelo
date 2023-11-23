@@ -1,6 +1,6 @@
 import { ref } from '@vue/composition-api';
 import { warn } from '@ace-util/core';
-import { useBasicApi } from '@/fetch/graphql';
+import { useBasicApi } from '@/fetch/apis';
 
 // Types
 import type { Ref } from '@vue/composition-api';

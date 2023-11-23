@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import { hasIn } from 'lodash-es';
-import { ref, reactive } from '@vue/composition-api';
 import axios from 'axios';
 import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
 import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@ace-fetch/axios';
+import { loadingRef, errorRef, SharedError } from '@/shared';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
 
@@ -20,18 +20,10 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) => {
   const locale = i18n.locale;
-  let token = await userManager
+  const token = await userManager
     .getUser()
     .then((user) => user?.access_token)
     .catch(() => '');
-
-  // 从管理端预览打开
-  if (!token && window.name === 'preview') {
-    token = await userManager
-      .signinSilent()
-      .then((user) => user?.access_token)
-      .catch(() => '');
-  }
 
   if (SUPPORTS_CORS) {
     return {
@@ -94,10 +86,6 @@ afetch.use(
   }),
 );
 
-/**
- * 全局的request loading 状态
- */
-export const loadingRef = ref(false);
 afetch.use(
   createLoadingPlugin({
     handler: () => {
@@ -109,13 +97,6 @@ afetch.use(
   }),
 );
 
-/**
- * 全局的request error
- */
-export const errorRef = reactive({
-  statusCode: 200,
-  message: '',
-});
 afetch.use(
   createCatchErrorPlugin({
     serializerData: (data: any) => {
@@ -135,9 +116,11 @@ afetch.use(
       }
       return data;
     },
-    handler: (err) => {
-      errorRef.statusCode = (err as any).code || 500;
-      errorRef.message = err.message || 'System error!';
+    handler: (error) => {
+      errorRef.value = new SharedError(
+        error.message || 'System error!',
+        (axios.isAxiosError(error) ? error.response?.status : (error as any).code) || 500,
+      );
       return new Promise(() => {});
     },
   }),

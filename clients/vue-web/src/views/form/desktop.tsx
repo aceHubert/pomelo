@@ -5,7 +5,7 @@ import { createSchemaField } from '@formily/vue';
 import { Card, Rate } from 'ant-design-vue';
 import { Form, FormButtonGroup, Submit } from '@formily/antdv';
 import * as Antdv from '@formily/antdv';
-import { OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-client';
+import { OptionPresetKeys, FormMetaPresetKeys } from '@ace-pomelo/shared-client';
 import { useI18n, useOptions } from '@/hooks';
 import { Spin, Result } from '@/components';
 import { checkSchemaValid, type IFormilySchema } from './utils';
@@ -14,7 +14,7 @@ import classes from './desktop.module.less';
 
 // Types
 import type { SchemaComponents } from '@formily/vue';
-import type { SchemaFramework } from '@pomelo/shared-client';
+import type { SchemaFramework } from '@ace-pomelo/shared-client';
 
 const form = createForm();
 const { SchemaField } = createSchemaField({

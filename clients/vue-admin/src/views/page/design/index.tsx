@@ -30,13 +30,12 @@ import {
   OptionPresetKeys,
   TemplateStatus,
   TemplateCommentStatus,
-  PageMetaPresetKeys,
   getFrameworkSchema,
   toFrameworkContent,
   type SchemaFramework,
-} from '@pomelo/shared-client';
+} from '@ace-pomelo/shared-client';
 import { Modal, message } from '@/components';
-import { useTemplateApi, usePageApi } from '@/fetch/graphql';
+import { useTemplateApi, usePageApi, PageMetaPresetKeys } from '@/fetch/apis';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
 import { useDesignerMixin, useFormilyMixin } from '@/mixins';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
@@ -47,7 +46,7 @@ import classes from './index.module.less';
 
 // Types
 import type { TreeNode, ITreeNode } from '@designable/core';
-import type { PageTemplateModel } from '@/fetch/graphql';
+import type { PageTemplateModel } from '@/fetch/apis';
 import type { ActionStatus, ActionCapability } from '../../post/components/design-layout/DesignLayout';
 
 GlobalRegistry.registerDesignerLocales({
@@ -88,12 +87,12 @@ export default defineComponent({
         // 使用默认 prefixCls 以避免与 layout 冲突
         // {
         //   id: 'ant-design-vue@1.7.8',
-        //   href: '//www.unpkg.com/ant-design-vue@1.7.8/dist/antd.min.css',
+        //   href: '//unpkg.com/ant-design-vue@1.7.8/dist/antd.min.css',
         //   rel: 'stylesheet',
         // },
         // {
         //   id: 'vant@2.12.53',
-        //   href: '//www.unpkg.com/vant@2.12.53/lib/index.css',
+        //   href: '//unpkg.com/vant@2.12.53/lib/index.css',
         //   rel: 'stylesheet',
         // },
       ],
@@ -296,7 +295,7 @@ export default defineComponent({
       actionStatus.disabledActions = false;
 
       // TODO: 设置条件管理员权限
-      if (user?.profile.role?.includes('isp.admin')) {
+      if (user?.profile.role === 'administrator') {
         actionCapability.operate = true;
         actionCapability.publish = true;
       } else {

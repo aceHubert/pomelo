@@ -1,13 +1,18 @@
-import Oidc from 'oidc-client';
+import * as Oidc from 'oidc-client-ts';
 
 // Types
-import type { User as OidcUser, UserManager as OidcUserManager, UserManagerSettings } from 'oidc-client';
+import type {
+  User as OidcUser,
+  UserManager as OidcUserManager,
+  UserManagerSettings,
+  SigninRedirectArgs,
+  SigninSilentArgs,
+  SignoutRedirectArgs,
+} from 'oidc-client-ts';
 import type { UserManager } from './user-manager';
-import type { SigninArgs, SigninRedirectArgs, SigninSilentArgs, SignoutArgs, SignoutRedirectArgs } from './types';
 
 export const RedirectKey = 'oidc.redirect';
-export const EidKey = 'oidc.eid';
-export const XEidKey = 'oidc.x-eid';
+export const IgnoreRoutes = ['/signin', '/signout'];
 
 const innerSigninSilent = Oidc.UserManager.prototype.signinSilent;
 Object.defineProperties(Oidc.UserManager.prototype, {
@@ -15,8 +20,11 @@ Object.defineProperties(Oidc.UserManager.prototype, {
     value: function (redirectUrl?: string) {
       if (redirectUrl) {
         localStorage.setItem(RedirectKey, redirectUrl);
-      } else if (['/signin', '/session-timeout', '/internal-access-only'].indexOf(location.pathname) === -1) {
+      } else if (IgnoreRoutes.indexOf(location.pathname) === -1) {
         localStorage.setItem(RedirectKey, location.href);
+      } else {
+        // remove cached redirect url
+        localStorage.removeItem(RedirectKey);
       }
     },
     writable: false,
@@ -34,7 +42,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
     value: function (this: OidcUserManager, user?: OidcUser) {
       return (typeof user !== 'undefined' ? Promise.resolve(user) : this.getUser()).then((user) => {
         if (user?.profile) {
-          sessionStorage.setItem(EidKey, user.profile.eid);
+          // store sign in params before redirect to user center
         }
       });
     },
@@ -45,25 +53,10 @@ Object.defineProperties(Oidc.UserManager.prototype, {
   getExtraQueryParams: {
     value: function (this: OidcUserManager, user?: OidcUser) {
       return this.prepareSignIn(user).then(() => {
-        let extraQueryParams: Record<string, string | number | boolean> = {},
-          eid,
-          xEid;
-        if ((eid = sessionStorage.getItem(EidKey))) {
-          // 退出登录、授权失效时缓存的 eid 信息
-          // 退出登录时会先清除 user, 所以从缓存中获取
-          extraQueryParams = {
-            eid: encodeURIComponent(eid),
-          };
-          // 跳转前清除eid
-          sessionStorage.removeItem(EidKey);
-        } else if ((xEid = sessionStorage.getItem(XEidKey))) {
-          // 匿名访问时缓存的 encoded eid 信息
-          extraQueryParams = {
-            x_eid: encodeURIComponent(xEid),
-          };
-          // 跳转前清除encoded eid
-          sessionStorage.removeItem(XEidKey);
-        }
+        const extraQueryParams: Record<string, string | number | boolean> = {};
+
+        // add extra query params
+
         return extraQueryParams;
       });
     },
@@ -89,7 +82,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
   // try to sign in to get access token if user center is authorized and stay in current page
   // otherwise, redirect to user center to sign in
   signin: {
-    value: function (this: OidcUserManager, args: SigninArgs = {}) {
+    value: function (this: OidcUserManager, args: SigninRedirectArgs = {}) {
       const { redirect_uri, ...restArgs } = args;
       this.saveRedirect(redirect_uri);
 
@@ -119,13 +112,13 @@ Object.defineProperties(Oidc.UserManager.prototype, {
   // sign out and redirect to user center
   // then redirect to home page after authorized
   signout: {
-    value: function (this: OidcUserManager, args: SignoutArgs = {}) {
+    value: function (this: OidcUserManager, args: SignoutRedirectArgs = {}) {
       // 退出前保存用户的企业识别信息
       return this.prepareSignIn().then(() => {
         const $signOut = () =>
           this.signoutRedirect({
             ...args,
-            useReplaceToNavigate: args.useReplaceToNavigate ?? true, // 默认使用 replace 跳转
+            redirectMethod: args.redirectMethod ?? 'replace', // 默认使用 replace 跳转
           });
 
         // TODO: 退出其它
@@ -142,22 +135,31 @@ Object.defineProperties(Oidc.UserManager.prototype, {
 
 // Oidc.Log.logger = console
 
-export class OidcUserManagerCreator implements UserManager<SigninArgs, SignoutArgs, OidcUser> {
+export class OidcUserManagerCreator implements UserManager<SigninRedirectArgs, SignoutRedirectArgs, OidcUser> {
   private readonly oidcUserManager: Oidc.UserManager;
 
   constructor(readonly settings: UserManagerSettings) {
     const userManager = new Oidc.UserManager(settings);
-    userManager.events.addUserSignedOut(function () {
+    userManager.events.addUserSignedOut(() => {
       userManager.removeUser();
     });
-    // userManager.events.addUserLoaded((user) => {
-    //   localStorage.setItem('atk', user.access_token);
-    // });
 
     this.oidcUserManager = userManager;
   }
 
-  getUser() {
+  get events() {
+    return this.oidcUserManager.events;
+  }
+
+  get settingsStore() {
+    return this.oidcUserManager.settings;
+  }
+
+  get metadataService() {
+    return this.oidcUserManager.metadataService;
+  }
+
+  async getUser() {
     return this.oidcUserManager.getUser();
   }
 
@@ -172,7 +174,7 @@ export class OidcUserManagerCreator implements UserManager<SigninArgs, SignoutAr
    * 触发尝试从授权登录中心获取登录态
    * 如果用户中心未授权，则跳转到授权登录页面, 登录成功后并返回到当前页面
    */
-  signin(args?: SigninArgs) {
+  signin(args?: SigninRedirectArgs) {
     return this.oidcUserManager.signin(args);
   }
 
@@ -187,7 +189,7 @@ export class OidcUserManagerCreator implements UserManager<SigninArgs, SignoutAr
   /**
    *  结束会话并重定向到授权登录页面
    */
-  signout(args?: SignoutArgs) {
+  signout(args?: SignoutRedirectArgs) {
     return this.oidcUserManager.signout(args);
   }
 
@@ -200,14 +202,19 @@ export class OidcUserManagerCreator implements UserManager<SigninArgs, SignoutAr
   }
 }
 
-declare module 'oidc-client/index' {
+declare module 'oidc-client-ts' {
   export interface UserManager {
     getRedirect(): string;
     saveRedirect(redirectUrl?: string): void;
     prepareSignIn(user?: OidcUser): Promise<void>;
     getExtraQueryParams(user?: OidcUser): Promise<Record<string, string | number | boolean>>;
-    signin(args?: SigninArgs): Promise<void>;
-    signout(args?: SignoutArgs): Promise<void>;
+    signin(args?: SigninRedirectArgs): Promise<void>;
+    signout(args?: SignoutRedirectArgs): Promise<void>;
+  }
+
+  export interface OidcStandardClaims {
+    display_name?: string;
+    role?: string;
   }
 }
 

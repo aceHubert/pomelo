@@ -3,9 +3,6 @@ import VueI18n, { type IVueI18n } from 'vue-i18n';
 import zhCN from './langs/zh-CN_basic.json';
 import enUS from './langs/en-US.json';
 
-// Types
-import type { LocaleConfig } from '@/types';
-
 Vue.use(VueI18n);
 
 /**
@@ -44,21 +41,6 @@ export const i18n = new VueI18n({
 }) as VueI18n & IVueI18n;
 
 export const useI18n = () => i18n;
-
-export const defaultSupportLanguages: LocaleConfig[] = [
-  {
-    name: 'English',
-    shortName: 'EN',
-    icon: '🇺🇸',
-    locale: 'en-US',
-  },
-  {
-    name: '简体中文',
-    shortName: '中',
-    icon: '🇨🇳',
-    locale: 'zh-CN',
-  },
-];
 
 /**
  * 扩展VueI18n.tv方法添加到 Vue 实例中

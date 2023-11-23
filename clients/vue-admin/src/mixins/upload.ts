@@ -1,8 +1,8 @@
 import { ref, reactive, computed } from '@vue/composition-api';
-import { useResApi } from '@/fetch/graphql';
+import { useResApi } from '@/fetch/apis';
 
 // Types
-import type { FileUploadOptions } from '@/fetch/graphql';
+import type { FileUploadOptions } from '@/fetch/apis';
 
 export const useUpload = () => {
   const resApi = useResApi();

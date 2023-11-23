@@ -4,8 +4,8 @@ import { defineComponent, ref, reactive, computed, watch } from '@vue/compositio
 import { useRoute } from 'vue2-helpers/vue-router';
 import { Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { TemplateStatus, useDeviceType } from '@pomelo/shared-client';
-import { useTemplateApi } from '@/fetch/graphql';
+import { TemplateStatus, useDeviceType } from '@ace-pomelo/shared-client';
+import { useTemplateApi } from '@/fetch/apis';
 import { useI18n, useUserManager } from '@/hooks';
 import { useTemplateMixin } from '@/mixins';
 import { TemplateType } from './constants';
@@ -13,8 +13,7 @@ import classes from './index.module.less';
 
 // Types
 import type { DataSourceFn, Column } from 'antdv-layout-pro/components/async-table/AsyncTable';
-import type { PagedTemplateArgs, PagedTemplateItem } from '@/fetch/graphql';
-import type { User } from '@/auth/user-manager';
+import type { PagedTemplateArgs, PagedTemplateItem } from '@/fetch/apis';
 import type { BulkActions } from '../../mixins/template';
 
 enum RouteQueryKey {
@@ -37,7 +36,7 @@ export default defineComponent({
     const templateApi = useTemplateApi();
     const templateMixin = useTemplateMixin();
 
-    const currentUser = ref<User>();
+    const currentUserId = ref<string>();
 
     // 从 URI 获取搜索参数
     const searchQuery = computed<Omit<PagedTemplateArgs, 'offset' | 'limit' | 'queryStatusCounts' | 'querySelfCounts'>>(
@@ -45,7 +44,7 @@ export default defineComponent({
         return {
           ...templateMixin.searchQuery,
           type: TemplateType,
-          author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUser.value?.profile.sub : void 0,
+          author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUserId.value : void 0,
         };
       },
     );
@@ -61,9 +60,9 @@ export default defineComponent({
     // 加载数据
     const loadData = async ({ page, size }: Parameters<DataSourceFn>[0]) => {
       // 加载数据前确保用户 id 已存在
-      if (!currentUser.value) {
+      if (!currentUserId.value) {
         const user = await userManager.getUser();
-        currentUser.value = user || void 0;
+        currentUserId.value = user?.profile.sub;
       }
 
       return templateApi

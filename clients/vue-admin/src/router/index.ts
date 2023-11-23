@@ -176,6 +176,7 @@ router.beforeEach((to, from, next) => {
         userManager.signin({ noInteractive: true });
       } else {
         next();
+
         // if (user.profile.ut !== '1') {
         //   next({ name: '403.8', replace: true });
         // } else {

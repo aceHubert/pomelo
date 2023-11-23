@@ -1,5 +1,5 @@
 import { defineComponent } from '@vue/composition-api';
-import { Theme, ConfigProvider, useDeviceMixin } from '@pomelo/shared-client';
+import { Theme, ConfigProvider, useDeviceMixin } from '@ace-pomelo/shared-client';
 import { ANT_PREFIX_CLS } from '@/components';
 
 export default defineComponent({

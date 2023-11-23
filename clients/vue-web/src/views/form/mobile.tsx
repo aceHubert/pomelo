@@ -5,7 +5,7 @@ import { createSchemaField, FragmentComponent } from '@formily/vue';
 import { Loading } from 'vant';
 import * as Vant from '@formily/vant';
 import { Form, Submit } from '@formily/vant';
-import { OptionPresetKeys, FormMetaPresetKeys } from '@pomelo/shared-client';
+import { OptionPresetKeys, FormMetaPresetKeys } from '@ace-pomelo/shared-client';
 import { useI18n, useOptions } from '@/hooks';
 import { Result } from '@/components';
 import { checkSchemaValid, type IFormilySchema } from './utils';
@@ -14,7 +14,7 @@ import classes from './mobile.module.less';
 
 // Types
 import type { SchemaComponents } from '@formily/vue';
-import type { SchemaFramework } from '@pomelo/shared-client';
+import type { SchemaFramework } from '@ace-pomelo/shared-client';
 
 const form = createForm();
 const { SchemaField } = createSchemaField({

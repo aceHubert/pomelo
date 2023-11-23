@@ -9,7 +9,7 @@ import {
   FormMetaPresetKeys,
   useLocationMixin,
   useDeviceType,
-} from '@pomelo/shared-client';
+} from '@ace-pomelo/shared-client';
 import { Modal } from 'ant-design-vue';
 import { Dialog } from 'vant';
 import { SkeletonLoader, Result } from '@/components';

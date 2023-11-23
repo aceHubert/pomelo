@@ -1,11 +1,11 @@
-import { defineRegistApi, gql } from './core';
+import { defineRegistApi, gql } from '../../graphql';
 
 // Types
-import type { TemplatePageType } from '@pomelo/shared-client';
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from './core/request';
-import type { PagedTemplateArgs, TempateModel, NewTemplateInput, TemplateStatusCountItem } from './template';
-import type { TermTaxonomyModel } from './term-taxonomy';
-import type { Paged } from './types';
+import type { TemplatePageType } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
+import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
+import type { TermTaxonomyModel } from '../term-taxonomy';
+import type { Paged } from '../types';
 
 export interface PagedPostTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {
   tagId?: number;
@@ -13,7 +13,7 @@ export interface PagedPostTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {
 
 export interface PostTemplateModel
   extends Pick<
-    TempateModel,
+    TemplateModel,
     | 'id'
     | 'name'
     | 'title'
