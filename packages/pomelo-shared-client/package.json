@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@ace-fetch/core": "^0.2.0",
-    "@ace-fetch/vue": "^0.2.0",
+    "@ace-fetch/vue": "^0.2.1",
     "@ace-util/core": "^0.1.0",
     "ant-design-vue": "^1.7.7",
     "babel-preset-vca-jsx": "^0.3.6",
@@ -51,7 +51,7 @@
   },
   "peerDependencies": {
     "@ace-fetch/core": "^0.2.0",
-    "@ace-fetch/vue": "^0.2.0",
+    "@ace-fetch/vue": "^0.2.1",
     "@ace-util/core": "^0.1.0",
     "@vue/composition-api": "^1.0.0",
     "ant-design-vue": "^1.7.7",

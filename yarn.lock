@@ -31,16 +31,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-fetch/vue@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@ace-fetch/vue@npm:0.2.0"
+"@ace-fetch/vue@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@ace-fetch/vue@npm:0.2.1"
   dependencies:
     "@ace-util/core": ^0.1.0
     vue-demi: ^*
   peerDependencies:
     "@ace-fetch/core": ^0.1.0
     vue: ^2.6.0 || ^3.0.0
-  checksum: 2ce5f89f7a056799c82b7f664a6f60df0dd1bce6d2c0d4ab38e5ed75d1e08a9782c2cc80da9ffaa08a398d044e1ea85b7c7bd30af6c2e1e62e9a3ecb951ea276
+  checksum: c648d9ff57f63ee556d3c9546a65ff2aacbf5539510cfda62d3b84ff07ba6f1439357f23c7b2bb61ae448649da2f4a3d9287b513763130455af22bf4cf680565
   languageName: node
   linkType: hard
 
@@ -283,7 +283,7 @@ __metadata:
   resolution: "@ace-pomelo/shared-client@workspace:packages/pomelo-shared-client"
   dependencies:
     "@ace-fetch/core": ^0.2.0
-    "@ace-fetch/vue": ^0.2.0
+    "@ace-fetch/vue": ^0.2.1
     "@ace-util/core": ^0.1.0
     ant-design-vue: ^1.7.7
     babel-preset-vca-jsx: ^0.3.6
@@ -294,7 +294,7 @@ __metadata:
     vue2-helpers: 1.x
   peerDependencies:
     "@ace-fetch/core": ^0.2.0
-    "@ace-fetch/vue": ^0.2.0
+    "@ace-fetch/vue": ^0.2.1
     "@ace-util/core": ^0.1.0
     "@vue/composition-api": ^1.0.0
     ant-design-vue: ^1.7.7
@@ -347,7 +347,7 @@ __metadata:
   dependencies:
     "@ace-fetch/axios": ^0.2.0
     "@ace-fetch/core": ^0.2.0
-    "@ace-fetch/vue": ^0.2.0
+    "@ace-fetch/vue": ^0.2.1
     "@ace-pomelo/shared-client": "workspace:^"
     "@ace-util/core": ^0.1.0
     "@apollo/client": ^3.6.9
@@ -431,7 +431,7 @@ __metadata:
   dependencies:
     "@ace-fetch/axios": ^0.2.0
     "@ace-fetch/core": ^0.2.0
-    "@ace-fetch/vue": ^0.2.0
+    "@ace-fetch/vue": ^0.2.1
     "@ace-pomelo/shared-client": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
     "@ace-util/core": ^0.1.0
