@@ -43,7 +43,7 @@ export interface TemplateAttributes {
   id: number;
   title: string;
   name: string;
-  author: string;
+  author: number;
   content: string;
   excerpt: string;
   type: TemplateType | string;

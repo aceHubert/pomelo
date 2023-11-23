@@ -20,7 +20,7 @@ export interface CommentAttributes {
   type: CommentType;
   agent: string;
   parentId: number;
-  userId: string;
+  userId: number;
   updatedAt: Date;
   createdAt: Date;
 }

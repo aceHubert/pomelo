@@ -14,7 +14,7 @@ export default class Links extends Model<
   public target!: LinkTarget;
   public description!: string;
   public visible!: LinkVisible;
-  public userId!: string;
+  public userId!: number;
   public rel?: string;
   public rss?: string;
 }

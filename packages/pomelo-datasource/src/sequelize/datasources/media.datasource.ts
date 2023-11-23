@@ -1,7 +1,7 @@
 import { Op, WhereOptions } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, RequestUser } from '@pomelo/shared-server';
+import { ValidationError, RequestUser } from '@ace-pomelo/shared-server';
 import {
   MediaModel,
   MediaMetaDataModel,
@@ -178,7 +178,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       const media = await this.models.Medias.create(
         {
           ...rest,
-          userId: requestUser.sub!,
+          userId: Number(requestUser.sub),
         },
         { transaction: t },
       );
@@ -230,7 +230,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       await this.models.Medias.update(
         {
           ...model,
-          userId: requestUser.sub!,
+          userId: Number(requestUser.sub),
         },
         {
           where: {

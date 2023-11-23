@@ -109,7 +109,8 @@ export class DbInitDataSource extends BaseDataSource {
           { userId: admin.id, metaKey: UserMetaPresetKeys.Avatar, metaValue: '' },
           { userId: admin.id, metaKey: UserMetaPresetKeys.Description, metaValue: 'Administrator' },
           { userId: admin.id, metaKey: UserMetaPresetKeys.Locale, metaValue: '' },
-          { userId: admin.id, metaKey: UserMetaPresetKeys.AdminColor, metaValue: 'default' },
+          { userId: admin.id, metaKey: UserMetaPresetKeys.AdminColor, metaValue: '' },
+          { userId: admin.id, metaKey: UserMetaPresetKeys.SuperAdministrator, metaValue: '1' },
           {
             userId: admin.id,
             metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
@@ -130,7 +131,26 @@ export class DbInitDataSource extends BaseDataSource {
       );
 
       const defaultLinkCategoryTaxonomy = await this.models.TermTaxonomy.create(
-        { name: 'DefaultLink', slug: 'default link', taxonomy: Taxonomy.Category, description: '' },
+        {
+          name: 'Uncategorized Link',
+          slug: 'uncategorized link',
+          taxonomy: Taxonomy.Category,
+          description: '',
+          group: 1,
+        },
+        {
+          transaction: t,
+        },
+      );
+
+      const defaultMediaCategoryTaxonomy = await this.models.TermTaxonomy.create(
+        {
+          name: 'Uncategorized Link',
+          slug: 'uncategorized medias',
+          taxonomy: Taxonomy.Category,
+          description: '',
+          group: 2,
+        },
         {
           transaction: t,
         },
@@ -161,6 +181,7 @@ export class DbInitDataSource extends BaseDataSource {
           { optionName: OptionPresetKeys.DefaultCategory, optionValue: String(defaultPostCategoryTaxonomy.id) },
           { optionName: OptionPresetKeys.DefaultEmailCategory, optionValue: String(defaultPostCategoryTaxonomy.id) },
           { optionName: OptionPresetKeys.DefaultLinkCategory, optionValue: String(defaultLinkCategoryTaxonomy.id) },
+          { optionName: OptionPresetKeys.DefaultMediaCategory, optionValue: String(defaultMediaCategoryTaxonomy.id) },
           { optionName: OptionPresetKeys.CommentsNotify, optionValue: '1' },
           { optionName: OptionPresetKeys.PostsPerPage, optionValue: '10' },
           { optionName: OptionPresetKeys.DataFormat, optionValue: 'L' },

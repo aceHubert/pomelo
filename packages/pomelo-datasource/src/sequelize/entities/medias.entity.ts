@@ -14,7 +14,7 @@ export default class Medias extends Model<
   public extension!: string;
   public mimeType!: string;
   public path!: string;
-  public userId?: string;
+  public userId?: number;
 
   // timestamps!
   public readonly createdAt!: Date;

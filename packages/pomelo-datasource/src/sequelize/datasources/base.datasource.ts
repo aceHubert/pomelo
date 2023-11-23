@@ -2,16 +2,13 @@ import { kebabCase, isEmpty } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
-import { RequestUser, ForbiddenError, jsonSafelyParse } from '@pomelo/shared-server';
+import { RequestUser, ForbiddenError, jsonSafelyParse } from '@ace-pomelo/shared-server';
 import { OptionAutoload } from '../../entities/options.entity';
 import { SequelizeService } from '../../sequelize/sequelize.service';
 import { UserCapability, UserRole, UserRoles } from '../../utils/user-capability.util';
 import { SequelizeOptions } from '../interfaces/sequelize-options.interface';
 import { SEQUELIZE_OPTIONS } from '../constants';
-import { OptionPresetKeys } from '../../utils/preset-keys.util';
-
-// TODO: 设置为可配置
-const roleKey = 'role';
+import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
 
 export abstract class BaseDataSource implements OnModuleInit {
   private __AUTOLOAD_OPTIONS__: Record<string, string> = {}; // Autoload options 缓存
@@ -140,6 +137,23 @@ export abstract class BaseDataSource implements OnModuleInit {
     return this.sequelize.col(`${modelName || model.name}.${String(this.field(fieldName, model))}`);
   }
 
+  protected async getUserCapabilities(userId: number): Promise<UserCapability[]> {
+    const userRoles =
+      jsonSafelyParse<UserRoles>((await this.getOption(OptionPresetKeys.UserRoles))!) ?? ({} as UserRoles);
+    const userCapabilities = await this.models.UserMeta.findOne({
+      attributes: ['metaValue'],
+      where: {
+        userId,
+        metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
+      },
+    }).then((meta) => {
+      return meta?.metaValue as UserRole | undefined;
+    });
+    const userRoleCapabilities = userCapabilities ? userRoles[userCapabilities].capabilities : [];
+
+    return userRoleCapabilities;
+  }
+
   /**
    * 验证用户是否有功能操作权限
    * @param capability 验证的功能
@@ -157,14 +171,8 @@ export abstract class BaseDataSource implements OnModuleInit {
     requestUser: RequestUser,
     callbackOrThrow?: true | ((error: Error | null) => void),
   ): Promise<boolean | void> {
-    const userRoles =
-      jsonSafelyParse<UserRoles>((await this.getOption(OptionPresetKeys.UserRoles))!) ?? ({} as UserRoles);
-    const userRole = requestUser[roleKey] as UserRole | undefined;
-    const userRoleCapabilities = userRole ? userRoles[userRole].capabilities : [];
-
-    const result = Boolean(
-      userRoleCapabilities.length && userRoleCapabilities.some((userCapability) => userCapability === capability),
-    );
+    const userRoleCapabilities = await this.getUserCapabilities(Number(requestUser.sub));
+    const result = userRoleCapabilities.some((userCapability) => userCapability === capability);
 
     if (callbackOrThrow) {
       const callback =

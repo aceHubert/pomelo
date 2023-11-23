@@ -25,7 +25,7 @@ export class UpdateLinkInput {
   target?: LinkTarget;
   description?: string;
   visible?: LinkVisible;
-  userId?: string;
+  userId?: number;
   rel?: string;
   rss?: string;
 }

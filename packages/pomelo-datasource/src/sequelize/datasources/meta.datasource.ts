@@ -1,7 +1,7 @@
 import { lowerFirst, flattenDeep, groupBy } from 'lodash';
 import { ModelStatic, Model, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
-import { UserInputError, ValidationError, RuntimeError } from '@pomelo/shared-server';
+import { UserInputError, ValidationError, RuntimeError } from '@ace-pomelo/shared-server';
 import { MetaModel, NewMetaInput } from '../interfaces/meta.interface';
 import { MetaDataSource as IMetaDataSource } from '../interfaces/meta-data-source.interface';
 import { BaseDataSource } from './base.datasource';
@@ -77,15 +77,17 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   /**
    * 获取元数据(根据metaKey)
    * @param modelId 实体 id
-   * @param metaKey metaKey
+   * @param metaKey metaKey (不需要添加 table 前缀会自动匹配到带有前缀的数据)
+   * @param fields 返回字段
    */
   getMetaByKey(modelId: number, metaKey: string, fields: string[]): Promise<MetaReturnType | undefined> {
+    const fixedKey = this.fixMetaKey(metaKey);
     return this.metaModel
       .findOne({
         attributes: this.filterFields(fields, this.metaModel),
         where: {
           [this.metaModelIdFieldName]: modelId,
-          metaKey: this.fixMetaKey(metaKey),
+          metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
         },
       })
       .then((meta) => {
@@ -105,7 +107,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * 根据实体 ID 获取元数据
    * 如果 metaKeys 为空或长度为0，则会返回所有非私有（$前缀）的的数据
    * @param modelId 实体 Id
-   * @param metaKeys 过滤的字段(不需要添加 table 前缀会自动匹配到带有前缀的数据, ALL 为所有)
+   * @param metaKeys meta keys(不需要添加 table 前缀会自动匹配到带有前缀的数据, ALL 为所有)
    * @param fields 返回字段
    */
   getMetas(modelId: number, metaKeys: string[] | 'ALL', fields: string[]): Promise<MetaReturnType[]>;
@@ -138,10 +140,10 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
               }
             : {
                 metaKey: flattenDeep(
-                  metaKeys.map((metaKey) => [
-                    this.fixMetaKey(metaKey),
-                    `${this.tablePrefix}${this.fixMetaKey(metaKey)}`,
-                  ]),
+                  metaKeys.map((metaKey) => {
+                    const fixedKey = this.fixMetaKey(metaKey);
+                    return [fixedKey, `${this.tablePrefix}${fixedKey}`];
+                  }),
                 ),
               }),
         },

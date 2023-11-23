@@ -7,7 +7,7 @@ export interface MediaAttributes {
   extension: string;
   mimeType: string;
   path: string;
-  userId: string;
+  userId: number;
   createdAt: Date;
 }
 

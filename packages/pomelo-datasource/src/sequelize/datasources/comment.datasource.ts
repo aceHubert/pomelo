@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { RequestUser } from '@pomelo/shared-server';
+import { RequestUser } from '@ace-pomelo/shared-server';
 import { UserCapability } from '../../utils/user-capability.util';
 import {
   CommentModel,
@@ -68,7 +68,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       const comment = await this.models.Comments.create(
         {
           ...rest,
-          userId: requestUser.sub!,
+          userId: Number(requestUser.sub),
         },
         { transaction: t },
       );
@@ -109,7 +109,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
     });
     if (comment) {
       // 非本人创建的是否可以编辑
-      if (comment.userId !== requestUser.sub) {
+      if (comment.userId !== Number(requestUser.sub)) {
         await this.hasCapability(UserCapability.ModerateComments, requestUser, true);
       }
 
@@ -133,7 +133,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
     const comment = await this.models.Comments.findByPk(id);
     if (comment) {
       // 非本人创建的是否可以删除
-      if (comment.userId !== requestUser.sub) {
+      if (comment.userId !== Number(requestUser.sub)) {
         await this.hasCapability(UserCapability.ModerateComments, requestUser, true);
       }
       const t = await this.sequelize.transaction();

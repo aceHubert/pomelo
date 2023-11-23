@@ -5,7 +5,7 @@ import { Optional } from '../types';
  */
 export enum UserStatus {
   Disabled = 0,
-  Enable = 1,
+  Enabled = 1,
 }
 
 export interface UserAttributes {

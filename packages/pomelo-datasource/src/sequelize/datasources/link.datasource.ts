@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { RequestUser } from '@pomelo/shared-server';
+import { RequestUser } from '@ace-pomelo/shared-server';
 import { UserCapability } from '../../utils/user-capability.util';
 import { LinkModel, PagedLinkModel, PagedLinkArgs, NewLinkInput, UpdateLinkInput } from '../interfaces/link.interface';
 import { BaseDataSource } from './base.datasource';
@@ -48,7 +48,7 @@ export class LinkDataSource extends BaseDataSource {
   async create(model: NewLinkInput, requestUser: RequestUser): Promise<LinkModel> {
     const link = await this.models.Links.create({
       ...model,
-      userId: requestUser.sub!,
+      userId: Number(requestUser.sub),
     });
     return link.toJSON() as LinkModel;
   }
@@ -68,7 +68,7 @@ export class LinkDataSource extends BaseDataSource {
     });
     if (link) {
       // 非本人创建的是否可编辑
-      if (link.userId !== requestUser.sub) {
+      if (link.userId !== Number(requestUser.sub)) {
         await this.hasCapability(UserCapability.ManageLinks, requestUser, true);
       }
 
@@ -92,7 +92,7 @@ export class LinkDataSource extends BaseDataSource {
     const link = await this.models.Links.findByPk(id);
     if (link) {
       // 非本人创建的是否可删除
-      if (link.userId !== requestUser.sub) {
+      if (link.userId !== Number(requestUser.sub)) {
         await this.hasCapability(UserCapability.ManageLinks, requestUser, true);
       }
 

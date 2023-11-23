@@ -35,6 +35,8 @@ export enum OptionPresetKeys {
   DefaultEmailCategory = 'default_email_category',
   /** 默认链接分类 */
   DefaultLinkCategory = 'default_link_category',
+  /** 默认媒体分类 */
+  DefaultMediaCategory = 'default_media_category',
   /** 评论提示，默认：1 */
   CommentsNotify = 'comments_notify',
   /** 文章显示页大小，默认：10 */
@@ -163,6 +165,12 @@ export enum UserMetaPresetKeys {
   Locale = 'locale',
   /** 管理平台主题颜色 */
   AdminColor = 'admin_color',
+  /** 是否超级管理员 */
+  SuperAdministrator = 'super_administrator',
+  /** 待验证的邮箱 */
+  VerifingEmail = 'verifing_email',
+  /** 待验证的手机 */
+  VerifingMobile = 'verifing_mobile',
   /**>>> 以下需要添加 table 前缀 <<<*/
   /** 角色权限 */
   Capabilities = 'capabilities',

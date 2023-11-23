@@ -16,7 +16,7 @@ export default class Templates extends Model<
   public id!: number;
   public title!: string;
   public name!: string;
-  public author!: string;
+  public author!: number;
   public content!: string;
   public excerpt!: string;
   public type!: TemplateType;
@@ -51,7 +51,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         comment: 'Title',
       },
       author: {
-        type: DataTypes.STRING(50),
+        type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
         comment: 'Author id',
       },

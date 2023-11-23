@@ -24,7 +24,7 @@ export interface LinkAttributes {
   target: LinkTarget;
   description: string;
   visible: LinkVisible;
-  userId: string;
+  userId: number;
   rel: string;
   rss: string;
   updatedAt: Date;

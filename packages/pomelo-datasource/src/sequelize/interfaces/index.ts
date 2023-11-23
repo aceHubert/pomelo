@@ -8,3 +8,4 @@ export * from './media.interface';
 export * from './option.interface';
 export * from './template.interface';
 export * from './term-taxonomy.interface';
+export * from './user.interface';

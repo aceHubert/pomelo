@@ -19,7 +19,7 @@ export default class Comments extends Model<
   public type!: CommentType;
   public agent?: string;
   public parentId!: number;
-  public userId!: string;
+  public userId!: number;
 
   // timestamps!
   public readonly createdAt!: Date;

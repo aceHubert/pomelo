@@ -5,9 +5,9 @@ import { isEmail, isPhoneNumber } from 'class-validator';
 import { WhereOptions, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenError, ValidationError, RequestUser } from '@pomelo/shared-server';
+import { ForbiddenError, ValidationError, RequestUser } from '@ace-pomelo/shared-server';
 import { UserStatus, UserAttributes } from '../../entities';
-import { UserRole, UserCapability } from '../../utils/user-capability.util';
+import { UserCapability, UserRole } from '../../utils/user-capability.util';
 import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
 import {
   UserModel,
@@ -28,17 +28,6 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 根据 Id 获取用户
-   * 只显示公开信息，id, niceName, displayName, email, mobile, url
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @access capabilities: [EditUsers(optional)]
-   * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
-   * @param fields 返回的字段
-   */
-  async get(id: number, fields: string[]): Promise<UserModel | null>;
-  /**
    * 根据 Id 获取用户（不包含登录密码）
    * @author Hubert
    * @since 2020-10-01
@@ -47,21 +36,15 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
    * @param fields 返回的字段
    */
-  async get(id: number | null, fields: string[], requestUser: RequestUser): Promise<UserModel | null>;
-  async get(id: number | null, fields: string[], requestUser?: RequestUser): Promise<UserModel | null> {
-    if (requestUser) {
-      // 查询非自己时，需要权限验证
-      if (id && String(id) !== String(requestUser.sub!)) {
-        await this.hasCapability(UserCapability.EditUsers, requestUser, true);
-      } else {
-        id = parseInt(requestUser.sub!);
-      }
-      // 排除登录密码
-      fields = fields.filter((field) => field !== 'loginPwd');
+  async get(id: number | null, fields: string[], requestUser: RequestUser): Promise<UserModel | undefined> {
+    // 查询非自己时，需要权限验证
+    if (id && id !== Number(requestUser.sub)) {
+      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     } else {
-      // 只显示公开信息
-      fields = fields.filter((field) => ['id', 'niceName', 'displayName', 'email', 'mobile', 'url'].includes(field));
+      id = Number(requestUser.sub);
     }
+    // 排除登录密码
+    fields = fields.filter((field) => field !== 'loginPwd');
 
     // 主键
     if (!fields.includes('id')) {
@@ -91,23 +74,33 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     const where: WhereOptions<UserAttributes> = {};
     if (query.keyword) {
-      where['displayName'] = {
-        [Op.like]: `%${query.keyword}%`,
-      };
+      // @ts-expect-error type error
+      where[Op.or] = [
+        {
+          loginName: {
+            [Op.like]: `%${query.keyword}%`,
+          },
+        },
+        {
+          displayName: {
+            [Op.like]: `%${query.keyword}%`,
+          },
+        },
+      ];
     }
     if (query.status) {
       where['status'] = query.status;
     }
 
-    if (query.userRole) {
+    if (!isUndefined(query.capabilities)) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$` as keyof UserAttributes] =
-        query.userRole === 'none'
+        query.capabilities === null
           ? {
               [Op.is]: null,
             }
-          : query.userRole;
+          : query.capabilities;
     }
 
     // 排除登录密码
@@ -134,7 +127,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       rows: rows.map((row) => {
         const { UserMetas, ...rest } = row.toJSON() as any;
         return {
-          userRole: UserMetas.length ? UserMetas[0].metaValue : null,
+          capabilities: UserMetas.length ? UserMetas[0].metaValue : null,
           ...rest,
         } as UserWithRoleModel;
       }),
@@ -146,16 +139,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * 获取用户角色权限
    * @param userId 用户 Id
    */
-  async getRole(userId: number): Promise<UserRole | null> {
-    // 角色
-    const role = await this.models.UserMeta.findOne({
-      attributes: ['metaValue'],
-      where: {
-        userId,
-        metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
-      },
-    });
-    return role?.metaValue as UserRole;
+  getCapabilities(userId: number): Promise<UserCapability[]> {
+    return this.getUserCapabilities(userId);
   }
 
   /**
@@ -340,12 +325,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         {
           userId: user.id,
           metaKey: UserMetaPresetKeys.AdminColor,
-          metaValue: 'default',
+          metaValue: model.adminColor || '',
         },
         {
           userId: user.id,
           metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
-          metaValue: model.userCapabilities,
+          metaValue: model.capabilities || UserRole.Subscriber,
         },
       ];
       // 添加元数据
@@ -386,38 +371,14 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async update(id: number, model: UpdateUserInput, requestUser: RequestUser): Promise<boolean> {
     // 修改非自己信息
-    if (String(id) !== String(requestUser.sub!)) {
+    if (id !== Number(requestUser.sub)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     }
 
     const user = await this.models.Users.findByPk(id);
     if (user) {
-      if (model.email && model.email !== user.email && (await this.isEmailExists(model.email))) {
-        throw new ValidationError(
-          await this.translate('datasource.user.email_unique_required', 'Email is reqiured to be unique!', {
-            lang: requestUser.lang,
-          }),
-        );
-      }
-      if (model.mobile && model.mobile !== user.mobile && (await this.isMobileExists(model.mobile))) {
-        throw new ValidationError(
-          await this.translate('datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
-            lang: requestUser.lang,
-          }),
-        );
-      }
-
-      const {
-        nickName,
-        firstName,
-        lastName,
-        avator,
-        description,
-        adminColor,
-        userCapabilities,
-        locale,
-        ...updateUser
-      } = model;
+      const { nickName, firstName, lastName, avator, description, adminColor, capabilities, locale, ...updateUser } =
+        model;
       const t = await this.sequelize.transaction();
       try {
         await this.models.Users.update(updateUser, {
@@ -425,68 +386,6 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           transaction: t,
         });
 
-        if (!isUndefined(userCapabilities)) {
-          await this.models.UserMeta.update(
-            { metaValue: userCapabilities === 'none' ? '' : userCapabilities },
-            {
-              where: {
-                userId: id,
-                metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
-              },
-              transaction: t,
-            },
-          );
-        }
-
-        if (!isUndefined(locale)) {
-          await this.models.UserMeta.update(
-            { metaValue: locale || '' },
-            {
-              where: {
-                userId: id,
-                metaKey: UserMetaPresetKeys.Locale,
-              },
-              transaction: t,
-            },
-          );
-        }
-
-        if (!isUndefined(description)) {
-          await this.models.UserMeta.update(
-            { metaValue: description },
-            {
-              where: {
-                userId: id,
-                metaKey: UserMetaPresetKeys.Description,
-              },
-              transaction: t,
-            },
-          );
-        }
-        if (!isUndefined(adminColor)) {
-          await this.models.UserMeta.update(
-            { metaValue: adminColor },
-            {
-              where: {
-                userId: id,
-                metaKey: UserMetaPresetKeys.AdminColor,
-              },
-              transaction: t,
-            },
-          );
-        }
-        if (!isUndefined(nickName)) {
-          await this.models.UserMeta.update(
-            { metaValue: nickName },
-            {
-              where: {
-                userId: id,
-                metaKey: UserMetaPresetKeys.NickName,
-              },
-              transaction: t,
-            },
-          );
-        }
         if (!isUndefined(firstName)) {
           await this.models.UserMeta.update(
             { metaValue: firstName },
@@ -511,6 +410,20 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
             },
           );
         }
+
+        if (!isUndefined(nickName)) {
+          await this.models.UserMeta.update(
+            { metaValue: nickName },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaPresetKeys.NickName,
+              },
+              transaction: t,
+            },
+          );
+        }
+
         if (!isUndefined(avator)) {
           await this.models.UserMeta.update(
             { metaValue: avator },
@@ -518,6 +431,58 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
               where: {
                 userId: id,
                 metaKey: UserMetaPresetKeys.Avatar,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(locale)) {
+          await this.models.UserMeta.update(
+            { metaValue: locale === null ? '' : locale },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaPresetKeys.Locale,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(description)) {
+          await this.models.UserMeta.update(
+            { metaValue: description },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaPresetKeys.Description,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(adminColor)) {
+          await this.models.UserMeta.update(
+            { metaValue: adminColor },
+            {
+              where: {
+                userId: id,
+                metaKey: UserMetaPresetKeys.AdminColor,
+              },
+              transaction: t,
+            },
+          );
+        }
+
+        if (!isUndefined(capabilities)) {
+          await this.models.UserMeta.update(
+            { metaValue: capabilities === null ? undefined : capabilities },
+            {
+              where: {
+                userId: id,
+                metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
               },
               transaction: t,
             },
@@ -546,7 +511,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async updateEmail(id: number, email: string, requestUser: RequestUser): Promise<boolean> {
     // 修改非自己信息
-    if (String(id) !== String(requestUser.sub!)) {
+    if (id !== Number(requestUser.sub)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     }
 
@@ -583,7 +548,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async updateMobile(id: number, mobile: string, requestUser: RequestUser): Promise<boolean> {
     // 修改非自己信息
-    if (String(id) !== String(requestUser.sub!)) {
+    if (id !== Number(requestUser.sub)) {
       await this.hasCapability(UserCapability.EditUsers, requestUser, true);
     }
 
@@ -667,7 +632,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async delete(id: number, requestUser: RequestUser): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
-    if (String(id) === String(requestUser.sub!)) {
+    if (id === Number(requestUser.sub)) {
       throw new ForbiddenError(
         await this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
           lang: requestUser.lang,
@@ -706,7 +671,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   async bulkDelete(ids: number[], requestUser: RequestUser): Promise<true> {
     await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
 
-    if (ids.includes(parseInt(requestUser.sub!))) {
+    if (ids.includes(Number(requestUser.sub))) {
       throw new ForbiddenError(
         await this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
           lang: requestUser.lang,
@@ -752,7 +717,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           isPhoneNumber(loginName, region) && { mobile: loginName },
         ].filter(Boolean) as any,
         loginPwd: md5(loginPwd),
-        status: UserStatus.Enable,
+        status: UserStatus.Enabled,
       },
     });
     if (!user) return false;

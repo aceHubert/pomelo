@@ -1,7 +1,7 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Includeable, Transaction, Op, Order } from 'sequelize';
-import { UserInputError, ValidationError, ForbiddenError, RequestUser } from '@pomelo/shared-server';
+import { UserInputError, ValidationError, ForbiddenError, RequestUser } from '@ace-pomelo/shared-server';
 import { Taxonomy, TemplateType, TemplateStatus, TemplateOperateStatus, TemplateAttributes } from '../../entities';
 import { UserCapability } from '../../utils/user-capability.util';
 import { OptionPresetKeys, TemplateMetaPresetKeys } from '../../utils/preset-keys.util';
@@ -102,7 +102,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         : template.type === TemplateType.Form
         ? UserCapability.EditOthersForms
         : null;
-    if (template.author !== requestUser.sub && editOthersCapability) {
+    if (template.author !== Number(requestUser.sub) && editOthersCapability) {
       await this.hasCapability(editOthersCapability, requestUser, true);
 
       // 是否有编辑私有的(别人)文章权限
@@ -163,7 +163,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         : template.type === TemplateType.Form
         ? UserCapability.DeleteOthersForms
         : null;
-    if (template.author !== requestUser.sub && deleteOthersCapability) {
+    if (template.author !== Number(requestUser.sub) && deleteOthersCapability) {
       await this.hasCapability(deleteOthersCapability, requestUser, true);
 
       // 是否有删除私有的文章权限
@@ -572,7 +572,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         [Op.not]: {
           status: TemplateStatus.Private,
           author: {
-            [Op.ne]: requestUser.sub!,
+            [Op.ne]: Number(requestUser.sub),
           },
         },
       });
@@ -593,7 +593,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         [Op.not]: {
           status: TemplateStatus.Pending,
           author: {
-            [Op.ne]: requestUser.sub!,
+            [Op.ne]: Number(requestUser.sub),
           },
         },
       });
@@ -1094,7 +1094,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           name,
           title,
           content: content ?? '',
-          author: requestUser.sub!,
+          author: Number(requestUser.sub),
           type,
           excerpt,
           status,
@@ -1208,7 +1208,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
               title: changedTitle || template.title,
               content: changedContent || template.content,
               excerpt: changedExcerpt || template.excerpt,
-              author: requestUser.sub!,
+              author: Number(requestUser.sub),
               name: `${id}-revision`,
               type: TemplateType.Revision,
               status: TemplateStatus.Inherit,

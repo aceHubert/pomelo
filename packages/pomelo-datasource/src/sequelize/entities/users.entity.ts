@@ -79,8 +79,8 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       status: {
         type: DataTypes.TINYINT,
         allowNull: false,
-        defaultValue: UserStatus.Enable,
-        comment: 'User status (0 for disabled or 1 for enable, default: 1)',
+        defaultValue: UserStatus.Enabled,
+        comment: 'User status (0 for disabled or 1 for enabled, default: 1)',
       },
     },
     {
