@@ -11,16 +11,20 @@ const DefaultRamAuthorizationOptions: Partial<RamAuthorizationOptions> = {
   policyName: 'RAMAuthorizationPolicy',
   ramClaimTypeName: 'ram',
   evaluateMethod: RAMEvaluateMethods.Statement,
+  userProperty: 'user',
 };
 
-@Module({})
+@Module({
+  exports: [RAM_AUTHORIZATION_OPTIONS],
+})
 export class RamAuthorizationModule {
   static forRoot(options: RamAuthorizationOptions): DynamicModule {
-    options = { ...options, ...DefaultRamAuthorizationOptions };
+    options = { ...DefaultRamAuthorizationOptions, ...options };
     this.assertOptions(options);
 
     return {
       module: RamAuthorizationModule,
+      global: true,
       providers: [
         {
           provide: RAM_AUTHORIZATION_OPTIONS,
@@ -33,6 +37,7 @@ export class RamAuthorizationModule {
   static forRootAsync(options: RamAuthorizationAsyncOptions): DynamicModule {
     return {
       module: RamAuthorizationModule,
+      global: true,
       imports: options.imports || [],
       providers: this.createAsyncProviders(options),
     };
@@ -57,7 +62,7 @@ export class RamAuthorizationModule {
         provide: RAM_AUTHORIZATION_OPTIONS,
         useFactory: async (...args: any[]) => {
           let config = await options.useFactory!(...args);
-          config = { ...config, ...DefaultRamAuthorizationOptions };
+          config = { ...DefaultRamAuthorizationOptions, ...config };
           this.assertOptions(config);
 
           return config;
@@ -69,7 +74,7 @@ export class RamAuthorizationModule {
       provide: RAM_AUTHORIZATION_OPTIONS,
       useFactory: async (optionsFactory: RamAuthorizationOptionsFactory) => {
         let config = await optionsFactory.createRamAuthorizationOptions();
-        config = { ...config, ...DefaultRamAuthorizationOptions };
+        config = { ...DefaultRamAuthorizationOptions, ...config };
         this.assertOptions(config);
 
         return config;

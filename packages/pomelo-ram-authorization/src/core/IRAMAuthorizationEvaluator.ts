@@ -1,13 +1,12 @@
 import { RAMAuthorizeContext } from './RAMAuthorizeContext';
 
-/// <summary>
-/// Define the ram policy evaluate methods.
-/// </summary>
+/**
+ * Define the ram policy evaluate methods.
+ */
 export interface IRAMAuthorizationEvaluator {
-  /// <summary>
-  /// Determines whether the authorization result was successful or not.
-  /// </summary>
-  /// <param name="authorizeContext"></param>
-  /// <returns></returns>
+  /**
+   * Determines whether the authorization result was successful or not.
+   * @param authorizeContext The authorize context.
+   */
   evaluateAsync(authorizeContext: RAMAuthorizeContext): Promise<boolean>;
 }

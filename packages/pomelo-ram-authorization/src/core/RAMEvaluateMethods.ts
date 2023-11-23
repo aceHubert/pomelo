@@ -1,9 +1,9 @@
-/// <summary>
-/// The method used for evaluate.
-/// </summary>
+/**
+ * The method used for evaluate.
+ */
 export enum RAMEvaluateMethods {
-  /// <summary>
-  /// RAM Statement
-  /// </summary>
+  /**
+   * RAM Statement
+   */
   Statement,
 }

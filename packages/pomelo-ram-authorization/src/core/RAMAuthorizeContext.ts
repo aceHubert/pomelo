@@ -2,27 +2,27 @@ import { ArgumentNullException } from './ArgumentNullException';
 import { RAMPolicy } from './RAMPolicy';
 
 export class RAMAuthorizeContext {
-  /// <summary>
-  /// The RAM policy to evaluate.
-  /// </summary>
+  /**
+   * The RAM policy to evaluate.
+   */
   readonly Policies: RAMPolicy[];
 
-  /// <summary>
-  /// The name of the authorize service.
-  /// </summary>
+  /**
+   * The name of the authorize service.
+   */
   ServiceName: string;
 
-  /// <summary>
-  /// The target action name to evaluate.
-  /// </summary>
+  /**
+   * The target action name to evaluate.
+   */
   ActionName: string;
 
-  /// <summary>
-  /// Creates a new instance of <see cref="RAMAuthorizeContext"/>
-  /// </summary>
-  /// <param name="serviceName">The name of the authorize service.</param>
-  /// <param name="actionName">The target action name to evaluate.</param>
-  /// <param name="policies">The RAM policy to evaluate.</param>
+  /**
+   * Creates a new instance of <see cref="RAMAuthorizeContext"/>
+   * @param serviceName The name of the authorize service.
+   * @param actionName The target action name to evaluate.
+   * @param policies The RAM policy to evaluate.
+   */
   constructor(serviceName: string, actionName: string, policies: RAMPolicy[]) {
     if (!serviceName) {
       throw new ArgumentNullException('serviceName');

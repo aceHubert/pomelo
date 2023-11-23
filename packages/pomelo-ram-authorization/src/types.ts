@@ -1,9 +1,10 @@
-declare module '@pomelo/shared-server' {
-  export interface UserPayload {
+declare module '@ace-pomelo/shared-server' {
+  export interface AccountClaims {
+    // extend the payload
     /**
-     * User Rams.
+     * rams claim
      */
-    rams?: string[];
+    ramsClaim?: string | string[];
   }
 }
 

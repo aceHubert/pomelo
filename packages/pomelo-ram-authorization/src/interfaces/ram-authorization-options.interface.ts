@@ -2,25 +2,31 @@ import { ModuleMetadata, Type } from '@nestjs/common';
 import { RAMEvaluateMethods } from '../core/RAMEvaluateMethods';
 
 export interface RamAuthorizationOptions {
-  /// <summary>
-  /// The name of the RAM authorization olicy. default is 'RAMAuthorizationPolicy'.
-  /// </summary>
+  /**
+   * The name of the RAM authorization olicy. default is 'RAMAuthorizationPolicy'.
+   */
   policyName?: string;
 
-  /// <summary>
-  /// The name of the RAM authorization claim type. default is 'ram'.
-  /// </summary>
+  /**
+   * The name of the RAM authorization claim type. default is 'ram'.
+   */
   ramClaimTypeName?: string;
 
-  /// <summary>
-  /// The name of the protected ApiResource.
-  /// </summary>
+  /**
+   * The name of the protected ApiResource.
+   */
   serviceName: string;
 
-  /// <summary>
-  /// Determines which method used to evaluate.
-  /// </summary>
+  /**
+   * Determines which method used to evaluate.
+   */
   evaluateMethod?: RAMEvaluateMethods;
+
+  /**
+   * Determines what property on `req`
+   * @default user.
+   */
+  userProperty?: string;
 }
 
 export interface RamAuthorizationOptionsFactory {

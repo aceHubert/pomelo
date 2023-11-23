@@ -1,13 +1,13 @@
-/// <summary>
-/// 授权类型。
-/// </summary>
+/**
+ * 授权类型。
+ */
 export enum AuthorizeEffect {
-  /// <summary>
-  /// 拒绝。
-  /// </summary>
+  /**
+   * 拒绝。
+   */
   Deny = 'DENY',
-  /// <summary>
-  /// 允许。
-  /// </summary>
+  /**
+   * 允许。
+   */
   Allow = 'ALLOW',
 }
