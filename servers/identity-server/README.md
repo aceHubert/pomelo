@@ -1,1 +1,2 @@
-## @ace-pomelo/auth
+# @ace-pomelo/identity-server
+> Pomelo OpenID Connect Identity Server

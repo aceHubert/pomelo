@@ -1,0 +1,116 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "servers/core-server/src",
+  "projects": {
+    "identity-server": {
+      "type": "application",
+      "root": "servers/identity-server",
+      "entryFile": "src/main",
+      "sourceRoot": "servers/identity-server",
+      "compilerOptions": {
+        "webpack": true,
+        "webpackConfigPath": "servers/core-server/webpack-hmr.config.js",
+        "tsConfigPath": "servers/identity-server/tsconfig.json",
+        "assets": ["package.json", "README.md", ".env", ".env.*"],
+        "deleteOutDir": true,
+        "plugins": [
+          {
+            "name": "@nestjs/swagger",
+            "options": {
+              "dtoFileNameSuffix": [".dto.ts", ".resp.ts"],
+              "controllerKeyOfComment": "summary",
+              "classValidatorShim": true,
+              "introspectComments": true
+            }
+          }
+        ]
+      }
+    },
+    "core-server": {
+      "type": "application",
+      "root": "servers/core-server",
+      "entryFile": "src/main",
+      "sourceRoot": "servers/core-server",
+      "compilerOptions": {
+        "webpack": true,
+        "webpackConfigPath": "servers/core-server/webpack-hmr.config.js",
+        "tsConfigPath": "servers/core-server/tsconfig.json",
+        "assets": ["package.json", "README.md", ".env", ".env.*"],
+        "deleteOutDir": true,
+        "plugins": [
+          {
+            "name": "@nestjs/swagger",
+            "options": {
+              "dtoFileNameSuffix": [".dto.ts", ".resp.ts"],
+              "controllerKeyOfComment": "summary",
+              "classValidatorShim": true,
+              "introspectComments": true
+            }
+          },
+          {
+            "name": "@nestjs/graphql",
+            "options": {
+              "typeFileNameSuffix": [".input.ts", ".args.ts", ".model.ts"],
+              "introspectComments": true
+            }
+          }
+        ]
+      }
+    },
+    "pomelo-nestjs-oidc": {
+      "type": "library",
+      "root": "packages/pomelo-nestjs-oidc",
+      "entryFile": "src/index",
+      "sourceRoot": "packages/pomelo-nestjs-oidc",
+      "compilerOptions": {
+        "tsConfigPath": "packages/pomelo-nestjs-oidc/tsconfig.json",
+        "assets": ["package.json", "README.md"],
+        "deleteOutDir": true
+      }
+    },
+    "pomelo-datasource": {
+      "type": "library",
+      "root": "packages/pomelo-datasource",
+      "entryFile": "src/index",
+      "sourceRoot": "packages/pomelo-datasource",
+      "compilerOptions": {
+        "tsConfigPath": "packages/pomelo-datasource/tsconfig.json",
+        "assets": ["package.json", "README.md"],
+        "deleteOutDir": true
+      }
+    },
+    "pomelo-authorization": {
+      "type": "library",
+      "root": "packages/pomelo-authorization",
+      "entryFile": "src/index",
+      "sourceRoot": "packages/pomelo-authorization",
+      "compilerOptions": {
+        "tsConfigPath": "packages/pomelo-authorization/tsconfig.json",
+        "assets": ["package.json", "README.md"],
+        "deleteOutDir": true
+      }
+    },
+    "pomelo-ram-authorization": {
+      "type": "library",
+      "root": "packages/pomelo-ram-authorization",
+      "entryFile": "src/index",
+      "sourceRoot": "packages/pomelo-ram-authorization",
+      "compilerOptions": {
+        "tsConfigPath": "packages/pomelo-ram-authorization/tsconfig.json",
+        "assets": ["package.json", "README.md"],
+        "deleteOutDir": true
+      }
+    },
+    "pomelo-shared-server": {
+      "type": "library",
+      "root": "packages/pomelo-shared-server",
+      "entryFile": "src/index",
+      "sourceRoot": "packages/pomelo-shared-server",
+      "compilerOptions": {
+        "tsConfigPath": "packages/pomelo-shared-server/tsconfig.json",
+        "assets": ["package.json", "README.md"],
+        "deleteOutDir": true
+      }
+    }
+  }
+}
