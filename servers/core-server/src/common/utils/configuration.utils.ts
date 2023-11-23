@@ -9,7 +9,8 @@ import { ConfigFactory } from '@nestjs/config';
 const logger = new Logger('Utils', { timestamp: true });
 
 export enum AuthType {
-  Jwt = 'JWT',
+  Jwt = 'jwt',
+  Opaque = 'opaque',
 }
 
 export interface ConfigObject {
@@ -96,25 +97,21 @@ export interface ConfigObject {
    */
   auth?: {
     /**
-     * debug mode in runtime (show auth logging)
-     */
-    debug?: boolean;
-    /**
-     * type, default: JWT
+     * type, default: jwt
      */
     type?: AuthType;
     /**
-     * endpoint
+     * client id
+     */
+    clientId: string;
+    /**
+     * client secret
+     */
+    clientSecret: string;
+    /**
+     * endpoint, get oidc metadata from {endpoint}.well-known/openid-configuration
      */
     endpoint?: string;
-    /**
-     * jwksRas options
-     */
-    jwksRsa?: {
-      requestsPerMinute: number;
-      cache: boolean;
-      rateLimit: boolean;
-    };
   };
   /**
    * upload configs
@@ -164,8 +161,8 @@ export interface ConfigObject {
 export const configuration =
   (basePath: string): ConfigFactory<ConfigObject> =>
   () => {
-    logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'}}`);
-    let contentPath;
+    logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'})`);
+    let contentPath: string | undefined;
     if (process.env.CONTENT_PATH) {
       if ((contentPath = process.env.CONTENT_PATH) && fs.existsSync(contentPath)) {
         // 配置为绝对路径
@@ -175,6 +172,15 @@ export const configuration =
         contentPath = undefined;
       }
     }
+    if (!contentPath) {
+      // 默认路径
+      contentPath = path.join(basePath, '../content');
+      if (!fs.existsSync(contentPath)) {
+        // 默认路径，不存在则创建
+        fs.mkdirSync(contentPath, { recursive: true });
+      }
+    }
+    logger.log(`Content path is: ${contentPath}`);
     const debugMode =
       process.env.DEBUG !== void 0 ? process.env.DEBUG === 'true' : process.env.NODE_ENV !== 'production';
     let config: ConfigObject = {
@@ -219,14 +225,10 @@ export const configuration =
         tablePrefix: process.env.TABLE_PREFIX,
       },
       auth: {
-        debug: process.env.AUTH_DEBUG !== void 0 ? process.env.AUTH_DEBUG === 'true' : debugMode,
         type: process.env.AUTH_TYPE as AuthType,
+        clientId: process.env.AUTH_CLIENT_ID!,
+        clientSecret: process.env.AUTH_CLIENT_SECRET!,
         endpoint: process.env.AUTH_ENDPOINT,
-        jwksRsa: {
-          requestsPerMinute: parseInt(process.env.AUTH_JWKSRAS_REQUESTS_PER_MINUTE as string, 10) || 5,
-          cache: process.env.AUTH_JWKSRAS_CACHE === 'true',
-          rateLimit: process.env.AUTH_JWKSRAS_RATE_LIMIT === 'true',
-        },
       },
       upload: {
         dest: process.env.UPLOAD_PATH,

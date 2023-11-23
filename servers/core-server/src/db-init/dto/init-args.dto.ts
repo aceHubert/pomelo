@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsLocale, IsUrl, IsEmail, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { InitArgs } from '@pomelo/datasource';
+import { InitArgs } from '@ace-pomelo/datasource';
 
 export class InitArgsDto implements Omit<InitArgs, 'siteUrl'> {
   /**

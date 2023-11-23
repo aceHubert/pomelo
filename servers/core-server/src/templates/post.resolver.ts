@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Parent, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Fields, User, RequestUser } from '@pomelo/shared-server';
+import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   TermTaxonomyDataSource,
@@ -10,11 +10,11 @@ import {
   Taxonomy as TaxonomyEnum,
   TemplateStatus,
   TemplateType,
-} from '@pomelo/datasource';
+} from '@ace-pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
-import { PostTemplateAction } from '@/common/actions';
+import { Anonymous, Authorized } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { TemplateAction, PostTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
 import { TermTaxonomy } from '../term-taxonomy/models/term-taxonomy.model';
@@ -60,7 +60,9 @@ export class PagedPostTemplateItemTaxonomyFieldResolver extends TaxonomyFieldRes
 
 @Authorized()
 @Resolver(() => PostTemplate)
-export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, TemplateDataSource) {
+export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, TemplateDataSource, {
+  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+}) {
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly templateDataSource: TemplateDataSource,
@@ -203,7 +205,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'createPostReview',
           payload: {
@@ -240,7 +242,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (result && model.status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'updatePostReview',
           payload: {

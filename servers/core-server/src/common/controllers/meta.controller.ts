@@ -1,8 +1,7 @@
-import { camelCase, lowerCase, upperFirst, words } from 'lodash';
+import { camelCase, lowerCase, upperFirst } from 'lodash';
 import { Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
 import {
-  applyDecorators,
   Query,
   Param,
   Body,
@@ -15,6 +14,7 @@ import {
   Type,
   Res,
   HttpStatus,
+  applyDecorators,
 } from '@nestjs/common';
 import {
   ApiOperation,
@@ -24,22 +24,31 @@ import {
   ApiCreatedResponse,
   ApiNoContentResponse,
 } from '@nestjs/swagger';
-import { Anonymous } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
-import { BaseController, createResponseSuccessType } from '@pomelo/shared-server';
-import { MetaDataSource } from '@pomelo/datasource';
+import { BaseController, createResponseSuccessType } from '@ace-pomelo/shared-server';
+import { MetaDataSource } from '@ace-pomelo/datasource';
 import { NewMetaDto } from './dto/new-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';
 
+export type Method =
+  | 'getMeta'
+  | 'getMetas'
+  | 'createMeta'
+  | 'createMetas'
+  | 'updateMeta'
+  | 'updateMetaByKey'
+  | 'deleteMeta'
+  | 'deleteMetaByKey';
+
 export type Options = {
   /**
-   * 对 model 描述（lower case）， 默认值为: modelName
+   * description model name for methods (lower case).
+   * @default lowerCase(modelName)
    */
   descriptionName?: string;
   /**
-   * auth decorator(s)
+   * authorize decorator(s)
    */
-  authDecorator?: MethodDecorator | MethodDecorator[];
+  authDecorator?: (method: Method) => MethodDecorator | MethodDecorator[];
 };
 
 /**
@@ -60,12 +69,11 @@ export function createMetaController<
   const _camelCaseModelName = camelCase(modelName);
   const _upperFirstModelName = upperFirst(modelName);
   const _descriptionName = descriptionName || lowerCase(modelName);
-  const _ramActionPrefix = words(_camelCaseModelName).map(lowerCase).join('.');
 
-  // auth decorators
-  const ApiAuth = (): MethodDecorator => {
+  const AuthDecorate = (method: Method): MethodDecorator => {
     if (authDecorator) {
-      return Array.isArray(authDecorator) ? applyDecorators(...authDecorator) : authDecorator;
+      const decorators = authDecorator(method);
+      return Array.isArray(decorators) ? applyDecorators(...decorators) : decorators;
     } else {
       return (() => {}) as MethodDecorator;
     }
@@ -83,9 +91,8 @@ export function createMetaController<
      * 获取元数据
      */
     @Get(`/metas/:id`)
-    @RamAuthorized(`${_ramActionPrefix}.meta`)
+    @AuthDecorate('getMeta')
     @ApiOperation({ summary: `Get ${_descriptionName} meta.` })
-    @Anonymous()
     @ApiOkResponse({
       description: `${_descriptionName} meta model`,
       type: () => createResponseSuccessType({ data: metaModelRespType }, `${_upperFirstModelName}MetaModelSuccessResp`),
@@ -107,7 +114,7 @@ export function createMetaController<
      * 获取元数据集合
      */
     @Get(`/:${_camelCaseModelName}Id/metas`)
-    @RamAuthorized(`${_ramActionPrefix}.meta.list`)
+    @AuthDecorate('getMetas')
     @ApiOperation({ summary: `Get ${_descriptionName} metas.` })
     @ApiQuery({
       name: 'metaKeys',
@@ -115,7 +122,6 @@ export function createMetaController<
       required: false,
       description: `return specific keys' metas if setted, otherwish return all metas`,
     })
-    @Anonymous()
     @ApiOkResponse({
       description: `${_descriptionName} meta models`,
       type: () =>
@@ -136,9 +142,8 @@ export function createMetaController<
      * 新建元数据
      */
     @Post('/metas')
-    @RamAuthorized(`${_ramActionPrefix}.meta.create`)
+    @AuthDecorate('createMeta')
     @ApiOperation({ summary: `Create a new ${_descriptionName} meta.` })
-    @ApiAuth()
     @ApiBody({ type: () => newMetaDtoType })
     @ApiCreatedResponse({
       description: `${_descriptionName} meta model`,
@@ -155,9 +160,8 @@ export function createMetaController<
      * 批量新建元数据
      */
     @Post(`/:${_camelCaseModelName}Id/metas/bulk`)
-    @RamAuthorized(`${_ramActionPrefix}.meta.bulk.create`)
+    @AuthDecorate('createMetas')
     @ApiOperation({ summary: `Create bulk of ${_descriptionName} metas.` })
-    @ApiAuth()
     @ApiBody({ type: () => [NewMetaDto] })
     @ApiCreatedResponse({
       description: `${_descriptionName} meta models`,
@@ -175,9 +179,8 @@ export function createMetaController<
      * 修改元数据
      */
     @Patch('/metas/:id')
-    @RamAuthorized(`${_ramActionPrefix}.meta.update`)
+    @AuthDecorate('updateMeta')
     @ApiOperation({ summary: `Update ${_descriptionName} meta value.` })
-    @ApiAuth()
     @ApiBody({ type: () => UpdateMetaDto })
     @ApiOkResponse({
       description: 'no data content',
@@ -192,9 +195,8 @@ export function createMetaController<
      * 根据 metaKey 修改元数据
      */
     @Patch(`/:${_camelCaseModelName}Id/metas/:metaKey`)
-    @RamAuthorized(`${_ramActionPrefix}.meta.update.bykey`)
+    @AuthDecorate('deleteMetaByKey')
     @ApiOperation({ summary: `Update ${_descriptionName} meta value by meta key.` })
-    @ApiAuth()
     @ApiBody({ type: () => UpdateMetaDto })
     @ApiOkResponse({
       description: 'no data content',
@@ -214,9 +216,8 @@ export function createMetaController<
      * 删除元数据
      */
     @Delete('/metas/:id')
-    @RamAuthorized(`${_ramActionPrefix}.meta.delete`)
+    @AuthDecorate('deleteMeta')
     @ApiOperation({ summary: `Delete ${_descriptionName} meta.` })
-    @ApiAuth()
     @ApiOkResponse({
       description: 'no data content',
       type: () => createResponseSuccessType({}, `Delete${_upperFirstModelName}MetaModelSuccessResp`),
@@ -230,9 +231,8 @@ export function createMetaController<
      * 根据 metaKey 添加元数据
      */
     @Delete(`/:${_camelCaseModelName}Id/metas/:metaKey`)
-    @RamAuthorized(`${_ramActionPrefix}.meta.delete.bykey`)
+    @AuthDecorate('deleteMetaByKey')
     @ApiOperation({ summary: `Delete ${_descriptionName} meta by meta key.` })
-    @ApiAuth()
     @ApiOkResponse({
       description: 'no data content',
       type: () => createResponseSuccessType({}, `Delete${_upperFirstModelName}MetaModelSuccessResp`),

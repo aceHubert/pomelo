@@ -16,16 +16,22 @@ import {
 } from '@nestjs/common';
 import {
   BaseController,
-  ApiAuth,
+  ApiAuthCreate,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   User,
   RequestUser,
   createResponseSuccessType,
-} from '@pomelo/shared-server';
-import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
-import { Authorized, Anonymous } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+} from '@ace-pomelo/shared-server';
+import {
+  TemplateDataSource,
+  PagedTemplateArgs,
+  TemplateOptionArgs,
+  Taxonomy,
+  TemplateType,
+} from '@ace-pomelo/datasource';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { FormTemplateAction } from '@/common/actions';
 import { PagedFormTemplateQueryDto, FormTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewFormTemplateDto } from './dto/new-template.dto';
@@ -129,7 +135,7 @@ export class FormTemplateController extends BaseController {
    */
   @Get()
   @RamAuthorized(FormTemplateAction.PagedList)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged from template models',
     type: () => createResponseSuccessType({ data: PagedFormTemplateResp }, 'PagedFormTemplateSuccessResp'),
@@ -162,7 +168,7 @@ export class FormTemplateController extends BaseController {
    */
   @Post()
   @RamAuthorized(FormTemplateAction.Create)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiCreatedResponse({
     description: 'From template model',
     type: () => createResponseSuccessType({ data: FormTemplateModelResp }, 'FormTemplateModelSuccessResp'),
@@ -191,7 +197,7 @@ export class FormTemplateController extends BaseController {
    */
   @Put(':id')
   @RamAuthorized(FormTemplateAction.Update)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'UpdateFormTemplateSuccessResp'),

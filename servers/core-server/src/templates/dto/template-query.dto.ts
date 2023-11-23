@@ -1,8 +1,8 @@
 import { ApiProperty, OmitType, PickType, IntersectionType } from '@nestjs/swagger';
-import { TemplateStatus } from '@pomelo/datasource';
-import { PagedTempateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
+import { TemplateStatus } from '@ace-pomelo/datasource';
+import { PagedTemplateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
 
-class PagedTemplateQueryDto extends PagedTempateArgsValidator {
+class PagedTemplateQueryDto extends PagedTemplateArgsValidator {
   /**
    * Fuzzy search by field "title"
    */

@@ -1,20 +1,20 @@
 import { Response } from 'express';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import { Controller, Query, Param, Body, Get, Post, Put, Delete, ParseIntPipe, Res, HttpStatus } from '@nestjs/common';
-import { OptionDataSource } from '@pomelo/datasource';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+import { OptionDataSource } from '@ace-pomelo/datasource';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { Authorized } from '@pomelo/authorization';
 import {
   BaseController,
   User,
-  ApiAuth,
+  ApiAuthCreate,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   describeType,
   createResponseSuccessType,
   RequestUser,
-} from '@pomelo/shared-server';
+} from '@ace-pomelo/shared-server';
 import { OptionAction } from '@/common/actions';
 import { OptionQueryDto } from './dto/option-query.dto';
 import { NewOptionDto } from './dto/new-option.dto';
@@ -22,6 +22,7 @@ import { UpdateOptionDto } from './dto/update-option.dto';
 import { OptionResp } from './resp/option.resp';
 
 @ApiTags('options')
+@Authorized()
 @Controller('api/options')
 export class OptionController extends BaseController {
   constructor(private readonly optionDataSource: OptionDataSource) {
@@ -32,6 +33,7 @@ export class OptionController extends BaseController {
    * Get autoload options.
    */
   @Get('autoload')
+  @Anonymous()
   @ApiOkResponse({
     description: 'Option values(key/value)',
     type: () => createResponseSuccessType({ data: {} }, 'AutoloadOptionsModelsSuccessResp'),
@@ -47,6 +49,7 @@ export class OptionController extends BaseController {
    * Get option.
    */
   @Get(':id')
+  @Anonymous()
   @ApiOkResponse({
     description: 'Option model',
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
@@ -66,6 +69,7 @@ export class OptionController extends BaseController {
    * Get option value by name.
    */
   @Get(':name/value')
+  @Anonymous()
   @ApiOkResponse({
     description: 'Option value',
     type: () =>
@@ -89,9 +93,8 @@ export class OptionController extends BaseController {
    * Get options.
    */
   @Get()
-  @Authorized()
   @RamAuthorized(OptionAction.List)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Option models',
     type: () => createResponseSuccessType({ data: [OptionResp] }, 'OptionModelsSuccessResp'),
@@ -107,9 +110,8 @@ export class OptionController extends BaseController {
    * Create a new option.
    */
   @Post()
-  @Authorized()
   @RamAuthorized(OptionAction.Create)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiCreatedResponse({
     description: 'Option model',
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
@@ -125,9 +127,8 @@ export class OptionController extends BaseController {
    * Update option.
    */
   @Put(':id')
-  @Authorized()
   @RamAuthorized(OptionAction.Update)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Option model',
     type: () => createResponseSuccessType({}, 'UpdateOptionModelSuccessResp'),
@@ -145,9 +146,8 @@ export class OptionController extends BaseController {
    * Delete option permanently.
    */
   @Delete(':id')
-  @Authorized()
   @RamAuthorized(OptionAction.Delete)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Option model',
     type: () => createResponseSuccessType({}, 'DeleteOptionModelSuccessResp'),

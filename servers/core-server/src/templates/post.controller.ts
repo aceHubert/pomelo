@@ -18,14 +18,20 @@ import {
   BaseController,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
-  ApiAuth,
+  ApiAuthCreate,
   User,
   RequestUser,
   createResponseSuccessType,
-} from '@pomelo/shared-server';
-import { TemplateDataSource, PagedTemplateArgs, TemplateOptionArgs, Taxonomy, TemplateType } from '@pomelo/datasource';
-import { Authorized, Anonymous } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+} from '@ace-pomelo/shared-server';
+import {
+  TemplateDataSource,
+  PagedTemplateArgs,
+  TemplateOptionArgs,
+  Taxonomy,
+  TemplateType,
+} from '@ace-pomelo/datasource';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { PostTemplateAction } from '@/common/actions';
 import { PostTemplateOptionQueryDto, PagedPostTemplateQueryDto } from './dto/template-query.dto';
 import { NewPostTemplateDto } from './dto/new-template.dto';
@@ -211,7 +217,7 @@ export class PostTemplateController extends BaseController {
    */
   @Get()
   @RamAuthorized(PostTemplateAction.PagedList)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged posts template models',
     type: () => createResponseSuccessType({ data: PagedPostTemplateResp }, 'PagedPostTemplateSuccessResp'),
@@ -249,7 +255,7 @@ export class PostTemplateController extends BaseController {
    */
   @Post()
   @RamAuthorized(PostTemplateAction.Create)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiCreatedResponse({
     description: 'Post template model',
     type: () => createResponseSuccessType({ data: PostTemplateModelResp }, 'PostTemplateModelSuccessResp'),
@@ -280,7 +286,7 @@ export class PostTemplateController extends BaseController {
    */
   @Put(':id')
   @RamAuthorized(PostTemplateAction.Update)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'UpdatePostTemplateModelSuccessResp'),

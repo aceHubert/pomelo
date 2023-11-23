@@ -1,17 +1,17 @@
 import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
-import { Fields, User, RequestUser } from '@pomelo/shared-server';
+import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   OptionDataSource,
   TermTaxonomyDataSource,
   TermTaxonomyModel,
   Taxonomy,
   OptionPresetKeys,
-} from '@pomelo/datasource';
+} from '@ace-pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+import { Anonymous, Authorized } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyInput } from './dto/new-term-taxonomy.input';
@@ -29,6 +29,24 @@ export class TermTaxonomyResolver extends createMetaResolver(
   TermTaxonomyMeta,
   NewTermTaxonomyMetaInput,
   TermTaxonomyDataSource,
+  {
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? TermTaxonomyAction.MetaDetail
+          : method === 'getMetas' || method === 'fieldMetas'
+          ? TermTaxonomyAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? TermTaxonomyAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? TermTaxonomyAction.MetaUpdate
+          : TermTaxonomyAction.MetaDelete;
+
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction)];
+    },
+  },
 ) {
   private cascadeLoader!: DataLoader<{ parentId: number; fields: string[] }, TermTaxonomyModel[]>;
 

@@ -1,17 +1,17 @@
 import { ModuleRef } from '@nestjs/core';
 import { ApiTags, ApiBody, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import { Controller, Scope, Param, Body, Get, Post, Put, Query, Delete, HttpStatus } from '@nestjs/common';
-import { OptionDataSource, TermTaxonomyDataSource, Taxonomy, OptionPresetKeys } from '@pomelo/datasource';
-import { Anonymous, Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+import { OptionDataSource, TermTaxonomyDataSource, Taxonomy, OptionPresetKeys } from '@ace-pomelo/datasource';
+import { Anonymous, Authorized } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
-  ApiAuth,
+  ApiAuthCreate,
   User,
   RequestUser,
   createResponseSuccessType,
-} from '@pomelo/shared-server';
+} from '@ace-pomelo/shared-server';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyMetaDto } from './dto/new-term-taxonomy-meta.dto';
@@ -37,7 +37,22 @@ export class TermTaxonomyController extends createMetaController(
   NewTermTaxonomyMetaDto,
   TermTaxonomyDataSource,
   {
-    authDecorator: ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN]),
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? TermTaxonomyAction.MetaDetail
+          : method === 'getMetas'
+          ? TermTaxonomyAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? TermTaxonomyAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? TermTaxonomyAction.MetaUpdate
+          : TermTaxonomyAction.MetaDelete;
+
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
+    },
   },
 ) {
   constructor(
@@ -53,7 +68,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Get('categories')
   @RamAuthorized(TermTaxonomyAction.CategoryList)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Term taxonomy models',
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
@@ -83,7 +98,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Get('tags')
   @RamAuthorized(TermTaxonomyAction.TagList)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Term taxonomy models',
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
@@ -108,7 +123,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Get()
   @RamAuthorized(TermTaxonomyAction.List)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Term taxonomy models',
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
@@ -159,7 +174,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Post()
   @RamAuthorized(TermTaxonomyAction.Create)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiCreatedResponse({
     description: 'Term taxonomy model',
     type: () => createResponseSuccessType({ data: TermTaxonomyModelResp }),
@@ -176,7 +191,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Post(':id/objects/:objectId')
   @RamAuthorized(TermTaxonomyAction.CreateRelationship)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiCreatedResponse({
     description: 'Term taxonomy relationship model',
     type: () => createResponseSuccessType({ data: TermRelationshipModelResp }),
@@ -197,7 +212,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Put(':id')
   @RamAuthorized(TermTaxonomyAction.Update)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: '"true" if success',
     type: () => createResponseSuccessType({}),
@@ -212,7 +227,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Delete(':id')
   @RamAuthorized(TermTaxonomyAction.Delete)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}),
@@ -227,7 +242,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Delete('/bulk')
   @RamAuthorized(TermTaxonomyAction.BulkDelete)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({ type: () => [Number], description: 'term taxonomy ids' })
   @ApiOkResponse({
     description: 'no data content',
@@ -243,7 +258,7 @@ export class TermTaxonomyController extends createMetaController(
    */
   @Delete(':id/objects/:objectId')
   @RamAuthorized(TermTaxonomyAction.DeleteRelationship)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}),

@@ -1,25 +1,42 @@
 import DataLoader from 'dataloader';
-import { camelCase, lowerCase, upperFirst, words } from 'lodash';
+import { camelCase, lowerCase, upperFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
-import { Type } from '@nestjs/common';
+import { Type, applyDecorators } from '@nestjs/common';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
-import { BaseResolver, Fields } from '@pomelo/shared-server';
-import { MetaDataSource } from '@pomelo/datasource';
+import { BaseResolver, Fields } from '@ace-pomelo/shared-server';
+import { MetaDataSource } from '@ace-pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { RamAuthorized } from '@pomelo/ram-authorization';
 import { NewMetaInput } from './dto/new-meta.input';
 import { Meta } from './models/meta.model';
 
+export type Method =
+  | 'getMeta'
+  | 'getMetas'
+  | 'fieldMetas'
+  | 'createMeta'
+  | 'createMetas'
+  | 'updateMeta'
+  | 'updateMetaByKey'
+  | 'deleteMeta'
+  | 'deleteMetaByKey';
+
 export type Options = {
   /**
-   * Query/Mutation命名(upper camel case)， 默认值为:  resolverType.name
-   * 例如设置为Post,则会命名为 postMetas, createPostMeta, updatePostMeta, deletePostMeta 的Query和Mutation方法
+   * Query/Mutation prefix (upper camel case).
+   * @default camelCase(resolverType.name)
+   * @example resolverType is Post, then will expose postMetas, createPostMeta, updatePostMeta, deletePostMeta, etc... methods
    */
   resolverName?: string;
   /**
-   * 对 resolver 描述(lower case). 默认值为: resolverName 或  resolverType.name
+   * description model name for resolver (lower case).
+   * @default lowerCase(resolverName)
+   * @example Get media(descriptionName) metas.
    */
   descriptionName?: string;
+  /**
+   * authorize decorator(s)
+   */
+  authDecorator?: (method: Method) => MethodDecorator | MethodDecorator[];
 };
 
 /**
@@ -33,10 +50,25 @@ export function createMetaFieldResolver<
 >(
   resolverType: Function,
   metaDataSourceTypeOrToken: Type<MetaDataSourceType> | string | symbol,
-  { resolverName, descriptionName }: Options = {},
+  {
+    resolverName,
+    descriptionName,
+    authDecorator,
+  }: Omit<Options, 'authDecorator'> & {
+    authDecorator?: () => MethodDecorator | MethodDecorator[];
+  },
 ) {
   const _resolverName = resolverName || resolverType.name;
   const _descriptionName = descriptionName || lowerCase(_resolverName);
+
+  const AuthDecorate = (): MethodDecorator => {
+    if (authDecorator) {
+      const decorators = authDecorator();
+      return Array.isArray(decorators) ? applyDecorators(...decorators) : decorators;
+    } else {
+      return (() => {}) as MethodDecorator;
+    }
+  };
 
   @Resolver(() => resolverType, { isAbstract: true })
   abstract class MetaFieldResolver extends BaseResolver {
@@ -60,6 +92,8 @@ export function createMetaFieldResolver<
         }
       });
     }
+
+    @AuthDecorate()
     @ResolveField((returns) => [Meta], {
       description: `${_descriptionName} metas.`,
     })
@@ -97,28 +131,56 @@ export function createMetaResolver<
   metaReturnType: Type<MetaReturnType>,
   newMetaInputType: Type<NewMetaInputType>,
   metaDataSourceTypeOrToken: Type<MetaDataSourceType> | string | symbol,
-  { resolverName, descriptionName }: Options = {},
+  { resolverName, descriptionName, authDecorator }: Options = {},
 ) {
   const _resolverName = resolverName || resolverType.name;
   const _camelCaseResolverName = camelCase(_resolverName);
   const _upperCamelCaseResolverName = upperFirst(_camelCaseResolverName);
   const _descriptionName = descriptionName || lowerCase(_resolverName);
-  const _ramActionPrefix = words(_resolverName).map(lowerCase).join('.');
+
+  const AuthDecorate = (method: Method): MethodDecorator => {
+    if (authDecorator) {
+      const decorators = authDecorator(method);
+      return Array.isArray(decorators) ? applyDecorators(...decorators) : decorators;
+    } else {
+      return (() => {}) as MethodDecorator;
+    }
+  };
 
   @Resolver(() => resolverType, { isAbstract: true })
   abstract class MetaResolver extends createMetaFieldResolver(resolverType, metaDataSourceTypeOrToken, {
     resolverName: _resolverName,
     descriptionName: _descriptionName,
+    authDecorator: () => AuthDecorate('fieldMetas'),
   }) {
     constructor(protected readonly moduleRef: ModuleRef) {
       super(moduleRef);
     }
 
     /**
-     * 获取元数据集合
-     *
+     * 获取元数据
      */
-    @RamAuthorized(`${_ramActionPrefix}.meta.list`)
+    @AuthDecorate('getMeta')
+    @Query((returns) => metaReturnType, {
+      nullable: true,
+      name: `${_camelCaseResolverName}Meta`,
+      description: `Get ${_descriptionName} meta.`,
+    })
+    getMeta(
+      @Args('id', {
+        type: () => ID,
+        description: 'meta Id',
+      })
+      id: number,
+      @Fields() fields: ResolveTree,
+    ) {
+      return this.metaDataSource.getMeta(id, this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]));
+    }
+
+    /**
+     * 获取元数据集合
+     */
+    @AuthDecorate('getMetas')
     @Query((returns) => [metaReturnType!], {
       name: `${_camelCaseResolverName}Metas`,
       description: `Get ${_descriptionName} metas.`,
@@ -147,7 +209,7 @@ export function createMetaResolver<
     /**
      * 创建元数据
      */
-    @RamAuthorized(`${_ramActionPrefix}.meta.create`)
+    @AuthDecorate('createMeta')
     @Mutation((returns) => metaReturnType, {
       nullable: true,
       name: `create${_upperCamelCaseResolverName}Meta`,
@@ -160,7 +222,7 @@ export function createMetaResolver<
     /**
      * 批量创建无数据
      */
-    @RamAuthorized(`${_ramActionPrefix}.meta.bulk.create`)
+    @AuthDecorate('createMetas')
     @Mutation((returns) => [metaReturnType!], {
       name: `create${_upperCamelCaseResolverName}Metas`,
       description: `Create the bulk of ${_descriptionName} metas.`,
@@ -179,7 +241,7 @@ export function createMetaResolver<
     /**
      * 修改元数据
      */
-    @RamAuthorized(`${_ramActionPrefix}.meta.update`)
+    @AuthDecorate('updateMeta')
     @Mutation((returns) => Boolean, {
       name: `update${_upperCamelCaseResolverName}Meta`,
       description: `Update ${_descriptionName} meta value.`,
@@ -195,7 +257,7 @@ export function createMetaResolver<
     /**
      * 根据 metaKey 修改元数据
      */
-    @RamAuthorized(`${_ramActionPrefix}.meta.update.bykey`)
+    @AuthDecorate('updateMetaByKey')
     @Mutation((returns) => Boolean, {
       name: `update${_upperCamelCaseResolverName}MetaByKey`,
       description: `Update ${_descriptionName} meta value by meta key.`,
@@ -220,7 +282,7 @@ export function createMetaResolver<
     /**
      * 删除元数据
      */
-    @RamAuthorized(`${_ramActionPrefix}.meta.delete`)
+    @AuthDecorate('deleteMeta')
     @Mutation((returns) => Boolean, {
       name: `delete${_upperCamelCaseResolverName}Meta`,
       description: `Delete ${_descriptionName} meta`,
@@ -235,7 +297,7 @@ export function createMetaResolver<
     /**
      * 根据 metaKey 删除元数据
      */
-    @RamAuthorized(`${_ramActionPrefix}.meta.delete.bykey`)
+    @AuthDecorate('deleteMetaByKey')
     @Mutation((returns) => Boolean, {
       name: `delete${_upperCamelCaseResolverName}MetaByKey`,
       description: `Delete ${_descriptionName} meta by meta key.`,

@@ -2,10 +2,10 @@ import DataLoader from 'dataloader';
 import { upperFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
-import { Authorized, Anonymous } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { BaseResolver, Fields, User, RequestUser } from '@pomelo/shared-server';
+import { BaseResolver, Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   TermTaxonomyDataSource,
@@ -15,7 +15,7 @@ import {
   Taxonomy as TaxonomyEnum,
   Taxonomy,
   TemplateStatus,
-} from '@pomelo/datasource';
+} from '@ace-pomelo/datasource';
 import { TemplateAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
@@ -150,6 +150,24 @@ export class TemplateResolver extends createMetaResolver(
   TemplateMeta,
   NewTemplateMetaInput,
   TemplateDataSource,
+  {
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? TemplateAction.MetaDetail
+          : method === 'getMetas' || method === 'fieldMetas'
+          ? TemplateAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? TemplateAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? TemplateAction.MetaUpdate
+          : TemplateAction.MetaDelete;
+
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction)];
+    },
+  },
 ) {
   constructor(
     protected readonly moduleRef: ModuleRef,
@@ -295,7 +313,7 @@ export class TemplateResolver extends createMetaResolver(
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'createTemplateReview',
           payload: {
@@ -333,7 +351,7 @@ export class TemplateResolver extends createMetaResolver(
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (result && model.status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'updateTemplateReview',
           payload: {
@@ -381,7 +399,7 @@ export class TemplateResolver extends createMetaResolver(
   @RamAuthorized(TemplateAction.BulkRestore)
   @Mutation((returns) => Boolean, { description: 'Restore the bulk of templates (must be in "trash" status)' })
   bulkRestoreTemplate(
-    @Args('ids', { type: () => [ID!], description: 'Tempalte ids' }) ids: number[],
+    @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.templateDataSource.bulkRestore(ids, requestUser);
@@ -392,7 +410,7 @@ export class TemplateResolver extends createMetaResolver(
     description: 'Delete template permanently (must be in "trash" status).',
   })
   deleteTemplate(
-    @Args('id', { type: () => ID, description: 'Tempalte id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
   ) {
     return this.templateDataSource.delete(id, requestUser);
@@ -403,7 +421,7 @@ export class TemplateResolver extends createMetaResolver(
     description: 'Delete the bulk of templates permanently (must be in "trash" status).',
   })
   bulkDeleteTemplate(
-    @Args('ids', { type: () => [ID!], description: 'Tempalte ids' }) ids: number[],
+    @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
     return this.templateDataSource.bulkDelete(ids, requestUser);

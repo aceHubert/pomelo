@@ -19,18 +19,18 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
-import { MediaDataSource } from '@pomelo/datasource';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { MediaDataSource } from '@ace-pomelo/datasource';
 import {
   User,
-  ApiAuth,
+  ApiAuthCreate,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   createResponseSuccessType,
   describeType,
   RequestUser,
-} from '@pomelo/shared-server';
+} from '@ace-pomelo/shared-server';
 import { isAbsoluteUrl } from '@/common/utils/path.util';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { MediaAction } from '@/common/actions';
@@ -52,7 +52,22 @@ export class MediaController extends createMetaController(
   NewMediaMetaDto,
   MediaDataSource,
   {
-    authDecorator: ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN]),
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? MediaAction.MetaDetail
+          : method === 'getMetas'
+          ? MediaAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? MediaAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? MediaAction.MetaUpdate
+          : MediaAction.MetaDelete;
+
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
+    },
   },
 ) {
   constructor(
@@ -70,7 +85,7 @@ export class MediaController extends createMetaController(
   @Post('upload')
   @RamAuthorized(MediaAction.Upload)
   @UseInterceptors(FileInterceptor('file'))
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'File upload',
@@ -143,7 +158,7 @@ export class MediaController extends createMetaController(
   @Post('upload-multi')
   @RamAuthorized(MediaAction.Upload)
   @UseInterceptors(FilesInterceptor('files'))
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Multiple files upload',
@@ -218,7 +233,7 @@ export class MediaController extends createMetaController(
   @Post('image/crop')
   @RamAuthorized(MediaAction.Upload)
   @UseInterceptors(FileInterceptor('file'))
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({
     description: 'Image crop',
     type: ImageCropDto,
@@ -321,7 +336,7 @@ export class MediaController extends createMetaController(
    */
   @Get(':id')
   @RamAuthorized(MediaAction.Detail)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Media model',
     type: () => createResponseSuccessType({ data: MediaModelResp }, 'MediaModelSuccessResp'),
@@ -359,7 +374,7 @@ export class MediaController extends createMetaController(
    */
   @Get()
   @RamAuthorized(MediaAction.PagedList)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Media model',
     type: () => createResponseSuccessType({ data: PagedMediaResp }, 'PagedMediaSuccessResp'),
@@ -403,7 +418,7 @@ export class MediaController extends createMetaController(
    */
   @Post()
   @RamAuthorized(MediaAction.Create)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({
     description: 'New media model',
     type: NewMediaDto,
@@ -433,7 +448,7 @@ export class MediaController extends createMetaController(
    */
   @Patch(':id')
   @RamAuthorized(MediaAction.Update)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({
     description: 'Update media model',
     type: UpdateMediaDto,

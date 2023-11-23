@@ -1,5 +1,5 @@
 import { IsOptional, IsDefined, IsString, IsEnum, MaxLength } from 'class-validator';
-import { TemplateStatus, TemplateCommentStatus } from '@pomelo/datasource';
+import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/datasource';
 
 export abstract class NewTemplateValidator {
   @IsOptional()

@@ -1,6 +1,6 @@
 import { Field, ObjectType, ID, OmitType, PickType } from '@nestjs/graphql';
-import { TemplateStatus, TemplateCommentStatus } from '@pomelo/datasource';
-// import { FieldAuthorized, UserRole } from '@pomelo/authorization';
+import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/datasource';
+// import { FieldAuthorized, UserRole } from '@ace-pomelo/authorization';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
 
@@ -9,7 +9,7 @@ export class Template {
   @Field((type) => ID, { description: 'Template Id' })
   id!: number;
 
-  @Field((type) => ID, { description: 'Name (Route path alias)' })
+  @Field({ description: 'Name (alias path)' })
   name!: string;
 
   @Field({ description: 'Title' })
@@ -22,8 +22,8 @@ export class Template {
   content!: string;
 
   // @FieldAuthorized(UserRole.Administrator)
-  @Field({ description: 'Author id' })
-  author!: string;
+  @Field((type) => ID, { description: 'Author id' })
+  author!: number;
 
   // @FieldAuthorized(UserRole.Administrator)
   @Field((type) => TemplateStatus, { description: 'Status' })

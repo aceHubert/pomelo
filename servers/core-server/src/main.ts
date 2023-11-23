@@ -4,11 +4,14 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { setupSession } from '@ace-pomelo/nestjs-oidc';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { AppModule } from './app.module';
 
 declare const module: any;
 
+const packageName = process.env.npm_package_name;
+const packageVersion = process.env.npm_package_version;
 const logger = new Logger('Main', { timestamp: true });
 
 async function bootstrap() {
@@ -47,22 +50,27 @@ async function bootstrap() {
   // swagger
   if (isSwaggerDebug) {
     const api = new DocumentBuilder()
-      .setTitle('APIs')
-      .setDescription('The API description')
-      .setVersion('1.0')
+      .setTitle(`${packageName?.replace('@', '').replace('/', ' ') || 'ace-pomelo core-server'} APIs`)
+      .setDescription(
+        `The RESTful API documentation.<br/>graphql support: <a href="${graphqlPath}" target="_blank">Documentation</a>`,
+      )
+      .setVersion(packageVersion || '1.0.0')
       .addBearerAuth()
       .addTag('options', 'Option configs.')
       .addTag('templates', 'Template common actions.')
       .addTag('templates/form', 'From template.')
       .addTag('templates/page', 'Page template.')
       .addTag('templates/post', 'Post template.')
-      // .addTag('submodules', 'Micro front-end sub modules.')
       .addTag('term-taxonomy', 'Term taxonomy.')
+      .addTag('user', 'User.')
       .addTag('resources', 'Resources management.')
+      // .addTag('submodules', 'Micro front-end sub modules.')
       .build();
     const document = SwaggerModule.createDocument(app, api);
     SwaggerModule.setup(swaggerPath, app, document);
   }
+
+  setupSession(app, packageName?.replace('@', '').replace('/', ':') || 'ace-pomelo:core-server');
 
   await app.listen(port, host);
   logger.log(`Application is running on: ${await app.getUrl()}`);

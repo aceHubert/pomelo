@@ -1,5 +1,5 @@
 import { Field, ArgsType } from '@nestjs/graphql';
-import { OptionAutoload } from '@pomelo/datasource';
+import { OptionAutoload } from '@ace-pomelo/datasource';
 import { OptionArgsValidator } from './option-args.validator';
 
 /**

@@ -1,4 +1,4 @@
-import { IRAMActionDefine } from '@pomelo/ram-authorization';
+import { IRAMActionDefine } from '@ace-pomelo/ram-authorization';
 
 export class TemplateAction implements IRAMActionDefine {
   static readonly PagedList = 'template.paged.list';
@@ -12,6 +12,13 @@ export class TemplateAction implements IRAMActionDefine {
   static readonly BulkRestore = 'template.bulk.restore';
   static readonly Delete = 'template.delete';
   static readonly BulkDelete = 'template.bulk.delete';
+
+  // metas
+  static readonly MetaDetail = 'template.meta.detail';
+  static readonly MetaList = 'template.meta.list';
+  static readonly MetaCreate = 'template.meta.create';
+  static readonly MetaUpdate = 'template.meta.update';
+  static readonly MetaDelete = 'template.meta.delete';
 }
 
 export class FormTemplateAction implements IRAMActionDefine {

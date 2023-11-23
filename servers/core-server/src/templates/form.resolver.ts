@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Fields, User, RequestUser } from '@pomelo/shared-server';
+import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
@@ -8,11 +8,11 @@ import {
   Taxonomy,
   TemplateStatus,
   TemplateType,
-} from '@pomelo/datasource';
+} from '@ace-pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
-import { FormTemplateAction } from '@/common/actions';
+import { Anonymous, Authorized } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { TemplateAction, FormTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
 import { NewFormTemplateInput } from './dto/new-template.input';
@@ -22,7 +22,9 @@ import { FormTemplate, PagedFormTemplate, FormTemplateOption } from './models/fo
 
 @Authorized()
 @Resolver(() => FormTemplate)
-export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, TemplateDataSource) {
+export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, TemplateDataSource, {
+  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+}) {
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly templateDataSource: TemplateDataSource,
@@ -110,7 +112,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'createFormReview',
           payload: {
@@ -143,7 +145,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (result && model.status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'updateFormReview',
           payload: {

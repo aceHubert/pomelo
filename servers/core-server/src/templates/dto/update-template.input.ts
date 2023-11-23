@@ -6,7 +6,7 @@ import {
   NewPostTemplateInput,
 } from './new-template.input';
 
-@InputType({ description: 'Update input' })
+@InputType({ description: 'Update template input' })
 export class UpdateTemplateInput extends PartialType(
   PickType(NewTemplateInput, ['name', 'title', 'excerpt', 'content', 'status'] as const),
 ) {}

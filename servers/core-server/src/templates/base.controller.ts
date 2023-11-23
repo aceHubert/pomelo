@@ -4,39 +4,39 @@ import {
   Controller,
   Param,
   Query,
+  Body,
   Get,
   Post,
   Patch,
   Put,
+  Delete,
   ParseIntPipe,
   ParseEnumPipe,
   ParseArrayPipe,
   ValidationPipe,
-  Body,
-  Delete,
   Res,
   HttpStatus,
 } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ModuleRef } from '@nestjs/core';
-import { Authorized, Anonymous } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
-  ApiAuth,
+  ApiAuthCreate,
   User,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   QueryRequired,
   createResponseSuccessType,
   RequestUser,
-} from '@pomelo/shared-server';
+} from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
   Taxonomy,
   TemplateStatus,
-} from '@pomelo/datasource';
+} from '@ace-pomelo/datasource';
 import { TemplateAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { NewTemplateMetaDto } from './dto/new-template-meta.dto';
@@ -64,7 +64,22 @@ export class TemplateController extends createMetaController(
   NewTemplateMetaDto,
   TemplateDataSource,
   {
-    authDecorator: ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN]),
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? TemplateAction.MetaDetail
+          : method === 'getMetas'
+          ? TemplateAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? TemplateAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? TemplateAction.MetaUpdate
+          : TemplateAction.MetaDelete;
+
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
+    },
   },
 ) {
   constructor(protected readonly moduleRef: ModuleRef, private readonly templateDataSource: TemplateDataSource) {
@@ -105,7 +120,7 @@ export class TemplateController extends createMetaController(
    */
   @Get('count/:type/by/status')
   @RamAuthorized(TemplateAction.Counts)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Count by status',
     type: () => createResponseSuccessType({ data: [TemplateStatusCount] }, 'TemplateCountByStatusModelSuccessResp'),
@@ -122,7 +137,7 @@ export class TemplateController extends createMetaController(
    */
   @Get('count/:type/by/self')
   @RamAuthorized(TemplateAction.Counts)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiQuery({
     name: 'includeTrash',
     type: Boolean,
@@ -149,7 +164,7 @@ export class TemplateController extends createMetaController(
    */
   @Get('count/:type/by/day')
   @RamAuthorized(TemplateAction.Counts)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiQuery({
     name: 'month',
     type: String,
@@ -173,7 +188,7 @@ export class TemplateController extends createMetaController(
    */
   @Get('count/:type/by/month')
   @RamAuthorized(TemplateAction.Counts)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiQuery({
     name: 'year',
     type: String,
@@ -208,7 +223,7 @@ export class TemplateController extends createMetaController(
    */
   @Get('count/:type/by/year')
   @RamAuthorized(TemplateAction.Counts)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Count by year',
     type: () => createResponseSuccessType({ data: [TemplateYearCount] }, 'TemplateCountByYearModelSuccessResp'),
@@ -352,7 +367,7 @@ export class TemplateController extends createMetaController(
    */
   @Get()
   @RamAuthorized(TemplateAction.PagedList)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged template models',
     type: () => createResponseSuccessType({ data: PagedTemplateResp }, 'PagedTemplateSuccessResp'),
@@ -397,7 +412,7 @@ export class TemplateController extends createMetaController(
    */
   @Post()
   @RamAuthorized(TemplateAction.Create)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiCreatedResponse({
     description: 'Template model',
     type: () => createResponseSuccessType({ data: TemplateModelResp }, 'TemplateModelSuccessResp'),
@@ -428,7 +443,7 @@ export class TemplateController extends createMetaController(
    */
   @Put(':id')
   @RamAuthorized(TemplateAction.Update)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'UpdateTemplateModelSuccessResp'),
@@ -447,7 +462,7 @@ export class TemplateController extends createMetaController(
    */
   @Patch(':id/name')
   @RamAuthorized(TemplateAction.UpdateName)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: '"true" if success or "false" if template does not exist or name ',
     type: () => createResponseSuccessType({}, 'UpdateTemplateModelSuccessResp'),
@@ -476,7 +491,7 @@ export class TemplateController extends createMetaController(
    */
   @Patch(':id/status')
   @RamAuthorized(TemplateAction.UpdateStatus)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: '"true" if success or "false" if template does not exist',
     type: () => createResponseSuccessType({}, 'UpdateTemplateStatusModelSuccessResp'),
@@ -505,7 +520,7 @@ export class TemplateController extends createMetaController(
    */
   @Patch('status/bulk')
   @RamAuthorized(TemplateAction.BulkUpdateStatus)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'BulkUpdateTemplateStatusModelSuccessResp'),
@@ -520,7 +535,7 @@ export class TemplateController extends createMetaController(
    */
   @Patch(':id/restore')
   @RamAuthorized(TemplateAction.Restore)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'RestoreTemplateModelSuccessResp'),
@@ -544,7 +559,7 @@ export class TemplateController extends createMetaController(
    */
   @Patch('restore/bulk')
   @RamAuthorized(TemplateAction.BulkRestore)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({ type: () => [Number], description: 'Template ids' })
   @ApiOkResponse({
     description: 'no data content',
@@ -560,7 +575,7 @@ export class TemplateController extends createMetaController(
    */
   @Delete(':id')
   @RamAuthorized(TemplateAction.Delete)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'DeleteTemplateModelSuccessResp'),
@@ -584,7 +599,7 @@ export class TemplateController extends createMetaController(
    */
   @Delete('/bulk')
   @RamAuthorized(TemplateAction.BulkDelete)
-  @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiBody({ type: () => [Number], description: 'Template ids' })
   @ApiOkResponse({
     description: 'no data content',

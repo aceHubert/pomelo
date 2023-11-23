@@ -1,4 +1,4 @@
-import { IRAMActionDefine } from '@pomelo/ram-authorization';
+import { IRAMActionDefine } from '@ace-pomelo/ram-authorization';
 
 export class TermTaxonomyAction implements IRAMActionDefine {
   static readonly CategoryList = 'taxonomy.category.list';
@@ -11,4 +11,11 @@ export class TermTaxonomyAction implements IRAMActionDefine {
   static readonly Delete = 'taxonomy.delete';
   static readonly BulkDelete = 'taxonomy.bulk.delete';
   static readonly DeleteRelationship = 'taxonomy.delete.relationship';
+
+  // metas
+  static readonly MetaDetail = 'taxonomy.meta.detail';
+  static readonly MetaList = 'taxonomy.meta.list';
+  static readonly MetaCreate = 'taxonomy.meta.create';
+  static readonly MetaUpdate = 'taxonomy.meta.update';
+  static readonly MetaDelete = 'taxonomy.meta.delete';
 }

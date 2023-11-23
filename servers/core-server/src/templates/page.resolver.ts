@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Fields, User, RequestUser } from '@pomelo/shared-server';
+import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
@@ -8,11 +8,11 @@ import {
   Taxonomy,
   TemplateStatus,
   TemplateType,
-} from '@pomelo/datasource';
+} from '@ace-pomelo/datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
-import { PageTemplateAction } from '@/common/actions';
+import { Anonymous, Authorized } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { TemplateAction, PageTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
 import { NewPageTemplateInput } from './dto/new-template.input';
@@ -22,7 +22,9 @@ import { PageTemplate, PagedPageTemplate, PageTemplateOption } from './models/pa
 
 @Authorized()
 @Resolver(() => PageTemplate)
-export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, TemplateDataSource) {
+export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, TemplateDataSource, {
+  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+}) {
   constructor(
     protected readonly moduleRef: ModuleRef,
     private readonly templateDataSource: TemplateDataSource,
@@ -127,7 +129,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'createPageReview',
           payload: {
@@ -163,7 +165,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (result && model.status === TemplateStatus.Pending) {
       await this.messageService.publish({
-        excludes: [requestUser.sub!],
+        excludes: [requestUser.sub],
         message: {
           eventName: 'updatePageReview',
           payload: {

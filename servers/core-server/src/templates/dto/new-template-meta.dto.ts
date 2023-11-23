@@ -1,4 +1,4 @@
-import { NewTemplateMetaInput as INewTemplateMetaInput } from '@pomelo/datasource';
+import { NewTemplateMetaInput as INewTemplateMetaInput } from '@ace-pomelo/datasource';
 import { NewMetaDto } from '@/common/controllers/dto/new-meta.dto';
 
 export class NewTemplateMetaDto extends NewMetaDto implements INewTemplateMetaInput {

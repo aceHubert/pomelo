@@ -5,11 +5,11 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { FileUpload } from 'graphql-upload/Upload.js';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
-import { Authorized } from '@pomelo/authorization';
-import { RamAuthorized } from '@pomelo/ram-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { MediaDataSource } from '@pomelo/datasource';
-import { Fields, User, RequestUser } from '@pomelo/shared-server';
+import { MediaDataSource } from '@ace-pomelo/datasource';
+import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { isAbsoluteUrl } from '@/common/utils/path.util';
 import { MediaAction } from '@/common/actions';
@@ -29,7 +29,24 @@ import { MEDIA_OPTIONS } from './constants';
 
 @Authorized()
 @Resolver(() => Media)
-export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMediaMetaInput, MediaDataSource) {
+export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMediaMetaInput, MediaDataSource, {
+  authDecorator: (method) => {
+    const ramAction =
+      method === 'getMeta'
+        ? MediaAction.MetaDetail
+        : method === 'getMetas' || method === 'fieldMetas'
+        ? MediaAction.MetaList
+        : method === 'createMeta' || method === 'createMetas'
+        ? MediaAction.MetaCreate
+        : method === 'updateMeta' || method === 'updateMetaByKey'
+        ? MediaAction.MetaUpdate
+        : MediaAction.MetaDelete;
+
+    return method === 'getMeta' || method === 'getMetas'
+      ? [RamAuthorized(ramAction), Anonymous()]
+      : [RamAuthorized(ramAction)];
+  },
+}) {
   constructor(
     protected readonly moduleRef: ModuleRef,
     @Inject(MEDIA_OPTIONS) private readonly fileOptions: FixedMediaOptions,

@@ -1,5 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { OptionAutoload } from '@pomelo/datasource';
+import { OptionAutoload } from '@ace-pomelo/datasource';
 
 registerEnumType(OptionAutoload, {
   name: 'OptionAutoload',

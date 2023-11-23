@@ -2,7 +2,7 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { Logger, Controller, Get, Post, Body, Request, Scope } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { BaseController } from '@pomelo/shared-server';
+import { BaseController } from '@ace-pomelo/shared-server';
 import { DbInitService } from './db-init.service';
 import { InitArgsDto } from './dto/init-args.dto';
 

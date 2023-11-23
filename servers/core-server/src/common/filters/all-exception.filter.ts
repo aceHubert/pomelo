@@ -1,12 +1,13 @@
 import { snakeCase } from 'lodash';
 import statuses from 'statuses';
+import { Request, Response } from 'express';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
 import { GqlContextType } from '@nestjs/graphql';
 import { BaseError as SequelizeBaseError, DatabaseError as SequelizeDatabaseError } from 'sequelize';
 import { GraphQLError } from 'graphql';
 import { isHttpError } from 'http-errors';
 import { I18nContext, I18nTranslation } from 'nestjs-i18n';
-import { Request, Response } from 'express';
+import { renderMsgPage } from '@ace-pomelo/nestjs-oidc';
 import { InvalidPackageNameError, InvalidPackageVersionError } from 'query-registry';
 
 @Catch()
@@ -42,7 +43,33 @@ export class AllExceptionFilter implements ExceptionFilter {
       if (responseData.message && Array.isArray(responseData.message)) {
         responseData.message = responseData.message.join('; ');
       }
-      return response.status(status).json(responseData);
+
+      this.logger.error(exception);
+
+      if (this.isJson(request)) {
+        return response.status(status).json(responseData);
+      } else {
+        let errorPage: string;
+        switch (status) {
+          case HttpStatus.NOT_FOUND:
+            errorPage = renderMsgPage({
+              title: `Page not found!`,
+              icon: '404',
+              actionsAlign: 'center',
+              backLabel: 'Back',
+            });
+            break;
+          default:
+            errorPage = renderMsgPage({
+              title: `We are sorry, it has encountered an error.`,
+              subtitle: `Error ${status}`,
+              description: responseData.message ?? exception.message,
+              icon: 'warning',
+            });
+            break;
+        }
+        return response.send(errorPage);
+      }
     } else if (type === 'graphql') {
       // 将非 ApolloError 转换在 ApolloError
       if (!(exception instanceof GraphQLError)) {
@@ -64,6 +91,17 @@ export class AllExceptionFilter implements ExceptionFilter {
       // todo:其它情况
       return;
     }
+  }
+
+  private isJson(req: Request) {
+    const requestAccept = req.headers['accept'];
+    let contentType = 'text/html';
+
+    if (requestAccept && (requestAccept.includes('json') || requestAccept.includes('text/javascript'))) {
+      contentType = 'application/json';
+    }
+
+    return contentType === 'application/json';
   }
 
   /**

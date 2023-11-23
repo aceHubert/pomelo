@@ -1,4 +1,4 @@
-import { OptionAutoload } from '@pomelo/datasource';
+import { OptionAutoload } from '@ace-pomelo/datasource';
 import { NewOptionValidator } from './new-option.validator';
 
 export class NewOptionDto extends NewOptionValidator {

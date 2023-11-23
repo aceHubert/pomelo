@@ -6,7 +6,13 @@ import moment from 'moment';
 import Jimp from 'jimp';
 import { camelCase } from 'lodash';
 import { Inject, Injectable } from '@nestjs/common';
-import { MediaDataSource, MediaMetaDataModel, ImageScaleModel, OptionPresetKeys, MediaModel } from '@pomelo/datasource';
+import {
+  MediaDataSource,
+  MediaMetaDataModel,
+  ImageScaleModel,
+  OptionPresetKeys,
+  MediaModel,
+} from '@ace-pomelo/datasource';
 import { normalizeRoutePath, foregoingSlash, stripTrailingSlash, isAbsoluteUrl } from '@/common/utils/path.util';
 import { FixedMediaOptions } from './interfaces/media-options.interface';
 import { FileSaveOptions } from './interfaces/file-upload-options.interface';

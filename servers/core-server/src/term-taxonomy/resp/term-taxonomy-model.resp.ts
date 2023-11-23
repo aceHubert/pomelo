@@ -1,8 +1,8 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { Taxonomy, TermRelationshipAttributes } from '@pomelo/datasource';
+import { Taxonomy, TermTaxonomyAttributes, TermRelationshipAttributes } from '@ace-pomelo/datasource';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 
-export class TermTaxonomyModelResp {
+export class TermTaxonomyModelResp implements TermTaxonomyAttributes {
   /**
    * Taxonomy id
    */

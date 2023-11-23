@@ -1,4 +1,4 @@
-import { defineConfig } from './common/utils/configuration.utils';
+import { AuthType, defineConfig } from './common/utils/configuration.utils';
 
 /**
  * 通过文件配置环境（设置环境变量 CONFIG_FILE：env config file path）
@@ -48,12 +48,9 @@ export default defineConfig({
   },
   // 认证
   auth: {
-    debug: false,
+    type: AuthType.Jwt,
+    clientId: 'clientId',
+    clientSecret: 'clientSecret',
     endpoint: 'https://oauth2.com/',
-    jwksRsa: {
-      requestsPerMinute: 5,
-      cache: true,
-      rateLimit: true,
-    },
   },
 });

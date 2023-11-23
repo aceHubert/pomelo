@@ -1,9 +1,9 @@
 import { Field, ArgsType, Int, IntersectionType, OmitType, PickType } from '@nestjs/graphql';
-import { TemplateStatus } from '@pomelo/datasource';
-import { PagedTempateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
+import { TemplateStatus } from '@ace-pomelo/datasource';
+import { PagedTemplateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
 
 @ArgsType()
-class PagedTemplateArgs extends PagedTempateArgsValidator {
+class PagedTemplateArgs extends PagedTemplateArgsValidator {
   @Field({ nullable: true, description: 'Fuzzy search by field "title"' })
   keyword?: string;
 
