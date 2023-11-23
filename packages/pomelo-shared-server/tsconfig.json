@@ -4,6 +4,7 @@
     "target": "es2018",
     "lib": ["ES2018", "ESNext.AsyncIterable"],
     "baseUrl": ".",
+    "outDir": "./dist",
     "declaration": true,
     "declarationMap": false,
     "sourceMap": false,

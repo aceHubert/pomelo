@@ -11,6 +11,7 @@ import dts from 'rollup-plugin-dts';
 import css from 'rollup-plugin-import-css';
 import ignoreImport from 'rollup-plugin-ignore-import';
 import postcss from 'rollup-plugin-postcss';
+import svg from 'rollup-plugin-svg';
 import NpmImport from 'less-plugin-npm-import';
 import Autoprefix from 'less-plugin-autoprefix';
 import CleanCSS from 'less-plugin-clean-css';
@@ -69,6 +70,7 @@ const presets = () => {
     //     },
     //   },
     // }),
+    svg(),
     css(),
     resolve({
       browser: true,

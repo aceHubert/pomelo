@@ -1,7 +1,7 @@
 {
   "name": "@ace-pomelo/theme",
   "description": "Pomelo Styles",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "author": "Hubert<yi.xiang@live.cn>",
   "main": "lib/index.js",
   "module": "esm/index.js",
@@ -17,12 +17,6 @@
     "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
     "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
-  },
-  "devDependencies": {
-    "ant-design-vue": "^1.7.7"
-  },
-  "peerDependencies": {
-    "ant-design-vue": "^1.7.7"
   },
   "publishConfig": {
     "access": "public"

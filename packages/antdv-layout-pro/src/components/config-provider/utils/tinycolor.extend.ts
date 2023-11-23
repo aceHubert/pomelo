@@ -50,7 +50,7 @@ declare module 'tinycolor2' {
      * @color2 color2
      * @weight weight default 50
      */
-    lessMix: (color1: ColorInput, color2: ColorInput, weight?: number) => Instance;
+    lessMix: (color1: tinycolor.ColorInput, color2: tinycolor.ColorInput, weight?: number) => tinycolor.Instance;
   }
 
   interface Instance {

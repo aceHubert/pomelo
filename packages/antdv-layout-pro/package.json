@@ -1,7 +1,7 @@
 {
   "name": "antdv-layout-pro",
   "description": "Layout by vue-design-vue",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "author": "Hubert<yi.xiang@live.cn>",
   "main": "lib/index.js",
   "module": "esm/index.js",
@@ -37,7 +37,7 @@
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
   "dependencies": {
-    "@ace-pomelo/theme": "workspace:^",
+    "@ace-pomelo/theme": "^0.1.0-alpha.2",
     "@ace-util/core": "^0.1.0",
     "@iconfu/svg-inject": "^1.2.3",
     "jsoneditor": "^9.5.6",
