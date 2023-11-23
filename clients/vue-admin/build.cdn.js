@@ -7,7 +7,7 @@ const fs = require('fs');
 const resolve = require('resolve');
 
 const cdnConfig = {
-  publicPath: 'https://unpkg.zhimg.com',
+  publicPath: '//unpkg.com',
   links: [
     {
       packageName: 'jsoneditor',
@@ -77,7 +77,7 @@ const cdnConfig = {
     {
       packageName: 'oidc-client',
       variableName: 'Oidc',
-      path: '/dist/oidc-client.min.js',
+      path: '/dist/browser/oidc-client-ts.min.js',
       onerror: 'onOidcFallback && onOidcFallback()',
     },
     {

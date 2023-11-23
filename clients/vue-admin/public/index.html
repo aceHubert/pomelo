@@ -131,12 +131,12 @@
         </style>
     </div>
     <!-- 自动注入 -->
-    <!-- <script src="https://www.unpkg.com/oidc-client@1.11.5/dist/oidc-client.min.js"></script> -->
+    <!-- <script src="//unpkg.com/oidc-client-ts@2.4.0/dist/browser/oidc-client-ts.min.js"></script> -->
     <script >
       // 由自动注入脚本事件fallback
-      // window.Oidc || document.write('<script src="<%= BASE_URL %>static/js/oidc-client.min.js"><\/script>');
+      // window.Oidc || document.write('<script src="<%= BASE_URL %>static/js/oidc-client-ts.min.js"><\/script>');
       function onOidcFallback(){
-        window.Oidc || document.write('<script src="<%= BASE_URL %>static/js/oidc-client.min.js"><\/script>');
+        window.Oidc || document.write('<script src="<%= BASE_URL %>static/js/oidc-client-ts.min.js"><\/script>');
       }
     </script>
   </body>

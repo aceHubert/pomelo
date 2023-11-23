@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+    <link rel="icon" href="/favicon.ico" />
     <style type="text/css">
       * {
         margin: 0;
@@ -38,10 +38,11 @@
   <body>
     <p id="msg">正在登录...</p>
     <p id="home"><a href="/">去首页</a></p>
-    <script src="https://www.unpkg.com/oidc-client@1.11.5/dist/oidc-client.min.js"></script>
+    <script src="/static/js/env.js"></script>
+    <script src="//unpkg.com/oidc-client-ts@2.4.0/dist/browser/oidc-client-ts.min.js"></script>
     <script>
-      // fallback to local oidc-client.min.js
-      window.Oidc || document.write('<script src="./static/js/oidc-client.min.js"><\/script>');
+      // fallback to local oidc-client-ts.min.js
+      window.oidc || document.write('<script src="./static/js/oidc-client-ts.min.js"><\/script>');
     </script>
     <script>
       var msgEl = document.getElementById('msg');
@@ -55,7 +56,9 @@
           location.replace(url);
         }
       };
-      new Oidc.UserManager()
+
+      const settings = window._ENV ? window._ENV.oidc || {} : {};
+      new oidc.UserManager(settings)
         .signinRedirectCallback()
         .then(function (user) {
           if (!user) {

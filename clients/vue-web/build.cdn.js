@@ -6,7 +6,7 @@
 const fs = require('fs');
 
 const cdnConfig = {
-  cdnRegistry: 'https://www.unpkg.com',
+  cdnRegistry: '//unpkg.com',
   links: [
     // {path: 'xxx.css', prefetch: true}
   ],
@@ -54,7 +54,7 @@ const cdnConfig = {
     {
       packageName: 'oidc-client',
       variableName: 'Oidc',
-      path: '/dist/oidc-client.min.js',
+      path: '/dist/browser/oidc-client-ts.min.js',
       onerror: 'onOidcFallback && onOidcFallback()',
     },
     {
