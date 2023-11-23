@@ -1,6 +1,7 @@
-import { SetMetadata, applyDecorators, CustomDecorator } from '@nestjs/common';
+import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';
 import { Extensions } from '@nestjs/graphql';
-import { getArrayFromOverloadedRest } from './utils/array-overload.util';
+import { getArrayFromOverloadedRest } from '@ace-pomelo/shared-server';
+import { AuthorizedGuard } from './authorized.guard';
 import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
 
 /**
@@ -17,6 +18,7 @@ export function Authorized(...rolesOrRoleArray: Array<string | string[]>): Metho
   return applyDecorators(
     SetMetadata(AUTHORIZATION_KEY, true), // 验证登录
     SetMetadata(AUTHORIZATION_ROLE_KEY, roles), // 角色权限
+    UseGuards(AuthorizedGuard), // 使用 Guards
   );
 }
 
@@ -27,20 +29,25 @@ export function Authorized(...rolesOrRoleArray: Array<string | string[]>): Metho
  * For example if you apply [Anonymous] at the controller level,
  * any [Authorize] attributes on the same controller (or on any action within it) is ignored (except graphql field).
  */
-export function Anonymous(): CustomDecorator {
-  return SetMetadata(ALLOWANONYMOUS_KEY, true);
+export function Anonymous(): ClassDecorator & MethodDecorator {
+  return applyDecorators(
+    SetMetadata(ALLOWANONYMOUS_KEY, true), // 匿名访问
+    UseGuards(AuthorizedGuard), // 使用 Guards
+  );
 }
 
 /**
  * graphql 角色权限验证（on Field）
  * Warning: this is not restricted by [Anonymous].
- *
  * @param role 角色
  * @param others 更多角色
  */
 export function FieldAuthorized(role: string, ...others: string[]): PropertyDecorator {
   const roles = [role].concat(others);
-  return Extensions({
-    roles, // 角色
-  });
+  return applyDecorators(
+    Extensions({
+      roles, // 角色
+    }),
+    UseGuards(AuthorizedGuard),
+  );
 }

@@ -1,21 +1,28 @@
 import { Reflector } from '@nestjs/core';
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
-import { RequestUser } from '@pomelo/shared-server';
+import {
+  Inject,
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { getContextObject, RequestUser } from '@ace-pomelo/shared-server';
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
 import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
-import { getContextObject } from './utils/get-context-object.util';
-import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
-
-// TODO: 设置为可配置
-const roleKey = 'role';
+import { AuthorizationOptions } from './interfaces/authorization-options.interface';
+import { AUTHORIZATION_OPTIONS, AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
 
 /**
  * 判断是否是登录状态和验证角色权限
  */
 @Injectable()
 export class AuthorizedGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(
+    @Inject(AUTHORIZATION_OPTIONS) private readonly options: AuthorizationOptions,
+    private readonly reflector: Reflector,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const ctx = getContextObject(context);
@@ -24,25 +31,6 @@ export class AuthorizedGuard implements CanActivate {
     }
 
     const type = context.getType<GqlContextType>();
-    const user: RequestUser | null = ctx.user;
-
-    // graphql 判断返回实体字段是否有权限
-    if (type === 'graphql') {
-      const info = GqlExecutionContext.create(context).getInfo<GraphQLResolveInfo>();
-
-      /**
-       * 这里未使用 FieldMiddleware 原因在于中间件对每个 field 是隔离的，当其中 field 验证失败时，ResoloveField 会继续执行
-       * https://docs.nestjs.com/graphql/extensions
-       */
-      // @FieldAuthorized
-      const fieldRoles = this.resolveGraphqlOutputFieldsRoles(info);
-      for (const field in fieldRoles) {
-        if (!user || !this.hasRolePermission(user!, fieldRoles[field])) {
-          // false return 403
-          throw new UnauthorizedException(`Access denied, You don't capability for field "${field}"!)`);
-        }
-      }
-    }
 
     const anonymous = this.reflector.getAllAndOverride<boolean>(ALLOWANONYMOUS_KEY, [
       context.getHandler(),
@@ -69,12 +57,31 @@ export class AuthorizedGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    const user = ctx[this.options.userProperty!] as RequestUser;
     if (!user) {
       // 没有的提供 token, return 401
       throw new UnauthorizedException(`Access denied, You don't have permission for this action!`);
     } else if (capabilities?.length && !this.hasRolePermission(user, capabilities)) {
       // false return 403
       throw new ForbiddenException(`Access denied, You don't have capability for this action!`);
+    }
+
+    // graphql 判断返回实体字段是否有权限
+    if (type === 'graphql') {
+      const info = GqlExecutionContext.create(context).getInfo<GraphQLResolveInfo>();
+
+      /**
+       * 这里未使用 FieldMiddleware 原因在于中间件对每个 field 是隔离的，当其中 field 验证失败时，ResoloveField 会继续执行
+       * https://docs.nestjs.com/graphql/extensions
+       */
+      // @FieldAuthorized
+      const fieldRoles = this.resolveGraphqlOutputFieldsRoles(info);
+      for (const field in fieldRoles) {
+        if (!user || !this.hasRolePermission(user!, fieldRoles[field])) {
+          // false return 403
+          throw new UnauthorizedException(`Access denied, You don't capability for field "${field}"!)`);
+        }
+      }
     }
 
     return true;
@@ -140,7 +147,7 @@ export class AuthorizedGuard implements CanActivate {
       return true;
     } else {
       // @Authorized(['admin', 'editor'])
-      const userRole = user[roleKey] as string | undefined;
+      const userRole = user.role as string | undefined;
       return Boolean(userRole && roles.some((role) => userRole === role));
     }
   }
