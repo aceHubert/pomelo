@@ -139,12 +139,7 @@ export default defineComponent({
     const hasTopMenu = computed(() => !!layoutMixin.topMenus?.length);
     const headerHeight = computed(() => (hasHeader.value ? 48 : 0));
     const isHeaderHidden = ref(false);
-    // siderMenu 不可以显示在 header 中
-    const hasSiderMenu = computed(
-      () =>
-        (props.layoutType === LayoutType.SiderMenu || props.layoutType === LayoutType.MixedMenu) &&
-        !!layoutMixin.siderMenus?.length,
-    );
+    const hasSiderMenu = computed(() => !!layoutMixin.siderMenus?.length);
     const sideCollapsed = ref(false);
     const sideCollapsedWidth = ref(48);
     const sideExpandedWidth = ref(200);
@@ -264,7 +259,9 @@ export default defineComponent({
 
       const resolved = layoutMixin.reslovePath(next);
 
-      if (menu.position === 'top' && menu.children?.length) {
+      // 如果是顶部菜单，且有侧边菜单，点击顶部菜单时，不切换路由，只切换菜单
+      // 等待侧边菜单选择后，再切换路由
+      if (menu.position === 'top' && menu.children?.some((item) => item.position === 'side')) {
         return layoutMixin.setPath(resolved.path, false);
       }
 

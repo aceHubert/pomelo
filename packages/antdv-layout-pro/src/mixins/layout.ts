@@ -56,9 +56,9 @@ export const useLayoutMixin = () => {
    * 侧边导航
    */
   const siderMenus = computed(() => {
-    const menu = menuKeyMap.value.get(currSiderMenuKey.value);
-    if (menu?.parent?.key && menu?.position === 'sub') {
-      return (menuKeyMap.value.get(menu.parent.key)?.children ?? [])
+    const currentSideMenu = menuKeyMap.value.get(currSiderMenuKey.value);
+    if (currentSideMenu?.parent?.key && currentSideMenu?.position === 'sub') {
+      return (menuKeyMap.value.get(currentSideMenu.parent.key)?.children ?? [])
         .filter((item) => item.display !== false)
         .map(({ children: _, ...restItem }) => restItem);
     } else {
@@ -72,7 +72,6 @@ export const useLayoutMixin = () => {
           }));
       })((!currTopMenuKey.value ? menus.value : menuKeyMap.value.get(currTopMenuKey.value)?.children) ?? []);
     }
-    return [];
   });
 
   /**
@@ -128,15 +127,28 @@ export const useLayoutMixin = () => {
         )?.[0] || matchNoRegistPageParentPath(path, menuPathMap.value);
   };
 
-  const getTopMenuKey = (key: string) => {
-    const parent = menuKeyMap.value.get(key)?.parent;
+  const getTopMenuKey = (matched: MenuConfig) => {
+    const parent = menuKeyMap.value.get(matched.key)?.parent;
 
     if (parent?.position === 'top') {
       return parent.key;
     } else if (parent) {
-      return getTopMenuKey(parent.key);
+      return getTopMenuKey(parent);
     }
-    return key;
+    return matched.key;
+  };
+
+  const getSiderMenuKey = (matched: MenuConfig) => {
+    return matched.display !== false
+      ? matched.key
+      : // if current menu is hidden, find the first parent menu which is not hidden
+        (function findParentKey(key: string): string {
+          const parent = menuKeyMap.value.get(key)?.parent;
+          if (parent?.position !== 'top' && parent?.display === false) {
+            return findParentKey(parent.key);
+          }
+          return parent?.key ?? key;
+        })(matched.key);
   };
 
   /**
@@ -152,7 +164,7 @@ export const useLayoutMixin = () => {
         const currentMatched = menuPathMap.value.get(matchedPath);
         if (!currentMatched) return;
 
-        setTopCurrMenuKey(getTopMenuKey(currentMatched.key));
+        setTopCurrMenuKey(getTopMenuKey(currentMatched));
       } else {
         currentMatchPath.value = getMatchedPath(path);
       }
@@ -161,7 +173,8 @@ export const useLayoutMixin = () => {
       const nextMatched = menuPathMap.value.get(matchedPath);
       if (!nextMatched) return;
 
-      setTopCurrMenuKey(getTopMenuKey(nextMatched.key));
+      setTopCurrMenuKey(getTopMenuKey(nextMatched));
+      setSiderCurrMenuKey(getSiderMenuKey(nextMatched));
     }
   };
 
@@ -265,7 +278,7 @@ export const useLayoutMixin = () => {
       if (!currentMatched) return;
 
       // topMenu
-      setTopCurrMenuKey(getTopMenuKey(currentMatched.key));
+      setTopCurrMenuKey(getTopMenuKey(currentMatched));
 
       // siderMenu
       const siderMenuOpenKeys = (function getSiderMenuOpenKeys(key: string, result: string[] = []): string[] {
@@ -280,18 +293,7 @@ export const useLayoutMixin = () => {
         }
       })(currentMatched.key);
 
-      setSiderCurrMenuKey(
-        currentMatched.display !== false
-          ? currentMatched.key
-          : // if current menu is hidden, find the first parent menu which is not hidden
-            (function findParentKey(key: string): string {
-              const parent = menuKeyMap.value.get(key)?.parent;
-              if (parent?.position !== 'top' && parent?.display === false) {
-                return findParentKey(parent.key);
-              }
-              return parent?.key ?? key;
-            })(currentMatched.key),
-      );
+      setSiderCurrMenuKey(getSiderMenuKey(currentMatched));
       setSiderMenuOpenKeys(siderMenuOpenKeys);
     }
   }, currentMatchPath);

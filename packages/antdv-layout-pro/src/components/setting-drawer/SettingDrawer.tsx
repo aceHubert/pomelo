@@ -9,11 +9,16 @@ import IconDark from './icons/dark.svg';
 import IconTopmenu from './icons/topmenu.svg';
 import IconSiderMenu from './icons/sidermenu.svg';
 
+// Types
+import type { PropType } from 'vue-demi';
+
 export interface SettingDrawerProps {
   visible: boolean;
   theme: Theme;
   primaryColor: string;
-  presetColors: Array<{ key: string; color: string }>;
+  presetColors?:
+    | Array<{ key: string; color: string }>
+    | ((defaultPresetColors: Array<{ key: string; color: string }>) => Array<{ key: string; color: string }>);
   layout: LayoutType;
   contentWidth: ContentWidth;
   fixedHeader: boolean;
@@ -21,6 +26,7 @@ export interface SettingDrawerProps {
   fixSiderbar: boolean;
   colorWeak: boolean;
   multiTab: boolean;
+  darkModeSupport: boolean;
   invisibleHandle: boolean;
   prefixCls?: string;
   i18nKeyPrefix: string;
@@ -36,7 +42,7 @@ export default defineComponent({
     visible: { type: Boolean, default: false },
     theme: { type: String, default: Theme.Light },
     primaryColor: { type: String, default: defaultPrimaryColor },
-    presetColors: { type: Array, default: () => [] },
+    presetColors: { type: [Array, Function] as PropType<SettingDrawerProps['presetColors']> },
     layout: { type: String, default: LayoutType.MixedMenu },
     contentWidth: { type: String, default: ContentWidth.Fluid },
     fixedHeader: { type: Boolean, default: true },
@@ -44,6 +50,7 @@ export default defineComponent({
     fixSiderbar: { type: Boolean, default: true },
     colorWeak: { type: Boolean, default: false },
     multiTab: { type: Boolean, default: false },
+    darkModeSupport: { type: Boolean, default: true },
     invisibleHandle: { type: Boolean, default: false },
     prefixCls: String,
     i18nKeyPrefix: {
@@ -111,9 +118,17 @@ export default defineComponent({
     );
 
     const presetColors = computed(() => {
-      const colors = props.presetColors.length
-        ? [...props.presetColors]
-        : getDefaultPresetColors(configProvider.i18nRender, `${props.i18nKeyPrefix}.preset_colors`);
+      const defaultPresetColors = getDefaultPresetColors(
+        configProvider.i18nRender,
+        `${props.i18nKeyPrefix}.preset_colors`,
+      );
+      let colors;
+      if (typeof props.presetColors === 'function') {
+        colors = props.presetColors(defaultPresetColors);
+      } else {
+        colors = props.presetColors ?? defaultPresetColors;
+      }
+
       if (!colors.some((item) => item.color === defaultPrimaryColor)) {
         colors.unshift({
           key: configProvider.i18nRender(`${props.i18nKeyPrefix}.preset_colors.daybreak_blue`, 'Daybreak Blue'),
@@ -214,16 +229,18 @@ export default defineComponent({
                 )}
               </div>
             </Tooltip>
-            <Tooltip title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.dark`, 'Dark style')}>
-              <div class={`${prefixCls}-block-checkbox__item`} onClick={handleThemeChange(Theme.Dark)}>
-                <img src={IconDark} alt="dark" />
-                {configs.theme === Theme.Dark && (
-                  <div class="selected-icon">
-                    <Icon type="check" />
-                  </div>
-                )}
-              </div>
-            </Tooltip>
+            {props.darkModeSupport && (
+              <Tooltip title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.dark`, 'Dark style')}>
+                <div class={`${prefixCls}-block-checkbox__item`} onClick={handleThemeChange(Theme.Dark)}>
+                  <img src={IconDark} alt="dark" />
+                  {configs.theme === Theme.Dark && (
+                    <div class="selected-icon">
+                      <Icon type="check" />
+                    </div>
+                  )}
+                </div>
+              </Tooltip>
+            )}
           </div>
         </div>
 

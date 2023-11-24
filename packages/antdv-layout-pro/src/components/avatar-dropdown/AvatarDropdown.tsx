@@ -151,7 +151,11 @@ export default defineComponent({
               ))}
           </div>
           <div class={[`${prefixCls}-name__wrapper`, { 'pl-2': slots.name || props.name || slots.description }]}>
-            {(slots.name || props.name) && <p class={`${prefixCls}__name`}>{slots.name?.() ?? props.name}</p>}
+            {(slots.name || props.name) && (
+              <p class={`${prefixCls}__name`} title={slots.name?.() ?? props.name}>
+                {slots.name?.() ?? props.name}
+              </p>
+            )}
             {slots.description && <div class={`${prefixCls}__description`}>{slots.description()}</div>}
           </div>
         </div>
