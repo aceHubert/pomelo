@@ -261,7 +261,7 @@ export const useTemplateApi = defineRegistApi('template', {
           id
           name
         }
-        metas(metaKeys: $metaKeys) {
+        metas {
           id
           key: metaKey
           value: metaValue

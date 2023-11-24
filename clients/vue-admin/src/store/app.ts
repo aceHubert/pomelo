@@ -43,31 +43,11 @@ export const useAppStore = defineStore(
     };
 
     const theme = ref(color.value.theme);
-    const themeChangeDisabled = ref(false);
     /**
      * 设置 theme（不会缓存，如需要缓存请使用 setColor）
      */
     const setTheme = (themeVal: Theme) => {
       theme.value = themeVal;
-    };
-    /**
-     * 重置成默认 theme
-     */
-    const resetTheme = () => {
-      theme.value = color.value.theme;
-    };
-
-    /**
-     * 设置 theme change disabled
-     */
-    const setThemeChangedDisabled = (flag: boolean) => {
-      themeChangeDisabled.value = flag;
-    };
-    /**
-     * 重置成默认 theme change disabled
-     */
-    const resetThemeChangeDisabled = () => {
-      themeChangeDisabled.value = false;
     };
 
     const primaryColor = ref(color.value.primaryColor);
@@ -78,13 +58,6 @@ export const useAppStore = defineStore(
       if (color && new tinycolor(color).isValid()) {
         primaryColor.value = color;
       }
-    };
-
-    /**
-     * 重置成默认 primary color
-     */
-    const resetPrimaryColor = () => {
-      primaryColor.value = color.value.primaryColor;
     };
 
     //#endregion
@@ -129,18 +102,13 @@ export const useAppStore = defineStore(
       layout,
       // color, // color 不导出，通过 theme / primaryColor 获取
       theme,
-      themeChangeDisabled,
       primaryColor,
       setLocale,
       setSupportLanguages,
       setLayout,
       setColor,
       setTheme,
-      resetTheme,
-      setThemeChangedDisabled,
-      resetThemeChangeDisabled,
       setPrimaryColor,
-      resetPrimaryColor,
     };
   },
   {

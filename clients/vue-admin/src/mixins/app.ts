@@ -37,15 +37,14 @@ export const useAppMixin = () => {
       : appStore.siteTitle,
   );
 
-  const layout = computed(() => appStore.layout);
   const supportLanguages = computed(() => appStore.supportLanguages);
+  const layout = computed(() => appStore.layout);
 
-  const primaryColor = computed(() => appStore.primaryColor);
   const theme = computed(() => appStore.theme);
   const isDark = computed(() => theme.value === Theme.Dark);
   const isLight = computed(() => !isDark.value);
   const isRealLight = computed(() => theme.value === Theme.RealLight);
-  const themeChangeDisabled = ref(() => appStore.themeChangeDisabled);
+  const primaryColor = computed(() => appStore.primaryColor);
 
   /**
    * 加载 antd 语言文件
@@ -73,7 +72,6 @@ export const useAppMixin = () => {
     siteLogo,
     siteTitle,
     theme,
-    themeChangeDisabled,
     isDark,
     isLight,
     isRealLight,
@@ -81,11 +79,7 @@ export const useAppMixin = () => {
     layout,
     supportLanguages,
     setTheme: appStore.setTheme,
-    resetTheme: appStore.resetTheme,
-    setThemeChangedDisabled: appStore.setThemeChangedDisabled,
-    resetThemeChangeDisabled: appStore.resetThemeChangeDisabled,
     setPrimaryColor: appStore.setPrimaryColor,
-    resetPrimaryColor: appStore.resetPrimaryColor,
     setColor: appStore.setColor,
     setLocale: appStore.setLocale,
     setLayout: appStore.setLayout,
