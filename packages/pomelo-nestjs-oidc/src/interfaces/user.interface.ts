@@ -3,7 +3,6 @@
 
 import { Timer } from '../utils/timer';
 import { IdTokenClaims } from './claims.interface';
-import { ExternalIdps } from './oidc-module-options.interface';
 
 /**
  * Holds claims represented by a combination of the `id_token` and the user info endpoint.
@@ -54,9 +53,6 @@ export class User {
   public readonly state: unknown;
   public readonly url_state?: string;
 
-  /** external identity provider options */
-  public readonly external_idps?: ExternalIdps;
-
   public constructor(args: {
     id_token?: string;
     session_state?: string | null;
@@ -68,7 +64,6 @@ export class User {
     expires_at?: number;
     userState?: unknown;
     url_state?: string;
-    external_idps?: ExternalIdps;
   }) {
     this.id_token = args.id_token;
     this.session_state = args.session_state ?? null;
@@ -81,7 +76,6 @@ export class User {
     this.expires_at = args.expires_at;
     this.state = args.userState;
     this.url_state = args.url_state;
-    this.external_idps = args.external_idps;
   }
 
   /** Computed number of seconds the access token has remaining. */

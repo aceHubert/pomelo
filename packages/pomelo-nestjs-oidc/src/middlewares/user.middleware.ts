@@ -1,7 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { ExtractJwt } from 'passport-jwt';
 import { OidcService } from '../oidc.service';
-import { authenticateExternalIdps } from '../utils';
 
 @Injectable()
 export class UserMiddleware implements NestMiddleware {
@@ -15,10 +14,6 @@ export class UserMiddleware implements NestMiddleware {
       const { tenantId, channelType } = this.oidcService.getMultitenantParamsFromRequest(req);
 
       const payload = await this.oidcService.verifyToken(jwt, tenantId, channelType);
-
-      if (this.oidcService.options.externalIdps) {
-        payload.external_idps = await authenticateExternalIdps(this.oidcService.options.externalIdps);
-      }
 
       payload['tenant_id'] = tenantId;
       payload['channel_type'] = channelType;

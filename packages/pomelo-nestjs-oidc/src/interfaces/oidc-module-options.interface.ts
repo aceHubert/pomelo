@@ -46,7 +46,6 @@ export type OidcModuleOptions = {
    * openid-client http options
    */
   defaultHttpOptions?: HttpOptions;
-  externalIdps?: ExternalIdps;
 
   /**
    * Disable to register Login Controllers
@@ -67,22 +66,6 @@ export type OidcModuleOptions = {
 
 interface OidcChannelOptions {
   clientMetadata: ClientMetadata;
-}
-
-export interface IdentityProviderOptions {
-  clientId: string;
-  clientSecret: string;
-  issuer: string;
-  scope: string;
-  accessToken?: string;
-  refreshToken?: string;
-  tokenEndpoint?: string;
-  expiresAt?: number;
-  channel?: ChannelType;
-}
-
-export interface ExternalIdps {
-  [idpName: string]: IdentityProviderOptions;
 }
 
 export interface OidcOptionsFactory {

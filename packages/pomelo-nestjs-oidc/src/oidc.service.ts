@@ -4,7 +4,7 @@ import { HttpStatus, Inject, Injectable, Logger, UnauthorizedException, OnModule
 import { Request, Response, NextFunction } from 'express';
 import { JWKS } from 'jose';
 import { Client, Issuer, custom, TokenSet, IdTokenClaims } from 'openid-client';
-import { Params, ChannelType, User, UserProfile, ExternalIdps, OidcModuleOptions } from './interfaces';
+import { Params, ChannelType, User, UserProfile, OidcModuleOptions } from './interfaces';
 import { renderPopupPage, renderMsgPage } from './templates';
 import { JwtUtils } from './utils';
 import { ClaimsService } from './claims.service';
@@ -313,7 +313,6 @@ export class OidcService implements OnModuleInit {
       scope: tokenset.scope,
       profile: tokenset.profile,
       expires_at: tokenset.expires_at,
-      external_idps: tokenset.external_idps,
     });
 
     if (verifySub) {
@@ -407,7 +406,6 @@ export class OidcService implements OnModuleInit {
 declare module 'openid-client' {
   export interface TokenSet {
     profile: UserProfile;
-    external_idps?: ExternalIdps;
   }
 }
 

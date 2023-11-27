@@ -2,7 +2,6 @@ import { Logger, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, TokenSet } from 'openid-client';
 import { ChannelType, User } from './interfaces';
-import { authenticateExternalIdps } from './utils';
 import { OidcService } from './oidc.service';
 
 export class OidcStrategy extends PassportStrategy(Strategy, 'oidc') {
@@ -32,10 +31,6 @@ export class OidcStrategy extends PassportStrategy(Strategy, 'oidc') {
 
     if (tokenset.expired()) {
       throw new UnauthorizedException('token is expired!');
-    }
-
-    if (this.oidcService.options.externalIdps) {
-      tokenset.external_idps = await authenticateExternalIdps(this.oidcService.options.externalIdps);
     }
 
     await this.oidcService.processClaims(tokenset, this.idpKey);

@@ -1,4 +1,3 @@
-export * from './external-idps';
 export * from './has-decorator';
 export * from './jwt-utils';
 export * from './merge-defaults';
