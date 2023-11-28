@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { createClient, RedisClientType } from 'redis';
 import { AdapterPayload } from 'oidc-provider';
 import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
@@ -76,13 +75,9 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
   }
 
   async find(model: string, id: string) {
-    let payload = this.decode<AdapterPayload>(await this.storage.get(this.key(model, id)));
+    const payload = this.decode<AdapterPayload>(await this.storage.get(this.key(model, id)));
     // https://github.com/panva/node-oidc-provider/blob/main/lib/actions/userinfo.js#L108
-    if (model === 'AccessToken') {
-      // try jwt decode
-      if (!payload) {
-        payload = jwt.decode(id, { json: true }) as AdapterPayload;
-      }
+    if (model === 'AccessToken' && payload) {
       if (payload) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { aud, ...rest } = payload;

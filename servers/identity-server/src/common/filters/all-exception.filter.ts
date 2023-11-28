@@ -3,6 +3,7 @@ import { BaseError as SequelizeBaseError } from 'sequelize';
 import { isHttpError } from 'http-errors';
 import { Request, Response } from 'express';
 import { InvalidPackageNameError, InvalidPackageVersionError } from 'query-registry';
+import { isJsonRequest } from '../utils/is-json-request.util';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -32,7 +33,7 @@ export class AllExceptionFilter implements ExceptionFilter {
 
       this.logger.error(exception);
 
-      if (this.isJson(request)) {
+      if (isJsonRequest(request.headers)) {
         return response.status(status).json(responseData);
       } else {
         let viewName = 'error',
@@ -65,17 +66,6 @@ export class AllExceptionFilter implements ExceptionFilter {
       // todo:其它情况
       return;
     }
-  }
-
-  private isJson(req: Request) {
-    const requestAccept = req.headers['accept'];
-    let contentType = 'text/html';
-
-    if (requestAccept && (requestAccept.includes('json') || requestAccept.includes('text/javascript'))) {
-      contentType = 'application/json';
-    }
-
-    return contentType === 'application/json';
   }
 
   /**

@@ -14,7 +14,7 @@ import {
 } from 'nestjs-i18n';
 import { OidcModule } from 'nest-oidc-provider';
 import { SequelizeModule } from '@ace-pomelo/datasource';
-import { configuration } from './common/utils/configuration.utils';
+import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';

@@ -1,4 +1,4 @@
-import { defineConfig } from './common/utils/configuration.utils';
+import { defineConfig } from './common/utils/configuration.util';
 
 /**
  * 通过文件配置环境（设置环境变量 CONFIG_FILE：env config file path）
