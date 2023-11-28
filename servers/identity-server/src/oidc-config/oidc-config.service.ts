@@ -1,4 +1,6 @@
-import { Provider, AdapterFactory, FindAccount, errors } from 'oidc-provider';
+import * as url from 'url';
+import * as crypto from 'crypto';
+import { Provider, AdapterFactory, FindAccount, KoaContextWithOIDC, errors } from 'oidc-provider';
 import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Logger } from '@nestjs/common';
@@ -45,6 +47,18 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           next();
         });
 
+        // checksession session_state
+        provider.on('authorization.success', async (ctx: KoaContextWithOIDC, response: Record<string, any>) => {
+          if (!response) return;
+
+          const origin = new url.URL((ctx.oidc.params?.redirect_uri as string) ?? '').origin;
+          const clientId = ctx.oidc.client?.clientId;
+          const sessionId = ctx.oidc.session?.jti;
+          if (clientId && origin && sessionId) {
+            response.session_state = this.getSessionState(clientId, origin, sessionId);
+          }
+        });
+
         return provider;
       },
     };
@@ -54,71 +68,8 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     return (modelName: string) => new OidcConfigAdapter(modelName, this.adapterService);
   }
 
-  private findAccount: FindAccount = async (ctx, id) => {
-    const user = await this.userDataSource.get(
-      Number(id),
-      ['niceName', 'displayName', 'email', 'mobile', 'url', 'updatedAt'],
-      { sub: id },
-    );
-
-    if (!user) {
-      return undefined;
-    }
-
-    return {
-      accountId: id,
-      claims: async (use, scope) => {
-        console.log('claims', use, scope);
-
-        if (use === 'extra_token_claims') {
-          return {
-            sub: id,
-            // TODO: add rams
-            ram: [],
-          };
-        } else if (
-          use === 'userinfo' ||
-          (use === 'id_token' && ctx.oidc.client?.metadata().access_token_format === 'jwt') // jwt token can not read from userinfo endpoint
-        ) {
-          const userMetas = await this.userDataSource.getMetas(Number(id), Object.values(UserMetaPresetKeys), [
-            'metaKey',
-            'metaValue',
-          ]);
-
-          return {
-            sub: id,
-            display_name: user.displayName,
-            nice_name: user.niceName,
-            email: userMetas.find((meta) => meta.metaKey === UserMetaPresetKeys.VerifingEmail)?.metaValue ?? user.email,
-            email_verified: user.email,
-            phone_number:
-              userMetas.find((meta) => meta.metaKey === UserMetaPresetKeys.VerifingEmail)?.metaValue ?? user.mobile,
-            phone_number_verified: user.mobile,
-            url: user.url,
-            updated_at: user.updatedAt,
-            ...userMetas.reduce((acc, meta) => {
-              if (
-                meta.metaKey === UserMetaPresetKeys.VerifingEmail ||
-                meta.metaKey === UserMetaPresetKeys.VerifingEmail
-              ) {
-                // ignore
-              } else if (meta.metaKey === UserMetaPresetKeys.Capabilities) {
-                acc['role'] = meta.metaValue;
-              } else {
-                acc[meta.metaKey] = meta.metaValue;
-              }
-              return acc;
-            }, {} as Record<string, any>),
-          };
-        } else {
-          return {
-            sub: id,
-          };
-        }
-      },
-    };
-  };
   getConfiguration(): OidcConfiguration {
+    const issuer = this.configService.getOrThrow('OIDC_ISSUER');
     const resource = this.configService.get<string>('OIDC_RESOURCE');
     return {
       clients: [
@@ -129,8 +80,13 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           scope: 'openid offline_access profile capabilities phone email',
           grant_types: ['authorization_code', 'implicit', 'refresh_token'],
           response_types: ['code', 'id_token', 'code id_token', 'id_token token'],
-          redirect_uris: ['https://localhost:5011/signin.html', 'https://localhost:5011/signin-silent.html'],
-          post_logout_redirect_uris: ['https://localhost:5011'],
+          redirect_uris: [
+            'https://localhost:5011/signin.html',
+            'https://localhost:5011/signin-silent.html',
+            'http://localhost:6033/signin.html',
+            'http://localhost:6033/signin-silent.html',
+          ],
+          post_logout_redirect_uris: ['https://localhost:5011', 'http://localhost:6033'],
           token_endpoint_auth_method: 'none',
           require_auth_time: true,
           access_token_format: 'jwt',
@@ -212,6 +168,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         introspection: '/connect/introspect',
         revocation: '/connect/revocation',
       },
+      discovery: {
+        check_session_iframe: url.resolve(issuer, '/connect/checksession'),
+      },
       ttl: {
         DeviceCode: (ctx, token, client) => {
           return client.metadata()['device_code_ttl'] || 5 * 60; // 5 minutes in seconds
@@ -262,8 +221,15 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         Grant: 15 * 24 * 60 * 60, // 15 day in seconds
         Interaction: 60 * 60, // 1 hour in seconds
       },
+
       cookies: {
         keys: ['gQMQym96H64-QInq7mvVX0nZEw0qUmcTA3bCpfnuR1h3YXNhgGJ0XLd17obmV8Gm'],
+        long: {
+          httpOnly: false,
+          // @ts-expect-error no types
+          secureProxy: true,
+          sameSite: 'none',
+        },
       },
       jwks: {
         keys: [
@@ -531,5 +497,81 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         `;
       },
     };
+  }
+
+  private findAccount: FindAccount = async (ctx, id) => {
+    const user = await this.userDataSource.get(
+      Number(id),
+      ['niceName', 'displayName', 'email', 'mobile', 'url', 'updatedAt'],
+      { sub: id },
+    );
+
+    if (!user) {
+      return undefined;
+    }
+
+    return {
+      accountId: id,
+      claims: async (use, scope) => {
+        console.log('claims', use, scope);
+
+        if (use === 'extra_token_claims') {
+          return {
+            sub: id,
+            // TODO: add rams
+            ram: [],
+          };
+        } else if (
+          use === 'userinfo' ||
+          (use === 'id_token' && ctx.oidc.client?.metadata().access_token_format === 'jwt') // jwt token can not read from userinfo endpoint
+        ) {
+          const userMetas = await this.userDataSource.getMetas(Number(id), Object.values(UserMetaPresetKeys), [
+            'metaKey',
+            'metaValue',
+          ]);
+
+          return {
+            sub: id,
+            display_name: user.displayName,
+            nice_name: user.niceName,
+            email: userMetas.find((meta) => meta.metaKey === UserMetaPresetKeys.VerifingEmail)?.metaValue ?? user.email,
+            email_verified: user.email,
+            phone_number:
+              userMetas.find((meta) => meta.metaKey === UserMetaPresetKeys.VerifingEmail)?.metaValue ?? user.mobile,
+            phone_number_verified: user.mobile,
+            url: user.url,
+            updated_at: user.updatedAt,
+            ...userMetas.reduce((acc, meta) => {
+              if (
+                meta.metaKey === UserMetaPresetKeys.VerifingEmail ||
+                meta.metaKey === UserMetaPresetKeys.VerifingEmail
+              ) {
+                // ignore
+              } else if (meta.metaKey === UserMetaPresetKeys.Capabilities) {
+                acc['role'] = meta.metaValue;
+              } else {
+                acc[meta.metaKey] = meta.metaValue;
+              }
+              return acc;
+            }, {} as Record<string, any>),
+          };
+        } else {
+          return {
+            sub: id,
+          };
+        }
+      },
+    };
+  };
+
+  private getSessionState(clientId: string, origin: string, sessionId: string) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    let stateEncode = crypto.createHash('sha256').update(`${clientId}${origin}${sessionId}${salt}`).digest('base64');
+
+    stateEncode = stateEncode.replace(/=/g, ''); // Remove any trailing '='s
+    stateEncode = stateEncode.replace(/\+/g, '-'); // '+' => '-'
+    stateEncode = stateEncode.replace(/\//g, '_'); // '/' => '_'
+
+    return `${stateEncode}.${salt}`;
   }
 }
