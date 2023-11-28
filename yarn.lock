@@ -12,22 +12,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-fetch/axios@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@ace-fetch/axios@npm:0.2.0"
+"@ace-fetch/axios@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@ace-fetch/axios@npm:0.2.1"
   dependencies:
     "@ace-util/core": ^0.1.0
   peerDependencies:
     "@ace-fetch/core": ^0.1.0
     axios: ^0.27.0
-  checksum: 31076af078337d42596eeb918ed26556a12edb782b16e81de846d5801480cfcc2fd4b960aecba1db20468b2ab0918bf3447297cde35ad5204daab0304c89e642
+  checksum: bfd85b443dabf6736ca2203c2a3bdea8253e4807e74bdb6e3647307e4c506c90447ca6401119e2ee3b0c7f5c29154b9c2a873a716e58c1e6c8b545a9247624a5
   languageName: node
   linkType: hard
 
-"@ace-fetch/core@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@ace-fetch/core@npm:0.2.0"
-  checksum: 0ec97d504d85e2213ab4036f5f097672fe268f3cc6aac7d459670e2bf165305d378c4a7491bb0e276fac99e86868567d48723ab763b59dd67eeb4fd87bfe59dd
+"@ace-fetch/core@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@ace-fetch/core@npm:0.2.1"
+  checksum: 955f8fede1f6d2da08104f6e8751d8ec583bc64e9eab0e4eca116fe7f79e1bbf0b3f4d40e49f30bd89a79396f4aeb9e7e467b549752445362c138cc0c7cec572
   languageName: node
   linkType: hard
 
@@ -282,7 +282,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/shared-client@workspace:packages/pomelo-shared-client"
   dependencies:
-    "@ace-fetch/core": ^0.2.0
+    "@ace-fetch/core": ^0.2.1
     "@ace-fetch/vue": ^0.2.1
     "@ace-util/core": ^0.1.0
     ant-design-vue: ^1.7.7
@@ -293,7 +293,7 @@ __metadata:
     vue-router: ^3.5.0
     vue2-helpers: 1.x
   peerDependencies:
-    "@ace-fetch/core": ^0.2.0
+    "@ace-fetch/core": ^0.2.1
     "@ace-fetch/vue": ^0.2.1
     "@ace-util/core": ^0.1.0
     "@vue/composition-api": ^1.0.0
@@ -331,7 +331,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/theme@workspace:^, @ace-pomelo/theme@workspace:packages/pomelo-theme":
+"@ace-pomelo/theme@^0.1.0-alpha.2, @ace-pomelo/theme@workspace:^, @ace-pomelo/theme@workspace:packages/pomelo-theme":
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/theme@workspace:packages/pomelo-theme"
   languageName: unknown
@@ -341,8 +341,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/vue-admin@workspace:clients/vue-admin"
   dependencies:
-    "@ace-fetch/axios": ^0.2.0
-    "@ace-fetch/core": ^0.2.0
+    "@ace-fetch/axios": ^0.2.1
+    "@ace-fetch/core": ^0.2.1
     "@ace-fetch/vue": ^0.2.1
     "@ace-pomelo/shared-client": "workspace:^"
     "@ace-util/core": ^0.1.0
@@ -425,8 +425,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/vue-web@workspace:clients/vue-web"
   dependencies:
-    "@ace-fetch/axios": ^0.2.0
-    "@ace-fetch/core": ^0.2.0
+    "@ace-fetch/axios": ^0.2.1
+    "@ace-fetch/core": ^0.2.1
     "@ace-fetch/vue": ^0.2.1
     "@ace-pomelo/shared-client": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
@@ -8361,7 +8361,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "antdv-layout-pro@workspace:packages/antdv-layout-pro"
   dependencies:
-    "@ace-pomelo/theme": "workspace:^"
+    "@ace-pomelo/theme": ^0.1.0-alpha.2
     "@ace-util/core": ^0.1.0
     "@iconfu/svg-inject": ^1.2.3
     "@types/lodash.clonedeep": ^4.5.0

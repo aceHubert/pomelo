@@ -40,7 +40,7 @@
     "vue2-helpers": "1.x"
   },
   "devDependencies": {
-    "@ace-fetch/core": "^0.2.0",
+    "@ace-fetch/core": "^0.2.1",
     "@ace-fetch/vue": "^0.2.1",
     "@ace-util/core": "^0.1.0",
     "ant-design-vue": "^1.7.7",
@@ -50,7 +50,7 @@
     "vue-router": "^3.5.0"
   },
   "peerDependencies": {
-    "@ace-fetch/core": "^0.2.0",
+    "@ace-fetch/core": "^0.2.1",
     "@ace-fetch/vue": "^0.2.1",
     "@ace-util/core": "^0.1.0",
     "@vue/composition-api": "^1.0.0",

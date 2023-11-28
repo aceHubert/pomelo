@@ -15,8 +15,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ace-fetch/axios": "^0.2.0",
-    "@ace-fetch/core": "^0.2.0",
+    "@ace-fetch/axios": "^0.2.1",
+    "@ace-fetch/core": "^0.2.1",
     "@ace-fetch/vue": "^0.2.1",
     "@ace-pomelo/shared-client": "workspace:^",
     "@ace-util/core": "^0.1.0",
