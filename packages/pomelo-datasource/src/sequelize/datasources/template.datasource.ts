@@ -294,7 +294,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   ): Promise<TemplateModel | undefined> {
     if (!fields.includes('id')) {
       // 主键(meta 查询)
-      fields.push('id');
+      fields.unshift('id');
     }
 
     const where: WhereOptions<TemplateAttributes> = {
@@ -349,7 +349,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   ): Promise<TemplateModel | undefined> {
     if (!fields.includes('id')) {
       // 主键(meta 查询)
-      fields.push('id');
+      fields.unshift('id');
     }
 
     const where: WhereOptions<TemplateAttributes> = {
@@ -874,7 +874,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   ): Promise<PagedTemplateModel> {
     if (!fields?.includes('id')) {
       // 主键(meta 查询)
-      fields.push('id');
+      fields.unshift('id');
     }
 
     const include: Includeable[] = [];

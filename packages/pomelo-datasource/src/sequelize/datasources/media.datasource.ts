@@ -29,7 +29,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   get(id: number, fields: string[]): Promise<MediaModel | undefined> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
-      fields.push('id');
+      fields.unshift('id');
     }
 
     return this.models.Medias.findByPk(id, {
@@ -62,7 +62,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   getByName(fileName: string, fields: string[]): Promise<MediaModel | undefined> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
-      fields.push('id');
+      fields.unshift('id');
     }
 
     return this.models.Medias.findOne({

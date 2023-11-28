@@ -31,7 +31,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
   get(id: number, fields: string[]): Promise<TermTaxonomyModel | undefined> {
     if (!fields.includes('id')) {
       // 主键(meta 查询)
-      fields.push('id');
+      fields.unshift('id');
     }
 
     return this.models.TermTaxonomy.findOne({
@@ -70,7 +70,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
     }
     if (!fields.includes('id')) {
       // 主键(meta/children 查询)
-      fields.push('id');
+      fields.unshift('id');
     }
 
     const where: WhereOptions<TermTaxonomyAttributes> = {};
@@ -133,38 +133,36 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
     taxonomyOrFields: string | string[],
     fields?: string[],
   ): Promise<Record<number, TermTaxonomyModel[]> | TermTaxonomyModel[]> {
-    let _query = objectIdsOrQuery as Omit<TermTaxonomyByObjectIdArgs, 'objectId'> & { objectId: number | number[] };
-    let _fields = taxonomyOrFields as string[];
-    if (Array.isArray(objectIdsOrQuery)) {
-      _query = {
-        objectId: objectIdsOrQuery,
-        taxonomy: taxonomyOrFields as string,
-      };
-      _fields = fields!;
-    }
+    const query = Array.isArray(objectIdsOrQuery)
+      ? ({
+          objectId: objectIdsOrQuery,
+          taxonomy: taxonomyOrFields as string,
+        } as Omit<TermTaxonomyByObjectIdArgs, 'objectId'> & { objectId: number | number[] })
+      : objectIdsOrQuery;
 
-    if (!_fields.includes('id')) {
+    fields = Array.isArray(objectIdsOrQuery) ? fields! : (taxonomyOrFields as string[]);
+    if (!fields.includes('id')) {
       // 主键(meta/children 查询)
-      _fields.push('id');
+      fields.unshift('id');
     }
 
     return this.models.TermTaxonomy.findAll({
-      attributes: this.filterFields(_fields, this.models.TermTaxonomy),
+      attributes: this.filterFields(fields, this.models.TermTaxonomy),
       include: [
         {
           model: this.models.TermRelationships,
           attributes: ['objectId'],
           as: 'TermRelationships',
           where: {
-            objectId: _query.objectId,
+            objectId: query.objectId,
           },
         },
       ],
       where: {
-        ...(!isUndefined(_query.parentId) ? { parentId: _query.parentId } : {}),
-        taxonomy: _query.taxonomy,
+        ...(!isUndefined(query.parentId) ? { parentId: query.parentId } : {}),
+        taxonomy: query.taxonomy,
       },
-      order: [[this.models.TermRelationships, 'order', _query.desc ? 'DESC' : 'ASC']],
+      order: [[this.models.TermRelationships, 'order', query.desc ? 'DESC' : 'ASC']],
     }).then((terms) => {
       const format = (term: Model<TermTaxonomyModel>) => {
         return term.toJSON<TermTaxonomyModel>();

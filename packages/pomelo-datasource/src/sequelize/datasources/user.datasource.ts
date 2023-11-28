@@ -48,7 +48,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     // 主键
     if (!fields.includes('id')) {
-      fields.push('id');
+      fields.unshift('id');
     }
 
     return this.models.Users.findByPk(id!, {

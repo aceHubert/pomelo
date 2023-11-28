@@ -27,7 +27,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
   get(id: number, fields: string[]): Promise<CommentModel | null> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
-      fields.push('id');
+      fields.unshift('id');
     }
 
     return this.models.Comments.findByPk(id, {
