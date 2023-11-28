@@ -157,7 +157,6 @@ __metadata:
     "@types/express": ^4.17.13
     "@types/express-ejs-layouts": ^2.5.3
     "@types/lodash": ^4.14.182
-    "@types/lru-cache": ^5.1.1
     "@types/oidc-provider": ^7.0.0
     "@types/sanitize-html": ^2.9.3
     "@types/supertest": ^2.0.11
@@ -168,7 +167,6 @@ __metadata:
     express-ejs-layouts: ^2.5.1
     jimp: ^0.22.8
     lodash: ^4.17.21
-    lru-cache: ^6.0.0
     mysql2: ^2.3.3
     nest-oidc-provider: ^1.1.1
     nestjs-i18n: ^10.0.0
@@ -6658,13 +6656,6 @@ __metadata:
   version: 4.0.2
   resolution: "@types/long@npm:4.0.2"
   checksum: d16cde7240d834cf44ba1eaec49e78ae3180e724cd667052b194a372f350d024cba8dd3f37b0864931683dab09ca935d52f0c4c1687178af5ada9fc85b0635f4
-  languageName: node
-  linkType: hard
-
-"@types/lru-cache@npm:^5.1.1":
-  version: 5.1.1
-  resolution: "@types/lru-cache@npm:5.1.1"
-  checksum: e1d6c0085f61b16ec5b3073ec76ad1be4844ea036561c3f145fc19f71f084b58a6eb600b14128aa95809d057d28f1d147c910186ae51219f58366ffd2ff2e118
   languageName: node
   linkType: hard
 

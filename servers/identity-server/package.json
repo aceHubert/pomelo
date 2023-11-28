@@ -38,7 +38,6 @@
     "express-ejs-layouts": "^2.5.1",
     "jimp": "^0.22.8",
     "lodash": "^4.17.21",
-    "lru-cache": "^6.0.0",
     "mysql2": "^2.3.3",
     "nest-oidc-provider": "^1.1.1",
     "nestjs-i18n": "^10.0.0",
@@ -54,7 +53,6 @@
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/lodash": "^4.14.182",
-    "@types/lru-cache": "^5.1.1",
     "@types/oidc-provider": "^7.0.0",
     "@types/sanitize-html": "^2.9.3",
     "@types/supertest": "^2.0.11",
