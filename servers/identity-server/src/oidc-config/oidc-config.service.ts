@@ -90,6 +90,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           token_endpoint_auth_method: 'none',
           require_auth_time: true,
           access_token_format: 'jwt',
+          extra_properties: {
+            'loginPage.template': 'login-form-20',
+            'loginPage.formLableDisplay': false,
+            'loginPage.formValidateTooltip': true,
+          },
         },
         {
           client_id: '3d136433-977f-40c7-8702-a0444a6b2a9f',
@@ -221,7 +226,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         Grant: 15 * 24 * 60 * 60, // 15 day in seconds
         Interaction: 60 * 60, // 1 hour in seconds
       },
-
       cookies: {
         keys: ['gQMQym96H64-QInq7mvVX0nZEw0qUmcTA3bCpfnuR1h3YXNhgGJ0XLd17obmV8Gm'],
         long: {
@@ -379,6 +383,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           'backchannel_authentication_request_ttl',
           'require_consent',
           'require_pkce',
+          'extra_properties',
         ],
         validator: (ctx, key, value) => {
           if (value) {
@@ -408,6 +413,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
               case 'require_pkce':
                 if (typeof value !== 'boolean') {
                   throw new errors.InvalidClientMetadata(`invalid ${key} value, must be a boolean!`);
+                }
+                break;
+              case 'extra_properties':
+                if (typeof value !== 'object') {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be an object!`);
                 }
                 break;
               default:

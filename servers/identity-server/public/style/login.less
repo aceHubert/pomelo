@@ -21,12 +21,66 @@ form {
   margin-top: 20px;
 }
 
-// #footer {
-//   position: absolute;
-//   left: 0;
-//   right: 0;
-//   bottom: 0;
-// }
+form .row > div {
+  position: relative;
+}
+
+form a {
+  color: var(--text-color);
+  text-decoration: underline;
+}
+
+form a:hover,
+form a:focus {
+  color: var(--theme-primary);
+}
+
+.form-control#password {
+  padding-right: 2.5em;
+}
+
+.was-validated .form-control:invalid#password + .icon-field {
+  display: none;
+}
+
+.was-validated .form-control:valid#password {
+  padding-right: calc(var(--bs-gutter-x) * 0.5 + 1.5rem + 0.75rem);
+}
+
+.was-validated .form-control:valid#password + .icon-field {
+  right: calc(var(--bs-gutter-x) * 0.5 + 1.5rem + 0.75rem);
+  transition: right 0.2s ease-in-out;
+}
+
+.form-control:hover,
+.form-control:focus {
+  outline: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.form-check-input:focus {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.icon-field {
+  width: 18px;
+  height: 18px;
+  position: absolute;
+  top: 50%;
+  right: calc(var(--bs-gutter-x) * 0.5 + 1rem);
+  transform: translateY(-50%);
+}
+
+.icon-field.eye {
+  background: url(../icon/eye.svg) no-repeat center center;
+  background-size: cover;
+}
+
+.icon-field.eye.slash {
+  background-image: url(../icon/eye-slash.svg);
+}
 
 @media screen and (min-width: 576px) and (min-height: 768px) {
   .wrapper {

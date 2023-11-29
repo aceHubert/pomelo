@@ -154,6 +154,7 @@ __metadata:
     "@nestjs/graphql": ^11.0.0
     "@nestjs/platform-express": ^9.0.0
     "@nestjs/sequelize": ^9.0.0
+    "@types/ejs": ^3.1.5
     "@types/express": ^4.17.13
     "@types/express-ejs-layouts": ^2.5.3
     "@types/lodash": ^4.14.182
@@ -6345,6 +6346,13 @@ __metadata:
   dependencies:
     "@types/ms": "*"
   checksum: a9a9bb40a199e9724aa944e139a7659173a9b274798ea7efbc277cb084bc37d32fc4c00877c3496fac4fed70a23243d284adb75c00b5fdabb38a22154d18e5df
+  languageName: node
+  linkType: hard
+
+"@types/ejs@npm:^3.1.5":
+  version: 3.1.5
+  resolution: "@types/ejs@npm:3.1.5"
+  checksum: e142266283051f27a7f79329871b311687dede19ae20268d882e4de218c65e1311d28a300b85579ca67157a8d601b7234daa50c2f99b252b121d27b4e5b21468
   languageName: node
   linkType: hard
 

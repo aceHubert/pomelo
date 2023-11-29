@@ -74,13 +74,16 @@ declare module '@types/oidc-provider' {
      * @default false
      */
     require_consent?: boolean | undefined;
-
     /**
      * Authorization Code Flow with Proof Key for Code Exchange (PKCE)
      * https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-proof-key-for-code-exchange-pkce
      * @default false
      */
     require_pkce?: boolean | undefined;
+    /**
+     * Extra properties
+     */
+    extra_properties?: Record<string, any> | undefined;
   }
 }
 
