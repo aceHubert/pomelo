@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsInt, IsEnum, IsDefined, IsString, Min, Max } from 'class-validator';
-import { TemplateStatus } from '@ace-pomelo/datasource';
+import { TemplateStatus } from '@ace-pomelo/infrastructure-datasource';
 
 export abstract class PagedTemplateArgsValidator {
   @IsOptional()

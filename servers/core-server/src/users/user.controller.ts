@@ -19,7 +19,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { UserDataSource, UserStatus } from '@ace-pomelo/datasource';
+import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {

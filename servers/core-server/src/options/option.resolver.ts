@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { GraphQLJSONObject } from 'graphql-type-json';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { OptionDataSource } from '@ace-pomelo/datasource';
+import { OptionDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { BaseResolver, User, Fields, RequestUser } from '@ace-pomelo/shared-server';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { OptionAction } from '@/common/actions';

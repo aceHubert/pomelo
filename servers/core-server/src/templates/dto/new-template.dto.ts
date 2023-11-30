@@ -1,5 +1,5 @@
 import { PickType } from '@nestjs/swagger';
-import { TemplateCommentStatus, TemplateStatus } from '@ace-pomelo/datasource';
+import { TemplateCommentStatus, TemplateStatus } from '@ace-pomelo/infrastructure-datasource';
 import { NewTemplateValidator } from './new-template.validator';
 
 export class NewTemplateDto extends NewTemplateValidator {

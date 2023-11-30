@@ -15,7 +15,7 @@ import {
   Taxonomy as TaxonomyEnum,
   Taxonomy,
   TemplateStatus,
-} from '@ace-pomelo/datasource';
+} from '@ace-pomelo/infrastructure-datasource';
 import { TemplateAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';

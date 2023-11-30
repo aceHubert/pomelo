@@ -1,4 +1,4 @@
-import { OptionAutoload } from '@ace-pomelo/datasource';
+import { OptionAutoload } from '@ace-pomelo/infrastructure-datasource';
 import { OptionArgsValidator } from './option-args.validator';
 
 /**

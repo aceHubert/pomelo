@@ -4,7 +4,7 @@ import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
-import { UserDataSource, UserStatus } from '@ace-pomelo/datasource';
+import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { UserAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { NewUserInput } from './dto/new-user.input';

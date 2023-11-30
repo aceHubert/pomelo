@@ -1,7 +1,7 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
 import { Options, ModelOptions } from 'sequelize';
 
-export interface SequelizeOptions {
+export interface InfrastructureOptions {
   /**
    * is global module
    */
@@ -35,14 +35,16 @@ export interface SequelizeOptions {
   ) => string;
 }
 
-export interface SequelizeOptionsFactory {
-  createSequlizeOptions(): Promise<Omit<SequelizeOptions, 'isGlobal'>> | Omit<SequelizeOptions, 'isGlobal'>;
+export interface InfrastructureOptionsFactory {
+  createSequlizeOptions(): Promise<Omit<InfrastructureOptions, 'isGlobal'>> | Omit<InfrastructureOptions, 'isGlobal'>;
 }
 
-export interface SequelizeAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+export interface InfrastructureAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
   isGlobal?: boolean;
-  useExisting?: Type<SequelizeOptionsFactory>;
-  useClass?: Type<SequelizeOptionsFactory>;
-  useFactory?: (...args: any[]) => Promise<Omit<SequelizeOptions, 'isGlobal'>> | Omit<SequelizeOptions, 'isGlobal'>;
+  useExisting?: Type<InfrastructureOptionsFactory>;
+  useClass?: Type<InfrastructureOptionsFactory>;
+  useFactory?: (
+    ...args: any[]
+  ) => Promise<Omit<InfrastructureOptions, 'isGlobal'>> | Omit<InfrastructureOptions, 'isGlobal'>;
   inject?: any[];
 }

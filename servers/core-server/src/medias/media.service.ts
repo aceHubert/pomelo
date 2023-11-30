@@ -12,7 +12,7 @@ import {
   ImageScaleModel,
   OptionPresetKeys,
   MediaModel,
-} from '@ace-pomelo/datasource';
+} from '@ace-pomelo/infrastructure-datasource';
 import { normalizeRoutePath, foregoingSlash, stripTrailingSlash, isAbsoluteUrl } from '@/common/utils/path.util';
 import { FixedMediaOptions } from './interfaces/media-options.interface';
 import { FileSaveOptions } from './interfaces/file-upload-options.interface';

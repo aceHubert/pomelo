@@ -66,7 +66,7 @@ __metadata:
   resolution: "@ace-pomelo/core-server@workspace:servers/core-server"
   dependencies:
     "@ace-pomelo/authorization": "workspace:^"
-    "@ace-pomelo/datasource": "workspace:^"
+    "@ace-pomelo/infrastructure-datasource": "workspace:^"
     "@ace-pomelo/nestjs-oidc": "workspace:^"
     "@ace-pomelo/ram-authorization": "workspace:^"
     "@ace-pomelo/shared-server": "workspace:^"
@@ -121,9 +121,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/datasource@workspace:^, @ace-pomelo/datasource@workspace:packages/pomelo-datasource":
+"@ace-pomelo/identity-datasource@workspace:packages/pomelo-identity-datasource":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/datasource@workspace:packages/pomelo-datasource"
+  resolution: "@ace-pomelo/identity-datasource@workspace:packages/pomelo-identity-datasource"
   dependencies:
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
@@ -142,7 +142,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/identity-server@workspace:servers/identity-server"
   dependencies:
-    "@ace-pomelo/datasource": "workspace:^"
+    "@ace-pomelo/infrastructure-datasource": "workspace:^"
     "@ace-pomelo/shared-server": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
     "@apollo/server": ^4.9.1
@@ -184,6 +184,23 @@ __metadata:
     tedious: ^15.1.0
     tsconfig-paths: ^3.10.1
     webpack-node-externals: ^3.0.0
+  languageName: unknown
+  linkType: soft
+
+"@ace-pomelo/infrastructure-datasource@workspace:^, @ace-pomelo/infrastructure-datasource@workspace:packages/pomelo-infrastructure-datasource":
+  version: 0.0.0-use.local
+  resolution: "@ace-pomelo/infrastructure-datasource@workspace:packages/pomelo-infrastructure-datasource"
+  dependencies:
+    "@nestjs/common": ^9.0.0
+    "@nestjs/core": ^9.0.0
+    lodash: ^4.17.21
+    mysql2: ^2.3.3
+    sequelize: ^6.19.0
+  peerDependencies:
+    "@ace-pomelo/shared-server": "workspace:^"
+    "@nestjs/common": ^9.0.0
+    "@nestjs/core": ^9.0.0
+    mysql2: ^2.3.3
   languageName: unknown
   linkType: soft
 

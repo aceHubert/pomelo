@@ -10,7 +10,7 @@ import {
   Taxonomy as TaxonomyEnum,
   TemplateStatus,
   TemplateType,
-} from '@ace-pomelo/datasource';
+} from '@ace-pomelo/infrastructure-datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';

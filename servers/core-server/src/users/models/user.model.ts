@@ -1,5 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { UserAttributes, UserStatus } from '@ace-pomelo/datasource';
+import { UserAttributes, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 

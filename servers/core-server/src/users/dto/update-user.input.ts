@@ -1,6 +1,6 @@
 import { ValidateIf, IsEnum, IsOptional, IsString, IsLocale } from 'class-validator';
 import { InputType, Field, PartialType, PickType } from '@nestjs/graphql';
-import { UserRole, UserStatus } from '@ace-pomelo/datasource';
+import { UserRole, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { NewUserInput } from './new-user.input';
 
 @InputType({ description: 'Update user input' })

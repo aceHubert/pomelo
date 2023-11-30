@@ -8,7 +8,7 @@ import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { MediaDataSource } from '@ace-pomelo/datasource';
+import { MediaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { isAbsoluteUrl } from '@/common/utils/path.util';

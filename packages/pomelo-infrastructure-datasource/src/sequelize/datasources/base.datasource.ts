@@ -4,48 +4,48 @@ import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
 import { RequestUser, ForbiddenError, jsonSafelyParse } from '@ace-pomelo/shared-server';
 import { OptionAutoload } from '../../entities/options.entity';
-import { SequelizeService } from '../../sequelize/sequelize.service';
+import { InfrastructureService } from '../../infrastructure.service';
 import { UserCapability, UserRole, UserRoles } from '../../utils/user-capability.util';
-import { SequelizeOptions } from '../interfaces/sequelize-options.interface';
-import { SEQUELIZE_OPTIONS } from '../constants';
+import { InfrastructureOptions } from '../../interfaces/infrastructure-options.interface';
+import { INFRASTRUCTURE_OPTIONS } from '../../constants';
 import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
 
 export abstract class BaseDataSource implements OnModuleInit {
   private __AUTOLOAD_OPTIONS__: Record<string, string> = {}; // Autoload options 缓存
   private __OPTIONS__: Record<string, string> = {}; // Not autoload options 缓存
-  private sequelizeOptions!: SequelizeOptions;
+  private infrastuctureOptions!: InfrastructureOptions;
   protected readonly logger!: Logger;
-  protected sequelizeService!: SequelizeService;
+  protected infrastructureService!: InfrastructureService;
 
   constructor(protected readonly moduleRef: ModuleRef) {
     this.logger = new Logger(this.constructor.name, { timestamp: true });
   }
 
   async onModuleInit() {
-    this.sequelizeService = this.moduleRef.get(SequelizeService, { strict: false });
-    this.sequelizeOptions = this.moduleRef.get<SequelizeOptions>(SEQUELIZE_OPTIONS, { strict: false });
+    this.infrastructureService = this.moduleRef.get(InfrastructureService, { strict: false });
+    this.infrastuctureOptions = this.moduleRef.get<InfrastructureOptions>(INFRASTRUCTURE_OPTIONS, { strict: false });
   }
 
   protected get databaseDialect() {
-    return typeof this.sequelizeOptions.connection === 'string'
-      ? (this.sequelizeOptions.connection.split(':')[0] as Dialect)
-      : this.sequelizeOptions.connection.dialect ?? 'mysql';
+    return typeof this.infrastuctureOptions.connection === 'string'
+      ? (this.infrastuctureOptions.connection.split(':')[0] as Dialect)
+      : this.infrastuctureOptions.connection.dialect ?? 'mysql';
   }
 
   protected get tablePrefix() {
-    return this.sequelizeOptions.tablePrefix || '';
+    return this.infrastuctureOptions.tablePrefix || '';
   }
 
   protected get translate() {
-    return this.sequelizeOptions.translate || ((key: string, fallback: string) => fallback);
+    return this.infrastuctureOptions.translate || ((key: string, fallback: string) => fallback);
   }
 
   protected get sequelize() {
-    return this.sequelizeService.sequelize;
+    return this.infrastructureService.sequelize;
   }
 
   protected get models() {
-    return this.sequelizeService.models;
+    return this.infrastructureService.models;
   }
 
   /**

@@ -71,6 +71,7 @@ declare module '@types/oidc-provider' {
     backchannel_authentication_request_ttl?: number | undefined;
     /**
      * Skip consent screen
+     * https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_consent.md
      * @default false
      */
     require_consent?: boolean | undefined;
@@ -80,6 +81,11 @@ declare module '@types/oidc-provider' {
      * @default false
      */
     require_pkce?: boolean | undefined;
+    /**
+     * Allowed CORS origins
+     * https://github.com/panva/node-oidc-provider/blob/main/recipes/client_based_origins.md
+     */
+    allowed_cors_origins?: string[] | undefined;
     /**
      * Extra properties
      */

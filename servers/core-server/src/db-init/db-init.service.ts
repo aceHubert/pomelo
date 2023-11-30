@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import { Injectable, Logger } from '@nestjs/common';
-import { DbInitDataSource, InitArgs } from '@ace-pomelo/datasource';
+import { DbInitDataSource, InitArgs } from '@ace-pomelo/infrastructure-datasource';
 
 const lockDbFile = path.join(process.cwd(), 'db.lock');
 

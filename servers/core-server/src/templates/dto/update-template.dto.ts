@@ -1,6 +1,6 @@
 import { IsArray, IsInt, IsEnum } from 'class-validator';
 import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
-import { TemplateStatus } from '@ace-pomelo/datasource';
+import { TemplateStatus } from '@ace-pomelo/infrastructure-datasource';
 import { NewTemplateDto, NewFormTemplateDto, NewPageTemplateDto, NewPostTemplateDto } from './new-template.dto';
 
 export class UpdateTemplateDto extends PartialType(

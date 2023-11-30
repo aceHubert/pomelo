@@ -1,5 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/datasource';
+import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/infrastructure-datasource';
 
 registerEnumType(TemplateStatus, {
   name: 'TemplateStatus',

@@ -5,7 +5,7 @@ import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from '
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/datasource';
+import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/infrastructure-datasource';
 import { OidcRedisAdapterService } from '../oidc-adapter/oidc-redis-adapter.service';
 import { OidcConfigAdapter } from './oidc-adapter';
 
@@ -41,6 +41,17 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             orig.call(this, message);
           };
         }
+
+        // Skip redirecting invalid request error to client
+        // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_redirect.md
+        Object.defineProperty(errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
+
+        // Update client secret comparison
+        // use SHA256 of input to compare with stored value
+        provider.Client.prototype.compareClientSecret = function compareClientSecret(actual: string) {
+          const constantEquals = require('oidc-provider/lib/helpers/constant_equals');
+          return constantEquals(this.clientSecret, crypto.createHash('sha256').update(actual).digest('hex'), 1000);
+        };
 
         provider.registerGrantType('password', (ctx, next) => {
           // TODO: Password Grant Type
@@ -228,6 +239,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       },
       cookies: {
         keys: ['gQMQym96H64-QInq7mvVX0nZEw0qUmcTA3bCpfnuR1h3YXNhgGJ0XLd17obmV8Gm'],
+        // set session cookie options to allow passing the session to the browser for check_session
         long: {
           httpOnly: false,
           // @ts-expect-error no types
@@ -370,61 +382,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         }
         return;
       },
-      extraClientMetadata: {
-        properties: [
-          'id_token_ttl',
-          'access_token_format',
-          'access_token_ttl',
-          'refresh_token_expiration',
-          'refresh_token_absolute_ttl',
-          'refresh_token_sliding_ttl',
-          'authorization_code_ttl',
-          'device_code_ttl',
-          'backchannel_authentication_request_ttl',
-          'require_consent',
-          'require_pkce',
-          'extra_properties',
-        ],
-        validator: (ctx, key, value) => {
-          if (value) {
-            switch (key) {
-              case 'access_token_format':
-                if (!['opaque', 'jwt'].includes(value as string)) {
-                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be one of [opaque, jwt]!`);
-                }
-                break;
-              case 'refresh_token_expiration':
-                if (!['absolute', 'sliding'].includes(value as string)) {
-                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be one of [absolute, sliding]!`);
-                }
-                break;
-              case 'id_token_ttl':
-              case 'access_token_ttl':
-              case 'refresh_token_absolute_ttl':
-              case 'refresh_token_sliding_ttl':
-              case 'authorization_code_ttl':
-              case 'device_code_ttl':
-              case 'backchannel_authentication_request_ttl':
-                if (typeof value !== 'number' || value <= 0) {
-                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be a positive number!`);
-                }
-                break;
-              case 'require_consent':
-              case 'require_pkce':
-                if (typeof value !== 'boolean') {
-                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be a boolean!`);
-                }
-                break;
-              case 'extra_properties':
-                if (typeof value !== 'object') {
-                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be an object!`);
-                }
-                break;
-              default:
-                break;
-            }
-          }
-        },
+      clientBasedCORS(ctx, origin, client) {
+        if (client.metadata()['allowed_cors_origins']?.includes(origin)) {
+          return true;
+        }
+        return false;
       },
       // If a client has the grant allowed and scope includes offline_access or the client is a public web client doing code flow
       // issueRefreshToken: (ctx, client, code) => {
@@ -506,6 +468,67 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         </html>
         `;
       },
+      extraClientMetadata: {
+        properties: [
+          'id_token_ttl',
+          'access_token_format',
+          'access_token_ttl',
+          'refresh_token_expiration',
+          'refresh_token_absolute_ttl',
+          'refresh_token_sliding_ttl',
+          'authorization_code_ttl',
+          'device_code_ttl',
+          'backchannel_authentication_request_ttl',
+          'require_consent',
+          'require_pkce',
+          'allowed_cors_origins',
+          'extra_properties',
+        ],
+        validator: (ctx, key, value) => {
+          if (value) {
+            switch (key) {
+              case 'access_token_format':
+                if (!['opaque', 'jwt'].includes(value as string)) {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be one of [opaque, jwt]!`);
+                }
+                break;
+              case 'refresh_token_expiration':
+                if (!['absolute', 'sliding'].includes(value as string)) {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be one of [absolute, sliding]!`);
+                }
+                break;
+              case 'id_token_ttl':
+              case 'access_token_ttl':
+              case 'refresh_token_absolute_ttl':
+              case 'refresh_token_sliding_ttl':
+              case 'authorization_code_ttl':
+              case 'device_code_ttl':
+              case 'backchannel_authentication_request_ttl':
+                if (typeof value !== 'number' || value <= 0) {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be a positive number!`);
+                }
+                break;
+              case 'require_consent':
+              case 'require_pkce':
+                if (typeof value !== 'boolean') {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be a boolean!`);
+                }
+                break;
+              case 'allowed_cors_origins':
+                if (!Array.isArray(value) || !value.every(this.isOrigin)) {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be an array of valid origins!`);
+                }
+              case 'extra_properties':
+                if (typeof value !== 'object') {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be an object!`);
+                }
+                break;
+              default:
+                break;
+            }
+          }
+        },
+      },
     };
   }
 
@@ -573,6 +596,19 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       },
     };
   };
+
+  private isOrigin(value: any) {
+    if (typeof value !== 'string') {
+      return false;
+    }
+    try {
+      const { origin } = new URL(value);
+      // Origin: <scheme> "://" <hostname> [ ":" <port> ]
+      return value === origin;
+    } catch (err) {
+      return false;
+    }
+  }
 
   private getSessionState(clientId: string, origin: string, sessionId: string) {
     const salt = crypto.randomBytes(16).toString('hex');

@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { OptionAutoload } from '@ace-pomelo/datasource';
+import { OptionAutoload } from '@ace-pomelo/infrastructure-datasource';
 
 export class OptionResp {
   /**

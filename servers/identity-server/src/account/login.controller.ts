@@ -3,7 +3,7 @@ import { get } from 'lodash';
 import { Response } from 'express';
 import { Provider } from 'oidc-provider';
 import { Controller, Get, Post, Body, Logger, Res, HttpStatus } from '@nestjs/common';
-import { UserDataSource } from '@ace-pomelo/datasource';
+import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { BaseController } from '@ace-pomelo/shared-server';
 import { Oidc, InteractionHelper } from 'nest-oidc-provider';
 import { getLoginTemplate } from '../templates';

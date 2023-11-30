@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@ace-pomelo/authorization": "workspace:^",
-    "@ace-pomelo/datasource": "workspace:^",
+    "@ace-pomelo/infrastructure-datasource": "workspace:^",
     "@ace-pomelo/nestjs-oidc": "workspace:^",
     "@ace-pomelo/ram-authorization": "workspace:^",
     "@ace-pomelo/shared-server": "workspace:^",

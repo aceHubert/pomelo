@@ -1,5 +1,5 @@
 import { Field, ObjectType, ID, OmitType, PickType } from '@nestjs/graphql';
-import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/datasource';
+import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/infrastructure-datasource';
 // import { FieldAuthorized, UserRole } from '@ace-pomelo/authorization';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';

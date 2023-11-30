@@ -1,5 +1,5 @@
 import { Field, InputType, PickType } from '@nestjs/graphql';
-import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/datasource';
+import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/infrastructure-datasource';
 import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 import { NewTemplateValidator } from './new-template.validator';
 

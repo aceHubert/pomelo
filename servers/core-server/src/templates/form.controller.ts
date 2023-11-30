@@ -29,7 +29,7 @@ import {
   TemplateOptionArgs,
   Taxonomy,
   TemplateType,
-} from '@ace-pomelo/datasource';
+} from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { FormTemplateAction } from '@/common/actions';

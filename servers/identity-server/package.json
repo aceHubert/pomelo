@@ -18,7 +18,7 @@
     "test:e2e": "run -T jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@ace-pomelo/datasource": "workspace:^",
+    "@ace-pomelo/infrastructure-datasource": "workspace:^",
     "@ace-pomelo/shared-server": "workspace:^",
     "@ace-pomelo/theme": "workspace:^",
     "@apollo/server": "^4.9.1",

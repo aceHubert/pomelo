@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsDefined, IsNotEmpty, IsInt } from 'class-validator';
-import { NewTermTaxonomyInput } from '@ace-pomelo/datasource';
+import { NewTermTaxonomyInput } from '@ace-pomelo/infrastructure-datasource';
 
 export abstract class NewTermTaxonomyValidator implements NewTermTaxonomyInput {
   @IsNotEmpty()

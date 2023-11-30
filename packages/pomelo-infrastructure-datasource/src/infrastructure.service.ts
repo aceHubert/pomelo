@@ -1,18 +1,18 @@
 import { Sequelize } from 'sequelize';
 import { Injectable, Inject, OnApplicationShutdown } from '@nestjs/common';
-import { SequelizeOptions } from './interfaces/sequelize-options.interface';
-import { Models } from './interfaces/models.interface';
-import { TableInitFunc } from './interfaces/table-init-func.interface';
-import { TableAssociateFunc } from './interfaces/table-associate-func.interface';
-import * as Entities from './entities';
-import { SEQUELIZE_OPTIONS } from './constants';
+import { InfrastructureOptions } from './interfaces/infrastructure-options.interface';
+import { Models } from './sequelize/interfaces/models.interface';
+import { TableInitFunc } from './sequelize/interfaces/table-init-func.interface';
+import { TableAssociateFunc } from './sequelize/interfaces/table-associate-func.interface';
+import * as Entities from './sequelize/entities';
+import { INFRASTRUCTURE_OPTIONS } from './constants';
 
 @Injectable()
-export class SequelizeService implements OnApplicationShutdown {
+export class InfrastructureService implements OnApplicationShutdown {
   sequelize: Sequelize;
   models: Models;
 
-  constructor(@Inject(SEQUELIZE_OPTIONS) options: SequelizeOptions) {
+  constructor(@Inject(INFRASTRUCTURE_OPTIONS) options: InfrastructureOptions) {
     let sequelize: Sequelize;
     if (typeof options.connection === 'string') {
       sequelize = new Sequelize(options.connection, {

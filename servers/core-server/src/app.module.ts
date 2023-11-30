@@ -25,7 +25,7 @@ import {
 import { OidcModule, OidcService } from '@ace-pomelo/nestjs-oidc';
 import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
-import { SequelizeModule } from '@ace-pomelo/datasource';
+import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.utils';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
@@ -215,7 +215,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService, OidcService],
     }),
-    SequelizeModule.registerAsync({
+    InfrastructureModule.registerAsync({
       isGlobal: true,
       useFactory: (config: ConfigService, i18n: I18nService) => ({
         isGlobal: true,

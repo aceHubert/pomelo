@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsInt, IsEnum, Min, Max } from 'class-validator';
-import { UserStatus } from '@ace-pomelo/datasource';
+import { UserStatus } from '@ace-pomelo/infrastructure-datasource';
 
 export abstract class PagedUserArgsValidator {
   @IsOptional()

@@ -25,7 +25,7 @@ import {
   ApiNoContentResponse,
 } from '@nestjs/swagger';
 import { BaseController, createResponseSuccessType } from '@ace-pomelo/shared-server';
-import { MetaDataSource } from '@ace-pomelo/datasource';
+import { MetaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { NewMetaDto } from './dto/new-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';
 

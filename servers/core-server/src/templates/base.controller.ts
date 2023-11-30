@@ -36,7 +36,7 @@ import {
   TemplateOptionArgs,
   Taxonomy,
   TemplateStatus,
-} from '@ace-pomelo/datasource';
+} from '@ace-pomelo/infrastructure-datasource';
 import { TemplateAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { NewTemplateMetaDto } from './dto/new-template-meta.dto';

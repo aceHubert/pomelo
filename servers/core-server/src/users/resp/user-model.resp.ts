@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { UserAttributes, UserStatus } from '@ace-pomelo/datasource';
+import { UserAttributes, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { PagedResponse } from '@/common/controllers/resp/paged.resp';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 

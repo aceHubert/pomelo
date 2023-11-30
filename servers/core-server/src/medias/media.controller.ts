@@ -21,7 +21,7 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { MediaDataSource } from '@ace-pomelo/datasource';
+import { MediaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import {
   User,
   ApiAuthCreate,

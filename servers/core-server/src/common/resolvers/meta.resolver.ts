@@ -4,7 +4,7 @@ import { ModuleRef } from '@nestjs/core';
 import { Type, applyDecorators } from '@nestjs/common';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
 import { BaseResolver, Fields } from '@ace-pomelo/shared-server';
-import { MetaDataSource } from '@ace-pomelo/datasource';
+import { MetaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { NewMetaInput } from './dto/new-meta.input';
 import { Meta } from './models/meta.model';

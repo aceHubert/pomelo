@@ -9,7 +9,7 @@ import {
   MinLength,
   IsUrl,
 } from 'class-validator';
-import { NewUserInput, UserRole } from '@ace-pomelo/datasource';
+import { NewUserInput, UserRole } from '@ace-pomelo/infrastructure-datasource';
 
 export abstract class NewUserValidator implements NewUserInput {
   @IsDefined()

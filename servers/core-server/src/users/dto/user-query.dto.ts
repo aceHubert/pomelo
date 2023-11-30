@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole, UserStatus } from '@ace-pomelo/datasource';
+import { UserRole, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { PagedUserArgsValidator } from './user-args.validator';
 
 export class PagedUserQueryDto extends PagedUserArgsValidator {

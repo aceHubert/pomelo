@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { KoaContextWithOIDC } from 'oidc-provider';
 import { Oidc } from 'nest-oidc-provider';
 import { BaseController } from '@ace-pomelo/shared-server';
-import { UserDataSource } from '@ace-pomelo/datasource';
+import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { isJsonRequest } from '@/common/utils/is-json-request.util';
 
 @Controller('/SECURITY')

@@ -13,7 +13,7 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { OidcModule } from 'nest-oidc-provider';
-import { SequelizeModule } from '@ace-pomelo/datasource';
+import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
@@ -70,7 +70,7 @@ import '@/common/extends/i18n.extend';
       ],
       inject: [ConfigService],
     }),
-    SequelizeModule.registerAsync({
+    InfrastructureModule.registerAsync({
       isGlobal: true,
       useFactory: (config: ConfigService, i18n: I18nService) => ({
         isGlobal: true,
