@@ -15,24 +15,15 @@ export default defineConfig({
   },
   // 数据库
   database: {
-    connection: {
-      // database name
-      database: 't_templates',
-      // database name
-      username: 'username',
-      // database password
-      password: 'password',
-      // database host
-      host: 'host',
-      // database port, default: 3306
-      port: 3306,
-      // database charset, default: utf8
-      charset: 'utf8',
-      // database dialect, default: mysql
-      dialect: 'mysql',
-      // database collate
-      collate: '',
+    // infrastructure database settings
+    infrastructure: {
+      connection: 'mysql://user:password@host:port/database',
+      tablePrefix: 'po_',
     },
-    tablePrefix: 'po_',
+    // identity database settings
+    identity: {
+      connection: 'mysql://user:password@host:port/database',
+      tablePrefix: 'po_',
+    },
   },
 });

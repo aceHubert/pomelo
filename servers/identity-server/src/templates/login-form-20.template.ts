@@ -159,6 +159,23 @@ body:after {
   color: var(--theme-primary);
 }
 
+.form-check-input.is-valid, .was-validated .form-check-input:valid {
+  border-color: var(--theme-primary);
+}
+
+.was-validated .form-check-input:valid:checked {
+  background-color: var(--theme-primary);
+}
+
+.was-validated .form-check-input:valid:focus{
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.was-validated .form-check-input:valid~.form-check-label {
+  color: var(--theme-primary);
+}
+
 .submit {
   cursor: pointer;
   border-radius: 40px;

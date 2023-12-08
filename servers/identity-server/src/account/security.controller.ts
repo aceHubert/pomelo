@@ -2,8 +2,8 @@ import { Controller, Get, Post, Req, Res, Logger, HttpException, HttpStatus } fr
 import { Request, Response } from 'express';
 import { KoaContextWithOIDC } from 'oidc-provider';
 import { Oidc } from 'nest-oidc-provider';
-import { BaseController } from '@ace-pomelo/shared-server';
 import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
+import { BaseController } from '@/common/controllers/base.controller';
 import { isJsonRequest } from '@/common/utils/is-json-request.util';
 
 @Controller('/SECURITY')

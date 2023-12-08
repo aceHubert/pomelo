@@ -39,12 +39,8 @@ form {
   margin-bottom: 3rem;
 }
 
-form .row {
+form .row:first-child {
   margin-bottom: 0 !important;
-}
-
-form .row:last-child {
-  margin-top: 1.5em;
 }
 
 .content {
@@ -173,6 +169,23 @@ form ::-ms-input-placeholder {
 
 .form-check-label{
   color: var(--text-secondary) !important;
+}
+
+.form-check-input.is-valid, .was-validated .form-check-input:valid {
+  border-color: var(--theme-primary);
+}
+
+.was-validated .form-check-input:valid:checked {
+  background-color: var(--theme-primary);
+}
+
+.was-validated .form-check-input:valid:focus{
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.was-validated .form-check-input:valid~.form-check-label {
+  color: var(--theme-primary);
 }
 
 .submit {

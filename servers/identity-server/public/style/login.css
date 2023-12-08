@@ -59,6 +59,21 @@ form a:focus {
   -webkit-box-shadow: none;
   box-shadow: none;
 }
+.form-check-input.is-valid,
+.was-validated .form-check-input:valid {
+  border-color: var(--bs-border-color);
+}
+.was-validated .form-check-input:valid:checked {
+  background-color: var(--theme-primary);
+  border-color: var(--theme-primary);
+}
+.was-validated .form-check-input:valid:focus {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.was-validated .form-check-input:valid ~ .form-check-label {
+  color: initial;
+}
 .icon-field {
   width: 18px;
   height: 18px;
@@ -87,4 +102,7 @@ form a:focus {
     -webkit-transform: translate(-50%, -50%);
             transform: translate(-50%, -50%);
   }
+}
+#error {
+  color: #f95155;
 }

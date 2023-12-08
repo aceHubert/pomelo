@@ -1,0 +1,39 @@
+{
+  "name": "@ace-pomelo/identity-datasource",
+  "description": "Pomelo Identity Datasource.",
+  "version": "0.1.0-alpha.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "serve": "run -T concurrently --raw \"tsc --project tsconfig.build.json -watch\"",
+    "build": "yarn build:version && run -T rimraf dist && run -T tsc --project tsconfig.build.json",
+    "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
+    "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
+    "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
+    "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
+    "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "sequelize": "^6.19.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "mysql2": "^2.3.3"
+  },
+  "peerDependencies": {
+    "@ace-pomelo/shared-server": "workspace:^",
+    "@nestjs/common": "^9.0.0",
+    "@nestjs/core": "^9.0.0",
+    "mysql2": "^2.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "yarn@3.1.0"
+}

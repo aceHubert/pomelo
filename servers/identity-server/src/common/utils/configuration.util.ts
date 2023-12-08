@@ -45,16 +45,22 @@ export interface ConfigObject {
    * database configs
    */
   database?: {
-    /**
-     * database connection,
-     * checkout on https://sequelize.org/docs/v6/getting-started/
-     */
-    connection: string | Record<string, any>;
-    /**
-     * table prefix
-     * @example t_
-     */
-    tablePrefix?: string;
+    infrastructure?: {
+      /**
+       * database connection,
+       * checkout on https://sequelize.org/docs/v6/getting-started/
+       */
+      connection: string | Record<string, any>;
+      /**
+       * table prefix
+       * @example t_
+       */
+      tablePrefix?: string;
+    };
+    identity?: {
+      connection: string | Record<string, any>;
+      tablePrefix?: string;
+    };
   };
 
   [key: string]: any;
@@ -106,19 +112,36 @@ export const configuration =
             : false,
       },
       database: {
-        connection: process.env.DATABASE_CONNECTION
-          ? process.env.DATABASE_CONNECTION
-          : {
-              database: process.env.DATABASE_NAME,
-              username: process.env.DATABASE_USERNAME,
-              password: process.env.DATABASE_PASSWORD,
-              dialect: process.env.DATABASE_DIALECT || 'mysql',
-              host: process.env.DATABASE_HOST || 'localhost',
-              port: process.env.DATABASE_PORT || 3306,
-              charset: process.env.DATABASE_CHARSET || 'utf8',
-              collate: process.env.DATABASE_COLLATE || '',
-            },
-        tablePrefix: process.env.TABLE_PREFIX,
+        infrastructure: {
+          connection: process.env.INFRASTRUCTURE_DATABASE_CONNECTION
+            ? process.env.INFRASTRUCTURE_DATABASE_CONNECTION
+            : {
+                database: process.env.INFRASTRUCTURE_DATABASE_NAME,
+                username: process.env.INFRASTRUCTURE_DATABASE_USERNAME,
+                password: process.env.INFRASTRUCTURE_DATABASE_PASSWORD,
+                dialect: process.env.INFRASTRUCTURE_DATABASE_DIALECT || 'mysql',
+                host: process.env.INFRASTRUCTURE_DATABASE_HOST || 'localhost',
+                port: process.env.INFRASTRUCTURE_DATABASE_PORT || 3306,
+                charset: process.env.INFRASTRUCTURE_DATABASE_CHARSET || 'utf8',
+                collate: process.env.INFRASTRUCTURE_DATABASE_COLLATE || '',
+              },
+          tablePrefix: process.env.INFRASTRUCTURE_TABLE_PREFIX,
+        },
+        identity: {
+          connection: process.env.IDENTITY_DATABASE_CONNECTION
+            ? process.env.IDENTITY_DATABASE_CONNECTION
+            : {
+                database: process.env.IDENTITY_DATABASE_NAME,
+                username: process.env.IDENTITY_DATABASE_USERNAME,
+                password: process.env.IDENTITY_DATABASE_PASSWORD,
+                dialect: process.env.IDENTITY_DATABASE_DIALECT || 'mysql',
+                host: process.env.IDENTITY_DATABASE_HOST || 'localhost',
+                port: process.env.IDENTITY_DATABASE_PORT || 3306,
+                charset: process.env.IDENTITY_DATABASE_CHARSET || 'utf8',
+                collate: process.env.IDENTITY_DATABASE_COLLATE || '',
+              },
+          tablePrefix: process.env.IDENTITY_TABLE_PREFIX,
+        },
       },
     };
 

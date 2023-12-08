@@ -13,9 +13,11 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { OidcModule } from 'nest-oidc-provider';
+import { IdentityModule } from '@ace-pomelo/identity-datasource';
 import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
+import { DbInitModule } from './db-init/db-init.module';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
@@ -74,12 +76,23 @@ import '@/common/extends/i18n.extend';
       isGlobal: true,
       useFactory: (config: ConfigService, i18n: I18nService) => ({
         isGlobal: true,
-        connection: config.getOrThrow('database.connection'),
-        tablePrefix: config.get('database.tablePrefix', ''),
+        connection: config.getOrThrow('database.infrastructure.connection'),
+        tablePrefix: config.get('database.infrastructure.tablePrefix', ''),
         translate: i18n.tv.bind(i18n),
       }),
       inject: [ConfigService, I18nService],
     }),
+    IdentityModule.registerAsync({
+      isGlobal: true,
+      useFactory: (config: ConfigService, i18n: I18nService) => ({
+        isGlobal: true,
+        connection: config.getOrThrow('database.identity.connection'),
+        tablePrefix: config.get('database.identity.tablePrefix', ''),
+        translate: i18n.tv.bind(i18n),
+      }),
+      inject: [ConfigService, I18nService],
+    }),
+    DbInitModule, // init database
     AccountModule,
     OidcModule.forRootAsync({
       imports: [OidcConfigModule],

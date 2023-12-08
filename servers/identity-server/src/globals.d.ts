@@ -25,6 +25,26 @@ declare global {
 declare module '@types/oidc-provider' {
   export interface AllClientMetadata {
     /**
+     * Multiple client secrets support
+     */
+    client_secrets?:
+      | Array<{
+          /**
+           * Secret type, 'SharedSecret' | 'PrivateKey'
+           * @default 'SharedSecret'
+           */
+          type?: string | undefined;
+          /**
+           * Secret value
+           */
+          value: string;
+          /**
+           * Secret expiration timestamp
+           */
+          expires_at?: number | undefined;
+        }>
+      | undefined;
+    /**
      * IdToken lifetime in seconds
      * @default 600
      */
@@ -46,12 +66,12 @@ declare module '@types/oidc-provider' {
     refresh_token_expiration?: 'absolute' | 'sliding' | undefined;
     /**
      * RefreshToken lifetime in seconds in case of 'absolute' expiration type
-     * @default 1209600
+     * @default 2592000
      */
     refresh_token_absolute_ttl?: number | undefined;
     /**
      * RefreshToken lifetime in seconds in case of 'sliding' expiration type
-     * @default 2592000
+     * @default 1209600
      */
     refresh_token_sliding_ttl?: number | undefined;
     /**
@@ -89,7 +109,7 @@ declare module '@types/oidc-provider' {
     /**
      * Extra properties
      */
-    extra_properties?: Record<string, any> | undefined;
+    extra_properties?: Record<string, string> | undefined;
   }
 }
 

@@ -1,0 +1,1 @@
+export const IDENTITY_OPTIONS = 'IDENTITY_OPTIONS';

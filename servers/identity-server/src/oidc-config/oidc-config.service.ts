@@ -1,11 +1,15 @@
 import * as url from 'url';
 import * as crypto from 'crypto';
-import { Provider, AdapterFactory, FindAccount, KoaContextWithOIDC, errors } from 'oidc-provider';
-import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
+import { get } from 'lodash';
+import { Provider, FindAccount, KoaContextWithOIDC, errors } from 'oidc-provider';
+import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/infrastructure-datasource';
+import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
+import { renderPrimaryStyle } from '../common/utils/render-primary-style-tag.util';
+import { DbInitService } from '../db-init/db-init.service';
 import { OidcRedisAdapterService } from '../oidc-adapter/oidc-redis-adapter.service';
 import { OidcConfigAdapter } from './oidc-adapter';
 
@@ -15,15 +19,20 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   constructor(
     private readonly configService: ConfigService,
+    private readonly dbInitService: DbInitService,
     private readonly adapterService: OidcRedisAdapterService,
+    private readonly identityResourceDataSource: IdentityResourceDataSource,
     private readonly userDataSource: UserDataSource,
   ) {}
 
-  createModuleOptions(): OidcModuleOptions | Promise<OidcModuleOptions> {
+  async createModuleOptions() {
+    // init database
+    await this.dbInitService.initDB();
+
     return {
       issuer: this.configService.getOrThrow('OIDC_ISSUER'),
       path: this.configService.get('OIDC_PATH', '/oidc'),
-      oidc: this.getConfiguration(),
+      oidc: await this.getConfiguration(),
       factory: (issuer: string, config?: OidcConfiguration) => {
         const provider = new Provider(issuer, config);
 
@@ -46,11 +55,16 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_redirect.md
         Object.defineProperty(errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
 
-        // Update client secret comparison
+        // Update client secret comparison and multiple client secrets support
         // use SHA256 of input to compare with stored value
         provider.Client.prototype.compareClientSecret = function compareClientSecret(actual: string) {
           const constantEquals = require('oidc-provider/lib/helpers/constant_equals');
+          console.log(this.clientSecret);
+          console.log(this.metadata()['client_secrets']);
+          // original client secret comparison
           return constantEquals(this.clientSecret, crypto.createHash('sha256').update(actual).digest('hex'), 1000);
+
+          // TODO: multiple client secrets support
         };
 
         provider.registerGrantType('password', (ctx, next) => {
@@ -62,11 +76,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         provider.on('authorization.success', async (ctx: KoaContextWithOIDC, response: Record<string, any>) => {
           if (!response) return;
 
-          const origin = new url.URL((ctx.oidc.params?.redirect_uri as string) ?? '').origin;
-          const clientId = ctx.oidc.client?.clientId;
-          const sessionId = ctx.oidc.session?.jti;
-          if (clientId && origin && sessionId) {
-            response.session_state = this.getSessionState(clientId, origin, sessionId);
+          const sessionState = this.generateSessionStateValue(ctx);
+          if (sessionState) {
+            response.session_state = sessionState;
           }
         });
 
@@ -75,56 +87,46 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     };
   }
 
-  createAdapterFactory(): AdapterFactory | Promise<AdapterFactory> {
+  createAdapterFactory() {
     return (modelName: string) => new OidcConfigAdapter(modelName, this.adapterService);
   }
 
-  getConfiguration(): OidcConfiguration {
+  async getConfiguration(): Promise<OidcConfiguration> {
     const issuer = this.configService.getOrThrow('OIDC_ISSUER');
     const resource = this.configService.get<string>('OIDC_RESOURCE');
+    const scopes: OidcConfiguration['scopes'] = [];
+    const claims: OidcConfiguration['claims'] = {};
+
+    // identity resources
+    await this.identityResourceDataSource.getList(['name', 'enabled', 'claims']).then((resources) => {
+      resources.forEach((resource) => {
+        scopes.push(resource.name);
+        claims[resource.name] = resource.claims?.map((claim) => claim.type) ?? [];
+      }, {} as NonNullable<OidcConfiguration['claims']>);
+    });
+
+    // api resources
+    // TODO: api resources
+
+    // required scopes
+    if (!scopes.includes('openid')) {
+      scopes.unshift('openid');
+    }
+
+    // no configured need scopes
+    if (!scopes.includes('offline_access')) {
+      scopes.push('offline_access');
+    }
+
     return {
+      // static clients metadata
       clients: [
         {
-          client_id: '35613c26-6a86-ba04-8ee0-6ced9688c75a',
-          client_secret: 'F691E0F0F69D8AAB9FF35CFD38AEAEF37DC24A75452C2D54D7D5C202AF4EB253',
-          client_name: 'Pomelo Admin',
-          scope: 'openid offline_access profile capabilities phone email',
-          grant_types: ['authorization_code', 'implicit', 'refresh_token'],
-          response_types: ['code', 'id_token', 'code id_token', 'id_token token'],
-          redirect_uris: [
-            'https://localhost:5011/signin.html',
-            'https://localhost:5011/signin-silent.html',
-            'http://localhost:6033/signin.html',
-            'http://localhost:6033/signin-silent.html',
-          ],
-          post_logout_redirect_uris: ['https://localhost:5011', 'http://localhost:6033'],
-          token_endpoint_auth_method: 'none',
-          require_auth_time: true,
-          access_token_format: 'jwt',
-          extra_properties: {
-            'loginPage.template': 'login-form-20',
-            'loginPage.formLableDisplay': false,
-            'loginPage.formValidateTooltip': true,
-          },
-        },
-        {
-          client_id: '3d136433-977f-40c7-8702-a0444a6b2a9f',
-          client_secret: '98E7152F6311F81F7505AA53C52AE426941B0807FD5DA01F5537709947AE0A09',
-          client_name: 'Pomelo Client',
-          scope: 'openid offline_access profile capabilities phone email',
-          grant_types: ['authorization_code', 'implicit', 'refresh_token'],
-          response_types: ['code', 'id_token', 'code id_token', 'id_token token'],
-          redirect_uris: ['https://localhost:5013/signin.html', 'https://localhost:5013/signin-silent.html'],
-          post_logout_redirect_uris: ['https://localhost:5013'],
-          token_endpoint_auth_method: 'none',
-          require_auth_time: true,
-          access_token_format: 'jwt',
-        },
-        {
-          client_id: '041567b1-3d71-4ea8-9ac2-8f3d28dab170',
-          client_secret: '98D54EE45DB53A378DADFE481E1B76CA59F2B1970564B5282294AD84B0139AF9',
+          client_id: '00000000-0000-0000-0000-000000000001',
+          // UtQs360CkP
+          client_secret: '10414436a1a7d7ff59e1087209ca32b508224462441c484dfe8f8994f55fcca1',
           client_name: 'Pomelo Identity Server',
-          scope: 'openid offline_access profile',
+          scope: 'openid profile offline_access',
           grant_types: ['client_credentials'],
           response_types: [],
           redirect_uris: [],
@@ -133,25 +135,22 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           access_token_format: 'jwt',
         },
         {
-          client_id: '75a9c633-cfde-4954-b35c-9344ed9b781a',
-          client_secret: 'A2FF9E058C9A182ACC11C372E4CEE929E71CFE4B7E126F9B50C9ABCDF9DE5AF8',
-          client_name: 'Pomelo Core Server',
-          scope: 'openid offline_access profile',
+          client_id: '00000000-0000-0000-0000-000000000002',
+          // b9fqUuo2Gd
+          client_secret: 'b1dc4e94b22ffd8e4f4016c506ac0f2c0795eaa628548a5250a78dbb3ef4d7f1',
+          client_name: 'Pomelo Infratructure Server',
+          scope: 'openid profile offline_access',
           grant_types: ['authorization_code', 'client_credentials'],
           response_types: ['code'],
-          redirect_uris: ['http://localhost:3000/login/callback', 'http://localhost:5002/login/callback'],
-          post_logout_redirect_uris: ['http://localhost:3000', 'http://localhost:5002'],
+          redirect_uris: ['http://localhost:5002/login/callback'],
+          post_logout_redirect_uris: ['http://localhost:5002'],
           token_endpoint_auth_method: 'client_secret_basic',
           require_auth_time: true,
           access_token_format: 'jwt',
         },
       ],
-      interactions: {
-        url(_, interaction) {
-          return `/login/${interaction.uid}`;
-        },
-      },
-      scopes: ['openid', 'offline_access', 'profile', 'email', 'phone'],
+      scopes,
+      claims,
       responseTypes: [
         'code',
         'id_token',
@@ -165,12 +164,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         methods: ['S256'],
         required: (ctx, client) => client.metadata()['require_pkce'] === true,
       },
-      claims: {
-        profile: ['display_name', 'nice_name', 'nick_name', 'avatar', 'gender', 'locale', 'url', 'updated_at'],
-        capabilities: ['role', 'ram'],
-        email: ['email', 'email_verified'],
-        phone: ['phone_number', 'phone_number_verified'],
-      },
       routes: {
         authorization: '/connect/authorize',
         backchannel_authentication: '/connect/backchannel',
@@ -183,6 +176,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         end_session: '/connect/endsession',
         introspection: '/connect/introspect',
         revocation: '/connect/revocation',
+      },
+      interactions: {
+        url(_, interaction) {
+          return `/login/${interaction.uid}`;
+        },
       },
       discovery: {
         check_session_iframe: url.resolve(issuer, '/connect/checksession'),
@@ -272,13 +270,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         jwtUserinfo: { enabled: true },
         revocation: { enabled: true }, // defaults to false
         deviceFlow: { enabled: true }, // defaults to false
-        registration: {
-          enabled: true,
-        },
-        registrationManagement: {
-          enabled: true,
-          rotateRegistrationAccessToken: true,
-        },
         introspection: {
           enabled: true,
           allowedPolicy: (ctx, client, token) => {
@@ -291,6 +282,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         },
         rpInitiatedLogout: {
           logoutSource: async (ctx, form) => {
+            const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
             // @param ctx - koa request context
             // @param form - form source (id="op.logoutForm") to be embedded in the page and submitted by
             //   the End-User
@@ -303,6 +295,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
               <title>Logout Request</title>
               <link rel="stylesheet" href="/style/index.css" />
               <link rel="stylesheet" href="/style/container.css" />
+              ${primaryColor ? renderPrimaryStyle(primaryColor) : ''}
             </head>
             <body>
               <main class="container">
@@ -352,6 +345,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           },
           getResourceServerInfo: (ctx, resourceIndicator, client) => {
             console.log('resource indicator', resourceIndicator);
+            console.log('client', client);
 
             const metadata = client.metadata();
             return {
@@ -400,45 +394,45 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       // },
       // Skipping consent screen
       // https://github.com/panva/node-oidc-provider/blob/v7.x/recipes/skip_consent.md
-      loadExistingGrant: async (ctx) => {
-        if (!ctx.oidc.session || !ctx.oidc.client) return;
+      // loadExistingGrant: async (ctx) => {
+      //   if (!ctx.oidc.session || !ctx.oidc.client) return;
 
-        const grantId =
-          (ctx.oidc.result && ctx.oidc.result.consent && ctx.oidc.result.consent.grantId) ||
-          ctx.oidc.session.grantIdFor(ctx.oidc.client.clientId);
+      //   const grantId =
+      //     (ctx.oidc.result && ctx.oidc.result.consent && ctx.oidc.result.consent.grantId) ||
+      //     ctx.oidc.session.grantIdFor(ctx.oidc.client.clientId);
 
-        if (grantId) {
-          // keep grant expiry aligned with session expiry
-          // to prevent consent prompt being requested when grant expires
-          const grant = await ctx.oidc.provider.Grant.find(grantId);
+      //   if (grantId) {
+      //     // keep grant expiry aligned with session expiry
+      //     // to prevent consent prompt being requested when grant expires
+      //     const grant = await ctx.oidc.provider.Grant.find(grantId);
 
-          if (grant) {
-            // this aligns the Grant ttl with that of the current session
-            // if the same Grant is used for multiple sessions, or is set
-            // to never expire, you probably do not want this in your code
-            if (ctx.oidc.account && grant.exp && grant.exp < ctx.oidc.session.exp) {
-              grant.exp = ctx.oidc.session.exp;
+      //     if (grant) {
+      //       // this aligns the Grant ttl with that of the current session
+      //       // if the same Grant is used for multiple sessions, or is set
+      //       // to never expire, you probably do not want this in your code
+      //       if (ctx.oidc.account && grant.exp && grant.exp < ctx.oidc.session.exp) {
+      //         grant.exp = ctx.oidc.session.exp;
 
-              await grant.save();
-            }
+      //         await grant.save();
+      //       }
 
-            return grant;
-          }
-        } else if (ctx.oidc.client.metadata()['require_consent'] !== true && !ctx.oidc.prompts.has('consent')) {
-          const grant = new ctx.oidc.provider.Grant({
-            clientId: ctx.oidc.client.clientId,
-            accountId: ctx.oidc.session.accountId,
-          });
+      //       return grant;
+      //     }
+      //   } else if (ctx.oidc.client.metadata()['require_consent'] !== true && !ctx.oidc.prompts.has('consent')) {
+      //     const grant = new ctx.oidc.provider.Grant({
+      //       clientId: ctx.oidc.client.clientId,
+      //       accountId: ctx.oidc.session.accountId,
+      //     });
 
-          grant.addOIDCScope(ctx.oidc.client.scope!);
-          grant.addResourceScope(resource ?? ctx.origin, ctx.oidc.client.scope!);
+      //     grant.addOIDCScope(ctx.oidc.client.scope!);
+      //     grant.addResourceScope(resource ?? ctx.origin, ctx.oidc.client.scope!);
 
-          await grant.save();
+      //     await grant.save();
 
-          return grant;
-        }
-        return;
-      },
+      //     return grant;
+      //   }
+      //   return;
+      // },
       renderError: async (ctx, out) => {
         this.logger.error('oidc renderError', out);
         ctx.type = 'html';
@@ -610,14 +604,30 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     }
   }
 
-  private getSessionState(clientId: string, origin: string, sessionId: string) {
+  private generateSessionStateValue(ctx: KoaContextWithOIDC) {
+    if (!ctx) return;
+    if (!ctx.oidc.requestParamScopes.has('openid')) return;
+
+    if (!ctx.oidc.session) return;
+
+    if (!ctx.oidc.client) return;
+    if (!ctx.oidc.params?.redirect_uri) return;
+
+    const sessionId = ctx.oidc.session.jti;
+    const clientId = ctx.oidc.client.clientId;
+    const { origin } = new url.URL(ctx.oidc.params.redirect_uri as string);
     const salt = crypto.randomBytes(16).toString('hex');
-    let stateEncode = crypto.createHash('sha256').update(`${clientId}${origin}${sessionId}${salt}`).digest('base64');
 
-    stateEncode = stateEncode.replace(/=/g, ''); // Remove any trailing '='s
-    stateEncode = stateEncode.replace(/\+/g, '-'); // '+' => '-'
-    stateEncode = stateEncode.replace(/\//g, '_'); // '/' => '_'
+    // https://base64.guru/standards/base64url
+    let base64UrlEncode = crypto
+      .createHash('sha256')
+      .update(`${clientId}${origin}${sessionId}${salt}`)
+      .digest('base64');
 
-    return `${stateEncode}.${salt}`;
+    base64UrlEncode = base64UrlEncode.replace(/=/g, ''); // Remove any trailing '='s
+    base64UrlEncode = base64UrlEncode.replace(/\+/g, '-'); // '+' => '-'
+    base64UrlEncode = base64UrlEncode.replace(/\//g, '_'); // '/' => '_'
+
+    return `${base64UrlEncode}.${salt}`;
   }
 }

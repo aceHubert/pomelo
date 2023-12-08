@@ -1,15 +1,15 @@
 import { createClient, RedisClientType } from 'redis';
 import { AdapterPayload } from 'oidc-provider';
-import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
 import { jsonSafelyParse } from '@ace-pomelo/shared-server';
+import { ClientDataSource } from '@ace-pomelo/identity-datasource';
 import { OidcAdapterServiceFactory } from '../oidc-config/oidc-adapter.factory';
 
 @Injectable()
 export class OidcRedisAdapterService extends OidcAdapterServiceFactory implements OnModuleInit, OnApplicationShutdown {
-  private readonly logger = new Logger(OidcRedisAdapterService.name, { timestamp: true });
   private readonly storage: RedisClientType;
 
-  constructor() {
+  constructor(protected readonly clientDataSource: ClientDataSource) {
     super();
     this.storage = createClient({
       url: 'redis://localhost:6379/0',
@@ -34,6 +34,11 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
   }
 
   async upsert(model: string, id: string, payload: AdapterPayload, expiresIn: number) {
+    // stop registration endpoint to create client
+    if (model === 'Client') {
+      throw new Error('Client model not supported');
+    }
+
     const key = this.key(model, id);
     const { grantId, userCode, uid } = payload;
 
@@ -66,6 +71,11 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
   }
 
   async destroy(model: string, id: string) {
+    // stop registration endpoint to delete client
+    if (model === 'Client') {
+      throw new Error('Client model not supported');
+    }
+
     const key = this.key(model, id);
     await this.storage.del(key);
   }
@@ -75,6 +85,10 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
   }
 
   async find(model: string, id: string) {
+    if (model === 'Client') {
+      return this.getClient(id);
+    }
+
     const payload = this.decode<AdapterPayload>(await this.storage.get(this.key(model, id)));
     // https://github.com/panva/node-oidc-provider/blob/main/lib/actions/userinfo.js#L108
     if (model === 'AccessToken' && payload) {

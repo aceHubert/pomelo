@@ -2,7 +2,6 @@ import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logge
 import { BaseError as SequelizeBaseError } from 'sequelize';
 import { isHttpError } from 'http-errors';
 import { Request, Response } from 'express';
-import { InvalidPackageNameError, InvalidPackageVersionError } from 'query-registry';
 import { isJsonRequest } from '../utils/is-json-request.util';
 
 @Catch()
@@ -77,8 +76,6 @@ export class AllExceptionFilter implements ExceptionFilter {
       ? exception.getStatus()
       : isHttpError(exception)
       ? exception.statusCode // 如果是 http-errors 错误，直接获取 statusCode
-      : exception instanceof InvalidPackageNameError || exception instanceof InvalidPackageVersionError //  query-registry InvalidPackageNameError/InvalidPackageVersionError 转换成 http 405
-      ? HttpStatus.METHOD_NOT_ALLOWED
       : (exception as { status?: number }).status ?? HttpStatus.INTERNAL_SERVER_ERROR; // 否则返回 500
   }
 
@@ -92,7 +89,8 @@ export class AllExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()
         : exception instanceof SequelizeBaseError
         ? ((exception as any).original || exception).message // 部分 sequelize error 格式化 error 到original
-        : exception.message;
+        : (exception as any).error_description || // oidc-provider error
+          exception.message;
 
     return typeof description === 'string' ? { message: description } : description;
   }
