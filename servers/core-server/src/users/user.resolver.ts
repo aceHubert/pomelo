@@ -86,7 +86,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update user.' })
   async updateUser(
-    @Args('id', { type: () => ID, description: 'Form id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {

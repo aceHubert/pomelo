@@ -24,10 +24,11 @@ import {
   ApiCreatedResponse,
   ApiNoContentResponse,
 } from '@nestjs/swagger';
-import { BaseController, createResponseSuccessType } from '@ace-pomelo/shared-server';
+import { createResponseSuccessType } from '@ace-pomelo/shared-server';
 import { MetaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { NewMetaDto } from './dto/new-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';
+import { BaseController } from './base.controller';
 
 export type Method =
   | 'getMeta'

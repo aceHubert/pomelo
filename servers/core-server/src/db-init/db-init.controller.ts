@@ -2,7 +2,7 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { Logger, Controller, Get, Post, Body, Request, Scope } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { BaseController } from '@ace-pomelo/shared-server';
+import { BaseController } from '@/common/controllers/base.controller';
 import { DbInitService } from './db-init.service';
 import { InitArgsDto } from './dto/init-args.dto';
 
@@ -20,7 +20,7 @@ export class DbInitController extends BaseController {
    */
   @Get('check')
   async check() {
-    const result = await this.dbInitService.hasDbInitialized();
+    const result = await this.dbInitService.hasDbLockFile();
     return this.success({
       dbInitRequired: !result,
     });
@@ -31,37 +31,31 @@ export class DbInitController extends BaseController {
    */
   @Post('start')
   async start(@Request() request: any, @Body() initArgs: InitArgsDto, @I18n() i18n: I18nContext) {
-    const result = await this.dbInitService.initDb();
+    const httpAdapter = this.httpAdapterHost.httpAdapter;
+    const platformName = httpAdapter.getType();
 
-    // true 第一次建表, 初始化数据
-    if (result) {
-      const httpAdapter = this.httpAdapterHost.httpAdapter;
-      const platformName = httpAdapter.getType();
+    let siteUrl = '';
+    if (platformName === 'express') {
+      siteUrl = `${request.protocol}://${request.get('host')}`;
+    } else {
+      // else if (platformName === 'fastify') {
+      this.logger.warn(`server platform "${platformName}" is not support!`);
+    }
 
-      let siteUrl = '';
-      if (platformName === 'express') {
-        siteUrl = `${request.protocol}://${request.get('host')}`;
-      } else {
-        // else if (platformName === 'fastify') {
-        this.logger.warn(`server platform "${platformName}" is not support!`);
-      }
-      const success = await this.dbInitService.initDatas({
+    try {
+      await this.dbInitService.initDB({
         ...initArgs,
         siteUrl,
       });
-      return success
-        ? this.success({
-            message: await i18n.tv('db-init.controller.init_data.success', 'Initialize datas successful!'),
-          })
-        : this.faild(
-            await i18n.tv('db-init.controller.init_data.faild', 'An error occurred while initializing datas!'),
-            400,
-          );
-    } else {
-      // 已经存在表结构，直接返回成功
+
       return this.success({
         message: await i18n.tv('db-init.controller.init_database.success', 'Initialize database successful!'),
       });
+    } catch (err) {
+      this.logger.error(err);
+      return this.faild(
+        await i18n.tv('db-init.controller.init.fail', 'An error occurred while initializing database!'),
+      );
     }
   }
 }

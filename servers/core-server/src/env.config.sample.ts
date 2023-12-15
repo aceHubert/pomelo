@@ -1,4 +1,4 @@
-import { AuthType, defineConfig } from './common/utils/configuration.utils';
+import { defineConfig } from './common/utils/configuration.utils';
 
 /**
  * 通过文件配置环境（设置环境变量 CONFIG_FILE：env config file path）
@@ -17,7 +17,7 @@ export default defineConfig({
   database: {
     connection: {
       // database name
-      database: 't_templates',
+      database: 'po_template',
       // database name
       username: 'username',
       // database password
@@ -45,12 +45,5 @@ export default defineConfig({
     debug: false,
     path: '/graphql',
     subscription_path: '/graphql',
-  },
-  // 认证
-  auth: {
-    type: AuthType.Jwt,
-    clientId: 'clientId',
-    clientSecret: 'clientSecret',
-    endpoint: 'https://oauth2.com/',
   },
 });

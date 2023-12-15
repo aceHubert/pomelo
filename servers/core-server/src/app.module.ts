@@ -100,6 +100,17 @@ const logger = new Logger('AppModule', { timestamp: true });
       ],
       inject: [ConfigService],
     }),
+    InfrastructureModule.registerAsync({
+      isGlobal: true,
+      useFactory: (config: ConfigService, i18n: I18nService) => ({
+        isGlobal: true,
+        connection: config.getOrThrow('database.connection'),
+        tablePrefix: config.get('database.tablePrefix', ''),
+        translate: i18n.tv.bind(i18n),
+      }),
+      inject: [ConfigService, I18nService],
+    }),
+    DbInitModule, // init database
     OidcModule.forRootAsync({
       isGlobal: true,
       disableController: true,
@@ -215,16 +226,6 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService, OidcService],
     }),
-    InfrastructureModule.registerAsync({
-      isGlobal: true,
-      useFactory: (config: ConfigService, i18n: I18nService) => ({
-        isGlobal: true,
-        connection: config.getOrThrow('database.connection'),
-        tablePrefix: config.get('database.tablePrefix', ''),
-        translate: i18n.tv.bind(i18n),
-      }),
-      inject: [ConfigService, I18nService],
-    }),
     MessageModule.forRoot({
       isGlobal: true,
       // TODO: PubSub 是使用内存管理，生产环境需要更换
@@ -264,16 +265,23 @@ const logger = new Logger('AppModule', { timestamp: true });
     // }),
     // SubModuleModule.forRootAsync({
     //   useFactory: (config: ConfigService) => ({
-    //     keywords: config.get('submodule.keywords', []),
-    //     registry: config.get('submodule.registry'),
-    //     mirrors: config.get('submodule.mirrors'),
-    //     cached: config.get('submodule.cached', false),
-    //     bucket: config.get('submodule.bucket', ''),
-    //     prefix: config.get('submodule.prefix'),
+    //     keywords: config
+    //       .get<string>('SUBMODULE_KEYWORDS', '')
+    //       .split('|')
+    //       .map((keyword) => keyword.trim())
+    //       .filter((keyword) => keyword),
+    //     registry: config.get('SUBMODULE_REGISTRY', 'https://registry.npmjs.org'),
+    //     mirrors: config
+    //       .get<string>('SUBMODULE_MIRRORS', '')
+    //       .split('|')
+    //       .map((mirror) => mirror.trim())
+    //       .filter((mirror) => mirror),
+    //     cached: config.get<string>('SUBMODULE_CACHE', 'false') === 'true',
+    //     bucket: config.get<string>('SUBMODULE_BUCKET'),
+    //     prefix: config.get<string>('SUBMODULE_PREFIX'),
     //   }),
     //   inject: [ConfigService],
     // }),
-    DbInitModule,
     OptionModule,
     TermTaxonomyModule,
     TemplateModule,

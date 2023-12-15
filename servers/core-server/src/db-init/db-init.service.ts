@@ -1,7 +1,12 @@
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { Injectable, Logger } from '@nestjs/common';
-import { DbInitDataSource, InitArgs } from '@ace-pomelo/infrastructure-datasource';
+import {
+  DbInitDataSource as InfrastructureDbInitDataSource,
+  version as InfrastructureVersion,
+  InitArgs as InfrastructureInitArgs,
+} from '@ace-pomelo/infrastructure-datasource';
 
 const lockDbFile = path.join(process.cwd(), 'db.lock');
 
@@ -9,12 +14,12 @@ const lockDbFile = path.join(process.cwd(), 'db.lock');
 export class DbInitService {
   private readonly logger = new Logger(DbInitService.name, { timestamp: true });
 
-  constructor(private readonly dbInitDataSource: DbInitDataSource) {}
+  constructor(private readonly infrastructureDbInitDataSource: InfrastructureDbInitDataSource) {}
 
   /**
-   * 查询数据库是否已经初始化
+   * check if the lock file exists
    */
-  hasDbInitialized(): Promise<boolean> {
+  hasDbLockFile(): Promise<boolean> {
     return new Promise((resolve) => {
       fs.access(lockDbFile, fs.constants.F_OK, (err) => {
         if (err) resolve(false);
@@ -25,33 +30,80 @@ export class DbInitService {
   }
 
   /**
-   * 初始化数据库
+   * read lock file & convert to array
    */
-  initDb(): Promise<boolean> {
-    return this.dbInitDataSource
+  readDbLockFile() {
+    try {
+      return fs.readFileSync(lockDbFile, 'utf-8').split(os.EOL);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Finds the key in lock files and returns the corresponding value
+   * @param {string} key Key to find
+   * @returns {string|null} Value of the key
+   */
+  getEnvValue(key: string) {
+    // find the line that contains the key (exact match)
+    const matchedLine = this.readDbLockFile().find((line) => line.split('=')[0] === key);
+    // split the line (delimiter is '=') and return the item at index 2
+    return matchedLine !== undefined ? matchedLine.split('=')[1] : null;
+  }
+
+  /**
+   * Updates value for existing key or creates a new key=value line
+   * This function is a modified version of https://stackoverflow.com/a/65001580/3153583
+   * @param {string} key Key to update/insert
+   * @param {string} value Value to update/insert
+   */
+  setEnvValue = (key: string, value: string) => {
+    const envVars = this.readDbLockFile();
+    const targetLine = envVars.find((line) => line.split('=')[0] === key);
+    if (targetLine !== undefined) {
+      // update existing line
+      const targetLineIndex = envVars.indexOf(targetLine);
+      // replace the key/value with the new value
+      envVars.splice(targetLineIndex, 1, `${key}="${value}"`);
+    } else {
+      // create new key value
+      envVars.push(`${key}="${value}"`);
+    }
+    // write everything back to the file system
+    fs.writeFileSync(lockDbFile, envVars.join(os.EOL));
+  };
+
+  /**
+   * Initialize the database and datas
+   */
+  initDB(initArgs: InfrastructureInitArgs): Promise<void> {
+    return this.infrastructureDbInitDataSource
       .initDB({
         alter: true,
         // match: /_dev$/,
-        when: () => this.hasDbInitialized().then((initialized) => !initialized),
+        when: () => this.hasDbLockFile().then((initialized) => !initialized),
       })
       .then((flag) => {
-        flag &&
-          fs.writeFile(lockDbFile, '', {}, (err) => {
-            if (err) this.logger.error(err.message);
+        if (flag) {
+          this.setEnvValue('INFRASTRUCTURE_MODULE', InfrastructureVersion);
+          this.logger.log('Initialize database successful!');
 
-            this.logger.log('DB initialize success!');
-          });
-
-        !flag && this.logger.warn('DB has been already initialized!');
-
-        return flag;
+          // 初始化数据
+          return this.initDatas(initArgs);
+        } else {
+          this.logger.warn('Database has been already initialized!');
+          return;
+        }
       });
   }
 
   /**
-   * 根据参数初始化表数据
+   * Initialize the datas
    */
-  initDatas(initArgs: InitArgs): Promise<boolean> {
-    return this.dbInitDataSource.initDatas(initArgs);
+  private async initDatas(initArgs: InfrastructureInitArgs) {
+    this.logger.log('Start to initialize datas!');
+    await this.infrastructureDbInitDataSource.initDatas(initArgs);
+    this.logger.log('Initialize datas successful!');
   }
 }

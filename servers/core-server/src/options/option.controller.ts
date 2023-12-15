@@ -6,7 +6,6 @@ import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import {
-  BaseController,
   User,
   ApiAuthCreate,
   ParseQueryPipe,
@@ -16,6 +15,7 @@ import {
   RequestUser,
 } from '@ace-pomelo/shared-server';
 import { OptionAction } from '@/common/actions';
+import { BaseController } from '@/common/controllers/base.controller';
 import { OptionQueryDto } from './dto/option-query.dto';
 import { NewOptionDto } from './dto/new-option.dto';
 import { UpdateOptionDto } from './dto/update-option.dto';

@@ -15,7 +15,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import {
-  BaseController,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   ApiAuthCreate,
@@ -33,6 +32,7 @@ import {
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { PostTemplateAction } from '@/common/actions';
+import { BaseController } from '@/common/controllers/base.controller';
 import { PostTemplateOptionQueryDto, PagedPostTemplateQueryDto } from './dto/template-query.dto';
 import { NewPostTemplateDto } from './dto/new-template.dto';
 import { UpdatePostTemplateDto } from './dto/update-template.dto';

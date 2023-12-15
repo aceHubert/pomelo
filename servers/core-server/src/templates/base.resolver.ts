@@ -5,7 +5,7 @@ import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { BaseResolver, Fields, User, RequestUser } from '@ace-pomelo/shared-server';
+import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   TermTaxonomyDataSource,
@@ -17,6 +17,7 @@ import {
   TemplateStatus,
 } from '@ace-pomelo/infrastructure-datasource';
 import { TemplateAction } from '@/common/actions';
+import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
 import { TermTaxonomy } from '../term-taxonomy/models/term-taxonomy.model';

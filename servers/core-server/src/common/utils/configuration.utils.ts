@@ -8,11 +8,6 @@ import { ConfigFactory } from '@nestjs/config';
 
 const logger = new Logger('Utils', { timestamp: true });
 
-export enum AuthType {
-  Jwt = 'jwt',
-  Opaque = 'opaque',
-}
-
 export interface ConfigObject {
   /**
    * Debug mode
@@ -93,27 +88,6 @@ export interface ConfigObject {
     tablePrefix?: string;
   };
   /**
-   * authorization
-   */
-  auth?: {
-    /**
-     * type, default: jwt
-     */
-    type?: AuthType;
-    /**
-     * client id
-     */
-    clientId: string;
-    /**
-     * client secret
-     */
-    clientSecret: string;
-    /**
-     * endpoint, get oidc metadata from {endpoint}.well-known/openid-configuration
-     */
-    endpoint?: string;
-  };
-  /**
    * upload configs
    */
   upload?: {
@@ -129,28 +103,6 @@ export interface ConfigObject {
      * max file count
      */
     maxFiles?: number;
-  };
-  /**
-   * sub-module store
-   */
-  submodule?: {
-    // read submodule configs from unpkg, https://github.com/velut/node-query-registry
-    /**
-     * unpkg keywords
-     */
-    keywords?: string[];
-    /**
-     * unpkg registry
-     */
-    registry?: string;
-    /**
-     * unpkg mirrors
-     */
-    mirrors?: string[];
-    /**
-     * unpkg cache
-     */
-    cache?: boolean;
   };
   [key: string]: any;
 }
@@ -224,29 +176,11 @@ export const configuration =
             },
         tablePrefix: process.env.TABLE_PREFIX,
       },
-      auth: {
-        type: process.env.AUTH_TYPE as AuthType,
-        clientId: process.env.AUTH_CLIENT_ID!,
-        clientSecret: process.env.AUTH_CLIENT_SECRET!,
-        endpoint: process.env.AUTH_ENDPOINT,
-      },
       upload: {
         dest: process.env.UPLOAD_PATH,
         maxFileSize:
           process.env.UPLOAD_LIMIT !== void 0 ? bytes.parse(process.env.UPLOAD_LIMIT) / 1024 : 1024 * 1024 * 10,
         maxFiles: process.env.UPLOAD_MAX_FILES !== void 0 ? parseInt(process.env.UPLOAD_MAX_FILES, 10) : 10,
-      },
-      submodule: {
-        keywords:
-          process.env.SUBMODULE_KEYWORDS !== void 0
-            ? process.env.SUBMODULE_KEYWORDS.split('|').map((keyword) => keyword.trim())
-            : [],
-        registry: process.env.SUBMODULE_REGISTRY,
-        mirrors:
-          process.env.SUBMODULE_MIRRORS !== void 0
-            ? process.env.SUBMODULE_MIRRORS.split('|').map((mirror) => mirror.trim())
-            : [],
-        cache: process.env.SUBMODULE_CACHE === 'true',
       },
     };
 

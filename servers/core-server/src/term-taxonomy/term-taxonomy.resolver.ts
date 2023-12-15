@@ -107,7 +107,9 @@ export class TermTaxonomyResolver extends createMetaResolver(
     let excludes: number[] | undefined;
     if (args.includeDefault !== true) {
       const defaultCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultCategory);
-      excludes = [Number(defaultCategoryId)];
+      const defaultLinkCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultLinkCategory);
+      const DefaultMediaCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultMediaCategory);
+      excludes = [Number(defaultCategoryId), Number(defaultLinkCategoryId), Number(DefaultMediaCategoryId)];
     }
     return this.termTaxonomyDataSource
       .getList(
