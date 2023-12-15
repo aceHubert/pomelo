@@ -1,4 +1,5 @@
 import { defineRegistApi, gql } from '../graphql';
+import { request } from '../graphql/requests/infrastructure-request';
 
 // Types
 import type { TypedQueryDocumentNode } from '../graphql';
@@ -19,19 +20,22 @@ export interface UserModel {
   updatedAt: Date;
 }
 
-export const useUserApi = defineRegistApi('use', {
-  get: gql`
-    query getUser($id: ID!) {
-      user(id: $id) {
-        id
-        niceName
-        displayName
-        mobile
-        email
-        url
-        status
-        updatedAt
+export const useUserApi = defineRegistApi('user', {
+  apis: {
+    get: gql`
+      query getUser($id: ID!) {
+        user(id: $id) {
+          id
+          niceName
+          displayName
+          mobile
+          email
+          url
+          status
+          updatedAt
+        }
       }
-    }
-  ` as TypedQueryDocumentNode<{ user: UserModel }, { id: string }>,
+    ` as TypedQueryDocumentNode<{ user: UserModel }, { id: string }>,
+  },
+  request,
 });

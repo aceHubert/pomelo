@@ -161,7 +161,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       enabled: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: false,
+        defaultValue: true,
         comment: 'Enabled',
       },
     },

@@ -75,7 +75,7 @@ const cdnConfig = {
       path: '/dist/pinia.iife.prod.js',
     },
     {
-      packageName: 'oidc-client',
+      packageName: 'oidc-client-ts',
       variableName: 'Oidc',
       path: '/dist/browser/oidc-client-ts.min.js',
       onerror: 'onOidcFallback && onOidcFallback()',

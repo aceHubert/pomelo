@@ -1,7 +1,8 @@
 import { defineRegistApi, gql } from '../graphql';
+import { request } from '../graphql/requests/infrastructure-request';
 
 // Types
-import type { Paged } from './types';
+import type { PagedArgs, Paged } from './types';
 
 export interface FileData {
   fileName: string;
@@ -36,12 +37,10 @@ export interface FileUploadOptions {
   crop?: ImageCropOptions;
 }
 
-export interface PagedMediaArgs {
+export interface PagedMediaArgs extends PagedArgs {
   keyword?: string;
   extensions?: string[];
   mimeTypes?: string[];
-  offset?: number;
-  limit?: number;
 }
 
 export interface Media extends Omit<File, 'original'>, FileData {
@@ -57,284 +56,291 @@ export interface PagedMedia extends Paged<Media> {}
 // Types
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
 
-export const useResApi = defineRegistApi('resource', {
-  uploadFile: gql`
-    mutation uploadFile($file: Upload!, $options: FileUploadOptionsInput) {
-      file: uploadFile(file: $file, options: $options) {
-        id
-        originalFileName
-        fileName
-        path
-        fullPath
-        fileSize
-        width
-        height
-        extension
-        mimeType
-        createdAt
-        thumbnail {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        medium {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        mediumLarge {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        large {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-      }
-    }
-  ` as TypedMutationDocumentNode<{ file: Media }, { file: File; options?: FileUploadOptions }>,
-  uploadFiles: gql`
-    mutation uploadFiles($files: [Upload!]!) {
-      files: uploadFiles(files: $files) {
-        id
-        originalFileName
-        fileName
-        path
-        fullPath
-        fileSize
-        width
-        height
-        extension
-        mimeType
-        createdAt
-        thumbnail {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        medium {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        mediumLarge {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        large {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-      }
-    }
-  ` as TypedMutationDocumentNode<{ files: Media[] }, { files: File[] }>,
-  cropImage: gql`
-    mutation cropImage($id: ID!, $options: ImageCropOptionsInput!) {
-      image: cropImage(id: $id, options: $options) {
-        id
-        originalFileName
-        fileName
-        path
-        fullPath
-        fileSize
-        width
-        height
-        extension
-        mimeType
-        createdAt
-        thumbnail {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        medium {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        mediumLarge {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-        large {
-          fileName
-          path
-          fullPath
-          width
-          height
-        }
-      }
-    }
-  ` as TypedMutationDocumentNode<{ image: Media }, { id: string; options: ImageCropOptions }>,
-  getPaged: gql`
-    query getMedias($offset: Int, $limit: Int, $keyword: String, $extensions: [String!], $mimeTypes: [String!]) {
-      medias: medias(
-        offset: $offset
-        limit: $limit
-        keyword: $keyword
-        extensions: $extensions
-        mimeTypes: $mimeTypes
-      ) {
-        rows {
-          id
-          originalFileName
-          fileName
-          path
-          fullPath
-          fileSize
-          width
-          height
-          extension
-          mimeType
-          createdAt
-          thumbnail {
+export const useResApi = defineRegistApi(
+  'resource',
+
+  {
+    apis: {
+      uploadFile: gql`
+        mutation uploadFile($file: Upload!, $options: FileUploadOptionsInput) {
+          file: uploadFile(file: $file, options: $options) {
+            id
+            originalFileName
             fileName
             path
             fullPath
+            fileSize
             width
             height
+            extension
+            mimeType
+            createdAt
+            thumbnail {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            medium {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            mediumLarge {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            large {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
           }
-          medium {
+        }
+      ` as TypedMutationDocumentNode<{ file: Media }, { file: File; options?: FileUploadOptions }>,
+      uploadFiles: gql`
+        mutation uploadFiles($files: [Upload!]!) {
+          files: uploadFiles(files: $files) {
+            id
+            originalFileName
             fileName
             path
             fullPath
+            fileSize
             width
             height
+            extension
+            mimeType
+            createdAt
+            thumbnail {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            medium {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            mediumLarge {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            large {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
           }
-          mediumLarge {
+        }
+      ` as TypedMutationDocumentNode<{ files: Media[] }, { files: File[] }>,
+      cropImage: gql`
+        mutation cropImage($id: ID!, $options: ImageCropOptionsInput!) {
+          image: cropImage(id: $id, options: $options) {
+            id
+            originalFileName
             fileName
             path
             fullPath
+            fileSize
             width
             height
+            extension
+            mimeType
+            createdAt
+            thumbnail {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            medium {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            mediumLarge {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            large {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
           }
-          large {
+        }
+      ` as TypedMutationDocumentNode<{ image: Media }, { id: string; options: ImageCropOptions }>,
+      getPaged: gql`
+        query getMedias($offset: Int, $limit: Int, $keyword: String, $extensions: [String!], $mimeTypes: [String!]) {
+          medias: medias(
+            offset: $offset
+            limit: $limit
+            keyword: $keyword
+            extensions: $extensions
+            mimeTypes: $mimeTypes
+          ) {
+            rows {
+              id
+              originalFileName
+              fileName
+              path
+              fullPath
+              fileSize
+              width
+              height
+              extension
+              mimeType
+              createdAt
+              thumbnail {
+                fileName
+                path
+                fullPath
+                width
+                height
+              }
+              medium {
+                fileName
+                path
+                fullPath
+                width
+                height
+              }
+              mediumLarge {
+                fileName
+                path
+                fullPath
+                width
+                height
+              }
+              large {
+                fileName
+                path
+                fullPath
+                width
+                height
+              }
+            }
+            total
+          }
+        }
+      ` as TypedQueryDocumentNode<{ medias: PagedMedia }, PagedMediaArgs>,
+      get: gql`
+        query getMedia($id: ID!) {
+          media(id: $id) {
+            id
+            originalFileName
             fileName
             path
             fullPath
+            fileSize
             width
             height
+            extension
+            mimeType
+            createdAt
+            thumbnail {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            medium {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            mediumLarge {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
+            large {
+              fileName
+              path
+              fullPath
+              width
+              height
+            }
           }
         }
-        total
-      }
-    }
-  ` as TypedQueryDocumentNode<{ medias: PagedMedia }, PagedMediaArgs>,
-  get: gql`
-    query getMedia($id: ID!) {
-      media(id: $id) {
-        id
-        originalFileName
-        fileName
-        path
-        fullPath
-        fileSize
-        width
-        height
-        extension
-        mimeType
-        createdAt
-        thumbnail {
-          fileName
-          path
-          fullPath
-          width
-          height
+      ` as TypedQueryDocumentNode<{ media: Media }, { id: number }>,
+      getObsUploadSignedUrl: gql`
+        query gethwCloudObsUploadSignedUrl(
+          $bucket: String!
+          $key: String
+          $expires: Int
+          $queryParams: JSONObject
+          $headers: JSONObject
+        ) {
+          signedUrl: hwCloudObsUploadSignedUrl(
+            bucket: $bucket
+            key: $key
+            expires: $expires
+            queryParams: $queryParams
+            headers: $headers
+          ) {
+            url
+            headers
+          }
         }
-        medium {
-          fileName
-          path
-          fullPath
-          width
-          height
+      ` as TypedQueryDocumentNode<
+        { signedUrl: { url: string; headers: Record<string, any> } },
+        {
+          bucket: string;
+          key?: string;
+          expires?: number;
+          queryParams?: Record<string, any>;
+          headers?: Record<string, any>;
         }
-        mediumLarge {
-          fileName
-          path
-          fullPath
-          width
-          height
+      >,
+      getObsPostUploadSignature: gql`
+        query gethwCloudObsPostUploadSignature($bucket: String!, $key: String, $expires: Int) {
+          signature: hwCloudObsPostUploadSignature(bucket: $bucket, key: $key, expires: $expires) {
+            url
+            policy
+            signature
+          }
         }
-        large {
-          fileName
-          path
-          fullPath
-          width
-          height
+      ` as TypedQueryDocumentNode<
+        { signature: { url: string; policy: string; signature: string } },
+        {
+          bucket: string;
+          key?: string;
+          expires?: number;
         }
-      }
-    }
-  ` as TypedQueryDocumentNode<{ media: Media }, { id: number }>,
-  getObsUploadSignedUrl: gql`
-    query gethwCloudObsUploadSignedUrl(
-      $bucket: String!
-      $key: String
-      $expires: Int
-      $queryParams: JSONObject
-      $headers: JSONObject
-    ) {
-      signedUrl: hwCloudObsUploadSignedUrl(
-        bucket: $bucket
-        key: $key
-        expires: $expires
-        queryParams: $queryParams
-        headers: $headers
-      ) {
-        url
-        headers
-      }
-    }
-  ` as TypedQueryDocumentNode<
-    { signedUrl: { url: string; headers: Record<string, any> } },
-    {
-      bucket: string;
-      key?: string;
-      expires?: number;
-      queryParams?: Record<string, any>;
-      headers?: Record<string, any>;
-    }
-  >,
-  getObsPostUploadSignature: gql`
-    query gethwCloudObsPostUploadSignature($bucket: String!, $key: String, $expires: Int) {
-      signature: hwCloudObsPostUploadSignature(bucket: $bucket, key: $key, expires: $expires) {
-        url
-        policy
-        signature
-      }
-    }
-  ` as TypedQueryDocumentNode<
-    { signature: { url: string; policy: string; signature: string } },
-    {
-      bucket: string;
-      key?: string;
-      expires?: number;
-    }
-  >,
-});
+      >,
+    },
+    request,
+  },
+);

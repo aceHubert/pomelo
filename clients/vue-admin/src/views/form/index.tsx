@@ -238,7 +238,7 @@ export default defineComponent({
                       : i18n.tv('page_templates.btn_text.move_to_trush', '放入回收站')}
                   </a>
                 ),
-                <a href={getViewUrl(record)} target="preview">
+                <a href={getViewUrl(record)} class="info--text" target="preview">
                   {record.status === TemplateStatus.Publish
                     ? i18n.tv('common.btn_text.view', '查看')
                     : i18n.tv('common.btn_text.preview', '预览')}

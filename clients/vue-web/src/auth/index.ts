@@ -5,9 +5,7 @@ import { OidcUserManagerCreator } from './oidc';
 // Types
 import type { UserManagerSettings } from 'oidc-client-ts';
 
-export const userManager = new OidcUserManagerCreator(
-  getEnv<UserManagerSettings>('oidc', {} as any, (window as any)._ENV),
-);
+export const userManager = new OidcUserManagerCreator(getEnv<UserManagerSettings>('oidc', {} as any, window._ENV));
 
 Object.defineProperties(Vue.prototype, {
   $userManager: {

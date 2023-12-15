@@ -17,9 +17,9 @@ const devHost = getEnv('DEV_HOST', 'localhost');
 const devPort = Number(getEnv('DEV_PORT', 3000));
 const isMock = getEnv('MOCK') === 'true';
 const isProxy = isMock || getEnv('PROXY') === 'true';
+const proxyInfrastructureOrigin = getEnv('PROXY_INFRASTRUCTURE_ORIGIN', 'http://localhost:5002');
 const isHttps = getEnv('HTTPS') === 'true';
-const proxyTarget = (to = 'http://localhost:5002') =>
-  isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to;
+const proxyTarget = (to) => (isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to);
 
 // env file
 const envJs = (isProxy ? 'env/env.dev.proxy.js' : getEnv('ENV_JS')) || 'env/env.js';
@@ -49,15 +49,11 @@ module.exports = defineConfig({
       isProxy && !isProd
         ? {
             '/api': {
-              target: proxyTarget(),
+              target: proxyTarget(proxyInfrastructureOrigin),
               changeOrigin: true,
             },
             '/graphql': {
-              target: proxyTarget(),
-              changeOrigin: true,
-            },
-            '/main/action': {
-              target: proxyTarget(),
+              target: proxyTarget(proxyInfrastructureOrigin),
               changeOrigin: true,
             },
           }

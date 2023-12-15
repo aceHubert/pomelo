@@ -1,4 +1,5 @@
 import { defineRegistApi, gql } from '../graphql';
+import { request } from '../graphql/requests/infrastructure-request';
 
 // Types
 import type { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
@@ -105,131 +106,134 @@ export const PageMetaPresetKeys = {
 };
 
 export const useTemplateApi = defineRegistApi('template', {
-  // 获取模版
-  get: gql`
-    query getTemplate($id: ID!, $metaKeys: [String!]) {
-      template(id: $id) {
-        id
-        title
-        content
-        excerpt
-        author
-        status
-        type
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        categories {
+  apis: {
+    // 获取模版
+    get: gql`
+      query getTemplate($id: ID!, $metaKeys: [String!]) {
+        template(id: $id) {
           id
-          name
-        }
-        metas(metaKeys: $metaKeys) {
-          id
-          key: metaKey
-          value: metaValue
-        }
-      }
-    }
-  ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
-  getForm: gql`
-    query getForm($id: ID!, $metaKeys: [String!]) {
-      form: formTemplate(id: $id) {
-        id
-        title
-        content
-        author
-        status
-        updatedAt
-        createdAt
-        metas(metaKeys: $metaKeys) {
-          id
-          key: metaKey
-          value: metaValue
+          title
+          content
+          excerpt
+          author
+          status
+          type
+          commentStatus
+          commentCount
+          updatedAt
+          createdAt
+          categories {
+            id
+            name
+          }
+          metas(metaKeys: $metaKeys) {
+            id
+            key: metaKey
+            value: metaValue
+          }
         }
       }
-    }
-  ` as TypedQueryDocumentNode<{ form?: FormTemplateModel }, { id: number; metaKeys?: string[] }>,
-  /**
-   * 获取页面别名路径
-   */
-  getAliasPaths: gql`
+    ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
+    getForm: gql`
+      query getForm($id: ID!, $metaKeys: [String!]) {
+        form: formTemplate(id: $id) {
+          id
+          title
+          content
+          author
+          status
+          updatedAt
+          createdAt
+          metas(metaKeys: $metaKeys) {
+            id
+            key: metaKey
+            value: metaValue
+          }
+        }
+      }
+    ` as TypedQueryDocumentNode<{ form?: FormTemplateModel }, { id: number; metaKeys?: string[] }>,
+    /**
+     * 获取页面别名路径
+     */
+    getAliasPaths: gql`
     query getAliasPaths() {
       paths: pageAliasPaths
     }
   ` as TypedQueryDocumentNode<{ paths: string[] }>,
-  // 获取页面
-  getPage: gql`
-    query getPage($id: ID!, $metaKeys: [String!]) {
-      page: pageTemplate(id: $id) {
-        id
-        name
-        title
-        content
-        author
-        status
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        metas(metaKeys: $metaKeys) {
-          id
-          key: metaKey
-          value: metaValue
-        }
-      }
-    }
-  ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { id: number; metaKeys?: string[] }>,
-  getPageByName: gql`
-    query getPage($name: String!, $metaKeys: [String!]) {
-      page: pageTemplateByName(name: $name) {
-        id
-        name
-        title
-        content
-        author
-        status
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        metas(metaKeys: $metaKeys) {
-          id
-          key: metaKey
-          value: metaValue
-        }
-      }
-    }
-  ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { name: string; metaKeys?: string[] }>,
-  // 获取文章
-  getPost: gql`
-    query getPost($id: ID!, $metaKeys: [String!]) {
-      post: postTemplate(id: $id) {
-        id
-        name
-        title
-        content
-        excerpt
-        author
-        status
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        categories {
+    // 获取页面
+    getPage: gql`
+      query getPage($id: ID!, $metaKeys: [String!]) {
+        page: pageTemplate(id: $id) {
           id
           name
-        }
-        tags {
-          id
-          name
-        }
-        metas(metaKeys: $metaKeys) {
-          id
-          key: metaKey
-          value: metaValue
+          title
+          content
+          author
+          status
+          commentStatus
+          commentCount
+          updatedAt
+          createdAt
+          metas(metaKeys: $metaKeys) {
+            id
+            key: metaKey
+            value: metaValue
+          }
         }
       }
-    }
-  ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { id: number; metaKeys?: string[] }>,
+    getPageByName: gql`
+      query getPage($name: String!, $metaKeys: [String!]) {
+        page: pageTemplateByName(name: $name) {
+          id
+          name
+          title
+          content
+          author
+          status
+          commentStatus
+          commentCount
+          updatedAt
+          createdAt
+          metas(metaKeys: $metaKeys) {
+            id
+            key: metaKey
+            value: metaValue
+          }
+        }
+      }
+    ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { name: string; metaKeys?: string[] }>,
+    // 获取文章
+    getPost: gql`
+      query getPost($id: ID!, $metaKeys: [String!]) {
+        post: postTemplate(id: $id) {
+          id
+          name
+          title
+          content
+          excerpt
+          author
+          status
+          commentStatus
+          commentCount
+          updatedAt
+          createdAt
+          categories {
+            id
+            name
+          }
+          tags {
+            id
+            name
+          }
+          metas(metaKeys: $metaKeys) {
+            id
+            key: metaKey
+            value: metaValue
+          }
+        }
+      }
+    ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: number }>,
+  },
+  request,
 });

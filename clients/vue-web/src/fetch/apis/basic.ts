@@ -1,4 +1,5 @@
 import { defineRegistApi, gql } from '../graphql';
+import { request } from '../graphql/requests/infrastructure-request';
 
 // Types
 import type { TypedQueryDocumentNode } from '../graphql';
@@ -40,17 +41,20 @@ export enum OptionPresetKeys {
  * prefix 需要注册到window._ENV上
  */
 export const useBasicApi = defineRegistApi('basic', {
-  /**
-   * 获取程序初始化自动加载配置
-   */
-  getAutoloadOptions: gql`
-    query getAutoloadOptions {
-      options: autoloadOptions
-    }
-  ` as TypedQueryDocumentNode<{ options: Record<string, string> }>,
-  getOptionValue: gql`
-    query getOptionValue($name: String!) {
-      value: optionValue(name: $name)
-    }
-  ` as TypedQueryDocumentNode<{ value: string }, { name: string }>,
+  apis: {
+    /**
+     * 获取程序初始化自动加载配置
+     */
+    getAutoloadOptions: gql`
+      query getAutoloadOptions {
+        options: autoloadOptions
+      }
+    ` as TypedQueryDocumentNode<{ options: Record<string, string> }>,
+    getOptionValue: gql`
+      query getOptionValue($name: String!) {
+        value: optionValue(name: $name)
+      }
+    ` as TypedQueryDocumentNode<{ value: string }, { name: string }>,
+  },
+  request,
 });

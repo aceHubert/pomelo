@@ -4,9 +4,10 @@
 
   var env = window._ENV || {};
 
-  env.apiBase = '/api';
-  env.graphqlBase = '/graphql';
-  env.graphqlSubscriptionBase = 'ws://localhost:5002/graphql';
+  env.infrastructureApiBase = '/infrastructure/api';
+  env.infrastructureGraphqlBase = '/infrastructure/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5002/graphql';
+  env.identityGraphqlBase = '/identity/graphql';
 
   env.oidc = {
     authority: 'http://localhost:5001/',
@@ -21,7 +22,7 @@
     // these two will be done dynamically from the buttons clicked, but are
     // needed if you want to use the silent_renew
     response_type: 'code',
-    scope: 'openid profile capabilities',
+    scope: 'openid profile',
     // will revoke (reference) access tokens at logout time
     revokeAccessTokenOnSignout: true,
     loadUserInfo: false,

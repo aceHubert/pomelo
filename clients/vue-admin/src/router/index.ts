@@ -110,7 +110,160 @@ export const router = createRouter({
       ],
     },
     {
-      path: '/data-scope',
+      path: '/clients',
+      component: RouterChild,
+      children: [
+        {
+          name: 'clients',
+          path: '',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client'),
+        },
+        {
+          name: 'client-detail',
+          path: ':clientId',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/detail'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-grant-types',
+          path: ':clientId/grant-types',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/grant-types'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-scopes',
+          path: ':clientId/scopes',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/scopes'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-claims',
+          path: ':clientId/claims',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/claims'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-cors-origins',
+          path: ':clientId/cors-origins',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/cors-origins'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-redirect-uris',
+          path: ':clientId/redirect-uris',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/redirect-uris'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-post-logout-redirect-uris',
+          path: ':clientId/post-logout-redirect-uris',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/post-logout-redirect-uris'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-secrets',
+          path: ':clientId/secrets',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/secrets'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-secrets-generate',
+          path: ':clientId/secrets/generate',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/secrets/generate'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+        {
+          name: 'client-properties',
+          path: ':clientId/properties',
+          component: () => import(/* webpackChunkName: "clients" */ '../views/client/properties'),
+          props: (route) => ({ clientId: route.params.clientId }),
+        },
+      ],
+    },
+    {
+      path: '/api-resources',
+      component: RouterChild,
+      children: [
+        {
+          name: 'api-resources',
+          path: '',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource'),
+        },
+        {
+          name: 'api-resource-detail',
+          path: ':id',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/detail'),
+          props: (route) => ({ id: Number(route.params.id) }),
+        },
+        {
+          name: 'api-claims',
+          path: ':id/claims',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/claims'),
+          props: (route) => ({ apiResourceId: Number(route.params.id) }),
+        },
+        {
+          name: 'api-scopes',
+          path: ':id/scopes',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/scopes'),
+          props: (route) => ({ apiResourceId: Number(route.params.id) }),
+        },
+        {
+          name: 'api-scope-claims',
+          path: '/api-scopes/:id/claims',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/scopes/claims'),
+          props: (route) => ({ apiScopeId: Number(route.params.id) }),
+        },
+        {
+          name: 'api-secrets',
+          path: ':id/secrets',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/secrets'),
+          props: (route) => ({ apiResourceId: Number(route.params.id) }),
+        },
+        {
+          name: 'api-secrets-generate',
+          path: ':id/secrets/generate',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/secrets/generate'),
+          props: (route) => ({ apiResourceId: Number(route.params.id) }),
+        },
+        {
+          name: 'api-properties',
+          path: ':id/properties',
+          component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/properties'),
+          props: (route) => ({ apiResourceId: Number(route.params.id) }),
+        },
+      ],
+    },
+    {
+      path: '/identity-resources',
+      component: RouterChild,
+      children: [
+        {
+          name: 'identity-resources',
+          path: '',
+          component: () => import(/* webpackChunkName: "identity-resources" */ '../views/identity-resource'),
+        },
+        {
+          name: 'identity-resource-detail',
+          path: ':id',
+          component: () => import(/* webpackChunkName: "identity-resources" */ '../views/identity-resource/detail'),
+          props: (route) => ({ id: Number(route.params.id) }),
+        },
+        {
+          name: 'identity-claims',
+          path: ':id/claims',
+          component: () => import(/* webpackChunkName: "identity-resources" */ '../views/identity-resource/claims'),
+          props: (route) => ({ identityResourceId: Number(route.params.id) }),
+        },
+        {
+          name: 'identity-properties',
+          path: ':id/properties',
+          component: () => import(/* webpackChunkName: "identity-resources" */ '../views/identity-resource/properties'),
+          props: (route) => ({ identityResourceId: Number(route.params.id) }),
+        },
+      ],
+    },
+    {
+      path: '/data-scopes',
       component: RouterChild,
       children: [
         {
@@ -157,6 +310,11 @@ export const router = createRouter({
     {
       name: 'signout',
       path: '/signout',
+    },
+    {
+      name: 'not-found',
+      path: '*',
+      component: () => import(/* webpackChunkName: "common" */ '../views/error/page-not-fount'),
     },
   ],
 });

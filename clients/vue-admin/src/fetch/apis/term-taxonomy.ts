@@ -1,4 +1,5 @@
 import { defineRegistApi, gql } from '../graphql';
+import { request } from '../graphql/requests/infrastructure-request';
 // Types
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
 
@@ -41,108 +42,111 @@ export type NewTermRelationshipInput = {
 };
 
 export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
-  get: gql`
-    query getTermTaxonomies($taxonomy: String!, $keyword: String, $parentId: ID, $group: Int) {
-      termTaxonomies(taxonomy: $taxonomy, keyword: $keyword, group: $group, parentId: $parentId) {
-        id
-        name
-        slug
-        description
-        parentId
-        count
-        group
+  apis: {
+    get: gql`
+      query getTermTaxonomies($taxonomy: String!, $keyword: String, $parentId: ID, $group: Int) {
+        termTaxonomies(taxonomy: $taxonomy, keyword: $keyword, group: $group, parentId: $parentId) {
+          id
+          name
+          slug
+          description
+          parentId
+          count
+          group
+        }
       }
-    }
-  ` as TypedQueryDocumentNode<
-    { termTaxonomies: Omit<TermTaxonomyModel, 'taxonomy'>[] },
-    { taxonomy: string; keyword?: string; group?: number; parentId?: number }
-  >,
-  getCategories: gql`
-    query getCategoryTermTaxonomies(
-      $keyword: String
-      $parentId: ID
-      $group: Int
-      $objectId: ID! = 0
-      $includeDefault: Boolean! = false
-      $withMine: Boolean! = false
-    ) {
-      categories: categoryTermTaxonomies(
-        keyword: $keyword
-        group: $group
-        parentId: $parentId
-        includeDefault: $includeDefault
+    ` as TypedQueryDocumentNode<
+      { termTaxonomies: Omit<TermTaxonomyModel, 'taxonomy'>[] },
+      { taxonomy: string; keyword?: string; group?: number; parentId?: number }
+    >,
+    getCategories: gql`
+      query getCategoryTermTaxonomies(
+        $keyword: String
+        $parentId: ID
+        $group: Int
+        $objectId: ID! = 0
+        $includeDefault: Boolean! = false
+        $withMine: Boolean! = false
       ) {
-        id
-        name
-        slug
-        description
-        parentId
-        count
-        group
+        categories: categoryTermTaxonomies(
+          keyword: $keyword
+          group: $group
+          parentId: $parentId
+          includeDefault: $includeDefault
+        ) {
+          id
+          name
+          slug
+          description
+          parentId
+          count
+          group
+        }
+        myCategories: termTaxonomiesByObjectId(objectId: $objectId, taxonomy: "Category") @include(if: $withMine) {
+          id
+          name
+        }
       }
-      myCategories: termTaxonomiesByObjectId(objectId: $objectId, taxonomy: "Category") @include(if: $withMine) {
-        id
-        name
+    ` as TypedQueryDocumentNode<
+      { categories: Omit<TermTaxonomyModel, 'taxonomy'>[]; myCategories?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
+      | { keyword?: string; group?: number; parentId?: number }
+      | {
+          keyword?: string;
+          group?: number;
+          parentId?: number;
+          objectId: string;
+          includeDefault?: boolean;
+          withMine?: true;
+        }
+    >,
+    getTags: gql`
+      query getTagTermTaxonomies($keyword: String, $group: Int, $objectId: ID! = 0, $withMine: Boolean! = false) {
+        tags: tagTermTaxonomies(keyword: $keyword, group: $group) {
+          id
+          name
+          slug
+          description
+          parentId
+          count
+          group
+        }
+        myTags: termTaxonomiesByObjectId(objectId: $objectId, taxonomy: "Category") @include(if: $withMine) {
+          id
+          name
+        }
       }
-    }
-  ` as TypedQueryDocumentNode<
-    { categories: Omit<TermTaxonomyModel, 'taxonomy'>[]; myCategories?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
-    | { keyword?: string; group?: number; parentId?: number }
-    | {
-        keyword?: string;
-        group?: number;
-        parentId?: number;
-        objectId: string;
-        includeDefault?: boolean;
-        withMine?: true;
+    ` as TypedQueryDocumentNode<
+      { tags: Omit<TermTaxonomyModel, 'taxonomy'>[]; myTags?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
+      { keyword?: string; group?: number } | { keyword?: string; group?: number; objectId: string; withMine: true }
+    >,
+    create: gql`
+      mutation createTerm($model: NewTermTaxonomyInput!) {
+        term: createTermTaxonomy(model: $model) {
+          id
+          name
+          slug
+          taxonomy
+          description
+          parentId
+          group
+          count
+        }
       }
-  >,
-  getTags: gql`
-    query getTagTermTaxonomies($keyword: String, $group: Int, $objectId: ID! = 0, $withMine: Boolean! = false) {
-      tags: tagTermTaxonomies(keyword: $keyword, group: $group) {
-        id
-        name
-        slug
-        description
-        parentId
-        count
-        group
+    ` as TypedMutationDocumentNode<{ term: TermTaxonomyModel }, { model: NewTermTaxonomyInput }>,
+    createRelationship: gql`
+      mutation createRelationship($model: NewTermRelationshipInput!) {
+        relationship: createTermRelationship(model: $model) {
+          objectId
+          termTaxonomyId
+          order
+        }
       }
-      myTags: termTaxonomiesByObjectId(objectId: $objectId, taxonomy: "Category") @include(if: $withMine) {
-        id
-        name
+    ` as TypedMutationDocumentNode<{ relationship: TermRelationshipModel }, { model: NewTermRelationshipInput }>,
+    deleteRelationship: gql`
+      mutation deleteRelationship($objectId: ID!, $termTaxonomyId: ID!) {
+        result: deleteTermRelationship(objectId: $objectId, termTaxonomyId: $termTaxonomyId)
       }
-    }
-  ` as TypedQueryDocumentNode<
-    { tags: Omit<TermTaxonomyModel, 'taxonomy'>[]; myTags?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
-    { keyword?: string; group?: number } | { keyword?: string; group?: number; objectId: string; withMine: true }
-  >,
-  create: gql`
-    mutation createTerm($model: NewTermTaxonomyInput!) {
-      term: createTermTaxonomy(model: $model) {
-        id
-        name
-        slug
-        taxonomy
-        description
-        parentId
-        group
-        count
-      }
-    }
-  ` as TypedMutationDocumentNode<{ term: TermTaxonomyModel }, { model: NewTermTaxonomyInput }>,
-  createRelationship: gql`
-    mutation createRelationship($model: NewTermRelationshipInput!) {
-      relationship: createTermRelationship(model: $model) {
-        objectId
-        termTaxonomyId
-        order
-      }
-    }
-  ` as TypedMutationDocumentNode<{ relationship: TermRelationshipModel }, { model: NewTermRelationshipInput }>,
-  deleteRelationship: gql`
-    mutation deleteRelationship($objectId: ID!, $termTaxonomyId: ID!) {
-      result: deleteTermRelationship(objectId: $objectId, termTaxonomyId: $termTaxonomyId)
-    }
-  ` as TypedMutationDocumentNode<{ result: Boolean }, { objectId: string; termTaxonomyId: string }>,
+    ` as TypedMutationDocumentNode<{ result: Boolean }, { objectId: string; termTaxonomyId: string }>,
+  },
+  request,
 });

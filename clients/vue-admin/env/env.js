@@ -4,9 +4,10 @@
 
   var env = window._ENV || {};
 
-  env.apiBase = 'https://server.pomelo.com/api';
-  env.graphqlBase = 'https://server.pomelo.com/graphql';
-  env.graphqlSubscriptionBase = 'wss://server.pomelo.com/graphql';
+  env.infrastructureApiBase = 'https://apis.pomelo.com/infrastructure/api';
+  env.infrastructureGraphqlBase = 'https://apis.pomelo.com/infrastructure/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'wss://apis.pomelo.com/infrastructure/graphql';
+  env.identityGraphqlBase = 'https://apis.pomelo.com/identity/graphql';
 
   env.oidc = {
     authority: 'https://auth.pomelo.com/',

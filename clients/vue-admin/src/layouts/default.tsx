@@ -44,9 +44,6 @@ export default defineComponent({
     const menus = ref<MenuConfig[]>([]);
     const settingDrawerVisible = ref(false);
 
-    /**
-     * serialize menu from server
-     */
     // const serializeMenu = (menus: MenuModel[], parent?: MenuConfig): MenuConfig[] => {
     //   return menus.map((menu) => {
     //     const { id, action, position, display, breadcrumb, children, ...rest } = menu;

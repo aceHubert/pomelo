@@ -1,10 +1,11 @@
 import { defineRegistApi, gql } from '../../graphql';
+import { request } from '../../graphql/requests/infrastructure-request';
 
 // Types
 import type { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
 import type { TermTaxonomyModel } from '../term-taxonomy';
-import type { Paged } from '../types';
+import type { PagedArgs, Paged } from '../types';
 
 export enum TemplateType {
   Post = 'Post',
@@ -12,15 +13,13 @@ export enum TemplateType {
   Form = 'Form',
 }
 
-export interface PagedTemplateArgs {
+export interface PagedTemplateArgs extends PagedArgs {
   keyword?: string;
   type: string;
   author?: string;
   status?: TemplateStatus;
   date?: string;
   categoryId?: number;
-  offset?: number;
-  limit?: number;
   queryStatusCounts?: boolean;
   querySelfCounts?: boolean;
 }
@@ -115,31 +114,139 @@ export const PageMetaPresetKeys = {
 };
 
 export const useTemplateApi = defineRegistApi('template', {
-  // 分页获取模版
-  getPaged: gql`
-    query getTemplates(
-      $offset: Int
-      $limit: Int
-      $keyword: String
-      $type: String!
-      $author: String
-      $status: TemplateStatus
-      $date: String
-      $categoryId: Int
-      $queryStatusCounts: Boolean! = false
-      $querySelfCounts: Boolean! = false
-    ) {
-      templates(
-        offset: $offset
-        limit: $limit
-        keyword: $keyword
-        type: $type
-        author: $author
-        status: $status
-        date: $date
-        categoryId: $categoryId
+  apis: {
+    // 分页获取模版
+    getPaged: gql`
+      query getTemplates(
+        $offset: Int
+        $limit: Int
+        $keyword: String
+        $type: String!
+        $author: String
+        $status: TemplateStatus
+        $date: String
+        $categoryId: Int
+        $queryStatusCounts: Boolean! = false
+        $querySelfCounts: Boolean! = false
       ) {
-        rows {
+        templates(
+          offset: $offset
+          limit: $limit
+          keyword: $keyword
+          type: $type
+          author: $author
+          status: $status
+          date: $date
+          categoryId: $categoryId
+        ) {
+          rows {
+            id
+            name
+            title
+            excerpt
+            author
+            status
+            commentStatus
+            commentCount
+            updatedAt
+            createdAt
+            categories {
+              id
+              name
+            }
+          }
+          total
+        }
+        statusCounts: templateCountByStatus(type: $type) @include(if: $queryStatusCounts) {
+          status
+          count
+        }
+        selfCounts: templateCountBySelf(type: $type) @include(if: $querySelfCounts)
+      }
+    ` as TypedQueryDocumentNode<
+      {
+        templates: Paged<PagedTemplateItem>;
+        statusCounts?: TemplateStatusCountItem[];
+        selfCounts?: number;
+      },
+      PagedTemplateArgs
+    >,
+    // 获取模版
+    get: gql`
+      query getTemplate($id: ID!, $metaKeys: [String!]) {
+        template(id: $id) {
+          id
+          title
+          content
+          excerpt
+          author
+          status
+          type
+          commentStatus
+          commentCount
+          updatedAt
+          createdAt
+          categories {
+            id
+            name
+          }
+          metas(metaKeys: $metaKeys) {
+            id
+            key: metaKey
+            value: metaValue
+          }
+        }
+      }
+    ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
+    // 按状态分组数量
+    getCountByStatus: gql`
+      query getCountByStatus($type: String!) {
+        statusCounts: templateCountByStatus(type: $type) {
+          status
+          count
+        }
+      }
+    ` as TypedQueryDocumentNode<{ statusCounts: TemplateStatusCountItem[] }, { type: string }>,
+    // 由本人创建的数量
+    getCountBySelf: gql`
+      query getCountBySelf($type: String!) {
+        count: templateCountBySelf(type: $type, includeTrash: false)
+      }
+    ` as TypedQueryDocumentNode<{ count: number }, { type: string }>,
+    // 按天分组数量, month (format: YYYYMM)
+    getCountByDay: gql`
+      query getCounts($type: String!, $month: String!) {
+        dayCounts: templateCountByDay(type: $type, month: $month) {
+          day
+          count
+        }
+      }
+    ` as TypedQueryDocumentNode<{ dayCounts: TemplateDayCountItem[] }, { month: string; type: string }>,
+    // 按月分组数量, year (format: YYYY), months: 如果年份没有则取以当前向前推的 months 月数，默认12
+    getCountByMonth: gql`
+      query getCountByMonth($type: String!, $months: Int, $year: String) {
+        monthCounts: templateCountByMonth(type: $type, months: $months, year: $year) {
+          month
+          count
+        }
+      }
+    ` as TypedQueryDocumentNode<
+      { monthCounts: TemplateMonthCountItem[] },
+      { year: string; months: number; type: string }
+    >,
+    // 按年分组数量
+    getCountByYear: gql`
+      query getCountByYear($type: String!) {
+        yearCounts: templateCountByYear(type: $type) {
+          year
+          count
+        }
+      }
+    ` as TypedQueryDocumentNode<{ monthCounts: TemplateMonthCountItem[] }, { type: string }>,
+    // 创建模版
+    create: gql`
+      mutation create($newTemplate: NewTemplateInput!) {
+        template: createTemplate(model: $newTemplate) {
           id
           name
           title
@@ -154,209 +261,104 @@ export const useTemplateApi = defineRegistApi('template', {
             id
             name
           }
+          metas {
+            id
+            key: metaKey
+            value: metaValue
+          }
         }
-        total
       }
-      statusCounts: templateCountByStatus(type: $type) @include(if: $queryStatusCounts) {
-        status
-        count
+    ` as TypedMutationDocumentNode<{ template: TemplateModel }, { newTemplate: NewTemplateInput }>,
+    // 修改模版
+    update: gql`
+      mutation update($id: ID!, $updateTemplate: UpdateTemplateInput!) {
+        result: updateTemplate(id: $id, model: $updateTemplate)
       }
-      selfCounts: templateCountBySelf(type: $type) @include(if: $querySelfCounts)
-    }
-  ` as TypedQueryDocumentNode<
-    {
-      templates: Paged<PagedTemplateItem>;
-      statusCounts?: TemplateStatusCountItem[];
-      selfCounts?: number;
-    },
-    PagedTemplateArgs
-  >,
-  // 获取模版
-  get: gql`
-    query getTemplate($id: ID!, $metaKeys: [String!]) {
-      template(id: $id) {
-        id
-        title
-        content
-        excerpt
-        author
-        status
-        type
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        categories {
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; updateTemplate: UpdateTemplateInput }>,
+    // 修改模版状态
+    updateStatus: gql`
+      mutation updateStatus($id: ID!, $status: TemplateStatus!) {
+        result: updateTemplateStatus(id: $id, status: $status)
+      }
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; status: TemplateStatus }>,
+    bulkUpdateStatus: gql`
+      mutation bulkUpdateStatus($ids: [ID!]!, $status: TemplateStatus!) {
+        result: bulkUpdateTemplateStatus(ids: $ids, status: $status)
+      }
+    ` as TypedMutationDocumentNode<{ result: boolean }, { ids: number[]; status: TemplateStatus }>,
+    // 重置模版(必须是trush状态)
+    restore: gql`
+      mutation restore($id: ID!) {
+        result: restoreTemplate(id: $id)
+      }
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    bulkRestore: gql`
+      mutation bulkRestore($ids: [ID!]!) {
+        result: bulkRestoreTemplate(ids: $ids)
+      }
+    ` as TypedMutationDocumentNode<{ result: boolean }, { ids: number[] }>,
+    // 删除模版(必须是trush状态)
+    delete: gql`
+      mutation delete($id: ID!) {
+        result: deleteTemplate(id: $id)
+      }
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    bulkDelete: gql`
+      mutation bulkDelete($ids: [ID!]!) {
+        result: bulkDeleteTemplate(ids: $ids)
+      }
+    ` as TypedMutationDocumentNode<{ result: boolean }, { ids: number[] }>,
+    // 创建模版 meta
+    createMeta: gql`
+      mutation createTemplateMeta($newMeta: NewTemplateMetaInput!) {
+        meta: createTemplateMeta(model: $newMeta) {
           id
-          name
-        }
-        metas(metaKeys: $metaKeys) {
-          id
+          templateId
           key: metaKey
           value: metaValue
         }
       }
-    }
-  ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
-  // 按状态分组数量
-  getCountByStatus: gql`
-    query getCountByStatus($type: String!) {
-      statusCounts: templateCountByStatus(type: $type) {
-        status
-        count
+    ` as TypedMutationDocumentNode<
+      { meta: TemplateMetaModel },
+      { newMeta: { templateId: number; metaKey: string; metaValue: string } }
+    >,
+    updateMetaByKey: gql`
+      mutation updateTemplateMetaByKey(
+        $templateId: ID!
+        $metaKey: String!
+        $metaValue: String!
+        $createIfNotExists: Boolean! = false
+      ) {
+        result: updateTemplateMetaByKey(
+          templateId: $templateId
+          metaKey: $metaKey
+          metaValue: $metaValue
+          createIfNotExists: $createIfNotExists
+        )
       }
-    }
-  ` as TypedQueryDocumentNode<{ statusCounts: TemplateStatusCountItem[] }, { type: string }>,
-  // 由本人创建的数量
-  getCountBySelf: gql`
-    query getCountBySelf($type: String!) {
-      count: templateCountBySelf(type: $type, includeTrash: false)
-    }
-  ` as TypedQueryDocumentNode<{ count: number }, { type: string }>,
-  // 按天分组数量, month (format: YYYYMM)
-  getCountByDay: gql`
-    query getCounts($type: String!, $month: String!) {
-      dayCounts: templateCountByDay(type: $type, month: $month) {
-        day
-        count
+    ` as TypedMutationDocumentNode<
+      { result: boolean },
+      { templateId: number; metaKey: string; metaValue: string; createIfNotExists?: boolean }
+    >,
+    updateMeta: gql`
+      mutation updateTemplateMeta($id: ID!, $metaValue: String!) {
+        result: updateTemplateMeta(id: $id, metaValue: $metaValue)
       }
-    }
-  ` as TypedQueryDocumentNode<{ dayCounts: TemplateDayCountItem[] }, { month: string; type: string }>,
-  // 按月分组数量, year (format: YYYY), months: 如果年份没有则取以当前向前推的 months 月数，默认12
-  getCountByMonth: gql`
-    query getCountByMonth($type: String!, $months: Int, $year: String) {
-      monthCounts: templateCountByMonth(type: $type, months: $months, year: $year) {
-        month
-        count
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; metaValue: string }>,
+    // 删除模版 meta
+    deleteMetaByKey: gql`
+      mutation deleteTemplateMetaByKey($templateId: ID!, $key: String!) {
+        result: deleteTemplateMetaByKey(templateId: $templateId, metaKey: $key)
       }
-    }
-  ` as TypedQueryDocumentNode<
-    { monthCounts: TemplateMonthCountItem[] },
-    { year: string; months: number; type: string }
-  >,
-  // 按年分组数量
-  getCountByYear: gql`
-    query getCountByYear($type: String!) {
-      yearCounts: templateCountByYear(type: $type) {
-        year
-        count
+    ` as TypedMutationDocumentNode<{ result: boolean }, { templateId: number; key: string }>,
+    // 删除模版 meta
+    deleteMeta: gql`
+      mutation deleteTemplateMeta($id: ID!) {
+        result: deleteTemplateMeta(id: $id)
       }
-    }
-  ` as TypedQueryDocumentNode<{ monthCounts: TemplateMonthCountItem[] }, { type: string }>,
-  // 创建模版
-  create: gql`
-    mutation create($newTemplate: NewTemplateInput!) {
-      template: createTemplate(model: $newTemplate) {
-        id
-        name
-        title
-        excerpt
-        author
-        status
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        categories {
-          id
-          name
-        }
-        metas {
-          id
-          key: metaKey
-          value: metaValue
-        }
-      }
-    }
-  ` as TypedMutationDocumentNode<{ template: TemplateModel }, { newTemplate: NewTemplateInput }>,
-  // 修改模版
-  update: gql`
-    mutation update($id: ID!, $updateTemplate: UpdateTemplateInput!) {
-      result: updateTemplate(id: $id, model: $updateTemplate)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; updateTemplate: UpdateTemplateInput }>,
-  // 修改模版状态
-  updateStatus: gql`
-    mutation updateStatus($id: ID!, $status: TemplateStatus!) {
-      result: updateTemplateStatus(id: $id, status: $status)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; status: TemplateStatus }>,
-  bulkUpdateStatus: gql`
-    mutation bulkUpdateStatus($ids: [ID!]!, $status: TemplateStatus!) {
-      result: bulkUpdateTemplateStatus(ids: $ids, status: $status)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { ids: number[]; status: TemplateStatus }>,
-  // 重置模版(必须是trush状态)
-  restore: gql`
-    mutation restore($id: ID!) {
-      result: restoreTemplate(id: $id)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
-  bulkRestore: gql`
-    mutation bulkRestore($ids: [ID!]!) {
-      result: bulkRestoreTemplate(ids: $ids)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { ids: number[] }>,
-  // 删除模版(必须是trush状态)
-  delete: gql`
-    mutation delete($id: ID!) {
-      result: deleteTemplate(id: $id)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
-  bulkDelete: gql`
-    mutation bulkDelete($ids: [ID!]!) {
-      result: bulkDeleteTemplate(ids: $ids)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { ids: number[] }>,
-  // 创建模版 meta
-  createMeta: gql`
-    mutation createTemplateMeta($newMeta: NewTemplateMetaInput!) {
-      meta: createTemplateMeta(model: $newMeta) {
-        id
-        templateId
-        key: metaKey
-        value: metaValue
-      }
-    }
-  ` as TypedMutationDocumentNode<
-    { meta: TemplateMetaModel },
-    { newMeta: { templateId: number; metaKey: string; metaValue: string } }
-  >,
-  updateMetaByKey: gql`
-    mutation updateTemplateMetaByKey(
-      $templateId: ID!
-      $metaKey: String!
-      $metaValue: String!
-      $createIfNotExists: Boolean! = false
-    ) {
-      result: updateTemplateMetaByKey(
-        templateId: $templateId
-        metaKey: $metaKey
-        metaValue: $metaValue
-        createIfNotExists: $createIfNotExists
-      )
-    }
-  ` as TypedMutationDocumentNode<
-    { result: boolean },
-    { templateId: number; metaKey: string; metaValue: string; createIfNotExists?: boolean }
-  >,
-  updateMeta: gql`
-    mutation updateTemplateMeta($id: ID!, $metaValue: String!) {
-      result: updateTemplateMeta(id: $id, metaValue: $metaValue)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; metaValue: string }>,
-  // 删除模版 meta
-  deleteMetaByKey: gql`
-    mutation deleteTemplateMetaByKey($templateId: ID!, $key: String!) {
-      result: deleteTemplateMetaByKey(templateId: $templateId, metaKey: $key)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { templateId: number; key: string }>,
-  // 删除模版 meta
-  deleteMeta: gql`
-    mutation deleteTemplateMeta($id: ID!) {
-      result: deleteTemplateMeta(id: $id)
-    }
-  ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+  },
+  request,
 });
 
 export * from './post';

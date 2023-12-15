@@ -75,6 +75,7 @@ export abstract class OidcAdapterServiceFactory {
       'backchannelAuthenticationRequestLifetime',
       'requireConsent',
       'requirePkce',
+      'enabled',
       'corsOrigins',
       'grantTypes',
       'scopes',
@@ -84,7 +85,7 @@ export abstract class OidcAdapterServiceFactory {
       'properties',
     ]);
 
-    if (!client) return;
+    if (!client || !client.enabled) return;
 
     return omitBy(
       {

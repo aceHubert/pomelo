@@ -1,4 +1,5 @@
 import { defineRegistApi, gql } from '../../graphql';
+import { request } from '../../graphql/requests/infrastructure-request';
 
 // Types
 import type { TemplatePageType } from '@ace-pomelo/shared-client';
@@ -39,34 +40,75 @@ export interface NewPostTemplateInput
 export interface UpdatePostTemplateInput extends Partial<Omit<NewPostTemplateInput, 'metas'>> {}
 
 export const usePostApi = defineRegistApi('template_post', {
-  // 分页获取文章
-  getPaged: gql`
-    query getPostTemplates(
-      $offset: Int
-      $limit: Int
-      $keyword: String
-      $author: String
-      $status: TemplateStatus
-      $date: String
-      $categoryId: Int
-      $tagId: Int
-      $queryStatusCounts: Boolean! = false
-      $querySelfCounts: Boolean! = false
-    ) {
-      posts: postTemplates(
-        offset: $offset
-        limit: $limit
-        keyword: $keyword
-        author: $author
-        status: $status
-        date: $date
-        categoryId: $categoryId
-        tagId: $tagId
+  apis: {
+    // 分页获取文章
+    getPaged: gql`
+      query getPostTemplates(
+        $offset: Int
+        $limit: Int
+        $keyword: String
+        $author: String
+        $status: TemplateStatus
+        $date: String
+        $categoryId: Int
+        $tagId: Int
+        $queryStatusCounts: Boolean! = false
+        $querySelfCounts: Boolean! = false
       ) {
-        rows {
+        posts: postTemplates(
+          offset: $offset
+          limit: $limit
+          keyword: $keyword
+          author: $author
+          status: $status
+          date: $date
+          categoryId: $categoryId
+          tagId: $tagId
+        ) {
+          rows {
+            id
+            name
+            title
+            excerpt
+            author
+            status
+            commentStatus
+            commentCount
+            updatedAt
+            createdAt
+            categories {
+              id
+              name
+            }
+            tags {
+              id
+              name
+            }
+          }
+          total
+        }
+        statusCounts: templateCountByStatus(type: "Post") @include(if: $queryStatusCounts) {
+          status
+          count
+        }
+        selfCounts: templateCountBySelf(type: "Post", includeTrash: false) @include(if: $querySelfCounts)
+      }
+    ` as TypedQueryDocumentNode<
+      {
+        posts: Paged<PagedPostTemplateItem>;
+        statusCounts?: TemplateStatusCountItem[];
+        selfCounts?: number;
+      },
+      PagedPostTemplateArgs
+    >,
+    // 获取文章
+    get: gql`
+      query getPost($id: ID!, $metaKeys: [String!]) {
+        post: postTemplate(id: $id) {
           id
           name
           title
+          content
           excerpt
           author
           status
@@ -82,104 +124,66 @@ export const usePostApi = defineRegistApi('template_post', {
             id
             name
           }
-        }
-        total
-      }
-      statusCounts: templateCountByStatus(type: "Post") @include(if: $queryStatusCounts) {
-        status
-        count
-      }
-      selfCounts: templateCountBySelf(type: "Post", includeTrash: false) @include(if: $querySelfCounts)
-    }
-  ` as TypedQueryDocumentNode<
-    {
-      posts: Paged<PagedPostTemplateItem>;
-      statusCounts?: TemplateStatusCountItem[];
-      selfCounts?: number;
-    },
-    PagedPostTemplateArgs
-  >,
-  // 获取文章
-  get: gql`
-    query getPost($id: ID!, $metaKeys: [String!]) {
-      post: postTemplate(id: $id) {
-        id
-        name
-        title
-        content
-        excerpt
-        author
-        status
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        categories {
-          id
-          name
-        }
-        tags {
-          id
-          name
-        }
-        metas(metaKeys: $metaKeys) {
-          id
-          key: metaKey
-          value: metaValue
+          metas(metaKeys: $metaKeys) {
+            id
+            key: metaKey
+            value: metaValue
+          }
         }
       }
-    }
-  ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: number }>,
-  // 创建文章
-  create: gql`
-    mutation createPost($newPostTemplate: NewPostTemplateInput! = {}) {
-      post: createPostTempate(model: $newPostTemplate) {
-        id
-        name
-        title
-        content
-        excerpt
-        author
-        status
-        commentStatus
-        commentCount
-        updatedAt
-        createdAt
-        categories {
+    ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: number }>,
+    // 创建文章
+    create: gql`
+      mutation createPost($newPostTemplate: NewPostTemplateInput! = {}) {
+        post: createPostTempate(model: $newPostTemplate) {
           id
           name
-        }
-        tags {
-          id
-          name
-        }
-        metas {
-          id
-          key: metaKey
-          value: metaValue
+          title
+          content
+          excerpt
+          author
+          status
+          commentStatus
+          commentCount
+          updatedAt
+          createdAt
+          categories {
+            id
+            name
+          }
+          tags {
+            id
+            name
+          }
+          metas {
+            id
+            key: metaKey
+            value: metaValue
+          }
         }
       }
-    }
-  ` as TypedMutationDocumentNode<{ post: PostTemplateModel }, { newPostTemplate?: NewPostTemplateInput }>,
-  // 修改文章
-  update: gql`
-    mutation updatePost($id: ID!, $updatePost: UpdatePostTemplateInput!, $featureImage: String!, $template: String!) {
-      result: updatePostTemplate(id: $id, model: $updatePost)
-      featureImageResult: updateTemplateMetaByKey(
-        templateId: $id
-        metaKey: "feature-image"
-        metaValue: $featureImage
-        createIfNotExists: true
-      )
-      templateResult: updateTemplateMetaByKey(
-        templateId: $id
-        metaKey: "template"
-        metaValue: $template
-        createIfNotExists: true
-      )
-    }
-  ` as TypedMutationDocumentNode<
-    { result: boolean; featureImageResult: boolean; templateResult: boolean },
-    { id: number; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
-  >,
+    ` as TypedMutationDocumentNode<{ post: PostTemplateModel }, { newPostTemplate?: NewPostTemplateInput }>,
+    // 修改文章
+    update: gql`
+      mutation updatePost($id: ID!, $updatePost: UpdatePostTemplateInput!, $featureImage: String!, $template: String!) {
+        result: updatePostTemplate(id: $id, model: $updatePost)
+        featureImageResult: updateTemplateMetaByKey(
+          templateId: $id
+          metaKey: "feature-image"
+          metaValue: $featureImage
+          createIfNotExists: true
+        )
+        templateResult: updateTemplateMetaByKey(
+          templateId: $id
+          metaKey: "template"
+          metaValue: $template
+          createIfNotExists: true
+        )
+      }
+    ` as TypedMutationDocumentNode<
+      { result: boolean; featureImageResult: boolean; templateResult: boolean },
+      { id: number; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
+    >,
+  },
+  request,
 });

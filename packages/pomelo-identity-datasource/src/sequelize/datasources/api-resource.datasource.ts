@@ -166,7 +166,15 @@ export class ApiResourceDataSource extends BaseDataSource {
    * Create api resource
    * @param input new resource input
    */
-  create(input: NewApiResourceInput): Promise<ApiResourceModel> {
+  async create(input: NewApiResourceInput): Promise<ApiResourceModel> {
+    const exists = await this.models.ApiResources.count({
+      where: {
+        name: input.name,
+      },
+    }).then((count) => count > 0);
+
+    if (exists) throw new Error('Api resource has already exists');
+
     return this.models.ApiResources.create(input).then((api) => api.toJSON<ApiResourceModel>());
   }
 
@@ -228,10 +236,15 @@ export class ApiResourceDataSource extends BaseDataSource {
    * Get api resource claims
    * @param id api resource id
    * @param fields claims return fields
+   * @param sorter sorter
    */
-  getClaims(id: number, fields: string[]): Promise<ApiClaimsModel | undefined> {
+  getClaims(
+    id: number,
+    fields: string[],
+    { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
+  ): Promise<ApiClaimsModel | undefined> {
     return this.models.ApiResources.findByPk(id, {
-      attributes: ['id', 'name', 'displayName'],
+      attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
           model: this.models.ApiClaims,
@@ -239,6 +252,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           as: 'ApiClaims',
         },
       ],
+      order: [[{ model: this.models.ApiClaims, as: 'ApiClaims' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -260,13 +274,58 @@ export class ApiResourceDataSource extends BaseDataSource {
       where: {
         id: apiResourceId,
       },
-    }).then((count) => {
+    }).then(async (count) => {
       if (count === 0) return;
+
+      const exists = await this.models.ApiClaims.count({
+        where: {
+          apiResourceId,
+          type: input.type,
+        },
+      }).then((count) => count > 0);
+
+      if (exists) throw new Error('Claim has already exists');
 
       return this.models.ApiClaims.create({
         ...input,
         apiResourceId,
       }).then((claim) => claim.toJSON<ApiClaimModel>());
+    });
+  }
+
+  /**
+   * create new api resource claims, skip if claim type already exists
+   * @param apiResourceId api resource id
+   * @param inputs new api resource claims input
+   */
+  createClaims(apiResourceId: number, inputs: NewApiClaimInput[]): Promise<ApiClaimModel[]> {
+    return this.models.ApiResources.count({
+      where: {
+        id: apiResourceId,
+      },
+    }).then(async (count) => {
+      if (count === 0) return [];
+
+      const claims = await this.models.ApiClaims.findAll({
+        attributes: ['type'],
+        where: {
+          apiResourceId,
+          type: {
+            [Op.in]: inputs.map((input) => input.type),
+          },
+        },
+      });
+
+      const existsType = claims.map((claim) => claim.type);
+
+      return this.models.ApiClaims.bulkCreate(
+        inputs
+          .filter((input) => !existsType.includes(input.type))
+          .map((input) => ({
+            ...input,
+            apiResourceId,
+          })),
+      ).then((claims) => claims.map((claim) => claim.toJSON<ApiClaimModel>()));
     });
   }
 
@@ -292,7 +351,7 @@ export class ApiResourceDataSource extends BaseDataSource {
     fields: string[],
   ): Promise<
     | (ApiScopeModel & {
-        claims?: ApiScopeClaimModel[];
+        claims?: Pick<ApiScopeClaimModel, 'id' | 'type'>[];
       })
     | undefined
   > {
@@ -338,6 +397,10 @@ export class ApiResourceDataSource extends BaseDataSource {
       };
     }
 
+    if (query.apiResourceId) {
+      where.apiResourceId = query.apiResourceId;
+    }
+
     return this.models.ApiScopes.findAndCountAll({
       attributes: this.filterFields(fields, this.models.ApiScopes),
       where,
@@ -353,7 +416,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         ELSE 4 END`),
           'ASC',
         ],
-        ['createdAt', 'DESC'],
+        ['id', 'DESC'],
       ].filter(Boolean) as Order,
     }).then(({ rows, count: total }) => ({
       rows: rows.map((row) => row.toJSON()),
@@ -366,13 +429,13 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param resourceId api resource id
    * @param fields return fields, "claims" will be included if fields includes
    */
-  getScopeList(
+  getScopes(
     apiResourceId: number,
     fields: string[],
   ): Promise<
     Array<
       ApiScopeModel & {
-        claims?: ApiScopeClaimModel[];
+        claims?: Pick<ApiScopeClaimModel, 'id' | 'type'>[];
       }
     >
   > {
@@ -413,8 +476,17 @@ export class ApiResourceDataSource extends BaseDataSource {
       where: {
         id: apiResourceId,
       },
-    }).then((count) => {
+    }).then(async (count) => {
       if (count === 0) return;
+
+      const exists = await this.models.ApiScopes.count({
+        where: {
+          apiResourceId,
+          name: input.name,
+        },
+      }).then((count) => count > 0);
+
+      if (exists) throw new Error('Scope has already exists');
 
       return this.models.ApiScopes.create({
         ...input,
@@ -429,14 +501,13 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input api scope input
    */
   async updateScope(id: number, input: UpdateApiScopeInput): Promise<boolean> {
-    const nonEditable = await this.models.IdentityResources.count({
+    const nonEditable = await this.models.ApiResources.count({
       include: [
         {
           model: this.models.ApiScopes,
           as: 'ApiScopes',
           where: {
             id,
-            nonEditable: true,
           },
         },
       ],
@@ -459,14 +530,13 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api scope id
    */
   async deleteScope(id: number): Promise<boolean> {
-    const nonEditable = await this.models.IdentityResources.count({
+    const nonEditable = await this.models.ApiResources.count({
       include: [
         {
           model: this.models.ApiScopes,
           as: 'ApiScopes',
           where: {
             id,
-            nonEditable: true,
           },
         },
       ],
@@ -489,7 +559,11 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param apiScopeId api scope id
    * @param fields scopeClamis return fields
    */
-  getScopeClaims(apiScopeId: number, fields: string[]): Promise<ApiScopeClaimsModel | undefined> {
+  getScopeClaims(
+    apiScopeId: number,
+    fields: string[],
+    { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
+  ): Promise<ApiScopeClaimsModel | undefined> {
     return this.models.ApiScopes.findByPk(apiScopeId, {
       attributes: ['id', 'name', 'displayName'],
       include: [
@@ -499,6 +573,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           as: 'ApiScopeClaims',
         },
       ],
+      order: [[{ model: this.models.ApiScopeClaims, as: 'ApiScopeClaims' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -522,13 +597,58 @@ export class ApiResourceDataSource extends BaseDataSource {
       where: {
         id: apiScopeId,
       },
-    }).then((count) => {
+    }).then(async (count) => {
       if (count === 0) return;
+
+      const exists = await this.models.ApiScopeClaims.count({
+        where: {
+          apiScopeId,
+          type: input.type,
+        },
+      }).then((count) => count > 0);
+
+      if (exists) throw new Error('Sclpe claim has already exists');
 
       return this.models.ApiScopeClaims.create({
         ...input,
         apiScopeId,
       }).then((claim) => claim.toJSON<ApiScopeClaimModel>());
+    });
+  }
+
+  /**
+   * create new api scope claims, skip if claim type already exists
+   * @param apiScopeId api scope id
+   * @param inputs new api scope claims input
+   */
+  createScopeClaims(apiScopeId: number, inputs: NewApiScopeClaimInput[]): Promise<ApiScopeClaimModel[]> {
+    return this.models.ApiScopes.count({
+      where: {
+        id: apiScopeId,
+      },
+    }).then(async (count) => {
+      if (count === 0) return [];
+
+      const claims = await this.models.ApiScopeClaims.findAll({
+        attributes: ['type'],
+        where: {
+          apiScopeId,
+          type: {
+            [Op.in]: inputs.map((input) => input.type),
+          },
+        },
+      });
+
+      const existsType = claims.map((claim) => claim.type);
+
+      return this.models.ApiScopeClaims.bulkCreate(
+        inputs
+          .filter((input) => !existsType.includes(input.type))
+          .map((input) => ({
+            ...input,
+            apiScopeId,
+          })),
+      ).then((claims) => claims.map((claim) => claim.toJSON<ApiScopeClaimModel>()));
     });
   }
 
@@ -548,10 +668,15 @@ export class ApiResourceDataSource extends BaseDataSource {
    * get api secrets
    * @param apiScopeId api resource id
    * @param fields secrets return fields
+   * @param sorter sorter
    */
-  getSecrets(apiResourceId: number, fields: string[]): Promise<ApiSecretsModel | undefined> {
+  getSecrets(
+    apiResourceId: number,
+    fields: string[],
+    { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
+  ): Promise<ApiSecretsModel | undefined> {
     return this.models.ApiResources.findByPk(apiResourceId, {
-      attributes: ['id', 'name', 'displayName'],
+      attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
           model: this.models.ApiSecrets,
@@ -559,6 +684,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           as: 'ApiSecrets',
         },
       ],
+      order: [[{ model: this.models.ApiSecrets, as: 'ApiSecrets' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -591,30 +717,30 @@ export class ApiResourceDataSource extends BaseDataSource {
   }
 
   /**
-   * Mark api secret as expired
+   * Delete api secret
    * @param id api secret id
    */
-  expireSecret(id: number): Promise<boolean> {
-    return this.models.ApiSecrets.update(
-      {
-        expiresAt: new Date().getMilliseconds() / 1000,
+  deleteSecret(id: number): Promise<boolean> {
+    return this.models.ApiSecrets.destroy({
+      where: {
+        id,
       },
-      {
-        where: {
-          id,
-        },
-      },
-    ).then(([count]) => count > 0);
+    }).then((count) => count > 0);
   }
 
   /**
    * Get api resource properties
-   * @param id api resource id
+   * @param apiResourceId api resource id
    * @param fields properties return fields
+   * @param sorter sorter
    */
-  getProperties(id: number, fields: string[]): Promise<ApiPropertiesModel | undefined> {
-    return this.models.ApiResources.findByPk(id, {
-      attributes: ['id', 'name', 'displayName'],
+  getProperties(
+    apiResourceId: number,
+    fields: string[],
+    { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
+  ): Promise<ApiPropertiesModel | undefined> {
+    return this.models.ApiResources.findByPk(apiResourceId, {
+      attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
           model: this.models.ApiProperties,
@@ -622,6 +748,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           as: 'ApiProperties',
         },
       ],
+      order: [[{ model: this.models.ApiProperties, as: 'ApiProperties' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -645,13 +772,58 @@ export class ApiResourceDataSource extends BaseDataSource {
       where: {
         id: apiResourceId,
       },
-    }).then((count) => {
+    }).then(async (count) => {
       if (count === 0) return;
+
+      const exists = await this.models.ApiProperties.count({
+        where: {
+          apiResourceId,
+          key: input.key,
+        },
+      }).then((count) => count > 0);
+
+      if (exists) throw new Error('Property has already exists.');
 
       return this.models.ApiProperties.create({
         ...input,
         apiResourceId,
       }).then((property) => property.toJSON<ApiPropertyModel>());
+    });
+  }
+
+  /**
+   * Create new api resource properties, skip if property key already exists
+   * @param apiResourceId api resource id
+   * @param inputs new api resource properties input
+   */
+  createProperties(apiResourceId: number, inputs: NewApiPropertyInput[]): Promise<ApiPropertyModel[]> {
+    return this.models.ApiResources.count({
+      where: {
+        id: apiResourceId,
+      },
+    }).then(async (count) => {
+      if (count === 0) return [];
+
+      const properties = await this.models.ApiProperties.findAll({
+        attributes: ['key'],
+        where: {
+          apiResourceId,
+          key: {
+            [Op.in]: inputs.map((input) => input.key),
+          },
+        },
+      });
+
+      const existsKey = properties.map((property) => property.key);
+
+      return this.models.ApiProperties.bulkCreate(
+        inputs
+          .filter((input) => !existsKey.includes(input.key))
+          .map((input) => ({
+            ...input,
+            apiResourceId,
+          })),
+      ).then((properties) => properties.map((property) => property.toJSON<ApiPropertyModel>()));
     });
   }
 

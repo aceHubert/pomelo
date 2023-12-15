@@ -42,7 +42,7 @@ export interface NewApiResourceInput extends Omit<CreationAttributes<ApiResource
 export interface UpdateApiResourceInput extends Partial<NewApiResourceInput> {}
 
 export interface ApiClaimModel extends Attributes<ApiClaims> {}
-export interface ApiClaimsModel extends Pick<ApiResourceModel, 'id' | 'name' | 'displayName'> {
+export interface ApiClaimsModel extends Pick<ApiResourceModel, 'id' | 'name' | 'displayName' | 'nonEditable'> {
   claims: Array<Pick<ApiClaimModel, 'id' | 'type'>>;
 }
 export interface NewApiClaimInput extends Omit<CreationAttributes<ApiClaims>, 'id' | 'apiResourceId'> {}
@@ -61,14 +61,9 @@ export interface PagedApiScopeArgs<F extends keyof ApiResourceModel = 'name' | '
   keywordField?: F;
 
   /**
-   * 是否可编辑
+   * Api resource id
    */
-  nonEditable?: boolean;
-
-  /**
-   * 是否启用
-   */
-  enabled?: boolean;
+  apiResourceId?: number;
 }
 export interface PagedApiScope extends Paged<ApiScopeModel> {}
 export interface NewApiScopeInput extends Omit<CreationAttributes<ApiScopes>, 'id' | 'apiResourceId'> {}
@@ -83,13 +78,13 @@ export interface NewApiScopeClaimInput extends Omit<CreationAttributes<ApiScopeC
 export interface ApiSecretModel extends Attributes<ApiSecrets> {
   readonly createdAt: Date;
 }
-export interface ApiSecretsModel extends Pick<ApiResourceModel, 'id' | 'name' | 'displayName'> {
+export interface ApiSecretsModel extends Pick<ApiResourceModel, 'id' | 'name' | 'displayName' | 'nonEditable'> {
   secrets: Array<Pick<ApiSecretModel, 'id' | 'type' | 'value' | 'expiresAt' | 'description' | 'createdAt'>>;
 }
 export interface NewApiSecretInput extends Omit<CreationAttributes<ApiSecrets>, 'id' | 'apiResourceId'> {}
 
 export interface ApiPropertyModel extends Attributes<ApiProperties> {}
-export interface ApiPropertiesModel extends Pick<ApiResourceModel, 'id' | 'name' | 'displayName'> {
+export interface ApiPropertiesModel extends Pick<ApiResourceModel, 'id' | 'name' | 'displayName' | 'nonEditable'> {
   properties: Array<Pick<ApiPropertyModel, 'id' | 'key' | 'value'>>;
 }
 

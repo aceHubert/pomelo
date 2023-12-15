@@ -22,7 +22,10 @@ export interface PagedClientArgs extends PagedArgs {
   clientName?: string;
 }
 
-export interface PagedClient extends Paged<Pick<ClientModel, 'applicationType' | 'clientId' | 'clientName'>> {}
+export interface PagedClient
+  extends Paged<
+    Pick<ClientModel, 'applicationType' | 'clientId' | 'clientName' | 'enabled' | 'updatedAt' | 'createdAt'>
+  > {}
 
 export interface NewClientInput extends Omit<CreationAttributes<Clients>, 'id'> {}
 

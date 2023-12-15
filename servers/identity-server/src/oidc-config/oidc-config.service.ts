@@ -394,45 +394,45 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       // },
       // Skipping consent screen
       // https://github.com/panva/node-oidc-provider/blob/v7.x/recipes/skip_consent.md
-      // loadExistingGrant: async (ctx) => {
-      //   if (!ctx.oidc.session || !ctx.oidc.client) return;
+      loadExistingGrant: async (ctx) => {
+        if (!ctx.oidc.session || !ctx.oidc.client) return;
 
-      //   const grantId =
-      //     (ctx.oidc.result && ctx.oidc.result.consent && ctx.oidc.result.consent.grantId) ||
-      //     ctx.oidc.session.grantIdFor(ctx.oidc.client.clientId);
+        const grantId =
+          (ctx.oidc.result && ctx.oidc.result.consent && ctx.oidc.result.consent.grantId) ||
+          ctx.oidc.session.grantIdFor(ctx.oidc.client.clientId);
 
-      //   if (grantId) {
-      //     // keep grant expiry aligned with session expiry
-      //     // to prevent consent prompt being requested when grant expires
-      //     const grant = await ctx.oidc.provider.Grant.find(grantId);
+        if (grantId) {
+          // keep grant expiry aligned with session expiry
+          // to prevent consent prompt being requested when grant expires
+          const grant = await ctx.oidc.provider.Grant.find(grantId);
 
-      //     if (grant) {
-      //       // this aligns the Grant ttl with that of the current session
-      //       // if the same Grant is used for multiple sessions, or is set
-      //       // to never expire, you probably do not want this in your code
-      //       if (ctx.oidc.account && grant.exp && grant.exp < ctx.oidc.session.exp) {
-      //         grant.exp = ctx.oidc.session.exp;
+          if (grant) {
+            // this aligns the Grant ttl with that of the current session
+            // if the same Grant is used for multiple sessions, or is set
+            // to never expire, you probably do not want this in your code
+            if (ctx.oidc.account && grant.exp && grant.exp < ctx.oidc.session.exp) {
+              grant.exp = ctx.oidc.session.exp;
 
-      //         await grant.save();
-      //       }
+              await grant.save();
+            }
 
-      //       return grant;
-      //     }
-      //   } else if (ctx.oidc.client.metadata()['require_consent'] !== true && !ctx.oidc.prompts.has('consent')) {
-      //     const grant = new ctx.oidc.provider.Grant({
-      //       clientId: ctx.oidc.client.clientId,
-      //       accountId: ctx.oidc.session.accountId,
-      //     });
+            return grant;
+          }
+        } else if (ctx.oidc.client.metadata()['require_consent'] !== true && !ctx.oidc.prompts.has('consent')) {
+          const grant = new ctx.oidc.provider.Grant({
+            clientId: ctx.oidc.client.clientId,
+            accountId: ctx.oidc.session.accountId,
+          });
 
-      //     grant.addOIDCScope(ctx.oidc.client.scope!);
-      //     grant.addResourceScope(resource ?? ctx.origin, ctx.oidc.client.scope!);
+          grant.addOIDCScope(ctx.oidc.client.scope!);
+          grant.addResourceScope(resource ?? ctx.origin, ctx.oidc.client.scope!);
 
-      //     await grant.save();
+          await grant.save();
 
-      //     return grant;
-      //   }
-      //   return;
-      // },
+          return grant;
+        }
+        return;
+      },
       renderError: async (ctx, out) => {
         this.logger.error('oidc renderError', out);
         ctx.type = 'html';

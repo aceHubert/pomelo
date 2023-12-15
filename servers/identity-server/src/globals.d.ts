@@ -71,7 +71,7 @@ declare module '@types/oidc-provider' {
     refresh_token_absolute_ttl?: number | undefined;
     /**
      * RefreshToken lifetime in seconds in case of 'sliding' expiration type
-     * @default 1209600
+     * @default 1296000
      */
     refresh_token_sliding_ttl?: number | undefined;
     /**

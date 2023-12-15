@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { h } from '@vue/composition-api';
-import { curry } from 'lodash-es';
+import { curry, merge } from 'lodash-es';
 import {
   Icon as AIcon,
   Spin as ASpin,
@@ -18,7 +18,7 @@ import type { Notification, NotificationOptions } from 'ant-design-vue/types/not
 // import { DefineComponent } from '@/types';
 
 // Types
-import type { OmitVue } from '@/types';
+import type { OmitVue } from 'antdv-layout-pro/types';
 
 Vue.use(ABase);
 
@@ -60,21 +60,21 @@ const _AModal = { ...Modal } as typeof AModal;
 // Modal 修改自定义 less 前缀
 const modalFn = curry(
   <FnName extends 'info' | 'error' | 'warning' | 'success' | 'confirm'>(key: FnName, options: ModalOptions) => {
-    _AModal[key]({
-      ...modalTextProps(),
-      prefixCls: `${ANT_PREFIX_CLS}-modal`,
-      cancelButtonProps: {
-        props: {
-          prefixCls: `${ANT_PREFIX_CLS}-btn`,
+    _AModal[key](
+      merge(modalTextProps(), options, {
+        prefixCls: `${ANT_PREFIX_CLS}-modal`,
+        cancelButtonProps: {
+          props: {
+            prefixCls: `${ANT_PREFIX_CLS}-btn`,
+          },
         },
-      },
-      okButtonProps: {
-        props: {
-          prefixCls: `${ANT_PREFIX_CLS}-btn`,
+        okButtonProps: {
+          props: {
+            prefixCls: `${ANT_PREFIX_CLS}-btn`,
+          },
         },
-      },
-      ...options,
-    });
+      }),
+    );
   },
 );
 Modal.info = modalFn('info');

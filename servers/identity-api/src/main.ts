@@ -1,0 +1,84 @@
+import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { setupSession } from '@ace-pomelo/nestjs-oidc';
+import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
+import { AppModule } from './app.module';
+
+declare const module: any;
+
+const packageName = process.env.npm_package_name;
+const packageVersion = process.env.npm_package_version;
+const logger = new Logger('Main', { timestamp: true });
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get(ConfigService);
+
+  const host = configService.get<string>('webServer.host', '');
+  const port = configService.get<number>('webServer.port', 3000);
+  const globalPrefixUri = configService.get<string>('webServer.globalPrefixUri', '');
+  const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
+  const isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
+  const swaggerPath = configService.get<string>('swagger.path', '/doc');
+  const isGraphqlDebug = configService.get<boolean>('graphql.debug', false);
+  const graphqlPath = configService.get<string>('graphql.path', '/graphql');
+
+  // Starts listening for shutdown hooks
+  app.enableShutdownHooks();
+
+  // enable cors
+  if (cors) {
+    cors === true ? app.enableCors() : app.enableCors(cors);
+  }
+
+  // add grobal prefix
+  app.setGlobalPrefix(globalPrefixUri);
+
+  // graphql upload file
+  app.use(
+    configService.get<string>('graphql.path', '/graphql'),
+    graphqlUploadExpress({
+      maxFileSize: configService.get<number>('upload.maxFileSize'),
+      maxFiles: configService.get<number>('upload.maxFiles'),
+    }),
+  );
+
+  // swagger
+  if (isSwaggerDebug) {
+    const api = new DocumentBuilder()
+      .setTitle(packageName?.replace('@', '').replace('/', ' ').replace(/api$/, 'APIs') || 'ace-pomelo identity  APIs')
+      .setDescription(
+        `The RESTful API documentation.<br/>graphql support: <a href="${graphqlPath}" target="_blank">Documentation</a>`,
+      )
+      .setVersion(packageVersion || '1.0.0')
+      .addBearerAuth()
+      .addTag('clients', 'Clients.')
+      .addTag('identityResources', 'Identity Resources.')
+      .addTag('apiResources', 'Api Resources.')
+      .build();
+    const document = SwaggerModule.createDocument(app, api);
+    SwaggerModule.setup(swaggerPath, app, document);
+  }
+
+  setupSession(app, packageName?.replace('@', '').replace('/', ':') || 'ace-pomelo:identity-api');
+
+  await app.listen(port, host);
+  logger.log(`Application is running on: ${await app.getUrl()}`);
+  globalPrefixUri && logger.log(`Application's global prefix uri is: ${globalPrefixUri} `);
+  logger.log(`Application is enable cors: ${!!cors}`);
+  isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${swaggerPath}`);
+  isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${graphqlPath}`);
+
+  // hot reload
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
+}
+
+// start
+bootstrap().then(() => null);

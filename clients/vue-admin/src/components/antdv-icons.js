@@ -12,6 +12,7 @@ export { default as CloseOutline } from '@ant-design/icons/lib/outline/CloseOutl
 export { default as CloseCircleOutline } from '@ant-design/icons/lib/outline/CloseCircleOutline';
 export { default as CloseCircleFill } from '@ant-design/icons/lib/fill/CloseCircleFill';
 export { default as CaretDownOutline } from '@ant-design/icons/lib/outline/CaretDownOutline';
+export { default as CopyOutline } from '@ant-design/icons/lib/outline/CopyOutline';
 export { default as DashboardOutline } from '@ant-design/icons/lib/outline/DashboardOutline';
 export { default as DeleteFill } from '@ant-design/icons/lib/fill/DeleteFill';
 export { default as DeleteOutline } from '@ant-design/icons/lib/outline/DeleteOutline';
@@ -29,6 +30,7 @@ export { default as InfoCircleOutline } from '@ant-design/icons/lib/outline/Info
 export { default as InfoCircleFill } from '@ant-design/icons/lib/fill/InfoCircleFill';
 export { default as MailOutline } from '@ant-design/icons/lib/outline/MailOutline';
 export { default as MinusOutline } from '@ant-design/icons/lib/outline/MinusOutline';
+export { default as MinusCircleOutline } from '@ant-design/icons/lib/outline/MinusCircleOutline';
 export { default as MinusSquareOutline } from '@ant-design/icons/lib/outline/MinusSquareOutline';
 export { default as LeftOutline } from '@ant-design/icons/lib/outline/LeftOutline';
 export { default as LinkOutline } from '@ant-design/icons/lib/outline/LinkOutline';

@@ -180,7 +180,15 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * Create identity resource
    * @param input resource input
    */
-  create(input: NewIdentityResourceInput): Promise<IdentityResourceModel> {
+  async create(input: NewIdentityResourceInput): Promise<IdentityResourceModel> {
+    const exists = await this.models.IdentityResources.count({
+      where: {
+        name: input.name,
+      },
+    }).then((count) => count > 0);
+
+    if (exists) throw new Error('Identity resource has already exists');
+
     return this.models.IdentityResources.create(input).then((resource) => {
       return resource.toJSON<IdentityResourceModel>();
     });
@@ -230,10 +238,15 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * Get identity resource claims
    * @param identityResourceId identity resource id
    * @param fields return fields
+   * @param sorter sorter
    */
-  getClaims(identityResourceId: number, fields: string[]): Promise<IdentityClaimsModel | undefined> {
+  getClaims(
+    identityResourceId: number,
+    fields: string[],
+    { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
+  ): Promise<IdentityClaimsModel | undefined> {
     return this.models.IdentityResources.findByPk(identityResourceId, {
-      attributes: ['id', 'name', 'displayName'],
+      attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
           model: this.models.IdentityClaims,
@@ -241,6 +254,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
           as: 'IdentityClaims',
         },
       ],
+      order: [[{ model: this.models.IdentityClaims, as: 'IdentityClaims' }, orderField, order]],
     }).then((resource) => {
       if (!resource) return;
 
@@ -264,8 +278,17 @@ export class IdentityResourceDataSource extends BaseDataSource {
       where: {
         id: identityResourceId,
       },
-    }).then((count) => {
+    }).then(async (count) => {
       if (count === 0) return;
+
+      const exists = await this.models.IdentityClaims.count({
+        where: {
+          identityResourceId,
+          type: input.type,
+        },
+      }).then((count) => count > 0);
+
+      if (exists) throw new Error('Claim has already exists');
 
       return this.models.IdentityClaims.create({
         ...input,
@@ -273,6 +296,42 @@ export class IdentityResourceDataSource extends BaseDataSource {
       }).then((claim) => {
         return claim.toJSON<IdentityClaimModel>();
       });
+    });
+  }
+
+  /**
+   * create new identity resource claims, skip if claim type already exists
+   * @param identityResourceId identity resource id
+   * @param inputs new identity resource claims input
+   */
+  createClaims(identityResourceId: number, inputs: NewIdentityClaimInput[]): Promise<IdentityClaimModel[]> {
+    return this.models.IdentityResources.count({
+      where: {
+        id: identityResourceId,
+      },
+    }).then(async (count) => {
+      if (count === 0) return [];
+
+      const claims = await this.models.IdentityClaims.findAll({
+        attributes: ['type'],
+        where: {
+          identityResourceId,
+          type: {
+            [Op.in]: inputs.map((input) => input.type),
+          },
+        },
+      });
+
+      const existsType = claims.map((claim) => claim.type);
+
+      return this.models.IdentityClaims.bulkCreate(
+        inputs
+          .filter((input) => !existsType.includes(input.type))
+          .map((input) => ({
+            ...input,
+            identityResourceId,
+          })),
+      ).then((claims) => claims.map((claim) => claim.toJSON<IdentityClaimModel>()));
     });
   }
 
@@ -292,10 +351,15 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * Get identity resource properties
    * @param identityResourceId identity resource id
    * @param fields return fields
+   * @param sorter sorter
    */
-  getProperties(identityResourceId: number, fields: string[]): Promise<IdentityPropertiesModel | undefined> {
+  getProperties(
+    identityResourceId: number,
+    fields: string[],
+    { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
+  ): Promise<IdentityPropertiesModel | undefined> {
     return this.models.IdentityResources.findByPk(identityResourceId, {
-      attributes: ['id', 'name', 'displayName'],
+      attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
           model: this.models.IdentityProperties,
@@ -303,6 +367,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
           as: 'IdentityProperties',
         },
       ],
+      order: [[{ model: this.models.IdentityProperties, as: 'IdentityProperties' }, orderField, order]],
     }).then((resource) => {
       if (!resource) return;
 
@@ -329,8 +394,17 @@ export class IdentityResourceDataSource extends BaseDataSource {
       where: {
         id: identityResourceId,
       },
-    }).then((count) => {
+    }).then(async (count) => {
       if (count === 0) return;
+
+      const exists = await this.models.IdentityProperties.count({
+        where: {
+          identityResourceId,
+          key: input.key,
+        },
+      }).then((count) => count > 0);
+
+      if (exists) throw new Error('Property has already exists.');
 
       return this.models.IdentityProperties.create({
         ...input,
@@ -338,6 +412,42 @@ export class IdentityResourceDataSource extends BaseDataSource {
       }).then((property) => {
         return property.toJSON<IdentityPropertyModel>();
       });
+    });
+  }
+
+  /**
+   * Create new identity resource properties, skip if property key already exists
+   * @param identityResourceId identity resource id
+   * @param inputs new identity resource properties input
+   */
+  createProperties(identityResourceId: number, inputs: NewIdentityPropertyInput[]): Promise<IdentityPropertyModel[]> {
+    return this.models.IdentityResources.count({
+      where: {
+        id: identityResourceId,
+      },
+    }).then(async (count) => {
+      if (count === 0) return [];
+
+      const properties = await this.models.IdentityProperties.findAll({
+        attributes: ['key'],
+        where: {
+          identityResourceId,
+          key: {
+            [Op.in]: inputs.map((input) => input.key),
+          },
+        },
+      });
+
+      const existsKey = properties.map((property) => property.key);
+
+      return this.models.IdentityProperties.bulkCreate(
+        inputs
+          .filter((input) => !existsKey.includes(input.key))
+          .map((input) => ({
+            ...input,
+            identityResourceId,
+          })),
+      ).then((properties) => properties.map((property) => property.toJSON<IdentityPropertyModel>()));
     });
   }
 
