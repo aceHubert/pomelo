@@ -1,7 +1,5 @@
 import { defineComponent } from 'vue-demi';
-
 import type Vue from 'vue';
-import type { Key } from 'path-to-regexp';
 
 class Helper<Props> {
   Return = defineComponent({} as { props: Record<keyof Props, any> });
@@ -11,11 +9,6 @@ export type DefineComponent<Props> = Helper<Props>['Return'];
 export type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
 export type OmitVue<T> = Partial<Omit<T, keyof Vue>>;
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-export interface PathRegExp extends RegExp {
-  // An array to be populated with the keys found in the path.
-  keys: Key[];
-}
 
 /**
  * Menu
@@ -28,11 +21,13 @@ export interface MenuConfig {
    */
   title: string | ((i18nRender: (key: string, fallback: string, args?: any) => string) => string);
   /**
-   * vue-router path, resolve from name if not set
+   * path
    */
-  path?: string;
+  path: string;
+  /**
+   * alias path
+   */
   alias?: string[];
-  redirect?: string;
   /**
    * svg icon or antd icon type
    * https://1x.antdv.com/components/icon-cn/
@@ -59,13 +54,6 @@ export interface MenuConfig {
    */
   breadcrumb?: false;
 }
-
-export type MenuKeyMap = Map<string, MenuConfig & { parent?: Omit<MenuConfig, 'children'> }>;
-
-export type MenuPathMap = Map<
-  string,
-  MenuConfig & { regex: PathRegExp; aliasRegexs?: PathRegExp[]; parent?: Omit<MenuConfig, 'children'> }
->;
 
 /**
  * Breadcrumb

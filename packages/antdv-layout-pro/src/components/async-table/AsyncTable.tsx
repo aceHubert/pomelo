@@ -115,7 +115,7 @@ export default defineComponent({
 
     const loading = ref(false);
     const localDataSource = ref<Record<string, any>[]>([]);
-    const localPagination = ref<OmitVue<PaginationConfig> | false>(false); // create 里重新计算
+    const localPagination = ref<OmitVue<PaginationConfig>>({}); // create 里重新计算
     const needTotalList = ref<
       Array<{
         title: string | ((i18nRender: Function) => string);
@@ -190,22 +190,18 @@ export default defineComponent({
       filters?: Record<string, any>,
       sorter?: { field?: string; order?: 'ASC' | 'DESC' },
     ) => {
-      pagination &&
-        typeof localPagination.value === 'object' &&
-        (localPagination.value = Object.assign({}, localPagination.value, pagination));
+      // 保存到本地分页器
+      pagination && (localPagination.value = Object.assign({}, localPagination.value, pagination));
+
       const params = Object.assign(
-        {
-          page:
-            pagination?.current ||
-            (props.showPagination && typeof localPagination.value === 'object' && localPagination.value.current) ||
-            props.pageNum,
-          size:
-            pagination?.pageSize ||
-            (props.showPagination && typeof localPagination.value === 'object' && localPagination.value.pageSize) ||
-            props.pageSize,
-        },
-        (sorter && sorter.field && { sortField: sorter.field }) || {},
-        (sorter && sorter.order && { sortOrder: sorter.order }) || {},
+        hasPagination.value
+          ? {
+              page: localPagination.value.current,
+              size: localPagination.value.pageSize,
+            }
+          : {},
+        sorter && sorter.field ? { sortField: sorter.field } : {},
+        sorter && sorter.order ? { sortOrder: sorter.order } : {},
         { ...filters },
       );
       const result = props.dataSource(params);
@@ -215,20 +211,14 @@ export default defineComponent({
         .then((r) => {
           const rows = (r[props.rowsFieldName] || []) as Exclude<PagedDataSource['rows'], undefined>;
           const total = (r[props.totolFieldName] || 0) as Exclude<PagedDataSource['total'], undefined>;
-          localPagination.value =
-            localPagination.value &&
-            Object.assign({}, localPagination.value, {
-              // current: r.pager.page, // 返回结果中的当前分页数
-              total, // 返回结果中的总记录数
-            });
+          // 修改总数
+          localPagination.value = Object.assign({}, localPagination.value, {
+            // current: r.pager.page, // 返回结果中的当前分页数
+            total, // 返回结果中的总记录数
+          });
           // 为防止删除数据后导致页面当前页面数据长度为 0 ,自动翻页到上一页
-          if (
-            rows.length === 0 &&
-            props.showPagination &&
-            typeof localPagination.value === 'object' &&
-            localPagination.value.current! > 1
-          ) {
-            localPagination.value.current!--;
+          if (rows.length === 0 && localPagination.value.current && localPagination.value.current > 1) {
+            localPagination.value.current--;
             loadData();
             return;
           }
@@ -347,14 +337,12 @@ export default defineComponent({
         // ate by dog
       }
     }
-    localPagination.value =
-      hasPagination.value &&
-      Object.assign({}, attrs.pagination as any, {
-        current: localPageNum,
-        pageSize: localPageSize,
-        hideOnSinglePage: props.showPagination === 'auto',
-        showSizeChanger: !!props.showSizeChanger,
-      });
+    localPagination.value = Object.assign({}, attrs.pagination as OmitVue<PaginationConfig>, {
+      current: localPageNum,
+      pageSize: localPageSize,
+      hideOnSinglePage: props.showPagination === 'auto',
+      showSizeChanger: !!props.showSizeChanger,
+    });
 
     watch([() => route.params, () => route.query], ([params, query]) => {
       if (router && localPagination.value && props.pageURI) {
@@ -390,7 +378,7 @@ export default defineComponent({
     watch(localPagination, (pagination, old) => {
       if (router && props.pageURI && pagination) {
         // 如果是初始化，或者分页器没有变化，则不处理
-        if (old === false || (pagination.current === old.current && pagination.pageSize === old.pageSize)) return;
+        if (pagination.current === old.current && pagination.pageSize === old.pageSize) return;
 
         // query 直接修改原始值会报重复路由
         const query = JSON.parse(JSON.stringify(route.query));
@@ -496,7 +484,7 @@ export default defineComponent({
         ...attrs,
         columns: props.columns,
         dataSource: localDataSource.value,
-        pagination: localPagination.value,
+        pagination: hasPagination.value ? localPagination.value : false,
         loading: loading.value,
         bodyStyle: {
           overflowX: 'auto',

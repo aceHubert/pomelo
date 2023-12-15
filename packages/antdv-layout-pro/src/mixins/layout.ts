@@ -3,6 +3,7 @@ import { default as pathToRegexp } from 'path-to-regexp';
 import { warn, pick } from '@ace-util/core';
 import { useEffect, useConfigProvider } from '../shared';
 import {
+  serializeMenu,
   createMenuKeyMap,
   createMenuPathMap,
   createFlatMenus,
@@ -11,6 +12,7 @@ import {
 } from '../utils';
 
 // Types
+import type { MenuConfigWithRedirect } from '../utils/menu';
 import type { MenuConfig, BreadcrumbConfig, MultiTabConfig } from '../types';
 
 /**
@@ -20,10 +22,11 @@ export const useLayoutMixin = () => {
   const configProvider = useConfigProvider();
 
   // menu
-  const menus = ref<MenuConfig[]>([]);
-  const currTopMenuKey = ref<string>();
-  const currSiderMenuKey = ref<string>('');
-  const siderMenuOpenKeys = ref<string[]>([]);
+  const menus = ref<MenuConfigWithRedirect[]>([]);
+  const currTopMenuKey = ref<string>(); // current top menu key, selected
+  const currSiderMenuKey = ref<string>(''); // current sider menu key, selected
+  const nextSiderMenuKey = ref<string>(''); // next sider menu key, to be selected
+  const siderMenuOpenKeys = ref<string[]>([]); // sider menu open keys
   const menuKeyMap = computed(() => createMenuKeyMap(menus.value));
   const menuPathMap = computed(() => createMenuPathMap(menus.value));
   const flatMenus = computed(() => createFlatMenus(menus.value));
@@ -41,7 +44,7 @@ export const useLayoutMixin = () => {
    * 项部导航
    */
   const topMenus = computed(() => {
-    return (function filter(menus: MenuConfig[] = []): MenuConfig[] {
+    return (function filter(menus: MenuConfigWithRedirect[] = []): MenuConfigWithRedirect[] {
       return menus
         .filter((menu) => menu.position === 'top')
         .filter((item) => item.display !== false)
@@ -56,13 +59,13 @@ export const useLayoutMixin = () => {
    * 侧边导航
    */
   const siderMenus = computed(() => {
-    const currentSideMenu = menuKeyMap.value.get(currSiderMenuKey.value);
+    const currentSideMenu = menuKeyMap.value.get(nextSiderMenuKey.value || currSiderMenuKey.value);
     if (currentSideMenu?.parent?.key && currentSideMenu?.position === 'sub') {
       return (menuKeyMap.value.get(currentSideMenu.parent.key)?.children ?? [])
         .filter((item) => item.display !== false)
         .map(({ children: _, ...restItem }) => restItem);
     } else {
-      return (function filter(menus: MenuConfig[] = []): MenuConfig[] {
+      return (function filter(menus: MenuConfigWithRedirect[] = []): MenuConfigWithRedirect[] {
         return menus
           .filter((menu) => menu.position === 'side')
           .filter((item) => item.display !== false)
@@ -91,9 +94,14 @@ export const useLayoutMixin = () => {
     currTopMenuKey.value = key;
   };
 
-  const setSiderCurrMenuKey = (key: string) => {
+  const setSiderCurrMenuKey = (key: string, next = false) => {
+    if (next) {
+      nextSiderMenuKey.value = key;
+      return;
+    }
     if (currSiderMenuKey.value === key) return;
     currSiderMenuKey.value = key;
+    nextSiderMenuKey.value = '';
   };
 
   const setSiderMenuOpenKeys = (openKeys: string[]) => {
@@ -124,10 +132,10 @@ export const useLayoutMixin = () => {
             aliasRegexs?.some(
               (regex) => regex.test(path.split('?')[0]), // path without query is matched by alias regex
             ),
-        )?.[0] || matchNoRegistPageParentPath(path, menuPathMap.value);
+        )?.[0] || matchNoRegistPageParentPath(path, [...menuPathMap.value.keys()]);
   };
 
-  const getTopMenuKey = (matched: MenuConfig) => {
+  const getTopMenuKey = (matched: MenuConfigWithRedirect) => {
     const parent = menuKeyMap.value.get(matched.key)?.parent;
 
     if (parent?.position === 'top') {
@@ -136,19 +144,6 @@ export const useLayoutMixin = () => {
       return getTopMenuKey(parent);
     }
     return matched.key;
-  };
-
-  const getSiderMenuKey = (matched: MenuConfig) => {
-    return matched.display !== false
-      ? matched.key
-      : // if current menu is hidden, find the first parent menu which is not hidden
-        (function findParentKey(key: string): string {
-          const parent = menuKeyMap.value.get(key)?.parent;
-          if (parent?.position !== 'top' && parent?.display === false) {
-            return findParentKey(parent.key);
-          }
-          return parent?.key ?? key;
-        })(matched.key);
   };
 
   /**
@@ -174,7 +169,7 @@ export const useLayoutMixin = () => {
       if (!nextMatched) return;
 
       setTopCurrMenuKey(getTopMenuKey(nextMatched));
-      setSiderCurrMenuKey(getSiderMenuKey(nextMatched));
+      setSiderCurrMenuKey(nextMatched.key, true);
     }
   };
 
@@ -182,7 +177,7 @@ export const useLayoutMixin = () => {
    * 设置菜单
    */
   const setMenus = (menuConfig: MenuConfig[]) => {
-    menus.value = menuConfig;
+    menus.value = serializeMenu(menuConfig);
     // 当手动设置后，需要使用 setPath 重新计算菜单状态
     cachedPath && setPath(cachedPath);
   };
@@ -293,7 +288,7 @@ export const useLayoutMixin = () => {
         }
       })(currentMatched.key);
 
-      setSiderCurrMenuKey(getSiderMenuKey(currentMatched));
+      setSiderCurrMenuKey(currentMatched.key);
       setSiderMenuOpenKeys(siderMenuOpenKeys);
     }
   }, currentMatchPath);

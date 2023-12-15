@@ -19,6 +19,7 @@ import { Theme, DeviceType, LayoutType, ContentWidth } from '../../types';
 
 // Types
 import type { Menu as MenuType } from 'ant-design-vue/types/menu/menu';
+import type { MenuConfigWithRedirect } from '../../utils/menu';
 import type { MenuConfig, MultiTabConfig, Optional, OmitVue } from '../../types';
 
 const StopSiderContextProvide = defineComponent({
@@ -267,7 +268,7 @@ export default defineComponent({
 
       layoutMixin.setPath(resolved.path);
 
-      emit('menuClick', resolved.path, menu);
+      emit('menuClick', resolved.path, next);
     };
 
     let handleContentScroll: () => void;
@@ -333,7 +334,7 @@ export default defineComponent({
       };
 
       const renderMenu = (
-        menus: MenuConfig[],
+        menus: MenuConfigWithRedirect[],
         {
           classname,
           subMenuPopupClassName,
@@ -365,7 +366,7 @@ export default defineComponent({
           </Menu>
         );
 
-        function renderNestedMenu(menus: MenuConfig[]) {
+        function renderNestedMenu(menus: MenuConfigWithRedirect[]) {
           return menus.map((menu) =>
             menu.children?.length ? (
               <Menu.SubMenu
@@ -383,7 +384,7 @@ export default defineComponent({
           );
         }
 
-        function renderMenuContent(menu: MenuConfig) {
+        function renderMenuContent(menu: MenuConfigWithRedirect) {
           const icon = renderIcon(menu.icon);
           const title =
             typeof menu.title === 'function' ? menu.title((...args) => configProvider.i18nRender(...args)) : menu.title;
@@ -576,12 +577,9 @@ export default defineComponent({
                         theme={configProvider.theme === Theme.Dark ? 'dark' : 'light'}
                         selectable={false}
                         onClick={() => {
+                          const resolved = layoutMixin.reslovePath(layoutMixin.goBackPath!);
                           // 切换菜单，并且切换路由
-                          emit('menuClick', {
-                            path: layoutMixin.goBackPath!,
-                            resolved: layoutMixin.reslovePath(layoutMixin.goBackPath!),
-                            reslovePath: layoutMixin.reslovePath,
-                          });
+                          emit('menuClick', resolved.path, layoutMixin.goBackPath);
                         }}
                       >
                         <Menu.Item key="go-back">

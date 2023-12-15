@@ -4,7 +4,29 @@ import { warn } from '@ace-util/core';
 
 // Types
 import type { Key, RegExpOptions, ParseOptions } from 'path-to-regexp';
-import type { MenuConfig, MenuKeyMap, MenuPathMap, BreadcrumbConfig, PathRegExp } from '../types';
+import type { MenuConfig, BreadcrumbConfig } from '../types';
+
+export interface PathRegExp extends RegExp {
+  // An array to be populated with the keys found in the path.
+  keys: Key[];
+}
+
+export interface MenuConfigWithRedirect extends Omit<MenuConfig, 'path' | 'children'> {
+  path?: string;
+  redirect?: string;
+  children?: MenuConfigWithRedirect[];
+}
+
+export type MenuKeyMap = Map<string, MenuConfigWithRedirect & { parent?: Omit<MenuConfigWithRedirect, 'children'> }>;
+
+export type MenuPathMap = Map<
+  string,
+  MenuConfigWithRedirect & {
+    regex: PathRegExp;
+    aliasRegexs?: PathRegExp[];
+    parent?: Omit<MenuConfigWithRedirect, 'children'>;
+  }
+>;
 
 function attachKeys(regex: RegExp, keys: Key[]): PathRegExp {
   const pathRegex = regex as PathRegExp;
@@ -25,11 +47,66 @@ function compilePathRegex(path: string, pathToRegexpOptions?: RegExpOptions & Pa
   return attachKeys(regex, keys);
 }
 
+/**
+ * 将不可点击的菜单转换成 redirect
+ */
+export function serializeMenu(menus: MenuConfig[], parent?: MenuConfigWithRedirect): MenuConfigWithRedirect[] {
+  return menus.map((menu) => {
+    const { key, path, position, display, breadcrumb, children, ...rest } = menu;
+    const menuConfig: MenuConfigWithRedirect = {
+      ...rest,
+      key,
+      position,
+      display: display === false ? false : void 0,
+      breadcrumb: breadcrumb === false ? false : void 0,
+    };
+
+    // 如果父节点和当前节点 position 一致，那么父节点的 path 变成 redirect (排除 sub 菜单)
+    if (parent?.path && menu.position !== 'sub' && parent.position === menu.position) {
+      parent.redirect = parent.path;
+      delete parent.path;
+    }
+
+    // 如果 top 菜单下有非 top 子菜单，那么 top 菜单的 action 变成 redirect
+    if (menu.position === 'top' && children?.some((item) => item.position !== menu.position)) {
+      // 如果 path 不在子菜单中，取第一个子菜单的 action
+      const childPaths = getChildPaths(children);
+      menuConfig.redirect = childPaths.has(path) ? path : [...childPaths][0];
+    } else {
+      menuConfig.path = path;
+    }
+
+    menuConfig.children = children ? serializeMenu(children, menuConfig) : undefined;
+    return menuConfig;
+
+    // 获取所有子菜单可执行的 path
+    function getChildPaths(children: MenuConfig[]): Set<string> {
+      const paths = new Set<string>();
+      children.map((item) => {
+        // 只取每个 position group 的最后一级 action
+        if (!item.children || item.children.some((child) => item.position !== child.position)) {
+          paths.add(item.path);
+          item.alias?.forEach((alias) => paths.add(alias));
+        }
+
+        if (item.children) {
+          getChildPaths(item.children).forEach((path) => paths.add(path));
+        }
+      });
+
+      return paths;
+    }
+  });
+}
+
+/**
+ * Key map menus
+ */
 export function createMenuKeyMap(
-  menus: MenuConfig[],
-  parent: MenuConfig | null = null,
+  menus: MenuConfigWithRedirect[],
+  parent: MenuConfigWithRedirect | null = null,
   keyMap: MenuKeyMap = new Map(),
-  key: keyof MenuConfig = 'key',
+  key: keyof MenuConfigWithRedirect = 'key',
 ) {
   menus.forEach((v) => {
     keyMap.set(v[key], {
@@ -43,9 +120,12 @@ export function createMenuKeyMap(
   return keyMap;
 }
 
+/**
+ * Path map menus
+ */
 export function createMenuPathMap(
-  menus: MenuConfig[],
-  parent: MenuConfig | null = null,
+  menus: MenuConfigWithRedirect[],
+  parent: MenuConfigWithRedirect | null = null,
   pathMap: MenuPathMap = new Map(),
 ) {
   menus.forEach((v) => {
@@ -64,7 +144,10 @@ export function createMenuPathMap(
   return pathMap;
 }
 
-export function createFlatMenus(menus: MenuConfig[], flatMenus: MenuConfig[] = []) {
+/**
+ * Flat menus
+ */
+export function createFlatMenus(menus: MenuConfigWithRedirect[], flatMenus: MenuConfigWithRedirect[] = []) {
   menus.forEach((v) => {
     flatMenus.push(v);
     v.children && createFlatMenus(flatMenus, v.children);
@@ -72,10 +155,12 @@ export function createFlatMenus(menus: MenuConfig[], flatMenus: MenuConfig[] = [
   return flatMenus;
 }
 
-// 找到未注册或菜单配置之外的路径的父路径
-export function matchNoRegistPageParentPath(path: string, pathMap: MenuPathMap) {
+/**
+ * Match closest path
+ */
+export function matchNoRegistPageParentPath(path: string, paths: string[]) {
   // 找出可能的父路径集合
-  const pathArr = [...pathMap.keys()]
+  const pathArr = paths
     .filter((v) => path.startsWith(v))
     .map((v) => {
       return {
@@ -89,7 +174,9 @@ export function matchNoRegistPageParentPath(path: string, pathMap: MenuPathMap) 
   return pathArr[0].path;
 }
 
-// 根据已注册的path，生成breadcrumblist
+/**
+ * generate breadcrumb
+ */
 export function createBreadcrumbList(
   path: string,
   pathMap: MenuPathMap,

@@ -1389,7 +1389,7 @@ h1, h2, h3, h4, h5, h6 {
 
     .@{ant-prefix}-descriptions-item-label,
     .@{ant-prefix}-descriptions-item-content {
-      border-right-color: 1px solid @border-color-split;
+      border-right-color: @border-color-split;
     }
 
     .@{ant-prefix}-descriptions-item-label {
@@ -1397,7 +1397,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .@{ant-prefix}-descriptions-row {
-      border-bottom-color: 1px solid @border-color-split;
+      border-bottom-color: @border-color-split;
     }
   }
 }
@@ -1687,6 +1687,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .@{ant-prefix}-form-item {
+  .reset-component;
+}
+.@{ant-prefix}-form-explain,
+.@{ant-prefix}-form-extra {
   .reset-component;
 }
 
@@ -3129,7 +3133,7 @@ h1, h2, h3, h4, h5, h6 {
       .hover;
     }
 
-    .@{ant-prefix}-select-focused .@{ant-prefix}-select-selection,
+    .@{ant-prefix}-select-focused &,
     &:focus,
     &:active {
       .active;
@@ -4113,7 +4117,7 @@ h1, h2, h3, h4, h5, h6 {
 
 // Tag
 // ---
-.@{ant-prefix}-tag {
+.@{ant-prefix}-tag:not([class*=~'@{ant-prefix}-tag-']) {
   .reset-component;
 
   background: @tag-default-bg;

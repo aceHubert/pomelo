@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, watch, nextTick } from 'vue-demi';
+import { defineComponent, ref, reactive, watch, nextTick, PropType } from 'vue-demi';
 import { isNavigationFailure, NavigationFailureType } from 'vue-router';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { Button, Col, Row, Divider, Form, Input, Select, Popover, Tooltip, Space } from 'ant-design-vue';
@@ -38,7 +38,7 @@ export type SearchFromProps = {
   /** 关键字名字，显示到 URI query 中的 key, 默认：keyword */
   keywordName: string;
   /** 关键字类型下拉框选项 */
-  keywordTypeOptions?: Array<{ label: string; value: string | number; default?: true }>;
+  keywordTypeOptions?: Array<{ label: string; value: string | number; selected?: true }>;
   /** 关键字类型名字，显示 URI query 中的 key, 默认为：keywordType */
   keywordTypeName: string;
   /** 状态名字，显示到 URI query 中的 key, 默认：status */
@@ -73,7 +73,7 @@ export default defineComponent({
     prefixCls: String,
     keywordPlaceholder: String,
     keywordName: { type: String, default: 'keyword' },
-    keywordTypeOptions: Array,
+    keywordTypeOptions: Array as PropType<SearchFromProps['keywordTypeOptions']>,
     keywordTypeName: { type: String, default: 'keywordType' },
     statusName: { type: String, default: 'status' },
     statusOptions: Array,
@@ -98,7 +98,7 @@ export default defineComponent({
     const localStatus = ref<StatusOption['value']>();
     const bulkAciton = ref<BulkAcitonOption['value']>();
 
-    const defaultKeywordType = props.keywordTypeOptions?.find((option) => option.default)?.value;
+    const defaultKeywordType = props.keywordTypeOptions?.find((option) => option.selected)?.value;
     if (defaultKeywordType) {
       updateRouteQuery({
         [props.keywordTypeName]: defaultKeywordType,
