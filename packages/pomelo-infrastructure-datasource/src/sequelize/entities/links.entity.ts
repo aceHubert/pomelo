@@ -93,6 +93,7 @@ export const associate: TableAssociateFunc = function associate(models) {
   models.Links.hasMany(models.TermRelationships, {
     foreignKey: 'objectId',
     sourceKey: 'id',
+    as: 'LinkTermRelationships',
     constraints: false,
   });
 };

@@ -63,7 +63,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
       })
       .then((meta) => {
         if (meta) {
-          const { metaKey, ...rest } = meta.toJSON() as any;
+          const { metaKey, ...rest } = meta.toJSON();
           return {
             ...rest,
             metaKey:
@@ -92,7 +92,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
       })
       .then((meta) => {
         if (meta) {
-          const { metaKey, ...rest } = meta.toJSON() as any;
+          const { metaKey, ...rest } = meta.toJSON();
           return {
             ...rest,
             metaKey:
@@ -150,7 +150,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
       })
       .then((metas) => {
         const format = (meta: Model<MetaModel>) => {
-          const { metaKey, ...rest } = meta.toJSON() as any;
+          const { metaKey, ...rest } = meta.toJSON();
           return {
             ...rest,
             metaKey:

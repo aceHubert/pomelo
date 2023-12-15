@@ -1,10 +1,11 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { WhereOptions, Includeable, Transaction, Op, Order } from 'sequelize';
+import { WhereOptions, Attributes, Includeable, Transaction, Op, Order } from 'sequelize';
 import { UserInputError, ValidationError, ForbiddenError, RequestUser } from '@ace-pomelo/shared-server';
-import { Taxonomy, TemplateType, TemplateStatus, TemplateOperateStatus, TemplateAttributes } from '../../entities';
+import { Taxonomy, TemplateType, TemplateStatus, TemplateOperateStatus } from '../../entities';
 import { UserCapability } from '../../utils/user-capability.util';
 import { OptionPresetKeys, TemplateMetaPresetKeys } from '../../utils/preset-keys.util';
+import { default as Templates } from '../entities/templates.entity';
 import {
   TemplateModel,
   TemplateOptionArgs,
@@ -66,7 +67,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUser 登录用户
    */
   private async hasEditCapability(
-    template: Pick<TemplateAttributes, 'type' | 'status' | 'author'>,
+    template: Pick<Attributes<Templates>, 'type' | 'status' | 'author'>,
     requestUser: RequestUser,
   ) {
     // 是否有编辑权限
@@ -127,7 +128,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUser 登录用户
    */
   private async hasDeleteCapability(
-    template: Pick<TemplateAttributes, 'type' | 'status' | 'author'>,
+    template: Pick<Attributes<Templates>, 'type' | 'status' | 'author'>,
     requestUser: RequestUser,
   ) {
     // 是否有删除文章的权限
@@ -240,7 +241,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * 批量记录修改为 Trash 状态之前的状态
    * @param templateIds Template ids
    */
-  private async bulkStoreTrashStatus(templatesOrtemplateIds: TemplateAttributes[] | number[], t?: Transaction) {
+  private async bulkStoreTrashStatus(templatesOrtemplateIds: Attributes<Templates>[] | number[], t?: Transaction) {
     const templates = templatesOrtemplateIds.some((templateOrId) => typeof templateOrId === 'number')
       ? await this.models.Templates.findAll({
           attributes: ['id', 'status'],
@@ -248,7 +249,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
             id: templatesOrtemplateIds as number[],
           },
         })
-      : (templatesOrtemplateIds as TemplateAttributes[]);
+      : (templatesOrtemplateIds as Attributes<Templates>[]);
 
     if (!templates.length) return [];
 
@@ -297,7 +298,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       fields.unshift('id');
     }
 
-    const where: WhereOptions<TemplateAttributes> = {
+    const where: WhereOptions<Attributes<Templates>> = {
       id,
     };
 
@@ -352,7 +353,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       fields.unshift('id');
     }
 
-    const where: WhereOptions<TemplateAttributes> = {
+    const where: WhereOptions<Attributes<Templates>> = {
       name,
     };
 
@@ -399,8 +400,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    */
   async getOptions(query: TemplateOptionArgs, type: string, fields = ['id', 'title']): Promise<TemplateOptionModel[]> {
     const include: Includeable[] = [];
-    const andWhere: WhereOptions<TemplateAttributes>[] = [];
-    const where: WhereOptions<TemplateAttributes> = {
+    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
+    const where: WhereOptions<Attributes<Templates>> = {
       status: TemplateStatus.Publish,
       type,
       [Op.not]: {
@@ -545,8 +546,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param type 类型
    */
   async getCountByStatus(type: string, requestUser: RequestUser) {
-    const andWhere: WhereOptions<TemplateAttributes>[] = [];
-    const where: WhereOptions<TemplateAttributes> = {
+    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
+    const where: WhereOptions<Attributes<Templates>> = {
       type,
       status: {
         // 不包含所有的操作时的状态
@@ -872,14 +873,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     fields: string[],
     requestUser?: RequestUser,
   ): Promise<PagedTemplateModel> {
+    // 主键(meta 查询)
     if (!fields?.includes('id')) {
-      // 主键(meta 查询)
       fields.unshift('id');
     }
 
     const include: Includeable[] = [];
-    const andWhere: WhereOptions<TemplateAttributes>[] = [];
-    const where: WhereOptions<TemplateAttributes> = {
+    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
+    const where: WhereOptions<Attributes<Templates>> = {
       type,
       [Op.and]: andWhere,
     };
@@ -1011,6 +1012,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       offset,
       limit,
       order: [
+        // 根据 keyword 匹配程度排序
         !!query.keyword && [
           this.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
         WHEN ${keywordField} LIKE '${query.keyword}%' THEN 1

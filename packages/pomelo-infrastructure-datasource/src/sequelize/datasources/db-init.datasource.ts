@@ -57,22 +57,22 @@ export class DbInitDataSource extends BaseDataSource {
    * @version 0.0.1
    * @access None
    */
-  haveTables(): Promise<boolean> {
-    if (this.databaseDialect === 'mysql') {
-      return this.sequelize
-        .query(
-          'select count(1) as tableCount from `INFORMATION_SCHEMA`.`TABLES` where `TABLE_SCHEMA`= (select database())',
-        )
-        .then(([value]) => {
-          // 当没有表的时候初始化
-          return (value as any)[0].tableCount > 0;
-        });
-    } else {
-      // todo: 其它数据库
-      this.logger.warn(`${this.databaseDialect} is not supported!`);
-      return Promise.resolve(true);
-    }
-  }
+  // haveTables(): Promise<boolean> {
+  //   if (this.databaseDialect === 'mysql') {
+  //     return this.sequelize
+  //       .query(
+  //         'select count(1) as tableCount from `INFORMATION_SCHEMA`.`TABLES` where `TABLE_SCHEMA`= (select database())',
+  //       )
+  //       .then(([value]) => {
+  //         // 当没有表的时候初始化
+  //         return (value as any)[0].tableCount > 0;
+  //       });
+  //   } else {
+  //     // todo: 其它数据库
+  //     this.logger.warn(`${this.databaseDialect} is not supported!`);
+  //     return Promise.resolve(true);
+  //   }
+  // }
 
   /**
    * 实始化数据（必须在DB初始化表结构后调用）
@@ -145,7 +145,7 @@ export class DbInitDataSource extends BaseDataSource {
 
       const defaultMediaCategoryTaxonomy = await this.models.TermTaxonomy.create(
         {
-          name: 'Uncategorized Link',
+          name: 'Uncategorized Medias',
           slug: 'uncategorized medias',
           taxonomy: Taxonomy.Category,
           description: '',

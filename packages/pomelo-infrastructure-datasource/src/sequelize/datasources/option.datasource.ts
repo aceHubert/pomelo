@@ -22,7 +22,7 @@ export class OptionDataSource extends BaseDataSource {
       attributes: this.filterFields(fields, this.models.Options),
     }).then((option) => {
       if (option) {
-        const { optionName, ...rest } = option.toJSON() as any;
+        const { optionName, ...rest } = option.toJSON();
         return {
           ...rest,
           optionName:
@@ -49,7 +49,7 @@ export class OptionDataSource extends BaseDataSource {
       },
     }).then((options) =>
       options.map((option) => {
-        const { optionName, ...rest } = option.toJSON() as any;
+        const { optionName, ...rest } = option.toJSON();
         return {
           ...rest,
           optionName:
@@ -111,7 +111,7 @@ export class OptionDataSource extends BaseDataSource {
 
     const option = await this.models.Options.create(model);
     super.resetOptions();
-    return option.toJSON() as OptionModel;
+    return option.toJSON<OptionModel>();
   }
 
   /**

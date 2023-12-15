@@ -1,4 +1,4 @@
-import { kebabCase, isEmpty } from 'lodash';
+import { kebabCase } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
@@ -10,12 +10,13 @@ import { InfrastructureOptions } from '../../interfaces/infrastructure-options.i
 import { INFRASTRUCTURE_OPTIONS } from '../../constants';
 import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
 
+const __AUTOLOAD_OPTIONS__ = new Map<string, string>(); // Autoload options 缓存
+const __OPTIONS__ = new Map<string, string>(); // Not autoload options 缓存
+
 export abstract class BaseDataSource implements OnModuleInit {
-  private __AUTOLOAD_OPTIONS__: Record<string, string> = {}; // Autoload options 缓存
-  private __OPTIONS__: Record<string, string> = {}; // Not autoload options 缓存
+  private infrastructureService!: InfrastructureService;
   private infrastuctureOptions!: InfrastructureOptions;
   protected readonly logger!: Logger;
-  protected infrastructureService!: InfrastructureService;
 
   constructor(protected readonly moduleRef: ModuleRef) {
     this.logger = new Logger(this.constructor.name, { timestamp: true });
@@ -54,12 +55,12 @@ export abstract class BaseDataSource implements OnModuleInit {
    */
   protected get autoloadOptions() {
     // 避免每次从缓存字符串序列化
-    if (!isEmpty(this.__AUTOLOAD_OPTIONS__)) {
-      return Promise.resolve(this.__AUTOLOAD_OPTIONS__);
+    if (__AUTOLOAD_OPTIONS__.size > 0) {
+      return Promise.resolve(Object.fromEntries(__AUTOLOAD_OPTIONS__));
     } else {
       return (async () => {
         // 赋默认值，initialize 会多次执行
-        const options: Record<string, string> = await this.models.Options.findAll({
+        const options = await this.models.Options.findAll({
           attributes: ['optionName', 'optionValue'],
           where: {
             autoload: OptionAutoload.Yes,
@@ -84,8 +85,10 @@ export abstract class BaseDataSource implements OnModuleInit {
             return prev;
           }, {} as Record<string, string>),
         );
-        // 缓存到内存中
-        this.__AUTOLOAD_OPTIONS__ = options;
+        // 缓存
+        Object.entries(options).forEach(([key, value]) => {
+          __AUTOLOAD_OPTIONS__.set(key, value);
+        });
         return options;
       })();
     }
@@ -95,8 +98,8 @@ export abstract class BaseDataSource implements OnModuleInit {
    * 修改 Options 时重置缓存，下次重新加载
    */
   protected resetOptions() {
-    this.__AUTOLOAD_OPTIONS__ = {};
-    this.__OPTIONS__ = {};
+    __AUTOLOAD_OPTIONS__.clear();
+    __OPTIONS__.clear();
   }
 
   /**
@@ -210,7 +213,7 @@ export abstract class BaseDataSource implements OnModuleInit {
     let value = (await this.autoloadOptions)[optionName] as R | undefined;
     // 从非autoload options缓存中取值
     if (value === void 0) {
-      value = this.__OPTIONS__[optionName] as R | undefined;
+      value = __OPTIONS__.get(optionName) as R | undefined;
     }
     // 如果缓存中没有，从数据库查询
     if (value === void 0) {
@@ -233,7 +236,7 @@ export abstract class BaseDataSource implements OnModuleInit {
       }
 
       // 缓存
-      value !== void 0 && (this.__OPTIONS__[optionName] = value);
+      value !== void 0 && __OPTIONS__.set(optionName, value);
     }
     return value;
   }

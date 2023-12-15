@@ -2,13 +2,14 @@ import md5 from 'md5';
 import { isUndefined } from 'lodash';
 import { CountryCode } from 'libphonenumber-js';
 import { isEmail, isPhoneNumber } from 'class-validator';
-import { WhereOptions, Op } from 'sequelize';
+import { WhereOptions, Attributes, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenError, ValidationError, RequestUser } from '@ace-pomelo/shared-server';
-import { UserStatus, UserAttributes } from '../../entities';
+import { UserStatus } from '../../entities';
 import { UserCapability, UserRole } from '../../utils/user-capability.util';
 import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
+import { default as User } from '../entities/users.entity';
 import {
   UserModel,
   UserWithRoleModel,
@@ -72,7 +73,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   ): Promise<PagedUserModel> {
     await this.hasCapability(UserCapability.ListUsers, requestUser, true);
 
-    const where: WhereOptions<UserAttributes> = {};
+    const where: WhereOptions<Attributes<User>> = {};
     if (query.keyword) {
       // @ts-expect-error type error
       where[Op.or] = [
@@ -125,7 +126,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
       rows: rows.map((row) => {
-        const { UserMetas, ...rest } = row.toJSON() as any;
+        const { UserMetas, ...rest } = row.toJSON() as any as UserModel & { UserMetas: UserMetaModel[] };
         return {
           capabilities: UserMetas.length ? UserMetas[0].metaValue : null,
           ...rest,
@@ -349,7 +350,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
       // 排除登录密码
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { loginPwd: pwd, ...restUser } = user.toJSON() as any;
+      const { loginPwd: pwd, ...restUser } = user.toJSON();
       return restUser as UserModel;
     } catch (err) {
       await t.rollback();
@@ -724,7 +725,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     // 排除登录密码
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { loginPwd: pwd, ...restUser } = user.toJSON() as any;
+    const { loginPwd: pwd, ...restUser } = user.toJSON();
     return restUser as UserModel;
   }
 }

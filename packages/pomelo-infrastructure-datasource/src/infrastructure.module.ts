@@ -39,7 +39,7 @@ export class InfrastructureModule {
       module: InfrastructureModule,
       global: options.isGlobal,
       imports: options.imports || [],
-      providers: this.createAsyncProviders(options),
+      providers: [...this.createAsyncProviders(options)],
     };
   }
 

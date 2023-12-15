@@ -12,17 +12,17 @@ export interface TemplateModel extends TemplateAttributes {}
 /**
  * Paged Template 查询参数
  */
-export interface PagedTemplateArgs extends PagedArgs {
+export interface PagedTemplateArgs<F extends keyof TemplateAttributes = 'title' | 'name'> extends PagedArgs {
   /**
    * 根据 keywordField 模糊查询
    */
   keyword?: string;
 
   /**
-   * keywork 查询字段
+   * keyword 查询字段
    * @default title
    */
-  keywordField?: 'title' | 'name';
+  keywordField?: F;
 
   /**
    * 创建人id
@@ -76,7 +76,8 @@ export interface TemplateOptionModel extends Pick<TemplateModel, 'id' | 'title' 
 /**
  * Template option 查询参数
  */
-export interface TemplateOptionArgs extends Omit<PagedTemplateArgs, 'status' | 'offset' | 'limit'> {
+export interface TemplateOptionArgs<F extends keyof TemplateAttributes = 'title' | 'name'>
+  extends Omit<PagedTemplateArgs<F>, 'status' | 'offset' | 'limit'> {
   // something else
 }
 

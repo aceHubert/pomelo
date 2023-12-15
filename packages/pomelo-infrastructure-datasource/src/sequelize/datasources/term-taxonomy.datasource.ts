@@ -1,9 +1,9 @@
 import { isUndefined } from 'lodash';
-import { Model, WhereOptions, Transaction, Op } from 'sequelize';
+import { WhereOptions, Model, Attributes, Transaction, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, RequestUser } from '@ace-pomelo/shared-server';
-import { TermTaxonomyAttributes } from '../../entities';
+import { default as TermTaxonomy } from '../entities/term-taxonomy.entity';
 import {
   TermTaxonomyMetaModel,
   NewTermTaxonomyMetaInput,
@@ -41,7 +41,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       },
     }).then((term) => {
       if (term) {
-        return term.toJSON() as TermTaxonomyModel;
+        return term.toJSON<TermTaxonomyModel>();
       }
       return;
     });
@@ -73,7 +73,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       fields.unshift('id');
     }
 
-    const where: WhereOptions<TermTaxonomyAttributes> = {};
+    const where: WhereOptions<Attributes<TermTaxonomy>> = {};
     if (_query.keyword) {
       where['name'] = {
         [Op.like]: `%${_query.keyword}%`,
@@ -264,7 +264,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       transaction,
     });
     const termRelationship = await this.models.TermRelationships.create(model, { transaction });
-    return termRelationship.toJSON() as TermRelationshipModel;
+    return termRelationship.toJSON<TermRelationshipModel>();
   }
 
   /**

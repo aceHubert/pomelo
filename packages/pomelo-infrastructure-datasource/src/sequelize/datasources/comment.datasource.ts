@@ -24,7 +24,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @param id 评论 Id
    * @param fields 返回的字段
    */
-  get(id: number, fields: string[]): Promise<CommentModel | null> {
+  get(id: number, fields: string[]): Promise<CommentModel | undefined> {
     // 主键(meta 查询)
     if (!fields.includes('id')) {
       fields.unshift('id');
@@ -32,7 +32,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
 
     return this.models.Comments.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Comments),
-    }).then((comment) => comment?.toJSON() as CommentModel);
+    }).then((comment) => comment?.toJSON<CommentModel>());
   }
 
   /**
@@ -87,7 +87,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
 
       await t.commit();
 
-      return comment.toJSON() as CommentModel;
+      return comment.toJSON<CommentModel>();
     } catch (err) {
       await t.rollback();
       throw err;

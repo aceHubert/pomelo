@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+import { Sequelize, ModelStatic } from 'sequelize';
 import { Injectable, Inject, OnApplicationShutdown } from '@nestjs/common';
 import { InfrastructureOptions } from './interfaces/infrastructure-options.interface';
 import { Models } from './sequelize/interfaces/models.interface';
@@ -47,21 +47,31 @@ export class InfrastructureService implements OnApplicationShutdown {
     this.sequelize = sequelize;
     this.models = (function initializer() {
       const models: Partial<Models> = {};
-      const associateFuncs: TableAssociateFunc[] = [];
+      const associates: TableAssociateFunc[] = [];
 
       for (const key in Entities) {
-        const { init, associate, default: model } = (Entities as any)[key];
-        init &&
-          (init as TableInitFunc)(sequelize, {
-            prefix: options.tablePrefix || '',
-          });
-        associate && associateFuncs.push(associate);
+        const {
+          init,
+          associate,
+          default: model,
+        } = (
+          Entities as Record<
+            string,
+            {
+              init?: TableInitFunc;
+              associate?: TableAssociateFunc;
+              default: ModelStatic<any>;
+            }
+          >
+        )[key];
+        init?.(sequelize, { prefix: options.tablePrefix || '' });
+        associate && associates.push(associate);
         model && (models[model.name as keyof Models] = model);
       }
 
-      associateFuncs.forEach((associate) => {
-        associate(models as Models);
-      });
+      // associate needs to be called after all models are initialized
+      associates.forEach((associate) => associate(models as Models));
+
       return models as Models;
     })();
   }

@@ -12,10 +12,10 @@ export class LinkDataSource extends BaseDataSource {
     super(moduleRef);
   }
 
-  get(id: number, fields: string[]): Promise<LinkModel | null> {
+  get(id: number, fields: string[]): Promise<LinkModel | undefined> {
     return this.models.Links.findByPk(id, {
       attributes: this.filterFields(fields, this.models.Links),
-    }).then((link) => link?.toJSON() as LinkModel);
+    }).then((link) => link?.toJSON<LinkModel>());
   }
 
   getPaged({ offset, limit, ...query }: PagedLinkArgs, fields: string[]): Promise<PagedLinkModel> {
@@ -50,7 +50,7 @@ export class LinkDataSource extends BaseDataSource {
       ...model,
       userId: Number(requestUser.sub),
     });
-    return link.toJSON() as LinkModel;
+    return link.toJSON<LinkModel>();
   }
 
   /**

@@ -40,13 +40,15 @@ export interface NewIdentityResourceInput extends Omit<CreationAttributes<Identi
 export interface UpdateIdentityResourceInput extends Partial<NewIdentityResourceInput> {}
 
 export interface IdentityClaimModel extends Attributes<IdentityClaims> {}
-export interface IdentityClaimsModel extends Pick<IdentityResourceModel, 'id' | 'name' | 'displayName'> {
+export interface IdentityClaimsModel
+  extends Pick<IdentityResourceModel, 'id' | 'name' | 'displayName' | 'nonEditable'> {
   claims: Array<Pick<IdentityClaimModel, 'id' | 'type'>>;
 }
 export interface NewIdentityClaimInput extends Omit<CreationAttributes<IdentityClaims>, 'id' | 'identityResourceId'> {}
 
 export interface IdentityPropertyModel extends Attributes<IdentityProperties> {}
-export interface IdentityPropertiesModel extends Pick<IdentityResourceModel, 'id' | 'name' | 'displayName'> {
+export interface IdentityPropertiesModel
+  extends Pick<IdentityResourceModel, 'id' | 'name' | 'displayName' | 'nonEditable'> {
   properties: Array<Pick<IdentityPropertyModel, 'id' | 'key' | 'value'>>;
 }
 export interface NewIdentityPropertyInput
