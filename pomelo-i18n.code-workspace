@@ -47,7 +47,7 @@
     "typescript.updateImportsOnFileMove.enabled": "always",
     // 自动修复
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": false
+      "source.fixAll.eslint": "never"
     },
     "i18n-ally.fullReloadOnChanged": true,
     "i18n-ally.keystyle": "nested",

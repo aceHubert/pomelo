@@ -1,0 +1,18 @@
+{
+  "unauthorized": "拒绝访问，您没有访问权限！",
+  "forbidden_field": "拒绝访问，您没有访问字段\"{field}\"的值！",
+  "forbidden_capability": "拒绝访问，您没有\"{requiredCapability}\"权限！",
+  "forbidden_role": "拒绝访问，需要\"{requiredRole}\"角色权限！",
+  "forbidden": "拒绝访问，您没有访问权限！",
+  "invalid_token": "无效的token！",
+  "no_such_table": "表不在在！",
+  "file": {
+    "limit_part_count": "超出参数数量限制！",
+    "limit_file_size": "文件超出上传大小限制！",
+    "limit_file_count": "文件超出上传数量限制！",
+    "limit_field_key": "上传字段key超长！",
+    "limit_field_value": "上传字段值超长！",
+    "limit_field_count": "超出上传个数限制！",
+    "limit_unexpected_field": "未知上传字段！"
+  }
+}

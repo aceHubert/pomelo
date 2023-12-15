@@ -35,6 +35,6 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   // 自动修复
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": false
+    "source.fixAll.eslint": "never"
   }
 }
