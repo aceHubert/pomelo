@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { v4 as uuid } from 'uuid';
-import { HttpStatus, Inject, Injectable, Logger, UnauthorizedException, OnModuleInit } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { JWKS } from 'jose';
 import { Client, Issuer, custom, TokenSet, IdTokenClaims } from 'openid-client';
@@ -13,7 +13,7 @@ import { OidcStrategy } from './oidc.strategy';
 import { OIDC_MODULE_OPTIONS, SESSION_STATE_COOKIE } from './oidc.constants';
 
 @Injectable()
-export class OidcService implements OnModuleInit {
+export class OidcService {
   logger = new Logger(OidcService.name, { timestamp: true });
   isMultitenant = false;
   strategy: any;
@@ -34,11 +34,11 @@ export class OidcService implements OnModuleInit {
     this.isMultitenant = !!this.options.issuerOrigin;
   }
 
-  async onModuleInit() {
-    if (!this.isMultitenant) {
-      this.strategy = await this.createStrategy();
-    }
-  }
+  // async onModuleInit() {
+  //   if (!this.isMultitenant) {
+  //     this.strategy = await this.createStrategy();
+  //   }
+  // }
 
   async createStrategy(tenantId?: string, channelType?: ChannelType) {
     let strategy;
@@ -141,6 +141,12 @@ export class OidcService implements OnModuleInit {
           this.strategy ||
           this.idpInfos[this.getIdpInfosKey(tenantId, channelType)]?.strategy ||
           (await this.createStrategy(tenantId, channelType));
+
+        // cache strategy in non-multitenant mode
+        if (this.isMultitenant && !this.strategy) {
+          this.strategy = strategy;
+        }
+
         redirectUrl = Buffer.from(
           JSON.stringify({ redirect_url: `${prefix}${redirectUrl}`, loginpopup: loginpopup }),
           'utf-8',
