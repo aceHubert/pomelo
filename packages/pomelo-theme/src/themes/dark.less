@@ -152,6 +152,17 @@
 @gold-9: mix(color(~`colorPalette('@{gold-base}', 3) `), @component-background, 97%);
 @gold-10: mix(color(~`colorPalette('@{gold-base}', 2) `), @component-background, 98%);
 
+@grey-1: mix(color(~`colorPalette('@{grey-base}', 8) `), @component-background, 15%);
+@grey-2: mix(color(~`colorPalette('@{grey-base}', 7) `), @component-background, 25%);
+@grey-3: mix(@grey-base, @component-background, 30%);
+@grey-4: mix(@grey-base, @component-background, 45%);
+@grey-5: mix(@grey-base, @component-background, 65%);
+@grey-6: mix(@grey-base, @component-background, 85%);
+@grey-7: mix(color(~`colorPalette('@{grey-base}', 5) `), @component-background, 90%);
+@grey-8: mix(color(~`colorPalette('@{grey-base}', 4) `), @component-background, 95%);
+@grey-9: mix(color(~`colorPalette('@{grey-base}', 3) `), @component-background, 97%);
+@grey-10: mix(color(~`colorPalette('@{grey-base}', 2) `), @component-background, 98%);
+
 // Color used by default to control hover and active backgrounds and for
 // alert info backgrounds.
 @primary-1: mix(color(~`colorPalette('@{primary-color}', 8) `), @component-background, 15%);
@@ -177,11 +188,6 @@
 @text-color-secondary: fade(@base-color, 65%); // 次文本色
 @text-color-disabled: fade(@base-color, 45%); // 失效色
 @text-color-inverse: @black; // 反色
-
-// Link
-@link-color: @blue-7;
-@link-hover-color: @blue-6; // hover
-@link-active-color: @blue-8; // active
 
 // Border color
 @border-color-base: #434343; // base border outline a component

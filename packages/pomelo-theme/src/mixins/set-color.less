@@ -1,29 +1,29 @@
 
 // set color
 
-// set hover/active/focus color 
+// set hover/active/focus color
 // for button and a element or class with "as-btn" or "as-link"
-.set-color-modifier(@key, @value, @deep: false, 
+.set-color-modifier(@key, @value, @deep: false,
   @hover-index: 5, // hover color index in color palette, 6 is current @value, default is 5
   @active-index : 7, // active color index in color palette, 6 is current @value, default is 7
   @focus-index : 7, // focus color index in color palette, 6 is current @value, default is 7
-  @light-text-color: #000, // btn hover/active/focus text color in light color background
-  @dark-text-color: #fff // btn hover/active/focus text color in dark color background
+  @light-bg-text-color: #000, // btn hover/active/focus text color in light color background
+  @dark-bg-text-color: #fff // btn hover/active/focus text color in dark color background
 ){
   // element a color
   // or element button background-color
   @hover-color: color(~`colorPalette('@{value}', '@{hover-index}')`);
   @active-color: color(~`colorPalette('@{value}', '@{active-index}')`);
   @focus-color: color(~`colorPalette('@{value}', '@{focus-index}')`);
- 
+
   // element button or class with "as-btn"
   // have inverse color and caret-color in hover/active/focus
   // have background-color and border-color in hover/active/focus
   button, .as-btn{
     @el-selector: if(not (@deep = false), e('.@{key}.@{deep}'), e('.@{key}'));
-    @hover-text-color: if(lightness(@hover-color)> 50, @light-text-color, @dark-text-color);
-    @active-text-color: if(lightness(@active-color)> 50, @light-text-color, @dark-text-color);
-    @focus-text-color: if(lightness(@focus-color)> 50, @light-text-color, @dark-text-color);
+    @hover-text-color: if(lightness(@hover-color)> 50, @light-bg-text-color, @dark-bg-text-color);
+    @active-text-color: if(lightness(@active-color)> 50, @light-bg-text-color, @dark-bg-text-color);
+    @focus-text-color: if(lightness(@focus-color)> 50, @light-bg-text-color, @dark-bg-text-color);
     &@{el-selector}{
       &:hover{
         color:  @hover-text-color;
@@ -48,21 +48,21 @@
     }
   }
 
-  // element a or class with "as-link" 
+  // element a or class with "as-link"
   // have color and caret-color in hover/active/focus
-  a, .as-link{ 
+  a, .as-link{
     @el-selector: if(not (@deep = false), e('.@{key}--text.text--@{deep}'), e('.@{key}--text'));
     &@{el-selector}{
       &:hover{
         color: @hover-color;
         caret-color: @hover-color;
       }
-  
+
       &:active{
         color: @active-color;
         caret-color: @active-color;
       }
-  
+
       &:focus{
         color: @focus-color;
         caret-color: @focus-color;
@@ -106,7 +106,7 @@
 // .hover\:.info--text:hover{
 //   color: #f5222d; // color palette 5
 //   caret-color: #f5222d;
-// }  
+// }
 
 // -- example 3 --
 // .set-color('info', #f5222d, 'darken-1')
@@ -151,7 +151,7 @@
     .focus\:@{key}:focus
     .disabled\:@{key}:disabled{
       background-color: @value;
-      border-color: @value;      
+      border-color: @value;
     }
 
     .@{key}--text,
@@ -175,7 +175,7 @@
     .focus\:@{key}-@{deep}:focus,
     .disabled\:@{key}-@{deep}:disabled{
       background-color: @value;
-      border-color: @value;      
+      border-color: @value;
     }
 
     .@{key}--text.text--@{deep},
@@ -184,7 +184,7 @@
     .focus\:@{key}-@{deep}--text:focus,
     .disabled\:@{key}-@{deep}--text:disabled{
       color: @value;
-      caret-color: @value;     
+      caret-color: @value;
     }
 
     & when(@modifier = true){
