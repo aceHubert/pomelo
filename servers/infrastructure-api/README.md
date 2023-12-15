@@ -1,4 +1,4 @@
-# @ace-pomelo/core-server
+# @ace-pomelo/infrastructure-api
 > Pomelo Core RESTful API Server
 > GraphQL Support
 

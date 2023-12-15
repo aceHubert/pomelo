@@ -50,7 +50,12 @@ async function bootstrap() {
   // swagger
   if (isSwaggerDebug) {
     const api = new DocumentBuilder()
-      .setTitle(`${packageName?.replace('@', '').replace('/', ' ') || 'ace-pomelo core-server'} APIs`)
+      .setTitle(
+        packageName
+          ?.replace('@', '')
+          .replace('/', ' ')
+          .replace(/apis?$/, 'APIs') || 'ace-pomelo infrastructure  APIs',
+      )
       .setDescription(
         `The RESTful API documentation.<br/>graphql support: <a href="${graphqlPath}" target="_blank">Documentation</a>`,
       )
@@ -70,7 +75,7 @@ async function bootstrap() {
     SwaggerModule.setup(swaggerPath, app, document);
   }
 
-  setupSession(app, packageName?.replace('@', '').replace('/', ':') || 'ace-pomelo:core-server');
+  setupSession(app, packageName?.replace('@', '').replace('/', ':') || 'ace-pomelo:infrastructure-api');
 
   await app.listen(port, host);
   logger.log(`Application is running on: ${await app.getUrl()}`);

@@ -1,6 +1,6 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "servers/core-server/src",
+  "sourceRoot": "servers/identity-server/src",
   "projects": {
     "identity-server": {
       "type": "application",
@@ -9,7 +9,7 @@
       "sourceRoot": "servers/identity-server",
       "compilerOptions": {
         "webpack": true,
-        "webpackConfigPath": "servers/core-server/webpack-hmr.config.js",
+        "webpackConfigPath": "servers/identity-server/webpack-hmr.config.js",
         "tsConfigPath": "servers/identity-server/tsconfig.json",
         "assets": ["package.json", "README.md", ".env", ".env.*"],
         "deleteOutDir": true,
@@ -26,15 +26,46 @@
         ]
       }
     },
-    "core-server": {
+    "identity-api": {
       "type": "application",
-      "root": "servers/core-server",
+      "root": "servers/identity-api",
       "entryFile": "src/main",
-      "sourceRoot": "servers/core-server",
+      "sourceRoot": "servers/identity-api",
       "compilerOptions": {
         "webpack": true,
-        "webpackConfigPath": "servers/core-server/webpack-hmr.config.js",
-        "tsConfigPath": "servers/core-server/tsconfig.json",
+        "webpackConfigPath": "servers/identity-api/webpack-hmr.config.js",
+        "tsConfigPath": "servers/identity-api/tsconfig.json",
+        "assets": ["package.json", "README.md", ".env", ".env.*"],
+        "deleteOutDir": true,
+        "plugins": [
+          {
+            "name": "@nestjs/swagger",
+            "options": {
+              "dtoFileNameSuffix": [".dto.ts", ".resp.ts"],
+              "controllerKeyOfComment": "summary",
+              "classValidatorShim": true,
+              "introspectComments": true
+            }
+          },
+          {
+            "name": "@nestjs/graphql",
+            "options": {
+              "typeFileNameSuffix": [".input.ts", ".args.ts", ".model.ts"],
+              "introspectComments": true
+            }
+          }
+        ]
+      }
+    },
+    "infrastructure-api": {
+      "type": "application",
+      "root": "servers/infrastructure-api",
+      "entryFile": "src/main",
+      "sourceRoot": "servers/infrastructure-api",
+      "compilerOptions": {
+        "webpack": true,
+        "webpackConfigPath": "servers/infrastructure-api/webpack-hmr.config.js",
+        "tsConfigPath": "servers/infrastructure-api/tsconfig.json",
         "assets": ["package.json", "README.md", ".env", ".env.*"],
         "deleteOutDir": true,
         "plugins": [

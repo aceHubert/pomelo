@@ -2,7 +2,7 @@ FROM swr.cn-east-3.myhuaweicloud.com/lejian-system/node:16.14.0-alpine AS builde
 ADD . /app
 WORKDIR /app
 # 添加ARG参数，可在docker build时通过 --build-arg BUILD_OPTION="xxx" 传入代码编译命令
-ARG BUILD_OPTION="core-server"
+ARG BUILD_OPTION="infrastructure-api"
 # 编译 Nodejs 文件
 RUN set -ex && pwd && ls && yarn install --mode=skip-build && yarn build:${BUILD_OPTION} && ls
 
@@ -17,7 +17,7 @@ COPY --from=builder /app/.yarnrc.yml /app/
 WORKDIR /app
 ENV NODE_ENV=production
 # 安装 Nodejs 运行时文件
-RUN yarn workspaces focus --production @ace-pomelo/core-server
+RUN yarn workspaces focus --production @ace-pomelo/infrastructure-api
 
 FROM swr.cn-east-3.myhuaweicloud.com/lejian-system/node:16.0.0-alpine3.13
 # copy content file
@@ -42,4 +42,4 @@ RUN npm install -g pm2
 
 EXPOSE 3000
 CMD ["pm2", "start", "dist/main.js", "--cwd", "server", "--no-daemon"]
-# CMD ["yarn", "workspace", "@ace-pomelo/core-server", "start:prod"]
+# CMD ["yarn", "workspace", "@ace-pomelo/infrastructure-api", "start:prod"]

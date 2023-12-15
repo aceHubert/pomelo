@@ -1,5 +1,5 @@
 {
-  "name": "@ace-pomelo/core-server",
+  "name": "@ace-pomelo/infrastructure-api",
   "version": "1.0.0",
   "description": "core server for pomelo",
   "author": "Hubert<yi.xiang@live.cn>",

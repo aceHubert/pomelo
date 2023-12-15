@@ -50,7 +50,12 @@ async function bootstrap() {
   // swagger
   if (isSwaggerDebug) {
     const api = new DocumentBuilder()
-      .setTitle(packageName?.replace('@', '').replace('/', ' ').replace(/api$/, 'APIs') || 'ace-pomelo identity  APIs')
+      .setTitle(
+        packageName
+          ?.replace('@', '')
+          .replace('/', ' ')
+          .replace(/apis?$/, 'APIs') || 'ace-pomelo identity  APIs',
+      )
       .setDescription(
         `The RESTful API documentation.<br/>graphql support: <a href="${graphqlPath}" target="_blank">Documentation</a>`,
       )

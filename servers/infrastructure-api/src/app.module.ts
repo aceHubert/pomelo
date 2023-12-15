@@ -70,7 +70,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const contentPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/core-server');
+        const contentPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/infrastructure-api');
         if (!fs.existsSync(contentPath)) {
           fs.mkdirSync(contentPath, { recursive: true });
         }
