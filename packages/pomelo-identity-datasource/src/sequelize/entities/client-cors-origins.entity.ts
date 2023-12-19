@@ -5,7 +5,10 @@ import {
 } from '../../entities/client-cors-origins.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ClientCorsOrigins extends Model<ClientCorsOriginsAttributes, ClientCorsOriginsCreationAttributes> {
+export default class ClientCorsOrigins extends Model<
+  ClientCorsOriginsAttributes,
+  Omit<ClientCorsOriginsCreationAttributes, 'id'>
+> {
   public id!: number;
   public clientId!: number;
   public origin!: string;

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Order, Attributes, Op, Includeable } from 'sequelize';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import { default as ApiResources } from '../entities/api-resources.entity';
 import { default as ApiScopes } from '../entities/api-scopes.entity';
 import {
@@ -173,7 +174,7 @@ export class ApiResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (exists) throw new Error('Api resource has already exists');
+    if (exists) throw new ValidationError('Api resource has already exists');
 
     return this.models.ApiResources.create(input).then((api) => api.toJSON<ApiResourceModel>());
   }
@@ -284,7 +285,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Claim has already exists');
+      if (exists) throw new ValidationError('Claim has already exists');
 
       return this.models.ApiClaims.create({
         ...input,
@@ -486,7 +487,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Scope has already exists');
+      if (exists) throw new ValidationError('Scope has already exists');
 
       return this.models.ApiScopes.create({
         ...input,
@@ -607,7 +608,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Sclpe claim has already exists');
+      if (exists) throw new ValidationError('Sclpe claim has already exists');
 
       return this.models.ApiScopeClaims.create({
         ...input,
@@ -782,7 +783,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Property has already exists.');
+      if (exists) throw new ValidationError('Property has already exists.');
 
       return this.models.ApiProperties.create({
         ...input,

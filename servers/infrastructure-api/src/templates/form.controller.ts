@@ -26,8 +26,8 @@ import {
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
-  Taxonomy,
-  TemplateType,
+  TemplatePresetType,
+  TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
@@ -69,14 +69,20 @@ export class FormTemplateController extends BaseController {
       {
         ...restQuery,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
       },
-      TemplateType.Form,
+      TemplatePresetType.Form,
     );
     return this.success({
       data: result,
@@ -108,7 +114,7 @@ export class FormTemplateController extends BaseController {
   ) {
     const result = await this.templateDataSource.get(
       id,
-      TemplateType.Form,
+      TemplatePresetType.Form,
       ['id', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
@@ -146,14 +152,20 @@ export class FormTemplateController extends BaseController {
       {
         ...restQuery,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
-      TemplateType.Form,
+      TemplatePresetType.Form,
       ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
       requestUser,
     );
@@ -176,7 +188,7 @@ export class FormTemplateController extends BaseController {
   async create(@Body() input: NewFormTemplateDto, @User() requestUser: RequestUser) {
     const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
       input,
-      TemplateType.Form,
+      TemplatePresetType.Form,
       requestUser,
     );
     return this.success({

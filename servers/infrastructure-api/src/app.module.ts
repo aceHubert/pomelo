@@ -30,13 +30,14 @@ import { configuration } from './common/utils/configuration.utils';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
 import { MessageModule } from './messages/message.module';
-import { DbInitModule } from './db-init/db-init.module';
+import { DataInitModule } from './data-init/data-init.module';
 import { OptionModule } from './options/option.module';
 import { TermTaxonomyModule } from './term-taxonomy/term-taxonomy.module';
 import { TemplateModule } from './templates/template.module';
 import { UserModule } from './users/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { envFilePaths } from './db.sync';
 
 // extends
 // eslint-disable-next-line import/order
@@ -51,11 +52,7 @@ const logger = new Logger('AppModule', { timestamp: true });
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath:
-        process.env.ENV_FILE ??
-        (process.env.NODE_ENV === 'production'
-          ? ['.env.production.local', '.env.production', '.env']
-          : ['.env.development.local', '.env.development']),
+      envFilePath: envFilePaths,
       load: [configuration(process.cwd())],
     }),
     ServeStaticModule.forRootAsync({
@@ -110,7 +107,6 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService, I18nService],
     }),
-    DbInitModule, // init database
     OidcModule.forRootAsync({
       isGlobal: true,
       disableController: true,
@@ -226,6 +222,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService, OidcService],
     }),
+    DataInitModule, // init database datas
     MessageModule.forRoot({
       isGlobal: true,
       // TODO: PubSub 是使用内存管理，生产环境需要更换

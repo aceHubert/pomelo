@@ -7,7 +7,7 @@ import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
 export default class ClientIdPRestrictions extends Model<
   ClientIdPRestrictionsAttributes,
-  ClientIdPRestrictionsCreationAttributes
+  Omit<ClientIdPRestrictionsCreationAttributes, 'id'>
 > {
   public id!: number;
   public clientId!: number;

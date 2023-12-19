@@ -1,12 +1,16 @@
-import { Model, DataTypes } from 'sequelize';
-import { OptionAttributes, OptionCreationAttributes, OptionAutoload } from '../../entities/options.entity';
+import { Model, Optional, DataTypes } from 'sequelize';
+import { OptionAttributes, OptionCreationAttributes } from '../../entities/options.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { OptionAutoload } from '../interfaces/option.interface';
 
-export default class Options extends Model<OptionAttributes, OptionCreationAttributes> {
+export default class Options extends Model<
+  OptionAttributes,
+  Optional<Omit<OptionCreationAttributes, 'id'>, 'autoload'>
+> {
   public id!: number;
   public optionName!: string;
   public optionValue!: string;
-  public autoload!: OptionAutoload;
+  public autoload!: string;
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
@@ -32,7 +36,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       autoload: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: 'yes',
+        defaultValue: OptionAutoload.Yes,
         comment: 'Autoload ("yes" or "no", default: "yes")',
       },
     },

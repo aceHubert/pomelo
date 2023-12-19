@@ -2,14 +2,14 @@ import { Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { RequestUser } from '@ace-pomelo/shared-server';
-import { UserCapability } from '../../utils/user-capability.util';
+import { UserCapability } from '../helpers/user-capability';
 import { LinkModel, PagedLinkModel, PagedLinkArgs, NewLinkInput, UpdateLinkInput } from '../interfaces/link.interface';
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class LinkDataSource extends BaseDataSource {
   constructor(protected readonly moduleRef: ModuleRef) {
-    super(moduleRef);
+    super();
   }
 
   get(id: number, fields: string[]): Promise<LinkModel | undefined> {

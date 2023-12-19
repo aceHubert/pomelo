@@ -1,10 +1,10 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { UserAttributes, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { UserModel, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'User model' })
-export class User implements Omit<UserAttributes, 'loginPwd'> {
+export class User implements UserModel {
   @Field((type) => ID, { description: 'User id' })
   id!: number;
 

@@ -237,10 +237,7 @@ export default Form.create({})(
                     style="width:268px"
                   ></Input>
                 </Form.Item>
-                <Form.Item
-                  label={i18n.tv('page_api_secrets.generate.form.type_label', '类型')}
-                  help={i18n.tv('page_api_secrets.generate.form.type_label_help', '密匙的类型')}
-                >
+                <Form.Item label={i18n.tv('page_api_secrets.generate.form.type_label', '类型')}>
                   <Select
                     v-decorator={[
                       'type',
@@ -259,10 +256,7 @@ export default Form.create({})(
                     options={presetTypeOptions.value}
                   ></Select>
                 </Form.Item>
-                <Form.Item
-                  label={i18n.tv('page_api_secrets.generate.form.expires_at_label', '过期时间')}
-                  help={i18n.tv('page_api_secrets.generate.form.expires_at_help', '密匙的过期时间')}
-                >
+                <Form.Item label={i18n.tv('page_api_secrets.generate.form.expires_at_label', '过期时间')}>
                   <Select
                     v-decorator={[
                       'expiresAt',

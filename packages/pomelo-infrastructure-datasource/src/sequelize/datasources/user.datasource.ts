@@ -6,11 +6,11 @@ import { WhereOptions, Attributes, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ForbiddenError, ValidationError, RequestUser } from '@ace-pomelo/shared-server';
-import { UserStatus } from '../../entities';
-import { UserCapability, UserRole } from '../../utils/user-capability.util';
-import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
+import { UserCapability } from '../helpers/user-capability';
+import { UserMetaPresetKeys } from '../helpers/user-preset-keys';
 import { default as User } from '../entities/users.entity';
 import {
+  UserStatus,
   UserModel,
   UserWithRoleModel,
   UserMetaModel,
@@ -20,6 +20,7 @@ import {
   NewUserMetaInput,
   UpdateUserInput,
 } from '../interfaces/user.interface';
+import { OptionPresetKeys } from '../helpers/option-preset-keys';
 import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
@@ -331,7 +332,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         {
           userId: user.id,
           metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
-          metaValue: model.capabilities || UserRole.Subscriber,
+          metaValue: model.capabilities,
         },
       ];
       // 添加元数据
@@ -718,7 +719,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           isPhoneNumber(loginName, region) && { mobile: loginName },
         ].filter(Boolean) as any,
         loginPwd: md5(loginPwd),
-        status: UserStatus.Enabled,
+        status: true,
       },
     });
     if (!user) return false;

@@ -1,7 +1,19 @@
-import { LinkAttributes, LinkCreationAttributes, LinkTarget, LinkVisible } from '../../entities';
+import { Attributes, CreationAttributes } from 'sequelize';
+import Links from '../entities/links.entity';
 import { PagedArgs, Paged } from './paged.interface';
 
-export interface LinkModel extends LinkAttributes {}
+/**
+ * 链接是否显示
+ */
+export enum LinkVisible {
+  Yes = 'yes',
+  No = 'no',
+}
+
+export interface LinkModel extends Attributes<Links> {
+  readonly updatedAt: Date;
+  readonly createdAt: Date;
+}
 
 export interface PagedLinkArgs extends PagedArgs {
   /**
@@ -12,20 +24,6 @@ export interface PagedLinkArgs extends PagedArgs {
 
 export interface PagedLinkModel extends Paged<LinkModel> {}
 
-export interface NewLinkInput
-  extends Pick<
-    LinkCreationAttributes,
-    'url' | 'name' | 'image' | 'target' | 'description' | 'visible' | 'rel' | 'rss'
-  > {}
+export interface NewLinkInput extends Omit<CreationAttributes<Links>, 'userId'> {}
 
-export class UpdateLinkInput {
-  url?: string;
-  name?: string;
-  image?: string;
-  target?: LinkTarget;
-  description?: string;
-  visible?: LinkVisible;
-  userId?: number;
-  rel?: string;
-  rss?: string;
-}
+export interface UpdateLinkInput extends Partial<NewLinkInput> {}

@@ -1,14 +1,25 @@
-import { OptionAttributes, OptionCreationAttributes, OptionAutoload } from '../../entities/options.entity';
+import { Attributes, CreationAttributes } from 'sequelize';
+import Options from '../entities/options.entity';
 
-export interface OptionModel extends OptionAttributes {}
+/**
+ * 配置自动加载
+ */
+export enum OptionAutoload {
+  Yes = 'yes',
+  No = 'no',
+}
+
+export interface OptionModel extends Attributes<Options> {
+  readonly autoload: OptionAutoload;
+}
 
 export interface OptionArgs {
+  /**
+   * 是否自动加载
+   */
   autoload?: OptionAutoload;
 }
 
-export interface NewOptionInput extends Pick<OptionCreationAttributes, 'optionName' | 'optionValue' | 'autoload'> {}
+export interface NewOptionInput extends CreationAttributes<Options> {}
 
-export class UpdateOptionInput {
-  optionValue?: string;
-  autoload?: OptionAutoload;
-}
+export interface UpdateOptionInput extends Pick<NewOptionInput, 'optionValue'> {}

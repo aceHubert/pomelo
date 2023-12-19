@@ -7,7 +7,7 @@ import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
 export default class IdentityProperties extends Model<
   IdentityPropertiesAttributes,
-  IdentityPropertiesCreationAttributes
+  Omit<IdentityPropertiesCreationAttributes, 'id'>
 > {
   public id!: number;
   public identityResourceId!: number;

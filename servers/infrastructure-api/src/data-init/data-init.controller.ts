@@ -3,15 +3,15 @@ import { Logger, Controller, Get, Post, Body, Request, Scope } from '@nestjs/com
 import { ApiExcludeController } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { BaseController } from '@/common/controllers/base.controller';
-import { DbInitService } from './db-init.service';
+import { DataInitService } from './data-init.service';
 import { InitArgsDto } from './dto/init-args.dto';
 
 @ApiExcludeController()
-@Controller({ path: 'api/db-init', scope: Scope.REQUEST })
-export class DbInitController extends BaseController {
-  private readonly logger = new Logger('DbInitController');
+@Controller({ path: 'api', scope: Scope.REQUEST })
+export class DataInitController extends BaseController {
+  private readonly logger = new Logger('DataInitController');
 
-  constructor(private readonly httpAdapterHost: HttpAdapterHost, private readonly dbInitService: DbInitService) {
+  constructor(private readonly httpAdapterHost: HttpAdapterHost, private readonly dbInitService: DataInitService) {
     super();
   }
 
@@ -19,10 +19,11 @@ export class DbInitController extends BaseController {
    * Has database been initialized
    */
   @Get('check')
-  async check() {
-    const result = await this.dbInitService.hasDbLockFile();
+  async check(@I18n() i18n: I18nContext) {
+    const result = this.dbInitService.hasDatasInitialed();
     return this.success({
-      dbInitRequired: !result,
+      dbInitRequired: result,
+      message: result ? await i18n.tv('db-init.controller.init_datas.required', 'Datas initializing is required!') : '',
     });
   }
 
@@ -43,18 +44,18 @@ export class DbInitController extends BaseController {
     }
 
     try {
-      await this.dbInitService.initDB({
+      await this.dbInitService.initDatas({
         ...initArgs,
         siteUrl,
       });
 
       return this.success({
-        message: await i18n.tv('db-init.controller.init_database.success', 'Initialize database successful!'),
+        message: await i18n.tv('db-init.controller.init_datas.success', 'Initialize datas successful!'),
       });
     } catch (err) {
       this.logger.error(err);
       return this.faild(
-        await i18n.tv('db-init.controller.init.fail', 'An error occurred while initializing database!'),
+        await i18n.tv('db-init.controller.init_datas.fail', 'An error occurred while initializing datas!'),
       );
     }
   }

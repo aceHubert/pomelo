@@ -5,7 +5,10 @@ import {
 } from '../../entities/client-properties.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ClientProperties extends Model<ClientPropertiesAttributes, ClientPropertiesCreationAttributes> {
+export default class ClientProperties extends Model<
+  ClientPropertiesAttributes,
+  Omit<ClientPropertiesCreationAttributes, 'id'>
+> {
   public id!: number;
   public clientId!: number;
   public key!: string;

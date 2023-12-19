@@ -5,7 +5,7 @@ import { TableAssociateFunc } from '../interfaces/table-associate-func.interface
 
 export default class ApiScopes extends Model<
   ApiScopesAttributes,
-  Optional<ApiScopesCreationAttributes, 'emphasize' | 'required' | 'showInDiscoveryDocument'>
+  Optional<Omit<ApiScopesCreationAttributes, 'id'>, 'emphasize' | 'required' | 'showInDiscoveryDocument'>
 > {
   public id!: number;
   public apiResourceId!: number;

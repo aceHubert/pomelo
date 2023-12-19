@@ -35,7 +35,7 @@ export interface PagedIdentityResourceArgs<F extends keyof IdentityResourceModel
 
 export interface PagedIdentityResource extends Paged<IdentityResourceModel> {}
 
-export interface NewIdentityResourceInput extends Omit<CreationAttributes<IdentityResources>, 'id'> {}
+export interface NewIdentityResourceInput extends CreationAttributes<IdentityResources> {}
 
 export interface UpdateIdentityResourceInput extends Partial<NewIdentityResourceInput> {}
 
@@ -44,12 +44,11 @@ export interface IdentityClaimsModel
   extends Pick<IdentityResourceModel, 'id' | 'name' | 'displayName' | 'nonEditable'> {
   claims: Array<Pick<IdentityClaimModel, 'id' | 'type'>>;
 }
-export interface NewIdentityClaimInput extends Omit<CreationAttributes<IdentityClaims>, 'id' | 'identityResourceId'> {}
+export interface NewIdentityClaimInput extends Omit<CreationAttributes<IdentityClaims>, 'identityResourceId'> {}
 
 export interface IdentityPropertyModel extends Attributes<IdentityProperties> {}
 export interface IdentityPropertiesModel
   extends Pick<IdentityResourceModel, 'id' | 'name' | 'displayName' | 'nonEditable'> {
   properties: Array<Pick<IdentityPropertyModel, 'id' | 'key' | 'value'>>;
 }
-export interface NewIdentityPropertyInput
-  extends Omit<CreationAttributes<IdentityProperties>, 'id' | 'identityResourceId'> {}
+export interface NewIdentityPropertyInput extends Omit<CreationAttributes<IdentityProperties>, 'identityResourceId'> {}

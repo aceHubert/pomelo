@@ -1,13 +1,5 @@
 import { Optional } from '../types';
 
-/**
- * 用户状态
- */
-export enum UserStatus {
-  Disabled = 0,
-  Enabled = 1,
-}
-
 export interface UserAttributes {
   id: number;
   loginName: string;
@@ -17,9 +9,9 @@ export interface UserAttributes {
   mobile: string;
   email: string;
   url: string;
-  status: UserStatus;
+  status: number;
   updatedAt: Date;
   createdAt: Date;
 }
 
-export interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'status'> {}
+export interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}

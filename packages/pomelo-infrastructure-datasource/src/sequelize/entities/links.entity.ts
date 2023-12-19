@@ -1,19 +1,20 @@
-import { Model, DataTypes } from 'sequelize';
-import { LinkAttributes, LinkCreationAttributes, LinkTarget, LinkVisible } from '../../entities/links.entity';
+import { Model, Optional, DataTypes } from 'sequelize';
+import { LinkAttributes, LinkCreationAttributes } from '../../entities/links.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { LinkVisible } from '../interfaces/link.interface';
 
 export default class Links extends Model<
   Omit<LinkAttributes, 'updatedAt' | 'createdAt'>,
-  Omit<LinkCreationAttributes, 'updatedAt' | 'createdAt'>
+  Optional<Omit<LinkCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'visible' | 'userId'>
 > {
   public id!: number;
   public url!: string;
   public name!: string;
   public image!: string;
-  public target!: LinkTarget;
+  public target!: string;
   public description!: string;
-  public visible!: LinkVisible;
+  public visible!: string;
   public userId!: number;
   public rel?: string;
   public rss?: string;
@@ -56,13 +57,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       visible: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: 'yes',
+        defaultValue: LinkVisible.Yes,
         comment: 'Visible ("yes" or "no", default: "yes")',
       },
       userId: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
-        defaultValue: 1,
+        defaultValue: 0,
         comment: 'User id',
       },
       rel: {

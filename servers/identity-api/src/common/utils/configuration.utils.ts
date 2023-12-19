@@ -144,19 +144,21 @@ export const configuration =
         subscription_path: process.env.GRAPHQL_SUBSCRIPTION_PATH,
       },
       database: {
-        connection: process.env.DATABASE_CONNECTION
-          ? process.env.DATABASE_CONNECTION
+        connection: process.env.IDENTITY_DATABASE_CONNECTION
+          ? process.env.IDENTITY_DATABASE_CONNECTION
           : {
-              database: process.env.DATABASE_NAME,
-              username: process.env.DATABASE_USERNAME,
-              password: process.env.DATABASE_PASSWORD,
-              dialect: process.env.DATABASE_DIALECT || 'mysql',
-              host: process.env.DATABASE_HOST || 'localhost',
-              port: process.env.DATABASE_PORT || 3306,
-              charset: process.env.DATABASE_CHARSET || 'utf8',
-              collate: process.env.DATABASE_COLLATE || '',
+              database: process.env.IDENTITY_DATABASE_NAME,
+              username: process.env.IDENTITY_DATABASE_USERNAME,
+              password: process.env.IDENTITY_DATABASE_PASSWORD,
+              dialect: process.env.IDENTITY_DATABASE_DIALECT || 'mysql',
+              host: process.env.IDENTITY_DATABASE_HOST || 'localhost',
+              port: process.env.IDENTITY_DATABASE_PORT || 3306,
+              define: {
+                charset: process.env.IDENTITY_DATABASE_CHARSET || 'utf8',
+                collate: process.env.IDENTITY_DATABASE_COLLATE || '',
+              },
             },
-        tablePrefix: process.env.TABLE_PREFIX,
+        tablePrefix: process.env.IDENTITY_TABLE_PREFIX,
       },
     };
 

@@ -26,8 +26,8 @@ import {
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
-  Taxonomy,
-  TemplateType,
+  TemplatePresetType,
+  TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
@@ -69,14 +69,20 @@ export class PageTemplateController extends BaseController {
       {
         ...restQuery,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
       },
-      TemplateType.Page,
+      TemplatePresetType.Page,
       ['id', 'name', 'title'],
     );
     return this.success({
@@ -94,7 +100,7 @@ export class PageTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: [String] }, 'PageAliaPathsSuccessResp'),
   })
   async getPathAlias() {
-    const result = await this.templateDataSource.getNames(TemplateType.Page);
+    const result = await this.templateDataSource.getNames(TemplatePresetType.Page);
     return this.success({
       data: result,
     });
@@ -125,7 +131,7 @@ export class PageTemplateController extends BaseController {
   ) {
     const result = await this.templateDataSource.getByName(
       name,
-      TemplateType.Page,
+      TemplatePresetType.Page,
       ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
       requestUser,
     );
@@ -172,7 +178,7 @@ export class PageTemplateController extends BaseController {
   ) {
     const result = await this.templateDataSource.get(
       id,
-      TemplateType.Page,
+      TemplatePresetType.Page,
       ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
       requestUser,
     );
@@ -210,14 +216,20 @@ export class PageTemplateController extends BaseController {
       {
         ...restQuery,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
-      TemplateType.Page,
+      TemplatePresetType.Page,
       ['id', 'name', 'title', 'author', 'status', 'createdAt'],
       requestUser,
     );
@@ -239,7 +251,7 @@ export class PageTemplateController extends BaseController {
   })
   async create(@Body() input: NewPageTemplateDto, @User() requestUser: RequestUser) {
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(input, TemplateType.Page, requestUser);
+      await this.templateDataSource.create(input, TemplatePresetType.Page, requestUser);
 
     return this.success({
       data: {

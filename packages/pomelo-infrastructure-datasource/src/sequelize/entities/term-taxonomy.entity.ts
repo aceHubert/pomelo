@@ -1,9 +1,12 @@
-import { Model, DataTypes } from 'sequelize';
+import { Model, Optional, DataTypes } from 'sequelize';
 import { TermTaxonomyAttributes, TermTaxonomyCreationAttributes } from '../../entities/term-taxonomy.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
 
-export default class TermTaxonomy extends Model<TermTaxonomyAttributes, TermTaxonomyCreationAttributes> {
+export default class TermTaxonomy extends Model<
+  TermTaxonomyAttributes,
+  Optional<Omit<TermTaxonomyCreationAttributes, 'id'>, 'parentId' | 'group' | 'count'>
+> {
   public id!: number;
   public name!: string;
   public slug!: string;

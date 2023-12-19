@@ -1,17 +1,15 @@
-import { Model, DataTypes } from 'sequelize';
-import {
-  TemplateAttributes,
-  TemplateCreationAttributes,
-  TemplateStatus,
-  TemplateType,
-  TemplateCommentStatus,
-} from '../../entities/template.entity';
+import { Model, Optional, DataTypes } from 'sequelize';
+import { TemplateAttributes, TemplateCreationAttributes } from '../../entities/template.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { TemplateStatus, TemplatePresetType, TemplateCommentStatus } from '../interfaces/template.interface';
 
 export default class Templates extends Model<
   Omit<TemplateAttributes, 'updatedAt' | 'createdAt'>,
-  Omit<TemplateCreationAttributes, 'updatedAt' | 'createdAt'>
+  Optional<
+    Omit<TemplateCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>,
+    'type' | 'status' | 'order' | 'parentId' | 'commentStatus' | 'commentCount'
+  >
 > {
   public id!: number;
   public title!: string;
@@ -19,7 +17,7 @@ export default class Templates extends Model<
   public author!: number;
   public content!: string;
   public excerpt!: string;
-  public type!: TemplateType;
+  public type!: string;
   public status!: TemplateStatus;
   public order!: number;
   public parent?: number;
@@ -68,13 +66,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       type: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: 'post',
+        defaultValue: TemplatePresetType.Post,
         comment: 'Type ("post", "page", ect...)',
       },
       status: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: 'publish',
+        defaultValue: TemplateStatus.Publish,
         comment: 'Post status ("draft", "publish", ect.... default: "publish")',
       },
       order: {
@@ -92,7 +90,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       commentStatus: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: 'closed',
+        defaultValue: TemplateCommentStatus.Closed,
         comment: 'Comment status ("open", "closed", default: "closed")',
       },
       commentCount: {

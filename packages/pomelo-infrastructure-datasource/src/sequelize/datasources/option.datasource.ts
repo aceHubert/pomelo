@@ -1,14 +1,14 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, RequestUser } from '@ace-pomelo/shared-server';
-import { UserCapability } from '../../utils/user-capability.util';
+import { UserCapability } from '../helpers/user-capability';
 import { OptionModel, OptionArgs, NewOptionInput, UpdateOptionInput } from '../interfaces/option.interface';
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class OptionDataSource extends BaseDataSource {
   constructor(protected readonly moduleRef: ModuleRef) {
-    super(moduleRef);
+    super();
   }
 
   /**

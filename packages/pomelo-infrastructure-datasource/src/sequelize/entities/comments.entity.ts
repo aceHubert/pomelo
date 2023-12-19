@@ -1,11 +1,15 @@
-import { Model, DataTypes } from 'sequelize';
-import { CommentAttributes, CommentCreationAttributes, CommentType } from '../../entities/comments.entity';
+import { Model, Optional, DataTypes } from 'sequelize';
+import { CommentAttributes, CommentCreationAttributes } from '../../entities/comments.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { CommentType } from '../interfaces/comment.interface';
 
 export default class Comments extends Model<
   Omit<CommentAttributes, 'updatedAt' | 'createdAt'>,
-  Omit<CommentCreationAttributes, 'updatedAt' | 'createdAt'>
+  Optional<
+    Omit<CommentCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>,
+    'approved' | 'edited' | 'type' | 'parentId' | 'userId'
+  >
 > {
   public id!: number;
   public templateId!: number;
@@ -79,7 +83,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       type: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        defaultValue: 'comment',
+        defaultValue: CommentType.Comment,
         comment: 'Type (for future, default: "comment")',
       },
       agent: {

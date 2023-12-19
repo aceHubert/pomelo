@@ -6,10 +6,9 @@ import {
   TermTaxonomyDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
-  Taxonomy,
-  Taxonomy as TaxonomyEnum,
   TemplateStatus,
-  TemplateType,
+  TemplatePresetType,
+  TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
@@ -33,8 +32,8 @@ export class PagedPostTemplateItemTaxonomyFieldResolver extends TaxonomyFieldRes
   constructor(termTaxonomyDataSource: TermTaxonomyDataSource) {
     super(termTaxonomyDataSource);
 
-    this.categoryDataLoader = this.createDataLoader(TaxonomyEnum.Category);
-    this.tagDataLoader = this.createDataLoader(TaxonomyEnum.Tag);
+    this.categoryDataLoader = this.createDataLoader(TermPresetTaxonomy.Category);
+    this.tagDataLoader = this.createDataLoader(TermPresetTaxonomy.Tag);
   }
 
   @ResolveField('categories', (returns) => [TermTaxonomy!], {
@@ -83,19 +82,28 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
       {
         ...restArgs,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
-          (tagId !== void 0 || tagName !== void 0) && {
-            taxonomyType: Taxonomy.Tag,
-            taxonomyId: tagId,
-            taxonomyName: tagName,
-          },
+          categoryId !== void 0
+            ? { type: TermPresetTaxonomy.Category, id: categoryId }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+          tagId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                id: tagId,
+              }
+            : tagName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                name: tagName,
+              }
+            : false,
         ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
       },
-      TemplateType.Post,
+      TemplatePresetType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PostTemplateOption),
     );
   }
@@ -109,7 +117,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
   ): Promise<PostTemplate | undefined> {
     return this.templateDataSource.get(
       id,
-      TemplateType.Post,
+      TemplatePresetType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PostTemplate),
       requestUser,
     );
@@ -124,7 +132,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
   ): Promise<PostTemplate | undefined> {
     return this.templateDataSource.getByName(
       name,
-      TemplateType.Post,
+      TemplatePresetType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PostTemplate),
       requestUser,
     );
@@ -138,7 +146,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     return this.termTaxonomyDataSource.getListByObjectId(
       {
         objectId,
-        taxonomy: TaxonomyEnum.Category,
+        taxonomy: TermPresetTaxonomy.Category,
       },
       this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
     );
@@ -152,7 +160,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     return this.termTaxonomyDataSource.getListByObjectId(
       {
         objectId,
-        taxonomy: TaxonomyEnum.Tag,
+        taxonomy: TermPresetTaxonomy.Tag,
       },
       this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
     );
@@ -170,19 +178,28 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
       {
         ...restArgs,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
-          (tagId !== void 0 || tagName !== void 0) && {
-            taxonomyType: Taxonomy.Tag,
-            taxonomyId: tagId,
-            taxonomyName: tagName,
-          },
+          categoryId !== void 0
+            ? { type: TermPresetTaxonomy.Category, id: categoryId }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+          tagId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                id: tagId,
+              }
+            : tagName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                name: tagName,
+              }
+            : false,
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
-      TemplateType.Post,
+      TemplatePresetType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PagedPostTemplate.rows.fieldsByTypeName.PagedPostTemplateItem),
       requestUser,
     );
@@ -200,7 +217,11 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     @User() requestUser: RequestUser,
   ): Promise<PostTemplate> {
     const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create({ ...model, excerpt: model.excerpt || '' }, TemplateType.Post, requestUser);
+      await this.templateDataSource.create(
+        { ...model, excerpt: model.excerpt || '' },
+        TemplatePresetType.Post,
+        requestUser,
+      );
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {

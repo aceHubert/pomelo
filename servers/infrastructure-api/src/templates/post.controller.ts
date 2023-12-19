@@ -26,8 +26,8 @@ import {
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
-  Taxonomy,
-  TemplateType,
+  TemplatePresetType,
+  TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
@@ -69,19 +69,28 @@ export class PostTemplateController extends BaseController {
       {
         ...restQuery,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
-          (tagId !== void 0 || tagName !== void 0) && {
-            taxonomyType: Taxonomy.Tag,
-            taxonomyId: tagId,
-            taxonomyName: tagName,
-          },
+          categoryId !== void 0
+            ? { type: TermPresetTaxonomy.Category, id: categoryId }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+          tagId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                id: tagId,
+              }
+            : tagName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                name: tagName,
+              }
+            : false,
         ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
       },
-      TemplateType.Post,
+      TemplatePresetType.Post,
       ['id', 'name', 'title'],
     );
     return this.success({
@@ -114,7 +123,7 @@ export class PostTemplateController extends BaseController {
   ) {
     const result = await this.templateDataSource.getByName(
       name,
-      TemplateType.Post,
+      TemplatePresetType.Post,
       [
         'id',
         'name',
@@ -173,7 +182,7 @@ export class PostTemplateController extends BaseController {
   ) {
     const result = await this.templateDataSource.get(
       id,
-      TemplateType.Post,
+      TemplatePresetType.Post,
       [
         'id',
         'name',
@@ -228,19 +237,28 @@ export class PostTemplateController extends BaseController {
       {
         ...restQuery,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
-          (tagId !== void 0 || tagName !== void 0) && {
-            taxonomyType: Taxonomy.Tag,
-            taxonomyId: tagId,
-            taxonomyName: tagName,
-          },
+          categoryId !== void 0
+            ? { type: TermPresetTaxonomy.Category, id: categoryId }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+          tagId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                id: tagId,
+              }
+            : tagName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                name: tagName,
+              }
+            : false,
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
-      TemplateType.Post,
+      TemplatePresetType.Post,
       ['id', 'name', 'title', 'author', 'excerpt', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
       requestUser,
     );
@@ -262,7 +280,11 @@ export class PostTemplateController extends BaseController {
   })
   async create(@Body() input: NewPostTemplateDto, @User() requestUser: RequestUser) {
     const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create({ ...input, excerpt: input.excerpt || '' }, TemplateType.Post, requestUser);
+      await this.templateDataSource.create(
+        { ...input, excerpt: input.excerpt || '' },
+        TemplatePresetType.Post,
+        requestUser,
+      );
 
     return this.success({
       data: {

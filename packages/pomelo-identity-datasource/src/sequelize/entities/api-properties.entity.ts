@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import { ApiPropertiesAttributes, ApiPropertiesCreationAttributes } from '../../entities/api-properties.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ApiProperties extends Model<ApiPropertiesAttributes, ApiPropertiesCreationAttributes> {
+export default class ApiProperties extends Model<ApiPropertiesAttributes, Omit<ApiPropertiesCreationAttributes, 'id'>> {
   public id!: number;
   public apiResourceId!: number;
   public key!: string;

@@ -1,9 +1,9 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { UserAttributes, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { UserModel, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { PagedResponse } from '@/common/controllers/resp/paged.resp';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 
-export class UserModelResp implements Omit<UserAttributes, 'loginPwd'> {
+export class UserModelResp implements UserModel {
   /**
    * User id
    */

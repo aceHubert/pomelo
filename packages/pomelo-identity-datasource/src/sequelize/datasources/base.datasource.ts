@@ -6,10 +6,10 @@ import { IdentityOptions } from '../../interfaces/identity-options.interface';
 import { IDENTITY_OPTIONS } from '../../constants';
 
 export abstract class BaseDataSource implements OnModuleInit {
+  protected readonly logger!: Logger;
   protected readonly moduleRef?: ModuleRef;
   protected identityService?: IdentityService;
   protected identityOptions?: IdentityOptions;
-  protected readonly logger!: Logger;
 
   constructor() {
     this.logger = new Logger(this.constructor.name, { timestamp: true });

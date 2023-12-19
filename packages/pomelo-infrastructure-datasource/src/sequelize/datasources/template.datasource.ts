@@ -1,12 +1,14 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Attributes, Includeable, Transaction, Op, Order } from 'sequelize';
-import { UserInputError, ValidationError, ForbiddenError, RequestUser } from '@ace-pomelo/shared-server';
-import { Taxonomy, TemplateType, TemplateStatus, TemplateOperateStatus } from '../../entities';
-import { UserCapability } from '../../utils/user-capability.util';
-import { OptionPresetKeys, TemplateMetaPresetKeys } from '../../utils/preset-keys.util';
+import { UserInputError, ForbiddenError, RequestUser } from '@ace-pomelo/shared-server';
+import { UserCapability } from '../helpers/user-capability';
+import { OptionPresetKeys } from '../helpers/option-preset-keys';
+import { TermPresetTaxonomy } from '../helpers/term-preset-taxonomy.enum';
 import { default as Templates } from '../entities/templates.entity';
 import {
+  TemplateStatus,
+  TemplatePresetType,
   TemplateModel,
   TemplateOptionArgs,
   TemplateOptionModel,
@@ -27,6 +29,26 @@ import {
   UpdatePostTemplateInput,
 } from '../interfaces/template.interface';
 import { MetaDataSource } from './meta.datasource';
+
+/**
+ * 操作状态（仅内部使用）
+ */
+const TemplateOperateStatus = Object.freeze([TemplateStatus.AutoDraft, TemplateStatus.Inherit]);
+
+/**
+ * 操作类型（仅内部使用）
+ */
+// const TemplateOperateType = Object.freeze([TemplatePresetType.Revision]);
+
+/**
+ * 元数据key (仅内部使用)
+ */
+enum TemplateMetaPresetKeys {
+  /** 在移入垃圾箱之前的状态 */
+  TrashStatus = '$trash_status',
+  /** 在移入垃圾箱的时间 */
+  TrashTime = '$trash_time',
+}
 
 @Injectable()
 export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTemplateMetaInput> {
@@ -72,22 +94,22 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   ) {
     // 是否有编辑权限
     const editCapability =
-      template.type === TemplateType.Post
+      template.type === TemplatePresetType.Post
         ? UserCapability.EditPosts
-        : template.type === TemplateType.Page
+        : template.type === TemplatePresetType.Page
         ? UserCapability.EditPages
-        : template.type === TemplateType.Form
+        : template.type === TemplatePresetType.Form
         ? UserCapability.EditForms
         : null;
     editCapability && (await this.hasCapability(editCapability, requestUser, true));
 
     // 是否有编辑已发布的文章的权限
     const publishCapability =
-      template.type === TemplateType.Post
+      template.type === TemplatePresetType.Post
         ? UserCapability.EditPublishedPosts
-        : template.type === TemplateType.Page
+        : template.type === TemplatePresetType.Page
         ? UserCapability.EditPublishedPages
-        : template.type === TemplateType.Form
+        : template.type === TemplatePresetType.Form
         ? UserCapability.EditPublishedForms
         : null;
     if (template.status === TemplateStatus.Publish && publishCapability) {
@@ -96,11 +118,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     // 是否有编辑别人文章的权限
     const editOthersCapability =
-      template.type === TemplateType.Post
+      template.type === TemplatePresetType.Post
         ? UserCapability.EditOthersPosts
-        : template.type === TemplateType.Page
+        : template.type === TemplatePresetType.Page
         ? UserCapability.EditOthersPages
-        : template.type === TemplateType.Form
+        : template.type === TemplatePresetType.Form
         ? UserCapability.EditOthersForms
         : null;
     if (template.author !== Number(requestUser.sub) && editOthersCapability) {
@@ -108,11 +130,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
       // 是否有编辑私有的(别人)文章权限
       const editPrivateCapability =
-        template.type === TemplateType.Post
+        template.type === TemplatePresetType.Post
           ? UserCapability.EditPrivatePosts
-          : template.type === TemplateType.Page
+          : template.type === TemplatePresetType.Page
           ? UserCapability.EditPrivatePages
-          : template.type === TemplateType.Form
+          : template.type === TemplatePresetType.Form
           ? UserCapability.EditPrivateForms
           : null;
       if (template.status === TemplateStatus.Private && editPrivateCapability) {
@@ -133,22 +155,22 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   ) {
     // 是否有删除文章的权限
     const deleteCapability =
-      template.type === TemplateType.Post
+      template.type === TemplatePresetType.Post
         ? UserCapability.DeletePosts
-        : template.type === TemplateType.Page
+        : template.type === TemplatePresetType.Page
         ? UserCapability.DeletePages
-        : template.type === TemplateType.Form
+        : template.type === TemplatePresetType.Form
         ? UserCapability.DeleteForms
         : null;
     deleteCapability && (await this.hasCapability(deleteCapability, requestUser, true));
 
     // 是否有删除已发布的文章的权限
     const deletePublishedCapability =
-      template.type === TemplateType.Post
+      template.type === TemplatePresetType.Post
         ? UserCapability.DeletePublishedPosts
-        : template.type === TemplateType.Page
+        : template.type === TemplatePresetType.Page
         ? UserCapability.DeletePublishedPages
-        : template.type === TemplateType.Form
+        : template.type === TemplatePresetType.Form
         ? UserCapability.DeletePublishedForms
         : null;
     if (template.status === TemplateStatus.Publish && deletePublishedCapability) {
@@ -157,11 +179,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     // 是否有删除别人文章的权限
     const deleteOthersCapability =
-      template.type === TemplateType.Post
+      template.type === TemplatePresetType.Post
         ? UserCapability.DeleteOthersPosts
-        : template.type === TemplateType.Page
+        : template.type === TemplatePresetType.Page
         ? UserCapability.DeleteOthersPages
-        : template.type === TemplateType.Form
+        : template.type === TemplatePresetType.Form
         ? UserCapability.DeleteOthersForms
         : null;
     if (template.author !== Number(requestUser.sub) && deleteOthersCapability) {
@@ -169,11 +191,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
       // 是否有删除私有的文章权限
       const deletePrivateCapability =
-        template.type === TemplateType.Post
+        template.type === TemplatePresetType.Post
           ? UserCapability.DeletePrivatePosts
-          : template.type === TemplateType.Page
+          : template.type === TemplatePresetType.Page
           ? UserCapability.DeletePrivatePages
-          : template.type === TemplateType.Form
+          : template.type === TemplatePresetType.Form
           ? UserCapability.DeletePrivateForms
           : null;
       if (template.status === TemplateStatus.Private && deletePrivateCapability) {
@@ -183,8 +205,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     return Promise.resolve(true);
   }
 
-  private async checkOperateStatus(status: TemplateStatus, requestUser: RequestUser) {
-    if (TemplateOperateStatus.includes(status)) {
+  private async checkOperateStatus(status: string, requestUser: RequestUser) {
+    if (TemplateOperateStatus.includes(status as TemplateStatus)) {
       if (status === TemplateStatus.AutoDraft) {
         throw new UserInputError(
           await this.translate(
@@ -216,7 +238,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param templateId Template id
    * @param prevStatus 之前的状态
    */
-  private async storeTrashStatus(templateId: number, prevStatus: TemplateStatus, t?: Transaction) {
+  private async storeTrashStatus(templateId: number, prevStatus: string, t?: Transaction) {
     return await this.models.TemplateMeta.bulkCreate(
       [
         {
@@ -449,13 +471,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     }
 
     const { taxonomies = [] } = query;
-    for (const { taxonomyId, taxonomyName, taxonomyType } of taxonomies) {
-      if ((taxonomyId || taxonomyName) && !taxonomyType) {
-        throw new ValidationError(
-          await this.translate('template.datasource.taxonomy_type_is_required', 'Taxonomy type is required!'),
-        );
-      }
-
+    for (const { id: taxonomyId, name: taxonomyName, type: taxonomyType } of taxonomies as Array<{
+      id?: number;
+      name?: string;
+      type: string;
+    }>) {
       if (taxonomyId) {
         include.push({
           model: this.models.TermRelationships,
@@ -472,7 +492,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
         // 特殊处理：如果是默认分类的情况下，查询是默认分类或没有分类的所有项
         if (
-          taxonomyType === Taxonomy.Category &&
+          taxonomyType === TermPresetTaxonomy.Category &&
           (await this.getOption(OptionPresetKeys.DefaultCategory)) === String(taxonomyId)
         ) {
           andWhere.push({
@@ -558,11 +578,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     // 如果没有编辑私有权限，则不返回非自己私有的内容
     const editPrivateCapability =
-      type === TemplateType.Post
+      type === TemplatePresetType.Post
         ? UserCapability.EditPrivatePosts
-        : type === TemplateType.Page
+        : type === TemplatePresetType.Page
         ? UserCapability.EditPrivatePages
-        : type === TemplateType.Form
+        : type === TemplatePresetType.Form
         ? UserCapability.EditPrivateForms
         : null;
     const hasEditPrivateCapability = editPrivateCapability
@@ -581,11 +601,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     // 如果没有发布权限的，不返回待发布的内容
     const publishCapability =
-      type === TemplateType.Post
+      type === TemplatePresetType.Post
         ? UserCapability.PublishPosts
-        : type === TemplateType.Page
+        : type === TemplatePresetType.Page
         ? UserCapability.PublishPages
-        : type === TemplateType.Form
+        : type === TemplatePresetType.Form
         ? UserCapability.PublishForms
         : null;
     const hasPublishCapability = publishCapability ? await this.hasCapability(publishCapability, requestUser) : true;
@@ -824,7 +844,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   getRevisionCount(id: number) {
     return this.models.Templates.count({
       where: {
-        type: TemplateType.Revision,
+        type: TemplatePresetType.Revision,
         parentId: id,
       },
     });
@@ -848,7 +868,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     return this.models.Templates.findAll({
       attributes: this.filterFields(fields, this.models.Templates),
       where: {
-        type: TemplateType.Revision,
+        type: TemplatePresetType.Revision,
         parentId: id,
       },
     }).then((templates) => templates.map((template) => template.toJSON<TemplateModel>()));
@@ -945,13 +965,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     }
 
     const { taxonomies = [] } = query;
-    for (const { taxonomyId, taxonomyName, taxonomyType } of taxonomies) {
-      if ((taxonomyId || taxonomyName) && !taxonomyType) {
-        throw new ValidationError(
-          await this.translate('template.datasource.taxonomy_type_is_required', 'Taxonomy type is required!'),
-        );
-      }
-
+    for (const { id: taxonomyId, name: taxonomyName, type: taxonomyType } of taxonomies as Array<{
+      id?: number;
+      name?: string;
+      type: string;
+    }>) {
       if (taxonomyId) {
         include.push({
           model: this.models.TermRelationships,
@@ -969,7 +987,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
         // 特殊处理：如果是默认分类的情况下，查询是默认分类或没有分类的所有项
         if (
-          taxonomyType === Taxonomy.Category &&
+          taxonomyType === TermPresetTaxonomy.Category &&
           (await this.getOption(OptionPresetKeys.DefaultCategory)) === String(taxonomyId)
         ) {
           andWhere.push({
@@ -1040,9 +1058,21 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param type 类型
    * @param requestUser 请求的用户
    */
-  async create(model: NewFormTemplateInput, type: TemplateType.Form, requestUser: RequestUser): Promise<TemplateModel>;
-  async create(model: NewPageTemplateInput, type: TemplateType.Page, requestUser: RequestUser): Promise<TemplateModel>;
-  async create(model: NewPostTemplateInput, type: TemplateType.Post, requestUser: RequestUser): Promise<TemplateModel>;
+  async create(
+    model: NewFormTemplateInput,
+    type: TemplatePresetType.Form,
+    requestUser: RequestUser,
+  ): Promise<TemplateModel>;
+  async create(
+    model: NewPageTemplateInput,
+    type: TemplatePresetType.Page,
+    requestUser: RequestUser,
+  ): Promise<TemplateModel>;
+  async create(
+    model: NewPostTemplateInput,
+    type: TemplatePresetType.Post,
+    requestUser: RequestUser,
+  ): Promise<TemplateModel>;
   async create(model: NewTemplateInput, type: string, requestUser: RequestUser): Promise<TemplateModel>;
   async create(
     model: NewFormTemplateInput | NewPageTemplateInput | NewPostTemplateInput | NewTemplateInput,
@@ -1056,22 +1086,22 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     // 具有编辑权限才可以新建
     const editCapability =
-      type === TemplateType.Form
+      type === TemplatePresetType.Form
         ? UserCapability.EditPosts
-        : type === TemplateType.Page
+        : type === TemplatePresetType.Page
         ? UserCapability.EditPages
-        : type === TemplateType.Form
+        : type === TemplatePresetType.Form
         ? UserCapability.EditForms
         : null;
     editCapability && (await this.hasCapability(editCapability, requestUser, true));
 
     // 是否有发布的权限
     const publishCapability =
-      type === TemplateType.Post
+      type === TemplatePresetType.Post
         ? UserCapability.PublishPosts
-        : type === TemplateType.Page
+        : type === TemplatePresetType.Page
         ? UserCapability.PublishPages
-        : type === TemplateType.Form
+        : type === TemplatePresetType.Form
         ? UserCapability.PublishForms
         : null;
     if (model.status === TemplateStatus.Publish && publishCapability) {
@@ -1212,7 +1242,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
               excerpt: changedExcerpt || template.excerpt,
               author: Number(requestUser.sub),
               name: `${id}-revision`,
-              type: TemplateType.Revision,
+              type: TemplatePresetType.Revision,
               status: TemplateStatus.Inherit,
               parentId: id,
             },

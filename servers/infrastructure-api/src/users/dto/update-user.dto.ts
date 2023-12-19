@@ -1,6 +1,7 @@
 import { ValidateIf, IsEnum, IsOptional, IsString, IsLocale } from 'class-validator';
 import { PartialType, PickType } from '@nestjs/swagger';
-import { UserRole, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { UserRole } from '../enums/user-role.enum';
 import { NewUserDto } from './new-user.dto';
 
 export class UpdateUserDto extends PartialType(

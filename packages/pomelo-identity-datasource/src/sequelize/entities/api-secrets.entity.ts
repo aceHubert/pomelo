@@ -4,7 +4,7 @@ import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
 export default class ApiSecrets extends Model<
   Omit<ApiSecretsAttributes, 'createdAt'>,
-  Omit<ApiSecretsCreationAttributes, 'createdAt'>
+  Omit<ApiSecretsCreationAttributes, 'id' | 'createdAt'>
 > {
   public id!: number;
   public apiResourceId!: number;

@@ -18,12 +18,13 @@
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
+    "lodash.merge": "^4.6.2",
     "sequelize": "^6.19.0"
   },
   "devDependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
+    "@types/lodash.merge": "^4.6.9",
     "mysql2": "^2.3.3"
   },
   "peerDependencies": {

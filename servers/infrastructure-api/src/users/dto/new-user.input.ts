@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { UserRole } from '@ace-pomelo/infrastructure-datasource';
+import { UserRole } from '../enums/user-role.enum';
 import { NewUserValidator } from './new-user.validator';
 
 @InputType({ description: 'New user input' })

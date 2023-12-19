@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import { CommentMetaAttributes, CommentMetaCreationAttributes } from '../../entities/comment-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class CommentMeta extends Model<CommentMetaAttributes, CommentMetaCreationAttributes> {
+export default class CommentMeta extends Model<CommentMetaAttributes, Omit<CommentMetaCreationAttributes, 'id'>> {
   public id!: number;
   public commentId!: number;
   public metaKey!: string;

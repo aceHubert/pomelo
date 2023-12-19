@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import { UserMetaAttributes, UserMetaCreationAttributes } from '../../entities/user-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class UserMeta extends Model<UserMetaAttributes, UserMetaCreationAttributes> {
+export default class UserMeta extends Model<UserMetaAttributes, Omit<UserMetaCreationAttributes, 'id'>> {
   public id!: number;
   public userId!: number;
   public metaKey!: string;
@@ -21,7 +21,6 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       userId: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
-        defaultValue: 0,
         comment: 'User id',
       },
       metaKey: {

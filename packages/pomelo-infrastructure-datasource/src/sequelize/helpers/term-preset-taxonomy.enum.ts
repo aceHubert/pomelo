@@ -1,5 +1,5 @@
 /** 两个默认存在的分类 */
-export enum TermTaxonomy {
+export enum TermPresetTaxonomy {
   Category = 'category',
   Tag = 'tag',
 }

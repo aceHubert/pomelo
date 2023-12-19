@@ -5,7 +5,7 @@ import { TableAssociateFunc } from '../interfaces/table-associate-func.interface
 
 export default class ApiResources extends Model<
   Omit<ApiResourcesAttributes, 'updatedAt' | 'createdAt'>,
-  Optional<Omit<ApiResourcesCreationAttributes, 'updatedAt' | 'createdAt'>, 'nonEditable' | 'enabled'>
+  Optional<Omit<ApiResourcesCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'nonEditable' | 'enabled'>
 > {
   public id!: number;
   public name!: string;

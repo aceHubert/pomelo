@@ -5,7 +5,7 @@ import { TableAssociateFunc } from '../interfaces/table-associate-func.interface
 
 export default class Clients extends Model<
   Omit<ClientsAttributes, 'updatedAt' | 'createdAt'>,
-  Optional<Omit<ClientsCreationAttributes, 'updatedAt' | 'createdAt'>, 'enabled'>
+  Optional<Omit<ClientsCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'enabled'>
 > {
   public id!: number;
 

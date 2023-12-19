@@ -1,8 +1,8 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { Taxonomy, TermTaxonomyAttributes, TermRelationshipAttributes } from '@ace-pomelo/infrastructure-datasource';
+import { TermTaxonomyModel, TermRelationshipModel } from '@ace-pomelo/infrastructure-datasource';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 
-export class TermTaxonomyModelResp implements TermTaxonomyAttributes {
+export class TermTaxonomyModelResp implements TermTaxonomyModel {
   /**
    * Taxonomy id
    */
@@ -25,7 +25,7 @@ export class TermTaxonomyModelResp implements TermTaxonomyAttributes {
    * taxonomy (category, tag, etc...)
    */
   @ApiResponseProperty()
-  taxonomy!: Taxonomy;
+  taxonomy!: string;
 
   /**
    * Description
@@ -55,7 +55,7 @@ export class TermTaxonomyModelResp implements TermTaxonomyAttributes {
   count!: number;
 }
 
-export class TermRelationshipModelResp implements TermRelationshipAttributes {
+export class TermRelationshipModelResp implements TermRelationshipModel {
   /**
    * Object id
    */

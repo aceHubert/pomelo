@@ -1,5 +1,5 @@
 import { HttpException } from '@nestjs/common';
-import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared-server/src/types';
+import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared-server';
 
 export abstract class BaseController {
   /**

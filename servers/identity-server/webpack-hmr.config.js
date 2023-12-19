@@ -10,7 +10,6 @@ module.exports = function (options) {
     externals: [
       nodeExternals({
         allowlist: ['webpack/hot/poll?100', 'utils/configuration.utils'],
-
         modulesFromFile: true,
       }),
     ],

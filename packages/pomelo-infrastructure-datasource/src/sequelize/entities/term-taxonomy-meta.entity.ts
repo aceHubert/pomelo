@@ -5,11 +5,14 @@ import {
 } from '../../entities/term-taxonomy-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class TermTaxonomyMeta extends Model<TermTaxonomyMetaAttributes, TermTaxonomyMetaCreationAttributes> {
+export default class TermTaxonomyMeta extends Model<
+  TermTaxonomyMetaAttributes,
+  Omit<TermTaxonomyMetaCreationAttributes, 'id'>
+> {
   public id!: number;
   public termTaxonomyId!: number;
   public metaKey!: string;
-  public metaValue?: string;
+  public metaValue!: string;
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
@@ -24,7 +27,6 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       termTaxonomyId: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
-        defaultValue: 0,
         comment: 'Term taxonomy id',
       },
       metaKey: {

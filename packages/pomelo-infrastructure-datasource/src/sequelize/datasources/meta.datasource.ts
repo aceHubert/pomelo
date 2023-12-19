@@ -21,7 +21,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   protected metaModelName: string; // 如 TemplateMeta
 
   constructor(protected readonly moduleRef: ModuleRef) {
-    super(moduleRef);
+    super();
     const rootModelName = this.constructor.name.replace('DataSource', '');
     this.metaModelIdFieldName = `${lowerFirst(rootModelName)}Id`;
     this.metaModelName = `${rootModelName}Meta`;

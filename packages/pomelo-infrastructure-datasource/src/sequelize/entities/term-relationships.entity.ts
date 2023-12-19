@@ -1,11 +1,14 @@
-import { Model, DataTypes } from 'sequelize';
+import { Model, Optional, DataTypes } from 'sequelize';
 import {
   TermRelationshipAttributes,
   TermRelationshipCreationAttributes,
 } from '../../entities/term-relationships.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class TermRelationships extends Model<TermRelationshipAttributes, TermRelationshipCreationAttributes> {
+export default class TermRelationships extends Model<
+  TermRelationshipAttributes,
+  Optional<TermRelationshipCreationAttributes, 'order'>
+> {
   public objectId!: number;
   public termTaxonomyId!: number;
   public order!: number;

@@ -6,8 +6,8 @@ import {
   OptionDataSource,
   TermTaxonomyDataSource,
   TermTaxonomyModel,
-  Taxonomy,
   OptionPresetKeys,
+  TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
@@ -113,7 +113,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
     }
     return this.termTaxonomyDataSource
       .getList(
-        { ...args, excludes, taxonomy: Taxonomy.Category },
+        { ...args, excludes, taxonomy: TermPresetTaxonomy.Category },
         this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       )
       .then((terms) =>
@@ -121,7 +121,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
           // 级联查询将参数传给 children
           Object.assign(
             {
-              taxonomy: Taxonomy.Category,
+              taxonomy: TermPresetTaxonomy.Category,
               group: args.group,
             },
             term,
@@ -134,13 +134,13 @@ export class TermTaxonomyResolver extends createMetaResolver(
   @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
   tagTermTaxonomies(@Args() args: TagTermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
     return this.termTaxonomyDataSource
-      .getList({ ...args, taxonomy: Taxonomy.Tag }, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
+      .getList({ ...args, taxonomy: TermPresetTaxonomy.Tag }, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
       .then((terms) =>
         terms.map((term) =>
           // 级联查询将参数传给 children
           Object.assign(
             {
-              taxonomy: Taxonomy.Tag,
+              taxonomy: TermPresetTaxonomy.Tag,
               group: args.group,
             },
             term,

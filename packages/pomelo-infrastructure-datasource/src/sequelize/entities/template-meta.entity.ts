@@ -2,7 +2,10 @@ import { Model, DataTypes } from 'sequelize';
 import { TemplateMetaAttributes, TemplateMetaMetaCreationAttributes } from '../../entities/template-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class TemplateMeta extends Model<TemplateMetaAttributes, TemplateMetaMetaCreationAttributes> {
+export default class TemplateMeta extends Model<
+  TemplateMetaAttributes,
+  Omit<TemplateMetaMetaCreationAttributes, 'id'>
+> {
   public id!: number;
   public templateId!: number;
   public metaKey!: string;
@@ -21,7 +24,6 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       templateId: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
-        defaultValue: 0,
         comment: 'Template id',
       },
       metaKey: {

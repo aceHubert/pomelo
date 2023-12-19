@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import { ApiClaimsAttributes, ApiClaimsCreationAttributes } from '../../entities/api-claims.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ApiClaims extends Model<ApiClaimsAttributes, ApiClaimsCreationAttributes> {
+export default class ApiClaims extends Model<ApiClaimsAttributes, Omit<ApiClaimsCreationAttributes, 'id'>> {
   public id!: number;
   public apiResourceId!: number;
   public type!: string;

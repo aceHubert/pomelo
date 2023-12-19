@@ -1,12 +1,13 @@
-import { Model, DataTypes } from 'sequelize';
-import { UserStatus, UserAttributes, UserCreationAttributes } from '../../entities/users.entity';
+import { Model, Optional, DataTypes } from 'sequelize';
+import { UserAttributes, UserCreationAttributes } from '../../entities/users.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { UserStatus } from '../interfaces/user.interface';
 
 export default class Users
   extends Model<
     Omit<UserAttributes, 'updatedAt' | 'createdAt'>,
-    Omit<UserCreationAttributes, 'updatedAt' | 'createdAt'>
+    Optional<Omit<UserCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'status'>
   >
   implements UserAttributes
 {

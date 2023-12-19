@@ -3,50 +3,105 @@ import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
 import { RequestUser, ForbiddenError, jsonSafelyParse } from '@ace-pomelo/shared-server';
-import { OptionAutoload } from '../../entities/options.entity';
 import { InfrastructureService } from '../../infrastructure.service';
-import { UserCapability, UserRole, UserRoles } from '../../utils/user-capability.util';
 import { InfrastructureOptions } from '../../interfaces/infrastructure-options.interface';
 import { INFRASTRUCTURE_OPTIONS } from '../../constants';
-import { OptionPresetKeys, UserMetaPresetKeys } from '../../utils/preset-keys.util';
+import { OptionPresetKeys } from '../helpers/option-preset-keys';
+import { UserMetaPresetKeys } from '../helpers/user-preset-keys';
+import { UserCapability } from '../helpers/user-capability';
+import { OptionAutoload } from '../interfaces/option.interface';
 
 const __AUTOLOAD_OPTIONS__ = new Map<string, string>(); // Autoload options 缓存
 const __OPTIONS__ = new Map<string, string>(); // Not autoload options 缓存
 
 export abstract class BaseDataSource implements OnModuleInit {
-  private infrastructureService!: InfrastructureService;
-  private infrastuctureOptions!: InfrastructureOptions;
   protected readonly logger!: Logger;
+  protected readonly moduleRef?: ModuleRef;
+  protected infrastructureService?: InfrastructureService;
+  protected infrastuctureOptions?: InfrastructureOptions;
 
-  constructor(protected readonly moduleRef: ModuleRef) {
+  constructor() {
     this.logger = new Logger(this.constructor.name, { timestamp: true });
   }
 
   async onModuleInit() {
-    this.infrastructureService = this.moduleRef.get(InfrastructureService, { strict: false });
-    this.infrastuctureOptions = this.moduleRef.get<InfrastructureOptions>(INFRASTRUCTURE_OPTIONS, { strict: false });
+    !this.infrastructureService &&
+      (this.infrastructureService = this.moduleRef?.get(InfrastructureService, { strict: false }));
+    !this.infrastuctureOptions &&
+      (this.infrastuctureOptions = this.moduleRef?.get<InfrastructureOptions>(INFRASTRUCTURE_OPTIONS, {
+        strict: false,
+      }));
   }
 
+  private ensureInfrastuctureService() {
+    if (!this.infrastructureService) {
+      this.logger.warn('Please inject IdentityService or ModuleRef in SubClass constructor');
+      throw new Error('IdentityService not initialized');
+    }
+  }
+
+  private ensureInfrastuctureOptions() {
+    if (!this.infrastuctureOptions) {
+      this.logger.warn('Please inject IdentityOptions or ModuleRef in SubClass constructor');
+      throw new Error('IdentityOptions not initialized');
+    }
+  }
+
+  /**
+   * Get dialect from infrastuctureOptions.connection
+   * Inject IdentityOptions in SubClass constructor when use this property before onModuleInit
+   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   */
   protected get databaseDialect() {
-    return typeof this.infrastuctureOptions.connection === 'string'
-      ? (this.infrastuctureOptions.connection.split(':')[0] as Dialect)
-      : this.infrastuctureOptions.connection.dialect ?? 'mysql';
+    this.ensureInfrastuctureOptions();
+
+    return typeof this.infrastuctureOptions!.connection === 'string'
+      ? (this.infrastuctureOptions!.connection.split(':')[0] as Dialect)
+      : this.infrastuctureOptions!.connection.dialect ?? 'mysql';
   }
 
+  /**
+   * Shortcut for this.infrastuctureOptions.tablePrefix
+   * Inject IdentityOptions in SubClass constructor when use this property before onModuleInit
+   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   */
   protected get tablePrefix() {
-    return this.infrastuctureOptions.tablePrefix || '';
+    this.ensureInfrastuctureOptions();
+
+    return this.infrastuctureOptions!.tablePrefix || '';
   }
 
+  /**
+   * Shortcut for this.infrastuctureOptions.translate
+   * Inject IdentityOptions in SubClass constructor when use this property before onModuleInit
+   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   */
   protected get translate() {
-    return this.infrastuctureOptions.translate || ((key: string, fallback: string) => fallback);
+    this.ensureInfrastuctureOptions();
+
+    return this.infrastuctureOptions!.translate || ((key: string, fallback: string) => fallback);
   }
 
+  /**
+   * Shortcut for this.infrastructureService.sequelize
+   * Inject IdentityService in SubClass constructor when use this property before onModuleInit
+   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   */
   protected get sequelize() {
-    return this.infrastructureService.sequelize;
+    this.ensureInfrastuctureService();
+
+    return this.infrastructureService!.sequelize;
   }
 
+  /**
+   * Shortcut for this.infrastructureService.models
+   * Inject IdentityService in SubClass constructor when use this property before onModuleInit
+   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   */
   protected get models() {
-    return this.infrastructureService.models;
+    this.ensureInfrastuctureService();
+
+    return this.infrastructureService!.models;
   }
 
   /**
@@ -141,8 +196,15 @@ export abstract class BaseDataSource implements OnModuleInit {
   }
 
   protected async getUserCapabilities(userId: number): Promise<UserCapability[]> {
-    const userRoles =
-      jsonSafelyParse<UserRoles>((await this.getOption(OptionPresetKeys.UserRoles))!) ?? ({} as UserRoles);
+    const userRoles = jsonSafelyParse<
+      Record<
+        string,
+        {
+          name: string;
+          capabilities: UserCapability[];
+        }
+      >
+    >((await this.getOption(OptionPresetKeys.UserRoles))!);
     const userCapabilities = await this.models.UserMeta.findOne({
       attributes: ['metaValue'],
       where: {
@@ -150,11 +212,11 @@ export abstract class BaseDataSource implements OnModuleInit {
         metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
       },
     }).then((meta) => {
-      return meta?.metaValue as UserRole | undefined;
+      return meta?.metaValue;
     });
-    const userRoleCapabilities = userCapabilities ? userRoles[userCapabilities].capabilities : [];
+    const userRoleCapabilities = userCapabilities ? userRoles?.[userCapabilities].capabilities : [];
 
-    return userRoleCapabilities;
+    return userRoleCapabilities ?? [];
   }
 
   /**

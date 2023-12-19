@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import { ClientScopesAttributes, ClientScopesCreationAttributes } from '../../entities/client-scopes.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ClientScopes extends Model<ClientScopesAttributes, ClientScopesCreationAttributes> {
+export default class ClientScopes extends Model<ClientScopesAttributes, Omit<ClientScopesCreationAttributes, 'id'>> {
   public id!: number;
   public clientId!: number;
   public scope!: string;

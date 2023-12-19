@@ -1,4 +1,3 @@
-export * from './db-init.datasource';
 export * from './option.datasource';
 export * from './template.datasource';
 export * from './comment.datasource';

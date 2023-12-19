@@ -2,7 +2,7 @@ import { Model, DataTypes } from 'sequelize';
 import { ClientClaimsAttributes, ClientClaimsCreationAttributes } from '../../entities/client-claims.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ClientClaims extends Model<ClientClaimsAttributes, ClientClaimsCreationAttributes> {
+export default class ClientClaims extends Model<ClientClaimsAttributes, Omit<ClientClaimsCreationAttributes, 'id'>> {
   public id!: number;
   public clientId!: number;
   public type!: string;

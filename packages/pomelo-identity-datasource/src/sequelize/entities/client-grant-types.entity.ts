@@ -5,7 +5,10 @@ import {
 } from '../../entities/client-grant-types.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ClientGrantTypes extends Model<ClientGrantTypesAttributes, ClientGrantTypesCreationAttributes> {
+export default class ClientGrantTypes extends Model<
+  ClientGrantTypesAttributes,
+  Omit<ClientGrantTypesCreationAttributes, 'id'>
+> {
   public id!: number;
   public clientId!: number;
   public grantType!: string;

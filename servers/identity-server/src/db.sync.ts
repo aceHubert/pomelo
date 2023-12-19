@@ -1,108 +1,67 @@
-import path from 'path';
-import fs from 'fs';
-import os from 'os';
-import { Injectable, Logger } from '@nestjs/common';
-import {
-  DbInitDataSource as IdentityDbInitDataSource,
-  version as IdentityVersion,
-} from '@ace-pomelo/identity-datasource';
+/* eslint-disable no-console */
+import * as path from 'path';
+import * as fs from 'fs';
+import dotenv from 'dotenv';
+import { DatabaseManager, version } from '@ace-pomelo/identity-datasource';
+import { LockFile } from './common/utils/lock-file.util';
 
-const lockDbFile = path.join(process.cwd(), 'db.lock');
+export const dbLockFileName = path.join(process.cwd(), 'db.lock');
+export const envFilePaths =
+  process.env.ENV_FILE ??
+  (process.env.NODE_ENV === 'production'
+    ? ['.env.production.local', '.env.production', '.env']
+    : ['.env.development.local', '.env.development']);
 
-@Injectable()
-export class DbInitService {
-  private readonly logger = new Logger(DbInitService.name, { timestamp: true });
+// 初始化数据库
+export async function syncDatabase() {
+  const dbLockFile = new LockFile(dbLockFileName);
 
-  constructor(private readonly identityDbInitDataSource: IdentityDbInitDataSource) {}
+  let config: Record<string, any> = {};
+  for (const envFilePath of envFilePaths) {
+    if (fs.existsSync(envFilePath)) {
+      config = Object.assign(dotenv.parse(fs.readFileSync(envFilePath)), config);
+    }
+  }
 
-  /**
-   * check if the lock file exists
-   */
-  hasDbLockFile(): Promise<boolean> {
-    return new Promise((resolve) => {
-      fs.access(lockDbFile, fs.constants.F_OK, (err) => {
-        if (err) resolve(false);
+  const connection = config.IDENTITY_DATABASE_CONNECTION
+    ? config.IDENTITY_DATABASE_CONNECTION
+    : {
+        database: config.IDENTITY_DATABASE_NAME,
+        username: config.IDENTITY_DATABASE_USERNAME,
+        password: config.IDENTITY_DATABASE_PASSWORD,
+        dialect: config.IDENTITY_DATABASE_DIALECT || 'mysql',
+        host: config.IDENTITY_DATABASE_HOST || 'localhost',
+        port: config.IDENTITY_DATABASE_PORT || 3306,
+        define: {
+          charset: config.IDENTITY_DATABASE_CHARSET || 'utf8',
+          collate: config.IDENTITY_DATABASE_COLLATE || '',
+        },
+      };
+  const tablePrefix = config.IDENTITY_TABLE_PREFIX;
 
-        resolve(true);
-      });
+  // 初始化数据库
+  const dbManager =
+    typeof connection === 'string'
+      ? new DatabaseManager(connection, { tablePrefix })
+      : new DatabaseManager({ ...connection, tablePrefix });
+  await dbManager
+    .sync({
+      alter: false,
+      // match: /_dev$/,
+      when: () => dbLockFile.hasFile().then((initialized) => !initialized),
+    })
+    .then((flag) => {
+      if (flag) {
+        dbLockFile.setEnvValue('INFRASTRUCTURE_DATASOURCE', version);
+        console.log('Initialize database successful!');
+      }
     });
-  }
 
-  /**
-   * read lock file & convert to array
-   */
-  readDbLockFile() {
-    try {
-      return fs.readFileSync(lockDbFile, 'utf-8').split(os.EOL);
-    } catch {
-      return [];
-    }
-  }
-
-  /**
-   * Finds the key in lock files and returns the corresponding value
-   * @param {string} key Key to find
-   * @returns {string|null} Value of the key
-   */
-  getEnvValue(key: string) {
-    // find the line that contains the key (exact match)
-    const matchedLine = this.readDbLockFile().find((line) => line.split('=')[0] === key);
-    // split the line (delimiter is '=') and return the item at index 2
-    return matchedLine !== undefined ? matchedLine.split('=')[1] : null;
-  }
-
-  /**
-   * Updates value for existing key or creates a new key=value line
-   * This function is a modified version of https://stackoverflow.com/a/65001580/3153583
-   * @param {string} key Key to update/insert
-   * @param {string} value Value to update/insert
-   */
-  setEnvValue = (key: string, value: string) => {
-    const envVars = this.readDbLockFile();
-    const targetLine = envVars.find((line) => line.split('=')[0] === key);
-    if (targetLine !== undefined) {
-      // update existing line
-      const targetLineIndex = envVars.indexOf(targetLine);
-      // replace the key/value with the new value
-      envVars.splice(targetLineIndex, 1, `${key}="${value}"`);
-    } else {
-      // create new key value
-      envVars.push(`${key}="${value}"`);
-    }
-    // write everything back to the file system
-    fs.writeFileSync(lockDbFile, envVars.join(os.EOL));
-  };
-
-  /**
-   * Initialize the database and datas
-   */
-  initDB(): Promise<void> {
-    return this.identityDbInitDataSource
-      .initDB({
-        alter: true,
-        // match: /_dev$/,
-        when: () => this.hasDbLockFile().then((initialized) => !initialized),
-      })
-      .then((flag) => {
-        if (flag) {
-          this.setEnvValue('IDENTITY_MODULE', IdentityVersion);
-          this.logger.log('Database initialize successful!');
-
-          // 初始化数据
-          return this.initDatas();
-        } else {
-          this.logger.warn('Dababase has been already initialized!');
-          return;
-        }
-      });
-  }
-
-  /**
-   * Initialize the datas
-   */
-  private async initDatas() {
-    this.logger.log('Start to initialize datas!');
-    await this.identityDbInitDataSource.initDatas({
+  // 初始化数据
+  const needInitDates = dbLockFile.getEnvValue('INIT_DATAS_REQUIRED') !== 'false';
+  if (needInitDates) {
+    console.log('Start to initialize datas!');
+    await dbManager.initDatas({
       apiResources: [],
       identityResources: [
         {
@@ -249,6 +208,7 @@ export class DbInitService {
         },
       ],
     });
-    this.logger.log('Initialize datas successful!');
+    dbLockFile.setEnvValue('INIT_DATAS_REQUIRED', 'false');
+    console.log('Initialize datas successful!');
   }
 }

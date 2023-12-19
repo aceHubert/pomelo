@@ -1,4 +1,4 @@
-import { UserRole } from '@ace-pomelo/infrastructure-datasource';
+import { UserRole } from '../enums/user-role.enum';
 import { NewUserValidator } from './new-user.validator';
 
 export class NewUserDto extends NewUserValidator {

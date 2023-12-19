@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import { WhereOptions, Order, Attributes, Op, Includeable } from 'sequelize';
 import { default as IdentityResources } from '../entities/identity-resources.entity';
 import {
@@ -187,7 +188,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (exists) throw new Error('Identity resource has already exists');
+    if (exists) throw new ValidationError('Identity resource has already exists');
 
     return this.models.IdentityResources.create(input).then((resource) => {
       return resource.toJSON<IdentityResourceModel>();
@@ -288,7 +289,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Claim has already exists');
+      if (exists) throw new ValidationError('Claim has already exists');
 
       return this.models.IdentityClaims.create({
         ...input,
@@ -404,7 +405,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Property has already exists.');
+      if (exists) throw new ValidationError('Property has already exists.');
 
       return this.models.IdentityProperties.create({
         ...input,

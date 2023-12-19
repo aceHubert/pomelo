@@ -1,0 +1,8 @@
+{
+  "unauthorized": "拒绝访问，您没有访问权限！",
+  "forbidden_field": "拒绝访问，您没有访问字段\"{field}\"的值！",
+  "forbidden_capability": "拒绝访问，您没有\"{requiredCapability}\"权限！",
+  "forbidden_role": "拒绝访问，需要\"{requiredRole}\"角色权限！",
+  "forbidden": "拒绝访问，您没有访问权限！",
+  "invalid_token": "无效的token！"
+}

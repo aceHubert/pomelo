@@ -2,7 +2,10 @@ import { Model, DataTypes } from 'sequelize';
 import { ApiScopeClaimsAttributes, ApiScopeClaimsCreationAttributes } from '../../entities/api-scope-claims.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class ApiScopeClaims extends Model<ApiScopeClaimsAttributes, ApiScopeClaimsCreationAttributes> {
+export default class ApiScopeClaims extends Model<
+  ApiScopeClaimsAttributes,
+  Omit<ApiScopeClaimsCreationAttributes, 'id'>
+> {
   public id!: number;
   public apiScopeId!: number;
   public type!: string;

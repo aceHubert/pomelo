@@ -1,12 +1,12 @@
-import { Model, DataTypes } from 'sequelize';
+import { Model, Optional, DataTypes } from 'sequelize';
 import { MediaAttributes, MediaCreationAttributes } from '../../entities/medias.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
-import { MediaMetaPresetKeys } from '../../utils/preset-keys.util';
+import { MediaMetaPresetKeys } from '../helpers/media-preset-keys';
 
 export default class Medias extends Model<
   Omit<MediaAttributes, 'createdAt'>,
-  Omit<MediaCreationAttributes, 'createdAt'>
+  Optional<Omit<MediaCreationAttributes, 'id' | 'createdAt'>, 'userId'>
 > {
   public id!: number;
   public fileName!: string;

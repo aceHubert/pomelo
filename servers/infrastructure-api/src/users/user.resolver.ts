@@ -63,11 +63,14 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.Create)
   @Mutation((returns) => UserModel, { description: 'Create a new user.' })
   async createUser(
-    @Args('model', { type: () => NewUserInput }) model: NewUserInput,
+    @Args('model', { type: () => NewUserInput }) input: NewUserInput,
     @User() requestUser: RequestUser,
   ): Promise<UserModel> {
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
-      await this.userDataSource.create(model, requestUser);
+      await this.userDataSource.create(
+        { ...input, niceName: input.loginName, displayName: input.loginName },
+        requestUser,
+      );
 
     return {
       id,

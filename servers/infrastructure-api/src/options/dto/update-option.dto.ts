@@ -1,6 +1,6 @@
-import { PickType, PartialType } from '@nestjs/swagger';
+import { PickType } from '@nestjs/swagger';
 import { NewOptionDto } from './new-option.dto';
 
-export class UpdateOptionDto extends PartialType(PickType(NewOptionDto, ['optionValue', 'autoload'] as const)) {
+export class UpdateOptionDto extends PickType(NewOptionDto, ['optionValue'] as const) {
   // something else
 }

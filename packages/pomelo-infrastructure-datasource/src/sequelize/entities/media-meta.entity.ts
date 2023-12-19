@@ -1,9 +1,9 @@
 import { Model, DataTypes } from 'sequelize';
 import { MediaMetaAttributes, MediaMetaCreationAttributes } from '../../entities/media-meta.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { MediaMetaPresetKeys } from '../../utils/preset-keys.util';
+import { MediaMetaPresetKeys } from '../helpers/media-preset-keys';
 
-export default class MediaMeta extends Model<MediaMetaAttributes, MediaMetaCreationAttributes> {
+export default class MediaMeta extends Model<MediaMetaAttributes, Omit<MediaMetaCreationAttributes, 'id'>> {
   public id!: number;
   public mediaId!: number;
   public metaKey!: string;
@@ -22,7 +22,6 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       mediaId: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
         allowNull: false,
-        defaultValue: 0,
         comment: 'Media id',
       },
       metaKey: {

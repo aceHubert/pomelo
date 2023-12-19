@@ -1,4 +1,5 @@
-import { MediaAttributes, MediaCreationAttributes } from '../../entities';
+import { Attributes, CreationAttributes } from 'sequelize';
+import Medias from '../entities/medias.entity';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 
@@ -17,8 +18,10 @@ export type MediaMetaDataModel = {
   [key: string]: any;
 };
 
-export interface MediaModel extends MediaAttributes {
+export interface MediaModel extends Attributes<Medias> {
   metaData?: MediaMetaDataModel;
+
+  readonly createdAt: Date;
 }
 
 export interface MediaMetaModel extends MetaModel {
@@ -36,8 +39,7 @@ export interface PagedMediaArgs extends PagedArgs {
 
 export interface PagedMediaModel extends Paged<MediaModel> {}
 
-export interface NewMediaInput
-  extends Pick<MediaCreationAttributes, 'fileName' | 'originalFileName' | 'extension' | 'mimeType' | 'path'> {
+export interface NewMediaInput extends Omit<CreationAttributes<Medias>, 'userId'> {
   /**
    * metas
    * metaKey 不可以重复

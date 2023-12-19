@@ -2,7 +2,10 @@ import { Model, DataTypes } from 'sequelize';
 import { IdentityClaimsAttributes, IdentityClaimsCreationAttributes } from '../../entities/identity-claims.entity';
 import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
-export default class IdentityClaims extends Model<IdentityClaimsAttributes, IdentityClaimsCreationAttributes> {
+export default class IdentityClaims extends Model<
+  IdentityClaimsAttributes,
+  Omit<IdentityClaimsCreationAttributes, 'id'>
+> {
   public id!: number;
   public identityResourceId!: number;
   public type!: string;

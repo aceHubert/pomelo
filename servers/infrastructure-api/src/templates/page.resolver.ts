@@ -5,9 +5,9 @@ import {
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
-  Taxonomy,
   TemplateStatus,
-  TemplateType,
+  TemplatePresetType,
+  TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
@@ -36,7 +36,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
   @Anonymous()
   @Query((returns) => [String!], { description: ' Get page alias paths' })
   pageAliasPaths(): Promise<string[]> {
-    return this.templateDataSource.getNames(TemplateType.Page);
+    return this.templateDataSource.getNames(TemplatePresetType.Page);
   }
 
   @Anonymous()
@@ -50,14 +50,20 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       {
         ...restArgs,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
       },
-      TemplateType.Page,
+      TemplatePresetType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PageTemplateOption),
     );
   }
@@ -71,7 +77,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
   ): Promise<PageTemplate | undefined> {
     return this.templateDataSource.get(
       id,
-      TemplateType.Page,
+      TemplatePresetType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
       requestUser,
     );
@@ -86,7 +92,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
   ): Promise<PageTemplate | undefined> {
     return this.templateDataSource.getByName(
       name,
-      TemplateType.Page,
+      TemplatePresetType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
       requestUser,
     );
@@ -104,14 +110,20 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       {
         ...restArgs,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
-      TemplateType.Page,
+      TemplatePresetType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PagedPageTemplate.rows.fieldsByTypeName.PagedPageTemplateItem),
       requestUser,
     );
@@ -124,7 +136,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @User() requestUser: RequestUser,
   ): Promise<PageTemplate> {
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(model, TemplateType.Page, requestUser);
+      await this.templateDataSource.create(model, TemplatePresetType.Page, requestUser);
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {

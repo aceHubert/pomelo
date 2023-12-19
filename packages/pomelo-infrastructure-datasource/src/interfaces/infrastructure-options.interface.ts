@@ -1,5 +1,5 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
-import { Options, ModelOptions } from 'sequelize';
+import { Options } from 'sequelize';
 
 export interface InfrastructureOptions {
   /**
@@ -9,11 +9,9 @@ export interface InfrastructureOptions {
 
   /**
    * database connection
+   * https://sequelize.org/docs/v6/getting-started/#connecting-to-a-database
    */
-  connection:
-    | string
-    | (Pick<Options, 'host' | 'port' | 'dialect' | 'database' | 'username' | 'password'> &
-        Pick<ModelOptions, 'charset' | 'collate'>);
+  connection: string | Options;
 
   /**
    * table prefix

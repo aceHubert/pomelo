@@ -10,5 +10,4 @@ export interface ApiSecretsAttributes {
   createdAt: Date;
 }
 
-export interface ApiSecretsCreationAttributes
-  extends Optional<ApiSecretsAttributes, 'id' | 'description' | 'expiresAt'> {}
+export interface ApiSecretsCreationAttributes extends Optional<ApiSecretsAttributes, 'id'> {}

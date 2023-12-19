@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/infrastructure-datasource';
 import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
 import { renderPrimaryStyle } from '../common/utils/render-primary-style-tag.util';
-import { DbInitService } from '../db-init/db-init.service';
 import { OidcRedisAdapterService } from '../oidc-adapter/oidc-redis-adapter.service';
 import { OidcConfigAdapter } from './oidc-adapter';
 
@@ -19,16 +18,12 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly dbInitService: DbInitService,
     private readonly adapterService: OidcRedisAdapterService,
     private readonly identityResourceDataSource: IdentityResourceDataSource,
     private readonly userDataSource: UserDataSource,
   ) {}
 
   async createModuleOptions() {
-    // init database
-    await this.dbInitService.initDB();
-
     return {
       issuer: this.configService.getOrThrow('OIDC_ISSUER'),
       path: this.configService.get('OIDC_PATH', '/oidc'),
@@ -433,8 +428,8 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         }
         return;
       },
-      renderError: async (ctx, out) => {
-        this.logger.error('oidc renderError', out);
+      renderError: async (ctx, out, err) => {
+        this.logger.error('oidc renderError', err);
         ctx.type = 'html';
         ctx.body = `<!DOCTYPE html>
         <html lang="en">

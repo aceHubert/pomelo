@@ -1,18 +1,53 @@
-import { TemplateAttributes, TemplateCreationAttributes, TemplateStatus } from '../../entities';
+import { Attributes, CreationAttributes } from 'sequelize';
+import Templates from '../entities/templates.entity';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
+
+/**
+ * 状态
+ */
+export enum TemplateStatus {
+  AutoDraft = 'auto draft', // 新建
+  Inherit = 'inherit', // 编辑副本
+  Draft = 'draft', // 草稿
+  Pending = 'pending', // 待审核发布
+  Publish = 'publish', // 已发布
+  Private = 'private', // 私有
+  Future = 'future', // 预约发布
+  Trash = 'trash', // 垃圾箱
+}
+
+/**
+ * 类型
+ */
+export enum TemplatePresetType {
+  Revision = 'revision', // 修订版本
+  Form = 'form', // 表单
+  Page = 'page', // 页面
+  Post = 'post', // 文章
+}
+
+export enum TemplateCommentStatus {
+  Open = 'open', // 允许评论
+  Closed = 'closed', // 禁止评论
+}
 
 /* ----------BASE--------------- */
 
 /**
  * Template 返回实体模型
  */
-export interface TemplateModel extends TemplateAttributes {}
+export interface TemplateModel extends Attributes<Templates> {
+  readonly status: TemplateStatus;
+  readonly commentStatus: TemplateCommentStatus;
+  readonly updatedAt: Date;
+  readonly createdAt: Date;
+}
 
 /**
  * Paged Template 查询参数
  */
-export interface PagedTemplateArgs<F extends keyof TemplateAttributes = 'title' | 'name'> extends PagedArgs {
+export interface PagedTemplateArgs<F extends keyof Attributes<Templates> = 'title' | 'name'> extends PagedArgs {
   /**
    * 根据 keywordField 模糊查询
    */
@@ -44,23 +79,32 @@ export interface PagedTemplateArgs<F extends keyof TemplateAttributes = 'title' 
    * 类别
    * AND 关系
    */
-  taxonomies?: Array<{
-    /**
-     * 类别id
-     */
-    taxonomyId?: number;
+  taxonomies?: Array<
+    | {
+        /**
+         * 类别id
+         */
+        id: number;
 
-    /**
-     * 类别name
-     * 不可以与 taxonomyId 同时设置，同时设置时此值无效
-     */
-    taxonomyName?: string;
+        /**
+         * type
+         * if type is "category", will compare with default category
+         */
+        type: string;
+      }
+    | {
+        /**
+         * 类别name
+         */
+        name: string;
 
-    /**
-     * 如果 taxonomyId 或 taxonomyName 赋值时，type为必填
-     */
-    taxonomyType?: string;
-  }>;
+        /**
+         * type
+         * if type is "category", will compare with default category
+         */
+        type: string;
+      }
+  >;
 }
 
 /**
@@ -76,7 +120,7 @@ export interface TemplateOptionModel extends Pick<TemplateModel, 'id' | 'title' 
 /**
  * Template option 查询参数
  */
-export interface TemplateOptionArgs<F extends keyof TemplateAttributes = 'title' | 'name'>
+export interface TemplateOptionArgs<F extends keyof Attributes<Templates> = 'title' | 'name'>
   extends Omit<PagedTemplateArgs<F>, 'status' | 'offset' | 'limit'> {
   // something else
 }
@@ -99,7 +143,7 @@ export interface NewTemplateMetaInput extends NewMetaInput {
  * Template 新建实体模型
  */
 export interface NewTemplateInput
-  extends Pick<TemplateCreationAttributes, 'name' | 'excerpt' | 'status' | 'commentStatus'> {
+  extends Pick<CreationAttributes<Templates>, 'name' | 'excerpt' | 'status' | 'commentStatus'> {
   title?: string;
   content?: string;
   /**
@@ -119,7 +163,7 @@ export interface UpdateTemplateInput
 /**
  * Form 新建实体模型
  */
-export interface NewFormTemplateInput extends Pick<TemplateCreationAttributes, 'name' | 'status' | 'commentStatus'> {
+export interface NewFormTemplateInput extends Pick<CreationAttributes<Templates>, 'name' | 'status' | 'commentStatus'> {
   title?: string;
   content?: string;
   /**
@@ -139,7 +183,7 @@ export interface UpdateFormTemplateInput
 /**
  * Page 新建实体模型
  */
-export interface NewPageTemplateInput extends Pick<TemplateCreationAttributes, 'name' | 'status' | 'commentStatus'> {
+export interface NewPageTemplateInput extends Pick<CreationAttributes<Templates>, 'name' | 'status' | 'commentStatus'> {
   title?: string;
   content?: string;
   /**
@@ -160,7 +204,7 @@ export interface UpdatePageTemplateInput
  * Post 新建实体模型
  */
 export interface NewPostTemplateInput
-  extends Pick<TemplateCreationAttributes, 'title' | 'name' | 'excerpt' | 'content' | 'status' | 'commentStatus'> {
+  extends Pick<CreationAttributes<Templates>, 'title' | 'name' | 'excerpt' | 'content' | 'status' | 'commentStatus'> {
   /**
    * metaKey 不可以重复
    */

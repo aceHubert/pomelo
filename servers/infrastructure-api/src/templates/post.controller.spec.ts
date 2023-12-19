@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
-import { DataSourceModule } from '../sequelize-datasources/datasource.module';
+import { TemplateDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { PostTemplateController } from './post.controller';
 // import { TemplateService } from './template.service';
 
@@ -10,7 +10,7 @@ describe('TemplateController', () => {
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({}), DataSourceModule],
+      imports: [ConfigModule.forRoot({}), TemplateDataSource],
       controllers: [PostTemplateController],
       // providers: [TemplateService],
     }).compile();

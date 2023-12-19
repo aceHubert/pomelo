@@ -1,5 +1,6 @@
 import { Field, ArgsType, Int } from '@nestjs/graphql';
-import { UserRole, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { UserRole } from '../enums/user-role.enum';
 import { PagedUserArgsValidator } from './user-args.validator';
 
 @ArgsType()

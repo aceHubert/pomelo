@@ -144,7 +144,10 @@ export class UserController extends createMetaController('user', UserMetaModelRe
   })
   async create(@Body() input: NewUserDto, @User() requestUser: RequestUser) {
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
-      await this.userDataSource.create(input, requestUser);
+      await this.userDataSource.create(
+        { ...input, niceName: input.loginName, displayName: input.loginName },
+        requestUser,
+      );
     return this.success({
       data: {
         id,

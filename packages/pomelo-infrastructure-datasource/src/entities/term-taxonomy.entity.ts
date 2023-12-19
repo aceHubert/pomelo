@@ -1,13 +1,5 @@
 import { Optional } from '../types';
 
-/**
- * 类别名
- */
-export enum Taxonomy {
-  Category = 'category',
-  Tag = 'tag',
-}
-
 export interface TermTaxonomyAttributes {
   id: number;
   name: string;
@@ -19,5 +11,4 @@ export interface TermTaxonomyAttributes {
   count: number;
 }
 
-export interface TermTaxonomyCreationAttributes
-  extends Optional<TermTaxonomyAttributes, 'id' | 'parentId' | 'group' | 'count'> {}
+export interface TermTaxonomyCreationAttributes extends Optional<TermTaxonomyAttributes, 'id'> {}

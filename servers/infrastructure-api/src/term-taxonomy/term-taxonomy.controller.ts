@@ -4,7 +4,7 @@ import { Controller, Scope, Param, Body, Get, Post, Put, Query, Delete, HttpStat
 import {
   OptionDataSource,
   TermTaxonomyDataSource,
-  Taxonomy,
+  TermPresetTaxonomy,
   OptionPresetKeys,
 } from '@ace-pomelo/infrastructure-datasource';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
@@ -84,15 +84,10 @@ export class TermTaxonomyController extends createMetaController(
       const defaultCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultCategory);
       excludes = [Number(defaultCategoryId)];
     }
-    const result = await this.termTaxonomyDataSource.getList({ ...query, excludes, taxonomy: Taxonomy.Category }, [
-      'id',
-      'name',
-      'slug',
-      'description',
-      'parentId',
-      'group',
-      'count',
-    ]);
+    const result = await this.termTaxonomyDataSource.getList(
+      { ...query, excludes, taxonomy: TermPresetTaxonomy.Category },
+      ['id', 'name', 'slug', 'description', 'parentId', 'group', 'count'],
+    );
     return this.success({
       data: result,
     });
@@ -109,7 +104,7 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
   })
   async getTagList(@Query(ParseQueryPipe) query: TagTermTaxonomyQueryDto) {
-    const result = await this.termTaxonomyDataSource.getList({ ...query, taxonomy: Taxonomy.Tag }, [
+    const result = await this.termTaxonomyDataSource.getList({ ...query, taxonomy: TermPresetTaxonomy.Tag }, [
       'id',
       'name',
       'slug',

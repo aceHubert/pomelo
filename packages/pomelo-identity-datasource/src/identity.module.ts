@@ -1,14 +1,12 @@
 import { Module, DynamicModule, Provider, Logger } from '@nestjs/common';
 import { IdentityOptions, IdentityAsyncOptions, IdentityOptionsFactory } from './interfaces/identity-options.interface';
-import * as DataSources from './sequelize/datasources';
+import { dataSources } from './sequelize';
 import { IdentityService } from './identity.service';
 import { IDENTITY_OPTIONS } from './constants';
 
-const dataSourceProviders = Object.values(DataSources);
-
 @Module({
-  providers: [...dataSourceProviders, IdentityService],
-  exports: [...dataSourceProviders, IdentityService],
+  providers: [...dataSources, IdentityService],
+  exports: [...dataSources, IdentityService],
 })
 export class IdentityModule {
   private static readonly logger = new Logger(IdentityModule.name, { timestamp: true });

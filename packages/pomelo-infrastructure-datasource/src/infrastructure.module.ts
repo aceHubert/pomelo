@@ -4,15 +4,13 @@ import {
   InfrastructureAsyncOptions,
   InfrastructureOptionsFactory,
 } from './interfaces/infrastructure-options.interface';
-import * as DataSources from './sequelize/datasources';
+import { dataSources } from './sequelize';
 import { InfrastructureService } from './infrastructure.service';
 import { INFRASTRUCTURE_OPTIONS } from './constants';
 
-const dataSourceProviders = Object.values(DataSources);
-
 @Module({
-  providers: [...dataSourceProviders, InfrastructureService],
-  exports: [...dataSourceProviders, InfrastructureService],
+  providers: [...dataSources, InfrastructureService],
+  exports: [...dataSources, InfrastructureService],
 })
 export class InfrastructureModule {
   private static readonly logger = new Logger(InfrastructureModule.name, { timestamp: true });

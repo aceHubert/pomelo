@@ -1,15 +1,12 @@
-import {
-  TermTaxonomyAttributes,
-  TermTaxonomyCreationAttributes,
-  TermRelationshipAttributes,
-  TermRelationshipCreationAttributes,
-} from '../../entities';
+import { Attributes, CreationAttributes } from 'sequelize';
+import TermTaxonomy from '../entities/term-taxonomy.entity';
+import TermRelationship from '../entities/term-relationships.entity';
 import { MetaModel, NewMetaInput } from './meta.interface';
 
 /**
  * 协议（类别）实体
  */
-export interface TermTaxonomyModel extends TermTaxonomyAttributes {}
+export interface TermTaxonomyModel extends Attributes<TermTaxonomy> {}
 
 export interface TermTaxonomyMetaModel extends MetaModel {
   termTaxonomyId: number;
@@ -22,7 +19,7 @@ export interface NewTermTaxonomyMetaInput extends NewMetaInput {
 /**
  * 协议关系
  */
-export interface TermRelationshipModel extends TermRelationshipAttributes {}
+export interface TermRelationshipModel extends Attributes<TermRelationship> {}
 
 /**
  * 协议（类别）搜索条件
@@ -50,7 +47,7 @@ export interface TermTaxonomyByObjectIdArgs {
  * 新建协议（类别）实体
  */
 export interface NewTermTaxonomyInput
-  extends Pick<TermTaxonomyCreationAttributes, 'name' | 'taxonomy' | 'description' | 'parentId' | 'group'> {
+  extends Pick<CreationAttributes<TermTaxonomy>, 'name' | 'taxonomy' | 'description' | 'parentId' | 'group'> {
   /**
    * 可为空，不填将以name填充
    */
@@ -70,4 +67,4 @@ export interface UpdateTermTaxonomyInput
 /**
  * 新建协议关系实体
  */
-export interface NewTermRelationshipInput extends TermRelationshipCreationAttributes {}
+export interface NewTermRelationshipInput extends CreationAttributes<TermRelationship> {}

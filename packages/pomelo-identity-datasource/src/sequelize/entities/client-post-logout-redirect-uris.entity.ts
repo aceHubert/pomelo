@@ -7,7 +7,7 @@ import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
 export default class ClientPostLogoutRedirectUris extends Model<
   ClientPostLogoutRedirectUrisAttributes,
-  ClientPostLogoutRedirectUrisCreationAttributes
+  Omit<ClientPostLogoutRedirectUrisCreationAttributes, 'id'>
 > {
   public id!: number;
   public clientId!: number;

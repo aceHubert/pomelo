@@ -9,7 +9,7 @@ import { TableAssociateFunc } from '../interfaces/table-associate-func.interface
 export default class IdentityResources extends Model<
   Omit<IdentityResourcesAttributes, 'updatedAt' | 'createdAt'>,
   Optional<
-    Omit<IdentityResourcesCreationAttributes, 'updatedAt' | 'createdAt'>,
+    Omit<IdentityResourcesCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>,
     'emphasize' | 'required' | 'showInDiscoveryDocument' | 'nonEditable' | 'enabled'
   >
 > {

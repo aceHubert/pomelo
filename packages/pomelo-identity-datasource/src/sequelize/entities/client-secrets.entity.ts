@@ -4,7 +4,7 @@ import { TableInitFunc } from '../interfaces/table-init-func.interface';
 
 export default class ClientSecrets extends Model<
   Omit<ClientSecretsAttributes, 'createdAt'>,
-  Omit<ClientSecretsCreationAttributes, 'createdAt'>
+  Omit<ClientSecretsCreationAttributes, 'id' | 'createdAt'>
 > {
   public id!: number;
   public clientId!: number;

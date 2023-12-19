@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { AppModule } from './app.module';
+import { syncDatabase } from './db.sync';
 
 declare const module: any;
 
@@ -57,5 +58,12 @@ async function bootstrap() {
   }
 }
 
-// start
-bootstrap().then(() => null);
+syncDatabase()
+  .then(() => {
+    // start
+    bootstrap().then(() => null);
+  })
+  .catch((err) => {
+    logger.error(err);
+    process.exit(1);
+  });

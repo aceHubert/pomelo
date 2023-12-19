@@ -123,7 +123,6 @@ __metadata:
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@types/lodash.merge": ^4.6.9
-    lodash: ^4.17.21
     lodash.merge: ^4.6.2
     mysql2: ^2.3.3
     sequelize: ^6.19.0
@@ -206,6 +205,7 @@ __metadata:
     "@nestjs/serve-static": ^4.0.0
     "@nestjs/swagger": ^6.0.0
     "@types/bytes": ^3.1.1
+    "@types/dotenv": ^8.2.0
     "@types/express": ^4.17.13
     "@types/graphql-upload": ^15.0.2
     "@types/lodash": ^4.14.182
@@ -252,7 +252,6 @@ __metadata:
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@types/lodash.merge": ^4.6.9
-    lodash: ^4.17.21
     lodash.merge: ^4.6.2
     mysql2: ^2.3.3
     sequelize: ^6.19.0
@@ -6464,6 +6463,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dotenv@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "@types/dotenv@npm:8.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fdotenv%2F-%2Fdotenv-8.2.0.tgz"
+  dependencies:
+    dotenv: "*"
+  checksum: a1f524da7dc18b09bdb6c2613b9abbbe8ca575621cce4625efc7f98daf2ba07c7dbab622c9bb394507a12c5c515f9cbbbba4aeec17b801c88faeb8e8e656d460
+  languageName: node
+  linkType: hard
+
 "@types/ejs@npm:^3.1.5":
   version: 3.1.5
   resolution: "@types/ejs@npm:3.1.5"
@@ -11616,6 +11624,13 @@ __metadata:
   version: 5.1.0
   resolution: "dotenv-expand@npm:5.1.0"
   checksum: 8017675b7f254384915d55f9eb6388e577cf0a1231a28d54b0ca03b782be9501b0ac90ac57338636d395fa59051e6209e9b44b8ddf169ce6076dffb5dea227d3
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:*":
+  version: 16.3.1
+  resolution: "dotenv@npm:16.3.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fdotenv%2F-%2Fdotenv-16.3.1.tgz"
+  checksum: 15d75e7279018f4bafd0ee9706593dd14455ddb71b3bcba9c52574460b7ccaf67d5cf8b2c08a5af1a9da6db36c956a04a1192b101ee102a3e0cf8817bbcf3dfd
   languageName: node
   linkType: hard
 

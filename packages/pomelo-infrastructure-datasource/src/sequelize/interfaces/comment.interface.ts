@@ -1,46 +1,47 @@
-import { CommentAttributes, CommentCreationAttributes } from '../../entities';
+import { Attributes, CreationAttributes } from 'sequelize';
+import Comments from '../entities/comments.entity';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 
-export interface CommentModel extends CommentAttributes {}
+/**
+ * 评论类型（扩展字段）
+ */
+export enum CommentType {
+  Comment = 'comment',
+}
+
+export interface CommentModel extends Attributes<Comments> {
+  readonly updatedAt: Date;
+  readonly createdAt: Date;
+}
 
 export interface CommentMetaModel extends MetaModel {
   commentId: number;
 }
 
 export interface PagedCommentArgs extends PagedArgs {
-  postId?: number;
+  /**
+   * template id
+   */
+  templateId?: number;
+
+  /**
+   * parent id
+   */
   parentId?: number;
 }
 
 export interface PagedCommentModel extends Paged<CommentModel> {}
 
-export interface NewCommentInput
-  extends Pick<
-    CommentCreationAttributes,
-    | 'templateId'
-    | 'author'
-    | 'authorEmail'
-    | 'authorUrl'
-    | 'authorIp'
-    | 'content'
-    | 'approved'
-    | 'edited'
-    | 'type'
-    | 'agent'
-    | 'parentId'
-    | 'userId'
-  > {
+export interface NewCommentInput extends Omit<CreationAttributes<Comments>, 'userId'> {
   /**
    * metaKey 不可以重复
    */
   metas?: NewMetaInput[];
 }
 
+export interface UpdateCommentInput extends Partial<Pick<NewCommentInput, 'content' | 'approved' | 'edited'>> {}
+
 export interface NewCommentMetaInput extends NewMetaInput {
   commentId: number;
-}
-
-export class UpdateCommentInput {
-  content!: string;
 }

@@ -5,9 +5,9 @@ import {
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
-  Taxonomy,
   TemplateStatus,
-  TemplateType,
+  TemplatePresetType,
+  TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
@@ -44,14 +44,20 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
       {
         ...restArgs,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
       },
-      TemplateType.Form,
+      TemplatePresetType.Form,
       this.getFieldNames(fields.fieldsByTypeName.FormTemplateOption),
     );
   }
@@ -65,7 +71,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
   ): Promise<FormTemplate | undefined> {
     return this.templateDataSource.get(
       id,
-      TemplateType.Form,
+      TemplatePresetType.Form,
       // content 不在模型里
       ['content', ...this.getFieldNames(fields.fieldsByTypeName.FormTemplate)],
       requestUser,
@@ -84,14 +90,20 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
       {
         ...restArgs,
         taxonomies: [
-          (categoryId !== void 0 || categoryName !== void 0) && {
-            taxonomyType: Taxonomy.Category,
-            taxonomyId: categoryId,
-            taxonomyName: categoryName,
-          },
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
         ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
       },
-      TemplateType.Form,
+      TemplatePresetType.Form,
       this.getFieldNames(fields.fieldsByTypeName.PagedFormTemplate.rows.fieldsByTypeName.PagedFormTemplateItem),
       requestUser,
     );
@@ -105,7 +117,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
   ): Promise<FormTemplate> {
     const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
       model,
-      TemplateType.Form,
+      TemplatePresetType.Form,
       requestUser,
     );
 

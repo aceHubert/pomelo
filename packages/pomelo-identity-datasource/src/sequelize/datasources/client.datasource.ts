@@ -1,5 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import { Includeable, Op, WhereOptions } from 'sequelize';
 import {
   ClientModel,
@@ -274,7 +275,7 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Claim has already exists');
+      if (exists) throw new ValidationError('Claim has already exists');
 
       return this.models.ClientClaims.create({
         ...input,
@@ -390,7 +391,7 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Cors origin has already exists');
+      if (exists) throw new ValidationError('Cors origin has already exists');
 
       return this.models.ClientCorsOrigins.create({
         ...input,
@@ -504,7 +505,7 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Scope has already exists');
+      if (exists) throw new ValidationError('Scope has already exists');
 
       return this.models.ClientScopes.create({
         ...input,
@@ -620,7 +621,7 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('GrantType has already exists');
+      if (exists) throw new ValidationError('GrantType has already exists');
 
       return this.models.ClientGrantTypes.create({
         ...input,
@@ -736,7 +737,7 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('RedirectUri has already exists');
+      if (exists) throw new ValidationError('RedirectUri has already exists');
 
       return this.models.ClientRedirectUris.create({
         ...input,
@@ -857,7 +858,7 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('PostLogoutRedirectUri has already exists');
+      if (exists) throw new ValidationError('PostLogoutRedirectUri has already exists');
 
       return this.models.ClientPostLogoutRedirectUris.create({
         ...input,
@@ -1050,7 +1051,7 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new Error('Property has already exists.');
+      if (exists) throw new ValidationError('Property has already exists.');
 
       return this.models.ClientProperties.create({
         ...input,

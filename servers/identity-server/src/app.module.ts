@@ -17,12 +17,12 @@ import { IdentityModule } from '@ace-pomelo/identity-datasource';
 import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
-import { DbInitModule } from './db-init/db-init.module';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { envFilePaths } from './db.sync';
 
 // extends
 // eslint-disable-next-line import/order
@@ -32,11 +32,7 @@ import '@/common/extends/i18n.extend';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath:
-        process.env.ENV_FILE ??
-        (process.env.NODE_ENV === 'production'
-          ? ['.env.production.local', '.env.production', '.env']
-          : ['.env.development.local', '.env.development']),
+      envFilePath: envFilePaths,
       load: [configuration(process.cwd())],
     }),
     I18nModule.forRootAsync({
@@ -92,7 +88,6 @@ import '@/common/extends/i18n.extend';
       }),
       inject: [ConfigService, I18nService],
     }),
-    DbInitModule, // init database
     AccountModule,
     OidcModule.forRootAsync({
       imports: [OidcConfigModule],
