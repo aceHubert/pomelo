@@ -92,6 +92,12 @@ export default defineComponent({
       $mediasRes.read(localPagination.value.current!, localPagination.value.pageSize!, keyword.value);
     }, [keyword, () => localPagination.value.current, () => localPagination.value.pageSize]);
 
+    useEffect(() => {
+      keyword.value = '';
+      $mediasRes.$result = void 0;
+      $mediasRes.read(1, localPagination.value.pageSize!);
+    }, [() => props.accept]);
+
     const addItem = (file: Media) => {
       const { $result: medias } = $mediasRes;
       if (!medias) return;
@@ -216,9 +222,11 @@ export default defineComponent({
     };
 
     const uploadCropSkip = ref(false);
+    const canCrop = (type: string) =>
+      ['image/jpe', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'].includes(type);
     const handleBeforeUpload = (file: File): Promise<Blob | File> => {
       return new Promise((resolve) => {
-        if (props.cropBeforeUpload) {
+        if (canCrop(file.type) && props.cropBeforeUpload) {
           cropImage.path = URL.createObjectURL(file);
           uploadCropSkip.value = false;
           Modal.confirm({
