@@ -1,4 +1,15 @@
-import { IsOptional, IsDefined, IsNotEmpty, IsIn, IsString, IsUUID, IsNumber, IsBoolean, IsUrl } from 'class-validator';
+import {
+  IsOptional,
+  IsDefined,
+  IsNotEmpty,
+  IsIn,
+  IsString,
+  IsUUID,
+  IsNumber,
+  IsBoolean,
+  IsUrl,
+  ValidateIf,
+} from 'class-validator';
 import { ClientAuthMethod, SigningAlgorithmWithNone, SubjectTypes, TokenFormat } from 'oidc-provider';
 import { NewClientInput } from '@ace-pomelo/identity-datasource';
 
@@ -17,8 +28,9 @@ export abstract class NewClientValidator implements NewClientInput {
   @IsNotEmpty()
   abstract clientName: string;
 
+  @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
   abstract clientUri?: string;
 
   @IsOptional()
@@ -48,28 +60,33 @@ export abstract class NewClientValidator implements NewClientInput {
   ])
   abstract idTokenSignedResponseAlg?: SigningAlgorithmWithNone;
 
+  @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
   abstract initiateLoginUri?: string;
 
+  @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
   abstract jwksUri?: string;
 
+  @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'], allow_protocol_relative_urls: true })
   abstract logoUri?: string;
 
+  @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl()
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
   abstract policyUri?: string;
 
   @IsOptional()
   @IsBoolean()
   abstract requireAuthTime?: boolean;
 
+  @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsString()
+  @IsUrl({ require_protocol: true })
   abstract sectorIdentifierUri?: string;
 
   @IsOptional()

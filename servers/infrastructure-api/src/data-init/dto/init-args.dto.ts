@@ -27,7 +27,7 @@ export class InitArgsDto implements Omit<InitArgs, 'siteUrl'> {
    * Home url
    */
   @IsNotEmpty({ message: 'field $property is required' })
-  @IsUrl({ require_tld: false }, { message: 'field $property must be a URL address' })
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] }, { message: 'field $property must be a URL address' })
   homeUrl!: string;
 
   /**

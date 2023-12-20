@@ -63,6 +63,6 @@ export abstract class NewUserValidator implements Omit<NewUserInput, 'niceName' 
 
   @IsDefined()
   @IsString()
-  @IsUrl()
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
   abstract url: string;
 }
