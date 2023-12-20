@@ -1,6 +1,6 @@
 import { omitBy, isNil } from 'lodash';
 import { Logger } from '@nestjs/common';
-import { AdapterPayload, ClientMetadata, SigningAlgorithmWithNone, ClientAuthMethod } from 'oidc-provider';
+import { AdapterPayload, ClientMetadata, SigningAlgorithmWithNone, ClientAuthMethod, errors } from 'oidc-provider';
 import { ClientDataSource } from '@ace-pomelo/identity-datasource';
 
 export abstract class OidcAdapterServiceFactory {
@@ -85,7 +85,8 @@ export abstract class OidcAdapterServiceFactory {
       'properties',
     ]);
 
-    if (!client || !client.enabled) return;
+    if (!client) return;
+    if (!client.enabled) throw new errors.InvalidClient('client has disabled');
 
     return omitBy(
       {

@@ -19,7 +19,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       const request = http.getRequest<Request>();
       const response = http.getResponse<Response>();
       const status = this.getHttpCodeFromError(exception);
-      const description = await this.getHttpDescriptionFromError(exception);
+      const description = this.getDescriptionFromError(exception);
 
       const responseData = Object.assign({}, description, {
         statusCode: status,
@@ -80,10 +80,10 @@ export class AllExceptionFilter implements ExceptionFilter {
   }
 
   /**
-   * 获取 http 的 response 对象
+   * 获取实际的错误描述
    * @param exception Error
    */
-  private async getHttpDescriptionFromError(exception: Error): Promise<Dictionary<any>> {
+  private getDescriptionFromError(exception: Error): { message: string | string[]; [key: string]: any } {
     const description =
       exception instanceof HttpException
         ? exception.getResponse()
@@ -92,6 +92,11 @@ export class AllExceptionFilter implements ExceptionFilter {
         : (exception as any).error_description || // oidc-provider error
           exception.message;
 
-    return typeof description === 'string' ? { message: description } : description;
+    return typeof description === 'string'
+      ? { message: description }
+      : {
+          message: exception.message,
+          ...description,
+        };
   }
 }

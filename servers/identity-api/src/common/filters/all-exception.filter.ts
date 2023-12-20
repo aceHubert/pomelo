@@ -25,7 +25,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       const request = http.getRequest<Request>();
       const response = http.getResponse<Response>();
       const status = this.getHttpCodeFromError(exception);
-      const description = await this.getHttpDescriptionFromError(exception);
+      const description = this.getDescriptionFromError(exception);
 
       // @ts-expect-error code doesn't export type
       if (exception instanceof SequelizeDatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
@@ -75,12 +75,10 @@ export class AllExceptionFilter implements ExceptionFilter {
         const extensions: Record<string, any> = {
           code: this.getGraphqlCodeFromError(exception),
         };
-        // @ts-expect-error code doesn't export type
-        if (exception instanceof SequelizeDatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
-          // 当出现表不存在错误时，提示要初始化数据库, 并设置 extensions.dbInitRequired = true
-          extensions['dbInitRequired'] = true;
-        }
-        return new GraphQLError(exception.message, {
+
+        const { message } = this.getDescriptionFromError(exception);
+
+        return new GraphQLError(Array.isArray(message) ? message.join(', ') : message, {
           originalError: exception,
           extensions,
         });
@@ -132,10 +130,10 @@ export class AllExceptionFilter implements ExceptionFilter {
   }
 
   /**
-   * 获取 http 的 response 对象
+   * 获取实际的错误描述
    * @param exception Error
    */
-  private async getHttpDescriptionFromError(exception: Error): Promise<Dictionary<any>> {
+  private getDescriptionFromError(exception: Error): { message: string | string[]; [key: string]: any } {
     const description =
       exception instanceof HttpException
         ? exception.getResponse()
@@ -143,6 +141,11 @@ export class AllExceptionFilter implements ExceptionFilter {
         ? ((exception as any).original || exception).message // 部分 sequelize error 格式化 error 到original
         : exception.message;
 
-    return typeof description === 'string' ? { message: description } : description;
+    return typeof description === 'string'
+      ? { message: description }
+      : {
+          message: exception.message,
+          ...description,
+        };
   }
 }
