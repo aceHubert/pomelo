@@ -48,6 +48,7 @@ export { default as PlusSquareOutline } from '@ant-design/icons/lib/outline/Plus
 export { default as ProfileOutline } from '@ant-design/icons/lib/outline/ProfileOutline';
 export { default as QuestionCircleOutline } from '@ant-design/icons/lib/outline/QuestionCircleOutline';
 export { default as RightOutline } from '@ant-design/icons/lib/outline/RightOutline';
+export { default as SaveOutline } from '@ant-design/icons/lib/outline/SaveOutline';
 export { default as SearchOutline } from '@ant-design/icons/lib/outline/SearchOutline';
 export { default as SelectOutline } from '@ant-design/icons/lib/outline/SelectOutline';
 export { default as SettingOutline } from '@ant-design/icons/lib/outline/SettingOutline';

@@ -9,7 +9,7 @@ import { PropertyType, PropertyGroupDesc } from '../utils/constants';
 import type { WrappedFormUtils, Form as FormProps } from 'ant-design-vue/types/form/form';
 import type { Property, PropertyGroup } from '../utils/constants';
 
-type PropertyProps = {
+type PropertyFormProps = {
   form: WrappedFormUtils;
   layout: FormProps['layout'];
   presetPrperties: Array<{ group: PropertyGroup; children: Property[] }>;
@@ -17,12 +17,12 @@ type PropertyProps = {
 
 export const PropertyForm = Form.create({})(
   defineComponent({
-    name: 'Property',
+    name: 'PropertyForm',
     props: {
       layout: { type: String, default: 'inline' },
       presetPrperties: { type: Array, default: () => [] },
     },
-    setup(props: PropertyProps, { slots }) {
+    setup(props: PropertyFormProps, { slots }) {
       const i18n = useI18n();
 
       const presetPropertyKeyMap = computed(() =>

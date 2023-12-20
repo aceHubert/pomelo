@@ -1,8 +1,8 @@
 import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import { upperFirst } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, set, nextTick } from '@vue/composition-api';
-import { Button, Card, Form, Input, Space, Descriptions, Icon, Tag, Select } from 'ant-design-vue';
-import { v4 as uuidv4 } from 'uuid';
+import { Button, Card, Form, Input, Space, Descriptions, Icon, Tag, Radio } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { useDeviceType } from '@ace-pomelo/shared-client';
 import { Modal, message } from '@/components';
@@ -260,14 +260,15 @@ export default Form.create({})(
               vModel={isAddModalVisable.value}
               title={i18n.tv('page_clients.add_modal_title', '添加客户端')}
               closable={false}
+              maskClosable={false}
               scopedSlots={{
                 footer: () => (
                   <div>
                     <Button disabled={adding.value} onClick={() => (isAddModalVisable.value = false)}>
-                      {i18n.tv('page_clients.form.cancel_btn', '关闭')}
+                      {i18n.tv('common.btn_text.cancel', '取消')}
                     </Button>
                     <Button type="primary" class="ml-2" loading={adding.value} onClick={() => handleAdd()}>
-                      {i18n.tv('page_clients.form.ok_btn', '保存')}
+                      {i18n.tv('common.btn_text.save', '保存')}
                     </Button>
                   </div>
                 ),
@@ -314,18 +315,21 @@ export default Form.create({})(
                         ],
                       },
                     ]}
-                    placeholder={i18n.tv('page_clients.form.name_placeholder', '请输入')}
+                    placeholder={i18n.tv('page_clients.form.name_placeholder', '请输入客户端名称')}
                   />
                 </Form.Item>
                 <Form.Item label={i18n.tv('page_clients.form.application_type_label', '客户端类型')}>
-                  <Select
-                    v-decorator={['applicationType']}
-                    placeholder={i18n.tv('page_clients.form.application_type_placeholder', '请输入客户端类型')}
-                    options={[
-                      { label: 'Web', value: 'web' },
-                      { label: 'Native', value: 'native' },
+                  <Radio.Group
+                    v-decorator={[
+                      'applicationType',
+                      {
+                        initialValue: 'web',
+                      },
                     ]}
-                  ></Select>
+                  >
+                    <Radio.Button value="web">Web</Radio.Button>
+                    <Radio.Button value="native">Native</Radio.Button>
+                  </Radio.Group>
                 </Form.Item>
               </Form>
             </Modal>

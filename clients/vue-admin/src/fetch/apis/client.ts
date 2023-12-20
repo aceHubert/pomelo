@@ -9,6 +9,28 @@ export interface ClientModel {
   applicationType: string;
   clientId: string;
   clientName: string;
+  clientUri?: string;
+  defaultMaxAge?: number;
+  idTokenSignedResponseAlg?: string;
+  initiateLoginUri?: string;
+  jwksUri?: string;
+  logoUri?: string;
+  policyUri?: string;
+  requireAuthTime?: boolean;
+  sectorIdentifierUri?: string;
+  subjectType?: string;
+  tokenEndpointAuthMethod?: string;
+  idTokenLifetime?: number;
+  accessTokenTormat?: string;
+  accessTokenLifetime?: number;
+  refreshTokenExpiration?: string;
+  refreshTokenAbsoluteLifetime?: number;
+  refreshTokenSlidingLifetime?: number;
+  authorizationCodeLifetime?: number;
+  deviceCodeLifetime?: number;
+  backchannelAuthenticationRequestLifetime?: number;
+  requireConsent?: boolean;
+  requirePkce?: boolean;
   enabled: boolean;
   updatedAt: Date;
   createdAt: Date;
@@ -27,6 +49,28 @@ export interface NewClientInput {
   application: 'web' | 'native';
   clientId: string;
   clientName: string;
+  clientUri?: string;
+  defaultMaxAge?: number;
+  idTokenSignedResponseAlg?: string;
+  initiateLoginUri?: string;
+  jwksUri?: string;
+  logoUri?: string;
+  policyUri?: string;
+  requireAuthTime?: boolean;
+  sectorIdentifierUri?: string;
+  subjectType?: string;
+  tokenEndpointAuthMethod?: string;
+  idTokenLifetime?: number;
+  accessTokenTormat?: string;
+  accessTokenLifetime?: number;
+  refreshTokenExpiration?: string;
+  refreshTokenAbsoluteLifetime?: number;
+  refreshTokenSlidingLifetime?: number;
+  authorizationCodeLifetime?: number;
+  deviceCodeLifetime?: number;
+  backchannelAuthenticationRequestLifetime?: number;
+  requireConsent?: boolean;
+  requirePkce?: boolean;
 }
 
 export interface UpdateClientInput extends Omit<NewClientInput, 'clientId'> {}
@@ -170,6 +214,28 @@ export const useClientApi = defineRegistApi('client', {
           applicationType
           clientId
           clientName
+          clientUri
+          defaultMaxAge
+          idTokenSignedResponseAlg
+          initiateLoginUri
+          jwksUri
+          logoUri
+          policyUri
+          requireAuthTime
+          sectorIdentifierUri
+          subjectType
+          tokenEndpointAuthMethod
+          idTokenLifetime
+          accessTokenTormat
+          accessTokenLifetime
+          refreshTokenExpiration
+          refreshTokenAbsoluteLifetime
+          refreshTokenSlidingLifetime
+          authorizationCodeLifetime
+          deviceCodeLifetime
+          backchannelAuthenticationRequestLifetime
+          requireConsent
+          requirePkce
           enabled
           updatedAt
           createdAt
