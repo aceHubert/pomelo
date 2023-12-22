@@ -1,8 +1,9 @@
 import ejs from 'ejs';
 import { get, pickBy, omit } from 'lodash';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { Provider } from 'oidc-provider';
-import { Controller, Get, Post, Body, Logger, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Logger, Req, Res, HttpStatus } from '@nestjs/common';
+import { I18n, I18nContext } from 'nestjs-i18n';
 import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
 import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { Oidc, InteractionHelper } from 'nest-oidc-provider';
@@ -24,7 +25,12 @@ export class LoginController extends BaseController {
   }
 
   @Get(':uid')
-  async login(@Oidc.Interaction() interaction: InteractionHelper, @Res() res: Response) {
+  async login(
+    @Oidc.Interaction() interaction: InteractionHelper,
+    @Req() req: Request,
+    @Res() res: Response,
+    @I18n() i18n: I18nContext,
+  ) {
     const { prompt, params, uid } = await interaction.details();
 
     const client = await this.provider.Client.find(params.client_id as string);
@@ -35,24 +41,35 @@ export class LoginController extends BaseController {
       ...client,
       ...pickBy(extraProperties, (value, key) => key.startsWith(`${prompt.name}Page.`)), // loginPage.xxx or consentPage.xxx
     };
+
     let wrapper, form;
     if (prompt.name === 'login') {
-      const customWrapperTemplate = get(extraProperties, 'loginPage.template');
-      const formLableDisplay = get(extraProperties, 'loginPage.formLableDisplay', '1') === '1';
-      const formValidateTooltip = get(extraProperties, 'loginPage.formValidateTooltip', '0') === '1';
+      const customWrapperTemplate = clientMetadata['loginPage.template'] as string;
+      const formLableDisplay = ['1', 'true'].includes((clientMetadata['loginPage.formLableDisplay'] as string) ?? '1');
+      const formValidateTooltip = ['1', 'true'].includes(
+        (clientMetadata['loginPage.formValidateTooltip'] as string) ?? '0',
+      );
 
       wrapper = customWrapperTemplate
         ? getLoginTemplate(customWrapperTemplate)
         : `<div class="wrapper-placeholder">
         <div class="wrapper">
-          <h1 class="title">Sign In</h1>
-          <p class="text--secondary">to <strong><%= new URL(params.redirect_uri).host %></strong></p>
+          <%- locales %>
+          <h1 class="title">${i18n.tv('login.wrapper.title', 'Sign In')}</h1>
+          <p class="text--secondary">
+          ${i18n.tv('login.wrapper.subtitle', `to <strong>${new URL(params.redirect_uri as string).host}</strong>`, {
+            args: {
+              host: new URL(params.redirect_uri as string).host,
+            },
+          })}</p>
           <%- form %>
           <div class="row mb-3">
             <div class="col-sm-10 offset-sm-2">
               <div id="error" class="alert alert-danger d-none"></div>
               <div class="d-sm-inline-block gap-2">
-                <button type="submit" class="btn btn-primary w-100" form="login-form">Sign in</button>
+                <button type="submit" class="btn btn-primary w-100" form="login-form">
+                  ${i18n.tv('login.wrapper.submit_btn_text', 'Sign In')}
+                </button>
               </div>
             </div>
           </div>
@@ -61,30 +78,44 @@ export class LoginController extends BaseController {
 
       form = `<form id="login-form" action="/login/${uid}" method="POST" autocomplete="off" novalidate>
         <div class="row mb-3">
-        ${formLableDisplay ? '<label for="username" class="col-sm-2 col-form-label">Username</label>' : ''}
+        ${
+          formLableDisplay
+            ? `<label for="username" class="col-sm-2 col-form-label">
+                ${i18n.tv('login.form.username_label', 'Username')}
+              </label>`
+            : ''
+        }
           <div class="${formLableDisplay ? 'col-sm-10' : ''}">
             <input
               type="text"
               class="form-control"
               id="username"
               name="username"
-              placeholder="User Name"
+              placeholder="${i18n.tv('login.form.username_placeholder', 'User Name')}"
               ${!params.login_hint ? `autofocus="on"` : `value="${params.login_hint}"`}
               required
               maxlength="50"
             />
-            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">Please input username.</div>
+            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+              ${i18n.tv('login.form.username_invalid', 'Please input username!')}
+            </div>
           </div>
         </div>
         <div class="row mb-3">
-         ${formLableDisplay ? '<label for="password" class="col-sm-2 col-form-label">Password</label>' : ''}
+         ${
+           formLableDisplay
+             ? `<label for="password" class="col-sm-2 col-form-label">
+                ${i18n.tv('login.form.password_label', 'Password')}
+              </label>`
+             : ''
+         }
           <div class="${formLableDisplay ? 'col-sm-10' : ''}">
             <input
               type="password"
               class="form-control"
               id="password"
               name="password"
-              placeholder="Password"
+              placeholder="${i18n.tv('login.form.password_placeholder', 'Password')}"
               autocomplete="off"
               ${params.login_hint ? `autofocus="on"` : ''}
               required
@@ -93,18 +124,22 @@ export class LoginController extends BaseController {
               value=""
             />
             <span toggle="#password" class="icon-field eye toggle-password"></span>
-            <div class="invalid-${
-              formValidateTooltip ? 'tooltip' : 'feedback'
-            }">Please input password(6-16 characters).</div>
+            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+              ${i18n.tv('login.form.password_invalid', 'Please input password(6-16 characters)!')}
+            </div>
           </div>
         </div>
         <div class="row mb-3">
           <div class="d-flex ${formLableDisplay ? 'col-sm-10 offset-sm-2' : ''}">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="" id="rememberMe" />
-              <label class="form-check-label" for="rememberMe"> Remember Me? </label>
+              <label class="form-check-label" for="rememberMe">
+                ${i18n.tv('login.form.remember_me_label', 'Remember Me?')}
+              </label>
             </div>
-            <span class="ml-auto"><a href="#" class="forgot-pass">Forgot Password</a></span>
+            <span class="ml-auto"><a href="#" class="forgot-pass">
+            ${i18n.tv('login.form.forgot_password_label', 'Forgot Password')}
+            </a></span>
           </div>
         </div>
         <div class="row mb-3">
@@ -134,6 +169,7 @@ export class LoginController extends BaseController {
         customWrapperTemplate ||
         `<div class="wrapper-placeholder">
           <div class="wrapper">
+            <%- locales %>
             <div class="mb-2 pb-2 border-bottom">
               <h1 class="title">Confirm</h1>
               <p class="text--secondary mb-0">to sign in to <strong><%= new URL(params.redirect_uri).host %></strong></p>
@@ -160,11 +196,12 @@ export class LoginController extends BaseController {
       }
       </form>`;
     }
-
     res.render(prompt.name, {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
       content: ejs.render(wrapper, {
         form,
+        locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
+        tv: i18n.tv.bind(i18n),
         details: prompt.details,
         clientMetadata: omit(
           clientMetadata,
@@ -181,8 +218,8 @@ export class LoginController extends BaseController {
   @Post(':uid')
   async loginCheck(
     @Oidc.Interaction() interaction: InteractionHelper,
-    @Body()
-    input: LoginDto,
+    @Body() input: LoginDto,
+    @I18n() i18n: I18nContext,
   ) {
     const { prompt, params, uid } = await interaction.details();
 
@@ -198,6 +235,9 @@ export class LoginController extends BaseController {
     this.logger.debug(`Login UID: ${uid}`);
     this.logger.debug(`Login user: ${input.username}`);
     this.logger.debug(`Client ID: ${params.client_id}`);
+
+    // sync locale to user
+    this.userDataSource.updateMetaByKey(verifiedUser.id, 'locale', i18n.lang);
 
     const redirectUrl = await interaction.result(
       {

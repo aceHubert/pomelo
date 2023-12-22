@@ -17,6 +17,43 @@
   max-width: 500px;
 }
 
+.locale-btns {
+  position: absolute;
+  top: 35px;
+  right: 25px;
+
+  .btn {
+    color: var(--theme-primary);
+    text-decoration: none;
+
+    &:hover,
+    &:focus,
+    &:active {
+      color: var(--theme-primary-7);
+    }
+
+    &-disabled,
+    &:disabled {
+      color: var(--text-secondary);
+      cursor: not-allowed;
+
+      &:hover,
+      &:focus,
+      &:active {
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .divider {
+    display: inline-block;
+    height: 12px;
+    border-right: 1px solid @border-color-base;
+    vertical-align: middle;
+    outline: none;
+  }
+}
+
 form {
   margin-top: 20px;
 }
@@ -64,7 +101,8 @@ form a:focus {
   box-shadow: none;
 }
 
-.form-check-input.is-valid, .was-validated .form-check-input:valid {
+.form-check-input.is-valid,
+.was-validated .form-check-input:valid {
   border-color: var(--bs-border-color);
 }
 
@@ -73,12 +111,12 @@ form a:focus {
   border-color: var(--theme-primary);
 }
 
-.was-validated .form-check-input:valid:focus{
+.was-validated .form-check-input:valid:focus {
   -webkit-box-shadow: none;
   box-shadow: none;
 }
 
-.was-validated .form-check-input:valid~.form-check-label {
+.was-validated .form-check-input:valid ~ .form-check-label {
   color: initial;
 }
 

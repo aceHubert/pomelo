@@ -1,7 +1,15 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { APP_PIPE, APP_FILTER } from '@nestjs/core';
-import { Module, ValidationPipe } from '@nestjs/common';
+import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
+import {
+  Logger,
+  Module,
+  NestModule,
+  RequestMethod,
+  ValidationPipe,
+  OnModuleInit,
+  MiddlewareConsumer,
+} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   I18nModule,
@@ -27,6 +35,8 @@ import { envFilePaths } from './db.sync';
 // extends
 // eslint-disable-next-line import/order
 import '@/common/extends/i18n.extend';
+
+const logger = new Logger('AppModule', { timestamp: true });
 
 @Module({
   imports: [
@@ -118,4 +128,30 @@ import '@/common/extends/i18n.extend';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule, OnModuleInit {
+  constructor(private adapter: HttpAdapterHost, private readonly i18n: I18nService) {}
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply((req: any, res: any, next: any) => {
+        let lang;
+        const requestAccept = req.headers['accept'];
+        if (requestAccept && requestAccept.includes('text/html') && (lang = req.query.lang || req.query.locale)) {
+          const resolveLang = this.i18n.resolveLanguage(lang);
+          if (['en-US', ...this.i18n.getSupportedLanguages()].includes(resolveLang)) {
+            res.cookie('locale', resolveLang, { httpOnly: true });
+            logger.debug(`Set locale to ${resolveLang}`);
+          }
+        }
+        next();
+      })
+      .forRoutes({ method: RequestMethod.GET, path: '*' });
+  }
+
+  onModuleInit() {
+    const app = this.adapter.httpAdapter.getInstance();
+    app.locals['tv'] = (key: string, fallback: any, lang: any, args: any) => {
+      return this.i18n.t(key, { defaultValue: fallback, lang, args });
+    };
+  }
+}

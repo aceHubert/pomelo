@@ -1,15 +1,15 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Render } from '@nestjs/common';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor() {}
 
   /**
-   * 启动 root 页面 return 'Hello World!'
+   * 启动 root 页面
    */
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Render('index')
+  index() {
+    return { layout: false };
   }
 }

@@ -26,6 +26,10 @@ async function bootstrap() {
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
 
+  // set application/x-www-form-urlencoded body parser
+  app.use(urlencoded({ extended: false }));
+
+  // set layout
   app.use(expressEjsLayout);
   app.useStaticAssets(join(__dirname, '../', 'public'));
   app.setBaseViewsDir(join(__dirname, '../', 'views'));
@@ -34,8 +38,6 @@ async function bootstrap() {
   app.set('layout extractScripts', true);
   app.set('layout extractStyles', true);
   app.set('layout extractMetas', true);
-
-  app.use('/interaction', urlencoded({ extended: false }));
 
   // enable cors
   if (cors) {

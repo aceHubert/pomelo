@@ -47,6 +47,16 @@ form .row:first-child {
   padding: 7rem 0;
 }
 
+.title{
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.locale-btns{
+  top: -4px;
+  right: -4px;
+}
+
 .sider-img svg{
   width: 100%;
   height: auto;
@@ -58,7 +68,16 @@ form .row:first-child {
 
 @media (max-width: 768px){
   .content {
-    padding: 3rem 0;
+    padding: 3rem .5rem;
+  }
+
+  .title{
+    position: static;
+  }
+
+  .locale-btns{
+    top: 1rem;
+    right: 1rem;
   }
 
   .sider-img {
@@ -204,12 +223,17 @@ form ::-ms-input-placeholder {
       <div class="col-md-6 contents">
         <div class="row justify-content-center">
           <div class="col-md-8">
-            <div class="mb-4">
-            <h3>Sign In</h3>
-            <p class="mb-4">to <strong><%= new URL(params.redirect_uri).host %></strong></p>
-          </div>
-          <%- form %>
-          <input type="submit" value="Log In" class="btn btn-primary submit" form="login-form">
+            <div class="title">
+              <%- locales %>
+              <h3><%= tv('login.wrapper.title', 'Sign In') %></h3>
+              <p class="mb-4"><%- tv('login.wrapper.subtitle', 'to <strong>' + new URL(params.redirect_uri).host + '</strong>', {
+                args: {
+                  host: new URL(params.redirect_uri).host,
+                },
+              }) %></p>
+            </div>
+            <%- form %>
+            <input type="submit" value="<%= tv('login.wrapper.submit_btn_text', 'Sign In') %>" class="btn btn-primary submit" form="login-form">
           </div>
         </div>
       </div>

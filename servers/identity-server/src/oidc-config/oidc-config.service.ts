@@ -11,6 +11,7 @@ import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
 import { renderPrimaryStyle } from '../common/utils/render-primary-style-tag.util';
 import { OidcRedisAdapterService } from '../oidc-adapter/oidc-redis-adapter.service';
 import { OidcConfigAdapter } from './oidc-adapter';
+import { getI18nFromContext } from './i18n.helper';
 
 @Injectable()
 export class OidcConfigService implements OidcModuleOptionsFactory {
@@ -87,6 +88,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
+    const globalPrefixUri = this.configService.get<string>('webServer.globalPrefixUri', '');
     const issuer = this.configService.getOrThrow('OIDC_ISSUER');
     const resource = this.configService.get<string>('OIDC_RESOURCE');
     const scopes: OidcConfiguration['scopes'] = [];
@@ -174,11 +176,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       },
       interactions: {
         url(_, interaction) {
-          return `/login/${interaction.uid}`;
+          return `${globalPrefixUri}/login/${interaction.uid}`;
         },
       },
       discovery: {
-        check_session_iframe: url.resolve(issuer, '/connect/checksession'),
+        check_session_iframe: url.resolve(issuer, `${globalPrefixUri}/connect/checksession`),
       },
       ttl: {
         DeviceCode: (ctx, token, client) => {
@@ -277,6 +279,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         },
         rpInitiatedLogout: {
           logoutSource: async (ctx, form) => {
+            const i18n = getI18nFromContext(ctx);
             const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
             // @param ctx - koa request context
             // @param form - form source (id="op.logoutForm") to be embedded in the page and submitted by
@@ -287,7 +290,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
               <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
               <link rel="icon" type="image/x-icon" href="favicon.ico" />
               <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-              <title>Logout Request</title>
+              <title>${i18n.tv('oidc.config.logout.confirm_page_title', `Logout Request`)}</title>
               <link rel="stylesheet" href="/style/index.css" />
               <link rel="stylesheet" href="/style/container.css" />
               ${primaryColor ? renderPrimaryStyle(primaryColor) : ''}
@@ -295,11 +298,23 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             <body>
               <main class="container">
                 <div class="wrapper">
-                  <h1 class="title">Do you want to sign-out from ${ctx.host}?</h1>
+                  <h1 class="title">${i18n.tv(
+                    'oidc.config.logout.confirm_title',
+                    `Do you want to sign-out from ${ctx.host}?`,
+                    {
+                      args: { ctx },
+                    },
+                  )}</h1>
                   ${form}
                   <div id="actions"">
-                    <button autofocus type="submit" class="action-button" form="op.logoutForm" value="yes" name="logout">Yes, sign me out</button>
-                    <button type="submit" class="action-button secondary" form="op.logoutForm">No, stay signed in</button>
+                    <button autofocus type="submit" class="action-button" form="op.logoutForm" value="yes" name="logout">${i18n.tv(
+                      'oidc.config.logout.confirm_btn_text',
+                      'Yes, sign me out',
+                    )}</button>
+                    <button type="submit" class="action-button secondary" form="op.logoutForm">${i18n.tv(
+                      'oidc.config.logout.cancel_btn_text',
+                      'No, stay signed in',
+                    )}</button>
                   </div>
                 </div>
               </main>
@@ -308,6 +323,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           },
           postLogoutSuccessSource: (ctx) => {
             // @param ctx - koa request context
+            const i18n = getI18nFromContext(ctx);
             const { clientId, clientName } = ctx.oidc.client || {}; // client is defined if the user chose to stay logged in with the OP
             const display = clientName || clientId;
             ctx.body = `<!DOCTYPE html>
@@ -316,15 +332,25 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
                 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
                 <link rel="icon" type="image/x-icon" href="favicon.ico" />
                 <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-                <title>Sign-out Success</title>
+                <title>${i18n.tv('oidc.config.logout.success_page_title', `Sign-out Success`)}</title>
                 <link rel="stylesheet" href="/style/index.css" />
                 <link rel="stylesheet" href="/style/container.css" />
               </head>
               <body>
                 <main class="container">
                   <div class="wrapper">
-                    <h1 class="title">Sign-out Success</h1>
-                    <p class="description">Your sign-out ${display ? `with ${display}` : ''} was successful.</p>
+                    <h1 class="title">${i18n.tv('oidc.config.logout.success_title', 'Sign-out Success')}</h1>
+                    <p class="description">${
+                      display
+                        ? i18n.tv(
+                            'oidc.config.logout.success_description_with_client',
+                            `Your sign-out with ${display} was successful.`,
+                            {
+                              args: { client: display },
+                            },
+                          )
+                        : i18n.tv('oidc.config.logout.success_description', `Your sign-out was successful.`)
+                    }</p>
                   </div>
                 </main>
               </body>
@@ -340,7 +366,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           },
           getResourceServerInfo: (ctx, resourceIndicator, client) => {
             console.log('resource indicator', resourceIndicator);
-            console.log('client', client);
 
             const metadata = client.metadata();
             return {
@@ -430,6 +455,15 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       },
       renderError: async (ctx, out, err) => {
         this.logger.error('oidc renderError', err);
+
+        const i18n = getI18nFromContext(ctx);
+        let pageTitle = i18n.tv('error.page_title', 'An error occurred'),
+          title = i18n.tv('error.title', 'An error occurred!');
+        if (ctx.status === 404) {
+          pageTitle = i18n.tv('404.page_title', 'Page not found');
+          title = i18n.tv('404.title', 'Page not found!');
+        }
+
         ctx.type = 'html';
         ctx.body = `<!DOCTYPE html>
         <html lang="en">
@@ -438,18 +472,22 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
             <link rel="icon" type="image/x-icon" href="favicon.ico" />
             <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
-            <title>An error occurred</title>
+            <title>${pageTitle}</title>
             <link rel="stylesheet" href="/style/index.css" />
             <link rel="stylesheet" href="/style/container.css" />
           </head>
           <body>
             <main class="container">
               <div class="wrapper">
-                <h1 class="title">An error occurred!</h1>
+                <h1 class="title">${title}</h1>
                 <p class="description">
-                  ${Object.entries(out)
-                    .map(([key, value]) => `<pre><strong>${key}</strong>: ${sanitizeHtml(value)}</pre>`)
-                    .join('')}
+                  ${
+                    ctx.status === 404
+                      ? (err as any).error_description ?? err.message
+                      : Object.entries(out)
+                          .map(([key, value]) => `<pre><strong>${key}</strong>: ${sanitizeHtml(value)}</pre>`)
+                          .join('')
+                  }
                 </p>
               </div>
             </main>

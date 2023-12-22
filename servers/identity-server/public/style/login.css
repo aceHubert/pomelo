@@ -21,6 +21,40 @@
   padding: 40px 30px 30px;
   max-width: 500px;
 }
+.locale-btns {
+  position: absolute;
+  top: 35px;
+  right: 25px;
+}
+.locale-btns .btn {
+  color: var(--theme-primary);
+  text-decoration: none;
+}
+.locale-btns .btn:hover,
+.locale-btns .btn:focus,
+.locale-btns .btn:active {
+  color: var(--theme-primary-7);
+}
+.locale-btns .btn-disabled,
+.locale-btns .btn:disabled {
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+.locale-btns .btn-disabled:hover,
+.locale-btns .btn:disabled:hover,
+.locale-btns .btn-disabled:focus,
+.locale-btns .btn:disabled:focus,
+.locale-btns .btn-disabled:active,
+.locale-btns .btn:disabled:active {
+  color: var(--text-secondary);
+}
+.locale-btns .divider {
+  display: inline-block;
+  height: 12px;
+  border-right: 1px solid #d9d9d9;
+  vertical-align: middle;
+  outline: none;
+}
 form {
   margin-top: 20px;
 }
@@ -104,5 +138,5 @@ form a:focus {
   }
 }
 #error {
-  color: #f95155;
+  color: #F82024;
 }

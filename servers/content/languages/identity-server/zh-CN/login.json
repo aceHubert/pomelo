@@ -1,0 +1,18 @@
+{
+  "page_title": "登录",
+  "form": {
+    "username_label": "用户名",
+    "username_placeholder": "请输入用户名",
+    "username_invalid": "请输入用户名！",
+    "password_label": "密码",
+    "password_placeholder": "请输入密码",
+    "password_invalid": "请输入密码（6-16位字符）！",
+    "remember_me_label": "记住我？",
+    "forgot_password_label": "忘记密码"
+  },
+  "wrapper": {
+    "title": "登录",
+    "subtitle": "到 <strong>{host}</strong>",
+    "submit_btn_text": "登  录"
+  }
+}

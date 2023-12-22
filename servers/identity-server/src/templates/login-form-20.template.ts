@@ -64,7 +64,17 @@ body:after {
   filter: brightness(2);
 }
 
+.locale-btns{
+  top: 30px;
+  right: 30px;
+}
+
 @media (max-width: 768px){
+  .locale-btns{
+    top: 1rem;
+    right: 1rem;
+  }
+
   .content {
     padding: 3rem 0;
   }
@@ -197,18 +207,23 @@ body:after {
 }
 </style>
 <section class="content">
+  <%- locales %>
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-6 text-center mb-7">
-        <h2 class="heading-section">Sign In</h2>
+        <h2 class="heading-section"><%= tv('login.wrapper.title', 'Sign In') %></h2>
       </div>
     </div>
     <div class="row justify-content-center">
       <div class="col-md-6 col-lg-4">
         <div class="login-wrap p-0">
-          <h3 class="mb-5 text-center">to <strong><%= new URL(params.redirect_uri).host %></strong></h3>
-         <%- form %>
-        <button type="submit" class="btn btn-primary btn-lg submit px-3" form="login-form">Sign In</button>
+          <h3 class="mb-5 text-center"><%- tv('login.wrapper.subtitle', 'to <strong>' + new URL(params.redirect_uri).host + '</strong>', {
+            args: {
+              host: new URL(params.redirect_uri).host,
+            },
+          }) %></h3>
+          <%- form %>
+          <button type="submit" class="btn btn-primary btn-lg submit px-3" form="login-form"><%= tv('login.wrapper.submit_btn_text', 'Sign In') %></button>
         </div>
       </div>
     </div>

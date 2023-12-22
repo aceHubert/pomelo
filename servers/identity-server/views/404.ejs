@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-    <title>Page not found!</title>
+    <title><%= tv('404.page_title', 'Page not found', i18nLang) %></title>
     <link rel="stylesheet" href="/style/index.css" />
     <link rel="stylesheet" href="/style/container.css" />
   </head>
   <body>
     <main class="container">
       <div class="wrapper">
-        <h1 class="title">Page not found!</h1>
-        <p class="description"><strong>path:</strong> <%= path %></p>
+        <h1 class="title"><%= tv('404.title', 'Page not found!', i18nLang) %></h1>
+        <p class="description"><%- tv('404.description', '<strong>path:</strong>' + path , i18nLang, { path }) %></p>
       </div>
     </main>
   </body>

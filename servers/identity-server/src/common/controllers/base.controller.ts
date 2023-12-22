@@ -1,3 +1,4 @@
+import * as url from 'url';
 import { HttpException } from '@nestjs/common';
 import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared-server';
 
@@ -36,6 +37,48 @@ export abstract class BaseController {
         message: messageOrException.message,
         statusCode: messageOrException instanceof HttpException ? messageOrException.getStatus() : undefined,
       };
+    }
+  }
+
+  protected getLocaleBtns(
+    req: { url: string },
+    currentLang: string,
+    locales: { lang: string; display: string }[] = [],
+  ) {
+    if (locales.length === 0) {
+      locales = [
+        {
+          lang: 'en-US',
+          display: 'EN',
+        },
+        {
+          lang: 'zh-CN',
+          display: '中',
+        },
+      ];
+    }
+    const parsedUrl = url.parse(req.url, true);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { lang, locale, ...restQuery } = parsedUrl.query;
+    const localeRemovedUrl = url.format({
+      ...parsedUrl,
+      search: void 0,
+      query: restQuery,
+    });
+
+    return `<div class="locale-btns">
+      ${locales
+        .map(
+          (locale) =>
+            `<a class="btn btn-sm btn-link ${currentLang === locale.lang ? 'btn-disabled' : ''}" href="${
+              currentLang === locale.lang ? 'javascript:;' : getHref(locale.lang)
+            }" >${locale.display}</a>`,
+        )
+        .join('<div class="divider"></div>')}
+    </div>`;
+
+    function getHref(lang: string) {
+      return `${localeRemovedUrl}${localeRemovedUrl.indexOf('?') >= 0 ? '&' : '?'}locale=${lang}`;
     }
   }
 }
