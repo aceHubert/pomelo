@@ -232,9 +232,16 @@ export const useLayoutMixin = () => {
     const { path: previousPath = cachedPath, define: previousPathDefine = currentMatchPath.value } = previous;
     if (previousPath && config?.regex.keys.length) {
       const requiredParamKeys = config.regex.keys.map((key) => String(key.name));
-      const matched = pathToRegexp.match<Record<string, any>>(previousPathDefine)(previousPath, {
+      let matched = pathToRegexp.match<Record<string, any>>(previousPathDefine)(previousPath, {
         decode: decodeURIComponent,
       });
+      // remove search
+      const splitPath = previousPath.split('?');
+      if (splitPath.length > 1) {
+        matched = pathToRegexp.match<Record<string, any>>(previousPathDefine.split('?')[0])(splitPath[0], {
+          decode: decodeURIComponent,
+        });
+      }
       if (matched) {
         const previousParamKeys = Object.keys(matched.params);
         process.env.NODE_ENV === 'production' &&

@@ -449,7 +449,7 @@ export default defineComponent({
                     }}
                   />
                 ) : (
-                  configProvider.i18nRender(`${props.i18nKeyPrefix}.sider_drawer.title`, '菜单')
+                  configProvider.i18nRender(`${props.i18nKeyPrefix}.sider_drawer.title`, 'Menu')
                 )
               }
               onClose={() => (sideDrawerVisable.value = false)}
@@ -472,7 +472,7 @@ export default defineComponent({
                   }}
                   maskClosable
                   closeable={false}
-                  title={configProvider.i18nRender(`${props.i18nKeyPrefix}.sider_drawer.title`, '菜单')}
+                  title={configProvider.i18nRender(`${props.i18nKeyPrefix}.sider_drawer.title`, 'Menu')}
                   onClose={() => (sideChildDrawerVisable.value = false)}
                 >
                   {renderMenu(layoutMixin.topMenus, {
@@ -584,7 +584,7 @@ export default defineComponent({
                       >
                         <Menu.Item key="go-back">
                           <Icon type="arrow-left" />
-                          <span>{configProvider.i18nRender(`${props.i18nKeyPrefix}.sider.go_back`, '返回')}</span>
+                          <span>{configProvider.i18nRender(`${props.i18nKeyPrefix}.sider.go_back`, 'Go Back')}</span>
                         </Menu.Item>
                       </Menu>
                     ) : !hasHeader.value && !hasTopMenu.value && slots.siderActions ? (
@@ -602,8 +602,8 @@ export default defineComponent({
                           <Icon class="trigger" type={sideCollapsed.value ? 'menu-unfold' : 'menu-fold'} />
                           <span>
                             {sideCollapsed.value
-                              ? configProvider.i18nRender(`${props.i18nKeyPrefix}.sider.expand`, '展开')
-                              : configProvider.i18nRender(`${props.i18nKeyPrefix}.sider.collapse`, '折叠')}
+                              ? configProvider.i18nRender(`${props.i18nKeyPrefix}.sider.expand`, 'Expand')
+                              : configProvider.i18nRender(`${props.i18nKeyPrefix}.sider.collapse`, 'Collapse')}
                           </span>
                         </Menu.Item>
                       </Menu>

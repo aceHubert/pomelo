@@ -1029,17 +1029,17 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 
-  &-today &-date {
+  &-today .@{ant-prefix}-calendar-date {
     color: @var-primary;
     border-color: @var-primary;
   }
 
-  &-selected-day &-date {
+  &-selected-day .@{ant-prefix}-calendar-date {
     background: @var-primary-2;
   }
 
-  &-last-month-cell &-date,
-  &-next-month-btn-day &-date {
+  &-last-month-cell .@{ant-prefix}-calendar-date,
+  &-next-month-btn-day .@{ant-prefix}-calendar-date {
     &,
     &:hover {
       color: @disabled-color;
@@ -1048,7 +1048,7 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 
-  &-disabled-cell &-date {
+  &-disabled-cell .@{ant-prefix}-calendar-date {
     color: @disabled-color;
     background: @disabled-bg;
     border-color: transparent;
@@ -1058,7 +1058,7 @@ h1, h2, h3, h4, h5, h6 {
     }
   }
 
-  &-disabled-cell&-today &-date {
+  &-disabled-cell.@{ant-prefix}-calendar-today .@{ant-prefix}-calendar-date {
     &::before {
       border-color: @disabled-color;
     }
