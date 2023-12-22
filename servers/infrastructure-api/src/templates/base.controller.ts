@@ -490,7 +490,7 @@ export class TemplateController extends createMetaController(
       return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
+        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -519,7 +519,7 @@ export class TemplateController extends createMetaController(
       return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
+        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -558,7 +558,7 @@ export class TemplateController extends createMetaController(
       return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
+        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -598,7 +598,7 @@ export class TemplateController extends createMetaController(
       return this.success();
     } else {
       return this.faild(
-        await i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
+        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
           args: { id },
         }),
         400,

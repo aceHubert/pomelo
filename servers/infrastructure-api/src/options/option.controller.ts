@@ -158,7 +158,7 @@ export class OptionController extends BaseController {
       return this.success();
     } else {
       return this.faild(
-        await i18n.tv('options.controller.option_does_not_exist', `Option "${id}" does not exist！`, {
+        i18n.tv('options.controller.option_does_not_exist', `Option "${id}" does not exist！`, {
           args: { id },
         }),
         400,

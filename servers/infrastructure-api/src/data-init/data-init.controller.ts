@@ -23,7 +23,9 @@ export class DataInitController extends BaseController {
     const result = this.dbInitService.hasDatasInitialed();
     return this.success({
       dbInitRequired: result,
-      message: result ? await i18n.tv('db-init.controller.init_datas.required', 'Datas initializing is required!') : '',
+      message: result
+        ? i18n.tv('db-init.controller.init_datas.required', 'Datas initializing is required!')
+        : i18n.tv('db-init.controller.init_datas.completed', 'Datas have already initialized!'),
     });
   }
 
@@ -50,13 +52,11 @@ export class DataInitController extends BaseController {
       });
 
       return this.success({
-        message: await i18n.tv('db-init.controller.init_datas.success', 'Initialize datas successful!'),
+        message: i18n.tv('db-init.controller.init_datas.success', 'Initialize datas successful!'),
       });
     } catch (err) {
       this.logger.error(err);
-      return this.faild(
-        await i18n.tv('db-init.controller.init_datas.fail', 'An error occurred while initializing datas!'),
-      );
+      return this.faild(i18n.tv('db-init.controller.init_datas.fail', 'An error occurred while initializing datas!'));
     }
   }
 }

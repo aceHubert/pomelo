@@ -30,7 +30,7 @@ export class AllExceptionFilter implements ExceptionFilter {
       // @ts-expect-error code doesn't export type
       if (exception instanceof SequelizeDatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
         // 当出现表不存在错误时，提示要初始化数据库， 并设置 response.dbInitRequired = true
-        description.message = (await i18n?.tv('error.no_such_table', 'No such table!')) ?? 'No such table!';
+        description.message = i18n?.tv('error.no_such_table', 'No such table!') ?? 'No such table!';
         description.dbInitRequired = true;
       }
 

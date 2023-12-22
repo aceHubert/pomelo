@@ -204,7 +204,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
       return this.success();
     } else {
       return this.faild(
-        await i18n.tv('users.controller.user_does_not_exist', `User "${id}" does not exist！`, {
+        i18n.tv('users.controller.user_does_not_exist', `User "${id}" does not exist！`, {
           args: { id },
         }),
         400,
@@ -228,7 +228,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
       return this.success();
     } else {
       return this.faild(
-        await i18n.tv('users.controller.user_does_not_exist', `User "${id}" does not exist！`, {
+        i18n.tv('users.controller.user_does_not_exist', `User "${id}" does not exist！`, {
           args: { id },
         }),
         400,
