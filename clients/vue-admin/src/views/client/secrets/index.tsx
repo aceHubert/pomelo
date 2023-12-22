@@ -117,7 +117,7 @@ export default defineComponent({
                 })
               }
             >
-              {i18n.tv('page_client_secrets.create_btn_text', '生成密匙')}
+              {i18n.tv('page_client_secrets.generate_btn_text', '生成密匙')}
             </Button>
           </div>
           <List
@@ -127,7 +127,7 @@ export default defineComponent({
               renderItem: (item: ClientSecretsModel['secrets'][0]) => (
                 <List.Item>
                   <Button slot="actions" type="link" class="danger--text as-link" onClick={() => handleDelete(item.id)}>
-                    {i18n.tv('page_client_secrets.delete_btn_text', '删除')}
+                    {i18n.tv('common.btn_text.delete', '删除')}
                   </Button>
                   <List.Item.Meta
                     title={`${item.description || '-'} (${item.type})`}

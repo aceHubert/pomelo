@@ -360,8 +360,7 @@ export default defineComponent({
                     footer: () => (
                       <div class={classes.footerWrapper}>
                         <div class="copyright">
-                          Copyright
-                          <Icon type="copyright" /> 2019-{new Date().getFullYear()} <span> Pomelo 版权所有 </span>
+                          <span>&#169;</span>2019-{new Date().getFullYear()} <span> Pomelo </span>
                         </div>
                       </div>
                     ),

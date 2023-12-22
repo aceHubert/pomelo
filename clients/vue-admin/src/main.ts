@@ -15,8 +15,7 @@ import './registerServiceWorker';
 import './assets/styles/index.less';
 
 // Plugins
-import optionsPlugin from './plugins/options';
-import pubSubMessagePlugin from './plugins/pubsub-messages';
+import plugins from './plugins';
 
 Vue.use(VueCompositionApi);
 Vue.use(ResourceManagerVuePlugin, { mode: 'visible' });
@@ -62,12 +61,10 @@ async function createApp() {
     });
   }
 
-  if (typeof optionsPlugin === 'function') {
-    await optionsPlugin(app, inject);
-  }
-
-  if (typeof pubSubMessagePlugin === 'function') {
-    await pubSubMessagePlugin(app, inject);
+  for (const plugin of plugins) {
+    if (typeof plugin === 'function') {
+      await plugin(app, inject);
+    }
   }
 
   return {

@@ -60,7 +60,7 @@ export default defineComponent({
                 class="px-0 danger--text as-link"
                 onClick={() => handleDelete(record.id!)}
               >
-                {i18n.tv('page_identity_resource_properties.action_delete_btn', '删除')}
+                {i18n.tv('common.btn_text.delete', '删除')}
               </Button>,
             ],
             fixed: deviceType.isMobile ? 'right' : void 0,
@@ -177,7 +177,7 @@ export default defineComponent({
                 default: (form: WrappedFormUtils) => (
                   <Form.Item class="mb-2">
                     <Button type="primary" loading={adding.value} onClick={() => handleAdd(form)}>
-                      {i18n.tv('page_identity_resource_properties.add_btn_text', '添加')}
+                      {i18n.tv('page_identity_resource_properties.form.add_btn_text', '添加')}
                     </Button>
                   </Form.Item>
                 ),

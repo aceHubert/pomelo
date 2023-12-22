@@ -61,7 +61,7 @@ export default Form.create({})(
                   class="px-0 danger--text as-link"
                   onClick={() => handleDelete(record.id)}
                 >
-                  {i18n.tv('page_client_claims.action_delete_btn', '删除')}
+                  {i18n.tv('common.btn_text.delete', '删除')}
                 </Button>,
               ],
               fixed: deviceType.isMobile ? 'right' : void 0,
@@ -180,7 +180,7 @@ export default Form.create({})(
                         rules: [
                           {
                             required: true,
-                            message: i18n.tv('page_client_claims.form.type_required', '请输入声明类型'),
+                            message: i18n.tv('page_client_claims.form.type_required', '请输入声明类型！'),
                           },
                         ],
                       },
@@ -198,7 +198,7 @@ export default Form.create({})(
                         rules: [
                           {
                             required: true,
-                            message: i18n.tv('page_client_claims.form.value_required', '请输入声明值'),
+                            message: i18n.tv('page_client_claims.form.value_required', '请输入声明值！'),
                           },
                         ],
                       },
@@ -228,7 +228,7 @@ export default Form.create({})(
               dataSource={$claimsRes.$result}
               loading={$claimsRes.$loading}
               locale={{
-                emptyText: i18n.tv('page_client_claims.empty_text', '暂无资源声明'),
+                emptyText: i18n.tv('page_client_claims.empty_text', '暂无资源声明！'),
               }}
             />
           </Card>

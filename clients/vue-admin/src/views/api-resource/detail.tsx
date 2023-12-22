@@ -10,7 +10,7 @@ export default defineComponent({
   name: 'ApiResourceDetail',
   head() {
     return {
-      title: this.$tv('page_api_resource_detail.page_title', 'Api资源详情') as string,
+      title: this.$tv('page_api_resource_detail.page_title', 'API资源详情') as string,
     };
   },
   props: {
@@ -127,7 +127,7 @@ export default defineComponent({
                     <Space>
                       {!resource.nonEditable && resource.enabled && (
                         <Button type="link" size="small" onClick={() => handleShowEdit()}>
-                          {i18n.tv('page_api_resource_detail.edit_btn', '编辑')}
+                          {i18n.tv('common.btn_text.edit', '编辑')}
                         </Button>
                       )}
                     </Space>
@@ -141,7 +141,7 @@ export default defineComponent({
               <Descriptions.Item label={i18n.tv('page_api_resource_detail.display_name_label', '显示名称')}>
                 {resource.displayName}
               </Descriptions.Item>
-              <Descriptions.Item label={i18n.tv('page_api_resource_detail.enabled_label', '启用状态')} span={2}>
+              <Descriptions.Item label={i18n.tv('page_api_resource_detail.status_label', '启用状态')} span={2}>
                 {resource.nonEditable ? (
                   <Tag color={resource.enabled ? 'green' : 'red'}>
                     {resource.enabled ? i18n.tv('common.btn_text.yes', '是') : i18n.tv('common.btn_text.no', '否')}
@@ -168,10 +168,10 @@ export default defineComponent({
               footer: () => (
                 <div>
                   <Button disabled={updating.value} onClick={() => (isEditModalVisable.value = false)}>
-                    {i18n.tv('page_api_resource_detail.btn_cancel_text', '关闭')}
+                    {i18n.tv('page_api_resource_detail.action_btn_text.edit_modal_cancel', '关闭')}
                   </Button>
                   <Button type="primary" class="ml-2" loading={updating.value} onClick={() => handleUpdate()}>
-                    {i18n.tv('page_api_resource_detail.btn_ok_text', '保存')}
+                    {i18n.tv('page_api_resource_detail.action_btn_text.edit_modal_ok', '保存')}
                   </Button>
                 </div>
               ),

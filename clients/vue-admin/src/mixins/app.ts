@@ -1,7 +1,9 @@
 import { ref, reactive, computed } from '@vue/composition-api';
+import { User } from 'oidc-client-ts';
 import { Theme } from 'antdv-layout-pro/types';
 import { warn } from '@ace-util/core';
-import { useI18n, useEffect } from '@/hooks';
+import { useUserApi } from '@/fetch/apis';
+import { useI18n, useUserManager, useEffect } from '@/hooks';
 import { useAppStore } from '@/store';
 
 // Types
@@ -19,6 +21,8 @@ const AntLocales: Record<string, () => Promise<Locale>> = {
 export const useAppMixin = () => {
   const i18n = useI18n();
   const appStore = useAppStore();
+  const userManager = useUserManager();
+  const userApi = useUserApi();
 
   // antd locale
   const antLocales = ref<Locale>({ locale: i18n.locale });
@@ -45,6 +49,29 @@ export const useAppMixin = () => {
   const isLight = computed(() => !isDark.value);
   const isRealLight = computed(() => theme.value === Theme.RealLight);
   const primaryColor = computed(() => appStore.primaryColor);
+
+  const setLocale = (locale: string) => {
+    appStore.setLocale(locale);
+    userManager
+      .getUser()
+      .then((user) => {
+        if (user?.profile.sub)
+          return userApi
+            .updateMetaByKey({
+              variables: {
+                userId: user.profile.sub,
+                key: 'locale',
+                value: locale,
+              },
+            })
+            .then(({ result }) => {
+              result && userManager.storeUser(new User({ ...user, profile: { ...user.profile, locale } }));
+              return result;
+            });
+        return Promise.resolve(true);
+      })
+      .catch(() => {});
+  };
 
   /**
    * 加载 antd 语言文件
@@ -78,10 +105,10 @@ export const useAppMixin = () => {
     primaryColor,
     layout,
     supportLanguages,
+    setLocale,
     setTheme: appStore.setTheme,
     setPrimaryColor: appStore.setPrimaryColor,
     setColor: appStore.setColor,
-    setLocale: appStore.setLocale,
     setLayout: appStore.setLayout,
   });
 };

@@ -187,9 +187,9 @@ export default Form.create({})(
                 <Alert
                   type="warning"
                   banner
-                  message={i18n.tv('page_api_secrets.generate.form.secret_generated_tip_title', '重要提醒')}
+                  message={i18n.tv('page_api_secrets.generate.secret_generated_tip_title', '重要提醒')}
                   description={i18n.tv(
-                    'page_api_secrets.generate.form.secret_generated_tip',
+                    'page_api_secrets.generate.secret_generated_tip_content',
                     '密匙已生成，请妥善保管，一旦离开此页面，密匙将不可查看。',
                   )}
                 ></Alert>
@@ -209,6 +209,9 @@ export default Form.create({})(
                     <Icon type="copy" />
                   </a>
                 </p>
+                <Button class="mt-2" type="primary" onClick={() => router.back()}>
+                  {i18n.tv('page_api_secrets.generate.back_btn_text', '返回')}
+                </Button>
               </div>
             ) : (
               <Form

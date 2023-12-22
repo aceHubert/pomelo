@@ -196,7 +196,7 @@ export default Form.create({})(
                               });
                             }}
                           >
-                            {i18n.tv('page_client_detail.edit_btn', '编辑')}
+                            {i18n.tv('common.btn_text.edit', '编辑')}
                           </Button>
                         )}
                       </Space>
@@ -215,7 +215,7 @@ export default Form.create({})(
                     {upperFirst(client.applicationType)}
                   </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label={i18n.tv('page_client_detail.disabled_label', '启用状态')}>
+                <Descriptions.Item label={i18n.tv('page_client_detail.status_label', '启用状态')}>
                   <Switch
                     disabled={updateStatusSubmiting.value}
                     checked={client.enabled}
@@ -225,7 +225,7 @@ export default Form.create({})(
                 <Descriptions.Item label={i18n.tv('page_client_detail.client_uri_label', '客户端URI')}>
                   {client.clientUri || '-'}
                 </Descriptions.Item>
-                <Descriptions.Item label={i18n.tv('page_client_detail.logo_uri_label', 'Logo')}>
+                <Descriptions.Item label={i18n.tv('page_client_detail.logo_uri_label', 'Logo URI')}>
                   {client.logoUri ? <img src={client.logoUri} style="height: 30px" /> : '-'}
                 </Descriptions.Item>
                 <Descriptions.Item label={i18n.tv('page_client_detail.policy_uri_label', '用户协议')}>

@@ -22,7 +22,7 @@ export default Form.create({})(
     name: 'ClientCorsOrigin',
     head() {
       return {
-        title: this.$tv('page_client_cors_origin.page_title', '客户端跨域设置') as string,
+        title: this.$tv('page_client_cors_origins.page_title', '客户端跨域设置') as string,
       };
     },
     props: {
@@ -55,7 +55,7 @@ export default Form.create({})(
                   class="px-0 danger--text as-link"
                   onClick={() => handleDelete(record.id)}
                 >
-                  {i18n.tv('page_client_cors_origins.action_delete_btn', '删除')}
+                  {i18n.tv('common.btn_text.delete', '删除')}
                 </Button>,
               ],
               fixed: deviceType.isMobile ? 'right' : void 0,
@@ -164,7 +164,7 @@ export default Form.create({})(
           <Card bordered={false} size="small">
             {$corsOriginsRes.$loaded && (
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
-                <Form.Item label={i18n.tv('page_client_cors_origins.form.value_label', '跨域URI')} class="mb-2">
+                <Form.Item label={i18n.tv('page_client_cors_origins.form.origin_label', '跨域URI')} class="mb-2">
                   <Input
                     style="width: 350px; max-width: 100%;"
                     v-decorator={[
@@ -173,21 +173,21 @@ export default Form.create({})(
                         rules: [
                           {
                             required: true,
-                            message: i18n.tv('page_client_cors_origins.form.value_required', '请输入允许跨域的URI'),
+                            message: i18n.tv('page_client_cors_origins.form.origin_required', '请输入允许跨域的URI'),
                           },
                           {
                             type: 'url',
-                            message: i18n.tv('page_client_cors_origins.form.value_pattern', 'URI格式错误'),
+                            message: i18n.tv('page_client_cors_origins.form.origin_pattern_invalid', 'URI格式错误'),
                           },
                         ],
                       },
                     ]}
-                    placeholder={i18n.tv('page_client_cors_origins.form.value_placeholder', '请输入允许跨域的URI')}
+                    placeholder={i18n.tv('page_client_cors_origins.form.origin_placeholder', '请输入允许跨域的URI')}
                   />
                 </Form.Item>
                 <Form.Item class="mb-2">
                   <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_client_cors_origins.form.submit_btn', '添加')}
+                    {i18n.tv('page_client_cors_origins.form.add_btn_text', '添加')}
                   </Button>
                 </Form.Item>
               </Form>
@@ -207,7 +207,7 @@ export default Form.create({})(
               dataSource={$corsOriginsRes.$result}
               loading={$corsOriginsRes.$loading}
               locale={{
-                emptyText: i18n.tv('page_client_cors_origins.empty_text', '暂无跨域配置'),
+                emptyText: i18n.tv('page_client_cors_origins.empty_text', '暂无跨域配置！'),
               }}
             />
           </Card>

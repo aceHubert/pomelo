@@ -187,9 +187,9 @@ export default Form.create({})(
                 <Alert
                   type="warning"
                   banner
-                  message={i18n.tv('page_client_secrets.generate.form.secret_generated_tip_title', '重要提醒')}
+                  message={i18n.tv('page_client_secrets.generate.secret_generated_tip_title', '重要提醒')}
                   description={i18n.tv(
-                    'page_client_secrets.generate.form.secret_generated_tip',
+                    'page_client_secrets.generate.secret_generated_tip_content',
                     '密匙已生成，请妥善保管，一旦离开此页面，密匙将不可查看。',
                   )}
                 ></Alert>
@@ -209,6 +209,10 @@ export default Form.create({})(
                     <Icon type="copy" />
                   </a>
                 </p>
+
+                <Button class="mt-2" type="primary" onClick={() => router.back()}>
+                  {i18n.tv('page_client_secrets.generate.back_btn_text', '返回')}
+                </Button>
               </div>
             ) : (
               <Form
@@ -228,12 +232,12 @@ export default Form.create({})(
                         rules: [
                           {
                             required: true,
-                            message: i18n.tv('page_client_secrets.generate.form.type_required', '请输入说明'),
+                            message: i18n.tv('page_client_secrets.generate.form.description_required', '请输入说明！'),
                           },
                         ],
                       },
                     ]}
-                    placeholder={i18n.tv('page_client_secrets.generate.form.type_placeholder', '请输入说明')}
+                    placeholder={i18n.tv('page_client_secrets.generate.form.description_placeholder', '请输入说明')}
                     style="width:268px"
                   ></Input>
                 </Form.Item>
@@ -246,7 +250,7 @@ export default Form.create({})(
                         rules: [
                           {
                             required: true,
-                            message: i18n.tv('page_client_secrets.generate.form.type_required', '请选择密匙类型'),
+                            message: i18n.tv('page_client_secrets.generate.form.type_required', '请选择密匙类型！'),
                           },
                         ],
                       },
@@ -285,7 +289,7 @@ export default Form.create({})(
                               required: true,
                               message: i18n.tv(
                                 'page_client_secrets.generate.form.expires_at_date_required',
-                                '请选择过期时间',
+                                '请选择过期时间！',
                               ),
                             },
                           ],

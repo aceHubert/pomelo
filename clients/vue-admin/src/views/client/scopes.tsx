@@ -26,6 +26,10 @@ const getPresetOptions = () => [
     value: 'profile',
     label: 'profile',
   },
+  {
+    value: 'offline_access',
+    label: 'offline access',
+  },
 ];
 
 export default Form.create({})(
@@ -66,7 +70,7 @@ export default Form.create({})(
                   class="px-0 danger--text as-link"
                   onClick={() => handleDelete(record.id)}
                 >
-                  {i18n.tv('page_client_scopes.action_delete_btn', '删除')}
+                  {i18n.tv('common.btn_text.delete', '删除')}
                 </Button>,
               ],
               fixed: deviceType.isMobile ? 'right' : void 0,
@@ -186,7 +190,7 @@ export default Form.create({})(
                         rules: [
                           {
                             required: true,
-                            message: i18n.tv('page_client_scopes.form.scope_required', '请选择/输入授权范围'),
+                            message: i18n.tv('page_client_scopes.form.scope_required', '请选择/输入授权范围！'),
                           },
                         ],
                       },
@@ -199,7 +203,7 @@ export default Form.create({})(
                 </Form.Item>
                 <Form.Item class="mb-2">
                   <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_client_scopes.form.submit_btn', '添加')}
+                    {i18n.tv('page_client_scopes.form.add_btn_text', '添加')}
                   </Button>
                 </Form.Item>
               </Form>

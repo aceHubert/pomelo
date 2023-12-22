@@ -61,7 +61,7 @@ export default defineComponent({
                 class="px-0 danger--text as-link"
                 onClick={() => handleDelete(record.id!)}
               >
-                {i18n.tv('page_client_properties.action_delete_btn', '删除')}
+                {i18n.tv('common.btn_text.delete', '删除')}
               </Button>,
             ],
             fixed: deviceType.isMobile ? 'right' : void 0,
@@ -71,7 +71,9 @@ export default defineComponent({
     );
 
     const clientName = ref('');
-    const presetPrperties = getPresetProperties();
+    const presetPrperties = computed(() =>
+      getPresetProperties((...args: [string, string]) => i18n.tv(...args) as string),
+    );
 
     const $propertiesRes = createResource(() => {
       return clientApi
@@ -169,12 +171,12 @@ export default defineComponent({
           {$propertiesRes.$loaded && (
             <PropertyForm
               layout={deviceType.isMobile ? '' : 'inline'}
-              presetPrperties={presetPrperties}
+              presetPrperties={presetPrperties.value}
               scopedSlots={{
                 default: (form: WrappedFormUtils) => (
                   <Form.Item class="mb-2">
                     <Button type="primary" loading={adding.value} onClick={() => handleAdd(form)}>
-                      {i18n.tv('page_client_properties.add_btn_text', '添加')}
+                      {i18n.tv('page_client_properties.form.add_btn_text', '添加')}
                     </Button>
                   </Form.Item>
                 ),
@@ -197,7 +199,7 @@ export default defineComponent({
             dataSource={$propertiesRes.$result}
             loading={$propertiesRes.$loading}
             locale={{
-              emptyText: i18n.tv('page_identity_resources_property.empty_text', '暂无自定义属性'),
+              emptyText: i18n.tv('page_client_properties.empty_text', '暂无自定义属性'),
             }}
           />
         </Card>

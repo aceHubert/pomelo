@@ -41,8 +41,7 @@ export default defineComponent({
 
     const apiResourceName = ref('');
     const isFormModalVisable = ref(false);
-    const editId = ref<number>();
-    const editFormObj = ref({});
+    const editFormObj = ref<PagedApiScopeModel['rows'][0]>();
 
     const rowCount = ref(0);
     const columns = computed(() => {
@@ -51,13 +50,13 @@ export default defineComponent({
           <Descriptions size="small" column={1} class="mt-2">
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {i18n.tv('page_clients.table_header.display_name_label', '显示名称')}
+                {i18n.tv('page_api_scopes.table_header.display_name_label', '显示名称')}
               </span>
               {record.displayName || '-'}
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {i18n.tv('page_clients.table_header.required_label', '是否必须')}
+                {i18n.tv('page_api_scopes.table_header.required_label', '是否必须')}
               </span>
               <Tag color={record.required ? 'green' : 'red'}>
                 {record.required ? i18n.tv('common.btn_text.yes', '是') : i18n.tv('common.btn_text.no', '否')}
@@ -92,24 +91,22 @@ export default defineComponent({
             },
           }}
         >
-          {i18n.tv('page_api_scopes.action_claim_btn_text', '声明')}
+          {i18n.tv('page_api_scopes.action_btn_text.claims', '声明')}
         </router-link>,
         <a
           href="javascript:;"
           class="info--text"
           onClick={() => {
-            isFormModalVisable.value = true;
-
+            editFormObj.value = record;
             nextTick(() => {
-              editId.value = record.id;
-              editFormObj.value = record;
+              isFormModalVisable.value = true;
             });
           }}
         >
-          {i18n.tv('page_api_scopes.action_edit_btn_text', '编辑')}
+          {i18n.tv('common.btn_text.edit', '编辑')}
         </a>,
         <a href="javascript:;" class="danger--text" onClick={() => handleDelete(record.id)}>
-          {i18n.tv('page_api_scopes.action_delete_btn_text', '删除')}
+          {i18n.tv('common.btn_text.delete', '删除')}
         </a>,
       ];
 
@@ -208,11 +205,11 @@ export default defineComponent({
       (refs['apiScopeForm'] as any)?.validateFields((err, values) => {
         if (err) return;
 
-        if (editId.value) {
+        if (editFormObj.value) {
           apiResourceApi
             .updateScope({
               variables: {
-                id: editId.value,
+                id: editFormObj.value.id,
                 model: values,
               },
               loading: () => {
@@ -222,8 +219,7 @@ export default defineComponent({
             })
             .then(() => {
               isFormModalVisable.value = false;
-              editId.value = undefined;
-              editFormObj.value = {};
+              editFormObj.value = void 0;
               (refs['apiScopeForm'] as any)?.resetFields();
               refreshTable(false);
             })
@@ -315,16 +311,16 @@ export default defineComponent({
         <Card bordered={false} size="small">
           <SearchForm
             // keywordPlaceholder={
-            //   i18n.tv('page_api_scopes.search.name_placeholder', '“API资源名称”模糊搜索') as string
+            //   i18n.tv('page_api_scopes.search_name_placeholder', '“API资源名称”模糊搜索') as string
             // }
             keywordTypeOptions={[
               {
-                label: i18n.tv('page_api_scopes.search.options.by_name', '名称') as string,
+                label: i18n.tv('page_api_scopes.search_options.by_name', '名称') as string,
                 value: 'name',
                 selected: true,
               },
               {
-                label: i18n.tv('page_api_scopes.search.options.by_display_name', '显示名称') as string,
+                label: i18n.tv('page_api_scopes.search_options.by_display_name', '显示名称') as string,
                 value: 'displyName',
               },
             ]}
@@ -340,7 +336,7 @@ export default defineComponent({
                     (refs['apiScopeForm'] as any)?.resetFields();
                   }}
                 >
-                  {i18n.tv('page_api_scopes.btn_add_text', '新增资源')}
+                  {i18n.tv('page_api_scopes.action_btn_text.add', '新增资源')}
                 </Button>
               ),
             }}
@@ -368,24 +364,28 @@ export default defineComponent({
           <Modal
             vModel={isFormModalVisable.value}
             title={
-              editId.value
+              editFormObj.value
                 ? i18n.tv('page_api_scopes.edit_modal_title', '编辑API授权范围')
                 : i18n.tv('page_api_scopes.add_modal_title', '添加API授权范围')
             }
+            afterClose={() => {
+              editFormObj.value = void 0;
+            }}
             scopedSlots={{
               footer: () => (
                 <div>
                   <Button disabled={saving.value} onClick={() => (isFormModalVisable.value = false)}>
-                    {i18n.tv('page_api_scopes.btn_cancel_text', '关闭')}
+                    {i18n.tv('page_api_scopes.action_btn_text.modal_cancel', '关闭')}
                   </Button>
                   <Button type="primary" class="ml-2" loading={saving.value} onClick={() => handleSave()}>
-                    {i18n.tv('page_api_scopes.btn_ok_text', '保存')}
+                    {i18n.tv('page_api_scopes.action_btn_text.modal_ok', '保存')}
                   </Button>
                 </div>
               ),
             }}
             closable={false}
             maskClosable={false}
+            destroyOnClose
           >
             <ScopeForm ref="apiScopeForm" defaultValue={editFormObj.value}></ScopeForm>
           </Modal>

@@ -94,7 +94,7 @@ export default Form.create({})(
                   class="px-0 danger--text as-link"
                   onClick={() => handleDelete(record.id)}
                 >
-                  {i18n.tv('page_client_grant_types.action_delete_btn', '删除')}
+                  {i18n.tv('common.btn_text.delete', '删除')}
                 </Button>,
               ],
               fixed: deviceType.isMobile ? 'right' : void 0,
@@ -212,7 +212,10 @@ export default Form.create({})(
                         rules: [
                           {
                             required: true,
-                            message: i18n.tv('page_client_grant_types.form.grant_type_required', '请选择/输入授权类型'),
+                            message: i18n.tv(
+                              'page_client_grant_types.form.grant_type_required',
+                              '请选择/输入授权类型！',
+                            ),
                           },
                         ],
                       },
@@ -225,7 +228,7 @@ export default Form.create({})(
                 </Form.Item>
                 <Form.Item class="mb-2">
                   <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_client_grant_types.form.submit_btn', '添加')}
+                    {i18n.tv('page_client_grant_types.form.add_btn_text', '添加')}
                   </Button>
                 </Form.Item>
               </Form>
@@ -245,7 +248,7 @@ export default Form.create({})(
               dataSource={$grantTypesRes.$result}
               loading={$grantTypesRes.$loading}
               locale={{
-                emptyText: i18n.tv('page_client_grant_types.empty_text', '暂无授权类型配置'),
+                emptyText: i18n.tv('page_client_grant_types.empty_text', '暂无授权类型配置！'),
               }}
             />
           </Card>

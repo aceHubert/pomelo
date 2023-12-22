@@ -54,7 +54,7 @@ export default Form.create({})(
                 </span>
                 <Tag color={record.enabled ? 'green' : 'red'}>
                   {i18n.tv(
-                    `clients.status.${record.enabled ? 'enabled' : 'disabled'}`,
+                    `page_clients.status.${record.enabled ? 'enabled' : 'disabled'}`,
                     record.enabled ? '启用' : '禁用',
                   )}
                 </Tag>
@@ -62,8 +62,8 @@ export default Form.create({})(
               <Descriptions.Item>
                 <span slot="label" class="text--secondary">
                   {record.enabled
-                    ? i18n.tv('page_clients.table_header.updated_at_label', '最后修改于')
-                    : i18n.tv('page_clients.status.disabled_at', '禁用于')}
+                    ? i18n.tv('page_clients.updated_at', '最后修改于')
+                    : i18n.tv('page_clients.disabled_at', '禁用于')}
                 </span>
                 {moment(record.updatedAt).locale(i18n.locale).format('L HH:mm')}
               </Descriptions.Item>
@@ -80,7 +80,7 @@ export default Form.create({})(
               },
             }}
           >
-            {i18n.tv('page_clients.action_detail_btn_text', '详情')}
+            {i18n.tv('page_clients.action_btn_text.detail', '详情')}
           </router-link>,
           <router-link
             to={{
@@ -91,7 +91,7 @@ export default Form.create({})(
             }}
             class="primary-7--text hover:primary-6--text active:primary-8--text"
           >
-            {i18n.tv('page_clients.action_grant_type_btn_text', '授权类型')}
+            {i18n.tv('page_clients.action_btn_text.grant_type', '授权类型')}
           </router-link>,
           <router-link
             to={{
@@ -102,7 +102,7 @@ export default Form.create({})(
             }}
             class="primary-8--text hover:primary-7--text active:primary-9--text"
           >
-            {i18n.tv('page_clients.action_scope_btn_text', '授权范围')}
+            {i18n.tv('page_clients.action_btn_text.scopes', '授权范围')}
           </router-link>,
           <router-link
             to={{
@@ -113,7 +113,7 @@ export default Form.create({})(
             }}
             class="primary-9--text hover:primary-7--text active:primary-10--text"
           >
-            {i18n.tv('page_clients.action_claim_btn_text', '声明')}
+            {i18n.tv('page_clients.action_btn_text.claims', '声明')}
           </router-link>,
         ];
 
@@ -154,7 +154,7 @@ export default Form.create({})(
                   ) : (
                     <span class="error--text">
                       <Icon type="minus-circle" class="mr-1" />
-                      {i18n.tv('page_clients.status.disabled_at', '禁用于')}
+                      {i18n.tv('page_clients.disabled_at', '禁用于')}
                     </span>
                   )}
                 </p>
@@ -215,7 +215,7 @@ export default Form.create({})(
         return (
           <Card bordered={false} size="small">
             <SearchForm
-              keywordPlaceholder={i18n.tv('page_clients.search.name_placeholder', '“客户端名称”模糊搜索') as string}
+              keywordPlaceholder={i18n.tv('page_clients.search_placeholder', '“客户端名称”模糊搜索') as string}
               keywordName="clientName"
               rowCount={rowCount.value}
               scopedSlots={{
@@ -230,7 +230,7 @@ export default Form.create({})(
                       });
                     }}
                   >
-                    {i18n.tv('page_clients.btn_add_text', '新增客户端')}
+                    {i18n.tv('page_clients.action_btn_text.add', '新增客户端')}
                   </Button>
                 ),
               }}

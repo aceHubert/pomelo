@@ -55,7 +55,7 @@ export default Form.create({})(
                   class="px-0 danger--text as-link"
                   onClick={() => handleDelete(record.id)}
                 >
-                  {i18n.tv('page_identity_resource_claims.action_delete_btn', '删除')}
+                  {i18n.tv('common.btn_text.delete', '删除')}
                 </Button>,
               ],
               fixed: deviceType.isMobile ? 'right' : void 0,
@@ -206,7 +206,7 @@ export default Form.create({})(
               dataSource={$claimsRes.$result}
               loading={$claimsRes.$loading}
               locale={{
-                emptyText: i18n.tv('page_identity_resource_claims.empty_text', '暂无资源声明'),
+                emptyText: i18n.tv('page_identity_resource_claims.empty_text', '暂无资源声明！'),
               }}
             />
           </Card>

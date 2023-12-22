@@ -159,7 +159,7 @@ export class OidcUserManagerCreator implements UserManager<SigninRedirectArgs, S
     return this.oidcUserManager.metadataService;
   }
 
-  async getUser() {
+  getUser() {
     return this.oidcUserManager.getUser();
   }
 
@@ -200,6 +200,10 @@ export class OidcUserManagerCreator implements UserManager<SigninRedirectArgs, S
   signoutRedirectCallback(url?: string) {
     return this.oidcUserManager.signoutRedirectCallback(url);
   }
+
+  storeUser(user: Oidc.User | null): Promise<void> {
+    return this.oidcUserManager.storeUser(user);
+  }
 }
 
 declare module 'oidc-client-ts' {
@@ -225,6 +229,11 @@ declare module './user-manager' {
   export interface UserManager
     extends Pick<
       Oidc.UserManager,
-      'signinSilent' | 'signinRedirect' | 'signinRedirectCallback' | 'signoutRedirect' | 'signoutRedirectCallback'
+      | 'signinSilent'
+      | 'signinRedirect'
+      | 'signinRedirectCallback'
+      | 'signoutRedirect'
+      | 'signoutRedirectCallback'
+      | 'storeUser'
     > {}
 }

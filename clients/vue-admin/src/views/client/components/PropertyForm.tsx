@@ -3,16 +3,16 @@ import { default as moment } from 'moment';
 import { Form, AutoComplete, Input, InputNumber, Select, DatePicker, TimePicker, Upload, Icon } from 'ant-design-vue';
 import { ColorInput } from 'antdv-layout-pro';
 import { useI18n } from '@/hooks';
-import { PropertyType, PropertyGroupDesc } from '../utils/constants';
+import { PropertyType } from '../utils/constants';
 
 // Types
 import type { WrappedFormUtils, Form as FormProps } from 'ant-design-vue/types/form/form';
-import type { Property, PropertyGroup } from '../utils/constants';
+import type { Property } from '../utils/constants';
 
 type PropertyFormProps = {
   form: WrappedFormUtils;
   layout: FormProps['layout'];
-  presetPrperties: Array<{ group: PropertyGroup; children: Property[] }>;
+  presetPrperties: Array<{ group: string; children: Property[] }>;
 };
 
 export const PropertyForm = Form.create({})(
@@ -43,7 +43,7 @@ export const PropertyForm = Form.create({})(
                 ? callback()
                 : callback(
                     !result
-                      ? i18n.tv('enterprise_property.value_validator_error', `${property.title || '属性值'}验证失败`, {
+                      ? i18n.tv('property_form.value_validator_error', `${property.title || '属性值'}验证失败`, {
                           title: property.title,
                           type: property.type,
                         })
@@ -75,7 +75,7 @@ export const PropertyForm = Form.create({})(
                         {
                           type: propertyType,
                           message: i18n.tv(
-                            'property_form.value_type_error',
+                            'property_form.value_pattern_invalid',
                             propertyType === PropertyType.Float
                               ? '请输入正确的小数'
                               : propertyType === PropertyType.Integer
@@ -348,7 +348,7 @@ export const PropertyForm = Form.create({})(
                         },
                         {
                           type: propertyType,
-                          message: i18n.tv('property_form.value_type_error', '请输入正确的 hex 色值', {
+                          message: i18n.tv('property_form.value_pattern_invalid', '请输入正确的 hex 色值', {
                             title: property?.title,
                             type: propertyType,
                           }),
@@ -393,7 +393,7 @@ export const PropertyForm = Form.create({})(
                         {
                           type: propertyType,
                           message: i18n.tv(
-                            'property_form.value_type_error',
+                            'property_form.value_pattern_invalid',
                             `请输入正确的${property?.title || '属性值'}`,
                             {
                               title: property?.title,
@@ -443,7 +443,7 @@ export const PropertyForm = Form.create({})(
               >
                 <template slot="dataSource">
                   {props.presetPrperties.map((item) => (
-                    <Select.OptGroup label={PropertyGroupDesc[item.group]}>
+                    <Select.OptGroup label={item.group}>
                       {item.children.map((child) => (
                         <Select.Option key={child.key}>{child.title || child.key}</Select.Option>
                       ))}

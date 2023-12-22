@@ -21,7 +21,7 @@ export default defineComponent({
   name: 'ApiProperty',
   head() {
     return {
-      title: this.$tv('page_api_resource_properties.page_title', '自定义属性') as string,
+      title: this.$tv('page_api_properties.page_title', '自定义属性') as string,
     };
   },
   props: {
@@ -40,19 +40,19 @@ export default defineComponent({
         [
           {
             key: 'key',
-            title: i18n.tv('page_api_resource_properties.table_header.key_label', '属性名'),
+            title: i18n.tv('page_api_properties.table_header.key_label', '属性名'),
             dataIndex: 'key',
             width: 200,
           },
           {
             key: 'value',
-            title: i18n.tv('page_api_resource_properties.table_header.value_label', '值'),
+            title: i18n.tv('page_api_properties.table_header.value_label', '值'),
             dataIndex: 'value',
             width: 300,
           },
           {
             key: 'action',
-            title: i18n.tv('page_api_resource_properties.table_header.action_label', '操作'),
+            title: i18n.tv('page_api_properties.table_header.action_label', '操作'),
             customRender: (_: any, record: ApiPropertiesModel['properties'][0]) => [
               <Button
                 type="link"
@@ -60,7 +60,7 @@ export default defineComponent({
                 class="px-0 danger--text as-link"
                 onClick={() => handleDelete(record.id!)}
               >
-                {i18n.tv('page_api_resource_properties.action_delete_btn', '删除')}
+                {i18n.tv('common.btn_text.delete', '删除')}
               </Button>,
             ],
             fixed: deviceType.isMobile ? 'right' : void 0,
@@ -117,8 +117,8 @@ export default defineComponent({
     const deleting = ref(false);
     const handleDelete = (id: number) => {
       Modal.confirm({
-        title: i18n.tv('page_api_resource_properties.delete_confirm.title', '提示'),
-        content: i18n.tv('page_api_resource_properties.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
+        title: i18n.tv('page_api_properties.delete_confirm.title', '提示'),
+        content: i18n.tv('page_api_properties.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
         okButtonProps: {
           props: {
             loading: deleting.value,
@@ -175,7 +175,7 @@ export default defineComponent({
                 default: (form: WrappedFormUtils) => (
                   <Form.Item class="mb-2">
                     <Button type="primary" loading={adding.value} onClick={() => handleAdd(form)}>
-                      {i18n.tv('page_api_resource_properties.add_btn_text', '添加')}
+                      {i18n.tv('page_api_properties.form.add_btn_text', '添加')}
                     </Button>
                   </Form.Item>
                 ),
@@ -198,7 +198,7 @@ export default defineComponent({
             dataSource={$propertiesRes.$result}
             loading={$propertiesRes.$loading}
             locale={{
-              emptyText: i18n.tv('page_api_resource_properties.empty_text', '暂无自定义属性'),
+              emptyText: i18n.tv('page_api_properties.empty_text', '暂无自定义属性'),
             }}
           />
         </Card>

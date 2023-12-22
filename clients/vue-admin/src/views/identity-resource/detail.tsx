@@ -127,7 +127,7 @@ export default defineComponent({
                     <Space>
                       {!resource.nonEditable && resource.enabled && (
                         <Button type="link" size="small" onClick={() => handleShowEdit()}>
-                          {i18n.tv('page_identity_resource_detail.edit_btn', '编辑')}
+                          {i18n.tv('common.btn_text.edit', '编辑')}
                         </Button>
                       )}
                     </Space>
@@ -155,7 +155,7 @@ export default defineComponent({
                     : i18n.tv('common.btn_text.no', '否')}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label={i18n.tv('page_identity_resource_detail.enabled_label', '启用状态')} span={2}>
+              <Descriptions.Item label={i18n.tv('page_identity_resource_detail.status_label', '启用状态')} span={2}>
                 {resource.nonEditable ? (
                   <Tag color={resource.enabled ? 'green' : 'red'}>
                     {resource.enabled ? i18n.tv('common.btn_text.yes', '是') : i18n.tv('common.btn_text.no', '否')}
@@ -182,10 +182,10 @@ export default defineComponent({
               footer: () => (
                 <div>
                   <Button disabled={updating.value} onClick={() => (isEditModalVisable.value = false)}>
-                    {i18n.tv('page_identity_resource_detail.btn_cancel_text', '关闭')}
+                    {i18n.tv('page_identity_resource_detail.action_btn_text.edit_modal_cancel', '关闭')}
                   </Button>
                   <Button type="primary" class="ml-2" loading={updating.value} onClick={() => handleUpdate()}>
-                    {i18n.tv('page_identity_resource_detail.btn_ok_text', '保存')}
+                    {i18n.tv('page_identity_resource_detail.action_btn_text.edit_modal_ok', '保存')}
                   </Button>
                 </div>
               ),

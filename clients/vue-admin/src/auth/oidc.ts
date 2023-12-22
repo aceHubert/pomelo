@@ -60,6 +60,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       return this.prepareSignIn(user).then(() => {
         const extraQueryParams: Record<string, string | number | boolean> = {};
 
+        extraQueryParams['locale'] = i18n.locale; // add locale
         // add extra query params
 
         return extraQueryParams;
@@ -135,6 +136,11 @@ Object.defineProperties(Oidc.UserManager.prototype, {
           this.signoutRedirect({
             ...args,
             redirectMethod: args.redirectMethod ?? 'replace', // 默认使用 replace 跳转
+            extraQueryParams: {
+              ...args.extraQueryParams,
+              locale: i18n.locale, // add locale
+              // add extra query params
+            },
           });
 
         // TODO: 退出其它
@@ -216,6 +222,10 @@ export class OidcUserManagerCreator implements UserManager<SigninArgs, SignoutAr
   signoutRedirectCallback(url?: string) {
     return this.oidcUserManager.signoutRedirectCallback(url);
   }
+
+  storeUser(user: Oidc.User | null): Promise<void> {
+    return this.oidcUserManager.storeUser(user);
+  }
 }
 
 declare module 'oidc-client-ts' {
@@ -241,6 +251,11 @@ declare module './user-manager' {
   export interface UserManager
     extends Pick<
       Oidc.UserManager,
-      'signinSilent' | 'signinRedirect' | 'signinRedirectCallback' | 'signoutRedirect' | 'signoutRedirectCallback'
+      | 'signinSilent'
+      | 'signinRedirect'
+      | 'signinRedirectCallback'
+      | 'signoutRedirect'
+      | 'signoutRedirectCallback'
+      | 'storeUser'
     > {}
 }

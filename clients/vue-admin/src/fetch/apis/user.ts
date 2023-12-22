@@ -2,7 +2,7 @@ import { defineRegistApi, gql } from '../graphql';
 import { request } from '../graphql/requests/infrastructure-request';
 
 // Types
-import type { TypedQueryDocumentNode } from '../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
 
 export enum UserStatus {
   Disabled = 'Disabled',
@@ -36,6 +36,11 @@ export const useUserApi = defineRegistApi('user', {
         }
       }
     ` as TypedQueryDocumentNode<{ user: UserModel }, { id: string }>,
+    updateMetaByKey: gql`
+      mutation updateUserMetaByKey($userId: ID!, $key: String!, $value: String!) {
+        result: updateUserMetaByKey(userId: $userId, metaKey: $key, metaValue: $value)
+      }
+    ` as TypedMutationDocumentNode<{ result: boolean }, { userId: number; key: string; value: string }>,
   },
   request,
 });

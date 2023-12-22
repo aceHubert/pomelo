@@ -22,7 +22,7 @@ export default Form.create({})(
     name: 'ClientLogoutRedirectUri',
     head() {
       return {
-        title: this.$tv('page_client_post_logout_redirect_uri.page_title', '登出跳转Uri') as string,
+        title: this.$tv('page_client_post_logout_redirect_uris.page_title', '登出跳转Uri') as string,
       };
     },
     props: {
@@ -41,7 +41,7 @@ export default Form.create({})(
           [
             {
               key: 'postLogoutRedirectUri',
-              title: i18n.tv('page_client_post_logout_redirect_uris.table_header.value_label', 'URI'),
+              title: i18n.tv('page_client_post_logout_redirect_uris.table_header.redirect_uri_label', 'URI'),
               dataIndex: 'postLogoutRedirectUri',
               width: 300,
             },
@@ -55,7 +55,7 @@ export default Form.create({})(
                   class="px-0 danger--text as-link"
                   onClick={() => handleDelete(record.id)}
                 >
-                  {i18n.tv('page_client_post_logout_redirect_uris.action_delete_btn', '删除')}
+                  {i18n.tv('common.btn_text.delete', '删除')}
                 </Button>,
               ],
               fixed: deviceType.isMobile ? 'right' : void 0,
@@ -168,7 +168,7 @@ export default Form.create({})(
             {$redirectUrisRes.$loaded && (
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
                 <Form.Item
-                  label={i18n.tv('page_client_post_logout_redirect_uris.form.value_label', '登出跳转URI')}
+                  label={i18n.tv('page_client_post_logout_redirect_uris.form.redirect_uri_label', '登出跳转URI')}
                   class="mb-2"
                 >
                   <Input
@@ -180,26 +180,29 @@ export default Form.create({})(
                           {
                             required: true,
                             message: i18n.tv(
-                              'page_client_post_logout_redirect_uris.form.value_required',
+                              'page_client_post_logout_redirect_uris.form.redirect_uri_required',
                               '请输入允许登出跳转调URI',
                             ),
                           },
                           {
                             type: 'url',
-                            message: i18n.tv('page_client_post_logout_redirect_uris.form.value_pattern', 'URI格式错误'),
+                            message: i18n.tv(
+                              'page_client_post_logout_redirect_uris.form.redirect_uri_pattern_invalid',
+                              'URI格式错误',
+                            ),
                           },
                         ],
                       },
                     ]}
                     placeholder={i18n.tv(
-                      'page_client_post_logout_redirect_uris.form.value_placeholder',
+                      'page_client_post_logout_redirect_uris.form.redirect_uri_placeholder',
                       '请输入登出跳转URI',
                     )}
                   />
                 </Form.Item>
                 <Form.Item class="mb-2">
                   <Button type="primary" icon="plus" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_client_post_logout_redirect_uris.form.submit_btn', '添加')}
+                    {i18n.tv('page_client_post_logout_redirect_uris.form.add_btn_text', '添加')}
                   </Button>
                 </Form.Item>
               </Form>

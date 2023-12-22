@@ -192,7 +192,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
               },
               {
                 key: 'client-cors-origin',
-                title: (i18nRender) => i18nRender('menu.clients.cors_origin', '跨域'),
+                title: (i18nRender) => i18nRender('menu.clients.cors_origins', '跨域'),
                 path: '/clients/:clientId/cors-origins',
                 icon: IconDetails,
                 position: 'sub',
@@ -251,14 +251,14 @@ export const getDefaultMenus = (): MenuConfig[] => [
               },
               {
                 key: 'api-scopes',
-                title: (i18nRender) => i18nRender('menu.api-resources.scopes', '授权范围'),
+                title: (i18nRender) => i18nRender('menu.api_resources.scopes', '授权范围'),
                 path: '/api-resources/:id/scopes',
                 icon: IconDetails,
                 position: 'sub',
                 children: [
                   {
                     key: 'api-scope-claims',
-                    title: (i18nRender) => i18nRender('menu.api-resources.scope_claims', '授权范围声明'),
+                    title: (i18nRender) => i18nRender('menu.api_resources.scope_claims', '授权范围声明'),
                     path: '/api-scopes/:id/claims',
                     icon: IconDetails,
                     position: 'sub',
@@ -268,21 +268,21 @@ export const getDefaultMenus = (): MenuConfig[] => [
               },
               {
                 key: 'api-claims',
-                title: (i18nRender) => i18nRender('menu.api-resources.claims', '声明'),
+                title: (i18nRender) => i18nRender('menu.api_resources.claims', '声明'),
                 path: '/api-resources/:id/claims',
                 icon: IconDetails,
                 position: 'sub',
               },
               {
                 key: 'api-secrets',
-                title: (i18nRender) => i18nRender('menu.api-resources.secrets', '密匙'),
+                title: (i18nRender) => i18nRender('menu.api_resources.secrets', '密匙'),
                 path: '/api-resources/:id/secrets',
                 icon: IconDetails,
                 position: 'sub',
               },
               {
                 key: 'api-secrets-generate',
-                title: (i18nRender) => i18nRender('menu.api-resources.secrets_generate', '生成密匙'),
+                title: (i18nRender) => i18nRender('menu.api_resources.secrets_generate', '生成密匙'),
                 path: '/api-resources/:id/secrets/generate',
                 icon: IconDetails,
                 position: 'sub',
@@ -313,7 +313,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
               },
               {
                 key: 'identity-claims',
-                title: (i18nRender) => i18nRender('menu.identity-resources.claims', '声明'),
+                title: (i18nRender) => i18nRender('menu.identity_resources.claims', '声明'),
                 path: '/identity-resources/:id/claims',
                 icon: IconDetails,
                 position: 'sub',
@@ -376,7 +376,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
                 children: [
                   {
                     key: 'data-scope-design',
-                    title: (i18nRender) => i18nRender('menu.data-scope。design', '数据范围设计器'),
+                    title: (i18nRender) => i18nRender('menu.data_scope。design', '数据范围设计器'),
                     path: '/data-scopes/:id/edit',
                     icon: IconDesign,
                     position: 'sub',

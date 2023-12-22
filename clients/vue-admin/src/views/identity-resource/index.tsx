@@ -35,13 +35,13 @@ export default defineComponent({
           <Descriptions size="small" column={1} class="mt-2">
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {i18n.tv('page_clients.table_header.display_name_label', '显示名称')}
+                {i18n.tv('page_identity_resources.table_header.display_name_label', '显示名称')}
               </span>
               {record.displayName || '-'}
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {i18n.tv('page_clients.table_header.required_label', '是否必须')}
+                {i18n.tv('page_identity_resources.table_header.required_label', '是否必须')}
               </span>
               <Tag color={record.required ? 'green' : 'red'}>
                 {record.required ? i18n.tv('common.btn_text.yes', '是') : i18n.tv('common.btn_text.no', '否')}
@@ -49,7 +49,7 @@ export default defineComponent({
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {i18n.tv('page_identity_resource.table_header.show_in_discovery_document_label', '是否显示在发现文档')}
+                {i18n.tv('page_identity_resources.table_header.show_in_discovery_document_label', '是否显示在发现文档')}
               </span>
               <Tag color={record.showInDiscoveryDocument ? 'green' : 'red'}>
                 {record.showInDiscoveryDocument
@@ -62,22 +62,25 @@ export default defineComponent({
                 {i18n.tv('page_identity_resources.table_header.status_label', '状态')}
               </span>
               <Tag color={record.enabled ? 'green' : 'red'}>
-                {i18n.tv(`clients.status.${record.enabled ? 'enabled' : 'disabled'}`, record.enabled ? '启用' : '禁用')}
+                {i18n.tv(
+                  `page_identity_resources.status.${record.enabled ? 'enabled' : 'disabled'}`,
+                  record.enabled ? '启用' : '禁用',
+                )}
               </Tag>
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {record.enabled
-                  ? i18n.tv('page_identity_resources.table_header.updated_at_label', '最后修改于')
-                  : i18n.tv('page_identity_resources.status.disabled_at', '禁用于')}
+                {i18n.tv('page_identity_resources.table_header.description_label', '描述')}
               </span>
-              {moment(record.updatedAt).locale(i18n.locale).format('L HH:mm')}
+              {record.description || '-'}
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
-                {i18n.tv('page_identity_resource.table_header.description_label', '描述')}
+                {record.enabled
+                  ? i18n.tv('page_identity_resources.updated_at', '最后修改于')
+                  : i18n.tv('page_identity_resources.disabled_at', '禁用于')}
               </span>
-              {record.description || '-'}
+              {moment(record.updatedAt).locale(i18n.locale).format('L HH:mm')}
             </Descriptions.Item>
           </Descriptions>
         );
@@ -92,7 +95,7 @@ export default defineComponent({
             },
           }}
         >
-          {i18n.tv('page_identity_resources.action_detail_btn_text', '详情')}
+          {i18n.tv('page_identity_resources.action_btn_text.detail', '详情')}
         </router-link>,
         <router-link
           to={{
@@ -103,14 +106,14 @@ export default defineComponent({
           }}
           class="primary-7--text hover:primary-6--text active:primary-8--text"
         >
-          {i18n.tv('page_identity_resources.action_claim_btn_text', '声明')}
+          {i18n.tv('page_identity_resources.action_btn_text.claims', '声明')}
         </router-link>,
       ];
 
       return [
         {
           key: 'name',
-          title: i18n.tv('page_identity_resource.table_header.name_label', '名称'),
+          title: i18n.tv('page_identity_resources.table_header.name_label', '名称'),
           width: deviceType.isDesktop ? 160 : 320,
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => {
             return (
@@ -124,7 +127,7 @@ export default defineComponent({
         },
         deviceType.isDesktop && {
           key: 'displayName',
-          title: i18n.tv('page_identity_resource.table_header.display_name_label', '显示名称'),
+          title: i18n.tv('page_identity_resources.table_header.display_name_label', '显示名称'),
           width: 200,
           dataIndex: 'displayName',
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => (
@@ -135,7 +138,7 @@ export default defineComponent({
         },
         deviceType.isDesktop && {
           key: 'required',
-          title: i18n.tv('page_identity_resource.table_header.required_label', '是否必须'),
+          title: i18n.tv('page_identity_resources.table_header.required_label', '是否必须'),
           width: 100,
           align: 'center',
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => (
@@ -146,7 +149,7 @@ export default defineComponent({
         },
         deviceType.isDesktop && {
           key: 'showInDiscoveryDocument',
-          title: i18n.tv('page_identity_resource.table_header.show_in_discovery_document_label', '是否显示在发现文档'),
+          title: i18n.tv('page_identity_resources.table_header.show_in_discovery_document_label', '是否显示在发现文档'),
           width: 100,
           align: 'center',
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => (
@@ -159,7 +162,7 @@ export default defineComponent({
         },
         deviceType.isDesktop && {
           key: 'description',
-          title: i18n.tv('page_identity_resource.table_header.description_label', '描述'),
+          title: i18n.tv('page_identity_resources.table_header.description_label', '描述'),
           width: 300,
           dataIndex: 'description',
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => (
@@ -179,7 +182,7 @@ export default defineComponent({
                 ) : (
                   <span class="error--text">
                     <Icon type="minus-circle" class="mr-1" />
-                    {i18n.tv('page_identity_resources.status.disabled_at', '禁用于')}
+                    {i18n.tv('page_identity_resources.disabled_at', '禁用于')}
                   </span>
                 )}
               </p>
@@ -242,16 +245,16 @@ export default defineComponent({
         <Card bordered={false} size="small">
           <SearchForm
             // keywordPlaceholder={
-            //   i18n.tv('page_identity_resource.search.name_placeholder', '“Identity资源名称”模糊搜索') as string
+            //   i18n.tv('page_identity_resources.search_name_placeholder', '“Identity资源名称”模糊搜索') as string
             // }
             keywordTypeOptions={[
               {
-                label: i18n.tv('page_identity_resource.search.options.by_name', '名称') as string,
+                label: i18n.tv('page_identity_resources.search_options.by_name', '名称') as string,
                 value: 'name',
                 selected: true,
               },
               {
-                label: i18n.tv('page_identity_resource.search.options.by_display_name', '显示名称') as string,
+                label: i18n.tv('page_identity_resources.search_options.by_display_name', '显示名称') as string,
                 value: 'displyName',
               },
             ]}
@@ -267,7 +270,7 @@ export default defineComponent({
                     (refs['apiResourceForm'] as any)?.resetFields();
                   }}
                 >
-                  {i18n.tv('page_identity_resource.btn_add_text', '新增资源')}
+                  {i18n.tv('page_identity_resources.action_btn_text.add', '新增资源')}
                 </Button>
               ),
             }}
@@ -296,15 +299,15 @@ export default defineComponent({
 
           <Modal
             vModel={isAddModalVisable.value}
-            title={i18n.tv('page_identity_resource.add_modal_title', '添加Identity资源')}
+            title={i18n.tv('page_identity_resources.add_modal_title', '添加Identity资源')}
             scopedSlots={{
               footer: () => (
                 <div>
                   <Button disabled={adding.value} onClick={() => (isAddModalVisable.value = false)}>
-                    {i18n.tv('page_identity_resource.btn_cancel_text', '关闭')}
+                    {i18n.tv('page_identity_resources.action_btn_text.add_modal_cancel', '关闭')}
                   </Button>
                   <Button type="primary" class="ml-2" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_identity_resource.btn_ok_text', '保存')}
+                    {i18n.tv('page_identity_resources.action_btn_text.add_modal_ok', '保存')}
                   </Button>
                 </div>
               ),

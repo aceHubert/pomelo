@@ -11,6 +11,7 @@
       "confirm": "确认",
       "close": "关闭",
       "create": "新建",
+      "add": "添加",
       "edit": "编辑",
       "update": "修改",
       "save": "保存",
@@ -84,10 +85,13 @@
   },
   "components": {
     "layout_admin": {
+      "sider": {
+        "collapse": "折叠",
+        "expand": "展开",
+        "go_back": "返回上级"
+      },
       "sider_drawer": {
-        "title": "菜单",
-        "collapse_sidebar": "折叠",
-        "expand_sidebar": "展开"
+        "title": "菜单"
       }
     },
     "search_form": {

@@ -43,64 +43,75 @@ export interface Property {
   accept?: string;
 }
 
-export enum PropertyGroup {
-  Basic = 'basic',
-  Authorization = 'authorization',
-  Other = 'other',
-}
-
-export const PropertyGroupDesc = {
-  [PropertyGroup.Basic]: '基础设置',
-  [PropertyGroup.Authorization]: '授权设置',
-  [PropertyGroup.Other]: '其他设置',
-};
-
-export const getPresetProperties = (): Array<{ group: PropertyGroup; children: Property[] }> => [
+export const getPresetProperties = (
+  i18nRender: (key: string, fallback) => string = (key: string, fallback: string) => fallback,
+): Array<{ group: string; children: Property[] }> => [
   {
-    group: PropertyGroup.Basic,
+    group: i18nRender('page_client_properties.form.basic_group_title', '基础设置'),
     children: [
       {
         key: 'primaryColor',
         type: PropertyType.Hex,
-        title: '主题色',
+        title: i18nRender('page_client_properties.form.preset_keys.primary_color_title', '主题色'),
         defaultValue: '#1890ff',
       },
     ],
   },
   {
-    group: PropertyGroup.Authorization,
+    group: i18nRender('page_client_properties.form.authorization_group_title', '授权设置'),
     children: [
       {
         key: 'loginPage.template',
         type: PropertyType.String,
-        title: '登录页自定义模版',
-        description: 'ejs模版，可使用<%= form %>占位符，表示登录表单, 表单id为login-form',
+        title: i18nRender('page_client_properties.form.preset_keys.login_page_template_title', '登录页自定义模版'),
+        description: i18nRender(
+          'page_client_properties.form.preset_keys.login_page_template_description',
+          'ejs模版，使用"<%- form %>"占位符渲染表单内容, 表单id为"login-form"',
+        ),
       },
       {
         key: 'loginPage.formLableDisplay',
         type: PropertyType.Boolean,
-        title: '登录表单Lable是否显示',
+        title: i18nRender(
+          'page_client_properties.form.preset_keys.login_page_form_label_display_title',
+          '登录表单Lable显示方式',
+        ),
         defaultValue: true,
-        description: '默认: true',
+        description: i18nRender(
+          'page_client_properties.form.preset_keys.login_page_form_label_display_description',
+          '显示表单Label, 默认: true',
+        ),
       },
       {
         key: 'loginPage.formValidateTooltip',
         type: PropertyType.Boolean,
-        title: '登录表单验证提示是否使用Tooltip',
+        title: i18nRender(
+          'page_client_properties.form.preset_keys.login_page_form_validate_tooltip_title',
+          '登录表单验证消息提示方式',
+        ),
         defaultValue: false,
-        description: '默认: false',
-      },
-      {
-        key: 'auth.signoutDisabled',
-        type: PropertyType.Boolean,
-        title: '禁用退出登录',
-        defaultValue: false,
+        description: i18nRender(
+          'page_client_properties.form.preset_keys.login_page_form_validate_tooltip_description',
+          '使用Tooltip显示，默认: false',
+        ),
       },
       {
         key: 'consentPage.template',
         type: PropertyType.String,
-        title: '登录确认页自定义模版',
-        description: 'ejs模版，可使用<%= form %>占位符，表示登录表单, 表单id为consent-form',
+        title: i18nRender(
+          'page_client_properties.form.preset_keys.consent_page_tmeplate_title',
+          '登录确认页自定义模版',
+        ),
+        description: i18nRender(
+          'page_client_properties.form.preset_keys.consent_page_tmeplate_description',
+          'ejs模版，使用"<%- form %>"占位符渲染表单内容, 表单id为"consent-form"',
+        ),
+      },
+      {
+        key: 'auth.signoutDisabled',
+        type: PropertyType.Boolean,
+        title: i18nRender('page_client_properties.form.preset_keys.signout_disabled_title', '禁用退出登录'),
+        defaultValue: false,
       },
     ],
   },

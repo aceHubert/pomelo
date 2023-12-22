@@ -48,11 +48,11 @@ export default Form.create({
                     },
                     {
                       pattern: /^[a-zA-Z.]+$/,
-                      message: i18n.tv('api_resource_form.name_pattern', '只允许英文字母或“.”'),
+                      message: i18n.tv('api_resource_form.name_pattern_invalid', '只允许英文字母或“.”'),
                     },
                     {
                       max: 50,
-                      message: i18n.tv('api_resource_form.name_max_length', '长度不能超过50个字符', {
+                      message: i18n.tv('api_resource_form.name_max_length_invalid', '长度不能超过50个字符', {
                         length: 50,
                       }),
                     },

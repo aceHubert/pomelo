@@ -22,7 +22,7 @@ export default Form.create({})(
     name: 'ClientRedirectUri',
     head() {
       return {
-        title: this.$tv('page_client_redirect_uris.page_title', '登入跳转Uri') as string,
+        title: this.$tv('page_client_redirect_uris.page_title', '登入跳转URIs') as string,
       };
     },
     props: {
@@ -55,7 +55,7 @@ export default Form.create({})(
                   class="px-0 danger--text as-link"
                   onClick={() => handleDelete(record.id)}
                 >
-                  {i18n.tv('page_client_redirect_uris.action_delete_btn', '删除')}
+                  {i18n.tv('common.btn_text.delete', '删除')}
                 </Button>,
               ],
               fixed: deviceType.isMobile ? 'right' : void 0,
@@ -164,7 +164,10 @@ export default Form.create({})(
           <Card bordered={false} size="small">
             {$redirectUrisRes.$loaded && (
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
-                <Form.Item label={i18n.tv('page_client_redirect_uris.form.value_label', '登入跳转URI')} class="mb-2">
+                <Form.Item
+                  label={i18n.tv('page_client_redirect_uris.form.redirect_uri_label', '登入跳转URI')}
+                  class="mb-2"
+                >
                   <Input
                     style="width: 350px; max-width: 100%;"
                     v-decorator={[
@@ -180,7 +183,10 @@ export default Form.create({})(
                           },
                           {
                             type: 'url',
-                            message: i18n.tv('page_client_redirect_uris.form.redirect_uri_pattern', 'URI格式错误'),
+                            message: i18n.tv(
+                              'page_client_redirect_uris.form.redirect_uri_pattern_invalid',
+                              'URI格式错误',
+                            ),
                           },
                         ],
                       },
@@ -193,7 +199,7 @@ export default Form.create({})(
                 </Form.Item>
                 <Form.Item class="mb-2">
                   <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_client_redirect_uris.form.submit_btn', '添加')}
+                    {i18n.tv('page_client_redirect_uris.form.add_btn_text', '添加')}
                   </Button>
                 </Form.Item>
               </Form>
