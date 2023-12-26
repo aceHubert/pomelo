@@ -17,6 +17,7 @@ export type SigninArgs = SigninRedirectArgs & { noInteractive?: boolean };
 export type SignoutArgs = SignoutRedirectArgs;
 
 export const RedirectKey = 'oidc.redirect';
+export const LoginNameKey = 'oidc.login_name';
 export const IgnoreRoutes = ['/signin', '/signout', '/internal-access-only'];
 
 const innerSigninSilent = Oidc.UserManager.prototype.signinSilent;
@@ -48,6 +49,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       return (typeof user !== 'undefined' ? Promise.resolve(user) : this.getUser()).then((user) => {
         if (user?.profile) {
           // store sign in params before redirect to user center
+          user.profile.login_name && sessionStorage.setItem(LoginNameKey, user.profile.login_name);
         }
       });
     },
@@ -61,6 +63,12 @@ Object.defineProperties(Oidc.UserManager.prototype, {
         const extraQueryParams: Record<string, string | number | boolean> = {};
 
         extraQueryParams['locale'] = i18n.locale; // add locale
+        let loginName;
+        // 退出后 user 为 null, 退出前把 login_name 存储在 sessionStorage 中（prepareSignIn）
+        if ((loginName = sessionStorage.getItem(LoginNameKey))) {
+          extraQueryParams['login_hint'] = loginName; // add login hint
+          sessionStorage.removeItem(LoginNameKey);
+        }
         // add extra query params
 
         return extraQueryParams;
@@ -92,9 +100,9 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       const { noInteractive, redirect_uri, ...restArgs } = args;
       this.saveRedirect(redirect_uri);
       if (noInteractive) {
-        return this.getUser().then((user: any) => {
+        return this.getUser().then((user) => {
           const removeUser = user ? this.removeUser() : Promise.resolve();
-          return Promise.all([this.getExtraQueryParams(user), removeUser]).then(([extraQueryParams]) => {
+          return Promise.all([this.getExtraQueryParams(user || void 0), removeUser]).then(([extraQueryParams]) => {
             const $signIn = () =>
               this.signinRedirect({
                 ...restArgs,
@@ -130,25 +138,27 @@ Object.defineProperties(Oidc.UserManager.prototype, {
   // then redirect to home page after authorized
   signout: {
     value: function (this: OidcUserManager, args: SignoutArgs = {}) {
-      // 退出前保存用户的企业识别信息
-      return this.prepareSignIn().then(() => {
-        const $signOut = () =>
-          this.signoutRedirect({
-            ...args,
-            redirectMethod: args.redirectMethod ?? 'replace', // 默认使用 replace 跳转
-            extraQueryParams: {
-              ...args.extraQueryParams,
-              locale: i18n.locale, // add locale
-              // add extra query params
-            },
-          });
+      // 退出前保存用户识别信息
+      return this.getUser().then((user) =>
+        this.prepareSignIn(user || void 0).then(() => {
+          const $signOut = () =>
+            this.signoutRedirect({
+              ...args,
+              redirectMethod: args.redirectMethod ?? 'replace', // 默认使用 replace 跳转
+              extraQueryParams: {
+                ...args.extraQueryParams,
+                locale: i18n.locale, // add locale
+                // add extra query params
+              },
+            });
 
-        // TODO: 退出其它
-        // 如微信、钉钉、飞书等用户解绑
+          // TODO: 退出其它
+          // 如微信、钉钉、飞书等用户解绑
 
-        // 跳转登出
-        return $signOut();
-      });
+          // 跳转登出
+          return $signOut();
+        }),
+      );
     },
     writable: false,
     enumerable: false,
@@ -238,7 +248,8 @@ declare module 'oidc-client-ts' {
     signout(args?: SignoutArgs): Promise<void>;
   }
 
-  export interface OidcStandardClaims {
+  export interface IdTokenClaims {
+    login_name?: string;
     display_name?: string;
     role?: string;
   }
