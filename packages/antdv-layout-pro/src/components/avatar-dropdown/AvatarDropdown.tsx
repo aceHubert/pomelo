@@ -9,11 +9,7 @@ import type { Avatar as AvatarProps } from 'ant-design-vue/types/avatar';
 import type { Tooltip as TooltipProps } from 'ant-design-vue/types/tootip/tooltip';
 import type { OmitVue } from '../../types';
 
-export enum AvatarDropdownAction {
-  Profile = 'profile',
-  Settings = 'settings',
-  SignOut = 'signout',
-}
+export type AvatarDropdownAction = 'profile' | 'settings' | 'signout' | string;
 
 export type AvatarDropdownProps = {
   /** 显示名 */
@@ -81,9 +77,9 @@ export default defineComponent({
       },
     );
 
-    const handleMenuClick = (key: AvatarDropdownAction | string) => {
+    const handleMenuClick = (key: AvatarDropdownAction) => {
       visibleRef.value = false;
-      if (key === AvatarDropdownAction.SignOut) {
+      if (key === 'signout') {
         Modal.confirm({
           title: configProvider.i18nRender(`${props.i18nKeyPrefix}.dialog.signout.title`, 'Confirm'),
           content: configProvider.i18nRender(`${props.i18nKeyPrefix}.dialog.signout.content`, 'Do you really log-out?'),
@@ -101,11 +97,11 @@ export default defineComponent({
     };
 
     const defaultMenus = () => [
-      <Menu.Item key={AvatarDropdownAction.Profile}>
+      <Menu.Item key="profile">
         <Icon type="user" />
         {configProvider.i18nRender(`${props.i18nKeyPrefix}.user.profile`, 'Profile')}
       </Menu.Item>,
-      <Menu.Item key={AvatarDropdownAction.Settings}>
+      <Menu.Item key="settings">
         <Icon type="setting" />
         {configProvider.i18nRender(`${props.i18nKeyPrefix}.user.settings`, 'Settings')}
       </Menu.Item>,
@@ -176,7 +172,7 @@ export default defineComponent({
           <template slot="content">
             <Menu class={`${prefixCls}-overlay__menu`} selected-keys={[]} onClick={({ key }) => handleMenuClick(key)}>
               {slots.menuItems ? slots.menuItems(defaultMenus) : defaultMenus}
-              <Menu.Item key={AvatarDropdownAction.SignOut}>
+              <Menu.Item key="signout">
                 <Icon type="logout" />
                 {configProvider.i18nRender(`${props.i18nKeyPrefix}.user.signout`, 'Sign out')}
               </Menu.Item>
