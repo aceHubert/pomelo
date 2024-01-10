@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Req, Res, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { Provider, KoaContextWithOIDC } from 'oidc-provider';
-import { Oidc } from 'nest-oidc-provider';
+import { OidcService } from 'nest-oidc-provider';
 import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { BaseController } from '@/common/controllers/base.controller';
 import { isJsonRequest } from '@/common/utils/is-json-request.util';
@@ -10,22 +9,23 @@ import { isJsonRequest } from '@/common/utils/is-json-request.util';
 export class SecurityController extends BaseController {
   logger = new Logger(SecurityController.name, { timestamp: true });
 
-  constructor(private readonly provider: Provider, private readonly userDataSource: UserDataSource) {
+  constructor(private readonly oidcService: OidcService, private readonly userDataSource: UserDataSource) {
     super();
   }
 
   @Get('whoami')
   @Post('whoami')
-  async whoami(@Oidc.Context() ctx: KoaContextWithOIDC, @Req() req: Request, @Res() res: Response) {
-    const session = await this.provider.Session.get(ctx);
+  async whoami(@Req() req: Request, @Res() res: Response) {
+    const ctx = this.oidcService.getContext(req, res);
+    const session = await ctx.oidc.provider.Session.get(ctx);
 
     let accountId: string | undefined;
-    if (session.accountId) {
+    if (session?.accountId) {
       accountId = session.accountId;
     } else {
       const accessTokenValue = ctx.oidc.getAccessToken({ acceptDPoP: true });
       if (accessTokenValue) {
-        const accessToken = await this.provider.AccessToken.find(accessTokenValue);
+        const accessToken = await ctx.oidc.provider.AccessToken.find(accessTokenValue);
 
         if (accessToken) {
           accountId = accessToken.accountId;
@@ -33,7 +33,7 @@ export class SecurityController extends BaseController {
           const JWT = require('oidc-provider/lib/helpers/jwt');
           const instance = require('oidc-provider/lib/helpers/weak_cache');
           try {
-            const { payload } = await JWT.verify(accessTokenValue, instance(this.provider).keystore);
+            const { payload } = await JWT.verify(accessTokenValue, instance(ctx.oidc.provider).keystore);
             accountId = payload.sub;
           } catch (e) {
             this.logger.warn(e);
@@ -43,9 +43,7 @@ export class SecurityController extends BaseController {
     }
 
     if (accountId) {
-      const account = await this.userDataSource.get(Number(accountId), ['niceName', 'displayName', 'updatedAt'], {
-        sub: accountId,
-      });
+      const account = await this.userDataSource.get(['niceName', 'displayName', 'updatedAt'], Number(accountId));
 
       if (isJsonRequest(req.headers)) {
         return res.send(this.success({ data: account }));

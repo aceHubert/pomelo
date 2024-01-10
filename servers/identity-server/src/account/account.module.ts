@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { DiscoveryController } from './discovery.controller';
 import { SecurityController } from './security.controller';
 import { LoginController } from './login.controller';
+import { PasswordController } from './password.controller';
 
 @Module({
-  controllers: [DiscoveryController, SecurityController, LoginController],
+  controllers: [DiscoveryController, SecurityController, LoginController, PasswordController],
 })
 export class AccountModule {}

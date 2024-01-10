@@ -440,5 +440,8 @@
     "full_path": "媒体地址",
     "created_at": "创建时间",
     "empty_list_description": "没有媒体文件！"
+  },
+  "page_client_detail": {
+    "initial_login_uri_label": "初始化登录URI"
   }
 }

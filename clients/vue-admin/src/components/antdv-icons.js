@@ -28,6 +28,7 @@ export { default as FileOutline } from '@ant-design/icons/lib/outline/FileOutlin
 export { default as GlobalOutline } from '@ant-design/icons/lib/outline/GlobalOutline';
 export { default as InfoCircleOutline } from '@ant-design/icons/lib/outline/InfoCircleOutline';
 export { default as InfoCircleFill } from '@ant-design/icons/lib/fill/InfoCircleFill';
+export { default as KeyOutline } from '@ant-design/icons/lib/outline/KeyOutline';
 export { default as MailOutline } from '@ant-design/icons/lib/outline/MailOutline';
 export { default as MinusOutline } from '@ant-design/icons/lib/outline/MinusOutline';
 export { default as MinusCircleOutline } from '@ant-design/icons/lib/outline/MinusCircleOutline';

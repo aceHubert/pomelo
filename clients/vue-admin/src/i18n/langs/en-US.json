@@ -157,6 +157,9 @@
   },
   "layout_default": {
     "page_style_setting_title": "Display Settings",
+    "avatar_menu_item": {
+      "modify_password": "Modify Password"
+    },
     "signout": {
       "tooltip": "Sign out",
       "dialog": {
@@ -463,7 +466,8 @@
     "policy_uri_label": "Policy URI",
     "policy_uri_perview_btn_text": "Preview",
     "authentication_title": "Authentication",
-    "field_description_tips": "Description"
+    "field_description_tips": "Description",
+    "initial_login_uri_label": "Initial Login URI"
   },
   "page_client_grant_types": {
     "page_title": "Client Grant Types",

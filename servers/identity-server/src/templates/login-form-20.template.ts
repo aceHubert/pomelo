@@ -27,7 +27,6 @@ export const LoginForm = `
   --bs-form-invalid-color: #f72025;
   --bs-form-invalid-border-color: #f72025;
 }
-
 body {
   background: url(${bg})
     no-repeat center center;
@@ -38,7 +37,6 @@ body {
   font-size: 16px;
   line-height: 1.8;
 }
-
 body:after {
   position: absolute;
   top: 0;
@@ -50,25 +48,17 @@ body:after {
   opacity: 0.3;
   z-index: -1;
 }
-
 .content {
   padding: 7em 0;
 }
-
 .heading-section {
   font-size: 28px;
   color: #fff;
 }
-
-.icon-field {
-  filter: brightness(2);
-}
-
 .locale-btns{
   top: 30px;
   right: 30px;
 }
-
 @media (max-width: 768px){
   .locale-btns{
     top: 1rem;
@@ -79,17 +69,14 @@ body:after {
     padding: 3rem 0;
   }
 }
-
 .login-wrap {
   position: relative;
   color: rgba(255, 255, 255, 0.9);
 }
-
 .login-wrap h3 {
   font-weight: 300;
   color: #fff;
 }
-
 .form-control {
   background: transparent;
   border: none;
@@ -104,7 +91,6 @@ body:after {
   -o-transition: 0.3s;
   transition: 0.3s;
 }
-
 @media (prefers-reduced-motion: reduce) {
   .form-control {
     -webkit-transition: none;
@@ -112,7 +98,6 @@ body:after {
     transition: none;
   }
 }
-
 .form-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   color: var(--text-secondary) !important;
@@ -129,7 +114,6 @@ body:after {
   /* Firefox 18- */
   color: var(--text-secondary) !important;
 }
-
 .form-control:hover,
 .form-control:focus {
   background: transparent;
@@ -138,54 +122,46 @@ body:after {
   box-shadow: none !important;;
   border-color: rgba(255, 255, 255, 0.4);
 }
-
+.form-control.password ~ .eye {
+  filter: brightness(2);
+}
 .content a {
   color: var(--text-color);
   text-decoration: none;
 }
-
 .form-check{
   padding-left: 1.75em;
 }
-
 .form-check .form-check-input{
   margin-left: -1.75em;
 }
-
 .form-check-input{
   --bs-form-check-bg: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.4);
   height: 1.25em;
   width: 1.25em;
 }
-
 .form-check-input:focus {
   border-color: var(--theme-primary);
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-
 .form-check-label{
   color: var(--theme-primary);
 }
-
 .form-check-input.is-valid, .was-validated .form-check-input:valid {
   border-color: var(--theme-primary);
 }
-
 .was-validated .form-check-input:valid:checked {
   background-color: var(--theme-primary);
 }
-
 .was-validated .form-check-input:valid:focus{
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-
 .was-validated .form-check-input:valid~.form-check-label {
   color: var(--theme-primary);
 }
-
 .submit {
   cursor: pointer;
   border-radius: 40px;

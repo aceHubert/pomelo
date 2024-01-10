@@ -225,6 +225,9 @@ export default Form.create({})(
                 <Descriptions.Item label={i18n.tv('page_client_detail.client_uri_label', '客户端URI')}>
                   {client.clientUri || '-'}
                 </Descriptions.Item>
+                <Descriptions.Item label={i18n.tv('page_client_detail.initial_login_uri_label', '初始化登录URI')}>
+                  {client.initiateLoginUri || '-'}
+                </Descriptions.Item>
                 <Descriptions.Item label={i18n.tv('page_client_detail.logo_uri_label', 'Logo URI')}>
                   {client.logoUri ? <img src={client.logoUri} style="height: 30px" /> : '-'}
                 </Descriptions.Item>
@@ -255,7 +258,7 @@ export default Form.create({})(
               >
                 <Descriptions.Item>
                   <span slot="label">
-                    {i18n.tv('page_client_detail.default_max_age_label', 'Default max age')}
+                    {i18n.tv('page_client_detail.default_max_age_label', 'Default max age (Minutes)')}
                     <a
                       href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest"
                       class="ml-1"
@@ -269,13 +272,12 @@ export default Form.create({})(
                     <Space>
                       <InputNumber
                         key="defaultMaxAge"
-                        value={client.defaultMaxAge}
+                        value={client.defaultMaxAge ? client.defaultMaxAge / 60 : void 0}
                         defaultValue={0}
                         min={0}
-                        step={60}
                         size="small"
                         placeholder="Max age"
-                        onChange={(value) => handleFieldChange(value, 'defaultMaxAge')}
+                        onChange={(value) => handleFieldChange(value * 60 || null, 'defaultMaxAge')}
                       />
                       <Button
                         key="defaultMaxAge"
@@ -492,7 +494,7 @@ export default Form.create({})(
               >
                 <Descriptions.Item>
                   <span slot="label">
-                    {i18n.tv('page_client_detail.id_token_lifetime_label', 'IDToken lifetime')}
+                    {i18n.tv('page_client_detail.id_token_lifetime_label', 'IDToken lifetime (Minutes)')}
                     <a
                       href="https://auth0.com/docs/secure/tokens/id-tokens"
                       class="ml-1"
@@ -506,13 +508,12 @@ export default Form.create({})(
                     <Space>
                       <InputNumber
                         key="idTokenLifetime"
-                        value={client.idTokenLifetime}
-                        defaultValue={0}
-                        min={0}
-                        step={60}
+                        value={client.idTokenLifetime / 60}
+                        defaultValue={5}
+                        min={5}
                         size="small"
                         placeholder="IdToken lifetime"
-                        onChange={(value) => handleFieldChange(value, 'idTokenLifetime')}
+                        onChange={(value) => handleFieldChange(value * 60, 'idTokenLifetime')}
                       />
                       <Button
                         key="idTokenLifetime"
@@ -606,7 +607,7 @@ export default Form.create({})(
                 </Descriptions.Item>
                 <Descriptions.Item>
                   <span slot="label">
-                    {i18n.tv('page_client_detail.access_token_lifetime_label', 'AccessToken lifetime')}
+                    {i18n.tv('page_client_detail.access_token_lifetime_label', 'AccessToken lifetime (Minutes)')}
                     <a
                       href="https://auth0.com/docs/secure/tokens/access-tokens"
                       class="ml-1"
@@ -620,13 +621,12 @@ export default Form.create({})(
                     <Space>
                       <InputNumber
                         key="accessTokenLifetime"
-                        value={client.accessTokenLifetime}
-                        defaultValue={0}
-                        min={0}
-                        step={60}
+                        value={client.accessTokenLifetime / 60}
+                        defaultValue={5}
+                        min={5}
                         size="small"
                         placeholder="AccessToken lifetime"
-                        onChange={(value) => handleFieldChange(value, 'accessTokenLifetime')}
+                        onChange={(value) => handleFieldChange(value * 60, 'accessTokenLifetime')}
                       />
                       <Button
                         key="accessTokenLifetime"
@@ -695,7 +695,7 @@ export default Form.create({})(
                     <span slot="label">
                       {i18n.tv(
                         'page_client_detail.refresh_token_absolute_lifetime_label',
-                        'RefreshToken absolute lifetime',
+                        'RefreshToken absolute lifetime (Days)',
                       )}
                       <a
                         href="https://auth0.com/docs/secure/tokens/refresh-tokens"
@@ -710,13 +710,12 @@ export default Form.create({})(
                       <Space>
                         <InputNumber
                           key="refreshTokenAbsoluteLifetime"
-                          value={client.refreshTokenAbsoluteLifetime}
-                          defaultValue={0}
-                          min={0}
-                          step={86400}
+                          value={client.refreshTokenAbsoluteLifetime / 86400}
+                          defaultValue={1}
+                          min={1}
                           size="small"
                           placeholder="RefreshToken absolute lifetime"
-                          onChange={(value) => handleFieldChange(value, 'refreshTokenAbsoluteLifetime')}
+                          onChange={(value) => handleFieldChange(value * 86400, 'refreshTokenAbsoluteLifetime')}
                         />
                         <Button
                           key="refreshTokenAbsoluteLifetime"
@@ -743,7 +742,7 @@ export default Form.create({})(
                     <span slot="label">
                       {i18n.tv(
                         'page_client_detail.refresh_token_sliding_lifetime_label',
-                        'RefreshToken sliding lifetime',
+                        'RefreshToken sliding lifetime (Days)',
                       )}
                       <a
                         href="https://auth0.com/docs/secure/tokens/refresh-tokens"
@@ -758,13 +757,12 @@ export default Form.create({})(
                       <Space>
                         <InputNumber
                           key="refreshTokenSlidingLifetime"
-                          value={client.refreshTokenSlidingLifetime}
-                          defaultValue={0}
-                          min={0}
-                          step={86400}
+                          value={client.refreshTokenSlidingLifetime / 86400}
+                          defaultValue={1}
+                          min={1}
                           size="small"
                           placeholder="RefreshToken sliding lifetime"
-                          onChange={(value) => handleFieldChange(value, 'refreshTokenSlidingLifetime')}
+                          onChange={(value) => handleFieldChange(value * 86400, 'refreshTokenSlidingLifetime')}
                         />
                         <Button
                           key="refreshTokenSlidingLifetime"
@@ -788,7 +786,10 @@ export default Form.create({})(
                 )}
                 <Descriptions.Item>
                   <span slot="label">
-                    {i18n.tv('page_client_detail.authorization_code_lifetime_label', 'Authorization code lifetime')}
+                    {i18n.tv(
+                      'page_client_detail.authorization_code_lifetime_label',
+                      'Authorization code lifetime (Minutes)',
+                    )}
                     <a
                       href="https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow"
                       class="ml-1"
@@ -802,13 +803,12 @@ export default Form.create({})(
                     <Space>
                       <InputNumber
                         key="authorizationCodeLifetime"
-                        value={client.authorizationCodeLifetime}
-                        defaultValue={0}
-                        min={0}
-                        step={60}
+                        value={client.authorizationCodeLifetime / 60}
+                        defaultValue={5}
+                        min={5}
                         size="small"
                         placeholder="Authorization code lifetime"
-                        onChange={(value) => handleFieldChange(value, 'authorizationCodeLifetime')}
+                        onChange={(value) => handleFieldChange(value * 60, 'authorizationCodeLifetime')}
                       />
                       <Button
                         key="authorizationCodeLifetime"
@@ -831,7 +831,7 @@ export default Form.create({})(
                 </Descriptions.Item>
                 <Descriptions.Item>
                   <span slot="label">
-                    {i18n.tv('page_client_detail.device_code_lifetime_label', 'Device code lifetime')}
+                    {i18n.tv('page_client_detail.device_code_lifetime_label', 'Device code lifetime (Minutes)')}
                     <a
                       href="https://auth0.com/docs/get-started/authentication-and-authorization-flow/device-authorization-flow"
                       class="ml-1"
@@ -845,13 +845,12 @@ export default Form.create({})(
                     <Space>
                       <InputNumber
                         key="deviceCodeLifetime"
-                        value={client.deviceCodeLifetime}
-                        defaultValue={0}
-                        min={0}
-                        step={60}
+                        value={client.deviceCodeLifetime / 60}
+                        defaultValue={5}
+                        min={5}
                         size="small"
                         placeholder="Device code lifetime"
-                        onChange={(value) => handleFieldChange(value, 'deviceCodeLifetime')}
+                        onChange={(value) => handleFieldChange(value * 60, 'deviceCodeLifetime')}
                       />
                       <Button
                         key="deviceCodeLifetime"
@@ -873,7 +872,7 @@ export default Form.create({})(
                   <span slot="label">
                     {i18n.tv(
                       'page_client_detail.backchannel_authentication_request_lifetime_label',
-                      'Backchannel authentication request lifetime',
+                      'Backchannel authentication request lifetime (Minutes)',
                     )}
                     <a
                       href="https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html"
@@ -888,13 +887,12 @@ export default Form.create({})(
                     <Space>
                       <InputNumber
                         key="backchannelAuthenticationRequestLifetime"
-                        value={client.backchannelAuthenticationRequestLifetime}
-                        defaultValue={0}
-                        min={0}
-                        step={60}
+                        value={client.backchannelAuthenticationRequestLifetime / 60}
+                        defaultValue={5}
+                        min={5}
                         size="small"
                         placeholder="Backchannel authentication request lifetime"
-                        onChange={(value) => handleFieldChange(value, 'backchannelAuthenticationRequestLifetime')}
+                        onChange={(value) => handleFieldChange(value * 60, 'backchannelAuthenticationRequestLifetime')}
                       />
                       <Button
                         key="backchannelAuthenticationRequestLifetime"
@@ -991,6 +989,28 @@ export default Form.create({})(
                       },
                     ]}
                     placeholder={i18n.tv('page_client_detail.form.client_uri_placeholder', '请输入客户端URI')}
+                  />
+                </Form.Item>
+                <Form.Item label={i18n.tv('page_client_detail.form.initial_login_uri_label', '初始化登录URI')}>
+                  <Input
+                    v-decorator={[
+                      'initialLoginUri',
+                      {
+                        rules: [
+                          {
+                            type: 'url',
+                            message: i18n.tv(
+                              'page_client_detail.form.initial_login_uri_validator_error',
+                              '请输入正确初始化登录URI',
+                            ),
+                          },
+                        ],
+                      },
+                    ]}
+                    placeholder={i18n.tv(
+                      'page_client_detail.form.initial_login_uri_placeholder',
+                      '请输入初始化登录URI',
+                    )}
                   />
                 </Form.Item>
                 <Form.Item label={i18n.tv('page_client_detail.form.logo_uri_label', 'Logo')}>

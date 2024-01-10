@@ -1,0 +1,26 @@
+{
+  "api_resource": {
+    "resource_has_existed": "资源已经存在！",
+    "resource_non_editable": "资源不可编辑！",
+    "resource_does_not_exist": "资源不存在！",
+    "claim_has_existed": "声明已经存在！",
+    "scope_claim_has_existed": "范围声明已经存在！",
+    "property_has_existed": "属性已经存在！"
+  },
+  "identity_resource": {
+    "resource_has_existed": "资源已经存在！",
+    "resource_non_editable": "资源不可编辑！",
+    "resource_does_not_exist": "资源不存在！",
+    "claim_has_existed": "声明已经存在！",
+    "property_has_existed": "属性已经存在！"
+  },
+  "client": {
+    "claim_has_existed": "声明已经存在！",
+    "cors_origin_has_existed": "跨域源已经存在！",
+    "scope_has_existed": "范围已经存在！",
+    "grant_type_has_existed": "授权类型已经存在！",
+    "redirect_uri_has_existed": "重定向地址已经存在！",
+    "post_logout_redirect_uri_has_existed": "登出重定向地址已经存在！",
+    "property_has_existed": "属性已经存在！"
+  }
+}

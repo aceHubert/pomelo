@@ -144,7 +144,7 @@ export default Form.create({})(
             ),
           },
           deviceType.isDesktop && {
-            dataIndex: 'updatedAt',
+            key: 'updatedAt',
             align: 'left',
             customRender: (_: any, record: PagedClientModel['rows'][0]) => (
               <div>

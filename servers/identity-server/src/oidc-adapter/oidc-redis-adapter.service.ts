@@ -1,36 +1,13 @@
-import { createClient, RedisClientType } from 'redis';
 import { AdapterPayload } from 'oidc-provider';
-import { Injectable, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
-import { jsonSafelyParse } from '@ace-pomelo/shared-server';
+import { Injectable } from '@nestjs/common';
 import { ClientDataSource } from '@ace-pomelo/identity-datasource';
+import { RedisService } from '../storage/redis.service';
 import { OidcAdapterServiceFactory } from '../oidc-config/oidc-adapter.factory';
 
 @Injectable()
-export class OidcRedisAdapterService extends OidcAdapterServiceFactory implements OnModuleInit, OnApplicationShutdown {
-  private readonly storage: RedisClientType;
-
-  constructor(protected readonly clientDataSource: ClientDataSource) {
+export class OidcRedisAdapterService extends OidcAdapterServiceFactory {
+  constructor(private readonly redis: RedisService, protected readonly clientDataSource: ClientDataSource) {
     super();
-    this.storage = createClient({
-      url: 'redis://localhost:6379/0',
-    });
-  }
-
-  async onModuleInit() {
-    this.storage.on('connect', () => {
-      this.logger.debug('Redis connected');
-    });
-    this.storage.on('disconnect', () => {
-      this.logger.debug('Redis disconnect');
-    });
-    this.storage.on('error', (err) => {
-      this.logger.error(err);
-    });
-    await this.storage.connect();
-  }
-
-  async onApplicationShutdown() {
-    await this.storage.disconnect();
   }
 
   async upsert(model: string, id: string, payload: AdapterPayload, expiresIn: number) {
@@ -43,31 +20,25 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
     const { grantId, userCode, uid } = payload;
 
     if (model === 'Session' && uid) {
-      await this.storage.set(this.sessionUidKeyFor(uid), this.encode(id), {
-        EX: expiresIn * 1000,
-      });
+      await this.redis.set(this.sessionUidKeyFor(uid), id, expiresIn);
     }
 
     if (this.grantable.has(model) && grantId) {
       const grantKey = this.grantKeyFor(grantId);
-      const grant = this.decode<string[]>(await this.storage.get(grantKey));
+      const grant = await this.redis.get<string[]>(grantKey);
 
       if (!grant) {
-        this.storage.set(grantKey, this.encode([key]));
+        this.redis.set(grantKey, [key]);
       } else {
         grant.push(key);
       }
     }
 
     if (userCode) {
-      await this.storage.set(this.userCodeKeyFor(userCode), this.encode(id), {
-        EX: expiresIn * 1000,
-      });
+      await this.redis.set(this.userCodeKeyFor(userCode), id, expiresIn);
     }
 
-    await this.storage.set(key, this.encode(payload), {
-      EX: expiresIn * 1000,
-    });
+    await this.redis.set(key, payload, expiresIn);
   }
 
   async destroy(model: string, id: string) {
@@ -77,11 +48,11 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
     }
 
     const key = this.key(model, id);
-    await this.storage.del(key);
+    await this.redis.del(key);
   }
 
   async consume(model: string, id: string) {
-    this.decode(await this.storage.get(this.key(model, id))).consumed = true;
+    (await this.redis.get<any>(this.key(model, id))).consumed = true;
   }
 
   async find(model: string, id: string) {
@@ -89,7 +60,7 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
       return this.getClient(id);
     }
 
-    const payload = this.decode<AdapterPayload>(await this.storage.get(this.key(model, id)));
+    const payload = await this.redis.get<AdapterPayload>(this.key(model, id));
     // https://github.com/panva/node-oidc-provider/blob/main/lib/actions/userinfo.js#L108
     if (model === 'AccessToken' && payload) {
       if (payload) {
@@ -102,33 +73,21 @@ export class OidcRedisAdapterService extends OidcAdapterServiceFactory implement
   }
 
   async findByUid(model: string, uid: string) {
-    const id = this.decode<string>(await this.storage.get(this.sessionUidKeyFor(uid)));
+    const id = await this.redis.get<string>(this.sessionUidKeyFor(uid));
     return id ? this.find(model, id) : undefined;
   }
 
   async findByUserCode(model: string, userCode: string) {
-    const id = this.decode<string>(await this.storage.get(this.userCodeKeyFor(userCode)));
+    const id = await this.redis.get<string>(this.userCodeKeyFor(userCode));
     return id ? this.find(model, id) : undefined;
   }
 
   async revokeByGrantId(grantId: string) {
     const grantKey = this.grantKeyFor(grantId);
-    const grant = this.decode<any[]>(await this.storage.get(grantKey));
+    const grant = await this.redis.get<any[]>(grantKey);
     if (grant) {
-      await Promise.all(grant.map((token) => this.storage.del(token)));
-      await this.storage.del(grantKey);
+      await Promise.all(grant.map((token) => this.redis.del(token)));
+      await this.redis.del(grantKey);
     }
-  }
-
-  private encode(payload: any) {
-    if (payload === undefined) return payload;
-
-    return JSON.stringify(payload);
-  }
-
-  private decode<T = any>(payload: string | null | undefined): T | null | undefined {
-    if (payload === null || payload === undefined) return payload;
-
-    return jsonSafelyParse<T>(payload);
   }
 }

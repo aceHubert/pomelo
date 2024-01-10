@@ -7,6 +7,10 @@ import type { UserManagerSettings } from 'oidc-client-ts';
 
 export const userManager = new OidcUserManagerCreator(getEnv<UserManagerSettings>('oidc', {} as any, window._ENV));
 
+userManager.events.addUserSignedOut(() => {
+  userManager.removeUser();
+});
+
 Object.defineProperties(Vue.prototype, {
   $userManager: {
     value: userManager,

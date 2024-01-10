@@ -2,10 +2,9 @@ import { getCurrentInstance } from '@vue/composition-api';
 import { warn } from '@ace-util/core';
 
 // Types
-import type { UserManager } from '@/auth/user-manager';
-import type { SigninArgs, SignoutArgs } from '@/auth/oidc';
+import type Vue from 'vue';
 
-export const useUserManager = (): UserManager<SigninArgs, SignoutArgs> => {
+export const useUserManager = (): Vue['$userManager'] => {
   const instance = getCurrentInstance();
   if (!instance) {
     warn(process.env.NODE_ENV === 'production', 'method can only be used inside setup() or functional components');

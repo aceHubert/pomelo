@@ -1,24 +1,27 @@
 import * as url from 'url';
-import * as crypto from 'crypto';
 import { get } from 'lodash';
-import { Provider, FindAccount, KoaContextWithOIDC, errors } from 'oidc-provider';
+import { Provider, FindAccount, KoaContextWithOIDC, CookiesSetOptions, errors } from 'oidc-provider';
 import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ModuleRef } from '@nestjs/core';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/infrastructure-datasource';
 import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
+import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { renderPrimaryStyle } from '../common/utils/render-primary-style-tag.util';
 import { OidcRedisAdapterService } from '../oidc-adapter/oidc-redis-adapter.service';
 import { OidcConfigAdapter } from './oidc-adapter';
 import { getI18nFromContext } from './i18n.helper';
+import { OidcConfigOptions } from './interfaces/oidc-config-options.interface';
+import { OIDC_CONFIG_OPTIONS } from './constants';
 
 @Injectable()
 export class OidcConfigService implements OidcModuleOptionsFactory {
   private logger = new Logger(OidcConfigService.name, { timestamp: true });
 
   constructor(
-    private readonly configService: ConfigService,
+    @Inject(OIDC_CONFIG_OPTIONS) private readonly options: OidcConfigOptions,
+    private readonly moduleRef: ModuleRef,
     private readonly adapterService: OidcRedisAdapterService,
     private readonly identityResourceDataSource: IdentityResourceDataSource,
     private readonly userDataSource: UserDataSource,
@@ -26,13 +29,14 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   async createModuleOptions() {
     return {
-      issuer: this.configService.getOrThrow('OIDC_ISSUER'),
-      path: this.configService.get('OIDC_PATH', '/oidc'),
+      issuer: this.options.issuer,
+      path: normalizeRoutePath(this.options.path ?? '/oidc'),
       oidc: await this.getConfiguration(),
       factory: (issuer: string, config?: OidcConfiguration) => {
         const provider = new Provider(issuer, config);
 
-        if (this.configService.get('debug', false)) {
+        // allow http,localhost in development mode
+        if (process.env.NODE_ENV !== 'production') {
           // Allowing HTTP and/or localhost for implicit response type web clients
           // https://github.com/panva/node-oidc-provider/blob/v7.x/recipes/implicit_http_localhost.md
           // @ts-expect-error no types
@@ -58,7 +62,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           console.log(this.clientSecret);
           console.log(this.metadata()['client_secrets']);
           // original client secret comparison
-          return constantEquals(this.clientSecret, crypto.createHash('sha256').update(actual).digest('hex'), 1000);
+          return constantEquals(this.clientSecret, sha256(actual).toString(), 1000);
 
           // TODO: multiple client secrets support
         };
@@ -88,11 +92,10 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
-    const globalPrefixUri = this.configService.get<string>('webServer.globalPrefixUri', '');
-    const issuer = this.configService.getOrThrow('OIDC_ISSUER');
-    const resource = this.configService.get<string>('OIDC_RESOURCE');
-    const scopes: OidcConfiguration['scopes'] = [];
-    const claims: OidcConfiguration['claims'] = {};
+    const appConfig = this.moduleRef['container'].applicationConfig,
+      globalPrefix = normalizeRoutePath(appConfig?.getGlobalPrefix() ?? ''),
+      scopes: OidcConfiguration['scopes'] = [],
+      claims: OidcConfiguration['claims'] = {};
 
     // identity resources
     await this.identityResourceDataSource.getList(['name', 'enabled', 'claims']).then((resources) => {
@@ -175,12 +178,25 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         revocation: '/connect/revocation',
       },
       interactions: {
-        url(_, interaction) {
-          return `${globalPrefixUri}/login/${interaction.uid}`;
+        url: (ctx, interaction) => {
+          this.logger.debug(
+            `interaction: ${interaction.prompt.name}, reason: ${interaction.prompt.reasons.join(', ')}`,
+          );
+
+          const params = new url.URLSearchParams({});
+          params.set(
+            'returnUrl',
+            `${globalPrefix}${
+              // @ts-expect-error type error
+              normalizeRoutePath(ctx.oidc.provider.pathFor('authorization'))
+            }?${new url.URLSearchParams(interaction.params as Record<string, any>).toString()}`,
+          );
+
+          return `${globalPrefix}/login?${params.toString()}`;
         },
       },
       discovery: {
-        check_session_iframe: url.resolve(issuer, `${globalPrefixUri}/connect/checksession`),
+        check_session_iframe: url.resolve(this.options.issuer, `${globalPrefix}/connect/checksession`),
       },
       ttl: {
         DeviceCode: (ctx, token, client) => {
@@ -235,12 +251,22 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       cookies: {
         keys: ['gQMQym96H64-QInq7mvVX0nZEw0qUmcTA3bCpfnuR1h3YXNhgGJ0XLd17obmV8Gm'],
         // set session cookie options to allow passing the session to the browser for check_session
-        long: {
-          httpOnly: false,
-          // @ts-expect-error no types
-          secureProxy: true,
-          sameSite: 'none',
-        },
+        long: Object.assign(
+          {
+            httpOnly: false,
+
+            //  https://github.com/pillarjs/cookies/blob/98a7556ef73bf376b26d51a416ae2b4645f34cd7/index.js#L119
+            secure: process.env.NODE_ENV === 'production' ? true : false,
+            sameSite: 'none',
+          } as CookiesSetOptions,
+          process.env.NODE_ENV === 'production'
+            ? {}
+            : {
+                // deprecated
+                // https://github.com/pillarjs/cookies/blob/98a7556ef73bf376b26d51a416ae2b4645f34cd7/index.js#L127
+                secureProxy: true,
+              },
+        ),
       },
       jwks: {
         keys: [
@@ -360,9 +386,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         resourceIndicators: {
           enabled: true,
           defaultResource: (ctx) => {
-            console.log('default resource', resource, ctx.origin);
+            console.log('default resource', this.options.resource, ctx.origin);
 
-            return resource ?? ctx.origin;
+            return this.options.resource ?? ctx.origin;
           },
           getResourceServerInfo: (ctx, resourceIndicator, client) => {
             console.log('resource indicator', resourceIndicator);
@@ -445,7 +471,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           });
 
           grant.addOIDCScope(ctx.oidc.client.scope!);
-          grant.addResourceScope(resource ?? ctx.origin, ctx.oidc.client.scope!);
+          grant.addResourceScope(this.options.resource ?? ctx.origin, ctx.oidc.client.scope!);
 
           await grant.save();
 
@@ -561,14 +587,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   private findAccount: FindAccount = async (ctx, id) => {
     const user = await this.userDataSource.get(
+      ['loginName', 'niceName', 'displayName', 'email', 'mobile', 'url', 'updatedAt'],
       Number(id),
-      ['niceName', 'displayName', 'email', 'mobile', 'url', 'updatedAt'],
-      { sub: id },
     );
 
-    if (!user) {
-      return undefined;
-    }
+    if (!user) return void 0;
 
     return {
       accountId: id,
@@ -592,6 +615,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
           return {
             sub: id,
+            login_name: user.loginName,
             display_name: user.displayName,
             nice_name: user.niceName,
             email: userMetas.find((meta) => meta.metaKey === UserMetaPresetKeys.VerifingEmail)?.metaValue ?? user.email,
@@ -649,18 +673,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     const sessionId = ctx.oidc.session.jti;
     const clientId = ctx.oidc.client.clientId;
     const { origin } = new url.URL(ctx.oidc.params.redirect_uri as string);
-    const salt = crypto.randomBytes(16).toString('hex');
+    const salt = random(16);
+    const hash = sha256(`${clientId}${origin}${sessionId}${salt}`).toBase64Url();
 
-    // https://base64.guru/standards/base64url
-    let base64UrlEncode = crypto
-      .createHash('sha256')
-      .update(`${clientId}${origin}${sessionId}${salt}`)
-      .digest('base64');
-
-    base64UrlEncode = base64UrlEncode.replace(/=/g, ''); // Remove any trailing '='s
-    base64UrlEncode = base64UrlEncode.replace(/\+/g, '-'); // '+' => '-'
-    base64UrlEncode = base64UrlEncode.replace(/\//g, '_'); // '/' => '_'
-
-    return `${base64UrlEncode}.${salt}`;
+    return `${hash}.${salt}`;
   }
 }

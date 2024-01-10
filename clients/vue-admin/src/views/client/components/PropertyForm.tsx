@@ -1,6 +1,17 @@
 import { defineComponent, computed } from '@vue/composition-api';
 import { default as moment } from 'moment';
-import { Form, AutoComplete, Input, InputNumber, Select, DatePicker, TimePicker, Upload, Icon } from 'ant-design-vue';
+import {
+  Form,
+  AutoComplete,
+  Input,
+  InputNumber,
+  Select,
+  DatePicker,
+  TimePicker,
+  Tooltip,
+  Upload,
+  Icon,
+} from 'ant-design-vue';
 import { ColorInput } from 'antdv-layout-pro';
 import { useI18n } from '@/hooks';
 import { PropertyType } from '../utils/constants';
@@ -452,11 +463,19 @@ export const PropertyForm = Form.create({})(
                 </template>
               </AutoComplete>
             </Form.Item>
-            <Form.Item
-              label={i18n.tv('property_form.value_label', '值')}
-              help={presetPropertyKeyMap.value.get(props.form.getFieldValue('key'))?.description}
-              class="mb-2"
-            >
+            <Form.Item class="mb-2">
+              <span slot="label">
+                {i18n.tv('property_form.value_label', '值')}
+                {presetPropertyKeyMap.value.get(props.form.getFieldValue('key'))?.description && (
+                  <Tooltip
+                    title={presetPropertyKeyMap.value.get(props.form.getFieldValue('key'))?.description}
+                    placement="bottomLeft"
+                  >
+                    <Icon type="question-circle" class="ml-1 primary--text" />
+                  </Tooltip>
+                )}
+              </span>
+
               {renderValueComponent(props.form.getFieldValue('key'))}
             </Form.Item>
             {slots.default?.(props.form)}

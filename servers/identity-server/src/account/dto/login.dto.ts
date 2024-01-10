@@ -1,4 +1,4 @@
-import { IsString, IsDefined, IsBoolean, MinLength } from 'class-validator';
+import { IsString, IsDefined, IsOptional, IsBoolean, MinLength } from 'class-validator';
 
 export class LoginDto {
   /**
@@ -18,8 +18,16 @@ export class LoginDto {
   password!: string;
 
   /**
-   * Remember
+   * Remember Me
    */
+  @IsOptional()
   @IsBoolean()
   remember?: boolean;
+
+  /**
+   * Argee with user policy
+   */
+  @IsOptional()
+  @IsBoolean()
+  userPolicy?: boolean;
 }

@@ -1,0 +1,60 @@
+@import '_variables.less';
+
+.wrapper {
+  margin: auto;
+  padding: 40px 30px 30px;
+  max-width: 500px;
+}
+
+.locale-btns {
+  position: absolute;
+  top: 35px;
+  right: 25px;
+
+  .btn {
+    color: var(--theme-primary);
+    text-decoration: none;
+
+    &:hover,
+    &:focus,
+    &:active {
+      color: var(--theme-primary-7);
+    }
+
+    &-disabled,
+    &:disabled {
+      color: var(--text-secondary);
+      cursor: not-allowed;
+
+      &:hover,
+      &:focus,
+      &:active {
+        color: var(--text-secondary);
+      }
+    }
+  }
+
+  .divider {
+    display: inline-block;
+    height: 12px;
+    border-right: 1px solid @border-color-base;
+    vertical-align: middle;
+    outline: none;
+  }
+}
+
+@media screen and (min-width: 576px) and (min-height: 768px) {
+  .wrapper {
+    width: 500px;
+    background-color: #fff;
+    box-shadow: @box-shadow-base;
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+  }
+
+  .locale-btns{
+    top: 25px;
+  }
+}

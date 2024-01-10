@@ -6,6 +6,7 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { AppModule } from './app.module';
 import { syncDatabase } from './db.sync';
 
@@ -19,9 +20,9 @@ async function bootstrap() {
 
   const host = configService.get<string>('webServer.host', '');
   const port = configService.get<number>('webServer.port', 3000);
-  const globalPrefixUri = configService.get<string>('webServer.globalPrefixUri', '');
-  const oidcPath = configService.get<string>('OIDC_PATH', '/oidc');
+  const globalPrefixUri = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
   const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
+  const oidcPath = normalizeRoutePath(configService.get<string>('OIDC_PATH', '/oidc'));
 
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
@@ -48,10 +49,15 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefixUri);
 
   await app.listen(port, host);
-  logger.log(`Application is running on: ${await app.getUrl()}`);
-  globalPrefixUri && logger.log(`Application's global prefix uri is: ${globalPrefixUri} `);
-  logger.log(`Discovery endpoint: ${await app.getUrl()}${oidcPath}/.well-known/openid-configuration`);
-  logger.log(`Application is enable cors: ${!!cors}`);
+  logger.log(
+    `Application is running on: ${await app.getUrl()}${
+      globalPrefixUri ? ' with global prefix: ' + globalPrefixUri : ''
+    }`,
+  );
+  !!cors && logger.log('cors is enabled');
+  logger.log(
+    `OpenID-Connect discovery endpoint: ${await app.getUrl()}${globalPrefixUri}${oidcPath}/.well-known/openid-configuration`,
+  );
 
   // hot reload
   if (module.hot) {

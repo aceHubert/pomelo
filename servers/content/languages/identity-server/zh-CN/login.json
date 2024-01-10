@@ -8,7 +8,9 @@
     "password_placeholder": "请输入密码",
     "password_invalid": "请输入密码（6-16位字符）！",
     "remember_me_label": "记住我？",
-    "forgot_password_label": "忘记密码"
+    "forgot_password_label": "忘记密码",
+    "user_policy_label": "已阅读并同意",
+    "user_policy_link_text": "用户协议"
   },
   "wrapper": {
     "title": "登录",

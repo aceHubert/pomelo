@@ -1,16 +1,14 @@
+<link rel="stylesheet" href="/style/index.css" />
 <link rel="stylesheet" href="/style/login.css" />
 <%- primaryStyleVars %>
 <div id="app"><%- content %> <%- include('partials/footer') %></div>
 <%- include('partials/axios') %>
-<script
-  src="//unpkg.com/crypto-js@4.2.0/core.js"
-  integrity="sha256-Jji91yJEcvgBiQY21C3xbBRMpGyEIp7zCHGQ0h+TXa8="
-  crossorigin="anonymous"
-></script>
-<script
-  src="//unpkg.com/crypto-js@4.2.0/sha256.js"
-  integrity="sha256-2AdPI8vSeqbC8jG4va00u9jUnH5H/6DXzQeixNHTx5g="
-  crossorigin="anonymous"
-></script>
+<%- include('partials/crypto') %>
+<script>
+  var locales = {
+    userPolicyInvalid:
+      '<%= tv("login.check.user_policy_invalid", "Please read and agree to the User Privacy Agreement!", i18nLang) %>',
+  };
+</script>
 <script src="/js/login.js"></script>
 <%- contentFor('title') %> <%= tv('login.page_title', 'Sign In', i18nLang) %>

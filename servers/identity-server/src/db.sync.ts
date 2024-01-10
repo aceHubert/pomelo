@@ -82,6 +82,7 @@ export async function syncDatabase() {
           showInDiscoveryDocument: true,
           nonEditable: true,
           claims: [
+            'login_name',
             'display_name',
             'nice_name',
             'nick_name',

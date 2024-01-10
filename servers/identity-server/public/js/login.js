@@ -3,31 +3,46 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    var form = $(this);
-    if (!form[0].checkValidity()) {
-      form.addClass('was-validated');
+    var $form = $(this);
+    var $submit = $form.find('button[type="submit"]');
+    var $error = $form.find('#error');
+
+    if (!$form[0].checkValidity()) {
+      $form.addClass('was-validated');
       return;
     }
-    var username = $('#username').val();
-    var password = $('#password').val();
-    var remember = $('#rememberMe').prop('checked');
-    var $submit = form.find('button[type="submit"]');
-    var $error = form.find('#error');
+    const data = $form.serializeArray().reduce(function (obj, item) {
+      obj[item.name] = item.value;
+      return obj;
+    }, {});
+
+    data.password = data.password.sha256();
+    data.remember = data.remember === 'on' ? true : false;
+    if ($form.find('#userPolicy').length) {
+      if (data.userPolicy !== 'on') {
+        return $error.removeClass('d-none').html(locales.userPolicyInvalid);
+      } else {
+        data.userPolicy = true;
+      }
+    }
+
     $submit.attr('disabled', 'disabled');
     $error.hasClass('d-none') ? null : $error.addClass('d-none');
     axios({
-      url: form.attr('action'),
-      method: form.attr('method') || 'POST',
-      data: {
-        username,
-        password: CryptoJS.SHA256(password).toString(),
-        remember,
-      },
+      url: $form.attr('action'),
+      method: $form.attr('method') || 'POST',
+      data,
     })
       .then(function (res) {
         var data = res.data;
-        if (data.status === 308) {
-          absoluteGo(data.location, true);
+        if (!data.success) throw new Error(data.message);
+        if (data.message) {
+          $error.removeClass('d-none').html(data.message);
+          setTimeout(() => {
+            absoluteGo(data.next, true);
+          }, 3000);
+        } else {
+          absoluteGo(data.next, true);
         }
       })
       .catch(function (err) {

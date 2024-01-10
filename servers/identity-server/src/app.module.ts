@@ -1,19 +1,13 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
-import {
-  Logger,
-  Module,
-  NestModule,
-  RequestMethod,
-  ValidationPipe,
-  OnModuleInit,
-  MiddlewareConsumer,
-} from '@nestjs/common';
+import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   I18nModule,
   I18nService,
+  I18nContext,
+  I18nValidationPipe,
   QueryResolver,
   HeaderResolver,
   AcceptLanguageResolver,
@@ -25,6 +19,7 @@ import { IdentityModule } from '@ace-pomelo/identity-datasource';
 import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
+import { StorageModule } from './storage/storage.module';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
@@ -44,6 +39,13 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       envFilePath: envFilePaths,
       load: [configuration(process.cwd())],
+    }),
+    StorageModule.forRootAsync({
+      isGlobal: true,
+      useFactory: (config: ConfigService) => ({
+        redis: config.getOrThrow('REDIS'),
+      }),
+      inject: [ConfigService],
     }),
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
@@ -71,36 +73,61 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       resolvers: [
         new GraphQLWebsocketResolver(),
-        new QueryResolver(['lang', 'locale', 'l']),
+        new QueryResolver(['lang', 'locale']),
         new HeaderResolver(['x-custom-lang', 'x-custom-locale']),
-        new CookieResolver(['lang', 'locale', 'l']),
+        new CookieResolver(['lang', 'locale']),
         new AcceptLanguageResolver(),
       ],
       inject: [ConfigService],
     }),
     InfrastructureModule.registerAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService, i18n: I18nService) => ({
+      useFactory: (config: ConfigService) => ({
         isGlobal: true,
         connection: config.getOrThrow('database.infrastructure.connection'),
         tablePrefix: config.get('database.infrastructure.tablePrefix', ''),
-        translate: i18n.tv.bind(i18n),
+        translate: (key, fallback, args) => {
+          const i18n = I18nContext.current();
+          return (
+            i18n?.translate(key, {
+              defaultValue: fallback,
+              args,
+            }) ?? fallback
+          );
+        },
       }),
       inject: [ConfigService, I18nService],
     }),
     IdentityModule.registerAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService, i18n: I18nService) => ({
+      useFactory: (config: ConfigService) => ({
         isGlobal: true,
         connection: config.getOrThrow('database.identity.connection'),
         tablePrefix: config.get('database.identity.tablePrefix', ''),
-        translate: i18n.tv.bind(i18n),
+        translate: (key, fallback, args) => {
+          const i18n = I18nContext.current();
+          return (
+            i18n?.translate(key, {
+              defaultValue: fallback,
+              args,
+            }) ?? fallback
+          );
+        },
       }),
-      inject: [ConfigService, I18nService],
+      inject: [ConfigService],
     }),
     AccountModule,
+    // All routes proxy to oidc provider, must be the last one
+    OidcConfigModule.forRootAsync({
+      isGlobal: true,
+      useFactory: (config: ConfigService) => ({
+        issuer: config.getOrThrow('OIDC_ISSUER'),
+        path: config.get('OIDC_PATH'),
+        resource: config.get('OIDC_RESOURCE'),
+      }),
+      inject: [ConfigService],
+    }),
     OidcModule.forRootAsync({
-      imports: [OidcConfigModule],
       useExisting: OidcConfigService,
     }),
   ],
@@ -111,7 +138,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       provide: APP_PIPE,
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        return new ValidationPipe({
+        return new I18nValidationPipe({
           enableDebugMessages: isDebug,
           stopAtFirstError: true,
         });
@@ -129,18 +156,28 @@ const logger = new Logger('AppModule', { timestamp: true });
   ],
 })
 export class AppModule implements NestModule, OnModuleInit {
-  constructor(private adapter: HttpAdapterHost, private readonly i18n: I18nService) {}
+  constructor(private readonly adapter: HttpAdapterHost, private readonly i18n: I18nService) {}
 
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply((req: any, res: any, next: any) => {
-        let lang;
-        const requestAccept = req.headers['accept'];
-        if (requestAccept && requestAccept.includes('text/html') && (lang = req.query.lang || req.query.locale)) {
-          const resolveLang = this.i18n.resolveLanguage(lang);
-          if (['en-US', ...this.i18n.getSupportedLanguages()].includes(resolveLang)) {
-            res.cookie('locale', resolveLang, { httpOnly: true });
-            logger.debug(`Set locale to ${resolveLang}`);
+        // save locale from query to cookie when request is a html
+        let lang, requestAccept;
+        if (
+          (requestAccept = req.headers['accept']) &&
+          requestAccept.includes('text/html') // only html request
+        ) {
+          if ((lang = req.query.lang || req.query.locale)) {
+            // same config with i18n QueryResolver
+            this.setLangToCookie(res, lang);
+          } else if (req.query.ui_locales) {
+            // openid connect
+            const langs = req.query.ui_locales.split(' ');
+            for (const lang of langs) {
+              if (this.setLangToCookie(res, lang)) {
+                break;
+              }
+            }
           }
         }
         next();
@@ -153,5 +190,16 @@ export class AppModule implements NestModule, OnModuleInit {
     app.locals['tv'] = (key: string, fallback: any, lang: any, args: any) => {
       return this.i18n.t(key, { defaultValue: fallback, lang, args });
     };
+  }
+
+  private setLangToCookie(res: any, lang: string) {
+    const resolveLang = this.i18n.resolveLanguage(lang);
+    // include i18n fa
+    if (['en-US', ...this.i18n.getSupportedLanguages()].includes(resolveLang)) {
+      res.cookie('locale', resolveLang, { httpOnly: true });
+      logger.debug(`Set locale to ${resolveLang} from query`);
+      return true;
+    }
+    return false;
   }
 }

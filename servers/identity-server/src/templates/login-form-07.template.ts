@@ -24,81 +24,62 @@ export const LoginForm = `
   --bs-form-invalid-color: #f95155;
   --bs-form-invalid-border-color: #f95155;
 }
-
 body {
   background: #f8fafb;
 }
-
 p {
   color: var(--text-secondary);
   font-weight: 300;
 }
-
 form {
   margin-top: 2rem;
   margin-bottom: 3rem;
 }
-
 form .row:first-child {
   margin-bottom: 0 !important;
 }
-
 .content {
   padding: 7rem 0;
 }
-
 .title{
   margin-bottom: 16px;
   position: relative;
 }
-
 .locale-btns{
   top: -4px;
   right: -4px;
 }
-
 .sider-img svg{
   width: 100%;
   height: auto;
 }
-
-.icon-field{
-  filter: invert(1);
-}
-
 @media (max-width: 768px){
   .content {
     padding: 3rem .5rem;
   }
-
   .title{
     position: static;
   }
-
   .locale-btns{
     top: 1rem;
     right: 1rem;
   }
-
   .sider-img {
     display: none;
   }
 }
-
 form ::placeholder {
   font-size: 12px;
   display: block;
   margin-bottom: 0;
   color: var(--text-secondary);
 }
-
 form ::-ms-input-placeholder {
   font-size: 12px;
   display: block;
   margin-bottom: 0;
   color: var(--text-secondary);
 }
-
 .form-control {
   overflow: hidden;
   margin-bottom: 0;
@@ -109,7 +90,9 @@ form ::-ms-input-placeholder {
   border: none;
   border-radius: 0;
 }
-
+.form-control.password ~ .eye{
+  filter: invert(1);
+}
 .form-control::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   font-size: 12px;
@@ -138,7 +121,6 @@ form ::-ms-input-placeholder {
   margin-bottom: 0;
   color: var(--text-secondary) !important;
 }
-
 .contents .form-control#username{
   border-bottom: 1px solid #e6edf1;
   border-radius: 7px 7px 0 0;
@@ -146,7 +128,6 @@ form ::-ms-input-placeholder {
 .contents .form-control#password {
   border-radius: 0 0 7px 7px;
 }
-
 .contents .form-control:active,
 .contents .form-control:focus {
   background-color: #edf2f5;
@@ -154,25 +135,20 @@ form ::-ms-input-placeholder {
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
 }
-
 .contents .invalid-tooltip{
   margin-top: -.8rem;
   right: calc(var(--bs-gutter-x) * .5);
 }
-
 .content a {
   color: var(--text-secondary);
   text-decoration: underline;
 }
-
 .form-check{
   padding-left: 2em;
 }
-
 .form-check .form-check-input{
   margin-left: -2em;
 }
-
 .form-check-input{
   --bs-form-check-bg: #e6e6e6;
   border-color: #e6e6e6;
@@ -180,33 +156,26 @@ form ::-ms-input-placeholder {
   height: 1.5em;
   width: 1.5em;
 }
-
 .form-check-input:focus {
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-
 .form-check-label{
   color: var(--text-secondary) !important;
 }
-
 .form-check-input.is-valid, .was-validated .form-check-input:valid {
   border-color: var(--theme-primary);
 }
-
 .was-validated .form-check-input:valid:checked {
   background-color: var(--theme-primary);
 }
-
 .was-validated .form-check-input:valid:focus{
   -webkit-box-shadow: none;
   box-shadow: none;
 }
-
 .was-validated .form-check-input:valid~.form-check-label {
   color: var(--theme-primary);
 }
-
 .submit {
   width: 100%;
   height: 54px;
