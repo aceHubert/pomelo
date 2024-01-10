@@ -120,9 +120,6 @@ form a:focus {
 .was-validated .form-check-input:valid ~ .form-check-label {
   color: initial;
 }
-#error {
-  color: #F82024;
-}
 #app {
   min-height: 100vh;
   -webkit-box-sizing: border-box;

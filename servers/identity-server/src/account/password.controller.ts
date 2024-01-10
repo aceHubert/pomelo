@@ -75,15 +75,14 @@ export class PasswordController extends BaseController {
         <div class="wrapper">
           <h1 class="title">${i18n.tv('password.modify.wrapper.title', 'Modify password')}</h1>
           <%- form %>
-          <div class="row mb-3">
+          <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-              <div id="error" class="alert alert-danger d-none"></div>
-              <div class="d-sm-inline-block gap-2">
+              <div class="d-sm-inline-block gap-2 mt-2">
                 <button type="submit" class="btn btn-primary w-100" form="password-modify-form">
                   ${i18n.tv('password.modify.wrapper.submit_btn_text', 'Submit')}
                 </button>
               </div>
-              <div class="d-sm-inline-block gap-2">
+              <div class="d-sm-inline-block gap-2 mt-2">
                 <button id="cancle-btn" type="button" class="btn btn-light w-100">
                   ${i18n.tv('password.modify.wrapper.cancel_btn_text', 'Cancel')}
                 </button>
@@ -187,33 +186,36 @@ export class PasswordController extends BaseController {
             </label>`
             : ''
         }
-        <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-          <div style="position: relative">
-            <input
-              type="password"
-              class="form-control password"
-              id="confirmPassword"
-              name="confirmPassword"
-              placeholder="${i18n.tv('password.modify.form.confirm_password_placeholder', 'Confirm Password')}"
-              autocomplete="off"
-              required
-              minlength="6"
-              maxlength="16"
-              value=""
-            />
-            <span toggle="#confirmPassword" class="toggle-password eye"></span>
-            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('password.modify.form.confirm_password_invalid', 'Please input confirm password!')}
+          <div class="${formLableDisplay ? 'col-sm-9' : ''}">
+            <div style="position: relative">
+              <input
+                type="password"
+                class="form-control password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="${i18n.tv('password.modify.form.confirm_password_placeholder', 'Confirm Password')}"
+                autocomplete="off"
+                required
+                minlength="6"
+                maxlength="16"
+                value=""
+              />
+              <span toggle="#confirmPassword" class="toggle-password eye"></span>
+              <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+                ${i18n.tv('password.modify.form.confirm_password_invalid', 'Please input confirm password!')}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-        <div class="row mb-3">
-          <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-            <div id="error"></div>
+      </form>
+      <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
+        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
         </div>
-      </form>`;
+      </div>`;
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
@@ -318,15 +320,14 @@ export class PasswordController extends BaseController {
         <div class="wrapper">
           <h1 class="title">${i18n.tv('password.forgot.wrapper.title', 'Find password')}</h1>
           <%- form %>
-          <div class="row mb-3">
+          <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-              <div id="error" class="alert alert-danger d-none"></div>
-              <div class="d-sm-inline-block gap-2">
+              <div class="d-sm-inline-block gap-2 mt-2">
                 <button type="submit" class="btn btn-primary w-100" form="password-forgot-form">
                   ${i18n.tv('password.forgot.wrapper.submit_btn_text', 'Submit')}
                 </button>
               </div>
-              <div class="d-sm-inline-block gap-2">
+              <div class="d-sm-inline-block gap-2 mt-2">
                 <button id="cancle-btn" type="button" class="btn btn-light w-100">
                   ${i18n.tv('password.forgot.wrapper.cancel_btn_text', 'Cancel')}
                 </button>
@@ -361,12 +362,15 @@ export class PasswordController extends BaseController {
             </div>
           </div>
         </div>
-        <div class="row mb-3">
-          <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-            <div id="error"></div>
+      </form>
+      <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
+        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
         </div>
-      </form>`;
+      </div>`;
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
@@ -456,7 +460,7 @@ export class PasswordController extends BaseController {
         content: ejs.render(errorWrapper, {
           error: `<p>
             <strong>${i18n.tv('password.reset.error.title', 'Error: ')}</strong>
-            <span id="error">${i18n.tv('password.reset.error.code_invalid', 'The link is invalid!')}</span>
+            <span class="error--text">${i18n.tv('password.reset.error.code_invalid', 'The link is invalid!')}</span>
           </p>`,
           locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
           tv: i18n.tv.bind(i18n),
@@ -502,10 +506,9 @@ export class PasswordController extends BaseController {
         <div class="wrapper">
           <h1 class="title">${i18n.tv('password.reset.wrapper.title', 'Reset password')}</h1>
           <%- form %>
-          <div class="row mb-3">
+          <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-              <div id="error" class="alert alert-danger d-none"></div>
-              <div class="d-sm-inline-block gap-2">
+              <div class="d-sm-inline-block gap-2 mt-2">
                 <button type="submit" class="btn btn-primary w-100" form="password-reset-form">
                   ${i18n.tv('password.reset.wrapper.submit_btn_text', 'Reset')}
                 </button>
@@ -555,33 +558,36 @@ export class PasswordController extends BaseController {
           </label>`
           : ''
       }
-      <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-        <div style="position: relative">
-          <input
-            type="password"
-            class="form-control password"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="${i18n.tv('password.reset.form.conform_password_placeholder', 'Confirm Password')}"
-            autocomplete="off"
-            required
-            minlength="6"
-            maxlength="16"
-            value=""
-          />
-          <span toggle="#confirmPassword" class="toggle-password eye"></span>
-          <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-            ${i18n.tv('password.reset.form.confirm_password_invalid', 'Please input confirm password!')}
+        <div class="${formLableDisplay ? 'col-sm-9' : ''}">
+          <div style="position: relative">
+            <input
+              type="password"
+              class="form-control password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="${i18n.tv('password.reset.form.conform_password_placeholder', 'Confirm Password')}"
+              autocomplete="off"
+              required
+              minlength="6"
+              maxlength="16"
+              value=""
+            />
+            <span toggle="#confirmPassword" class="toggle-password eye"></span>
+            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+              ${i18n.tv('password.reset.form.confirm_password_invalid', 'Please input confirm password!')}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-      <div class="row mb-3">
-        <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-          <div id="error"></div>
+    </form>
+    <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
+        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
         </div>
-      </div>
-    </form>`;
+      </div>`;
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',

@@ -70,7 +70,6 @@ body:after {
   }
 }
 .login-wrap {
-  position: relative;
   color: rgba(255, 255, 255, 0.9);
 }
 .login-wrap h3 {
@@ -161,6 +160,9 @@ body:after {
 }
 .was-validated .form-check-input:valid~.form-check-label {
   color: var(--theme-primary);
+}
+#errorToast{
+  color: rgba(0, 0, 0, 0.85);
 }
 .submit {
   cursor: pointer;

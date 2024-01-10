@@ -4,8 +4,17 @@ $(document).ready(function () {
     e.stopPropagation();
 
     var $form = $(this);
-    var $error = $form.find('#error');
     var $submit = $('button[type="submit"], input[type="submit"]');
+    var $errorToast = $('#errorToast');
+
+    function showError(message) {
+      $errorToast.find('.toast-body').html(message);
+
+      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
+      errorToast.show();
+      return () => errorToast.hide();
+    }
+
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
       return;
@@ -16,7 +25,7 @@ $(document).ready(function () {
     }, {});
 
     if (data.newPassword !== data.confirmPassword) {
-      return $error.removeClass('d-none').html(locales.dismatchPassword);
+      return showError(locales.dismatchPassword);
     }
 
     data.oldPassword = data.oldPassword.sha256();
@@ -24,7 +33,6 @@ $(document).ready(function () {
     delete data.confirmPassword;
 
     $submit.attr('disabled', 'disabled');
-    $error.hasClass('d-none') ? null : $error.addClass('d-none');
     axios({
       url: $form.attr('action'),
       method: $form.attr('method') || 'POST',
@@ -35,7 +43,7 @@ $(document).ready(function () {
         if (!data.success) throw new Error(data.message);
         $form[0].reset();
         if (data.message) {
-          $error.removeClass('d-none').html(data.message);
+          showError(data.message);
           setTimeout(() => {
             absoluteGo(data.next, true);
           }, 3000);
@@ -45,7 +53,7 @@ $(document).ready(function () {
       })
       .catch(function (err) {
         var data = err.response ? err.response.data : err;
-        $error.removeClass('d-none').html(data.message);
+        showError(data.message);
       })
       .finally(function () {
         $submit.removeAttr('disabled');
@@ -57,8 +65,17 @@ $(document).ready(function () {
     e.stopPropagation();
 
     var $form = $(this);
-    var $error = $form.find('#error');
     var $submit = $('button[type="submit"], input[type="submit"]');
+    var $errorToast = $('#errorToast');
+
+    function showError(message) {
+      $errorToast.find('.toast-body').html(message);
+
+      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
+      errorToast.show();
+      return () => errorToast.hide();
+    }
+
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
       return;
@@ -69,7 +86,6 @@ $(document).ready(function () {
     }, {});
 
     $submit.attr('disabled', 'disabled');
-    $error.hasClass('d-none') ? null : $error.addClass('d-none');
     axios({
       url: $form.attr('action'),
       method: $form.attr('method') || 'POST',
@@ -80,7 +96,7 @@ $(document).ready(function () {
         if (!data.success) throw new Error(data.message);
         $form[0].reset();
         $submit.remove();
-        $error.removeClass('d-none').html('<span class="success--text">' + data.message + '</span>');
+        showError('<span class="success--text">' + data.message + '</span>');
 
         // 修改路由但不刷新页面，使浏览器刷新返回到上一页
         const returnUrl = getUrlParams('returnUrl');
@@ -88,7 +104,7 @@ $(document).ready(function () {
       })
       .catch(function (err) {
         var data = err.response ? err.response.data : err;
-        $error.removeClass('d-none').html(data.message);
+        showError(data.message);
       })
       .finally(function () {
         $submit.removeAttr('disabled');
@@ -100,8 +116,17 @@ $(document).ready(function () {
     e.stopPropagation();
 
     var $form = $(this);
-    var $error = $form.find('#error');
     var $submit = $('button[type="submit"], input[type="submit"]');
+    var $errorToast = $('#errorToast');
+
+    function showError(message) {
+      $errorToast.find('.toast-body').html(message);
+
+      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
+      errorToast.show();
+      return () => errorToast.hide();
+    }
+
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
       return;
@@ -112,7 +137,7 @@ $(document).ready(function () {
     }, {});
 
     if (data.newPassword !== data.confirmPassword) {
-      return $error.removeClass('d-none').html(locales.dismatchPassword);
+      return showError(locales.dismatchPassword);
     }
 
     data.password = data.newPassword.sha256();
@@ -120,7 +145,6 @@ $(document).ready(function () {
     delete data.confirmPassword;
 
     $submit.attr('disabled', 'disabled');
-    $error.hasClass('d-none') ? null : $error.addClass('d-none');
     axios({
       url: $form.attr('action'),
       method: $form.attr('method') || 'POST',
@@ -131,7 +155,7 @@ $(document).ready(function () {
         if (!data.success) throw new Error(data.message);
         $form[0].reset();
         if (data.message) {
-          $error.removeClass('d-none').html(data.message);
+          showError(data.message);
           setTimeout(() => {
             absoluteGo(data.next, true);
           }, 3000);
@@ -141,7 +165,7 @@ $(document).ready(function () {
       })
       .catch(function (err) {
         var data = err.response ? err.response.data : err;
-        $error.removeClass('d-none').html(data.message);
+        showError(data.message);
       })
       .finally(function () {
         $submit.removeAttr('disabled');

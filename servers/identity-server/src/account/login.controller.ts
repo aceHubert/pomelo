@@ -98,10 +98,9 @@ export class LoginController extends BaseController {
                   : ''
               }
               <%- form %>
-              <div class="row mb-3">
+              <div class="row">
                 <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-                  <div id="error" class="alert alert-danger d-none"></div>
-                  <div class="d-sm-inline-block gap-2">
+                  <div class="d-sm-inline-block gap-2 mt-2">
                     <button type="submit" class="btn btn-primary w-100" form="login-form">
                       ${i18n.tv('login.wrapper.submit_btn_text', 'Sign In')}
                     </button>
@@ -201,12 +200,15 @@ export class LoginController extends BaseController {
               </div>`
             : ''
         }
-        <div class="row mb-3">
-          <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
-            <div id="error"></div>
+      </form>
+      <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
+        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body"></div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
         </div>
-      </form>`;
+      </div>`;
     } else {
       const missingScopes = new Set(prompt.details.missingOIDCScope as string[]);
       const resourceMap = new Map<string, string>();

@@ -5,7 +5,15 @@ $(document).ready(function () {
 
     var $form = $(this);
     var $submit = $form.find('button[type="submit"]');
-    var $error = $form.find('#error');
+    var $errorToast = $('#errorToast');
+
+    function showError(message) {
+      $errorToast.find('.toast-body').html(message);
+
+      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
+      errorToast.show();
+      return () => errorToast.hide();
+    }
 
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
@@ -20,14 +28,13 @@ $(document).ready(function () {
     data.remember = data.remember === 'on' ? true : false;
     if ($form.find('#userPolicy').length) {
       if (data.userPolicy !== 'on') {
-        return $error.removeClass('d-none').html(locales.userPolicyInvalid);
+        return showError(locales.userPolicyInvalid);
       } else {
         data.userPolicy = true;
       }
     }
 
     $submit.attr('disabled', 'disabled');
-    $error.hasClass('d-none') ? null : $error.addClass('d-none');
     axios({
       url: $form.attr('action'),
       method: $form.attr('method') || 'POST',
@@ -37,7 +44,7 @@ $(document).ready(function () {
         var data = res.data;
         if (!data.success) throw new Error(data.message);
         if (data.message) {
-          $error.removeClass('d-none').html(data.message);
+          showError(data.message);
           setTimeout(() => {
             absoluteGo(data.next, true);
           }, 3000);
@@ -47,7 +54,7 @@ $(document).ready(function () {
       })
       .catch(function (err) {
         var data = err.response ? err.response.data : err;
-        $error.removeClass('d-none').html(data.message);
+        showError(data.message);
       })
       .finally(function () {
         $submit.removeAttr('disabled');
