@@ -14,14 +14,7 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ParseQueryPipe,
-  ValidatePayloadExistsPipe,
-  ApiAuthCreate,
-  User,
-  RequestUser,
-  createResponseSuccessType,
-} from '@ace-pomelo/shared-server';
+import { ParseQueryPipe, ValidatePayloadExistsPipe, ApiAuthCreate, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
@@ -31,6 +24,7 @@ import {
 } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { PostTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { PostTemplateOptionQueryDto, PagedPostTemplateQueryDto } from './dto/template-query.dto';
@@ -118,8 +112,8 @@ export class PostTemplateController extends BaseController {
   async getByName(
     @Param('name') name: string,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-    @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.templateDataSource.getByName(
       name,
@@ -137,7 +131,7 @@ export class PostTemplateController extends BaseController {
         'updatedAt',
         'createdAt',
       ],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     let metas;
@@ -177,8 +171,8 @@ export class PostTemplateController extends BaseController {
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-    @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.templateDataSource.get(
       id,
@@ -196,7 +190,7 @@ export class PostTemplateController extends BaseController {
         'updatedAt',
         'createdAt',
       ],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     let metas;
@@ -225,13 +219,13 @@ export class PostTemplateController extends BaseController {
    * Get paged post template model
    */
   @Get()
-  @RamAuthorized(PostTemplateAction.PagedList)
+  @Anonymous()
   @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged posts template models',
     type: () => createResponseSuccessType({ data: PagedPostTemplateResp }, 'PagedPostTemplateSuccessResp'),
   })
-  async getPaged(@Query(ParseQueryPipe) query: PagedPostTemplateQueryDto, @User() requestUser: RequestUser) {
+  async getPaged(@Query(ParseQueryPipe) query: PagedPostTemplateQueryDto, @User() requestUser?: RequestUser) {
     const { categoryId, categoryName, tagId, tagName, ...restQuery } = query;
     const result = await this.templateDataSource.getPaged(
       {
@@ -260,7 +254,7 @@ export class PostTemplateController extends BaseController {
       },
       TemplatePresetType.Post,
       ['id', 'name', 'title', 'author', 'excerpt', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     return this.success({
@@ -283,7 +277,7 @@ export class PostTemplateController extends BaseController {
       await this.templateDataSource.create(
         { ...input, excerpt: input.excerpt || '' },
         TemplatePresetType.Post,
-        requestUser,
+        Number(requestUser.sub),
       );
 
     return this.success({
@@ -318,8 +312,13 @@ export class PostTemplateController extends BaseController {
     @Body(ValidatePayloadExistsPipe) model: UpdatePostTemplateDto,
     @User() requestUser: RequestUser,
   ) {
-    await this.templateDataSource.update(id, model, requestUser);
-    return this.success();
+    try {
+      await this.templateDataSource.update(id, model, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**

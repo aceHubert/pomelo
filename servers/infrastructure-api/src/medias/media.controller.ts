@@ -23,15 +23,14 @@ import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { MediaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import {
+  isAbsoluteUrl,
   User,
   ApiAuthCreate,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
-  createResponseSuccessType,
-  describeType,
   RequestUser,
 } from '@ace-pomelo/shared-server';
-import { isAbsoluteUrl } from '@/common/utils/path.util';
+import { createResponseSuccessType, describeType } from '@/common/utils/swagger-type.util';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { MediaAction } from '@/common/actions';
 import { FixedMediaOptions } from './interfaces/media-options.interface';
@@ -102,7 +101,6 @@ export class MediaController extends createMetaController(
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() options: Omit<FileUploadDto, 'file'> | undefined,
-    @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
   ) {
     // 解决中文乱码问题，https://github.com/expressjs/multer/issues/1104
@@ -134,7 +132,7 @@ export class MediaController extends createMetaController(
           path,
         },
         metaData,
-        requestUser,
+        Number(requestUser.sub),
       );
     }
     const { original, ...rest } = await this.fileService.toFileModel(media, media.metaData);
@@ -172,11 +170,7 @@ export class MediaController extends createMetaController(
         'FormTemplateOptionModelsSuccessResp',
       ),
   })
-  async uploadFiles(
-    @UploadedFiles() files: Express.Multer.File[],
-    @I18n() i18n: I18nContext,
-    @User() requestUser: RequestUser,
-  ) {
+  async uploadFiles(@UploadedFiles() files: Express.Multer.File[], @User() requestUser: RequestUser) {
     const result = await Promise.all(
       files.map(async (file) => {
         // 解决中文乱码问题，https://github.com/expressjs/multer/issues/1104
@@ -207,7 +201,7 @@ export class MediaController extends createMetaController(
               path,
             },
             metaData,
-            requestUser,
+            Number(requestUser.sub),
           );
         }
 
@@ -283,7 +277,7 @@ export class MediaController extends createMetaController(
             path: filePath,
           },
           metaData,
-          requestUser,
+          Number(requestUser.sub),
         );
         const { original, ...rest } = await this.fileService.toFileModel(
           {
@@ -312,7 +306,7 @@ export class MediaController extends createMetaController(
             path: filePath,
           },
           metaData,
-          requestUser,
+          Number(requestUser.sub),
         );
         const { original, ...rest } = await this.fileService.toFileModel(newMedia, newMedia.metaData);
         return this.success({
@@ -427,8 +421,8 @@ export class MediaController extends createMetaController(
     description: 'Media model',
     type: () => createResponseSuccessType({ data: MediaModelResp }, 'MediaModelSuccessResp'),
   })
-  async createMedia(@Body() { metaData, ...model }: NewMediaDto, @User() user: RequestUser) {
-    const media = await this.mediaDataSource.create(model, metaData, user);
+  async createMedia(@Body() { metaData, ...model }: NewMediaDto, @User() requestUser: RequestUser) {
+    const media = await this.mediaDataSource.create(model, metaData, Number(requestUser.sub));
     const { original, ...rest } = await this.fileService.toFileModel(media, media?.metaData);
     return this.success({
       data: {
@@ -465,9 +459,14 @@ export class MediaController extends createMetaController(
       }),
     )
     { metaData, ...model }: UpdateMediaDto,
-    @User() user: RequestUser,
+    @User() requestUser: RequestUser,
   ) {
-    await this.mediaDataSource.update(id, model, metaData ?? 'NONE', user);
-    return this.success();
+    try {
+      await this.mediaDataSource.update(id, model, metaData ?? 'NONE', Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 }

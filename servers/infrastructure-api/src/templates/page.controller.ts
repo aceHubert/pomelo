@@ -14,14 +14,7 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ParseQueryPipe,
-  ValidatePayloadExistsPipe,
-  ApiAuthCreate,
-  User,
-  RequestUser,
-  createResponseSuccessType,
-} from '@ace-pomelo/shared-server';
+import { ParseQueryPipe, ValidatePayloadExistsPipe, ApiAuthCreate, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
@@ -31,6 +24,7 @@ import {
 } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { PageTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { PageTemplateOptionQueryDto, PagedPageTemplateQueryDto } from './dto/template-query.dto';
@@ -126,14 +120,14 @@ export class PageTemplateController extends BaseController {
   async getByName(
     @Param('name') name: string,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-    @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.templateDataSource.getByName(
       name,
       TemplatePresetType.Page,
       ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     let metas;
@@ -173,14 +167,14 @@ export class PageTemplateController extends BaseController {
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-    @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.templateDataSource.get(
       id,
       TemplatePresetType.Page,
       ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     let metas;
@@ -204,7 +198,7 @@ export class PageTemplateController extends BaseController {
    * Get paged page template model
    */
   @Get()
-  @RamAuthorized(PageTemplateAction.PagedList)
+  @Anonymous()
   @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged pages template models',
@@ -231,7 +225,7 @@ export class PageTemplateController extends BaseController {
       },
       TemplatePresetType.Page,
       ['id', 'name', 'title', 'author', 'status', 'createdAt'],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     return this.success({
@@ -251,7 +245,7 @@ export class PageTemplateController extends BaseController {
   })
   async create(@Body() input: NewPageTemplateDto, @User() requestUser: RequestUser) {
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(input, TemplatePresetType.Page, requestUser);
+      await this.templateDataSource.create(input, TemplatePresetType.Page, Number(requestUser.sub));
 
     return this.success({
       data: {
@@ -284,8 +278,13 @@ export class PageTemplateController extends BaseController {
     @Body(ValidatePayloadExistsPipe) input: UpdatePageTemplateDto,
     @User() requestUser: RequestUser,
   ) {
-    await this.templateDataSource.update(id, input, requestUser);
-    return this.success();
+    try {
+      await this.templateDataSource.update(id, input, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**

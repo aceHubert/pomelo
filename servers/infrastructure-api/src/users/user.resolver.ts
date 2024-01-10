@@ -3,7 +3,7 @@ import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
+import { Fields, User, RequestUser, md5 } from '@ace-pomelo/shared-server';
 import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { UserAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
@@ -43,7 +43,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Fields() fields: ResolveTree,
     @User() requestUser: RequestUser,
   ): Promise<UserModel | undefined> {
-    return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.UserModel), requestUser);
+    return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.UserModel), Number(requestUser.sub));
   }
 
   @RamAuthorized(UserAction.PagedList)
@@ -56,7 +56,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     return this.userDataSource.getPaged(
       args,
       this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.PagedUser),
-      requestUser,
+      Number(requestUser.sub),
     );
   }
 
@@ -68,8 +68,8 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   ): Promise<UserModel> {
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
       await this.userDataSource.create(
-        { ...input, niceName: input.loginName, displayName: input.loginName },
-        requestUser,
+        { ...input, loginPwd: md5(input.loginPwd).toString(), niceName: input.loginName, displayName: input.loginName },
+        Number(requestUser.sub),
       );
 
     return {
@@ -93,26 +93,47 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    return await this.userDataSource.update(id, model, requestUser);
+    try {
+      await this.userDataSource.update(id, model, Number(requestUser.sub));
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(UserAction.UpdateStatus)
   @Mutation((returns) => Boolean, {
     description: 'Update user stauts',
   })
-  updateUserStatus(
+  async updateUserStatus(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('status', { type: () => UserStatus, description: 'status' }) status: UserStatus,
     @User() requestUser: RequestUser,
-  ): Promise<Boolean> {
-    return this.userDataSource.updateStatus(id, status, requestUser);
+  ): Promise<boolean> {
+    try {
+      await this.userDataSource.updateStatus(id, status, Number(requestUser.sub));
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(UserAction.Delete)
   @Mutation((returns) => Boolean, {
     description: 'Delete user permanently.',
   })
-  deleteUser(@Args('id', { type: () => ID, description: 'User id' }) id: number, @User() requestUser: RequestUser) {
-    return this.userDataSource.delete(id, requestUser);
+  async deleteUser(
+    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @User() requestUser: RequestUser,
+  ): Promise<boolean> {
+    try {
+      await this.userDataSource.delete(id, Number(requestUser.sub));
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

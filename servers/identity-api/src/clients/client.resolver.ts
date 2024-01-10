@@ -70,11 +70,17 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update client.' })
-  updateClient(
+  async updateClient(
     @Args('clientId', { description: 'Client id' }) clientId: string,
     @Args('model', { type: () => UpdateClientInput }) input: UpdateClientInput,
   ): Promise<boolean> {
-    return this.clientDataSource.update(clientId, input);
+    try {
+      await this.clientDataSource.update(clientId, input);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.Claims)
@@ -109,8 +115,16 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeleteClaim)
   @Mutation((returns) => Boolean, { description: 'Delete client claim permanently.' })
-  deleteClientClaim(@Args('id', { type: () => ID, description: 'Client claim id' }) id: number): Promise<boolean> {
-    return this.clientDataSource.deleteClaim(id);
+  async deleteClientClaim(
+    @Args('id', { type: () => ID, description: 'Client claim id' }) id: number,
+  ): Promise<boolean> {
+    try {
+      await this.clientDataSource.deleteClaim(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.CorsOrigins)
@@ -145,10 +159,16 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeleteCorsOrigin)
   @Mutation((returns) => Boolean, { description: 'Delete client cors origin permanently.' })
-  deleteClientCorsOrigin(
+  async deleteClientCorsOrigin(
     @Args('id', { type: () => ID, description: 'Client cors origin id' }) id: number,
   ): Promise<boolean> {
-    return this.clientDataSource.deleteCorsOrigin(id);
+    try {
+      await this.clientDataSource.deleteCorsOrigin(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.GrantTypes)
@@ -183,10 +203,16 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeleteGrantType)
   @Mutation((returns) => Boolean, { description: 'Delete client grant type permanently.' })
-  deleteClientGrantType(
+  async deleteClientGrantType(
     @Args('id', { type: () => ID, description: 'Client grant type id' }) id: number,
   ): Promise<boolean> {
-    return this.clientDataSource.deleteGrantType(id);
+    try {
+      await this.clientDataSource.deleteGrantType(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.Scopes)
@@ -221,8 +247,16 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeleteScope)
   @Mutation((returns) => Boolean, { description: 'Delete client scope permanently.' })
-  deleteClientScope(@Args('id', { type: () => ID, description: 'Client scope id' }) id: number): Promise<boolean> {
-    return this.clientDataSource.deleteScope(id);
+  async deleteClientScope(
+    @Args('id', { type: () => ID, description: 'Client scope id' }) id: number,
+  ): Promise<boolean> {
+    try {
+      await this.clientDataSource.deleteScope(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.RedirectUris)
@@ -257,10 +291,16 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeleteRedirectUri)
   @Mutation((returns) => Boolean, { description: 'Delete client redirect uri permanently.' })
-  deleteClientRedirectUri(
+  async deleteClientRedirectUri(
     @Args('id', { type: () => ID, description: 'Client redirect uri id' }) id: number,
   ): Promise<boolean> {
-    return this.clientDataSource.deleteRedirectUri(id);
+    try {
+      await this.clientDataSource.deleteRedirectUri(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.PostLogoutRedirectUris)
@@ -304,10 +344,16 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeletePostLogoutRedirectUri)
   @Mutation((returns) => Boolean, { description: 'Delete client post logout redirect uri permanently.' })
-  deleteClientPostLogoutRedirectUri(
+  async deleteClientPostLogoutRedirectUri(
     @Args('id', { type: () => ID, description: 'Client post logout redirect uri id' }) id: number,
   ): Promise<boolean> {
-    return this.clientDataSource.deletePostLogoutRedirectUri(id);
+    try {
+      await this.clientDataSource.deletePostLogoutRedirectUri(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.Secrets)
@@ -347,8 +393,16 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeleteSecret)
   @Mutation((returns) => Boolean, { description: 'Delete client secret permanently.' })
-  deleteClientSecret(@Args('id', { type: () => ID, description: 'Client secret id' }) id: number): Promise<boolean> {
-    return this.clientDataSource.deleteSecret(id);
+  async deleteClientSecret(
+    @Args('id', { type: () => ID, description: 'Client secret id' }) id: number,
+  ): Promise<boolean> {
+    try {
+      await this.clientDataSource.deleteSecret(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ClientAction.Properties)
@@ -383,9 +437,15 @@ export class ClientResolver extends BaseResolver {
 
   @RamAuthorized(ClientAction.DeleteProperty)
   @Mutation((returns) => Boolean, { description: 'Delete client property permanently.' })
-  deleteClientProperty(
+  async deleteClientProperty(
     @Args('id', { type: () => ID, description: 'Client property id' }) id: number,
   ): Promise<boolean> {
-    return this.clientDataSource.deleteProperty(id);
+    try {
+      await this.clientDataSource.deleteProperty(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

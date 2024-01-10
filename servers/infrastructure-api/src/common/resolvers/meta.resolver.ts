@@ -273,7 +273,7 @@ export function createMetaResolver<
       @Args('metaValue', { description: 'Meta value' }) metaValue: string,
       @Args('createIfNotExists', {
         nullable: true,
-        description: 'Create meta if metaKey is not exists, default: false',
+        description: 'Create meta if metaKey does not exist, default: false',
       })
       createIfNotExists?: boolean,
     ) {

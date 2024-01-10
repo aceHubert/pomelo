@@ -17,7 +17,6 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import { I18n, I18nContext } from 'nestjs-i18n';
 import { ModuleRef } from '@nestjs/core';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
@@ -27,7 +26,6 @@ import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   QueryRequired,
-  createResponseSuccessType,
   RequestUser,
 } from '@ace-pomelo/shared-server';
 import {
@@ -37,6 +35,7 @@ import {
   TemplateStatus,
   TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
+import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { TemplateAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { NewTemplateMetaDto } from './dto/new-template-meta.dto';
@@ -132,7 +131,7 @@ export class TemplateController extends createMetaController(
     type: () => createResponseSuccessType({ data: [TemplateStatusCount] }, 'TemplateCountByStatusModelSuccessResp'),
   })
   async getCountByStatus(@Param('type') type: string, @User() requestUser: RequestUser) {
-    const result = await this.templateDataSource.getCountByStatus(type, requestUser);
+    const result = await this.templateDataSource.getCountByStatus(type, Number(requestUser.sub));
     return this.success({
       data: result,
     });
@@ -159,7 +158,7 @@ export class TemplateController extends createMetaController(
     @Query('includeTrash') includeTrash: boolean,
     @User() requestUser: RequestUser,
   ) {
-    const result = await this.templateDataSource.getCountBySelf(type, !!includeTrash, requestUser);
+    const result = await this.templateDataSource.getCountBySelf(type, !!includeTrash, Number(requestUser.sub));
     return this.success({
       data: result,
     });
@@ -261,8 +260,8 @@ export class TemplateController extends createMetaController(
   async getByName(
     @Param('name') name: string,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-    @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.templateDataSource.getByName(
       name,
@@ -281,7 +280,7 @@ export class TemplateController extends createMetaController(
         'updatedAt',
         'createdAt',
       ],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     let metas;
@@ -323,8 +322,8 @@ export class TemplateController extends createMetaController(
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-    @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.templateDataSource.get(
       id,
@@ -343,7 +342,7 @@ export class TemplateController extends createMetaController(
         'updatedAt',
         'createdAt',
       ],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     let metas;
@@ -372,7 +371,7 @@ export class TemplateController extends createMetaController(
    * Get paged template model
    */
   @Get()
-  @RamAuthorized(TemplateAction.PagedList)
+  @Anonymous()
   @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged template models',
@@ -411,7 +410,7 @@ export class TemplateController extends createMetaController(
         'updatedAt',
         'createdAt',
       ],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     return this.success({
@@ -432,7 +431,11 @@ export class TemplateController extends createMetaController(
   async create(@Body() input: NewTemplateDto, @User() requestUser: RequestUser) {
     const { type, ...restDto } = input;
     const { id, title, author, excerpt, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create({ ...restDto, excerpt: restDto.excerpt || '' }, type, requestUser);
+      await this.templateDataSource.create(
+        { ...restDto, excerpt: restDto.excerpt || '' },
+        type,
+        Number(requestUser.sub),
+      );
     return this.success({
       data: {
         id,
@@ -465,7 +468,7 @@ export class TemplateController extends createMetaController(
     @Body(ValidatePayloadExistsPipe) model: UpdateTemplateDto,
     @User() requestUser: RequestUser,
   ) {
-    await this.templateDataSource.update(id, model, requestUser);
+    await this.templateDataSource.update(id, model, Number(requestUser.sub));
     return this.success();
   }
 
@@ -483,18 +486,13 @@ export class TemplateController extends createMetaController(
     @Param('id', ParseIntPipe) id: number,
     @Query('name', new ValidationPipe({ expectedType: String })) name: string,
     @User() requestUser: RequestUser,
-    @I18n() i18n: I18nContext,
   ) {
-    const result = await this.templateDataSource.updateName(id, name, requestUser);
-    if (result) {
+    try {
+      await this.templateDataSource.updateName(id, name, Number(requestUser.sub));
       return this.success();
-    } else {
-      return this.faild(
-        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
-          args: { id },
-        }),
-        400,
-      );
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
     }
   }
 
@@ -512,18 +510,13 @@ export class TemplateController extends createMetaController(
     @Param('id', ParseIntPipe) id: number,
     @Query('status', new ParseEnumPipe(TemplateStatus)) status: TemplateStatus,
     @User() requestUser: RequestUser,
-    @I18n() i18n: I18nContext,
   ) {
-    const result = await this.templateDataSource.updateStatus(id, status, requestUser);
-    if (result) {
+    try {
+      await this.templateDataSource.updateStatus(id, status, Number(requestUser.sub));
       return this.success();
-    } else {
-      return this.faild(
-        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
-          args: { id },
-        }),
-        400,
-      );
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
     }
   }
 
@@ -538,8 +531,13 @@ export class TemplateController extends createMetaController(
     type: () => createResponseSuccessType({}, 'BulkUpdateTemplateStatusModelSuccessResp'),
   })
   async bulkUpdateStatus(@Body() model: BulkUpdateTemplateStatusDto, @User() requestUser: RequestUser) {
-    await this.templateDataSource.bulkUpdateStatus(model.templateIds, model.status, requestUser);
-    return this.success();
+    try {
+      await this.templateDataSource.bulkUpdateStatus(model.templateIds, model.status, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -552,17 +550,13 @@ export class TemplateController extends createMetaController(
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'RestoreTemplateModelSuccessResp'),
   })
-  async restore(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser, @I18n() i18n: I18nContext) {
-    const result = await this.templateDataSource.restore(id, requestUser);
-    if (result) {
+  async restore(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
+    try {
+      await this.templateDataSource.restore(id, Number(requestUser.sub));
       return this.success();
-    } else {
-      return this.faild(
-        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
-          args: { id },
-        }),
-        400,
-      );
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
     }
   }
 
@@ -578,8 +572,13 @@ export class TemplateController extends createMetaController(
     type: () => createResponseSuccessType({}, 'BulkRestoreTemplateModelSuccessResp'),
   })
   async bulkRestore(@Body() ids: number[], @User() requestUser: RequestUser) {
-    await this.templateDataSource.bulkRestore(ids, requestUser);
-    return this.success();
+    try {
+      await this.templateDataSource.bulkRestore(ids, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -592,17 +591,13 @@ export class TemplateController extends createMetaController(
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'DeleteTemplateModelSuccessResp'),
   })
-  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser, @I18n() i18n: I18nContext) {
-    const result = await this.templateDataSource.delete(id, requestUser);
-    if (result) {
+  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
+    try {
+      await this.templateDataSource.delete(id, Number(requestUser.sub));
       return this.success();
-    } else {
-      return this.faild(
-        i18n.tv('templates.controller.template_does_not_exist', `Template "${id}" does not exist！`, {
-          args: { id },
-        }),
-        400,
-      );
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
     }
   }
 
@@ -618,7 +613,12 @@ export class TemplateController extends createMetaController(
     type: () => createResponseSuccessType({}, 'BulkDeleteTemplateModelSuccessResp'),
   })
   async bulkDelete(@Body() ids: number[], @User() requestUser: RequestUser) {
-    await this.templateDataSource.bulkDelete(ids, requestUser);
-    return this.success();
+    try {
+      await this.templateDataSource.bulkDelete(ids, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 }

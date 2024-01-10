@@ -79,7 +79,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       id,
       TemplatePresetType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
@@ -94,11 +94,11 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       name,
       TemplatePresetType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
-  @RamAuthorized(PageTemplateAction.PagedList)
+  @Anonymous()
   @Query((returns) => PagedPageTemplate, { description: 'Get paged page templates.' })
   pageTemplates(
     @Args() args: PagedPageTemplateArgs,
@@ -125,7 +125,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
       },
       TemplatePresetType.Page,
       this.getFieldNames(fields.fieldsByTypeName.PagedPageTemplate.rows.fieldsByTypeName.PagedPageTemplateItem),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
@@ -136,7 +136,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @User() requestUser: RequestUser,
   ): Promise<PageTemplate> {
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(model, TemplatePresetType.Page, requestUser);
+      await this.templateDataSource.create(model, TemplatePresetType.Page, Number(requestUser.sub));
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
@@ -172,21 +172,26 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Args('model', { type: () => UpdatePageTemplateInput }) model: UpdatePageTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    const result = await this.templateDataSource.update(id, model, requestUser);
+    try {
+      await this.templateDataSource.update(id, model, Number(requestUser.sub));
 
-    // 修改（当状态为需要审核并且有任何修改）审核消息推送
-    if (result && model.status === TemplateStatus.Pending) {
-      await this.messageService.publish({
-        excludes: [requestUser.sub],
-        message: {
-          eventName: 'updatePageReview',
-          payload: {
-            id,
+      // 修改（当状态为需要审核并且有任何修改）审核消息推送
+      if (model.status === TemplateStatus.Pending) {
+        await this.messageService.publish({
+          excludes: [requestUser.sub],
+          message: {
+            eventName: 'updatePageReview',
+            payload: {
+              id,
+            },
           },
-        },
-      });
-    }
+        });
+      }
 
-    return result;
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

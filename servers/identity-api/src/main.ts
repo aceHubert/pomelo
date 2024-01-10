@@ -5,6 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { setupSession } from '@ace-pomelo/nestjs-oidc';
+import { normalizeRoutePath } from '@ace-pomelo/shared-server';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
 import { AppModule } from './app.module';
 
@@ -20,12 +21,12 @@ async function bootstrap() {
 
   const host = configService.get<string>('webServer.host', '');
   const port = configService.get<number>('webServer.port', 3000);
-  const globalPrefixUri = configService.get<string>('webServer.globalPrefixUri', '');
+  const globalPrefixUri = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
   const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
   const isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
-  const swaggerPath = configService.get<string>('swagger.path', '/doc');
+  const swaggerPath = normalizeRoutePath(configService.get<string>('swagger.path', '/doc'));
   const isGraphqlDebug = configService.get<boolean>('graphql.debug', false);
-  const graphqlPath = configService.get<string>('graphql.path', '/graphql');
+  const graphqlPath = normalizeRoutePath(configService.get<string>('graphql.path', '/graphql'));
 
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
@@ -72,11 +73,14 @@ async function bootstrap() {
   setupSession(app, packageName?.replace('@', '').replace('/', ':') || 'ace-pomelo:identity-api');
 
   await app.listen(port, host);
-  logger.log(`Application is running on: ${await app.getUrl()}`);
-  globalPrefixUri && logger.log(`Application's global prefix uri is: ${globalPrefixUri} `);
-  logger.log(`Application is enable cors: ${!!cors}`);
-  isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${swaggerPath}`);
-  isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${graphqlPath}`);
+  logger.log(
+    `Application is running on: ${await app.getUrl()}${
+      globalPrefixUri ? ' with global prefix: ' + globalPrefixUri : ''
+    }`,
+  );
+  !!cors && logger.log('cors is enabled');
+  isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${globalPrefixUri}${swaggerPath}`);
+  isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${globalPrefixUri}${graphqlPath}`);
 
   // hot reload
   if (module.hot) {

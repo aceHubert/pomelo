@@ -1,7 +1,13 @@
-import { HttpException } from '@nestjs/common';
+import { Logger, HttpException } from '@nestjs/common';
 import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared-server';
 
 export abstract class BaseController {
+  protected logger: Logger;
+
+  constructor() {
+    this.logger = new Logger(this.constructor.name, { timestamp: true });
+  }
+
   /**
    * 返回成功
    * @param data data object

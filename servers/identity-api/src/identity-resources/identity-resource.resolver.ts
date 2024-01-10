@@ -58,19 +58,31 @@ export class IdentityResourceResolver extends BaseResolver {
 
   @RamAuthorized(IdentityResourceAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update identity resource.' })
-  updateIdentityResource(
+  async updateIdentityResource(
     @Args('id', { type: () => ID, description: 'Identity resource id' }) id: number,
     @Args('model') input: UpdateIdentityResourceInput,
   ): Promise<boolean> {
-    return this.identityResourceDataSource.update(id, input);
+    try {
+      await this.identityResourceDataSource.update(id, input);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(IdentityResourceAction.Delete)
   @Mutation((returns) => Boolean, { description: 'Delete identity resource.' })
-  deleteIdentityResource(
+  async deleteIdentityResource(
     @Args('id', { type: () => ID, description: 'Identity resource id' }) id: number,
   ): Promise<boolean> {
-    return this.identityResourceDataSource.delete(id);
+    try {
+      await this.identityResourceDataSource.delete(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(IdentityResourceAction.Claims)
@@ -96,8 +108,16 @@ export class IdentityResourceResolver extends BaseResolver {
 
   @RamAuthorized(IdentityResourceAction.DeleteClaim)
   @Mutation((returns) => Boolean, { description: 'Delete identity claim permanently.' })
-  deleteIdentityClaim(@Args('id', { type: () => ID, description: 'Identity claim id' }) id: number): Promise<boolean> {
-    return this.identityResourceDataSource.deleteClaim(id);
+  async deleteIdentityClaim(
+    @Args('id', { type: () => ID, description: 'Identity claim id' }) id: number,
+  ): Promise<boolean> {
+    try {
+      await this.identityResourceDataSource.deleteClaim(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(IdentityResourceAction.Properties)
@@ -123,9 +143,15 @@ export class IdentityResourceResolver extends BaseResolver {
 
   @RamAuthorized(IdentityResourceAction.DeleteProperty)
   @Mutation((returns) => Boolean, { description: 'Delete identity resource property permanently.' })
-  deleteIdentityProperty(
+  async deleteIdentityProperty(
     @Args('id', { type: () => ID, description: 'Identity resopurce property id' }) id: number,
   ): Promise<boolean> {
-    return this.identityResourceDataSource.deleteProperty(id);
+    try {
+      await this.identityResourceDataSource.deleteProperty(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

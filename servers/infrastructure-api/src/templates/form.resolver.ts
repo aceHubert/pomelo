@@ -74,11 +74,11 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
       TemplatePresetType.Form,
       // content 不在模型里
       ['content', ...this.getFieldNames(fields.fieldsByTypeName.FormTemplate)],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
-  @RamAuthorized(FormTemplateAction.PagedList)
+  @Anonymous()
   @Query((returns) => PagedFormTemplate, { description: 'Get paged form templates.' })
   async formTemplates(
     @Args() args: PagedFormTemplateArgs,
@@ -105,7 +105,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
       },
       TemplatePresetType.Form,
       this.getFieldNames(fields.fieldsByTypeName.PagedFormTemplate.rows.fieldsByTypeName.PagedFormTemplateItem),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
@@ -118,7 +118,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
       model,
       TemplatePresetType.Form,
-      requestUser,
+      Number(requestUser.sub),
     );
 
     // 新建（当状态为需要审核）审核消息推送
@@ -152,21 +152,26 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @Args('model', { type: () => UpdateFormTemplateInput }) model: UpdateFormTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    const result = await this.templateDataSource.update(id, model, requestUser);
+    try {
+      await this.templateDataSource.update(id, model, Number(requestUser.sub));
 
-    // 修改（当状态为需要审核并且有任何修改）审核消息推送
-    if (result && model.status === TemplateStatus.Pending) {
-      await this.messageService.publish({
-        excludes: [requestUser.sub],
-        message: {
-          eventName: 'updateFormReview',
-          payload: {
-            id,
+      // 修改（当状态为需要审核并且有任何修改）审核消息推送
+      if (model.status === TemplateStatus.Pending) {
+        await this.messageService.publish({
+          excludes: [requestUser.sub],
+          message: {
+            eventName: 'updateFormReview',
+            payload: {
+              id,
+            },
           },
-        },
-      });
-    }
+        });
+      }
 
-    return result;
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

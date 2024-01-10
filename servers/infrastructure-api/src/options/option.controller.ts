@@ -4,16 +4,8 @@ import { Controller, Query, Param, Body, Get, Post, Put, Delete, ParseIntPipe, R
 import { OptionDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { I18n, I18nContext } from 'nestjs-i18n';
-import {
-  User,
-  ApiAuthCreate,
-  ParseQueryPipe,
-  ValidatePayloadExistsPipe,
-  describeType,
-  createResponseSuccessType,
-  RequestUser,
-} from '@ace-pomelo/shared-server';
+import { User, ApiAuthCreate, ParseQueryPipe, ValidatePayloadExistsPipe, RequestUser } from '@ace-pomelo/shared-server';
+import { describeType, createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { OptionAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { OptionQueryDto } from './dto/option-query.dto';
@@ -117,7 +109,7 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
   })
   async create(@Body() input: NewOptionDto, @User() requestUser: RequestUser) {
-    const result = await this.optionDataSource.create(input, requestUser);
+    const result = await this.optionDataSource.create(input, Number(requestUser.sub));
     return this.success({
       data: result,
     });
@@ -138,8 +130,13 @@ export class OptionController extends BaseController {
     @Body(ValidatePayloadExistsPipe) model: UpdateOptionDto,
     @User() requestUser: RequestUser,
   ) {
-    await this.optionDataSource.update(id, model, requestUser);
-    return this.success();
+    try {
+      await this.optionDataSource.update(id, model, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -152,17 +149,13 @@ export class OptionController extends BaseController {
     description: 'Option model',
     type: () => createResponseSuccessType({}, 'DeleteOptionModelSuccessResp'),
   })
-  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser, @I18n() i18n: I18nContext) {
-    const result = await this.optionDataSource.delete(id, requestUser);
-    if (result) {
+  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
+    try {
+      await this.optionDataSource.delete(id, Number(requestUser.sub));
       return this.success();
-    } else {
-      return this.faild(
-        i18n.tv('options.controller.option_does_not_exist', `Option "${id}" does not exist！`, {
-          args: { id },
-        }),
-        400,
-      );
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
     }
   }
 }

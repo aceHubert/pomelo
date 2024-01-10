@@ -213,7 +213,12 @@ export class TemplateResolver extends createMetaResolver(
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<Template | undefined> {
-    return this.templateDataSource.get(id, 'NONE', this.getFieldNames(fields.fieldsByTypeName.Template), requestUser);
+    return this.templateDataSource.get(
+      id,
+      'NONE',
+      this.getFieldNames(fields.fieldsByTypeName.Template),
+      requestUser ? Number(requestUser.sub) : undefined,
+    );
   }
 
   @Anonymous()
@@ -227,7 +232,7 @@ export class TemplateResolver extends createMetaResolver(
       name,
       'NONE',
       this.getFieldNames(fields.fieldsByTypeName.Template),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
@@ -237,7 +242,7 @@ export class TemplateResolver extends createMetaResolver(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
     @User() requestUser: RequestUser,
   ) {
-    return this.templateDataSource.getCountByStatus(type, requestUser);
+    return this.templateDataSource.getCountByStatus(type, Number(requestUser.sub));
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -248,7 +253,7 @@ export class TemplateResolver extends createMetaResolver(
     includeTrash: boolean,
     @User() requestUser: RequestUser,
   ) {
-    return this.templateDataSource.getCountBySelf(type, includeTrash, requestUser);
+    return this.templateDataSource.getCountBySelf(type, includeTrash, Number(requestUser.sub));
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -281,7 +286,7 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.getCountByYear(type);
   }
 
-  @RamAuthorized(TemplateAction.PagedList)
+  @Anonymous()
   @Query((returns) => PagedTemplate, { description: 'Get paged templates.' })
   templates(
     @Args() args: PagedBaseTemplateArgs,
@@ -308,7 +313,7 @@ export class TemplateResolver extends createMetaResolver(
       },
       type,
       this.getFieldNames(fields.fieldsByTypeName.PagedTemplate.rows.fieldsByTypeName.PagedTemplateItem),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
@@ -320,7 +325,11 @@ export class TemplateResolver extends createMetaResolver(
   ): Promise<Template> {
     const { type, ...restInput } = model;
     const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create({ ...restInput, excerpt: restInput.excerpt || '' }, type, requestUser);
+      await this.templateDataSource.create(
+        { ...restInput, excerpt: restInput.excerpt || '' },
+        type,
+        Number(requestUser.sub),
+      );
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
@@ -358,84 +367,125 @@ export class TemplateResolver extends createMetaResolver(
     @Args('model', { type: () => UpdateTemplateInput }) model: UpdateTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    const result = await this.templateDataSource.update(id, model, requestUser);
+    try {
+      await this.templateDataSource.update(id, model, Number(requestUser.sub));
 
-    // 修改（当状态为需要审核并且有任何修改）审核消息推送
-    if (result && model.status === TemplateStatus.Pending) {
-      await this.messageService.publish({
-        excludes: [requestUser.sub],
-        message: {
-          eventName: 'updateTemplateReview',
-          payload: {
-            id,
+      // 修改（当状态为需要审核并且有任何修改）审核消息推送
+      if (model.status === TemplateStatus.Pending) {
+        await this.messageService.publish({
+          excludes: [requestUser.sub],
+          message: {
+            eventName: 'updateTemplateReview',
+            payload: {
+              id,
+            },
           },
-        },
-      });
+        });
+      }
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
     }
-    return result;
   }
 
   @RamAuthorized(TemplateAction.UpdateStatus)
   @Mutation((returns) => Boolean, {
     description: 'Update template stauts (must not be in "trash" status)',
   })
-  updateTemplateStatus(
+  async updateTemplateStatus(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @Args('status', { type: () => TemplateStatus, description: 'status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
   ): Promise<Boolean> {
-    return this.templateDataSource.updateStatus(id, status, requestUser);
+    try {
+      await this.templateDataSource.updateStatus(id, status, Number(requestUser.sub));
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TemplateAction.BulkUpdateStatus)
   @Mutation((returns) => Boolean, {
     description: `Update the bulk of templates' status (must not be in "trash" status)`,
   })
-  bulkUpdateTemplateStatus(
+  async bulkUpdateTemplateStatus(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @Args('status', { type: () => TemplateStatus, description: 'Status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.templateDataSource.bulkUpdateStatus(ids, status, requestUser);
+    try {
+      await this.templateDataSource.bulkUpdateStatus(ids, status, Number(requestUser.sub));
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TemplateAction.Restore)
   @Mutation((returns) => Boolean, { description: 'Restore template (must be in "trash" status)' })
-  restoreTemplate(
+  async restoreTemplate(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.templateDataSource.restore(id, requestUser);
+    try {
+      await this.templateDataSource.restore(id, Number(requestUser.sub));
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TemplateAction.BulkRestore)
   @Mutation((returns) => Boolean, { description: 'Restore the bulk of templates (must be in "trash" status)' })
-  bulkRestoreTemplate(
+  async bulkRestoreTemplate(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.templateDataSource.bulkRestore(ids, requestUser);
+    try {
+      await this.templateDataSource.bulkRestore(ids, Number(requestUser.sub));
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TemplateAction.Delete)
   @Mutation((returns) => Boolean, {
     description: 'Delete template permanently (must be in "trash" status).',
   })
-  deleteTemplate(
+  async deleteTemplate(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
-  ) {
-    return this.templateDataSource.delete(id, requestUser);
+  ): Promise<boolean> {
+    try {
+      await this.templateDataSource.delete(id, Number(requestUser.sub));
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TemplateAction.BulkDelete)
   @Mutation((returns) => Boolean, {
     description: 'Delete the bulk of templates permanently (must be in "trash" status).',
   })
-  bulkDeleteTemplate(
+  async bulkDeleteTemplate(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.templateDataSource.bulkDelete(ids, requestUser);
+    try {
+      await this.templateDataSource.bulkDelete(ids, Number(requestUser.sub));
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

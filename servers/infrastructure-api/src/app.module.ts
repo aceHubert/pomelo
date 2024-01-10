@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import multer from 'multer';
-import { APP_PIPE, APP_FILTER } from '@nestjs/core';
-import { Module, NestModule, MiddlewareConsumer, ValidationPipe, Logger } from '@nestjs/common';
+import { APP_PIPE, APP_FILTER, ModuleRef } from '@nestjs/core';
+import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -15,13 +15,15 @@ import { PubSub } from 'graphql-subscriptions';
 import {
   I18nModule,
   I18nMiddleware,
-  I18nService,
+  I18nContext,
+  I18nValidationPipe,
   QueryResolver,
   HeaderResolver,
   AcceptLanguageResolver,
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
+import { normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { OidcModule, OidcService } from '@ace-pomelo/nestjs-oidc';
 import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
@@ -90,22 +92,30 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       resolvers: [
         new GraphQLWebsocketResolver(),
-        new QueryResolver(['lang', 'locale', 'l']),
+        new QueryResolver(['lang', 'locale']),
         new HeaderResolver(['x-custom-lang', 'x-custom-locale']),
-        new CookieResolver(['lang', 'locale', 'l']),
+        new CookieResolver(['lang', 'locale']),
         new AcceptLanguageResolver(),
       ],
       inject: [ConfigService],
     }),
     InfrastructureModule.registerAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService, i18n: I18nService) => ({
+      useFactory: (config: ConfigService) => ({
         isGlobal: true,
         connection: config.getOrThrow('database.connection'),
         tablePrefix: config.get('database.tablePrefix', ''),
-        translate: i18n.tv.bind(i18n),
+        translate: (key, fallback, args) => {
+          const i18n = I18nContext.current();
+          return (
+            i18n?.translate(key, {
+              defaultValue: fallback,
+              args,
+            }) ?? fallback
+          );
+        },
       }),
-      inject: [ConfigService, I18nService],
+      inject: [ConfigService],
     }),
     OidcModule.forRootAsync({
       isGlobal: true,
@@ -291,7 +301,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       provide: APP_PIPE,
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        return new ValidationPipe({
+        return new I18nValidationPipe({
           enableDebugMessages: isDebug,
           stopAtFirstError: true,
         });
@@ -305,16 +315,17 @@ const logger = new Logger('AppModule', { timestamp: true });
   ],
 })
 export class AppModule implements NestModule {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly moduleRef: ModuleRef, private readonly configService: ConfigService) {}
 
   configure(consumer: MiddlewareConsumer) {
-    const globalPrefixUri = this.configService.get<string>('webServer.globalPrefixUri', '');
-    const graphqlPath = this.configService.get<string>('graphql.path', '/graphql');
+    const appConfig = this.moduleRef['container'].applicationConfig;
+    const globalPrefix = normalizeRoutePath(appConfig?.getGlobalPrefix() ?? ''),
+      graphqlPath = normalizeRoutePath(this.configService.get<string>('graphql.path', '/graphql'));
 
     consumer
       .apply(I18nMiddleware)
       // exclude routes
       // .exclude()
-      .forRoutes(`${globalPrefixUri}${graphqlPath}`, `${globalPrefixUri}/api/*`);
+      .forRoutes(`${globalPrefix}${graphqlPath}`, `${globalPrefix}/api/*`);
   }
 }

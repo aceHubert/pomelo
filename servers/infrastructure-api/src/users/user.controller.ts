@@ -18,7 +18,6 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import { I18n, I18nContext } from 'nestjs-i18n';
 import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
@@ -28,8 +27,9 @@ import {
   ApiAuthCreate,
   User,
   RequestUser,
-  createResponseSuccessType,
+  md5,
 } from '@ace-pomelo/shared-server';
+import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { UserAction } from '@/common/actions';
 import { NewUserDto } from './dto/new-user.dto';
@@ -90,7 +90,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     const result = await this.userDataSource.get(
       id,
       ['id', 'loginName', 'niceName', 'displayName', 'mobile', 'email', 'url', 'status', 'updatedAt', 'createdAt'],
-      requestUser,
+      Number(requestUser.sub),
     );
 
     let metas;
@@ -124,7 +124,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     const result = await this.userDataSource.getPaged(
       query,
       ['id', 'loginName', 'niceName', 'displayName', 'mobile', 'email', 'url', 'status', 'updatedAt', 'createdAt'],
-      requestUser,
+      Number(requestUser.sub),
     );
 
     return this.success({
@@ -145,8 +145,8 @@ export class UserController extends createMetaController('user', UserMetaModelRe
   async create(@Body() input: NewUserDto, @User() requestUser: RequestUser) {
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
       await this.userDataSource.create(
-        { ...input, niceName: input.loginName, displayName: input.loginName },
-        requestUser,
+        { ...input, loginPwd: md5(input.loginPwd).toString(), niceName: input.loginName, displayName: input.loginName },
+        Number(requestUser.sub),
       );
     return this.success({
       data: {
@@ -179,8 +179,13 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @Body(ValidatePayloadExistsPipe) model: UpdateUserDto,
     @User() requestUser: RequestUser,
   ) {
-    await this.userDataSource.update(id, model, requestUser);
-    return this.success();
+    try {
+      await this.userDataSource.update(id, model, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -197,18 +202,13 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @Param('id', ParseIntPipe) id: number,
     @Query('status', new ParseEnumPipe(UserStatus)) status: UserStatus,
     @User() requestUser: RequestUser,
-    @I18n() i18n: I18nContext,
   ) {
-    const result = await this.userDataSource.updateStatus(id, status, requestUser);
-    if (result) {
+    try {
+      await this.userDataSource.updateStatus(id, status, Number(requestUser.sub));
       return this.success();
-    } else {
-      return this.faild(
-        i18n.tv('users.controller.user_does_not_exist', `User "${id}" does not exist！`, {
-          args: { id },
-        }),
-        400,
-      );
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
     }
   }
 
@@ -222,17 +222,13 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'DeleteUserModelSuccessResp'),
   })
-  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser, @I18n() i18n: I18nContext) {
-    const result = await this.userDataSource.delete(id, requestUser);
-    if (result) {
+  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
+    try {
+      await this.userDataSource.delete(id, Number(requestUser.sub));
       return this.success();
-    } else {
-      return this.faild(
-        i18n.tv('users.controller.user_does_not_exist', `User "${id}" does not exist！`, {
-          args: { id },
-        }),
-        400,
-      );
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
     }
   }
 }

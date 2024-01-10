@@ -9,9 +9,8 @@ import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { MediaDataSource } from '@ace-pomelo/infrastructure-datasource';
-import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
+import { isAbsoluteUrl, Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
-import { isAbsoluteUrl } from '@/common/utils/path.util';
 import { MediaAction } from '@/common/actions';
 import { FixedMediaOptions } from './interfaces/media-options.interface';
 import { MediaService } from './media.service';
@@ -110,7 +109,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
           path,
         },
         metaData,
-        requestUser,
+        Number(requestUser.sub),
       );
     }
 
@@ -172,7 +171,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
               path,
             },
             metaData,
-            requestUser,
+            Number(requestUser.sub),
           );
         }
 
@@ -233,7 +232,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
             path: filePath,
           },
           metaData,
-          requestUser,
+          Number(requestUser.sub),
         );
         const { original, ...rest } = await this.fileService.toFileModel(
           {
@@ -262,7 +261,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
             path: filePath,
           },
           metaData,
-          requestUser,
+          Number(requestUser.sub),
         );
         const { original, ...rest } = await this.fileService.toFileModel(newMedia, newMedia.metaData);
         return {
@@ -347,7 +346,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @User()
     requestUser: RequestUser,
   ): Promise<Media> {
-    const media = await this.mediaDataSource.create(model, metaData, requestUser);
+    const media = await this.mediaDataSource.create(model, metaData, Number(requestUser.sub));
     const { original, ...rest } = await this.fileService.toFileModel(media, media.metaData);
     return {
       ...original,
@@ -361,13 +360,19 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   }
 
   @Mutation(() => Boolean)
-  updateMedia(
+  async updateMedia(
     @Args('id', { type: () => ID, description: 'Media id' }) id: number,
     @Args('model', { type: () => UpdateMediaInput }) model: UpdateMediaInput,
     @Args('metaData', { type: () => MediaMetaDataInput, nullable: true }) metaData: MediaMetaDataInput | undefined,
     @User()
     requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.mediaDataSource.update(id, model, metaData ?? 'NONE', requestUser);
+    try {
+      await this.mediaDataSource.update(id, model, metaData ?? 'NONE', Number(requestUser.sub));
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

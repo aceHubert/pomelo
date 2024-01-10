@@ -61,17 +61,31 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update api scope.' })
-  updateApiResource(
+  async updateApiResource(
     @Args('id', { type: () => ID, description: 'Api resource id' }) id: number,
     @Args('model') input: UpdateApiResourceInput,
   ): Promise<boolean> {
-    return this.apiResourceDataSource.update(id, input);
+    try {
+      await this.apiResourceDataSource.update(id, input);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ApiResourceAction.Delete)
   @Mutation((returns) => Boolean, { description: 'Delete api scope.' })
-  deleteApiResource(@Args('id', { type: () => ID, description: 'Api resource id' }) id: number): Promise<boolean> {
-    return this.apiResourceDataSource.delete(id);
+  async deleteApiResource(
+    @Args('id', { type: () => ID, description: 'Api resource id' }) id: number,
+  ): Promise<boolean> {
+    try {
+      await this.apiResourceDataSource.delete(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ApiResourceAction.Claims)
@@ -97,8 +111,14 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.DeleteClaim)
   @Mutation((returns) => Boolean, { description: 'Delete api claim permanently.' })
-  deleteApiClaim(@Args('id', { type: () => ID, description: 'Api claim id' }) id: number): Promise<boolean> {
-    return this.apiResourceDataSource.deleteClaim(id);
+  async deleteApiClaim(@Args('id', { type: () => ID, description: 'Api claim id' }) id: number): Promise<boolean> {
+    try {
+      await this.apiResourceDataSource.deleteClaim(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ApiResourceAction.ScopeDetail)
@@ -135,17 +155,29 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update api scope.' })
-  updateApiScope(
+  async updateApiScope(
     @Args('id', { type: () => ID, description: 'Api scope id' }) id: number,
     @Args('model') input: UpdateApiScopeInput,
   ): Promise<boolean> {
-    return this.apiResourceDataSource.updateScope(id, input);
+    try {
+      await this.apiResourceDataSource.updateScope(id, input);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ApiResourceAction.Delete)
   @Mutation((returns) => Boolean, { description: 'Delete api scope.' })
-  deleteApiScope(@Args('id', { type: () => ID, description: 'Api scope id' }) id: number): Promise<boolean> {
-    return this.apiResourceDataSource.deleteScope(id);
+  async deleteApiScope(@Args('id', { type: () => ID, description: 'Api scope id' }) id: number): Promise<boolean> {
+    try {
+      await this.apiResourceDataSource.deleteScope(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ApiResourceAction.ScopeClaims)
@@ -171,8 +203,16 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.DeleteScopeClaim)
   @Mutation((returns) => Boolean, { description: 'Delete api scope claim permanently.' })
-  deleteApiScopeClaim(@Args('id', { type: () => ID, description: 'Api scope claim id' }) id: number): Promise<boolean> {
-    return this.apiResourceDataSource.deleteScopeClaim(id);
+  async deleteApiScopeClaim(
+    @Args('id', { type: () => ID, description: 'Api scope claim id' }) id: number,
+  ): Promise<boolean> {
+    try {
+      await this.apiResourceDataSource.deleteScopeClaim(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ApiResourceAction.Secrets)
@@ -213,8 +253,14 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.DeleteSecret)
   @Mutation((returns) => Boolean, { description: 'Delete api secret permanently.' })
-  deleteApiSecret(@Args('id', { type: () => ID, description: 'Api secret id' }) id: number): Promise<boolean> {
-    return this.apiResourceDataSource.deleteSecret(id);
+  async deleteApiSecret(@Args('id', { type: () => ID, description: 'Api secret id' }) id: number): Promise<boolean> {
+    try {
+      await this.apiResourceDataSource.deleteSecret(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(ApiResourceAction.Properties)
@@ -240,9 +286,15 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.DeleteProperty)
   @Mutation((returns) => Boolean, { description: 'Delete api scope property permanently.' })
-  deleteApiProperty(
+  async deleteApiProperty(
     @Args('id', { type: () => ID, description: 'Api resopurce property id' }) id: number,
   ): Promise<boolean> {
-    return this.apiResourceDataSource.deleteProperty(id);
+    try {
+      await this.apiResourceDataSource.deleteProperty(id);
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

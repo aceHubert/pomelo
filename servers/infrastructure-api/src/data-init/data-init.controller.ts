@@ -1,5 +1,5 @@
 import { HttpAdapterHost } from '@nestjs/core';
-import { Logger, Controller, Get, Post, Body, Request, Scope } from '@nestjs/common';
+import { Controller, Get, Post, Body, Request, Scope } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { BaseController } from '@/common/controllers/base.controller';
@@ -9,8 +9,6 @@ import { InitArgsDto } from './dto/init-args.dto';
 @ApiExcludeController()
 @Controller({ path: 'api', scope: Scope.REQUEST })
 export class DataInitController extends BaseController {
-  private readonly logger = new Logger('DataInitController');
-
   constructor(private readonly httpAdapterHost: HttpAdapterHost, private readonly dbInitService: DataInitService) {
     super();
   }

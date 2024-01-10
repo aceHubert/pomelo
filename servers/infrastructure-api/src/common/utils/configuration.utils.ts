@@ -210,7 +210,7 @@ function getFromFile(pathStr: string): ConfigObject {
     return interopDefault(require(pathStr));
   } catch (err: any) {
     if (err.code === 'ENOENT' || err.code === 'MODULE_NOT_FOUND') {
-      throw new Error(`File "${pathStr}" is not exists`);
+      throw new Error(`File "${pathStr}"  not exists`);
     }
     throw err;
   }

@@ -1,7 +1,7 @@
 import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
-import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
+import { Fields } from '@ace-pomelo/shared-server';
 import {
   OptionDataSource,
   TermTaxonomyDataSource,
@@ -173,47 +173,71 @@ export class TermTaxonomyResolver extends createMetaResolver(
   @Mutation((returns) => TermTaxonomy, { description: 'Create a new term taxonomy.' })
   createTermTaxonomy(
     @Args('model', { type: () => NewTermTaxonomyInput }) model: NewTermTaxonomyInput,
-    @User() requestUser: RequestUser,
   ): Promise<TermTaxonomy> {
-    return this.termTaxonomyDataSource.create(model, requestUser);
+    return this.termTaxonomyDataSource.create(model);
   }
 
   @RamAuthorized(TermTaxonomyAction.CreateRelationship)
   @Mutation((returns) => TermRelationship, { description: 'Create a new term relationship.' })
   createTermRelationship(
     @Args('model', { type: () => NewTermRelationshipInput }) model: NewTermRelationshipInput,
-    @User() requestUser: RequestUser,
   ): Promise<TermRelationship> {
-    return this.termTaxonomyDataSource.createRelationship(model, requestUser);
+    return this.termTaxonomyDataSource.createRelationship(model);
   }
 
   @RamAuthorized(TermTaxonomyAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update term taxonomy.' })
-  updateTermTaxonomy(
+  async updateTermTaxonomy(
     @Args('id', { type: () => ID, description: 'Term id' }) id: number,
     @Args('model', { type: () => UpdateTermTaxonomyInput }) model: UpdateTermTaxonomyInput,
   ): Promise<boolean> {
-    return this.termTaxonomyDataSource.update(id, model);
+    try {
+      await this.termTaxonomyDataSource.update(id, model);
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TermTaxonomyAction.Delete)
   @Mutation((returns) => Boolean, { description: 'Delete term taxonomy permanently (include term relationship).' })
-  deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<boolean> {
-    return this.termTaxonomyDataSource.delete(id);
+  async deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<boolean> {
+    try {
+      await this.termTaxonomyDataSource.delete(id);
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TermTaxonomyAction.BulkDelete)
   @Mutation((returns) => Boolean, { description: 'Delete term taxonomies permanently (include term relationship).' })
-  bulkDeleteTermTaxonomy(@Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[]): Promise<boolean> {
-    return this.termTaxonomyDataSource.bulkDelete(ids);
+  async bulkDeleteTermTaxonomy(
+    @Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[],
+  ): Promise<boolean> {
+    try {
+      await this.termTaxonomyDataSource.bulkDelete(ids);
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(TermTaxonomyAction.DeleteRelationship)
   @Mutation((returns) => Boolean, { description: 'Delete term relationship permanently.' })
-  deleteTermRelationship(
+  async deleteTermRelationship(
     @Args('objectId', { type: () => ID, description: 'Object id' }) objectId: number,
     @Args('termTaxonomyId', { type: () => ID, description: 'Term taxonomy id' }) termTaxonomyId: number,
   ): Promise<boolean> {
-    return this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
+    try {
+      await this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

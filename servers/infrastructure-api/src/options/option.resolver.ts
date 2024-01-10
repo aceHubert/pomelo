@@ -49,25 +49,37 @@ export class OptionResolver extends BaseResolver {
     @Args('model', { type: () => NewOptionInput }) model: NewOptionInput,
     @User() requestUser: RequestUser,
   ): Promise<Option> {
-    return this.optionDataSource.create(model, requestUser);
+    return this.optionDataSource.create(model, Number(requestUser.sub));
   }
 
   @RamAuthorized(OptionAction.Update)
   @Mutation((returns) => Boolean, { description: 'Update option.' })
-  updateOption(
+  async updateOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,
     @Args('model') model: UpdateOptionInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.optionDataSource.update(id, model, requestUser);
+    try {
+      await this.optionDataSource.update(id, model, Number(requestUser.sub));
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 
   @RamAuthorized(OptionAction.Delete)
   @Mutation((returns) => Boolean, { description: 'Delete option permanently.' })
-  deleteOption(
+  async deleteOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    return this.optionDataSource.delete(id, requestUser);
+    try {
+      await this.optionDataSource.delete(id, Number(requestUser.sub));
+      return true;
+    } catch (e: any) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

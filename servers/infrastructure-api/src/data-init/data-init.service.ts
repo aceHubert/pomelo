@@ -1,4 +1,3 @@
-import md5 from 'md5';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   OptionAutoload,
@@ -7,6 +6,7 @@ import {
   UserMetaPresetKeys,
   InfrastructureService,
 } from '@ace-pomelo/infrastructure-datasource';
+import { md5 } from '@ace-pomelo/shared-server';
 import { LockFile } from '../common/utils/lock-file.util';
 import { UserRole } from '../users/enums/user-role.enum';
 import { getDefaultUserRoles } from '../users/constants';
@@ -156,14 +156,14 @@ export class DataInitService {
       taxonomies: [
         {
           name: 'Uncategorized',
-          slug: 'uncategorized',
+          slug: '未分类',
           taxonomy: TermPresetTaxonomy.Category,
           description: '',
           optionName: OptionPresetKeys.DefaultCategory,
         },
         {
           name: 'Uncategorized Link',
-          slug: 'uncategorized link',
+          slug: '链接未分类',
           taxonomy: TermPresetTaxonomy.Category,
           description: '',
           group: 1,
@@ -171,7 +171,7 @@ export class DataInitService {
         },
         {
           name: 'Uncategorized Medias',
-          slug: 'uncategorized medias',
+          slug: '媒体未分类',
           taxonomy: TermPresetTaxonomy.Category,
           description: '',
           group: 2,

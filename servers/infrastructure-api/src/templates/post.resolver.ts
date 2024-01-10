@@ -119,7 +119,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
       id,
       TemplatePresetType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PostTemplate),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
@@ -134,7 +134,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
       name,
       TemplatePresetType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PostTemplate),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
   }
 
@@ -166,7 +166,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     );
   }
 
-  @RamAuthorized(PostTemplateAction.PagedList)
+  @Anonymous()
   @Query((returns) => PagedPostTemplate, { description: 'Get paged post templates.' })
   async postTemplates(
     @Args() args: PagedPostTemplateArgs,
@@ -201,7 +201,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
       },
       TemplatePresetType.Post,
       this.getFieldNames(fields.fieldsByTypeName.PagedPostTemplate.rows.fieldsByTypeName.PagedPostTemplateItem),
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     return {
@@ -220,7 +220,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
       await this.templateDataSource.create(
         { ...model, excerpt: model.excerpt || '' },
         TemplatePresetType.Post,
-        requestUser,
+        Number(requestUser.sub),
       );
 
     // 新建（当状态为需要审核）审核消息推送
@@ -258,21 +258,26 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     @Args('model', { type: () => UpdatePostTemplateInput }) model: UpdatePostTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<boolean> {
-    const result = await this.templateDataSource.update(id, model, requestUser);
+    try {
+      await this.templateDataSource.update(id, model, Number(requestUser.sub));
 
-    // 修改（当状态为需要审核并且有任何修改）审核消息推送
-    if (result && model.status === TemplateStatus.Pending) {
-      await this.messageService.publish({
-        excludes: [requestUser.sub],
-        message: {
-          eventName: 'updatePostReview',
-          payload: {
-            id,
+      // 修改（当状态为需要审核并且有任何修改）审核消息推送
+      if (model.status === TemplateStatus.Pending) {
+        await this.messageService.publish({
+          excludes: [requestUser.sub],
+          message: {
+            eventName: 'updatePostReview',
+            payload: {
+              id,
+            },
           },
-        },
-      });
-    }
+        });
+      }
 
-    return result;
+      return true;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
   }
 }

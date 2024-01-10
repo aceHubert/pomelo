@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
@@ -13,7 +12,7 @@ import {
   OptionPresetKeys,
   MediaModel,
 } from '@ace-pomelo/infrastructure-datasource';
-import { normalizeRoutePath, foregoingSlash, stripTrailingSlash, isAbsoluteUrl } from '@/common/utils/path.util';
+import { md5, normalizeRoutePath, foregoingSlash, stripTrailingSlash, isAbsoluteUrl } from '@ace-pomelo/shared-server';
 import { FixedMediaOptions } from './interfaces/media-options.interface';
 import { FileSaveOptions } from './interfaces/file-upload-options.interface';
 import { File, ImageScaleType, ImageScales } from './interfaces/file.interface';
@@ -105,12 +104,11 @@ export class MediaService {
    * 获取文件md5
    */
   async getFileMd5(file: string | Buffer): Promise<string> {
-    const hash = crypto.createHash('md5');
     let fileBuffer = file as Buffer;
     if (typeof file === 'string') {
       fileBuffer = await readFile(file);
     }
-    return hash.update(fileBuffer.toString('binary'), 'binary').digest('hex');
+    return md5(fileBuffer.toString('binary'), 'binary').toString();
   }
 
   /**

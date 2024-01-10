@@ -14,14 +14,7 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiAuthCreate,
-  ParseQueryPipe,
-  ValidatePayloadExistsPipe,
-  User,
-  RequestUser,
-  createResponseSuccessType,
-} from '@ace-pomelo/shared-server';
+import { ApiAuthCreate, ParseQueryPipe, ValidatePayloadExistsPipe, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
@@ -31,6 +24,7 @@ import {
 } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { FormTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { PagedFormTemplateQueryDto, FormTemplateOptionQueryDto } from './dto/template-query.dto';
@@ -116,7 +110,7 @@ export class FormTemplateController extends BaseController {
       id,
       TemplatePresetType.Form,
       ['id', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     let metas;
@@ -140,7 +134,7 @@ export class FormTemplateController extends BaseController {
    * Get paged form template model
    */
   @Get()
-  @RamAuthorized(FormTemplateAction.PagedList)
+  @Anonymous()
   @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged from template models',
@@ -167,7 +161,7 @@ export class FormTemplateController extends BaseController {
       },
       TemplatePresetType.Form,
       ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
-      requestUser,
+      requestUser ? Number(requestUser.sub) : undefined,
     );
 
     return this.success({
@@ -189,7 +183,7 @@ export class FormTemplateController extends BaseController {
     const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
       input,
       TemplatePresetType.Form,
-      requestUser,
+      Number(requestUser.sub),
     );
     return this.success({
       data: {
@@ -219,8 +213,13 @@ export class FormTemplateController extends BaseController {
     @Body(ValidatePayloadExistsPipe) input: UpdateFormTemplateDto,
     @User() requestUser: RequestUser,
   ) {
-    await this.templateDataSource.update(id, input, requestUser);
-    return this.success();
+    try {
+      await this.templateDataSource.update(id, input, Number(requestUser.sub));
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**

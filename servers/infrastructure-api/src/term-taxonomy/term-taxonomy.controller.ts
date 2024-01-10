@@ -9,14 +9,8 @@ import {
 } from '@ace-pomelo/infrastructure-datasource';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import {
-  ParseQueryPipe,
-  ValidatePayloadExistsPipe,
-  ApiAuthCreate,
-  User,
-  RequestUser,
-  createResponseSuccessType,
-} from '@ace-pomelo/shared-server';
+import { ParseQueryPipe, ValidatePayloadExistsPipe, ApiAuthCreate } from '@ace-pomelo/shared-server';
+import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyMetaDto } from './dto/new-term-taxonomy-meta.dto';
@@ -179,8 +173,8 @@ export class TermTaxonomyController extends createMetaController(
     description: 'Term taxonomy model',
     type: () => createResponseSuccessType({ data: TermTaxonomyModelResp }),
   })
-  async create(@Body() input: NewTermTaxonomyDto, @User() requestUser: RequestUser) {
-    const result = await this.termTaxonomyDataSource.create(input, requestUser);
+  async create(@Body() input: NewTermTaxonomyDto) {
+    const result = await this.termTaxonomyDataSource.create(input);
     return this.success({
       data: result,
     });
@@ -196,12 +190,8 @@ export class TermTaxonomyController extends createMetaController(
     description: 'Term taxonomy relationship model',
     type: () => createResponseSuccessType({ data: TermRelationshipModelResp }),
   })
-  async createRelationship(
-    @Param('id') termTaxonomyId: number,
-    @Param('objectId') objectId: number,
-    @User() requestUser: RequestUser,
-  ) {
-    const result = await this.termTaxonomyDataSource.createRelationship({ termTaxonomyId, objectId }, requestUser);
+  async createRelationship(@Param('id') termTaxonomyId: number, @Param('objectId') objectId: number) {
+    const result = await this.termTaxonomyDataSource.createRelationship({ termTaxonomyId, objectId });
     return this.success({
       data: result,
     });
@@ -218,8 +208,13 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({}),
   })
   async update(@Param('id') id: number, @Body(ValidatePayloadExistsPipe) input: UpdateTermTaxonomyDto) {
-    await this.termTaxonomyDataSource.update(id, input);
-    return this.success();
+    try {
+      await this.termTaxonomyDataSource.update(id, input);
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -233,8 +228,13 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({}),
   })
   async delete(@Param('id') id: number) {
-    await this.termTaxonomyDataSource.delete(id);
-    return this.success();
+    try {
+      await this.termTaxonomyDataSource.delete(id);
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -249,8 +249,13 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({}),
   })
   async bulkDelete(@Body() ids: number[]) {
-    await this.termTaxonomyDataSource.bulkDelete(ids);
-    return this.success();
+    try {
+      await this.termTaxonomyDataSource.bulkDelete(ids);
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -264,7 +269,12 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({}),
   })
   async deleteRelationship(@Param('id') termTaxonomyId: number, @Param('objectId') objectId: number) {
-    await this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
-    return this.success();
+    try {
+      await this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 }
