@@ -23,14 +23,7 @@ export interface IdentityOptions {
    * @param key key
    * @param fallback fallback value
    */
-  translate?: (
-    key: string,
-    fallback: string,
-    options?: {
-      lang?: string;
-      args?: Record<string, any>;
-    },
-  ) => string;
+  translate?: (key: string, fallback: string, args?: Record<string, any>) => string;
 }
 
 export interface IdentityOptionsFactory {

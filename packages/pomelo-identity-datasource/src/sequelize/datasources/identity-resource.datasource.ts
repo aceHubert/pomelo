@@ -188,7 +188,10 @@ export class IdentityResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (exists) throw new ValidationError('Identity resource has already exists');
+    if (exists)
+      throw new ValidationError(
+        this.translate('datasource.identity_resource.resource_has_existed', 'Identity resource has already existed!'),
+      );
 
     return this.models.IdentityResources.create(input).then((resource) => {
       return resource.toJSON<IdentityResourceModel>();
@@ -200,7 +203,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param id resource id
    * @param input resource input
    */
-  async update(id: number, input: UpdateIdentityResourceInput): Promise<boolean> {
+  async update(id: number, input: UpdateIdentityResourceInput): Promise<void> {
     const nonEditable = await this.models.IdentityResources.count({
       where: {
         id,
@@ -208,13 +211,16 @@ export class IdentityResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (nonEditable) return false;
+    if (nonEditable)
+      throw new ValidationError(
+        this.translate('datasource.identity_resource.resource_non_editable', 'IdentityResource is not editable!'),
+      );
 
-    return this.models.IdentityResources.update(input, {
+    await this.models.IdentityResources.update(input, {
       where: {
         id,
       },
-    }).then(([count]) => count > 0);
+    });
   }
 
   /**
@@ -222,17 +228,23 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param id resource id
    * @returns
    */
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number): Promise<void> {
     const resource = await this.models.IdentityResources.findByPk(id, {
       attributes: ['id', 'nonEditable'],
     });
-    if (!resource) return true;
 
-    if (resource.nonEditable) return false;
+    if (resource) {
+      if (resource.nonEditable)
+        throw new ValidationError(
+          this.translate('datasource.identity_resource.resource_non_editable', 'IdentityResource is not editable!'),
+        );
 
-    await resource.destroy();
+      await resource.destroy();
+    }
 
-    return true;
+    throw new ValidationError(
+      this.translate('datasource.identity_resource.resource_does_not_exist', 'IdentityResource does not exist!'),
+    );
   }
 
   /**
@@ -289,7 +301,10 @@ export class IdentityResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Claim has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.identity_resource.claim_has_existed', 'Claim has already existed!'),
+        );
 
       return this.models.IdentityClaims.create({
         ...input,
@@ -340,12 +355,12 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * Delete identity resource claim
    * @param id identity claim id
    */
-  deleteClaim(id: number): Promise<boolean> {
-    return this.models.IdentityClaims.destroy({
+  async deleteClaim(id: number): Promise<void> {
+    await this.models.IdentityClaims.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -405,7 +420,10 @@ export class IdentityResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Property has already exists.');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.identity_resource.property_has_existed', 'Property has already existed.'),
+        );
 
       return this.models.IdentityProperties.create({
         ...input,
@@ -456,11 +474,11 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * Delete identity resource property
    * @param id property id
    */
-  deleteProperty(id: number): Promise<boolean> {
-    return this.models.IdentityProperties.destroy({
+  async deleteProperty(id: number): Promise<void> {
+    await this.models.IdentityProperties.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 }

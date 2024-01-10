@@ -2,7 +2,7 @@ import { kebabCase } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
-import { RequestUser, ForbiddenError, jsonSafelyParse } from '@ace-pomelo/shared-server';
+import { ForbiddenError, jsonSafelyParse } from '@ace-pomelo/shared-server';
 import { InfrastructureService } from '../../infrastructure.service';
 import { InfrastructureOptions } from '../../interfaces/infrastructure-options.interface';
 import { INFRASTRUCTURE_OPTIONS } from '../../constants';
@@ -222,21 +222,21 @@ export abstract class BaseDataSource implements OnModuleInit {
   /**
    * 验证用户是否有功能操作权限
    * @param capability 验证的功能
-   * @param requestUser 请求的用户
+   * @param requestUserId 请求的用户ID
    * @param callbackOrThrow 当为 function 时如果验证不过参数 error 将是 ForbiddenError，否则为null; 为 ture 时，验证不过则抛出异常
    */
-  protected async hasCapability(capability: UserCapability, requestUser: RequestUser): Promise<boolean>;
+  protected async hasCapability(capability: UserCapability, requestUserId: number): Promise<boolean>;
   protected async hasCapability(
     capability: UserCapability,
-    requestUser: RequestUser,
+    requestUserId: number,
     callbackOrThrow: true | ((error: Error | null) => void),
   ): Promise<void>;
   protected async hasCapability(
     capability: UserCapability,
-    requestUser: RequestUser,
+    requestUserId: number,
     callbackOrThrow?: true | ((error: Error | null) => void),
   ): Promise<boolean | void> {
-    const userRoleCapabilities = await this.getUserCapabilities(Number(requestUser.sub));
+    const userRoleCapabilities = await this.getUserCapabilities(requestUserId);
     const result = userRoleCapabilities.some((userCapability) => userCapability === capability);
 
     if (callbackOrThrow) {
@@ -250,13 +250,10 @@ export abstract class BaseDataSource implements OnModuleInit {
       return callback(
         !result
           ? new ForbiddenError(
-              await this.translate(
+              this.translate(
                 'datasource.error.forbidden_capability',
                 `Access denied, You don't have capability "${kebabCase(capability)}" for this action!`,
-                {
-                  lang: requestUser.lang,
-                  args: { requiredCapability: kebabCase(capability) },
-                },
+                { requiredCapability: kebabCase(capability) },
               ),
             )
           : null,

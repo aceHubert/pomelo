@@ -2,7 +2,7 @@ import { isUndefined } from 'lodash';
 import { WhereOptions, Model, Attributes, Transaction, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, RequestUser } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import { default as TermTaxonomy } from '../entities/term-taxonomy.entity';
 import {
   TermTaxonomyMetaModel,
@@ -190,7 +190,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * 新建协议
    * @param model 新建协议实体
    */
-  async create(model: NewTermTaxonomyInput, requestUser: RequestUser): Promise<TermTaxonomyModel> {
+  async create(model: NewTermTaxonomyInput): Promise<TermTaxonomyModel> {
     const t = await this.sequelize.transaction();
     const { name, slug, group, taxonomy, description, parentId } = model;
     try {
@@ -214,7 +214,6 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
             objectId: model.objectId,
             termTaxonomyId: termTaxonomy.id,
           },
-          requestUser,
           t,
         );
       }
@@ -233,11 +232,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * 如果关系存在则不允许创建（返回 ForbiddenError）
    * @param model 新建协议关系实体
    */
-  async createRelationship(
-    model: NewTermRelationshipInput,
-    requestUser: RequestUser,
-    transaction?: Transaction,
-  ): Promise<TermRelationshipModel> {
+  async createRelationship(model: NewTermRelationshipInput, transaction?: Transaction): Promise<TermRelationshipModel> {
     const isExists =
       (await this.models.TermRelationships.count({
         where: {
@@ -248,10 +243,9 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
 
     if (isExists) {
       throw new ValidationError(
-        await this.translate(
-          'datasource.termrelationship_duplicate_definition',
+        this.translate(
+          'datasource.term_taxonomy.relationship_duplicate_definition',
           'Term taxonomy relationship has been defined!',
-          { lang: requestUser.lang },
         ),
       );
     }
@@ -272,18 +266,12 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * @param id term Id
    * @param model 修改协议实体
    */
-  async update(id: number, model: UpdateTermTaxonomyInput): Promise<true> {
-    try {
-      await this.models.TermTaxonomy.update(model, {
-        where: {
-          id,
-        },
-      });
-
-      return true;
-    } catch (err) {
-      throw err;
-    }
+  async update(id: number, model: UpdateTermTaxonomyInput): Promise<void> {
+    await this.models.TermTaxonomy.update(model, {
+      where: {
+        id,
+      },
+    });
   }
 
   /**
@@ -291,7 +279,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * @param objectId
    * @param termTaxonomyId
    */
-  async deleteRelationship(objectId: number, termTaxonomyId: number): Promise<true> {
+  async deleteRelationship(objectId: number, termTaxonomyId: number): Promise<void> {
     const t = await this.sequelize.transaction();
     try {
       const count = await this.models.TermRelationships.destroy({
@@ -314,7 +302,6 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       }
 
       await t.commit();
-      return true;
     } catch (err) {
       await t.rollback();
       throw err;
@@ -325,7 +312,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * 删除协议（包括类别，关系，元数据）
    * @param id term Id
    */
-  async delete(id: number): Promise<true> {
+  async delete(id: number): Promise<void> {
     const t = await this.sequelize.transaction();
     try {
       await this.models.TermRelationships.destroy({
@@ -359,7 +346,6 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       }
 
       await t.commit();
-      return true;
     } catch (err) {
       await t.rollback();
       throw err;
@@ -382,7 +368,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * 批量删除协议（包括类别，关系，元数据）
    * @param id term Id
    */
-  async bulkDelete(ids: number[]): Promise<true> {
+  async bulkDelete(ids: number[]): Promise<void> {
     const t = await this.sequelize.transaction();
     try {
       await this.models.TermRelationships.destroy({
@@ -423,7 +409,6 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       }
 
       await t.commit();
-      return true;
     } catch (err) {
       await t.rollback();
       throw err;

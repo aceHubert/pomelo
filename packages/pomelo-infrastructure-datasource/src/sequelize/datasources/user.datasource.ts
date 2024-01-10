@@ -1,11 +1,10 @@
-import md5 from 'md5';
 import { isUndefined } from 'lodash';
 import { CountryCode } from 'libphonenumber-js';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { WhereOptions, Attributes, Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ForbiddenError, ValidationError, RequestUser } from '@ace-pomelo/shared-server';
+import { ForbiddenError, ValidationError } from '@ace-pomelo/shared-server';
 import { UserCapability } from '../helpers/user-capability';
 import { UserMetaPresetKeys } from '../helpers/user-preset-keys';
 import { default as User } from '../entities/users.entity';
@@ -30,21 +29,60 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 根据 Id 获取用户（不包含登录密码）
+   * 获取当前用户信息
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @access capabilities: [EditUsers(optional)]
-   * @param id 用户 Id（null 则查询请求用户，否则 id 不是自己时需要 EditUsers 权限）
-   * @param fields 返回的字段
+   * @param fields 返回的字段（除密码以外的字段）
+   * @param requestUserId 请求的用户Id
    */
-  async get(id: number | null, fields: string[], requestUser: RequestUser): Promise<UserModel | undefined> {
-    // 查询非自己时，需要权限验证
-    if (id && id !== Number(requestUser.sub)) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+  async get(fields: string[], requestUserId: number): Promise<UserModel | undefined>;
+  /**
+   * 匿名获取用户信息
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @param id 用户 Id
+   * @param fields 返回的字段（"id" ,"loginName", "niceName", "displayName", "url" 字段）
+   */
+  async get(id: number, fields: string[]): Promise<UserModel | undefined>;
+  /**
+   * 获取用户信息 (需要权限验证)
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers]
+   * @param id 用户 Id
+   * @param fields 返回的字段（除密码以外的字段）
+   * @param requestUserId 请求的用户Id
+   */
+  async get(id: number, fields: string[], requestUserId: number): Promise<UserModel | undefined>;
+  async get(
+    ...args: [string[], number] | [number, string[]] | [number, string[], number]
+  ): Promise<UserModel | undefined> {
+    let id: number | undefined, fields: string[], requestUserId: number | undefined;
+
+    if (args.length === 2) {
+      if (typeof args[0] === 'number') {
+        [id, fields] = args as [number, string[]];
+      } else {
+        [fields, requestUserId] = args as [string[], number];
+      }
     } else {
-      id = Number(requestUser.sub);
+      [id, fields, requestUserId] = args;
     }
+
+    if (id && requestUserId && id !== requestUserId) {
+      // 查询非自己时，需要权限验证
+      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
+    } else if (!id && requestUserId) {
+      // 查询自己
+      id = requestUserId;
+    } else {
+      // 匿名查询
+      fields = fields.filter((field) => ['id', 'loginName', 'niceName', 'displayName', 'url'].includes(field));
+    }
+
     // 排除登录密码
     fields = fields.filter((field) => field !== 'loginPwd');
 
@@ -58,6 +96,48 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     }).then((user) => user?.toJSON() as any as UserModel);
   }
 
+  private async getFieldValue<F extends keyof UserModel>(
+    idOrUserName: number | string,
+    field: F,
+  ): Promise<Pick<UserModel, 'id' | F> | undefined> {
+    const id = typeof idOrUserName === 'number' ? idOrUserName : undefined,
+      username = id ? undefined : (idOrUserName as string),
+      region = username ? await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion) : undefined;
+
+    if (id) {
+      return this.models.Users.findByPk(id, {
+        attributes: ['id', field],
+      }).then((user) => user?.toJSON() as any as UserModel);
+    } else {
+      return this.models.Users.findOne({
+        attributes: ['id', field],
+        where: {
+          [Op.or]: [
+            { loginName: username },
+            isEmail(username) && { email: username },
+            isPhoneNumber(username!, region!) && { mobile: username },
+          ].filter(Boolean) as any,
+        },
+      }).then((user) => user?.toJSON() as any as UserModel);
+    }
+  }
+
+  /**
+   * 获取用户邮箱
+   * @param idOrUserName 用户 Id 或 登录名/邮箱/手机号码
+   */
+  async getEmail(idOrUserName: number | string): Promise<Pick<UserModel, 'id' | 'email'> | undefined> {
+    return this.getFieldValue(idOrUserName, 'email');
+  }
+
+  /**
+   * 获取用户手机号码
+   * @param idOrUserName 用户 Id 或 登录名/邮箱/手机号码
+   */
+  async getMobile(idOrUserName: number | string): Promise<Pick<UserModel, 'id' | 'mobile'> | undefined> {
+    return this.getFieldValue(idOrUserName, 'mobile');
+  }
+
   /**
    * 获取用户分页列表
    * @author Hubert
@@ -66,13 +146,14 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [ListUsers]
    * @param query 分页 Query 参数
    * @param fields 返回的字段
+   * @param requestUserId 请求的用户Id
    */
   async getPaged(
     { offset, limit, ...query }: PagedUserArgs,
     fields: string[],
-    requestUser: RequestUser,
+    requestUserId: number,
   ): Promise<PagedUserModel> {
-    await this.hasCapability(UserCapability.ListUsers, requestUser, true);
+    await this.hasCapability(UserCapability.ListUsers, requestUserId, true);
 
     const where: WhereOptions<Attributes<User>> = {};
     if (query.keyword) {
@@ -195,14 +276,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access None
    * @param loginName 登录名
    */
-  async isLoginNameExists(loginName: string): Promise<boolean> {
-    return (
-      (await this.models.Users.count({
-        where: {
-          loginName,
-        },
-      })) > 0
-    );
+  isLoginNameExists(loginName: string): Promise<boolean> {
+    return this.models.Users.count({
+      where: {
+        loginName,
+      },
+    }).then((count) => count > 0);
   }
 
   /**
@@ -213,14 +292,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access None
    * @param mobile 手机号码
    */
-  async isMobileExists(mobile: string): Promise<boolean> {
-    return (
-      (await this.models.Users.count({
-        where: {
-          mobile,
-        },
-      })) > 0
-    );
+  isMobileExists(mobile: string): Promise<boolean> {
+    return this.models.Users.count({
+      where: {
+        mobile,
+      },
+    }).then((count) => count > 0);
   }
 
   /**
@@ -231,50 +308,42 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access None
    * @param email 电子邮箱
    */
-  async isEmailExists(email: string): Promise<boolean> {
-    return (
-      (await this.models.Users.count({
-        where: {
-          email,
-        },
-      })) > 0
-    );
+  isEmailExists(email: string): Promise<boolean> {
+    return this.models.Users.count({
+      where: {
+        email,
+      },
+    }).then((count) => count > 0);
   }
 
   /**
-   * 添加用户
-   * loginName, mobile, emaile 要求必须是唯一，否则会抛出 ValidationError
+   * 添加用户，loginName, mobile, emaile 要求必须是唯一，否则会抛出 ValidationError
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [CreateUsers]
    * @param model 添加实体模型
    * @param fields 返回的字段
+   * @param requestUserId 请求的用户Id
    */
-  async create(model: NewUserInput, requestUser: RequestUser): Promise<UserModel> {
-    await this.hasCapability(UserCapability.CreateUsers, requestUser, true);
+  async create(model: NewUserInput, requestUserId: number): Promise<UserModel> {
+    await this.hasCapability(UserCapability.CreateUsers, requestUserId, true);
 
     if (model.loginName && (await this.isLoginNameExists(model.loginName))) {
       throw new ValidationError(
-        await this.translate('datasource.user.username_unique_required', 'Username is reqiured to be unique!', {
-          lang: requestUser.lang,
-        }),
+        this.translate('datasource.user.username_unique_required', 'Username is reqiured to be unique!'),
       );
     }
 
     if (model.email && (await this.isEmailExists(model.email))) {
       throw new ValidationError(
-        await this.translate('datasource.user.email_unique_required', `Email is reqiured to be unique!`, {
-          lang: requestUser.lang,
-        }),
+        this.translate('datasource.user.email_unique_required', `Email is reqiured to be unique!`),
       );
     }
 
     if (model.mobile && (await this.isMobileExists(model.mobile))) {
       throw new ValidationError(
-        await this.translate('datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
-          lang: requestUser.lang,
-        }),
+        this.translate('datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!'),
       );
     }
 
@@ -283,7 +352,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       const user = await this.models.Users.create(
         {
           loginName: model.loginName,
-          loginPwd: md5(model.loginPwd),
+          loginPwd: model.loginPwd,
           niceName: model.loginName,
           displayName: model.loginName,
           mobile: model.mobile,
@@ -351,7 +420,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
       // 排除登录密码
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { loginPwd: pwd, ...restUser } = user.toJSON();
+      const { loginPwd, ...restUser } = user.toJSON();
       return restUser as UserModel;
     } catch (err) {
       await t.rollback();
@@ -360,21 +429,19 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 修改用户
-   * mobile, email 要求必须是唯一，否则会抛出 ValidationError
-   * todo: 修改了角色后要重置 access_token
+   * 修改用户，mobile, email 要求必须是唯一，否则会抛出 ValidationError
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(修改非自己信息)]
    * @param id 用户 Id
    * @param model 修改实体模型
-   * @param requestUser 请求的用户
+   * @param requestUserId 请求的用户Id
    */
-  async update(id: number, model: UpdateUserInput, requestUser: RequestUser): Promise<boolean> {
+  async update(id: number, model: UpdateUserInput, requestUserId: number): Promise<void> {
     // 修改非自己信息
-    if (id !== Number(requestUser.sub)) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    if (id !== requestUserId) {
+      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
     }
 
     const user = await this.models.Users.findByPk(id);
@@ -492,13 +559,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         }
 
         await t.commit();
-        return true;
       } catch (err) {
         await t.rollback();
         throw err;
       }
     }
-    return false;
+    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
   }
 
   /**
@@ -509,33 +575,33 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [EditUsers(修改非自己信息)]
    * @param id 用户 Id
    * @param email Email
-   * @param requestUser 请求的用户
+   * @param requestUserId 请求的用户Id
    */
-  async updateEmail(id: number, email: string, requestUser: RequestUser): Promise<boolean> {
+  async updateEmail(id: number, email: string, requestUserId: number): Promise<void> {
     // 修改非自己信息
-    if (id !== Number(requestUser.sub)) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    if (id !== requestUserId) {
+      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
     }
 
     const user = await this.models.Users.findByPk(id);
     if (user) {
-      // 相同不需要修改
+      if (user.status === UserStatus.Disabled) {
+        throw new ValidationError(this.translate('datasource.user.user_disabled', 'User is disabled!'));
+      }
       if (email === user.email) {
-        return true;
+        throw new ValidationError(this.translate('datasource.user.email_same_with_old', 'Email is same with old!'));
       }
       if (await this.isEmailExists(email)) {
         throw new ValidationError(
-          await this.translate('datasource.user.email_unique_required', 'Email is reqiured to be unique!', {
-            lang: requestUser.lang,
-          }),
+          this.translate('datasource.user.email_unique_required', 'Email is reqiured to be unique!'),
         );
       }
 
       user.email = email;
       await user.save();
-      return true;
     }
-    return false;
+
+    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
   }
 
   /**
@@ -546,33 +612,33 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [EditUsers(修改非自己信息)]
    * @param id 用户 Id
    * @param mobile 手机号码
-   * @param requestUser 请求的用户
+   * @param requestUserId 请求的用户Id
    */
-  async updateMobile(id: number, mobile: string, requestUser: RequestUser): Promise<boolean> {
+  async updateMobile(id: number, mobile: string, requestUserId: number): Promise<void> {
     // 修改非自己信息
-    if (id !== Number(requestUser.sub)) {
-      await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+    if (id !== requestUserId) {
+      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
     }
 
     const user = await this.models.Users.findByPk(id);
     if (user) {
-      // 相同不需要修改
+      if (user.status === UserStatus.Disabled) {
+        throw new ValidationError(this.translate('datasource.user.user_disabled', 'User is disabled!'));
+      }
       if (mobile === user.mobile) {
-        return true;
+        throw new ValidationError(this.translate('datasource.user.mobile_same_with_old', 'Mobile is same with old!'));
       }
       if (await this.isMobileExists(mobile)) {
         throw new ValidationError(
-          await this.translate('datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!', {
-            lang: requestUser.lang,
-          }),
+          this.translate('datasource.user.mobile_unique_required', 'Mobile is reqiured to be unique!'),
         );
       }
 
       user.mobile = mobile;
       await user.save();
-      return true;
     }
-    return false;
+
+    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
   }
 
   /**
@@ -583,63 +649,135 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @access capabilities: [EditUsers]
    * @param id 用户 Id
    * @param status 状态
+   * @param requestUserId 请求的用户Id
    */
-  async updateStatus(id: number, status: UserStatus, requestUser: RequestUser): Promise<boolean> {
-    await this.hasCapability(UserCapability.EditUsers, requestUser, true);
+  async updateStatus(id: number, status: UserStatus, requestUserId: number): Promise<void> {
+    await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
 
-    return await this.models.Users.update(
+    await this.models.Users.update(
       { status },
       {
         where: {
           id,
         },
       },
-    ).then(([count]) => count > 0);
+    );
   }
 
   /**
-   * 修改密码
-   * 旧密码不正确返回 false
-   * @param userId 用户 Id
+   * 通过用户Id修改密码
+   * @param id 用户 Id
    * @param oldPwd 旧密码
    * @param newPwd 新密码
-   * @returns
    */
-  async updateLoginPwd(userId: number, oldPwd: string, newPwd: string): Promise<boolean> {
-    const user = await this.models.Users.findOne({
-      where: {
-        id: userId,
-        loginPwd: md5(oldPwd),
-      },
-    });
+  async updateLoginPwd(id: number, oldPwd: string, newPwd: string): Promise<void>;
+  /**
+   * 通过用户名修改密码
+   * @param username 登录名/邮箱/手机号码
+   * @param oldPwd 旧密码
+   * @param newPwd 新密码
+   */
+  async updateLoginPwd(username: string, oldPwd: string, newPwd: string): Promise<void>;
+  async updateLoginPwd(idOrUsername: number | string, oldPwd: string, newPwd: string): Promise<void> {
+    const id = typeof idOrUsername === 'number' ? idOrUsername : undefined,
+      username = id ? undefined : (idOrUsername as string),
+      region = username ? await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion) : undefined;
+    const user = id
+      ? await this.models.Users.findOne({
+          where: {
+            id,
+            loginPwd: oldPwd,
+          },
+        })
+      : await this.models.Users.findOne({
+          where: {
+            [Op.or]: [
+              { loginName: username },
+              isEmail(username) && { email: username },
+              isPhoneNumber(username!, region!) && { mobile: username },
+            ].filter(Boolean) as any,
+            loginPwd: oldPwd,
+          },
+        });
 
     // 旧密码可以找到用户
     if (user) {
+      if (user.status === UserStatus.Disabled) {
+        throw new ValidationError(this.translate('datasource.user.user_disabled', 'User is disabled!'));
+      } else if (oldPwd === newPwd) {
+        throw new ValidationError(
+          this.translate('datasource.user.new_password_same_with_old', 'New password is same with old!'),
+        );
+      }
+
       user.loginPwd = newPwd;
       await user.save();
-      return true;
     }
-    return false;
+
+    throw new ValidationError(this.translate('datasource.user.old_password_incorrect', 'Old password is incorrect!'));
+  }
+
+  /**
+   * 重置密码
+   * @param id 用户 Id
+   * @param password 新密码
+   */
+  async resetLoginPwd(id: number, password: string): Promise<void> {
+    const user = await this.models.Users.findByPk(id);
+    if (user) {
+      if (user.status === UserStatus.Disabled) {
+        throw new ValidationError(this.translate('datasource.user.user_disabled', 'User is disabled!'));
+      }
+      user.loginPwd = password;
+      user.save();
+    }
+    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
+  }
+
+  /**
+   * 验证用户登录账号密码
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access None
+   * @param username 登录名/邮箱/手机号码
+   * @param password 登录密码
+   */
+  async verifyUser(username: string, password: string): Promise<false | UserModel> {
+    const region = await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
+    const user = await this.models.Users.findOne({
+      where: {
+        [Op.or]: [
+          { loginName: username },
+          isEmail(username) && { email: username },
+          isPhoneNumber(username, region) && { mobile: username },
+        ].filter(Boolean) as any,
+        loginPwd: password,
+        status: true,
+      },
+    });
+    if (!user) return false;
+
+    // 排除登录密码
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { loginPwd: pwd, ...restUser } = user.toJSON();
+    return restUser as UserModel;
   }
 
   /**
    * 删除用户
-   * Super Admin 无法删除，抛出 ForbiddenError 错误
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [DeleteUsers]
    * @param id 用户 Id
+   * @param requestUserId 请求的用户Id
    */
-  async delete(id: number, requestUser: RequestUser): Promise<true> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
+  async delete(id: number, requestUserId: number): Promise<void> {
+    await this.hasCapability(UserCapability.DeleteUsers, requestUserId, true);
 
-    if (id === Number(requestUser.sub)) {
-      throw new ForbiddenError(
-        await this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
-          lang: requestUser.lang,
-        }),
-      );
+    if (id === requestUserId) {
+      throw new ForbiddenError(this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`));
     }
 
     const t = await this.sequelize.transaction();
@@ -654,7 +792,6 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       });
 
       await t.commit();
-      return true;
     } catch (err) {
       await t.rollback();
       throw err;
@@ -663,22 +800,18 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /**
    * 批量删除用户
-   * Super Admin 无法删除，抛出 ForbiddenError 错误
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [DeleteUsers]
    * @param id 用户 Id
+   * @param requestUserId 请求的用户Id
    */
-  async bulkDelete(ids: number[], requestUser: RequestUser): Promise<true> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUser, true);
+  async bulkDelete(ids: number[], requestUserId: number): Promise<void> {
+    await this.hasCapability(UserCapability.DeleteUsers, requestUserId, true);
 
-    if (ids.includes(Number(requestUser.sub))) {
-      throw new ForbiddenError(
-        await this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`, {
-          lang: requestUser.lang,
-        }),
-      );
+    if (ids.includes(requestUserId)) {
+      throw new ForbiddenError(this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`));
     }
 
     const t = await this.sequelize.transaction();
@@ -693,40 +826,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       });
 
       await t.commit();
-      return true;
     } catch (err) {
       await t.rollback();
       throw err;
     }
-  }
-
-  /**
-   * 验证用户登录账号密码
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @access None
-   * @param loginName 登录名/邮箱/手机号码
-   * @param loginPwd 登录密码
-   */
-  async verifyUser(loginName: string, loginPwd: string): Promise<false | UserModel> {
-    const region = await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
-    const user = await this.models.Users.findOne({
-      where: {
-        [Op.or]: [
-          { loginName },
-          isEmail(loginName) && { email: loginName },
-          isPhoneNumber(loginName, region) && { mobile: loginName },
-        ].filter(Boolean) as any,
-        loginPwd: md5(loginPwd),
-        status: true,
-      },
-    });
-    if (!user) return false;
-
-    // 排除登录密码
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { loginPwd: pwd, ...restUser } = user.toJSON();
-    return restUser as UserModel;
   }
 }

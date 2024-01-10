@@ -211,12 +211,12 @@ export class ClientDataSource extends BaseDataSource {
    * @param clientId client id (clientId field)
    * @param input update client input
    */
-  update(clientId: string, input: UpdateClientInput): Promise<boolean> {
-    return this.models.Clients.update(input, {
+  async update(clientId: string, input: UpdateClientInput): Promise<void> {
+    await this.models.Clients.update(input, {
       where: {
         clientId,
       },
-    }).then(([count]) => count > 0);
+    });
   }
 
   /**
@@ -275,7 +275,8 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Claim has already exists');
+      if (exists)
+        throw new ValidationError(this.translate('datasource.client.claim_has_existed', 'Claim has already existed!'));
 
       return this.models.ClientClaims.create({
         ...input,
@@ -325,12 +326,12 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client claim
    * @param id client claim id
    */
-  deleteClaim(id: number): Promise<boolean> {
-    return this.models.ClientClaims.destroy({
+  async deleteClaim(id: number): Promise<void> {
+    await this.models.ClientClaims.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -391,7 +392,10 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Cors origin has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.client.cors_origin_has_existed', 'Cors origin has already existed!'),
+        );
 
       return this.models.ClientCorsOrigins.create({
         ...input,
@@ -441,12 +445,12 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client cors origin
    * @param id client cors origin id
    */
-  deleteCorsOrigin(id: number): Promise<boolean> {
-    return this.models.ClientCorsOrigins.destroy({
+  async deleteCorsOrigin(id: number): Promise<void> {
+    await this.models.ClientCorsOrigins.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -505,7 +509,8 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Scope has already exists');
+      if (exists)
+        throw new ValidationError(this.translate('datasource.client.scope_has_existed', 'Scope has already existed!'));
 
       return this.models.ClientScopes.create({
         ...input,
@@ -555,12 +560,12 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client scope
    * @param id client scope id
    */
-  deleteScope(id: number): Promise<boolean> {
-    return this.models.ClientScopes.destroy({
+  async deleteScope(id: number): Promise<void> {
+    await this.models.ClientScopes.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -621,7 +626,10 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('GrantType has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.client.grant_type_has_existed', 'GrantType has already existed!'),
+        );
 
       return this.models.ClientGrantTypes.create({
         ...input,
@@ -671,12 +679,12 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client grant type
    * @param id client grant type id
    */
-  deleteGrantType(id: number): Promise<boolean> {
-    return this.models.ClientGrantTypes.destroy({
+  async deleteGrantType(id: number): Promise<void> {
+    await this.models.ClientGrantTypes.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -737,7 +745,10 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('RedirectUri has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.client.redirect_uri_has_existed', 'RedirectUri has already existed!'),
+        );
 
       return this.models.ClientRedirectUris.create({
         ...input,
@@ -787,12 +798,12 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client redirect uri
    * @param id client redirect uri id
    */
-  deleteRedirectUri(id: number): Promise<boolean> {
-    return this.models.ClientRedirectUris.destroy({
+  async deleteRedirectUri(id: number): Promise<void> {
+    await this.models.ClientRedirectUris.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -858,7 +869,13 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('PostLogoutRedirectUri has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate(
+            'datasource.client.post_logout_redirect_uri_has_existed',
+            'PostLogoutRedirectUri has already existed!',
+          ),
+        );
 
       return this.models.ClientPostLogoutRedirectUris.create({
         ...input,
@@ -917,12 +934,12 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client post logout redirect uri
    * @param id client post logout redirect uri id
    */
-  deletePostLogoutRedirectUri(id: number): Promise<boolean> {
-    return this.models.ClientPostLogoutRedirectUris.destroy({
+  async deletePostLogoutRedirectUri(id: number): Promise<void> {
+    await this.models.ClientPostLogoutRedirectUris.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -985,12 +1002,12 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client secret
    * @param id client secret id
    */
-  deleteSecret(id: number): Promise<boolean> {
-    return this.models.ClientSecrets.destroy({
+  async deleteSecret(id: number): Promise<void> {
+    await this.models.ClientSecrets.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -1051,7 +1068,10 @@ export class ClientDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Property has already exists.');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.client.property_has_existed', 'Property has already existed.'),
+        );
 
       return this.models.ClientProperties.create({
         ...input,
@@ -1101,11 +1121,11 @@ export class ClientDataSource extends BaseDataSource {
    * Delete client property
    * @param id client property id
    */
-  deleteProperty(id: number): Promise<boolean> {
-    return this.models.ClientProperties.destroy({
+  async deleteProperty(id: number): Promise<void> {
+    await this.models.ClientProperties.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 }

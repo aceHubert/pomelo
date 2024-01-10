@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { RequestUser } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import { UserCapability } from '../helpers/user-capability';
 import { LinkModel, PagedLinkModel, PagedLinkArgs, NewLinkInput, UpdateLinkInput } from '../interfaces/link.interface';
 import { BaseDataSource } from './base.datasource';
@@ -44,11 +44,12 @@ export class LinkDataSource extends BaseDataSource {
   /**
    * 添加链接
    * @param model 添加实体模型
+   * @param requestUserId 请求用户 Id
    */
-  async create(model: NewLinkInput, requestUser: RequestUser): Promise<LinkModel> {
+  async create(model: NewLinkInput, requestUserId: number): Promise<LinkModel> {
     const link = await this.models.Links.create({
       ...model,
-      userId: Number(requestUser.sub),
+      userId: requestUserId,
     });
     return link.toJSON<LinkModel>();
   }
@@ -61,23 +62,24 @@ export class LinkDataSource extends BaseDataSource {
    * @access capabilities: [ManageLinks (if not yours)]
    * @param id Link Id
    * @param model 修改实体模型
+   * @param requestUserId 请求用户 Id
    */
-  async update(id: number, model: UpdateLinkInput, requestUser: RequestUser): Promise<boolean> {
+  async update(id: number, model: UpdateLinkInput, requestUserId: number): Promise<void> {
     const link = await this.models.Links.findByPk(id, {
       attributes: ['userId'],
     });
     if (link) {
       // 非本人创建的是否可编辑
-      if (link.userId !== Number(requestUser.sub)) {
-        await this.hasCapability(UserCapability.ManageLinks, requestUser, true);
+      if (link.userId !== requestUserId) {
+        await this.hasCapability(UserCapability.ManageLinks, requestUserId, true);
       }
 
       await this.models.Links.update(model, {
         where: { id },
       });
-      return true;
     }
-    return false;
+
+    throw new ValidationError(this.translate('datasource.link.link_does_not_exist', 'Link does not exist!'));
   }
 
   /**
@@ -87,18 +89,19 @@ export class LinkDataSource extends BaseDataSource {
    * @version 0.0.1
    * @access capabilities: [ManageLinks (if not yours)]
    * @param id Link Id
+   * @param requestUserId 请求用户 Id
    */
-  async delete(id: number, requestUser: RequestUser): Promise<boolean> {
+  async delete(id: number, requestUserId: number): Promise<void> {
     const link = await this.models.Links.findByPk(id);
     if (link) {
       // 非本人创建的是否可删除
-      if (link.userId !== Number(requestUser.sub)) {
-        await this.hasCapability(UserCapability.ManageLinks, requestUser, true);
+      if (link.userId !== requestUserId) {
+        await this.hasCapability(UserCapability.ManageLinks, requestUserId, true);
       }
 
       await link.destroy();
-      return true;
     }
-    return false;
+
+    throw new ValidationError(this.translate('datasource.link.link_does_not_exist', 'Link does not exist!'));
   }
 }

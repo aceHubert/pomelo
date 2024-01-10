@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, RequestUser } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import { UserCapability } from '../helpers/user-capability';
 import { OptionModel, OptionArgs, NewOptionInput, UpdateOptionInput } from '../interfaces/option.interface';
 import { BaseDataSource } from './base.datasource';
@@ -94,17 +94,15 @@ export class OptionDataSource extends BaseDataSource {
   /**
    * 新建 Options
    * @param model 新建模型
+   * @param requestUserId 请求用户 Id
    */
-  async create(model: NewOptionInput, requestUser: RequestUser): Promise<OptionModel> {
-    await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
+  async create(model: NewOptionInput, requestUserId: number): Promise<OptionModel> {
+    await this.hasCapability(UserCapability.ManageOptions, requestUserId, true);
 
     if (await this.isExists(model.optionName)) {
       throw new ValidationError(
-        await this.translate('datasource.option.name_exists', `Option name "${model.optionName}" has existed!`, {
-          lang: requestUser.lang,
-          args: {
-            name: model.optionName,
-          },
+        this.translate('datasource.option.name_exists', `Option name "${model.optionName}" has existed!`, {
+          name: model.optionName,
         }),
       );
     }
@@ -118,28 +116,28 @@ export class OptionDataSource extends BaseDataSource {
    * 修改 Options
    * @param id Options id
    * @param model 修改实体模型
+   * @param requestUserId 请求用户 Id
    */
-  async update(id: number, model: UpdateOptionInput, requestUser: RequestUser): Promise<boolean> {
-    await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
+  async update(id: number, model: UpdateOptionInput, requestUserId: number): Promise<void> {
+    await this.hasCapability(UserCapability.ManageOptions, requestUserId, true);
 
-    const result = await this.models.Options.update(model, {
+    await this.models.Options.update(model, {
       where: { id },
-    }).then(([count]) => count > 0);
+    });
     super.resetOptions();
-    return result;
   }
 
   /**
    * 删除 Options
    * @param id Option Id
+   * @param requestUserId 请求用户 Id
    */
-  async delete(id: number, requestUser: RequestUser): Promise<boolean> {
-    await this.hasCapability(UserCapability.ManageOptions, requestUser, true);
+  async delete(id: number, requestUserId: number): Promise<void> {
+    await this.hasCapability(UserCapability.ManageOptions, requestUserId, true);
 
-    const result = await this.models.Options.destroy({
+    await this.models.Options.destroy({
       where: { id },
-    }).then((count) => count > 0);
+    });
     super.resetOptions();
-    return result;
   }
 }

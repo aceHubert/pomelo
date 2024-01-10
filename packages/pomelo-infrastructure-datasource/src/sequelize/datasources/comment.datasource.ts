@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { RequestUser } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import { UserCapability } from '../helpers/user-capability';
 import {
   CommentModel,
@@ -59,8 +59,9 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * 添加评论
    * @param model 添加实体模型
    * @param fields 返回的字段
+   * @param requestUserId 请求用户 Id
    */
-  async create(model: NewCommentInput, requestUser: RequestUser): Promise<CommentModel> {
+  async create(model: NewCommentInput, requestUserId: number): Promise<CommentModel> {
     const { metas, ...rest } = model;
 
     const t = await this.sequelize.transaction();
@@ -68,7 +69,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       const comment = await this.models.Comments.create(
         {
           ...rest,
-          userId: Number(requestUser.sub),
+          userId: requestUserId,
         },
         { transaction: t },
       );
@@ -102,23 +103,24 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @access capabilities: [ModerateComments (if not yours)]
    * @param id Link Id
    * @param model 修改实体模型
+   * @param requestUserId 请求用户 Id
    */
-  async update(id: number, model: UpdateCommentInput, requestUser: RequestUser): Promise<boolean> {
+  async update(id: number, model: UpdateCommentInput, requestUserId: number): Promise<void> {
     const comment = await this.models.Comments.findByPk(id, {
       attributes: ['userId'],
     });
     if (comment) {
       // 非本人创建的是否可以编辑
-      if (comment.userId !== Number(requestUser.sub)) {
-        await this.hasCapability(UserCapability.ModerateComments, requestUser, true);
+      if (comment.userId !== requestUserId) {
+        await this.hasCapability(UserCapability.ModerateComments, requestUserId, true);
       }
 
       await this.models.Comments.update(model, {
         where: { id },
       });
-      return true;
     }
-    return false;
+
+    throw new ValidationError(this.translate('datasource.comment.comment_does_not_exist', 'Comment does not exist!'));
   }
 
   /**
@@ -128,13 +130,14 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @version 0.0.1
    * @access capabilities: [ModerateComments (if not yours)]
    * @param id comment id
+   * @param requestUserId 请求用户 Id
    */
-  async delete(id: number, requestUser: RequestUser): Promise<boolean> {
+  async delete(id: number, requestUserId: number): Promise<void> {
     const comment = await this.models.Comments.findByPk(id);
     if (comment) {
       // 非本人创建的是否可以删除
-      if (comment.userId !== Number(requestUser.sub)) {
-        await this.hasCapability(UserCapability.ModerateComments, requestUser, true);
+      if (comment.userId !== requestUserId) {
+        await this.hasCapability(UserCapability.ModerateComments, requestUserId, true);
       }
       const t = await this.sequelize.transaction();
       try {
@@ -148,13 +151,12 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
         });
 
         await t.commit();
-
-        return true;
       } catch (err) {
         await t.rollback();
         throw err;
       }
     }
-    return false;
+
+    throw new ValidationError(this.translate('datasource.comment.comment_does_not_exist', 'Comment does not exist!'));
   }
 }

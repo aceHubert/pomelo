@@ -1,7 +1,7 @@
 import { Op, WhereOptions } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, RequestUser } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared-server';
 import {
   MediaModel,
   MediaMetaDataModel,
@@ -156,12 +156,13 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   /**
    * 添加媒体
    * @param model 添加实体模型
-   * @param fields 返回的字段
+   * @param metaData Metadata
+   * @param requestUserId 请求用户 Id
    */
   async create(
     model: NewMediaInput,
     metaData: MediaMetaDataModel,
-    requestUser: RequestUser,
+    requestUserId: number,
   ): Promise<
     MediaModel & {
       metaData: MediaMetaDataModel;
@@ -178,7 +179,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       const media = await this.models.Medias.create(
         {
           ...rest,
-          userId: Number(requestUser.sub),
+          userId: requestUserId,
         },
         { transaction: t },
       );
@@ -216,21 +217,22 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
   /**
    * 修改媒体
    * @param id Media id
-   * @param model Update model
-   * @param metaData metadata
+   * @param model 修改实体模型
+   * @param metaData Metadata
+   * @param requestUserId 请求用户 Id
    */
   async update(
     id: number,
     model: UpdateMediaInput,
     metaData: MediaMetaDataModel | 'NONE',
-    requestUser: RequestUser,
-  ): Promise<boolean> {
+    requestUserId: number,
+  ): Promise<void> {
     const t = await this.sequelize.transaction();
     try {
       await this.models.Medias.update(
         {
           ...model,
-          userId: Number(requestUser.sub),
+          userId: requestUserId,
         },
         {
           where: {
@@ -256,10 +258,9 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       }
 
       await t.commit();
-      return true;
     } catch (err) {
       await t.rollback();
-      return false;
+      throw err;
     }
   }
 
@@ -268,8 +269,8 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    * @param mediaId Media Id
    * @param metaData Metadata
    */
-  updateMetaData(mediaId: number, metaData: MediaMetaDataModel): Promise<boolean> {
-    return this.models.MediaMeta.update(
+  async updateMetaData(mediaId: number, metaData: MediaMetaDataModel): Promise<void> {
+    await this.models.MediaMeta.update(
       {
         metaValue: JSON.stringify(metaData),
       },
@@ -279,6 +280,6 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
           metaKey: MediaMetaPresetKeys.Matedata,
         },
       },
-    ).then(([count]) => count > 0);
+    );
   }
 }

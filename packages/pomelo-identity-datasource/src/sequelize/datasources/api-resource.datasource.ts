@@ -174,17 +174,20 @@ export class ApiResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (exists) throw new ValidationError('Api resource has already exists');
+    if (exists)
+      throw new ValidationError(
+        this.translate('datasource.api_resource.resource_has_existed', 'Api resource has already existed!'),
+      );
 
     return this.models.ApiResources.create(input).then((api) => api.toJSON<ApiResourceModel>());
   }
 
   /**
-   * Update api resource (return false if resource is non-editable)
+   * Update api resource
    * @param id api resource id
    * @param input update resource input
    */
-  async update(id: number, input: UpdateApiResourceInput): Promise<boolean> {
+  async update(id: number, input: UpdateApiResourceInput): Promise<void> {
     const nonEditable = await this.models.ApiResources.count({
       where: {
         id,
@@ -192,21 +195,24 @@ export class ApiResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (nonEditable) return false;
+    if (nonEditable)
+      throw new ValidationError(
+        this.translate('datasource.api_resource.resource_non_editable', 'ApiResource is not editable!'),
+      );
 
-    return this.models.ApiResources.update(input, {
+    await this.models.ApiResources.update(input, {
       where: {
         id,
       },
-    }).then(([count]) => count > 0);
+    });
   }
 
   /**
    * Update api resource last accessed time
    * @param id api resource id
    */
-  updateLastAccessed(id: number): Promise<boolean> {
-    return this.models.ApiResources.update(
+  async updateLastAccessed(id: number): Promise<void> {
+    await this.models.ApiResources.update(
       {
         lastAccessed: new Date(),
       },
@@ -215,22 +221,27 @@ export class ApiResourceDataSource extends BaseDataSource {
           id,
         },
       },
-    ).then(([count]) => count > 0);
+    );
   }
 
   /**
-   * Delete api resource (return false if resource is non-editable)
+   * Delete api resource
    * @param id api resource id
    */
-  async delete(id: number): Promise<boolean> {
+  async delete(id: number): Promise<void> {
     const resource = await this.models.ApiResources.findByPk(id);
-    if (!resource) return true;
+    if (resource) {
+      if (resource.nonEditable)
+        throw new ValidationError(
+          this.translate('datasource.api_resource.resource_non_editable', 'ApiResource is not editable!'),
+        );
 
-    if (resource.nonEditable) return false;
+      await resource.destroy();
+    }
 
-    await resource.destroy();
-
-    return true;
+    throw new ValidationError(
+      this.translate('datasource.api_resource.resource_does_not_exist', 'ApiResource does not exist!'),
+    );
   }
 
   /**
@@ -285,7 +296,10 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Claim has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.api_resource.claim_has_existed', 'Claim has already existed!'),
+        );
 
       return this.models.ApiClaims.create({
         ...input,
@@ -334,12 +348,12 @@ export class ApiResourceDataSource extends BaseDataSource {
    * Delete api claim
    * @param id api claim id
    */
-  deleteClaim(id: number): Promise<boolean> {
-    return this.models.ApiClaims.destroy({
+  async deleteClaim(id: number): Promise<void> {
+    await this.models.ApiClaims.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -487,7 +501,10 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Scope has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.api_resource.scope_has_existed', 'Scope has already existed!'),
+        );
 
       return this.models.ApiScopes.create({
         ...input,
@@ -501,7 +518,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api scope id
    * @param input api scope input
    */
-  async updateScope(id: number, input: UpdateApiScopeInput): Promise<boolean> {
+  async updateScope(id: number, input: UpdateApiScopeInput): Promise<void> {
     const nonEditable = await this.models.ApiResources.count({
       include: [
         {
@@ -517,20 +534,23 @@ export class ApiResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (nonEditable) return false;
+    if (nonEditable)
+      throw new ValidationError(
+        this.translate('datasource.api_resource.resource_non_editable', 'ApiResource is not editable!'),
+      );
 
-    return this.models.ApiScopes.update(input, {
+    await this.models.ApiScopes.update(input, {
       where: {
         id,
       },
-    }).then(([count]) => count > 0);
+    });
   }
 
   /**
-   * Delete api scope (return false if api resource is non-editable)
+   * Delete api scope
    * @param id api scope id
    */
-  async deleteScope(id: number): Promise<boolean> {
+  async deleteScope(id: number): Promise<void> {
     const nonEditable = await this.models.ApiResources.count({
       include: [
         {
@@ -546,9 +566,12 @@ export class ApiResourceDataSource extends BaseDataSource {
       },
     }).then((count) => count > 0);
 
-    if (nonEditable) return false;
+    if (nonEditable)
+      throw new ValidationError(
+        this.translate('datasource.api_resource.resource_non_editable', 'ApiResource is not editable!'),
+      );
 
-    return this.models.ApiScopes.destroy({
+    await this.models.ApiScopes.destroy({
       where: {
         id,
       },
@@ -608,7 +631,10 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Sclpe claim has already exists');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.api_resource.scope_claim_has_existed', 'Scope claim has already existed!'),
+        );
 
       return this.models.ApiScopeClaims.create({
         ...input,
@@ -657,12 +683,12 @@ export class ApiResourceDataSource extends BaseDataSource {
    * Delete api scope claim
    * @param id api scope claim id
    */
-  deleteScopeClaim(id: number): Promise<boolean> {
-    return this.models.ApiScopeClaims.destroy({
+  async deleteScopeClaim(id: number): Promise<void> {
+    await this.models.ApiScopeClaims.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -721,12 +747,12 @@ export class ApiResourceDataSource extends BaseDataSource {
    * Delete api secret
    * @param id api secret id
    */
-  deleteSecret(id: number): Promise<boolean> {
-    return this.models.ApiSecrets.destroy({
+  async deleteSecret(id: number): Promise<void> {
+    await this.models.ApiSecrets.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 
   /**
@@ -783,7 +809,10 @@ export class ApiResourceDataSource extends BaseDataSource {
         },
       }).then((count) => count > 0);
 
-      if (exists) throw new ValidationError('Property has already exists.');
+      if (exists)
+        throw new ValidationError(
+          this.translate('datasource.api_resource.property_has_existed', 'Property has already existed.'),
+        );
 
       return this.models.ApiProperties.create({
         ...input,
@@ -832,11 +861,11 @@ export class ApiResourceDataSource extends BaseDataSource {
    * Delete api property
    * @param id api property id
    */
-  deleteProperty(id: number): Promise<boolean> {
-    return this.models.ApiProperties.destroy({
+  async deleteProperty(id: number): Promise<void> {
+    await this.models.ApiProperties.destroy({
       where: {
         id,
       },
-    }).then((count) => count > 0);
+    });
   }
 }
