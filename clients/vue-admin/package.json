@@ -19,7 +19,7 @@
     "@ace-fetch/core": "^0.2.1",
     "@ace-fetch/vue": "^0.2.1",
     "@ace-pomelo/shared-client": "workspace:^",
-    "@ace-util/core": "^0.1.0",
+    "@ace-util/core": "^0.1.1",
     "@apollo/client": "^3.6.9",
     "@ckeditor/ckeditor5-build-balloon": "^40.0.0",
     "@ckeditor/ckeditor5-build-decoupled-document": "^40.0.0",

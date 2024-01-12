@@ -17,7 +17,7 @@
     "@ace-fetch/vue": "^0.2.1",
     "@ace-pomelo/shared-client": "workspace:^",
     "@ace-pomelo/theme": "workspace:^",
-    "@ace-util/core": "^0.1.0",
+    "@ace-util/core": "^0.1.1",
     "@formily-portal/vant": "portal:../../.submodules/formily-portal-vant/packages/components",
     "@formily/core": "^2.2.0",
     "@formily/vant": "portal:../../.submodules/formily-vant/packages/components",

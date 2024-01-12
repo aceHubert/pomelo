@@ -358,7 +358,7 @@ __metadata:
   dependencies:
     "@ace-fetch/core": ^0.2.1
     "@ace-fetch/vue": ^0.2.1
-    "@ace-util/core": ^0.1.0
+    "@ace-util/core": ^0.1.1
     ant-design-vue: ^1.7.7
     babel-preset-vca-jsx: ^0.3.6
     pinia: ^2.0.17
@@ -369,7 +369,7 @@ __metadata:
   peerDependencies:
     "@ace-fetch/core": ^0.2.1
     "@ace-fetch/vue": ^0.2.1
-    "@ace-util/core": ^0.1.0
+    "@ace-util/core": ^0.1.1
     "@vue/composition-api": ^1.0.0
     ant-design-vue: ^1.7.7
     pinia: ^2.0.0
@@ -419,7 +419,7 @@ __metadata:
     "@ace-fetch/core": ^0.2.1
     "@ace-fetch/vue": ^0.2.1
     "@ace-pomelo/shared-client": "workspace:^"
-    "@ace-util/core": ^0.1.0
+    "@ace-util/core": ^0.1.1
     "@apollo/client": ^3.6.9
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-build-decoupled-document": ^40.0.0
@@ -504,7 +504,7 @@ __metadata:
     "@ace-fetch/vue": ^0.2.1
     "@ace-pomelo/shared-client": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
-    "@ace-util/core": ^0.1.0
+    "@ace-util/core": ^0.1.1
     "@formily-portal/vant": "portal:../../.submodules/formily-portal-vant/packages/components"
     "@formily/core": ^2.2.0
     "@formily/vant": "portal:../../.submodules/formily-vant/packages/components"
@@ -543,6 +543,15 @@ __metadata:
   dependencies:
     lodash.get: ^4.4.2
   checksum: ff0f278fbb0f7f97e4654ada0885c1c02e3adb3db05f722019ca7065882ef7a21730114477d9c78e7d143da27505df3c15f65d63e9fe6eb61f9d26cbcdd13862
+  languageName: node
+  linkType: hard
+
+"@ace-util/core@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@ace-util/core@npm:0.1.1"
+  dependencies:
+    lodash.get: ^4.4.2
+  checksum: 3b6604d277e360ae18cfa6bef2428380f96849115827bcbf78521f1370eeee8abb1702443d466b9cacb70bddfe8755b922041f6b6a1a92990593aefebe9a467f
   languageName: node
   linkType: hard
 
@@ -8499,7 +8508,7 @@ __metadata:
   resolution: "antdv-layout-pro@workspace:packages/antdv-layout-pro"
   dependencies:
     "@ace-pomelo/theme": ^0.1.0-alpha.2
-    "@ace-util/core": ^0.1.0
+    "@ace-util/core": ^0.1.1
     "@iconfu/svg-inject": ^1.2.3
     "@types/lodash.clonedeep": ^4.5.0
     "@types/lodash.debounce": ^4.0.7
