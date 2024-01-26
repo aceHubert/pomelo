@@ -156,10 +156,15 @@ export function setStyle(el: HTMLElement, stylesOrName: string | Record<string, 
 /**
  * generate primary color
  * @param colorInput color input
- * @param isDark is dark theme
- * @param mixColor mix component background color
+ * @param options options
+ * @param options.isDark is dark theme
+ * @param options.mixColor mix component background color
+ * @returns
  */
-export const genColor = (colorInput: tinycolor.ColorInput, isDark = false) => {
+export const genColor = (
+  colorInput: tinycolor.ColorInput,
+  { isDark = false, mixColor = '#141414' }: { isDark?: boolean; mixColor?: tinycolor.ColorInput } = {},
+) => {
   const base = tinycolor(colorInput);
 
   const shadowColor = base.clone().setAlpha(0.3).toString();
@@ -179,7 +184,6 @@ export const genColor = (colorInput: tinycolor.ColorInput, isDark = false) => {
       'shadow-color': shadowColor,
     };
   } else {
-    const mixColor = '#141414';
     const mix = (color: tinycolor.ColorInput, weight: number) =>
       tinycolor.lessMix(color, mixColor, weight).toHexString();
 

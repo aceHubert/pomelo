@@ -1,4 +1,4 @@
-import { omit } from 'lodash-es';
+import { omit, groupBy } from 'lodash-es';
 import pathToRegexp from 'path-to-regexp';
 import { warn } from '@ace-util/core';
 
@@ -53,6 +53,12 @@ function compilePathRegex(path: string, pathToRegexpOptions?: RegExpOptions & Pa
 export function serializeMenu(menus: MenuConfig[], parent?: MenuConfigWithRedirect): MenuConfigWithRedirect[] {
   return menus.map((menu) => {
     const { key, path, position, display, breadcrumb, children, ...rest } = menu;
+
+    // 检查同级菜单的 position 是否一致
+    if (Object.keys(groupBy(children, 'position')).length > 1) {
+      throw new Error('Menu position must be the same in the same level!');
+    }
+
     const menuConfig: MenuConfigWithRedirect = {
       ...rest,
       key,
@@ -67,10 +73,10 @@ export function serializeMenu(menus: MenuConfig[], parent?: MenuConfigWithRedire
       delete parent.path;
     }
 
-    // 如果 top 菜单下有非 top 子菜单，那么 top 菜单的 action 变成 redirect
-    if (menu.position === 'top' && children?.some((item) => item.position !== menu.position)) {
+    // 如果 top 菜单下有 side 子菜单，那么 top 菜单的 action 变成 redirect
+    if (menu.position === 'top' && children?.some((item) => item.position === 'side')) {
       // 如果 path 不在子菜单中，取第一个子菜单的 action
-      const childPaths = getChildPaths(children);
+      const childPaths = getExecutableChildPaths(children);
       menuConfig.redirect = childPaths.has(path) ? path : [...childPaths][0];
     } else {
       menuConfig.path = path;
@@ -80,7 +86,7 @@ export function serializeMenu(menus: MenuConfig[], parent?: MenuConfigWithRedire
     return menuConfig;
 
     // 获取所有子菜单可执行的 path
-    function getChildPaths(children: MenuConfig[]): Set<string> {
+    function getExecutableChildPaths(children: MenuConfig[]): Set<string> {
       const paths = new Set<string>();
       children.map((item) => {
         // 只取每个 position group 的最后一级 action
@@ -90,7 +96,7 @@ export function serializeMenu(menus: MenuConfig[], parent?: MenuConfigWithRedire
         }
 
         if (item.children) {
-          getChildPaths(item.children).forEach((path) => paths.add(path));
+          getExecutableChildPaths(item.children).forEach((path) => paths.add(path));
         }
       });
 

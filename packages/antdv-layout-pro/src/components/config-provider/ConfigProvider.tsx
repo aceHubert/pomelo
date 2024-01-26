@@ -79,7 +79,7 @@ export default defineComponent({
       const unWatchCssVariable = watch(
         [() => props.primaryColor, () => props.theme],
         ([primaryColor, theme]) => {
-          const colors = genColor(primaryColor, theme === Theme.Dark);
+          const colors = genColor(primaryColor, { isDark: theme === Theme.Dark });
           addCssText(
             `:root .theme-${theme} {\n${Object.keys(colors)
               .map((key) =>

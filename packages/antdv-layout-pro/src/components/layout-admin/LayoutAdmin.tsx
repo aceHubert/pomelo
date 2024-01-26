@@ -229,7 +229,7 @@ export default defineComponent({
 
     useEffect(() => {
       let fixedMenus = cloneDeep(props.menus);
-      if (props.layoutType === LayoutType.TopMenu) {
+      if (!isMobile.value && props.layoutType === LayoutType.TopMenu) {
         // trade side as top in topMenu mode
         fixedMenus = (function format(menus) {
           return menus.map((menu) => {
@@ -244,7 +244,7 @@ export default defineComponent({
         })(fixedMenus);
       }
       layoutMixin.setMenus(fixedMenus);
-    }, [() => props.menus, () => props.layoutType]);
+    }, [() => configProvider.device, () => props.menus, () => props.layoutType]);
 
     useEffect(
       () => {
@@ -497,18 +497,19 @@ export default defineComponent({
             </Drawer>
           );
         } else if ((!hasHeader.value && hasTopMenu.value) || hasSiderMenu.value) {
+          const fixSiderbar = props.fixSiderbar || props.layoutType === LayoutType.TopMenu;
           const renderSiderContent = () => [
             <section
               class={[
                 `${prefixCls}-sider d-flex flex-column`,
                 {
-                  [`${prefixCls}-sider--fixed`]: props.fixSiderbar,
+                  [`${prefixCls}-sider--fixed`]: fixSiderbar,
                   [`${prefixCls}-sider--collapsed`]:
                     (topMenuInSideCollaspsed.value && sideCollapsed.value) || !layoutMixin.siderMenus.length,
                 },
               ]}
               style={
-                props.fixSiderbar
+                fixSiderbar
                   ? { top: isHeaderHidden.value ? 0 : `${headerHeight.value}px`, transition: 'top 0.2s' }
                   : { height: `calc(100vh - ${headerHeight.value}px)` }
               }
@@ -614,7 +615,7 @@ export default defineComponent({
             </section>,
           ];
 
-          if (props.fixSiderbar) {
+          if (fixSiderbar) {
             return (
               <div
                 class={`${prefixCls}-sider-placeholder`}

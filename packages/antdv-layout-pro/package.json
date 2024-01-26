@@ -18,8 +18,14 @@
       "require": "./lib/index.js"
     },
     "./*": {
-      "import": "./esm/*",
-      "require": "./lib/*",
+      "import": [
+        "./esm/*",
+        "./*"
+      ],
+      "require": [
+        "./lib/*",
+        "./*"
+      ],
       "default": {
         "import": "./esm/*/index.js",
         "require": "./lib/*/index.js"
