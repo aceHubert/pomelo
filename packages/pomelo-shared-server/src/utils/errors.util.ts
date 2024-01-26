@@ -69,3 +69,14 @@ export class RuntimeError extends Error {
     this.name = 'RuntimeError';
   }
 }
+
+export class NotFoundError extends Error {
+  readonly status: number;
+
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, NotFoundError.prototype);
+    this.status = HttpStatus.NOT_FOUND;
+    this.name = 'NotFoundError';
+  }
+}

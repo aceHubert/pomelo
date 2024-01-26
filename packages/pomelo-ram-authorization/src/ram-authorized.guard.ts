@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
-import { getContextObject, RequestUser } from '@ace-pomelo/shared-server';
+import { getRequest, RequestUser } from '@ace-pomelo/shared-server';
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
 import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
@@ -25,8 +25,8 @@ export class RamAuthorizedGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const ctx = getContextObject(context);
-    if (!ctx) {
+    const request = getRequest(context);
+    if (!request) {
       throw Error(`context type: ${context.getType()} not supported`);
     }
 
@@ -37,7 +37,7 @@ export class RamAuthorizedGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    const user = ctx[this.options.userProperty!] as RequestUser;
+    const user = request[this.options.userProperty!] as RequestUser;
     if (!user) {
       // 没有的提供 token, return 401
       throw new UnauthorizedException("Access denied, You don't have permission for this action!");

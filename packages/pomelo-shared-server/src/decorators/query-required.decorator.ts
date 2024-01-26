@@ -3,8 +3,12 @@ import { createParamDecorator, BadRequestException, ExecutionContext } from '@ne
 /**
  * Make @Query required
  */
-export const QueryRequired = createParamDecorator((key: string, ctx: ExecutionContext) => {
-  const request = ctx.switchToHttp().getRequest();
+export const QueryRequired = createParamDecorator((key: string, context: ExecutionContext) => {
+  const request = context.switchToHttp().getRequest();
+
+  if (!request) {
+    throw Error(`context type: ${context.getType()} not supported`);
+  }
 
   const value = request.query[key];
 
