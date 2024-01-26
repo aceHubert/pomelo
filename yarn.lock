@@ -12,35 +12,35 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-fetch/axios@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@ace-fetch/axios@npm:0.2.1"
+"@ace-fetch/axios@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@ace-fetch/axios@npm:0.2.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Faxios%2F-%2Faxios-0.2.2.tgz"
   dependencies:
-    "@ace-util/core": ^0.1.0
+    "@ace-util/core": ^0.1.1
   peerDependencies:
     "@ace-fetch/core": ^0.1.0
     axios: ^0.27.0
-  checksum: bfd85b443dabf6736ca2203c2a3bdea8253e4807e74bdb6e3647307e4c506c90447ca6401119e2ee3b0c7f5c29154b9c2a873a716e58c1e6c8b545a9247624a5
+  checksum: b352b1706f23c9ebb82617e971263a55cd5e744632b8c54fe1396ca54ccdf48d4d34e18865b6887d28bf754550378b2cbca27ce012ef337f65b3876a68585668
   languageName: node
   linkType: hard
 
-"@ace-fetch/core@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@ace-fetch/core@npm:0.2.1"
-  checksum: 955f8fede1f6d2da08104f6e8751d8ec583bc64e9eab0e4eca116fe7f79e1bbf0b3f4d40e49f30bd89a79396f4aeb9e7e467b549752445362c138cc0c7cec572
+"@ace-fetch/core@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@ace-fetch/core@npm:0.2.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fcore%2F-%2Fcore-0.2.2.tgz"
+  checksum: f5a25123476775b398aa6581f164ed1eb7201ffb639797870cd209d77be5087cf162de7cac9efb834b0579dd6dc5f3da7f7cc17f57e6ecd8a057c637adbbf303
   languageName: node
   linkType: hard
 
-"@ace-fetch/vue@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@ace-fetch/vue@npm:0.2.1"
+"@ace-fetch/vue@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@ace-fetch/vue@npm:0.2.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fvue%2F-%2Fvue-0.2.2.tgz"
   dependencies:
-    "@ace-util/core": ^0.1.0
+    "@ace-util/core": ^0.1.1
     vue-demi: ^*
   peerDependencies:
     "@ace-fetch/core": ^0.1.0
     vue: ^2.6.0 || ^3.0.0
-  checksum: c648d9ff57f63ee556d3c9546a65ff2aacbf5539510cfda62d3b84ff07ba6f1439357f23c7b2bb61ae448649da2f4a3d9287b513763130455af22bf4cf680565
+  checksum: c94f382e1e676cd5be5a3475d408c051f74bf7c6ccc6857e90d093895bf95dbb80271a90b4998a1563164c184c9822108771ef872b51a54b77c4ccfe2301d3bf
   languageName: node
   linkType: hard
 
@@ -48,12 +48,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/authorization@workspace:packages/pomelo-authorization"
   dependencies:
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@nestjs/graphql": ^11.0.0
     graphql-parse-resolve-info: ^4.12.0
   peerDependencies:
-    "@ace-pomelo/shared-server": "workspace:^"
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@nestjs/graphql": ^11.0.0
@@ -112,6 +113,7 @@ __metadata:
     supertest: ^6.1.3
     tedious: ^15.1.0
     tsconfig-paths: ^3.10.1
+    typescript: ^4.1.5
     webpack-node-externals: ^3.0.0
   languageName: unknown
   linkType: soft
@@ -120,6 +122,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/identity-datasource@workspace:packages/pomelo-identity-datasource"
   dependencies:
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@types/lodash.merge": ^4.6.9
@@ -127,7 +130,7 @@ __metadata:
     mysql2: ^2.3.3
     sequelize: ^6.19.0
   peerDependencies:
-    "@ace-pomelo/shared-server": "workspace:^"
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     mysql2: ^2.3.3
@@ -141,7 +144,6 @@ __metadata:
     "@ace-pomelo/identity-datasource": "workspace:^"
     "@ace-pomelo/infrastructure-datasource": "workspace:^"
     "@ace-pomelo/shared-server": "workspace:^"
-    "@ace-pomelo/theme": "workspace:^"
     "@apollo/server": ^4.9.1
     "@apollo/utils.keyvaluecache": ^2.1.0
     "@nestjs/apollo": ^11.0.0
@@ -180,6 +182,7 @@ __metadata:
     supertest: ^6.1.3
     tedious: ^15.1.0
     tsconfig-paths: ^3.10.1
+    typescript: ^4.1.5
     webpack-node-externals: ^3.0.0
   languageName: unknown
   linkType: soft
@@ -240,6 +243,7 @@ __metadata:
     supertest: ^6.1.3
     tedious: ^15.1.0
     tsconfig-paths: ^3.10.1
+    typescript: ^4.1.5
     webpack-node-externals: ^3.0.0
   languageName: unknown
   linkType: soft
@@ -248,6 +252,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/infrastructure-datasource@workspace:packages/pomelo-infrastructure-datasource"
   dependencies:
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@types/lodash.merge": ^4.6.9
@@ -255,7 +260,7 @@ __metadata:
     mysql2: ^2.3.3
     sequelize: ^6.19.0
   peerDependencies:
-    "@ace-pomelo/shared-server": "workspace:^"
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     mysql2: ^2.3.3
@@ -339,12 +344,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/ram-authorization@workspace:packages/pomelo-ram-authorization"
   dependencies:
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@nestjs/graphql": ^11.0.0
     graphql-parse-resolve-info: ^4.12.0
   peerDependencies:
-    "@ace-pomelo/shared-server": "workspace:^"
+    "@ace-pomelo/shared-server": 0.1.0-alpha.0
     "@nestjs/common": ^9.0.0
     "@nestjs/core": ^9.0.0
     "@nestjs/graphql": ^11.0.0
@@ -356,32 +362,20 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/shared-client@workspace:packages/pomelo-shared-client"
   dependencies:
-    "@ace-fetch/core": ^0.2.1
-    "@ace-fetch/vue": ^0.2.1
     "@ace-util/core": ^0.1.1
-    ant-design-vue: ^1.7.7
-    babel-preset-vca-jsx: ^0.3.6
-    pinia: ^2.0.17
-    tinycolor2: ^1.6.0
-    vue-demi: ^*
-    vue-router: ^3.5.0
-    vue2-helpers: 1.x
   peerDependencies:
-    "@ace-fetch/core": ^0.2.1
-    "@ace-fetch/vue": ^0.2.1
-    "@ace-util/core": ^0.1.1
-    "@vue/composition-api": ^1.0.0
-    ant-design-vue: ^1.7.7
-    pinia: ^2.0.0
-    vue: ^2.6.0 || ^3.0.0
-    vue-router: ^3.5.0 || >=4.0.0
+    "@apollo/client": ^3.0.0
+    graphql: ^16.0.0
+    lodash-es: ^4.0.0
   peerDependenciesMeta:
-    "@vue/composition-api":
+    "@apollo/client":
+      optional: true
+    graphql:
       optional: true
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/shared-server@workspace:^, @ace-pomelo/shared-server@workspace:packages/pomelo-shared-server":
+"@ace-pomelo/shared-server@0.1.0-alpha.0, @ace-pomelo/shared-server@workspace:^, @ace-pomelo/shared-server@workspace:packages/pomelo-shared-server":
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/shared-server@workspace:packages/pomelo-shared-server"
   dependencies:
@@ -415,9 +409,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/vue-admin@workspace:clients/vue-admin"
   dependencies:
-    "@ace-fetch/axios": ^0.2.1
-    "@ace-fetch/core": ^0.2.1
-    "@ace-fetch/vue": ^0.2.1
+    "@ace-fetch/axios": ^0.2.2
+    "@ace-fetch/core": ^0.2.2
+    "@ace-fetch/vue": ^0.2.2
     "@ace-pomelo/shared-client": "workspace:^"
     "@ace-util/core": ^0.1.1
     "@apollo/client": ^3.6.9
@@ -467,6 +461,7 @@ __metadata:
     axios: ^0.27.2
     babel-preset-vca-jsx: ^0.3.6
     core-js: ^3.8.3
+    crypto-js: ^4.2.0
     custom-event-polyfill: ^1.0.7
     graphql: ^16.0.0
     graphql-ws: ^5.11.2
@@ -499,12 +494,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/vue-web@workspace:clients/vue-web"
   dependencies:
-    "@ace-fetch/axios": ^0.2.1
-    "@ace-fetch/core": ^0.2.1
-    "@ace-fetch/vue": ^0.2.1
+    "@ace-fetch/axios": ^0.2.2
+    "@ace-fetch/core": ^0.2.2
+    "@ace-fetch/vue": ^0.2.2
     "@ace-pomelo/shared-client": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
     "@ace-util/core": ^0.1.1
+    "@apollo/client": ^3.6.9
     "@formily-portal/vant": "portal:../../.submodules/formily-portal-vant/packages/components"
     "@formily/core": ^2.2.0
     "@formily/vant": "portal:../../.submodules/formily-vant/packages/components"
@@ -523,11 +519,15 @@ __metadata:
     axios: ^0.27.2
     babel-preset-vca-jsx: ^0.3.6
     core-js: ^3.8.3
+    graphql: ^16.0.0
+    graphql-ws: ^5.11.2
     highlight.js: ^11.9.0
+    lodash-es: ^4.17.21
     moment: ^2.29.4
     oidc-client-ts: ^2.4.0
     pinia: ^2.0.17
     store: ^2.0.12
+    tinycolor2: ^1.6.0
     vant: ^2.12.48
     vue: ^2.6.12
     vue-i18n: ^8.27.2
@@ -5931,14 +5931,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-json@npm:^4.0.2":
-  version: 4.1.0
-  resolution: "@rollup/plugin-json@npm:4.1.0"
+"@rollup/plugin-json@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "@rollup/plugin-json@npm:6.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40rollup%2Fplugin-json%2F-%2Fplugin-json-6.1.0.tgz"
   dependencies:
-    "@rollup/pluginutils": ^3.0.8
+    "@rollup/pluginutils": ^5.1.0
   peerDependencies:
-    rollup: ^1.20.0 || ^2.0.0
-  checksum: 867bc9339b4ccf0b9ff3b2617a95b3b8920115163f86c8e3b1f068a14ca25949472d3c05b09a5ac38ca0fe2185756e34617eaeb219d4a2b6e2307c501c7d4552
+    rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+  peerDependenciesMeta:
+    rollup:
+      optional: true
+  checksum: cc018d20c80242a2b8b44fae61a968049cf31bb8406218187cc7cda35747616594e79452dd65722e7da6dd825b392e90d4599d43cd4461a02fefa2865945164e
   languageName: node
   linkType: hard
 
@@ -6048,6 +6051,22 @@ __metadata:
     rollup:
       optional: true
   checksum: 893d5805ac4121fc704926963a0ae4e79e9e2bc8d736c3b28499ab69a404cce5119ca3a4e0c3d3a81d62f1beb3966f35285c36935d94b061794f26e94fed4cd1
+  languageName: node
+  linkType: hard
+
+"@rollup/pluginutils@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@rollup/pluginutils@npm:5.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40rollup%2Fpluginutils%2F-%2Fpluginutils-5.1.0.tgz"
+  dependencies:
+    "@types/estree": ^1.0.0
+    estree-walker: ^2.0.2
+    picomatch: ^2.3.1
+  peerDependencies:
+    rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+  peerDependenciesMeta:
+    rollup:
+      optional: true
+  checksum: 3cc5a6d91452a6eabbfd1ae79b4dd1f1e809d2eecda6e175deb784e75b0911f47e9ecce73f8dd315d6a8b3f362582c91d3c0f66908b6ced69345b3cbe28f8ce8
   languageName: node
   linkType: hard
 
@@ -11086,7 +11105,7 @@ __metadata:
 
 "date-format@npm:^4.0.14":
   version: 4.0.14
-  resolution: "date-format@npm:4.0.14"
+  resolution: "date-format@npm:4.0.14::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fdate-format%2F-%2Fdate-format-4.0.14.tgz"
   checksum: dfe5139df6af5759b9dd3c007b899b3f60d45a9240ffeee6314ab74e6ab52e9b519a44ccf285888bdd6b626c66ee9b4c8a523075fa1140617b5beb1cbb9b18d1
   languageName: node
   linkType: hard
@@ -12219,12 +12238,12 @@ __metadata:
   linkType: hard
 
 "esdk-obs-nodejs@npm:^3.21.6":
-  version: 3.21.6
-  resolution: "esdk-obs-nodejs@npm:3.21.6"
+  version: 3.23.11
+  resolution: "esdk-obs-nodejs@npm:3.23.11::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fesdk-obs-nodejs%2F-%2Fesdk-obs-nodejs-3.23.11.tgz"
   dependencies:
+    fast-xml-parser: ^4.0.11
     log4js: ^6.3.0
-    xml2js: ^0.4.23
-  checksum: 894bcb1108976ffd699c1844c5f405b09a30b6dd57dcdccd8562b3f112a82c710b699217381cb1137718b0978e92342f0c792b5270bedc3ab3762c502e8db8ce
+  checksum: ba7c17b81e21f22c2a7af10e10220f9faa61b16354e5f0b38a944b534a82dd1420ccea65ca7f759d229c319f6b7b838292f91083f6a90ad7b0878e3c9ec302d1
   languageName: node
   linkType: hard
 
@@ -12910,6 +12929,17 @@ __metadata:
   version: 2.1.1
   resolution: "fast-safe-stringify@npm:2.1.1"
   checksum: a851cbddc451745662f8f00ddb622d6766f9bd97642dabfd9a405fb0d646d69fc0b9a1243cbf67f5f18a39f40f6fa821737651ff1bceeba06c9992ca2dc5bd3d
+  languageName: node
+  linkType: hard
+
+"fast-xml-parser@npm:^4.0.11":
+  version: 4.3.3
+  resolution: "fast-xml-parser@npm:4.3.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Ffast-xml-parser%2F-%2Ffast-xml-parser-4.3.3.tgz"
+  dependencies:
+    strnum: ^1.0.5
+  bin:
+    fxparser: src/cli/cli.js
+  checksum: 5e272a0dbb73c4341487935cd6f37df360999f680c0638efec0974dfc58071fb803919f7a030941a7f5bb894794a2f3356d4b863ba2fb9438191795004cdf36e
   languageName: node
   linkType: hard
 
@@ -17366,7 +17396,7 @@ __metadata:
 
 "log4js@npm:^6.3.0":
   version: 6.9.1
-  resolution: "log4js@npm:6.9.1"
+  resolution: "log4js@npm:6.9.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Flog4js%2F-%2Flog4js-6.9.1.tgz"
   dependencies:
     date-format: ^4.0.14
     debug: ^4.3.4
@@ -21546,7 +21576,7 @@ __metadata:
     "@nestjs/testing": ^10.0.0
     "@rollup/plugin-babel": ^5.0.0
     "@rollup/plugin-commonjs": ~11.0.0
-    "@rollup/plugin-json": ^4.0.2
+    "@rollup/plugin-json": ^6.1.0
     "@rollup/plugin-multi-entry": ^6.0.0
     "@rollup/plugin-node-resolve": ^7.1.3
     "@rollup/plugin-replace": ^2.3.1
@@ -22544,7 +22574,7 @@ __metadata:
 
 "streamroller@npm:^3.1.5":
   version: 3.1.5
-  resolution: "streamroller@npm:3.1.5"
+  resolution: "streamroller@npm:3.1.5::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fstreamroller%2F-%2Fstreamroller-3.1.5.tgz"
   dependencies:
     date-format: ^4.0.14
     debug: ^4.3.4
@@ -22819,6 +22849,13 @@ __metadata:
   version: 3.1.1
   resolution: "strip-json-comments@npm:3.1.1"
   checksum: 492f73e27268f9b1c122733f28ecb0e7e8d8a531a6662efbd08e22cccb3f9475e90a1b82cab06a392f6afae6d2de636f977e231296400d0ec5304ba70f166443
+  languageName: node
+  linkType: hard
+
+"strnum@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "strnum@npm:1.0.5::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fstrnum%2F-%2Fstrnum-1.0.5.tgz"
+  checksum: 651b2031db5da1bf4a77fdd2f116a8ac8055157c5420f5569f64879133825915ad461513e7202a16d7fec63c54fd822410d0962f8ca12385c4334891b9ae6dd2
   languageName: node
   linkType: hard
 
@@ -25501,7 +25538,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml2js@npm:^0.4.23, xml2js@npm:^0.4.5":
+"xml2js@npm:^0.4.5":
   version: 0.4.23
   resolution: "xml2js@npm:0.4.23"
   dependencies:

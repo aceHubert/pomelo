@@ -123,5 +123,17 @@ sw.*
 .umi
 .umi-production
 .umi-test
-.env.local
 
+# iisnode
+iisnode/
+iisnode.js.debug/
+
+# local env files
+.env.local
+.env.*.local
+env.local.js
+env.*.local.js
+
+# docker-compose
+/release
+/.cache

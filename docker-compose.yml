@@ -1,0 +1,62 @@
+# vim: set shiftwidth=2 tabstop=2 softtabstop=-1 expandtab:
+
+# >  cat > .env.docker.local
+#   BUILD_TAG=0.0.1
+#   BUILD_IGNORE=true
+#   DEBUG=true
+#   ENV_FILE=.env.local
+
+# > mkdir release
+# > docker-compose --env-file .env.docker.local --build --force-recreate up -d
+
+version: '3.1'
+
+networks:
+  mysql_default:
+    external: true
+  redis_default:
+    external: true
+services:
+  server:
+    build:
+      context: ${BUILD_CONTEXT:-.}
+      dockerfile: Dockerfile
+      args:
+        - BUILD_IGNORE=${BUILD_IGNORE:-false}
+        - BUILD_OPTION=${BUILD_OPTION}
+        - RUNTIME_ENV=${RUNTIME_ENV}
+        - RUNTIME_APPS=${RUNTIME_APPS}
+      cache_from:
+        - pomelo:latest
+      target: deploy
+      tags:
+        - pomelo:${BUILD_TAG:-latest}
+    image: pomelo
+    container_name: pomelo-dev
+    restart: always
+    ports:
+      - 3001:3001
+      - 3002:3002
+      - 3003:3003
+      - 3011:3011
+      - 3012:3012
+    volumes:
+      - deploy:/app
+    environment:
+      DEBUG: ${DEBUG:-false}
+      ENV_FILE: ${ENV_FILE:-.env}
+    external_links:
+      - mysql-default-5.7:mysql
+      - redis-default-6.2:redis
+    networks:
+      - default
+      - mysql_default
+      - redis_default
+volumes:
+  deploy:
+    name: pomelo
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/${DEPLOY_DIR:-release}
+      o: bind

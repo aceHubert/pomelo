@@ -1,3 +1,17 @@
+.devcontainer
 .vscode
 .workflow
 node_modules
+**/.git*
+**/.env.development*
+**/.env.sample
+**/.eslintignore
+**/db.lock
+**/iisnode.js
+**/jest.config.json
+**/nest-cli.json
+**/README.md
+**/web.config
+**/webpack-hmr.config.js
+**/__test__
+**/node_modules

@@ -1,0 +1,109 @@
+# https://fly.io/docs/reference/configuration/
+# https://fly.io/docs/reference/monorepo/
+
+# Run `fly launch` to create an app
+# > fly launch --no-deploy
+# Create a volume named "pomelodata" within our app "pomelo-server"
+# > fly volumes create pomelodata --size 1 # gb
+# Set secrets:
+# > fly secrets set IDENTITY_DATABASE_CONNECTION=xxx INFRASTRUCTURE_DATABASE_CONNECTION=xxx REDIS_URL=xxx
+# Deploy the App from dockerfile
+# > fly deploy
+
+app = "pomelo-server"
+primary_region = "nrt"
+kill_signal = "SIGINT"
+kill_timeout = "5s"
+
+[build]
+  dockerfile = "Dockerfile"
+  build-target = "deploy"
+
+[build.args]
+  BUILD_IGNORE = "true"
+  # BUILD_OPTION = "servers"
+  # RUNTIME_ENV = "production"
+  # RUNTIME_APPS = "identity-server"
+
+[env]
+  SWAGGER_DEBUG = "true"
+  GRAPHQL_DEBUG = "true"
+  ENV_FILE = ".env.fly"
+
+[mounts]
+  source = "pomelodata"
+  destination = "/data"
+  # auto_extend_size_threshold = 0
+
+# [http_service]
+#   internal_port = 3001
+#   force_https = true
+#   auto_stop_machines = true
+#   auto_start_machines = true
+#   min_machines_running = 0
+#   processes = ["app"]
+
+[[services]]
+  internal_port = 3001
+  protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [[services.ports]]
+    port = 3001
+    handlers = ["http"]
+    force_https = true
+
+[[services]]
+  internal_port = 3002
+  protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [[services.ports]]
+    port = 3002
+    handlers = ["http"]
+    force_https = true
+
+[[services]]
+  internal_port = 3003
+  protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [[services.ports]]
+    port = 3003
+    handlers = ["http"]
+    force_https = true
+
+[[services]]
+  internal_port = 3011
+  protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [[services.ports]]
+    port = 3011
+    handlers = ["http"]
+    force_https = true
+
+[[services]]
+  internal_port = 3012
+  protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [[services.ports]]
+    port = 3012
+    handlers = ["http"]
+    force_https = true
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256

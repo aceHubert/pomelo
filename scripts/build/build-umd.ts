@@ -5,6 +5,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 import multiEntry from '@rollup/plugin-multi-entry';
+import json from '@rollup/plugin-json';
 import injectProcessEnv from 'rollup-plugin-inject-process-env';
 import externalGlobals from 'rollup-plugin-external-globals';
 import dts from 'rollup-plugin-dts';
@@ -72,6 +73,7 @@ const presets = () => {
     // }),
     svg(),
     css(),
+    json(),
     resolve({
       browser: true,
       extensions,
