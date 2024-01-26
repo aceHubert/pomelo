@@ -3,6 +3,6 @@ import { NewClientPostLogoutRedirectUriInput } from '@ace-pomelo/identity-dataso
 
 export abstract class NewClientPostLogoutRedirectUriValidator implements NewClientPostLogoutRedirectUriInput {
   @IsDefined()
-  @IsUrl()
+  @IsUrl({ require_tld: false, require_protocol: true })
   abstract postLogoutRedirectUri: string;
 }

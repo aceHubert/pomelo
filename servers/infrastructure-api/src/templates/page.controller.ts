@@ -16,6 +16,8 @@ import {
 } from '@nestjs/common';
 import { ParseQueryPipe, ValidatePayloadExistsPipe, ApiAuthCreate, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
+  OptionDataSource,
+  OptionPresetKeys,
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
@@ -44,7 +46,10 @@ import { UpdatePageTemplateDto } from './dto/update-template.dto';
 @Authorized()
 @Controller({ path: 'api/template/pages', scope: Scope.REQUEST })
 export class PageTemplateController extends BaseController {
-  constructor(private readonly templateDataSource: TemplateDataSource) {
+  constructor(
+    private readonly optionDataSource: OptionDataSource,
+    private readonly templateDataSource: TemplateDataSource,
+  ) {
     super();
   }
 
@@ -103,8 +108,15 @@ export class PageTemplateController extends BaseController {
   /**
    * Get page template model by alias name
    */
-  @Get(':name/alias')
+  @Get('alias')
   @Anonymous()
+  @ApiQuery({
+    name: 'name',
+    type: String,
+    required: false,
+    example: '/page1',
+    description: `page alias name, if not setted, will get the page template which is setted as "page on front".`,
+  })
   @ApiQuery({
     name: 'metaKeys',
     type: [String],
@@ -118,17 +130,51 @@ export class PageTemplateController extends BaseController {
   })
   @ApiNoContentResponse({ description: 'Page template not found' })
   async getByName(
-    @Param('name') name: string,
+    @Query('name') name: string | undefined,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.templateDataSource.getByName(
-      name,
-      TemplatePresetType.Page,
-      ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = name
+      ? await this.templateDataSource.getByName(
+          name,
+          TemplatePresetType.Page,
+          [
+            'id',
+            'name',
+            'title',
+            'author',
+            'content',
+            'status',
+            'commentStatus',
+            'commentCount',
+            'updatedAt',
+            'createdAt',
+          ],
+          requestUser ? Number(requestUser.sub) : undefined,
+        )
+      : await this.optionDataSource.getOptionValue(OptionPresetKeys.PageOnFront).then((id) => {
+          if (id) {
+            return this.templateDataSource.get(
+              Number(id),
+              TemplatePresetType.Page,
+              [
+                'id',
+                'name',
+                'title',
+                'author',
+                'content',
+                'status',
+                'commentStatus',
+                'commentCount',
+                'updatedAt',
+                'createdAt',
+              ],
+              requestUser ? Number(requestUser.sub) : undefined,
+            );
+          }
+          return undefined;
+        });
 
     let metas;
     if (result) {

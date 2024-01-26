@@ -30,7 +30,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         responseData.message = responseData.message.join('; ');
       }
 
-      this.logger.error(exception);
+      this.logger.error(exception, exception.stack);
 
       if (isJsonRequest(request.headers)) {
         return response.status(status).json(responseData);

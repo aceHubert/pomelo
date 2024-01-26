@@ -1,43 +1,48 @@
-/* eslint-disable no-console */
-import * as path from 'path';
-import * as fs from 'fs';
+import path from 'path';
+import fs from 'fs';
 import dotenv from 'dotenv';
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { DatabaseManager, version } from '@ace-pomelo/infrastructure-datasource';
-import { LockFile } from './common/utils/lock-file.util';
+import { DbCheck } from './common/utils/db-check.util';
+import { ensureContentPath } from './common/utils/configuration.utils';
 
-export const dbLockFileName = path.join(process.cwd(), 'db.lock');
-export const envFilePaths =
-  process.env.ENV_FILE ??
-  (process.env.NODE_ENV === 'production'
-    ? ['.env.production.local', '.env.production', '.env']
-    : ['.env.development.local', '.env.development']);
+const logger = new Logger('DbSync', { timestamp: true });
 
-// 初始化数据库
-export async function syncDatabase() {
-  const dbLockFile = new LockFile(dbLockFileName);
-
-  let config: Record<string, any> = {};
-  for (const envFilePath of envFilePaths) {
-    if (fs.existsSync(envFilePath)) {
-      config = Object.assign(dotenv.parse(fs.readFileSync(envFilePath)), config);
-    }
+// env file
+const envFilePaths = process.env.ENV_FILE
+  ? [process.env.ENV_FILE]
+  : process.env.NODE_ENV === 'production'
+  ? ['.env.production.local', '.env.production', '.env.local', '.env']
+  : ['.env.development.local', '.env.development'];
+let config: Record<string, any> = {};
+for (const envFilePath of envFilePaths) {
+  if (fs.existsSync(envFilePath)) {
+    config = Object.assign(dotenv.parse(fs.readFileSync(envFilePath)), config);
   }
+}
+const configService = new ConfigService(config);
 
-  const connection = config.INFRASTRUCTURE_DATABASE_CONNECTION
-    ? config.INFRASTRUCTURE_DATABASE_CONNECTION
+// sync database
+async function syncDatabase() {
+  const connection = configService.get('INFRASTRUCTURE_DATABASE_CONNECTION')
+    ? configService.get('INFRASTRUCTURE_DATABASE_CONNECTION')
     : {
-        database: config.INFRASTRUCTURE_DATABASE_NAME,
-        username: config.INFRASTRUCTURE_DATABASE_USERNAME,
-        password: config.INFRASTRUCTURE_DATABASE_PASSWORD,
-        dialect: config.INFRASTRUCTURE_DATABASE_DIALECT || 'mysql',
-        host: config.INFRASTRUCTURE_DATABASE_HOST || 'localhost',
-        port: config.INFRASTRUCTURE_DATABASE_PORT || 3306,
+        database: configService.get('INFRASTRUCTURE_DATABASE_NAME'),
+        username: configService.get('INFRASTRUCTURE_DATABASE_USERNAME'),
+        password: configService.get('INFRASTRUCTURE_DATABASE_PASSWORD'),
+        dialect: configService.get('INFRASTRUCTURE_DATABASE_DIALECT', 'mysql'),
+        host: configService.get('INFRASTRUCTURE_DATABASE_HOST', 'localhost'),
+        port: configService.get('INFRASTRUCTURE_DATABASE_PORT', 3306),
         define: {
-          charset: config.INFRASTRUCTURE_DATABASE_CHARSET || 'utf8',
-          collate: config.INFRASTRUCTURE_DATABASE_COLLATE || '',
+          charset: configService.get('INFRASTRUCTURE_DATABASE_CHARSET', 'utf8'),
+          collate: configService.get('INFRASTRUCTURE_DATABASE_COLLATE', ''),
         },
       };
-  const tablePrefix = config.INFRASTRUCTURE_TABLE_PREFIX;
+  const tablePrefix = configService.get('INFRASTRUCTURE_TABLE_PREFIX');
+
+  // db lock
+  const dbCheck = new DbCheck(path.join(ensureContentPath(configService.get<string>('CONTENT_PATH')), 'db.lock'));
 
   // 初始化数据库
   const dbManager =
@@ -46,14 +51,18 @@ export async function syncDatabase() {
       : new DatabaseManager({ ...connection, tablePrefix });
   await dbManager
     .sync({
-      alter: true,
+      alter: false,
       // match: /_dev$/,
-      when: () => dbLockFile.hasFile().then((initialized) => !initialized),
+      when: () =>
+        dbCheck.hasDBInitialed().then((initialized) => !initialized || !dbCheck.getEnv('INFRASTRUCTURE_DATASOURCE')),
     })
     .then((flag) => {
       if (flag) {
-        dbLockFile.setEnvValue('INFRASTRUCTURE_MODULE', version);
-        console.log('Initialize database successful!');
+        dbCheck.setEnv('INFRASTRUCTURE_DATASOURCE', version);
+        logger.debug('Initialize database successful!');
       }
+      3;
     });
 }
+
+export { envFilePaths, syncDatabase };

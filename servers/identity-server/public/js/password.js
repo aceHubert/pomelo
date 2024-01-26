@@ -24,7 +24,9 @@ $(document).ready(function () {
       return obj;
     }, {});
 
-    if (data.newPassword !== data.confirmPassword) {
+    if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/.test(data.newPassword)) {
+      return showError(locales.passwordInvalid);
+    } else if (data.newPassword !== data.confirmPassword) {
       return showError(locales.dismatchPassword);
     }
 
@@ -136,7 +138,9 @@ $(document).ready(function () {
       return obj;
     }, {});
 
-    if (data.newPassword !== data.confirmPassword) {
+    if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/.test(data.newPassword)) {
+      return showError(locales.passwordInvalid);
+    } else if (data.newPassword !== data.confirmPassword) {
       return showError(locales.dismatchPassword);
     }
 

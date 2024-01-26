@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import multer from 'multer';
-import { APP_PIPE, APP_FILTER, ModuleRef } from '@nestjs/core';
+import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, ModuleRef } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -29,10 +29,11 @@ import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
 import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.utils';
+import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
 import { MessageModule } from './messages/message.module';
-import { DataInitModule } from './data-init/data-init.module';
+import { SiteInitModule } from './site-init/site-init.module';
 import { OptionModule } from './options/option.module';
 import { TermTaxonomyModule } from './term-taxonomy/term-taxonomy.module';
 import { TemplateModule } from './templates/template.module';
@@ -55,7 +56,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: envFilePaths,
-      load: [configuration(process.cwd())],
+      load: [configuration()],
     }),
     ServeStaticModule.forRootAsync({
       useFactory: (config: ConfigService) => [
@@ -232,7 +233,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService, OidcService],
     }),
-    DataInitModule, // init database datas
+    SiteInitModule, // init database datas
     MessageModule.forRoot({
       isGlobal: true,
       // TODO: PubSub 是使用内存管理，生产环境需要更换
@@ -307,6 +308,10 @@ const logger = new Logger('AppModule', { timestamp: true });
         });
       },
       inject: [ConfigService],
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DbCheckInterceptor,
     },
     {
       provide: APP_FILTER,

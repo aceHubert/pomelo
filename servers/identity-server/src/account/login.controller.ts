@@ -160,7 +160,10 @@ export class LoginController extends BaseController {
               />
               <span toggle="#password" class="toggle-password eye"></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-                ${i18n.tv('login.form.password_invalid', 'Please input password(6-16 characters)!')}
+                ${i18n.tv(
+                  'login.form.password_invalid',
+                  'Please input password(6-16 characters includes numbers and letters)!',
+                )}
               </div>
             </div>
           </div>
@@ -328,7 +331,7 @@ export class LoginController extends BaseController {
     }
 
     // sync locale to user
-    this.userDataSource.updateMetaByKey(verifiedUser.id, 'locale', i18n.lang);
+    // this.userDataSource.updateMetaByKey(verifiedUser.id, 'locale', i18n.lang);
 
     const redirectUrl = await this.oidcService.provider.interactionResult(
       req,

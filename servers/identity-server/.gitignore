@@ -1,6 +1,0 @@
-db.lock
-iisnode/
-iisnode.js.debug/
-.env.*.local
-env.config.*.local.josn
-!types

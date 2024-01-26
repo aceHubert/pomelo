@@ -2,6 +2,8 @@ import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
+  OptionDataSource,
+  OptionPresetKeys,
   TemplateDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
@@ -27,6 +29,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
 }) {
   constructor(
     protected readonly moduleRef: ModuleRef,
+    private readonly optionDataSource: OptionDataSource,
     private readonly templateDataSource: TemplateDataSource,
     private readonly messageService: MessageService,
   ) {
@@ -86,16 +89,35 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
   @Anonymous()
   @Query((returns) => PageTemplate, { nullable: true, description: 'Get page template by alias name.' })
   pageTemplateByName(
-    @Args('name', { type: () => String, description: 'Page name' }) name: string,
+    @Args('name', {
+      type: () => String,
+      nullable: true,
+      description: 'Page alias name, if not setted, will get the page template which is setted as "page on front".',
+    })
+    name: string | undefined,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
-    return this.templateDataSource.getByName(
-      name,
-      TemplatePresetType.Page,
-      this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    if (name) {
+      return this.templateDataSource.getByName(
+        name,
+        TemplatePresetType.Page,
+        this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
+        requestUser ? Number(requestUser.sub) : undefined,
+      );
+    } else {
+      return this.optionDataSource.getOptionValue(OptionPresetKeys.PageOnFront).then((id) => {
+        if (id) {
+          return this.templateDataSource.get(
+            Number(id),
+            TemplatePresetType.Page,
+            this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
+            requestUser ? Number(requestUser.sub) : undefined,
+          );
+        }
+        return undefined;
+      });
+    }
   }
 
   @Anonymous()

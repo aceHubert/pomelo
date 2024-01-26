@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { APP_PIPE, APP_FILTER, ModuleRef } from '@nestjs/core';
+import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, ModuleRef } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -24,6 +24,7 @@ import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
 import { IdentityModule } from '@ace-pomelo/identity-datasource';
 import { configuration } from './common/utils/configuration.utils';
+import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { ApiResourceModule } from './api-resources/api-resource.module';
 import { IdentityResourceModule } from './identity-resources/identity-resource.module';
@@ -47,9 +48,9 @@ import '@/common/extends/i18n.extend';
       envFilePath:
         process.env.ENV_FILE ??
         (process.env.NODE_ENV === 'production'
-          ? ['.env.production.local', '.env.production', '.env']
+          ? ['.env.production.local', '.env.production', '.env.local', '.env']
           : ['.env.development.local', '.env.development']),
-      load: [configuration(process.cwd())],
+      load: [configuration()],
     }),
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
@@ -167,6 +168,10 @@ import '@/common/extends/i18n.extend';
         });
       },
       inject: [ConfigService],
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DbCheckInterceptor,
     },
     {
       provide: APP_FILTER,

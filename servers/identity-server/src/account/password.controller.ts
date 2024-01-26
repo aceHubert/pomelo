@@ -173,7 +173,10 @@ export class PasswordController extends BaseController {
               />
               <span toggle="#newPassword" class="toggle-password eye"></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-                ${i18n.tv('password.modify.form.new_password_invalid', 'Please input new password(6-16 characters)!')}
+                ${i18n.tv(
+                  'password.modify.form.new_password_invalid',
+                  'Please input password(6-16 characters includes numbers and letters)!',
+                )}
               </div>
             </div>
           </div>
@@ -545,7 +548,10 @@ export class PasswordController extends BaseController {
             />
             <span toggle="#newPassword" class="toggle-password eye"></span>
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('password.reset.form.new_password_invalid', 'Please input new password(6-16 characters)!')}
+              ${i18n.tv(
+                'password.reset.form.new_password_invalid',
+                'Please input password(6-16 characters includes numbers and letters)!',
+              )}
             </div>
           </div>
         </div>

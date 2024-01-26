@@ -1,7 +1,8 @@
+import path from 'path';
 import fs from 'fs';
 import os from 'os';
 
-export class LockFile {
+class LockFile {
   constructor(private readonly fileName: string) {}
 
   /**
@@ -33,11 +34,11 @@ export class LockFile {
    * @param {string} key Key to find
    * @returns {string|null} Value of the key
    */
-  getEnvValue(key: string) {
+  getEnvValue(key: string, defaultValue?: string) {
     // find the line that contains the key (exact match)
     const matchedLine = this.readFile().find((line) => line.split('=')[0] === key);
     // split the line (delimiter is '=') and return the item at index 2
-    return matchedLine !== undefined ? matchedLine.split('=')[1]?.replace(/^"/, '').replace(/"$/, '') : null;
+    return matchedLine !== undefined ? matchedLine.split('=')[1]?.replace(/^"/, '').replace(/"$/, '') : defaultValue;
   }
 
   /**
@@ -60,5 +61,33 @@ export class LockFile {
     }
     // write everything back to the file system
     fs.writeFileSync(this.fileName, envVars.join(os.EOL));
+  }
+}
+
+export class DbCheck {
+  private readonly dbLockFile: LockFile;
+
+  constructor(dbLockFileName?: string) {
+    this.dbLockFile = new LockFile(dbLockFileName || path.join(process.cwd(), 'db.lock'));
+  }
+
+  hasDBInitialed() {
+    return this.dbLockFile.hasFile();
+  }
+
+  hasDatasInitialed() {
+    return this.dbLockFile.getEnvValue('DATAS_INIT_REQUIRED', 'true') === 'false';
+  }
+
+  setDatasInitialed() {
+    this.dbLockFile.setEnvValue('DATAS_INIT_REQUIRED', 'false');
+  }
+
+  getEnv(key: string) {
+    return this.dbLockFile.getEnvValue(key);
+  }
+
+  setEnv(key: string, value: string) {
+    this.dbLockFile.setEnvValue(key, value);
   }
 }

@@ -30,7 +30,7 @@ export abstract class NewClientValidator implements NewClientInput {
 
   @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract clientUri?: string;
 
   @IsOptional()
@@ -62,22 +62,27 @@ export abstract class NewClientValidator implements NewClientInput {
 
   @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract initiateLoginUri?: string;
 
   @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract jwksUri?: string;
 
   @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl({ require_protocol: true, protocols: ['http', 'https'], allow_protocol_relative_urls: true })
+  @IsUrl({
+    require_tld: false,
+    require_protocol: true,
+    protocols: ['http', 'https'],
+    allow_protocol_relative_urls: true,
+  })
   abstract logoUri?: string;
 
   @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract policyUri?: string;
 
   @IsOptional()
@@ -86,7 +91,7 @@ export abstract class NewClientValidator implements NewClientInput {
 
   @ValidateIf((client) => client.clientUri !== '')
   @IsOptional()
-  @IsUrl({ require_protocol: true })
+  @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract sectorIdentifierUri?: string;
 
   @IsOptional()

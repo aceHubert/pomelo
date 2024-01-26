@@ -8,6 +8,11 @@ import {
 } from './interfaces/oidc-config-options.interface';
 import { OIDC_CONFIG_OPTIONS } from './constants';
 
+const defaultOptions: Partial<OidcConfigOptions> = {
+  debug: false,
+  path: '/oidc',
+};
+
 @Module({
   imports: [OidcAdapterModule],
   providers: [OidcConfigService],
@@ -22,7 +27,7 @@ export class OidcConfigModule {
       providers: [
         {
           provide: OIDC_CONFIG_OPTIONS,
-          useValue: restOptions,
+          useValue: { ...defaultOptions, ...restOptions },
         },
       ],
     };
@@ -56,7 +61,7 @@ export class OidcConfigModule {
         provide: OIDC_CONFIG_OPTIONS,
         useFactory: async (...args: any[]) => {
           const config = await options.useFactory!(...args);
-          return config;
+          return { ...defaultOptions, ...config };
         },
         inject: options.inject || [],
       };
@@ -65,7 +70,7 @@ export class OidcConfigModule {
       provide: OIDC_CONFIG_OPTIONS,
       useFactory: async (optionsFactory: OidcConfigOptionsFactory) => {
         const config = await optionsFactory.createOidcConfigOptions();
-        return config;
+        return { ...defaultOptions, ...config };
       },
       inject: [options.useExisting! || options.useClass!],
     };

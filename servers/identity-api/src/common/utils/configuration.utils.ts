@@ -90,36 +90,45 @@ export interface ConfigObject {
 }
 
 /**
+ * ensure content path
+ * @param contentPath customized content path, absolute or relative to basePath
+ * @param basePath base path to resolve relative path，or create fallback content directory relative to this path
+ */
+export const ensureContentPath = (contentPath?: string, basePath = process.cwd()) => {
+  if (contentPath) {
+    if (fs.existsSync(contentPath)) {
+      // 配置为绝对路径
+    } else if ((contentPath = path.join(process.cwd(), contentPath)) && fs.existsSync(contentPath)) {
+      // 配置为相对路径
+    } else {
+      contentPath = undefined;
+    }
+  }
+  if (!contentPath) {
+    // 默认路径
+    contentPath = path.join(basePath, '../content');
+    if (!fs.existsSync(contentPath)) {
+      // 默认路径，不存在则创建
+      fs.mkdirSync(contentPath, { recursive: true });
+    }
+  }
+  logger.log(`Content path: ${contentPath}`);
+  return contentPath;
+};
+
+/**
  * @nextjs/config load
  */
 export const configuration =
-  (basePath: string): ConfigFactory<ConfigObject> =>
+  (basePath: string = process.cwd()): ConfigFactory<ConfigObject> =>
   () => {
     logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'})`);
-    let contentPath: string | undefined;
-    if (process.env.CONTENT_PATH) {
-      if ((contentPath = process.env.CONTENT_PATH) && fs.existsSync(contentPath)) {
-        // 配置为绝对路径
-      } else if ((contentPath = path.join(process.cwd(), process.env.CONTENT_PATH)) && fs.existsSync(contentPath)) {
-        // 配置为相对路径
-      } else {
-        contentPath = undefined;
-      }
-    }
-    if (!contentPath) {
-      // 默认路径
-      contentPath = path.join(basePath, '../content');
-      if (!fs.existsSync(contentPath)) {
-        // 默认路径，不存在则创建
-        fs.mkdirSync(contentPath, { recursive: true });
-      }
-    }
-    logger.log(`Content path is: ${contentPath}`);
+
     const debugMode =
       process.env.DEBUG !== void 0 ? process.env.DEBUG === 'true' : process.env.NODE_ENV !== 'production';
     let config: ConfigObject = {
       debug: debugMode,
-      contentPath: contentPath,
+      contentPath: ensureContentPath(process.env.CONTENT_PATH, basePath),
       webServer: {
         host: process.env.HOST,
         port: process.env.PORT,

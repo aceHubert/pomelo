@@ -1,4 +1,4 @@
-export interface InitArgs {
+export interface SiteInitArgs {
   /**
    * 站点标题
    */

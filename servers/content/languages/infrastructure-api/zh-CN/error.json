@@ -5,7 +5,7 @@
   "forbidden_role": "拒绝访问，需要\"{requiredRole}\"角色权限！",
   "forbidden": "拒绝访问，您没有访问权限！",
   "invalid_token": "无效的token！",
-  "no_such_table": "表不在在！",
+  "site_datas_init_required": "请初始化网站数据！",
   "file": {
     "limit_part_count": "超出参数数量限制！",
     "limit_file_size": "文件超出上传大小限制！",

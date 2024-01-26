@@ -3,10 +3,9 @@ import statuses from 'statuses';
 import { Request, Response } from 'express';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
 import { GqlContextType } from '@nestjs/graphql';
-import { BaseError as SequelizeBaseError, DatabaseError as SequelizeDatabaseError } from 'sequelize';
+import { BaseError as SequelizeBaseError } from 'sequelize';
 import { GraphQLError } from 'graphql';
 import { isHttpError } from 'http-errors';
-import { I18nContext, I18nTranslation } from 'nestjs-i18n';
 import { renderMsgPage } from '@ace-pomelo/nestjs-oidc';
 
 @Catch()
@@ -18,7 +17,6 @@ export class AllExceptionFilter implements ExceptionFilter {
     this.logger.error(exception, exception.stack);
 
     const type = host.getType<GqlContextType>();
-    const i18n = I18nContext.current<I18nTranslation>(host);
     if (type === 'http') {
       const http = host.switchToHttp();
 
@@ -26,13 +24,6 @@ export class AllExceptionFilter implements ExceptionFilter {
       const response = http.getResponse<Response>();
       const status = this.getHttpCodeFromError(exception);
       const description = this.getDescriptionFromError(exception);
-
-      // @ts-expect-error code doesn't export type
-      if (exception instanceof SequelizeDatabaseError && exception.original.code === 'ER_NO_SUCH_TABLE') {
-        // 当出现表不存在错误时，提示要初始化数据库， 并设置 response.dbInitRequired = true
-        description.message = i18n?.tv('error.no_such_table', 'No such table!') ?? 'No such table!';
-        description.dbInitRequired = true;
-      }
 
       const responseData = Object.assign({}, description, {
         statusCode: status,
@@ -43,7 +34,7 @@ export class AllExceptionFilter implements ExceptionFilter {
         responseData.message = responseData.message.join('; ');
       }
 
-      this.logger.error(exception);
+      this.logger.error(exception, exception.stack);
 
       if (this.isJson(request)) {
         return response.status(status).json(responseData);
@@ -72,17 +63,22 @@ export class AllExceptionFilter implements ExceptionFilter {
     } else if (type === 'graphql') {
       // 将非 ApolloError 转换在 ApolloError
       if (!(exception instanceof GraphQLError)) {
+        const { message, ...restDescription } = this.getDescriptionFromError(exception);
         const extensions: Record<string, any> = {
+          ...restDescription,
           code: this.getGraphqlCodeFromError(exception),
         };
 
-        const { message } = this.getDescriptionFromError(exception);
+        this.logger.error(exception, exception.stack);
 
         return new GraphQLError(Array.isArray(message) ? message.join(', ') : message, {
           originalError: exception,
           extensions,
         });
       }
+
+      this.logger.error(exception, exception.stack);
+
       return exception;
     } else {
       // todo:其它情况

@@ -24,6 +24,10 @@ $(document).ready(function () {
       return obj;
     }, {});
 
+    // if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/.test(data.password)) {
+    //   return showError(locales.passwordInvalid);
+    // }
+
     data.password = data.password.sha256();
     data.remember = data.remember === 'on' ? true : false;
     if ($form.find('#userPolicy').length) {

@@ -30,13 +30,13 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   async createModuleOptions() {
     return {
       issuer: this.options.issuer,
-      path: normalizeRoutePath(this.options.path ?? '/oidc'),
+      path: normalizeRoutePath(this.options.path!),
       oidc: await this.getConfiguration(),
       factory: (issuer: string, config?: OidcConfiguration) => {
         const provider = new Provider(issuer, config);
 
         // allow http,localhost in development mode
-        if (process.env.NODE_ENV !== 'production') {
+        if (this.options.debug) {
           // Allowing HTTP and/or localhost for implicit response type web clients
           // https://github.com/panva/node-oidc-provider/blob/v7.x/recipes/implicit_http_localhost.md
           // @ts-expect-error no types
@@ -251,22 +251,15 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       cookies: {
         keys: ['gQMQym96H64-QInq7mvVX0nZEw0qUmcTA3bCpfnuR1h3YXNhgGJ0XLd17obmV8Gm'],
         // set session cookie options to allow passing the session to the browser for check_session
-        long: Object.assign(
-          {
-            httpOnly: false,
-
-            //  https://github.com/pillarjs/cookies/blob/98a7556ef73bf376b26d51a416ae2b4645f34cd7/index.js#L119
-            secure: process.env.NODE_ENV === 'production' ? true : false,
-            sameSite: 'none',
-          } as CookiesSetOptions,
-          process.env.NODE_ENV === 'production'
-            ? {}
-            : {
-                // deprecated
-                // https://github.com/pillarjs/cookies/blob/98a7556ef73bf376b26d51a416ae2b4645f34cd7/index.js#L127
-                secureProxy: true,
-              },
-        ),
+        long: {
+          httpOnly: false,
+          sameSite: 'none',
+          //  https://github.com/pillarjs/cookies/blob/98a7556ef73bf376b26d51a416ae2b4645f34cd7/index.js#L119
+          // secure:  true,
+          // deprecated
+          // https://github.com/pillarjs/cookies/blob/98a7556ef73bf376b26d51a416ae2b4645f34cd7/index.js#L127
+          secureProxy: true,
+        } as CookiesSetOptions,
       },
       jwks: {
         keys: [
@@ -429,6 +422,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         return false;
       },
       // If a client has the grant allowed and scope includes offline_access or the client is a public web client doing code flow
+      // https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#issuerefreshtoken
       // issueRefreshToken: (ctx, client, code) => {
       //   if (!client.grantTypeAllowed('refresh_token')) {
       //     return false;
@@ -437,6 +431,22 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       //     code.scopes.has('offline_access') ||
       //     (client.applicationType === 'web' && client.tokenEndpointAuthMethod === 'none')
       //   );
+      // },
+      // Configures if and how the OP rotates refresh tokens after they are used
+      // https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#rotaterefreshtoken
+      // rotateRefreshToken: (ctx) => {
+      //   const { RefreshToken: refreshToken, Client: client } = ctx.oidc.entities;
+      //   // cap the maximum amount of time a refresh token can be
+      //   // rotated for up to 1 year, afterwards its TTL is final
+      //   if (refreshToken.totalLifetime() >= 365.25 * 24 * 60 * 60) {
+      //     return false;
+      //   }
+      //   // rotate non sender-constrained public client refresh tokens
+      //   if (client.clientAuthMethod === 'none' && !refreshToken.isSenderConstrained()) {
+      //     return true;
+      //   }
+      //   // rotate if the token is nearing expiration (it's beyond 70% of its lifetime)
+      //   return refreshToken.ttlPercentagePassed() >= 70;
       // },
       // Skipping consent screen
       // https://github.com/panva/node-oidc-provider/blob/v7.x/recipes/skip_consent.md

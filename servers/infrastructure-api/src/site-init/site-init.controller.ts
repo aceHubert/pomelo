@@ -3,26 +3,28 @@ import { Controller, Get, Post, Body, Request, Scope } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { BaseController } from '@/common/controllers/base.controller';
-import { DataInitService } from './data-init.service';
-import { InitArgsDto } from './dto/init-args.dto';
+import { IgnoreDbCheckInterceptor } from '@/common/interceptors/db-check.interceptor';
+import { SiteInitService } from './site-init.service';
+import { SiteInitArgsDto } from './dto/init-args.dto';
 
 @ApiExcludeController()
+@IgnoreDbCheckInterceptor()
 @Controller({ path: 'api', scope: Scope.REQUEST })
-export class DataInitController extends BaseController {
-  constructor(private readonly httpAdapterHost: HttpAdapterHost, private readonly dbInitService: DataInitService) {
+export class SiteInitController extends BaseController {
+  constructor(private readonly httpAdapterHost: HttpAdapterHost, private readonly siteInitService: SiteInitService) {
     super();
   }
 
   /**
-   * Has database been initialized
+   * It is required to initial database before running site.
    */
   @Get('check')
   async check(@I18n() i18n: I18nContext) {
-    const result = this.dbInitService.hasDatasInitialed();
+    const initialized = this.siteInitService.hasInitialized();
     return this.success({
-      dbInitRequired: result,
-      message: result
-        ? i18n.tv('db-init.controller.init_datas.required', 'Datas initializing is required!')
+      siteInitRequired: !initialized,
+      message: !initialized
+        ? i18n.tv('db-init.controller.init_datas.required', 'Datas initialization is required!')
         : i18n.tv('db-init.controller.init_datas.completed', 'Datas have already initialized!'),
     });
   }
@@ -31,7 +33,7 @@ export class DataInitController extends BaseController {
    * Sync database and initialize datas if database has not been initialized
    */
   @Post('start')
-  async start(@Request() request: any, @Body() initArgs: InitArgsDto, @I18n() i18n: I18nContext) {
+  async start(@Body() initArgs: SiteInitArgsDto, @Request() request: any, @I18n() i18n: I18nContext) {
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const platformName = httpAdapter.getType();
 
@@ -44,7 +46,7 @@ export class DataInitController extends BaseController {
     }
 
     try {
-      await this.dbInitService.initDatas({
+      await this.siteInitService.initialize({
         ...initArgs,
         siteUrl,
       });

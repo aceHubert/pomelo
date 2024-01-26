@@ -72,6 +72,6 @@ syncDatabase()
     bootstrap().then(() => null);
   })
   .catch((err) => {
-    logger.error(err);
+    logger.error(err, err.stack);
     process.exit(1);
   });

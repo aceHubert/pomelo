@@ -1,9 +1,10 @@
 {
   "controller": {
     "init_datas": {
-      "required": "请初始化网站数据!",
-      "success": "初始化数据成功!",
-      "faild": "在初始化数据时发生错误!"
+      "required": "请初始化网站数据！",
+      "completed": "网站数据已经初始化！",
+      "success": "初始化数据成功！",
+      "faild": "在初始化数据时发生错误！"
     }
   }
 }

@@ -108,8 +108,8 @@ export class ClientResolver extends BaseResolver {
   @Mutation((returns) => [ClientClaim], { nullable: true, description: 'Create new client claims.' })
   createClientClaims(
     @Args('clientId', { description: 'Client id' }) clientId: string,
-    @Args('model', { type: () => [NewClientClaimInput] }) input: NewClientClaimInput[],
-  ): Promise<ClientClaim[] | undefined> {
+    @Args('model', { type: () => [NewClientClaimInput!] }) input: NewClientClaimInput[],
+  ): Promise<ClientClaim[]> {
     return this.clientDataSource.createClaims(clientId, input);
   }
 
@@ -152,8 +152,8 @@ export class ClientResolver extends BaseResolver {
   @Mutation((returns) => [ClientCorsOrigin], { nullable: true, description: 'Create new client cors origins.' })
   createClientCorsOrigins(
     @Args('clientId', { description: 'Client id' }) clientId: string,
-    @Args('model', { type: () => [NewClientCorsOriginInput] }) input: NewClientCorsOriginInput[],
-  ): Promise<ClientCorsOrigin[] | undefined> {
+    @Args('model', { type: () => [NewClientCorsOriginInput!] }) input: NewClientCorsOriginInput[],
+  ): Promise<ClientCorsOrigin[]> {
     return this.clientDataSource.createCorsOrigins(clientId, input);
   }
 
@@ -196,8 +196,8 @@ export class ClientResolver extends BaseResolver {
   @Mutation((returns) => [ClientGrantType], { nullable: true, description: 'Create new client grant types.' })
   createClientGrantTypes(
     @Args('clientId', { description: 'Client id' }) clientId: string,
-    @Args('model', { type: () => [NewClientGrantTypeInput] }) input: NewClientGrantTypeInput[],
-  ): Promise<ClientGrantType[] | undefined> {
+    @Args('model', { type: () => [NewClientGrantTypeInput!] }) input: NewClientGrantTypeInput[],
+  ): Promise<ClientGrantType[]> {
     return this.clientDataSource.createGrantTypes(clientId, input);
   }
 
@@ -240,8 +240,8 @@ export class ClientResolver extends BaseResolver {
   @Mutation((returns) => [ClientScope], { nullable: true, description: 'Create new client scopes.' })
   createClientScopes(
     @Args('clientId', { description: 'Client id' }) clientId: string,
-    @Args('model', { type: () => [NewClientScopeInput] }) input: NewClientScopeInput[],
-  ): Promise<ClientScope[] | undefined> {
+    @Args('model', { type: () => [NewClientScopeInput!] }) input: NewClientScopeInput[],
+  ): Promise<ClientScope[]> {
     return this.clientDataSource.createScopes(clientId, input);
   }
 
@@ -284,8 +284,8 @@ export class ClientResolver extends BaseResolver {
   @Mutation((returns) => [ClientRedirectUri], { nullable: true, description: 'Create new client redirect uris.' })
   createClientRedirectUris(
     @Args('clientId', { description: 'Client id' }) clientId: string,
-    @Args('model', { type: () => [NewClientRedirectUriInput] }) input: NewClientRedirectUriInput[],
-  ): Promise<ClientRedirectUri[] | undefined> {
+    @Args('model', { type: () => [NewClientRedirectUriInput!] }) input: NewClientRedirectUriInput[],
+  ): Promise<ClientRedirectUri[]> {
     return this.clientDataSource.createRedirectUris(clientId, input);
   }
 
@@ -337,8 +337,8 @@ export class ClientResolver extends BaseResolver {
   })
   createClientPostLogoutRedirectUris(
     @Args('clientId', { description: 'Client id' }) clientId: string,
-    @Args('model', { type: () => [NewClientPostLogoutRedirectUriInput] }) input: NewClientPostLogoutRedirectUriInput[],
-  ): Promise<ClientPostLogoutRedirectUri[] | undefined> {
+    @Args('model', { type: () => [NewClientPostLogoutRedirectUriInput!] }) input: NewClientPostLogoutRedirectUriInput[],
+  ): Promise<ClientPostLogoutRedirectUri[]> {
     return this.clientDataSource.createPostLogoutRedirectUris(clientId, input);
   }
 
@@ -430,8 +430,8 @@ export class ClientResolver extends BaseResolver {
   @Mutation((returns) => [ClientProperty], { nullable: true, description: 'Create new client properties.' })
   createClientProperties(
     @Args('clientId', { description: 'Client id' }) clientId: string,
-    @Args('model', { type: () => [NewClientPropertyInput] }) input: NewClientPropertyInput[],
-  ): Promise<ClientProperty[] | undefined> {
+    @Args('model', { type: () => [NewClientPropertyInput!] }) input: NewClientPropertyInput[],
+  ): Promise<ClientProperty[]> {
     return this.clientDataSource.createProperties(clientId, input);
   }
 

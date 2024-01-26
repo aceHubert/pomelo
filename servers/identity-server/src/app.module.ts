@@ -38,12 +38,12 @@ const logger = new Logger('AppModule', { timestamp: true });
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: envFilePaths,
-      load: [configuration(process.cwd())],
+      load: [configuration()],
     }),
     StorageModule.forRootAsync({
       isGlobal: true,
       useFactory: (config: ConfigService) => ({
-        redis: config.getOrThrow('REDIS'),
+        redis: config.getOrThrow('REDIS_URL'),
       }),
       inject: [ConfigService],
     }),
@@ -121,6 +121,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     OidcConfigModule.forRootAsync({
       isGlobal: true,
       useFactory: (config: ConfigService) => ({
+        debug: config.get('debug', false),
         issuer: config.getOrThrow('OIDC_ISSUER'),
         path: config.get('OIDC_PATH'),
         resource: config.get('OIDC_RESOURCE'),
@@ -145,10 +146,6 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService],
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthorizedGuard,
-    // },
     {
       provide: APP_FILTER,
       useClass: AllExceptionFilter,
