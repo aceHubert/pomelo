@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '../../graphql';
-import { request } from '../../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../../graphql/infrastructure-request';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
 import type { Paged } from '../types';
 
@@ -83,7 +83,7 @@ export const useFormApi = defineRegistApi('template_form', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ form?: FormTemplateModel }, { id: number; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ form: FormTemplateModel | null }, { id: number; metaKeys?: string[] }>,
     // 创建表单
     create: gql`
       mutation createForm($newFormTemplate: NewFormTemplateInput! = {}) {

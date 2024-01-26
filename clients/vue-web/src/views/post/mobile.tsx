@@ -2,8 +2,9 @@ import moment from 'moment';
 import hljs from 'highlight.js/lib/core';
 import { defineComponent, computed, onMounted } from '@vue/composition-api';
 import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
-import { OptionPresetKeys, PostMetaPresetKeys, TemplatePageType } from '@ace-pomelo/shared-client';
+import { OptionPresetKeys, TemplatePageType } from '@ace-pomelo/shared-client';
 import { useI18n, useOptions } from '@/hooks';
+import { PostMetaPresetKeys } from '@/fetch/apis';
 import classes from './mobile.module.less';
 
 // Types
@@ -43,7 +44,7 @@ export default defineComponent({
       if (!value) return undefined;
       if (isAbsoluteUrl(value)) return value;
 
-      return trailingSlash(siteUrl.value) + (value.startsWith('/') ? value.slice(1) : value);
+      return trailingSlash(siteUrl.value ?? '/') + (value.startsWith('/') ? value.slice(1) : value);
     });
 
     const template = computed(() => {

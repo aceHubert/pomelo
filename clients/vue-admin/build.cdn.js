@@ -76,7 +76,7 @@ const cdnConfig = {
     },
     {
       packageName: 'oidc-client-ts',
-      variableName: 'Oidc',
+      variableName: 'oidc',
       path: '/dist/browser/oidc-client-ts.min.js',
       onerror: 'onOidcFallback && onOidcFallback()',
     },
@@ -258,6 +258,10 @@ function getCdnConfig(config = cdnConfig) {
       },
       [],
     ),
+    append: {
+      links: [],
+      scripts: [],
+    },
   };
 }
 module.exports = getCdnConfig;

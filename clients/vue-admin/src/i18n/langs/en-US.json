@@ -4,6 +4,7 @@
   "site_title": "Pomelo Admin",
   "common": {
     "btn_text": {
+      "go_back": "Go back",
       "back_to_home": "return to home page",
       "cancel": "Cancel",
       "collapse": "Collapse",
@@ -467,7 +468,8 @@
     "policy_uri_perview_btn_text": "Preview",
     "authentication_title": "Authentication",
     "field_description_tips": "Description",
-    "initial_login_uri_label": "Initial Login URI"
+    "initial_login_uri_label": "Initial Login URI",
+    "not_found": "Client does not exist!"
   },
   "page_client_grant_types": {
     "page_title": "Client Grant Types",
@@ -720,7 +722,8 @@
     "action_btn_text": {
       "edit_modal_cancel": "@:common.btn_text.cancel",
       "edit_modal_ok": "@:common.btn_text.save"
-    }
+    },
+    "not_found": "Identity Resource does not exist!"
   },
   "page_identity_resource_claims": {
     "page_title": "Identity Resource Claims",
@@ -754,7 +757,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this property permanently?"
     },
-    "empty_text": "No properties!"
+    "empty_text": "No properties!",
+    "page_title": "Identity Resource Properties"
   },
   "page_api_resources": {
     "page_title": "API Resources",
@@ -822,7 +826,8 @@
     "action_btn_text": {
       "edit_modal_cancel": "@:common.btn_text.cancel",
       "edit_modal_ok": "@:common.btn_text.save"
-    }
+    },
+    "not_found": "API Resource does not exist!"
   },
   "page_api_resource_claims": {
     "page_title": "API Resource Claims",
@@ -938,6 +943,7 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this property permanently?"
     },
-    "empty_text": "No properties!"
+    "empty_text": "No properties!",
+    "page_title": "API Resource Properties"
   }
 }

@@ -23,13 +23,12 @@ import {
   TemplateCommentStatus,
   getFrameworkSchema,
   toFrameworkContent,
-  useDeviceType,
   type SchemaFramework,
 } from '@ace-pomelo/shared-client';
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
 import { useDesignerMixin } from '@/mixins';
-import { useI18n, useUserManager, useOptions } from '@/hooks';
+import { useI18n, useUserManager, useOptions, useDeviceType } from '@/hooks';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
 import { MediaList } from '../media/components';
 import { DesignLayout, DocumentEditor } from './components';
@@ -136,7 +135,7 @@ export default defineComponent({
     const fixedLinkRef = computed(() => {
       if (!cachedPostData.value) return '';
       // 使用cache data, 保存后生效
-      return trailingSlash(homeUrl.value) + `p/${cachedPostData.value.id}`;
+      return trailingSlash(homeUrl.value ?? '/') + `p/${cachedPostData.value.id}`;
     });
 
     const actionStatus = reactive<Required<ActionStatus>>({

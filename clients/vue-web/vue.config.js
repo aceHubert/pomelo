@@ -192,7 +192,7 @@ module.exports = defineConfig({
           new HtmlWebpackTagsPlugin({
             links: cdnConfig.links,
             scripts: cdnConfig.scripts,
-            publicPath: cdnConfig.cdnRegistry,
+            publicPath: cdnConfig.publicPath,
             append: false,
           }),
         );
@@ -201,7 +201,7 @@ module.exports = defineConfig({
           new HtmlWebpackTagsPlugin({
             links: cdnConfig.append.links,
             scripts: cdnConfig.append.scripts,
-            publicPath: cdnConfig.cdnRegistry,
+            publicPath: cdnConfig.publicPath,
             append: true,
           }),
         );
@@ -227,7 +227,7 @@ module.exports = defineConfig({
                 propList: ['*'],
                 mediaQuery: false,
                 exclude:
-                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|node_modules\/@pomelo\/theme|packages\/pomelo-theme|desktop.less|desktop.module.less/i,
+                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|node_modules\/@pomelo\/theme|packages\/pomelo-theme|views\/site-init|desktop.less|desktop.module.less/i,
               },
             ],
           ],

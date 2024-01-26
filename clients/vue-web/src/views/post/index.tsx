@@ -1,15 +1,10 @@
 import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composition-api';
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { createResource } from '@vue-async/resource-manager';
-import {
-  useTemplateApi,
-  getFrameworkSchema,
-  OptionPresetKeys,
-  PostMetaPresetKeys,
-  useDeviceType,
-} from '@ace-pomelo/shared-client';
+import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
-import { useI18n, useOptions, useEffect, expose } from '@/hooks';
+import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
+import { useTemplateApi, PostMetaPresetKeys } from '@/fetch/apis';
 
 const MobilePost = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopPost = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -25,7 +20,7 @@ export default defineComponent({
           href: '/static/ckeditor5/content-style.css',
           rel: 'stylesheet',
         },
-        ...(this.links as string[]).map((href) => ({ href, rel: 'stylesheet' })),
+        ...((this.links as string[]) ?? []).map((href) => ({ href, rel: 'stylesheet' })),
       ],
       style: this.cssText
         ? [
@@ -54,8 +49,8 @@ export default defineComponent({
 
     // post /p/:id
     const postRes = createResource(async (id: number) => {
-      const { data: post } = await templateApi.getPost({
-        params: {
+      const { post } = await templateApi.getPost({
+        variables: {
           id,
         },
       });
@@ -81,7 +76,7 @@ export default defineComponent({
     const metas = computed(() => {
       if (postRes.$result?.metas?.length) {
         return postRes.$result.metas.reduce((acc, cur) => {
-          acc[cur.metaKey] = cur.metaValue;
+          acc[cur.key] = cur.value;
           return acc;
         }, {} as Record<string, string>);
       }
@@ -94,22 +89,20 @@ export default defineComponent({
       return $loading
         ? ''
         : $error
-        ? i18n.tv('post.page_load_error_title', '内容加载错误')
-        : $result?.title ?? i18n.tv('post.page_not_found_title', '未找到内容');
+        ? i18n.tv('post_template.page_load_error_title', '内容加载错误')
+        : $result?.title ?? i18n.tv('post_template.page_not_found_title', '未找到内容');
     });
 
     // stylesheets
     const links = computed<string[]>(() => {
       return !postRes.$result
         ? []
-        : JSON.parse(
-            postRes.$result.metas?.find(({ metaKey }) => metaKey === PostMetaPresetKeys.StyleLink)?.metaValue || '[]',
-          );
+        : JSON.parse(postRes.$result.metas?.find(({ key }) => key === PostMetaPresetKeys.StyleLink)?.value || '[]');
     });
 
     // css text
     const cssText = computed(() => {
-      return postRes.$result?.metas?.find(({ metaKey }) => metaKey === PostMetaPresetKeys.CssText)?.metaValue || '';
+      return postRes.$result?.metas?.find(({ key }) => key === PostMetaPresetKeys.CssText)?.value || '';
     });
 
     // page metas
@@ -122,7 +115,7 @@ export default defineComponent({
         'og:image':
           (!featureImage || isAbsoluteUrl(featureImage)
             ? featureImage
-            : `${trailingSlash(siteUrl.value)}${
+            : `${trailingSlash(siteUrl.value ?? '/')}${
                 featureImage.startsWith('/') ? featureImage.slice(1) : featureImage
               }}`) || '',
       };

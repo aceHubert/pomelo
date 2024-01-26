@@ -1,9 +1,8 @@
-import { defineRegistApi, gql } from '../../graphql';
-import { request } from '../../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../../graphql/infrastructure-request';
 
 // Types
-import type { TemplatePageType } from '@ace-pomelo/shared-client';
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
+import type { TemplatePageType, TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
 import type { TermTaxonomyModel } from '../term-taxonomy';
 import type { Paged } from '../types';
@@ -131,7 +130,7 @@ export const usePostApi = defineRegistApi('template_post', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ post: PostTemplateModel | null }, { id: number }>,
     // 创建文章
     create: gql`
       mutation createPost($newPostTemplate: NewPostTemplateInput! = {}) {

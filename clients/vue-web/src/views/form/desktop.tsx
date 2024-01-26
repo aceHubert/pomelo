@@ -5,9 +5,10 @@ import { createSchemaField } from '@formily/vue';
 import { Card, Rate } from 'ant-design-vue';
 import { Form, FormButtonGroup, Submit } from '@formily/antdv';
 import * as Antdv from '@formily/antdv';
-import { OptionPresetKeys, FormMetaPresetKeys } from '@ace-pomelo/shared-client';
-import { useI18n, useOptions } from '@/hooks';
+import { OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { Spin, Result } from '@/components';
+import { useI18n, useOptions } from '@/hooks';
+import { FormMetaPresetKeys } from '@/fetch/apis';
 import { checkSchemaValid, type IFormilySchema } from './utils';
 import { Text } from './components';
 import classes from './desktop.module.less';
@@ -85,7 +86,7 @@ export default defineComponent({
       if (!value) return undefined;
       if (isAbsoluteUrl(value)) return value;
 
-      return trailingSlash(siteUrl.value) + (value.startsWith('/') ? value.slice(1) : value);
+      return trailingSlash(siteUrl.value ?? '/') + (value.startsWith('/') ? value.slice(1) : value);
     });
 
     const submitingRef = ref(false);

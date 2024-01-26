@@ -1,10 +1,11 @@
 import { defineComponent, ref, reactive, computed, set, nextTick } from '@vue/composition-api';
-import { Card, Button, Descriptions, Tag, Space } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { createResource } from '@vue-async/resource-manager';
+import { useRouter } from 'vue2-helpers/vue-router';
+import { Card, Button, Descriptions, Tag, Space, Result } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useApiResourceApi } from '@/fetch/apis';
 import { default as ScopeForm } from '../components/ApiScopeForm';
 import classes from '../index.module.less';
@@ -31,6 +32,7 @@ export default defineComponent({
     },
   },
   setup(props: ApiScopeProps, { refs }) {
+    const router = useRouter();
     const i18n = useI18n();
     const deviceType = useDeviceType();
     const apiResourceApi = useApiResourceApi();
@@ -39,7 +41,6 @@ export default defineComponent({
       apiResourceId: props.apiResourceId,
     });
 
-    const apiResourceName = ref('');
     const isFormModalVisable = ref(false);
     const editFormObj = ref<PagedApiScopeModel['rows'][0]>();
 
@@ -174,15 +175,19 @@ export default defineComponent({
       ].filter(Boolean) as Column[];
     });
 
-    apiResourceApi
-      .getBasicInfo({
-        variables: {
-          id: props.apiResourceId,
-        },
-      })
-      .then(({ apiResource }) => {
-        apiResourceName.value = apiResource.name;
-      });
+    const $apiResourceRes = createResource((id: number) =>
+      apiResourceApi
+        .getBasicInfo({
+          variables: {
+            id,
+          },
+          loading: true,
+          catchError: true,
+        })
+        .then(({ apiResource }) => apiResource),
+    );
+
+    $apiResourceRes.read(props.apiResourceId);
 
     const loadData: DataSourceFn = ({ page, size }) => {
       return apiResourceApi
@@ -293,104 +298,120 @@ export default defineComponent({
       (refs['table'] as any)?.refresh(force);
     }
 
-    return () => (
-      <PageBreadcrumb
-        breadcrumb={
-          apiResourceName.value
-            ? (routeBreadcrumb) => {
-                routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                  key: 'apiResourceName',
-                  label: apiResourceName.value,
-                  path: '',
-                });
-                return routeBreadcrumb;
-              }
-            : true
-        }
-      >
-        <Card bordered={false} size="small">
-          <SearchForm
-            // keywordPlaceholder={
-            //   i18n.tv('page_api_scopes.search_name_placeholder', '“API资源名称”模糊搜索') as string
-            // }
-            keywordTypeOptions={[
-              {
-                label: i18n.tv('page_api_scopes.search_options.by_name', '名称') as string,
-                value: 'name',
-                selected: true,
-              },
-              {
-                label: i18n.tv('page_api_scopes.search_options.by_display_name', '显示名称') as string,
-                value: 'displyName',
-              },
-            ]}
-            keywordTypeName="keyworkField"
-            rowCount={rowCount.value}
-            scopedSlots={{
-              filter: () => (
-                <Button
-                  type="primary"
-                  icon="plus"
-                  onClick={() => {
-                    isFormModalVisable.value = true;
-                    (refs['apiScopeForm'] as any)?.resetFields();
-                  }}
-                >
-                  {i18n.tv('page_api_scopes.action_btn_text.add', '新增资源')}
-                </Button>
-              ),
-            }}
-            onSearch={(values) => {
-              Object.keys(values).forEach((key) => {
-                set(searchQuery, key, values[key]);
-              });
-              refreshTable();
-            }}
-          />
-          <AsyncTable
-            ref="table"
-            attrs={{
-              rowKey: 'id',
-              size: 'small',
-              bordered: true,
-              scroll: { x: true, y: 0 },
-              rowClassName: () => `${classes.row} ${classes.rowAlign}`,
-            }}
-            pageURI
-            columns={columns.value}
-            dataSource={loadData}
-          />
+    return () => {
+      const { $result: apiResource, $loading } = $apiResourceRes;
 
-          <Modal
-            vModel={isFormModalVisable.value}
-            title={
-              editFormObj.value
-                ? i18n.tv('page_api_scopes.edit_modal_title', '编辑API授权范围')
-                : i18n.tv('page_api_scopes.add_modal_title', '添加API授权范围')
-            }
-            afterClose={() => {
-              editFormObj.value = void 0;
-            }}
-            scopedSlots={{
-              footer: () => (
-                <div>
-                  <Button disabled={saving.value} onClick={() => (isFormModalVisable.value = false)}>
-                    {i18n.tv('page_api_scopes.action_btn_text.modal_cancel', '关闭')}
+      if ($loading) return;
+
+      return apiResource ? (
+        <PageBreadcrumb
+          breadcrumb={
+            apiResource.displayName || apiResource.name
+              ? (routeBreadcrumb) => {
+                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                    key: 'apiResourceName',
+                    label: apiResource.displayName || apiResource.name,
+                    path: '',
+                  });
+                  return routeBreadcrumb;
+                }
+              : true
+          }
+        >
+          <Card bordered={false} size="small">
+            <SearchForm
+              // keywordPlaceholder={
+              //   i18n.tv('page_api_scopes.search_name_placeholder', '“API资源名称”模糊搜索') as string
+              // }
+              keywordTypeOptions={[
+                {
+                  label: i18n.tv('page_api_scopes.search_options.by_name', '名称') as string,
+                  value: 'name',
+                  selected: true,
+                },
+                {
+                  label: i18n.tv('page_api_scopes.search_options.by_display_name', '显示名称') as string,
+                  value: 'displyName',
+                },
+              ]}
+              keywordTypeName="keyworkField"
+              rowCount={rowCount.value}
+              scopedSlots={{
+                filter: () => (
+                  <Button
+                    type="primary"
+                    icon="plus"
+                    onClick={() => {
+                      isFormModalVisable.value = true;
+                      (refs['apiScopeForm'] as any)?.resetFields();
+                    }}
+                  >
+                    {i18n.tv('page_api_scopes.action_btn_text.add', '新增资源')}
                   </Button>
-                  <Button type="primary" class="ml-2" loading={saving.value} onClick={() => handleSave()}>
-                    {i18n.tv('page_api_scopes.action_btn_text.modal_ok', '保存')}
-                  </Button>
-                </div>
-              ),
-            }}
-            closable={false}
-            maskClosable={false}
-            destroyOnClose
-          >
-            <ScopeForm ref="apiScopeForm" defaultValue={editFormObj.value}></ScopeForm>
-          </Modal>
+                ),
+              }}
+              onSearch={(values) => {
+                Object.keys(values).forEach((key) => {
+                  set(searchQuery, key, values[key]);
+                });
+                refreshTable();
+              }}
+            />
+            <AsyncTable
+              ref="table"
+              attrs={{
+                rowKey: 'id',
+                size: 'small',
+                bordered: true,
+                scroll: { x: true, y: 0 },
+                rowClassName: () => `${classes.row} ${classes.rowAlign}`,
+              }}
+              pageURI
+              columns={columns.value}
+              dataSource={loadData}
+            />
+
+            <Modal
+              vModel={isFormModalVisable.value}
+              title={
+                editFormObj.value
+                  ? i18n.tv('page_api_scopes.edit_modal_title', '编辑API授权范围')
+                  : i18n.tv('page_api_scopes.add_modal_title', '添加API授权范围')
+              }
+              afterClose={() => {
+                editFormObj.value = void 0;
+              }}
+              scopedSlots={{
+                footer: () => (
+                  <div>
+                    <Button disabled={saving.value} onClick={() => (isFormModalVisable.value = false)}>
+                      {i18n.tv('page_api_scopes.action_btn_text.modal_cancel', '关闭')}
+                    </Button>
+                    <Button type="primary" class="ml-2" loading={saving.value} onClick={() => handleSave()}>
+                      {i18n.tv('page_api_scopes.action_btn_text.modal_ok', '保存')}
+                    </Button>
+                  </div>
+                ),
+              }}
+              closable={false}
+              maskClosable={false}
+              destroyOnClose
+            >
+              <ScopeForm ref="apiScopeForm" defaultValue={editFormObj.value}></ScopeForm>
+            </Modal>
+          </Card>
+        </PageBreadcrumb>
+      ) : (
+        <Card bordered={false} size="small">
+          <Result status="error" subTitle={i18n.tv('page_api_resource_detail.not_found', 'API资源不存在！')}>
+            <template slot="extra">
+              <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                {i18n.tv('common.btn_text.go_back', '返回')}
+              </Button>
+            </template>
+          </Result>
         </Card>
-      </PageBreadcrumb>
-    );
+      );
+    };
   },
 });

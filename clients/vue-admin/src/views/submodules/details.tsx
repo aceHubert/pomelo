@@ -1,4 +1,4 @@
-import { defineComponent, ref, onMounted } from '@vue/composition-api';
+import { defineComponent, ref } from '@vue/composition-api';
 import { Skeleton, Tabs, Icon } from 'ant-design-vue';
 import { MarkdownInput } from 'antdv-layout-pro';
 import { useSubmoduleApi } from '@/fetch/apis';
@@ -26,8 +26,8 @@ export default defineComponent({
     const latestVersion = ref('');
     const loading = ref(false);
 
-    const getModule = async () => {
-      const { subModule: data } = await submoduleApi.get({
+    submoduleApi
+      .get({
         variables: {
           name: props.name,
         },
@@ -36,14 +36,11 @@ export default defineComponent({
           loading.value = true;
           return () => (loading.value = false);
         },
+      })
+      .then(({ subModule: data }) => {
+        subModule.value = data;
+        latestVersion.value = data?.tags.find(({ name }) => name === 'latest')?.version || '';
       });
-      subModule.value = data;
-      latestVersion.value = data.tags.find(({ name }) => name === 'latest')?.version || '';
-    };
-
-    onMounted(() => {
-      getModule();
-    });
 
     return () => (
       <div class={[classes.container]}>

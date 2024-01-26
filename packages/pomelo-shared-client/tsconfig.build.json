@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./src",
+    // "baseUrl": "./src",
     "outDir": "./lib",
     "declaration": true,
     "stripInternal": true

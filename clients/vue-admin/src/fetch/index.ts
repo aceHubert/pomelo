@@ -72,6 +72,9 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
   }
 
   const { data = {} } = error.response as { data: any };
+  if (data.siteInitRequired) {
+    // TODO: 初始化数据
+  }
   const message = data.message ?? error.message;
   return Promise.reject(new Error(message?.length > 100 ? message.substring(0, 100) + '...' : message));
 });

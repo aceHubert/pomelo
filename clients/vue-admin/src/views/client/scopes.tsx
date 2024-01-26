@@ -1,10 +1,10 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Button, Form, Alert, Select, Table } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { Card, Button, Form, Alert, Select, Table, Result } from 'ant-design-vue';
+import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useClientApi } from '@/fetch/apis';
 
 // Types
@@ -47,6 +47,7 @@ export default Form.create({})(
       },
     },
     setup(props: ClientScopeProps) {
+      const router = useRouter();
       const i18n = useI18n();
       const deviceType = useDeviceType();
       const clientApi = useClientApi();
@@ -88,11 +89,13 @@ export default Form.create({})(
             variables: {
               clientId: props.clientId,
             },
+            loading: true,
             catchError: true,
           })
           .then(({ clientScopes }) => {
-            clientName.value = clientScopes.clientName;
+            if (!clientScopes) return;
 
+            clientName.value = clientScopes.clientName;
             return clientScopes.scopes;
           });
       });
@@ -116,7 +119,7 @@ export default Form.create({})(
             })
             .then(({ scopes }) => {
               props.form.resetFields();
-              $scopesRes.$result.push(...scopes);
+              $scopesRes.$result!.push(...scopes);
             })
             .catch((err) => {
               message.error(err.message);
@@ -152,8 +155,8 @@ export default Form.create({})(
               })
               .then(({ result }) => {
                 result &&
-                  $scopesRes.$result.splice(
-                    $scopesRes.$result.findIndex((item) => item.id === id),
+                  $scopesRes.$result!.splice(
+                    $scopesRes.$result!.findIndex((item) => item.id === id),
                     1,
                   );
               })
@@ -164,23 +167,26 @@ export default Form.create({})(
         });
       };
 
-      return () => (
-        <PageBreadcrumb
-          breadcrumb={
-            clientName.value
-              ? (routeBreadcrumb) => {
-                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                    key: 'clientName',
-                    label: clientName.value,
-                    path: '',
-                  });
-                  return routeBreadcrumb;
-                }
-              : true
-          }
-        >
-          <Card bordered={false} size="small">
-            {$scopesRes.$loaded && (
+      return () => {
+        const { $result: scopes, $loading } = $scopesRes;
+
+        if ($loading) return;
+        return scopes ? (
+          <PageBreadcrumb
+            breadcrumb={
+              clientName.value
+                ? (routeBreadcrumb) => {
+                    routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                      key: 'clientName',
+                      label: clientName.value,
+                      path: '',
+                    });
+                    return routeBreadcrumb;
+                  }
+                : true
+            }
+          >
+            <Card bordered={false} size="small">
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
                 <Form.Item label={i18n.tv('page_client_scopes.form.scope_label', '授权范围')} class="mb-2">
                   <Select
@@ -207,28 +213,37 @@ export default Form.create({})(
                   </Button>
                 </Form.Item>
               </Form>
-            )}
-            <Alert
-              type="warning"
-              banner
-              showIcon={false}
-              message="By default a client has no access to any resources - specify the allowed resources by adding the corresponding scopes names"
-            />
-            <Table
-              class="mt-3"
-              size="small"
-              bordered={true}
-              pagination={false}
-              columns={columns.value}
-              dataSource={$scopesRes.$result}
-              loading={$scopesRes.$loading}
-              locale={{
-                emptyText: i18n.tv('page_client_scopes.empty_text', '暂无授权范围配置'),
-              }}
-            />
+              <Alert
+                type="warning"
+                banner
+                showIcon={false}
+                message="By default a client has no access to any resources - specify the allowed resources by adding the corresponding scopes names"
+              />
+              <Table
+                class="mt-3"
+                size="small"
+                bordered={true}
+                pagination={false}
+                columns={columns.value}
+                dataSource={scopes}
+                locale={{
+                  emptyText: i18n.tv('page_client_scopes.empty_text', '暂无授权范围配置'),
+                }}
+              />
+            </Card>
+          </PageBreadcrumb>
+        ) : (
+          <Card bordered={false} size="small">
+            <Result status="error" subTitle={i18n.tv('page_client_detail.not_found', '客户端不存在！')}>
+              <template slot="extra">
+                <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                  {i18n.tv('common.btn_text.go_back', '返回')}
+                </Button>
+              </template>
+            </Result>
           </Card>
-        </PageBreadcrumb>
-      );
+        );
+      };
     },
   }),
 );

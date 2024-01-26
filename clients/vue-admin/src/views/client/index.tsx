@@ -4,9 +4,8 @@ import { upperFirst } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, set, nextTick } from '@vue/composition-api';
 import { Button, Card, Form, Input, Space, Descriptions, Icon, Tag, Radio } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { useDeviceType } from '@ace-pomelo/shared-client';
 import { Modal, message } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useClientApi } from '@/fetch/apis';
 import classes from './index.module.less';
 

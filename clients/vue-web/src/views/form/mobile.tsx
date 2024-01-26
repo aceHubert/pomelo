@@ -5,9 +5,10 @@ import { createSchemaField, FragmentComponent } from '@formily/vue';
 import { Loading } from 'vant';
 import * as Vant from '@formily/vant';
 import { Form, Submit } from '@formily/vant';
-import { OptionPresetKeys, FormMetaPresetKeys } from '@ace-pomelo/shared-client';
-import { useI18n, useOptions } from '@/hooks';
+import { OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { Result } from '@/components';
+import { useI18n, useOptions } from '@/hooks';
+import { FormMetaPresetKeys } from '@/fetch/apis';
 import { checkSchemaValid, type IFormilySchema } from './utils';
 import { Text } from './components';
 import classes from './mobile.module.less';
@@ -79,7 +80,7 @@ export default defineComponent({
       if (!value) return undefined;
       if (isAbsoluteUrl(value)) return value;
 
-      return trailingSlash(siteUrl.value) + (value.startsWith('/') ? value.slice(1) : value);
+      return trailingSlash(siteUrl.value ?? '/') + (value.startsWith('/') ? value.slice(1) : value);
     });
 
     const submitingRef = ref(false);

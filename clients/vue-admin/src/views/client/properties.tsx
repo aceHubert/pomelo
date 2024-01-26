@@ -1,10 +1,10 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Button, Form, Alert, Table } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { Card, Button, Form, Alert, Table, Result } from 'ant-design-vue';
+import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useClientApi } from '@/fetch/apis';
 import { PropertyForm } from './components/PropertyForm';
 import { getPresetProperties } from './utils/constants';
@@ -32,6 +32,7 @@ export default defineComponent({
     },
   },
   setup(props: ClientPropertyProps) {
+    const router = useRouter();
     const i18n = useI18n();
     const deviceType = useDeviceType();
     const clientApi = useClientApi();
@@ -81,11 +82,13 @@ export default defineComponent({
           variables: {
             clientId: props.clientId,
           },
+          loading: true,
           catchError: true,
         })
         .then(({ clientProperties }) => {
-          clientName.value = clientProperties.clientName;
+          if (!clientProperties) return;
 
+          clientName.value = clientProperties.clientName;
           return clientProperties.properties;
         });
     });
@@ -152,23 +155,27 @@ export default defineComponent({
       });
     };
 
-    return () => (
-      <PageBreadcrumb
-        breadcrumb={
-          clientName.value
-            ? (routeBreadcrumb) => {
-                routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                  key: 'clientName',
-                  label: clientName.value,
-                  path: '',
-                });
-                return routeBreadcrumb;
-              }
-            : true
-        }
-      >
-        <Card bordered={false} size="small">
-          {$propertiesRes.$loaded && (
+    return () => {
+      const { $result: properties, $loading } = $propertiesRes;
+
+      if ($loading) return;
+
+      return properties ? (
+        <PageBreadcrumb
+          breadcrumb={
+            clientName.value
+              ? (routeBreadcrumb) => {
+                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                    key: 'clientName',
+                    label: clientName.value,
+                    path: '',
+                  });
+                  return routeBreadcrumb;
+                }
+              : true
+          }
+        >
+          <Card bordered={false} size="small">
             <PropertyForm
               layout={deviceType.isMobile ? '' : 'inline'}
               presetPrperties={presetPrperties.value}
@@ -182,28 +189,37 @@ export default defineComponent({
                 ),
               }}
             ></PropertyForm>
-          )}
-          <Alert
-            class="mt-2"
-            type="warning"
-            banner
-            showIcon={false}
-            message="Dictionary to hold any custom client-specific values as needed."
-          />
-          <Table
-            class="mt-3"
-            size="small"
-            bordered={true}
-            pagination={false}
-            columns={columns.value}
-            dataSource={$propertiesRes.$result}
-            loading={$propertiesRes.$loading}
-            locale={{
-              emptyText: i18n.tv('page_client_properties.empty_text', '暂无自定义属性'),
-            }}
-          />
+            <Alert
+              class="mt-2"
+              type="warning"
+              banner
+              showIcon={false}
+              message="Dictionary to hold any custom client-specific values as needed."
+            />
+            <Table
+              class="mt-3"
+              size="small"
+              bordered={true}
+              pagination={false}
+              columns={columns.value}
+              dataSource={properties}
+              locale={{
+                emptyText: i18n.tv('page_client_properties.empty_text', '暂无自定义属性'),
+              }}
+            />
+          </Card>
+        </PageBreadcrumb>
+      ) : (
+        <Card bordered={false} size="small">
+          <Result status="error" subTitle={i18n.tv('page_client_detail.not_found', '客户端不存在！')}>
+            <template slot="extra">
+              <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                {i18n.tv('common.btn_text.go_back', '返回')}
+              </Button>
+            </template>
+          </Result>
         </Card>
-      </PageBreadcrumb>
-    );
+      );
+    };
   },
 });

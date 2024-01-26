@@ -175,7 +175,7 @@ export default defineComponent({
     const fixedLinkRef = computed(() => {
       if (!cachedFormData.value) return '';
       // 使用cache data, 保存后生效
-      return trailingSlash(homeUrl.value) + `f/${cachedFormData.value.id}`;
+      return trailingSlash(homeUrl.value ?? '/') + `f/${cachedFormData.value.id}`;
     });
 
     const actionStatus = reactive<Required<ActionStatus>>({

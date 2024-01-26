@@ -1,6 +1,7 @@
 import { defineComponent, ref, nextTick } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Descriptions, Button, Switch, Space, Spin, Tag } from 'ant-design-vue';
+import { useRouter } from 'vue2-helpers/vue-router';
+import { Card, Descriptions, Button, Switch, Space, Tag, Result } from 'ant-design-vue';
 import { Modal, message } from '@/components';
 import { useI18n } from '@/hooks';
 import { useIdentityResourceApi } from '@/fetch/apis';
@@ -20,6 +21,7 @@ export default defineComponent({
     },
   },
   setup(props, { refs }) {
+    const router = useRouter();
     const i18n = useI18n();
     const identityResourceApi = useIdentityResourceApi();
 
@@ -31,6 +33,8 @@ export default defineComponent({
           variables: {
             id,
           },
+          loading: true,
+          catchError: true,
         })
         .then(({ identityResource }) => identityResource);
     });
@@ -44,7 +48,7 @@ export default defineComponent({
       isEditModalVisable.value = true;
 
       nextTick(() => {
-        editFormObj.value = $detailRes.$result;
+        editFormObj.value = $detailRes.$result!;
       });
     };
 
@@ -64,7 +68,7 @@ export default defineComponent({
             },
           })
           .then(() => {
-            Object.assign($detailRes.$result, values);
+            Object.assign($detailRes.$result!, values);
             isEditModalVisable.value = false;
           })
           .catch((err) => {
@@ -90,7 +94,7 @@ export default defineComponent({
           },
         })
         .then(({ result }) => {
-          result && ($detailRes.$result[field] = checked);
+          result && ($detailRes.$result![field] = checked);
         })
         .catch((err) => {
           message.error(err.message);
@@ -98,22 +102,11 @@ export default defineComponent({
     };
 
     return () => {
-      const { $result: resource, $loading, $error } = $detailRes;
+      const { $result: resource, $loading } = $detailRes;
 
-      if ($loading)
-        return (
-          <Card bordered={false} class="loading text-center">
-            <Spin spinning={true} tip={i18n.tv('common.tips.loading_text', '加载中')}></Spin>
-          </Card>
-        );
-      if ($error)
-        return (
-          <Card bordered={false} class="error--text text-center">
-            {$error.message}
-          </Card>
-        );
+      if ($loading) return;
 
-      return (
+      return resource ? (
         <div>
           <Card bordered={false} size="small">
             <Descriptions
@@ -196,6 +189,16 @@ export default defineComponent({
             <ResourceForm defaultValue={editFormObj.value} ref="identityResourceForm"></ResourceForm>
           </Modal>
         </div>
+      ) : (
+        <Card bordered={false} size="small">
+          <Result status="error" subTitle={i18n.tv('page_identity_resource_detail.not_found', 'Identity资源不存在！')}>
+            <template slot="extra">
+              <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                {i18n.tv('common.btn_text.go_back', '返回')}
+              </Button>
+            </template>
+          </Result>
+        </Card>
       );
     };
   },

@@ -1,8 +1,7 @@
 import { upperFirst } from 'lodash-es';
 import { defineComponent } from '@vue/composition-api';
 import { ConfigProvider } from 'antdv-layout-pro';
-import { useDeviceMixin } from '@ace-pomelo/shared-client';
-import { useAppMixin } from '@/mixins';
+import { useAppMixin, useDeviceMixin } from '@/mixins';
 import { useI18n } from '@/hooks';
 import { Spin, ANT_PREFIX_CLS } from '@/components';
 import { loadingRef } from '@/shared';
@@ -23,7 +22,7 @@ export default defineComponent({
         theme={appMixin.theme}
         primaryColor={appMixin.primaryColor}
         device={deviceMixin.device}
-        i18nRender={(...args: Parameters<typeof i18n.tv>) => i18n.tv(...args) as string}
+        i18nRender={(...args: [string, string, Record<string, string>]) => i18n.tv(...args) as string}
       >
         {
           // device 变化重新渲染导致 wujie Vue组件初始化使用 Promise 执行$refs找不到问题

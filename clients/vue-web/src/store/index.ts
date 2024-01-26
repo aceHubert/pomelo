@@ -6,4 +6,4 @@ Vue.use(PiniaVuePlugin);
 export const pinia = createPinia();
 
 export * from './utils';
-export * from './user';
+export * from './app';

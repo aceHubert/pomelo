@@ -17,8 +17,14 @@
       "require": "./lib/index.js"
     },
     "./*": {
-      "import": "./esm/*",
-      "require": "./lib/*",
+      "import": [
+        "./esm/*",
+        "./*"
+      ],
+      "require": [
+        "./lib/*",
+        "./*"
+      ],
       "default": {
         "import": "./esm/*/index.js",
         "require": "./lib/*/index.js"
@@ -35,32 +41,18 @@
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
   "dependencies": {
-    "@ace-util/core": "^0.1.1",
-    "tinycolor2": "^1.6.0",
-    "vue2-helpers": "1.x"
-  },
-  "devDependencies": {
-    "@ace-fetch/core": "^0.2.1",
-    "@ace-fetch/vue": "^0.2.1",
-    "@ace-util/core": "^0.1.1",
-    "ant-design-vue": "^1.7.7",
-    "babel-preset-vca-jsx": "^0.3.6",
-    "pinia": "^2.0.17",
-    "vue-demi": "^*",
-    "vue-router": "^3.5.0"
+    "@ace-util/core": "^0.1.1"
   },
   "peerDependencies": {
-    "@ace-fetch/core": "^0.2.1",
-    "@ace-fetch/vue": "^0.2.1",
-    "@ace-util/core": "^0.1.1",
-    "@vue/composition-api": "^1.0.0",
-    "ant-design-vue": "^1.7.7",
-    "pinia": "^2.0.0",
-    "vue": "^2.6.0 || ^3.0.0",
-    "vue-router": "^3.5.0 || >=4.0.0"
+    "@apollo/client": "^3.0.0",
+    "graphql": "^16.0.0",
+    "lodash-es": "^4.0.0"
   },
   "peerDependenciesMeta": {
-    "@vue/composition-api": {
+    "@apollo/client": {
+      "optional": true
+    },
+    "graphql": {
       "optional": true
     }
   },

@@ -2,7 +2,8 @@ import Vue from 'vue';
 import VueMeta from 'vue-meta';
 import { createRouter } from 'vue2-helpers/vue-router';
 import { Modal } from '@/components';
-import { i18n } from '@/i18n';
+import { errorRef } from '@/shared';
+import { useSiteInitApi } from '@/fetch/apis';
 import { routes } from './routes';
 
 // Types
@@ -20,10 +21,33 @@ export const router = createRouter({
   routes,
 });
 
-const AnonymousRouteNames = ['signin', 'session-timeout'];
+// preset anonymous routes
+const AnonymousRouteNames = ['site-init', 'signin', 'session-timeout'];
+const SiteInitRequiredSessionKey = '__SITE_INIT_REQUEST__';
 
-router.beforeEach((to, from, next) => {
-  Modal.destroyAll(); // clear all modals
+router.beforeEach(async (to, from, next) => {
+  let siteInitRequired = Boolean(sessionStorage.getItem(SiteInitRequiredSessionKey) || 'true');
+
+  if (siteInitRequired) {
+    const siteInitApi = useSiteInitApi();
+
+    siteInitRequired = await siteInitApi.check().then(({ result }) => result);
+    if (siteInitRequired && to.name !== 'site-init') {
+      return next({ name: 'site-init', query: { redirect: to.fullPath } });
+    }
+
+    // 通过sessionStorage缓存siteInitRequired，避免每次都请求接口
+    !siteInitRequired && sessionStorage.setItem(SiteInitRequiredSessionKey, 'false');
+  }
+
+  // clear all modals
+  Modal.destroyAll();
+
+  // clear error
+  if (to.path !== from.path) {
+    errorRef.value = false;
+  }
+
   const userManager = router.app.$userManager;
 
   if (to.name === 'signout') {
@@ -35,10 +59,6 @@ router.beforeEach((to, from, next) => {
       if (user === null || user.expired) {
         userManager.signin({ noInteractive: true });
       } else {
-        // 根据 user claims 设置 i18n locale
-        if (user.profile.locale && i18n.locale !== user.profile.locale) {
-          i18n.locale = user.profile.locale;
-        }
         next();
 
         // if (user.profile.ut !== '1') {

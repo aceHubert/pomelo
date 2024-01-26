@@ -1,10 +1,10 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Button, Form, Alert, Table } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { useRouter } from 'vue2-helpers/vue-router';
+import { Card, Button, Form, Alert, Table, Result } from 'ant-design-vue';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useApiResourceApi } from '@/fetch/apis';
 import { PropertyForm } from '../client/components/PropertyForm';
 
@@ -31,6 +31,7 @@ export default defineComponent({
     },
   },
   setup(props: ApiPropertyProps) {
+    const router = useRouter();
     const i18n = useI18n();
     const deviceType = useDeviceType();
     const apiResourceApi = useApiResourceApi();
@@ -77,11 +78,13 @@ export default defineComponent({
           variables: {
             apiResourceId: props.apiResourceId,
           },
+          loading: true,
           catchError: true,
         })
         .then(({ apiProperties }) => {
-          apiResourceName.value = apiProperties.name;
+          if (!apiProperties) return;
 
+          apiResourceName.value = apiProperties.name;
           return apiProperties.properties;
         });
     });
@@ -105,7 +108,7 @@ export default defineComponent({
             },
           })
           .then(({ property }) => {
-            $propertiesRes.$result.unshift(property);
+            $propertiesRes.$result!.unshift(property);
             form.resetFields();
           })
           .catch((err) => {
@@ -140,8 +143,8 @@ export default defineComponent({
             })
             .then(({ result }) => {
               result &&
-                $propertiesRes.$result.splice(
-                  $propertiesRes.$result.findIndex((x) => x.id === id),
+                $propertiesRes.$result!.splice(
+                  $propertiesRes.$result!.findIndex((x) => x.id === id),
                   1,
                 );
             })
@@ -152,23 +155,27 @@ export default defineComponent({
       });
     };
 
-    return () => (
-      <PageBreadcrumb
-        breadcrumb={
-          apiResourceName.value
-            ? (routeBreadcrumb) => {
-                routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                  key: 'apiResourceName',
-                  label: apiResourceName.value,
-                  path: '',
-                });
-                return routeBreadcrumb;
-              }
-            : true
-        }
-      >
-        <Card bordered={false} size="small">
-          {$propertiesRes.$loaded && (
+    return () => {
+      const { $result: properties, $loading } = $propertiesRes;
+
+      if ($loading) return;
+
+      return properties ? (
+        <PageBreadcrumb
+          breadcrumb={
+            apiResourceName.value
+              ? (routeBreadcrumb) => {
+                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                    key: 'apiResourceName',
+                    label: apiResourceName.value,
+                    path: '',
+                  });
+                  return routeBreadcrumb;
+                }
+              : true
+          }
+        >
+          <Card bordered={false} size="small">
             <PropertyForm
               layout={deviceType.isMobile ? '' : 'inline'}
               scopedSlots={{
@@ -181,28 +188,37 @@ export default defineComponent({
                 ),
               }}
             ></PropertyForm>
-          )}
-          <Alert
-            class="mt-2"
-            type="warning"
-            banner
-            showIcon={false}
-            message="Dictionary to hold any custom api-resource-specific values as needed."
-          />
-          <Table
-            class="mt-3"
-            size="small"
-            bordered={true}
-            pagination={false}
-            columns={columns.value}
-            dataSource={$propertiesRes.$result}
-            loading={$propertiesRes.$loading}
-            locale={{
-              emptyText: i18n.tv('page_api_properties.empty_text', '暂无自定义属性'),
-            }}
-          />
+            <Alert
+              class="mt-2"
+              type="warning"
+              banner
+              showIcon={false}
+              message="Dictionary to hold any custom api-resource-specific values as needed."
+            />
+            <Table
+              class="mt-3"
+              size="small"
+              bordered={true}
+              pagination={false}
+              columns={columns.value}
+              dataSource={properties}
+              locale={{
+                emptyText: i18n.tv('page_api_properties.empty_text', '暂无自定义属性'),
+              }}
+            />
+          </Card>
+        </PageBreadcrumb>
+      ) : (
+        <Card bordered={false} size="small">
+          <Result status="error" subTitle={i18n.tv('page_api_resource_detail.not_found', 'API资源不存在！')}>
+            <template slot="extra">
+              <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                {i18n.tv('common.btn_text.go_back', '返回')}
+              </Button>
+            </template>
+          </Result>
         </Card>
-      </PageBreadcrumb>
-    );
+      );
+    };
   },
 });

@@ -28,7 +28,10 @@
       "schema_error_text": "表单配置错误！",
       "render_error_text": "表单渲染错误！",
       "contact_administrator_tips": "请联系管理员。",
-      "load_error_text": "表单加载错误！"
+      "load_error_text": "表单加载错误！",
+      "submit_success_text": "提交成功",
+      "submit_success_title": "提示",
+      "submit_failed_title": "提交失败"
     }
   },
   "post_template": {

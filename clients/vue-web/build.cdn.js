@@ -6,7 +6,7 @@
 const fs = require('fs');
 
 const cdnConfig = {
-  cdnRegistry: '//unpkg.com',
+  publicPath: '//unpkg.com',
   links: [
     // {path: 'xxx.css', prefetch: true}
   ],
@@ -53,7 +53,7 @@ const cdnConfig = {
     },
     {
       packageName: 'oidc-client-ts',
-      variableName: 'Oidc',
+      variableName: 'oidc',
       path: '/dist/browser/oidc-client-ts.min.js',
       onerror: 'onOidcFallback && onOidcFallback()',
     },
@@ -77,7 +77,12 @@ const cdnConfig = {
     {
       packageName: '@ace-fetch/axios',
       variableName: ['AceFetch', 'Axios'],
-      path: '/dist/index-axios.umd.production.js',
+      path: '/dist/index.umd.production.js',
+    },
+    {
+      packageName: '@ace-fetch/vue',
+      variableName: ['AceFetch', 'Vue'],
+      path: '/dist/index.umd.production.js',
     },
     // 打开必须调用，不然会阻止 vue-router hook
     // {
@@ -112,10 +117,10 @@ function assert(condition, message) {
 }
 
 function getCdnConfig(config = cdnConfig) {
-  const { cdnRegistry = '/', links = [], scripts = [] } = config;
+  const { publicPath = '/', links = [], scripts = [] } = config;
 
   return {
-    cdnRegistry,
+    publicPath,
     externals: scripts.reduce((prev, { packageName, variableName }) => {
       variableName && (prev[packageName] = variableName);
       return prev;

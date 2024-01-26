@@ -29,7 +29,8 @@ export const defaultSettings: {
    * 语言配置
    */
   language: {
-    locale: string;
+    defaultLocale: string;
+    fallbackLocale: string;
     supportLanguages: LocaleConfig[];
   };
 } = {
@@ -53,7 +54,8 @@ export const defaultSettings: {
     primaryColor: '#FA541C',
   },
   language: {
-    locale: 'zh-CN',
+    defaultLocale: 'zh-CN',
+    fallbackLocale: 'zh-CN',
     supportLanguages: [
       {
         name: 'English',

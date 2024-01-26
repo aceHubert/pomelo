@@ -177,7 +177,7 @@ export default defineComponent({
     const fixedLinkRef = computed(() => {
       if (!cachedPageData.value) return '';
       // 使用cache data, 保存后生效
-      return trailingSlash(homeUrl.value) + (cachedPageData.value.name || cachedPageData.value.id);
+      return trailingSlash(homeUrl.value ?? '/') + (cachedPageData.value.name || cachedPageData.value.id);
     });
     const fixedLinkUploadingRef = ref(false);
     const fixedLinkNameRef = ref('');

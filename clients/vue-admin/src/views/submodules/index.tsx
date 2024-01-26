@@ -1,7 +1,7 @@
 import { defineComponent, ref, reactive, watch } from '@vue/composition-api';
 import { Button, Icon, Input, List } from 'ant-design-vue';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { useLocationMixin } from '@ace-pomelo/shared-client';
+import { useLocationMixin } from '@/mixins';
 import { useSubmoduleApi } from '@/fetch/apis';
 import classes from './index.module.less';
 

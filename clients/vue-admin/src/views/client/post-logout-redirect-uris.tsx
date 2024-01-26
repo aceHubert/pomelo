@@ -1,10 +1,10 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Button, Form, Input, Alert, Table } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { Card, Button, Form, Input, Alert, Table, Result } from 'ant-design-vue';
+import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useClientApi } from '@/fetch/apis';
 
 // Types
@@ -32,6 +32,7 @@ export default Form.create({})(
       },
     },
     setup(props: ClientLogoutRedirectUriProps) {
+      const router = useRouter();
       const i18n = useI18n();
       const deviceType = useDeviceType();
       const clientApi = useClientApi();
@@ -72,11 +73,13 @@ export default Form.create({})(
             variables: {
               clientId: props.clientId,
             },
+            loading: true,
             catchError: true,
           })
           .then(({ clientPostLogoutRedirectUris }) => {
-            clientName.value = clientPostLogoutRedirectUris.clientName;
+            if (!clientPostLogoutRedirectUris) return;
 
+            clientName.value = clientPostLogoutRedirectUris.clientName;
             return clientPostLogoutRedirectUris.postLogoutRedirectUris;
           });
       });
@@ -100,7 +103,7 @@ export default Form.create({})(
             })
             .then(({ postLogoutRedirectUri }) => {
               props.form.resetFields();
-              $redirectUrisRes.$result.push(postLogoutRedirectUri);
+              $redirectUrisRes.$result!.push(postLogoutRedirectUri);
             })
             .catch((err) => {
               message.error(err.message);
@@ -137,8 +140,8 @@ export default Form.create({})(
               })
               .then(({ result }) => {
                 result &&
-                  $redirectUrisRes.$result.splice(
-                    $redirectUrisRes.$result.findIndex((item) => item.id === id),
+                  $redirectUrisRes.$result!.splice(
+                    $redirectUrisRes.$result!.findIndex((item) => item.id === id),
                     1,
                   );
               })
@@ -149,23 +152,27 @@ export default Form.create({})(
         });
       };
 
-      return () => (
-        <PageBreadcrumb
-          breadcrumb={
-            clientName.value
-              ? (routeBreadcrumb) => {
-                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                    key: 'clientName',
-                    label: clientName.value,
-                    path: '',
-                  });
-                  return routeBreadcrumb;
-                }
-              : true
-          }
-        >
-          <Card bordered={false} size="small">
-            {$redirectUrisRes.$loaded && (
+      return () => {
+        const { $result: redirectUris, $loading } = $redirectUrisRes;
+
+        if ($loading) return;
+
+        return redirectUris ? (
+          <PageBreadcrumb
+            breadcrumb={
+              clientName.value
+                ? (routeBreadcrumb) => {
+                    routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                      key: 'clientName',
+                      label: clientName.value,
+                      path: '',
+                    });
+                    return routeBreadcrumb;
+                  }
+                : true
+            }
+          >
+            <Card bordered={false} size="small">
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
                 <Form.Item
                   label={i18n.tv('page_client_post_logout_redirect_uris.form.redirect_uri_label', '登出跳转URI')}
@@ -206,38 +213,47 @@ export default Form.create({})(
                   </Button>
                 </Form.Item>
               </Form>
-            )}
-            <Alert
-              type="warning"
-              banner
-              showIcon={false}
-              scopedSlots={{
-                message: () => (
-                  <span>
-                    Specifies allowed URIs to redirect to after logout. See the
-                    <a target="_blank" href="https://openid.net/specs/openid-connect-session-1_0.html" class="mx-1">
-                      OIDC Connect Session Management spec
-                    </a>
-                    for more details.
-                  </span>
-                ),
-              }}
-            />
-            <Table
-              class="mt-3"
-              size="small"
-              bordered={true}
-              pagination={false}
-              columns={columns.value}
-              dataSource={$redirectUrisRes.$result}
-              loading={$redirectUrisRes.$loading}
-              locale={{
-                emptyText: i18n.tv('page_client_post_logout_redirect_uris.empty_text', '暂无登出跳转URI配置'),
-              }}
-            />
+              <Alert
+                type="warning"
+                banner
+                showIcon={false}
+                scopedSlots={{
+                  message: () => (
+                    <span>
+                      Specifies allowed URIs to redirect to after logout. See the
+                      <a target="_blank" href="https://openid.net/specs/openid-connect-session-1_0.html" class="mx-1">
+                        OIDC Connect Session Management spec
+                      </a>
+                      for more details.
+                    </span>
+                  ),
+                }}
+              />
+              <Table
+                class="mt-3"
+                size="small"
+                bordered={true}
+                pagination={false}
+                columns={columns.value}
+                dataSource={redirectUris}
+                locale={{
+                  emptyText: i18n.tv('page_client_post_logout_redirect_uris.empty_text', '暂无登出跳转URI配置'),
+                }}
+              />
+            </Card>
+          </PageBreadcrumb>
+        ) : (
+          <Card bordered={false} size="small">
+            <Result status="error" subTitle={i18n.tv('page_client_detail.not_found', '客户端不存在！')}>
+              <template slot="extra">
+                <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                  {i18n.tv('common.btn_text.go_back', '返回')}
+                </Button>
+              </template>
+            </Result>
           </Card>
-        </PageBreadcrumb>
-      );
+        );
+      };
     },
   }),
 );

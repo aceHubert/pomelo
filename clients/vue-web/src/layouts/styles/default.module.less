@@ -1,0 +1,24 @@
+.layout-content {
+  &__wrapper {
+    width: 100%;
+    height: 100%;
+    // transition: 0.3s;
+    position: relative;
+
+    // webkit h1 在section下字号不正常， layout 使用section布局
+    h1 {
+      font-size: 2em;
+    }
+  }
+
+  &__loading {
+    padding-top: 30%;
+    background-color: fadeout(@white, 30%);
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+  }
+}

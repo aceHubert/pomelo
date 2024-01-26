@@ -4,9 +4,9 @@ import { defineComponent, ref, reactive, computed, watch } from '@vue/compositio
 import { useRoute } from 'vue2-helpers/vue-router';
 import { Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { TemplateStatus, useDeviceType } from '@ace-pomelo/shared-client';
+import { TemplateStatus } from '@ace-pomelo/shared-client';
 import { useTemplateApi } from '@/fetch/apis';
-import { useI18n, useUserManager } from '@/hooks';
+import { useI18n, useUserManager, useDeviceType } from '@/hooks';
 import { useTemplateMixin } from '@/mixins';
 import { TemplateType } from './constants';
 import classes from './index.module.less';

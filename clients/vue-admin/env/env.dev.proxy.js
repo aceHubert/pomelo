@@ -4,7 +4,7 @@
 
   var env = window._ENV || {};
 
-  env.infrastructureApiBase = '/infrastructure/api';
+  // env.infrastructureApiBase = '/infrastructure/api';
   env.infrastructureGraphqlBase = '/infrastructure/graphql';
   env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5002/graphql';
   env.identityGraphqlBase = '/identity/graphql';

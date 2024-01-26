@@ -5,17 +5,11 @@ import { trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { TreeSelect, Select, Card, Descriptions, Popconfirm, Spin, Space } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import {
-  OptionPresetKeys,
-  TemplateStatus,
-  TemplateCommentStatus,
-  useLocationMixin,
-  useDeviceType,
-} from '@ace-pomelo/shared-client';
+import { OptionPresetKeys, TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
 import { usePostApi, TemplateType } from '@/fetch/apis';
-import { useI18n, useOptions, useUserManager } from '@/hooks';
-import { useTemplateMixin } from '@/mixins';
+import { useI18n, useOptions, useUserManager, useDeviceType } from '@/hooks';
+import { useTemplateMixin, useLocationMixin } from '@/mixins';
 import classes from './index.module.less';
 
 // typed

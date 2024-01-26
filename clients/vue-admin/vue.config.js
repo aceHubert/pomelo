@@ -422,8 +422,17 @@ module.exports = defineConfig({
           new HtmlWebpackTagsPlugin({
             links: cdnConfig.links,
             scripts: cdnConfig.scripts,
-            publicPath: cdnConfig.cdnRegistry,
+            publicPath: cdnConfig.publicPath,
             append: false,
+          }),
+        );
+
+        config.plugins.push(
+          new HtmlWebpackTagsPlugin({
+            links: cdnConfig.append.links,
+            scripts: cdnConfig.append.scripts,
+            publicPath: cdnConfig.publicPath,
+            append: true,
           }),
         );
       }

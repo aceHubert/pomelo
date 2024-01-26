@@ -43,7 +43,12 @@ export default defineComponent({
       () => {
         let layoutName = route.meta?.layout;
         if (!layoutName && route.matched.length) {
-          layoutName = sanitizeComponent(route.matched.slice(-1)[0].components.default).options.layout;
+          const component = sanitizeComponent(route.matched.slice(-1)[0].components.default);
+          layoutName = component.options.layout;
+          // antd Form.create({})(WrappedComponent)
+          if (!layoutName && component.options.WrappedComponent) {
+            layoutName = sanitizeComponent(component.options.WrappedComponent).options.layout;
+          }
         }
         if (typeof layoutName === 'function') {
           layoutName = layoutName();

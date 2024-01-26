@@ -22,6 +22,7 @@
       "expand": "展开",
       "collapse": "收起",
       "upload": "上传",
+      "go_back": "返回",
       "back_to_home": "返回主页",
       "in_operation": "操作中",
       "view": "查看",
@@ -442,6 +443,19 @@
     "empty_list_description": "没有媒体文件！"
   },
   "page_client_detail": {
-    "initial_login_uri_label": "初始化登录URI"
+    "initial_login_uri_label": "初始化登录URI",
+    "not_found": "客户端不存在！"
+  },
+  "page_identity_resource_detail": {
+    "not_found": "Identity资源不存在！"
+  },
+  "page_api_resource_detail": {
+    "not_found": "API资源不存在！"
+  },
+  "page_api_properties": {
+    "page_title": "自定义属性"
+  },
+  "page_identity_resource_properties": {
+    "page_title": "自定义属性"
   }
 }

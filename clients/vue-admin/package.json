@@ -15,9 +15,9 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ace-fetch/axios": "^0.2.1",
-    "@ace-fetch/core": "^0.2.1",
-    "@ace-fetch/vue": "^0.2.1",
+    "@ace-fetch/axios": "^0.2.2",
+    "@ace-fetch/core": "^0.2.2",
+    "@ace-fetch/vue": "^0.2.2",
     "@ace-pomelo/shared-client": "workspace:^",
     "@ace-util/core": "^0.1.1",
     "@apollo/client": "^3.6.9",
@@ -52,6 +52,7 @@
     "apollo-upload-client": "^17.0.0",
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
+    "crypto-js": "^4.2.0",
     "custom-event-polyfill": "^1.0.7",
     "graphql": "^16.0.0",
     "graphql-ws": "^5.11.2",

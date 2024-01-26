@@ -5,6 +5,14 @@ import type { RouteConfig } from 'vue-router';
 
 export const routes: Array<RouteConfig> = [
   {
+    name: 'site-init',
+    path: '/site-init',
+    component: () => import(/* webpackChunkName: "common" */ '../views/site-init'),
+    meta: {
+      breadcrumb: false,
+    },
+  },
+  {
     name: 'dashboard',
     path: '/',
     alias: ['/dashboard'],

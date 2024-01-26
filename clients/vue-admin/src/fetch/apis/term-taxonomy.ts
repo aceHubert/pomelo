@@ -1,7 +1,7 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/infrastructure-request';
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 
 export enum PresetTaxonomy {
   Category = 'Category',

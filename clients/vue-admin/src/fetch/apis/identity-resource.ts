@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/identity-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/identity-request';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 import type { PagedArgs, Paged } from './types';
 
 export interface IdentityResourceModel {
@@ -105,7 +105,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
           createdAt
         }
       }
-    ` as TypedQueryDocumentNode<{ identityResource: IdentityResourceModel }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ identityResource: IdentityResourceModel | null }, { id: number }>,
     create: gql`
       mutation createIdentityResource($model: NewIdentityResourceInput!) {
         identityResource: createIdentityResource(model: $model) {
@@ -141,7 +141,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ identityClaims: IdentityClaimsModel }, { identityResourceId: number }>,
+    ` as TypedQueryDocumentNode<{ identityClaims: IdentityClaimsModel | null }, { identityResourceId: number }>,
     createClaim: gql`
       mutation createIdentityClaim($identityResourceId: ID!, $model: NewIdentityClaimInput!) {
         claim: createIdentityClaim(identityResourceId: $identityResourceId, model: $model) {
@@ -171,7 +171,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ identityProperties: IdentityPropertiesModel }, { identityResourceId: number }>,
+    ` as TypedQueryDocumentNode<{ identityProperties: IdentityPropertiesModel | null }, { identityResourceId: number }>,
     createProperty: gql`
       mutation createIdentityProperty($identityResourceId: ID!, $model: NewIdentityPropertyInput!) {
         property: createIdentityProperty(identityResourceId: $identityResourceId, model: $model) {

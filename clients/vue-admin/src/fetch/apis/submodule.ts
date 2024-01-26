@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/infrastructure-request';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 import type { PagedArgs, Paged } from './types';
 
 export interface Version {
@@ -69,7 +69,7 @@ export const useSubmoduleApi = defineRegistApi('submodule', {
           readme
         }
       }
-    ` as TypedMutationDocumentNode<{ subModule: SubModuleItem }, { name: string }>,
+    ` as TypedMutationDocumentNode<{ subModule: SubModuleItem | null }, { name: string }>,
   },
   request,
 });

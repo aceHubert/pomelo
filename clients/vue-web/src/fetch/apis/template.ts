@@ -1,9 +1,8 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/infrastructure-request';
 
 // Types
-import type { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
-import type { TypedQueryDocumentNode } from '../graphql';
+import type { TemplateStatus, TemplateCommentStatus, TypedQueryDocumentNode } from '@ace-pomelo/shared-client';
 import type { TermTaxonomyModel } from './term-taxonomy';
 
 export enum TemplatePageType {
@@ -134,6 +133,7 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
+    // 获取表单
     getForm: gql`
       query getForm($id: ID!, $metaKeys: [String!]) {
         form: formTemplate(id: $id) {
@@ -152,14 +152,12 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     ` as TypedQueryDocumentNode<{ form?: FormTemplateModel }, { id: number; metaKeys?: string[] }>,
-    /**
-     * 获取页面别名路径
-     */
+    // 获取页面别名路径
     getAliasPaths: gql`
-    query getAliasPaths() {
-      paths: pageAliasPaths
-    }
-  ` as TypedQueryDocumentNode<{ paths: string[] }>,
+      query getAliasPaths {
+        paths: pageAliasPaths
+      }
+    ` as TypedQueryDocumentNode<{ paths: string[] }>,
     // 获取页面
     getPage: gql`
       query getPage($id: ID!, $metaKeys: [String!]) {
@@ -182,8 +180,9 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { id: number; metaKeys?: string[] }>,
+    // 通过别名获取页面
     getPageByName: gql`
-      query getPage($name: String!, $metaKeys: [String!]) {
+      query getPage($name: String, $metaKeys: [String!]) {
         page: pageTemplateByName(name: $name) {
           id
           name
@@ -202,7 +201,7 @@ export const useTemplateApi = defineRegistApi('template', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { name: string; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { name?: string; metaKeys?: string[] }>,
     // 获取文章
     getPost: gql`
       query getPost($id: ID!, $metaKeys: [String!]) {

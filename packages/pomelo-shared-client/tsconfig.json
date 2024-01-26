@@ -3,9 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "skipLibCheck": true,
-    "jsx": "preserve",
     "noImplicitAny": false,
-    "lib": ["ESNext", "DOM"],
+    "resolveJsonModule": true,
+    "lib": ["ESNext", "DOM"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts"]
 }

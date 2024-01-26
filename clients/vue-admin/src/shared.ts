@@ -1,5 +1,4 @@
 import { ref } from '@vue/composition-api';
-import { router } from '@/router';
 
 export class SharedError extends Error {
   statusCode: number;
@@ -20,10 +19,3 @@ export const loadingRef = ref(false);
  * 全局的request error
  */
 export const errorRef = ref<SharedError | false>(false);
-
-router.beforeEach((to, from, next) => {
-  if (to.path !== from.path) {
-    errorRef.value = false;
-  }
-  next();
-});

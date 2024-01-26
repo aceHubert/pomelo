@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/infrastructure-request';
 
 // Types
-import type { TypedQueryDocumentNode, TypedSubscriptionDocumentNode } from '../graphql';
+import type { TypedQueryDocumentNode, TypedSubscriptionDocumentNode } from '@ace-pomelo/shared-client';
 
 export enum OptionAutoload {
   Yes = 'Yes',
@@ -29,14 +29,13 @@ export type Message =
 
 export const useBasicApi = defineRegistApi('basic', {
   apis: {
-    /**
-     * 获取程序初始化自动加载配置
-     */
+    // 获取程序初始化自动加载配置
     getAutoloadOptions: gql`
       query getAutoloadOptions {
         options: autoloadOptions
       }
     ` as TypedQueryDocumentNode<{ options: Record<string, string> }>,
+    // 获取Option
     getOption: gql`
       query getOption($id: ID!) {
         option(id: $id) {
@@ -46,13 +45,13 @@ export const useBasicApi = defineRegistApi('basic', {
           autoload
         }
       }
-    ` as TypedQueryDocumentNode<{ option: OptionModel }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ option: OptionModel | null }, { id: number }>,
+    // 获取 Option Value
     getOptionValue: gql`
       query getOptionValue($name: String!) {
         value: optionValue(name: $name)
       }
-    ` as TypedQueryDocumentNode<{ value: string }, { name: string }>,
-
+    ` as TypedQueryDocumentNode<{ value: string | null }, { name: string }>,
     // 消息订阅
     onMessage: gql`
       subscription OnMessage {

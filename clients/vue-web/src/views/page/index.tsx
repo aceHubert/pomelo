@@ -2,19 +2,10 @@ import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composi
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { createResource } from '@vue-async/resource-manager';
-import {
-  useTemplateApi,
-  useBasicApi,
-  getFrameworkSchema,
-  OptionPresetKeys,
-  PageMetaPresetKeys,
-  useDeviceType,
-} from '@ace-pomelo/shared-client';
+import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
-import { useI18n, useOptions, useEffect, expose } from '@/hooks';
-
-// Types
-import type { PageTemplateWithMetasModel } from '@ace-pomelo/shared-client';
+import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
+import { useTemplateApi, PageMetaPresetKeys } from '@/fetch/apis';
 
 const MobilePage = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopPage = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -30,7 +21,7 @@ export default defineComponent({
           href: '/static/ckeditor5/content-style.css',
           rel: 'stylesheet',
         },
-        ...(this.links as string[]).map((href) => ({ href, rel: 'stylesheet' })),
+        ...((this.links as string[]) ?? []).map((href) => ({ href, rel: 'stylesheet' })),
       ],
       style: this.cssText
         ? [
@@ -53,52 +44,24 @@ export default defineComponent({
     const route = useRoute();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const deviceType = useDeviceType();
-    const basicApi = useBasicApi();
     const templateApi = useTemplateApi();
 
-    const pageRes = createResource(async ({ id, name }: { id?: number; name: string }) => {
-      let promise: Promise<PageTemplateWithMetasModel | undefined> = Promise.resolve(undefined);
-      if (id) {
-        // from /p/:id
-        promise = templateApi
-          .getPage({
-            params: {
-              id,
-            },
-          })
-          .then(({ data }) => data);
-      } else if (name) {
-        // from fallback
-        promise = templateApi
-          .getPageByName({
-            params: {
-              name,
-            },
-          })
-          .then(({ data }) => data);
-      } else {
-        // get page on front
-        promise = basicApi
-          .getOptionValue({
-            params: {
-              name: OptionPresetKeys.PageOnFront,
-            },
-          })
-          .then(({ data }) => {
-            if (data) {
-              return templateApi
-                .get({
-                  params: {
-                    id: data,
-                  },
-                })
-                .then(({ data }) => data);
-            }
-            return;
-          });
-      }
-
-      const page = await promise;
+    const pageRes = createResource(async ({ id, name }: { id?: number; name?: string }) => {
+      const page = id
+        ? await templateApi // from /p/:id
+            .getPage({
+              variables: {
+                id,
+              },
+            })
+            .then(({ page }) => page)
+        : await templateApi // from name alias: /page-name
+            .getPageByName({
+              variables: {
+                name,
+              },
+            })
+            .then(({ page }) => page);
 
       if (page) {
         const { schema, framework } = getFrameworkSchema(page.content);
@@ -111,17 +74,19 @@ export default defineComponent({
       return;
     });
 
+    const pageName = computed(() => encodeURIComponent(route.path.substring(1))); // path 去掉开始 "/" 作为 name
+
     useEffect(() => {
       pageRes.read({
         id: props.id,
-        name: encodeURIComponent(route.path.substring(1)), // path 去掉开始 "/" 作为 name
+        name: pageName.value,
       });
     }, [() => props.id, () => route.path]);
 
     const metas = computed(() => {
       if (pageRes.$result?.metas?.length) {
         return pageRes.$result.metas.reduce((acc, cur) => {
-          acc[cur.metaKey] = cur.metaValue;
+          acc[cur.key] = cur.value;
           return acc;
         }, {} as Record<string, string>);
       }
@@ -134,8 +99,8 @@ export default defineComponent({
       return $loading
         ? ''
         : $error
-        ? i18n.tv('page.page_load_error_title', '页面加载错误')
-        : $result?.title ?? i18n.tv('page.page_not_found_title', '未找到页面');
+        ? i18n.tv('page_template.page_load_error_title', '页面加载错误')
+        : $result?.title ?? i18n.tv('page_template.page_not_found_title', '未找到页面');
     });
 
     // stylesheets
@@ -143,9 +108,7 @@ export default defineComponent({
       const { $error, $loading, $result } = pageRes;
       return $error || $loading
         ? []
-        : JSON.parse(
-            $result?.metas?.find(({ metaKey }) => metaKey === PageMetaPresetKeys.StyleLink)?.metaValue || '[]',
-          );
+        : JSON.parse($result?.metas?.find(({ key }) => key === PageMetaPresetKeys.StyleLink)?.value || '[]');
     });
 
     // css text
@@ -153,7 +116,7 @@ export default defineComponent({
       const { $error, $loading, $result } = pageRes;
       return $error || $loading
         ? ''
-        : $result?.metas?.find(({ metaKey }) => metaKey === PageMetaPresetKeys.CssText)?.metaValue || '';
+        : $result?.metas?.find(({ key }) => key === PageMetaPresetKeys.CssText)?.value || '';
     });
 
     // page metas
@@ -166,7 +129,7 @@ export default defineComponent({
         'og:image':
           (!featureImage || isAbsoluteUrl(featureImage)
             ? featureImage
-            : `${trailingSlash(siteUrl.value)}${
+            : `${trailingSlash(siteUrl.value ?? '/')}${
                 featureImage.startsWith('/') ? featureImage.slice(1) : featureImage
               }}`) || '',
       };
@@ -246,18 +209,22 @@ export default defineComponent({
           title={i18n.tv('page_template.index.load_error_text', '页面加载错误！') as string}
           subTitle={$error.message}
         ></Result>
-      ) : !pageData ? (
-        <Result
-          status="error"
-          title="404"
-          subTitle={i18n.tv('page_template.index.not_found_text', '未找到页面！') as string}
-        ></Result>
       ) : renderError.value ? (
         <Result
           status="error"
           title={i18n.tv('page_template.index.render_error_text', '页面渲染错误！') as string}
           subTitle={renderError.value}
         ></Result>
+      ) : !pageData ? (
+        pageName.value ? (
+          <Result
+            status="error"
+            title="404"
+            subTitle={i18n.tv('page_template.index.not_found_text', '未找到页面！') as string}
+          ></Result>
+        ) : (
+          <div class="text-center">TODO:default home page</div>
+        )
       ) : deviceType.isDesktop ? (
         h(DesktopPage, {
           props: {

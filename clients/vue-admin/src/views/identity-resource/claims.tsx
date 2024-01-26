@@ -1,10 +1,10 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Button, Form, Alert, Input, Table } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { useRouter } from 'vue2-helpers/vue-router';
+import { Card, Button, Form, Alert, Input, Table, Result } from 'ant-design-vue';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useIdentityResourceApi } from '@/fetch/apis';
 
 // Types
@@ -32,6 +32,7 @@ export default Form.create({})(
       },
     },
     setup(props: IdentityClaimProps) {
+      const router = useRouter();
       const i18n = useI18n();
       const deviceType = useDeviceType();
       const identityResourceApi = useIdentityResourceApi();
@@ -72,9 +73,12 @@ export default Form.create({})(
             variables: {
               identityResourceId: props.identityResourceId,
             },
+            loading: true,
             catchError: true,
           })
           .then(({ identityClaims }) => {
+            if (!identityClaims) return;
+
             identityResourceName.value = identityClaims.name;
             identityResourceNonEditable.value = identityClaims.nonEditable;
 
@@ -101,7 +105,7 @@ export default Form.create({})(
             })
             .then(({ claim }) => {
               props.form.resetFields();
-              $claimsRes.$result.push(claim);
+              $claimsRes.$result!.push(claim);
             })
             .catch((err) => {
               message.error(err.message);
@@ -137,8 +141,8 @@ export default Form.create({})(
               })
               .then(({ result }) => {
                 result &&
-                  $claimsRes.$result.splice(
-                    $claimsRes.$result.findIndex((item) => item.id === id),
+                  $claimsRes.$result!.splice(
+                    $claimsRes.$result!.findIndex((item) => item.id === id),
                     1,
                   );
               })
@@ -149,69 +153,88 @@ export default Form.create({})(
         });
       };
 
-      return () => (
-        <PageBreadcrumb
-          breadcrumb={
-            identityResourceName.value
-              ? (routeBreadcrumb) => {
-                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                    key: 'identityResourceName',
-                    label: identityResourceName.value,
-                    path: '',
-                  });
-                  return routeBreadcrumb;
-                }
-              : true
-          }
-        >
+      return () => {
+        const { $result: claims, $loading } = $claimsRes;
+
+        if ($loading) return;
+
+        return claims ? (
+          <PageBreadcrumb
+            breadcrumb={
+              identityResourceName.value
+                ? (routeBreadcrumb) => {
+                    routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                      key: 'identityResourceName',
+                      label: identityResourceName.value,
+                      path: '',
+                    });
+                    return routeBreadcrumb;
+                  }
+                : true
+            }
+          >
+            <Card bordered={false} size="small">
+              {!identityResourceNonEditable.value && (
+                <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
+                  <Form.Item label={i18n.tv('page_identity_resource_claims.form.type_label', '声明类型')} class="mb-2">
+                    <Input
+                      v-decorator={[
+                        'type',
+                        {
+                          rules: [
+                            {
+                              required: true,
+                              message: i18n.tv('page_identity_resource_claims.form.type_required', '请输入声明类型'),
+                            },
+                          ],
+                        },
+                      ]}
+                      placeholder={i18n.tv('page_identity_resource_claims.form.type_placeholder', '请输入声明类型')}
+                      style="width:220px"
+                    />
+                  </Form.Item>
+                  <Form.Item class="mb-2">
+                    <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
+                      {i18n.tv('page_identity_resource_claims.form.add_btn_text', '添加')}
+                    </Button>
+                  </Form.Item>
+                </Form>
+              )}
+              <Alert
+                type="warning"
+                banner
+                showIcon={false}
+                message="Allows settings claims for the client (will be included in the access token)."
+              />
+              <Table
+                class="mt-3"
+                size="small"
+                bordered={true}
+                pagination={false}
+                columns={columns.value}
+                dataSource={$claimsRes.$result}
+                loading={$claimsRes.$loading}
+                locale={{
+                  emptyText: i18n.tv('page_identity_resource_claims.empty_text', '暂无资源声明！'),
+                }}
+              />
+            </Card>
+          </PageBreadcrumb>
+        ) : (
           <Card bordered={false} size="small">
-            {!identityResourceNonEditable.value && $claimsRes.$loaded && (
-              <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
-                <Form.Item label={i18n.tv('page_identity_resource_claims.form.type_label', '声明类型')} class="mb-2">
-                  <Input
-                    v-decorator={[
-                      'type',
-                      {
-                        rules: [
-                          {
-                            required: true,
-                            message: i18n.tv('page_identity_resource_claims.form.type_required', '请输入声明类型'),
-                          },
-                        ],
-                      },
-                    ]}
-                    placeholder={i18n.tv('page_identity_resource_claims.form.type_placeholder', '请输入声明类型')}
-                    style="width:220px"
-                  />
-                </Form.Item>
-                <Form.Item class="mb-2">
-                  <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_identity_resource_claims.form.add_btn_text', '添加')}
-                  </Button>
-                </Form.Item>
-              </Form>
-            )}
-            <Alert
-              type="warning"
-              banner
-              showIcon={false}
-              message="Allows settings claims for the client (will be included in the access token)."
-            />
-            <Table
-              class="mt-3"
-              size="small"
-              bordered={true}
-              pagination={false}
-              columns={columns.value}
-              dataSource={$claimsRes.$result}
-              loading={$claimsRes.$loading}
-              locale={{
-                emptyText: i18n.tv('page_identity_resource_claims.empty_text', '暂无资源声明！'),
-              }}
-            />
+            <Result
+              status="error"
+              subTitle={i18n.tv('page_identity_resource_detail.not_found', 'Identity资源不存在！')}
+            >
+              <template slot="extra">
+                <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                  {i18n.tv('common.btn_text.go_back', '返回')}
+                </Button>
+              </template>
+            </Result>
           </Card>
-        </PageBreadcrumb>
-      );
+        );
+      };
     },
   }),
 );

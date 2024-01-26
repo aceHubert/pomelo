@@ -4,9 +4,9 @@ import { warn } from '@ace-util/core';
 // Types
 import type { Ref } from '@vue/composition-api';
 
-export function useOptions(key: string): Ref<string>;
+export function useOptions(key: string): Ref<string | undefined>;
 export function useOptions(): Ref<Record<string, string>>;
-export function useOptions(key?: string): Ref<string> | Ref<Record<string, string>> {
+export function useOptions(key?: string): Ref<string | undefined> | Ref<Record<string, string>> {
   const instance = getCurrentInstance();
   if (!instance) {
     warn(process.env.NODE_ENV === 'production', 'method can only be used inside setup() or functional components');

@@ -1,10 +1,10 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Button, Form, Alert, Input, Table } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { Card, Button, Form, Alert, Input, Table, Result } from 'ant-design-vue';
+import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useClientApi } from '@/fetch/apis';
 
 // Types
@@ -32,6 +32,7 @@ export default Form.create({})(
       },
     },
     setup(props: ClientClaimProps) {
+      const router = useRouter();
       const i18n = useI18n();
       const deviceType = useDeviceType();
       const clientApi = useClientApi();
@@ -81,8 +82,9 @@ export default Form.create({})(
             catchError: true,
           })
           .then(({ clientClaims }) => {
-            clientName.value = clientClaims.clientName;
+            if (!clientClaims) return;
 
+            clientName.value = clientClaims.clientName;
             return clientClaims.claims;
           });
       });
@@ -106,7 +108,7 @@ export default Form.create({})(
             })
             .then(({ claim }) => {
               props.form.resetFields();
-              $claimsRes.$result.push(claim);
+              $claimsRes.$result!.push(claim);
             })
             .catch((err) => {
               message.error(err.message);
@@ -142,8 +144,8 @@ export default Form.create({})(
               })
               .then(({ result }) => {
                 result &&
-                  $claimsRes.$result.splice(
-                    $claimsRes.$result.findIndex((item) => item.id === id),
+                  $claimsRes.$result!.splice(
+                    $claimsRes.$result!.findIndex((item) => item.id === id),
                     1,
                   );
               })
@@ -154,23 +156,27 @@ export default Form.create({})(
         });
       };
 
-      return () => (
-        <PageBreadcrumb
-          breadcrumb={
-            clientName.value
-              ? (routeBreadcrumb) => {
-                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                    key: 'clientName',
-                    label: clientName.value,
-                    path: '',
-                  });
-                  return routeBreadcrumb;
-                }
-              : true
-          }
-        >
-          <Card bordered={false} size="small">
-            {$claimsRes.$loaded && (
+      return () => {
+        const { $result: claims, $loading } = $claimsRes;
+
+        if ($loading) return;
+
+        return claims ? (
+          <PageBreadcrumb
+            breadcrumb={
+              clientName.value
+                ? (routeBreadcrumb) => {
+                    routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                      key: 'clientName',
+                      label: clientName.value,
+                      path: '',
+                    });
+                    return routeBreadcrumb;
+                  }
+                : true
+            }
+          >
+            <Card bordered={false} size="small">
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
                 <Form.Item label={i18n.tv('page_client_claims.form.type_label', '声明类型')} class="mb-2">
                   <Input
@@ -212,28 +218,37 @@ export default Form.create({})(
                   </Button>
                 </Form.Item>
               </Form>
-            )}
-            <Alert
-              type="warning"
-              banner
-              showIcon={false}
-              message="Allows settings claims for the client (will be included in the access token)."
-            />
-            <Table
-              class="mt-3"
-              size="small"
-              bordered={true}
-              pagination={false}
-              columns={columns.value}
-              dataSource={$claimsRes.$result}
-              loading={$claimsRes.$loading}
-              locale={{
-                emptyText: i18n.tv('page_client_claims.empty_text', '暂无资源声明！'),
-              }}
-            />
+              <Alert
+                type="warning"
+                banner
+                showIcon={false}
+                message="Allows settings claims for the client (will be included in the access token)."
+              />
+              <Table
+                class="mt-3"
+                size="small"
+                bordered={true}
+                pagination={false}
+                columns={columns.value}
+                dataSource={claims}
+                locale={{
+                  emptyText: i18n.tv('page_client_claims.empty_text', '暂无资源声明！'),
+                }}
+              />
+            </Card>
+          </PageBreadcrumb>
+        ) : (
+          <Card bordered={false} size="small">
+            <Result status="error" subTitle={i18n.tv('page_client_detail.not_found', '客户端不存在！')}>
+              <template slot="extra">
+                <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                  {i18n.tv('common.btn_text.go_back', '返回')}
+                </Button>
+              </template>
+            </Result>
           </Card>
-        </PageBreadcrumb>
-      );
+        );
+      };
     },
   }),
 );

@@ -1,7 +1,21 @@
 import { upperFirst, merge, omitBy, isNil } from 'lodash-es';
 import { defineComponent, ref, reactive, set, nextTick } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Button, Card, Descriptions, Form, Input, InputNumber, Icon, Radio, Switch, Space, Tag } from 'ant-design-vue';
+import {
+  Button,
+  Card,
+  Descriptions,
+  Form,
+  Input,
+  InputNumber,
+  Icon,
+  Radio,
+  Switch,
+  Space,
+  Tag,
+  Result,
+} from 'ant-design-vue';
+import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
 import { useI18n } from '@/hooks';
 import { useClientApi } from '@/fetch/apis';
@@ -51,6 +65,7 @@ export default Form.create({})(
       },
     },
     setup(props: ClientDetailProps) {
+      const router = useRouter();
       const i18n = useI18n();
       const clientApi = useClientApi();
 
@@ -72,7 +87,8 @@ export default Form.create({})(
           })
           .then(
             ({ client }) =>
-              merge(getDefaultClientMetadata(), omitBy(client, isNil)) as ClientModel &
+              client &&
+              (merge(getDefaultClientMetadata(), omitBy(client, isNil)) as ClientModel &
                 Required<
                   Pick<
                     ClientModel,
@@ -93,7 +109,7 @@ export default Form.create({})(
                     | 'deviceCodeLifetime'
                     | 'backchannelAuthenticationRequestLifetime'
                   >
-                >,
+                >),
           );
       });
 
@@ -117,7 +133,7 @@ export default Form.create({})(
               },
             })
             .then(() => {
-              Object.assign($detailRes.$result, values);
+              Object.assign($detailRes.$result!, values);
               isBasicModalVisable.value = false;
             })
             .catch((err) => {
@@ -142,7 +158,7 @@ export default Form.create({})(
             },
           })
           .then(({ result }) => {
-            result && ($detailRes.$result.enabled = checked);
+            result && ($detailRes.$result!.enabled = checked);
           })
           .catch((err) => {
             message.error(err.message);
@@ -160,7 +176,7 @@ export default Form.create({})(
             },
           })
           .then(({ result }) => {
-            result && set($detailRes.$result, field, value);
+            result && set($detailRes.$result!, field, value);
           })
           .catch((err) => {
             message.error(err.message);
@@ -172,7 +188,7 @@ export default Form.create({})(
 
         if ($loading) return;
 
-        return (
+        return client ? (
           <div class={classes.container}>
             <Card bordered={false} size="small">
               <Descriptions
@@ -192,7 +208,7 @@ export default Form.create({})(
                               isBasicModalVisable.value = true;
 
                               nextTick(() => {
-                                props.form.setFieldsValue($detailRes.$result);
+                                props.form.setFieldsValue($detailRes.$result!);
                               });
                             }}
                           >
@@ -1108,6 +1124,16 @@ export default Form.create({})(
               />
             </Modal>
           </div>
+        ) : (
+          <Card bordered={false} size="small">
+            <Result status="error" subTitle={i18n.tv('page_client_detail.not_found', '客户端不存在！')}>
+              <template slot="extra">
+                <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                  {i18n.tv('common.btn_text.go_back', '返回')}
+                </Button>
+              </template>
+            </Result>
+          </Card>
         );
       };
     },

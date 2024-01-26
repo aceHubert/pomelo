@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia';
 import tinycolor from 'tinycolor2';
+import { defineStore } from 'pinia';
 import { ref, shallowRef } from '@vue/composition-api';
-import { i18n } from '@/i18n';
+import { i18n, supportLanguages as i18nSupportLanguages } from '@/i18n';
 import { defaultSettings } from '@/configs/settings.config';
 import { STORAGE_PREFIX } from './utils';
 
@@ -64,12 +64,12 @@ export const useAppStore = defineStore(
 
     //#region locale
 
-    const locale = ref(defaultSettings.language.locale);
+    const locale = ref(i18n.locale);
 
     /**
      * 支持的语言
      */
-    const supportLanguages = shallowRef(defaultSettings.language.supportLanguages);
+    const supportLanguages = shallowRef(i18nSupportLanguages);
 
     /**
      * 设置支持的语言
@@ -97,18 +97,18 @@ export const useAppStore = defineStore(
     return {
       siteTitle,
       siteLogo,
-      locale,
-      supportLanguages,
       layout,
       // color, // color 不导出，通过 theme / primaryColor 获取
       theme,
       primaryColor,
-      setLocale,
-      setSupportLanguages,
+      locale,
+      supportLanguages,
       setLayout,
       setColor,
       setTheme,
       setPrimaryColor,
+      setLocale,
+      setSupportLanguages,
     };
   },
   {

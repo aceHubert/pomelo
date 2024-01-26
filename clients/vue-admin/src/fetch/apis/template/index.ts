@@ -1,9 +1,14 @@
-import { defineRegistApi, gql } from '../../graphql';
-import { request } from '../../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../../graphql/infrastructure-request';
 
 // Types
-import type { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../../graphql';
+import type {
+  TemplateStatus,
+  TemplateCommentStatus,
+  TypedQueryDocumentNode,
+  TypedMutationDocumentNode,
+} from '@ace-pomelo/shared-client';
+
 import type { TermTaxonomyModel } from '../term-taxonomy';
 import type { PagedArgs, Paged } from '../types';
 

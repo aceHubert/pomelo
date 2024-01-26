@@ -12,10 +12,10 @@ const optionPlugin: Plugin = async (app, inject) => {
   const options = ref<Record<string, string>>({});
 
   try {
-    const { options: values } = await basicApi.getAutoloadOptions();
-    options.value = values;
-  } catch (err) {
-    warn(false, `Options loaded error, ${(err as Error).message}`);
+    const autoload = await basicApi.getAutoloadOptions();
+    options.value = autoload.options;
+  } catch (err: any) {
+    warn(false, `Options loaded error, ${err.message}`);
   }
 
   inject('config', options);

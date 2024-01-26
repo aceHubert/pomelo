@@ -14,8 +14,8 @@ import {
   Col,
   Space,
 } from 'ant-design-vue';
-import { TemplateStatus, useDeviceType } from '@ace-pomelo/shared-client';
-import { useI18n } from '@/hooks';
+import { TemplateStatus } from '@ace-pomelo/shared-client';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useAppMixin } from '@/mixins';
 import IconMore from '@/assets/icons/more.svg?inline';
 import './index.less';

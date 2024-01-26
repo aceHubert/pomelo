@@ -1,7 +1,8 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/infrastructure-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/infrastructure-request';
 
 // Types
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 import type { PagedArgs, Paged } from './types';
 
 export interface FileData {
@@ -52,9 +53,6 @@ export interface Media extends Omit<File, 'original'>, FileData {
 }
 
 export interface PagedMedia extends Paged<Media> {}
-
-// Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
 
 export const useResApi = defineRegistApi(
   'resource',
@@ -294,7 +292,7 @@ export const useResApi = defineRegistApi(
             }
           }
         }
-      ` as TypedQueryDocumentNode<{ media: Media }, { id: number }>,
+      ` as TypedQueryDocumentNode<{ media: Media | null }, { id: number }>,
       getObsUploadSignedUrl: gql`
         query gethwCloudObsUploadSignedUrl(
           $bucket: String!

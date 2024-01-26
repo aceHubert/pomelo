@@ -2,7 +2,7 @@ import moment from 'moment';
 import { defineComponent, ref } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { Button, Card, List } from 'ant-design-vue';
+import { Button, Card, List, Result } from 'ant-design-vue';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
 import { useI18n } from '@/hooks';
@@ -43,8 +43,9 @@ export default defineComponent({
           },
         })
         .then(({ clientSecrets }) => {
-          clientName.value = clientSecrets.clientName;
+          if (!clientSecrets) return;
 
+          clientName.value = clientSecrets.clientName;
           return clientSecrets.secrets;
         });
     });
@@ -89,60 +90,81 @@ export default defineComponent({
       });
     };
 
-    return () => (
-      <PageBreadcrumb
-        breadcrumb={
-          clientName.value
-            ? (routeBreadcrumb) => {
-                routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                  key: 'clientName',
-                  label: clientName.value,
-                  path: '',
-                });
-                return routeBreadcrumb;
-              }
-            : true
-        }
-      >
+    return () => {
+      const { $result: secrets, $loading } = $secretsRes;
+
+      if ($loading) return;
+
+      return secrets ? (
+        <PageBreadcrumb
+          breadcrumb={
+            clientName.value
+              ? (routeBreadcrumb) => {
+                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                    key: 'clientName',
+                    label: clientName.value,
+                    path: '',
+                  });
+                  return routeBreadcrumb;
+                }
+              : true
+          }
+        >
+          <Card bordered={false} size="small">
+            <div class="py-2 text-right" slot="title">
+              <Button
+                type="primary"
+                onClick={() =>
+                  router.push({
+                    name: 'client-secrets-generate',
+                    params: {
+                      clientId: props.clientId,
+                    },
+                  })
+                }
+              >
+                {i18n.tv('page_client_secrets.generate_btn_text', '生成密匙')}
+              </Button>
+            </div>
+            <List
+              layout="horizontal"
+              dataSource={secrets}
+              scopedSlots={{
+                renderItem: (item: ClientSecretsModel['secrets'][0]) => (
+                  <List.Item>
+                    <Button
+                      slot="actions"
+                      type="link"
+                      class="danger--text as-link"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      {i18n.tv('common.btn_text.delete', '删除')}
+                    </Button>
+                    <List.Item.Meta
+                      title={`${item.description || '-'} (${item.type})`}
+                      description={`${i18n.tv('page_client_secrets.expiration', '过期时间')}: ${
+                        item.expiresAt
+                          ? moment(item.createdAt).add(item.expiresAt, 'seconds').locale(i18n.locale).format('L HH:mm')
+                          : i18n.tv('page_client_secrets.never_expired', '永不')
+                      }`}
+                    ></List.Item.Meta>
+                  </List.Item>
+                ),
+              }}
+            ></List>
+          </Card>
+        </PageBreadcrumb>
+      ) : (
         <Card bordered={false} size="small">
-          <div class="py-2 text-right" slot="title">
-            <Button
-              type="primary"
-              onClick={() =>
-                router.push({
-                  name: 'client-secrets-generate',
-                  params: {
-                    clientId: props.clientId,
-                  },
-                })
-              }
-            >
-              {i18n.tv('page_client_secrets.generate_btn_text', '生成密匙')}
-            </Button>
-          </div>
-          <List
-            layout="horizontal"
-            dataSource={$secretsRes.$result || []}
-            scopedSlots={{
-              renderItem: (item: ClientSecretsModel['secrets'][0]) => (
-                <List.Item>
-                  <Button slot="actions" type="link" class="danger--text as-link" onClick={() => handleDelete(item.id)}>
-                    {i18n.tv('common.btn_text.delete', '删除')}
-                  </Button>
-                  <List.Item.Meta
-                    title={`${item.description || '-'} (${item.type})`}
-                    description={`${i18n.tv('page_client_secrets.expiration', '过期时间')}: ${
-                      item.expiresAt
-                        ? moment(item.createdAt).add(item.expiresAt, 'seconds').locale(i18n.locale).format('L HH:mm')
-                        : i18n.tv('page_client_secrets.never_expired', '永不')
-                    }`}
-                  ></List.Item.Meta>
-                </List.Item>
-              ),
-            }}
-          ></List>
+          <Result status="error" subTitle={i18n.tv('page_client_detail.not_found', '客户端不存在！')}>
+            <template slot="extra">
+              <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                {i18n.tv('common.btn_text.go_back', '返回')}
+              </Button>
+            </template>
+          </Result>
         </Card>
-      </PageBreadcrumb>
-    );
+      );
+    };
   },
 });

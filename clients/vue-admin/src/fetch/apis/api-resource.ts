@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/identity-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/identity-request';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 import type { PagedArgs, Paged } from './types';
 
 export interface ApiResourceModel {
@@ -156,7 +156,7 @@ export const useApiResourceApi = defineRegistApi('api', {
           createdAt
         }
       }
-    ` as TypedQueryDocumentNode<{ apiResource: ApiResourceModel }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ apiResource: ApiResourceModel | null }, { id: number }>,
     getBasicInfo: gql`
       query getApiResource($id: ID!) {
         apiResource(id: $id) {
@@ -168,7 +168,7 @@ export const useApiResourceApi = defineRegistApi('api', {
         }
       }
     ` as TypedQueryDocumentNode<
-      { apiResource: Pick<ApiResourceModel, 'id' | 'name' | 'displayName' | 'enabled' | 'createdAt'> },
+      { apiResource: Pick<ApiResourceModel, 'id' | 'name' | 'displayName' | 'enabled' | 'createdAt'> | null },
       { id: number }
     >,
     create: gql`
@@ -203,7 +203,7 @@ export const useApiResourceApi = defineRegistApi('api', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiClaims: ApiClaimsModel }, { apiResourceId: number }>,
+    ` as TypedQueryDocumentNode<{ apiClaims: ApiClaimsModel | null }, { apiResourceId: number }>,
     createClaim: gql`
       mutation createApiClaim($apiResourceId: ID!, $model: NewApiClaimInput!) {
         claim: createApiClaim(apiResourceId: $apiResourceId, model: $model) {
@@ -274,7 +274,7 @@ export const useApiResourceApi = defineRegistApi('api', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiScopeClaims: ApiScopeClaimsModel }, { apiScopeId: number }>,
+    ` as TypedQueryDocumentNode<{ apiScopeClaims: ApiScopeClaimsModel | null }, { apiScopeId: number }>,
     createScopeClaim: gql`
       mutation createApiScopeClaim($apiScopeId: ID!, $model: NewApiScopeClaimInput!) {
         scopeClaim: createApiScopeClaim(apiScopeId: $apiScopeId, model: $model) {
@@ -306,7 +306,7 @@ export const useApiResourceApi = defineRegistApi('api', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiSecrets: ApiSecretsModel }, { apiResourceId: number }>,
+    ` as TypedQueryDocumentNode<{ apiSecrets: ApiSecretsModel | null }, { apiResourceId: number }>,
     createSecret: gql`
       mutation createApiSecret($apiResourceId: ID!, $model: NewApiSecretInput!) {
         apiSecret: createApiSecret(apiResourceId: $apiResourceId, model: $model) {
@@ -337,7 +337,7 @@ export const useApiResourceApi = defineRegistApi('api', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiProperties: ApiPropertiesModel }, { apiResourceId: number }>,
+    ` as TypedQueryDocumentNode<{ apiProperties: ApiPropertiesModel | null }, { apiResourceId: number }>,
     createProperty: gql`
       mutation createApiProperty($apiResourceId: ID!, $model: NewApiPropertyInput!) {
         property: createApiProperty(apiResourceId: $apiResourceId, model: $model) {

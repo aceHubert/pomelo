@@ -3,7 +3,7 @@ import { User } from 'oidc-client-ts';
 import { Theme } from 'antdv-layout-pro/types';
 import { warn } from '@ace-util/core';
 import { useUserApi } from '@/fetch/apis';
-import { useI18n, useUserManager, useEffect } from '@/hooks';
+import { useI18n, useOptions, useUserManager, useEffect } from '@/hooks';
 import { useAppStore } from '@/store';
 
 // Types
@@ -21,11 +21,12 @@ const AntLocales: Record<string, () => Promise<Locale>> = {
 export const useAppMixin = () => {
   const i18n = useI18n();
   const appStore = useAppStore();
+  const sietLocale = useOptions('locale');
   const userManager = useUserManager();
   const userApi = useUserApi();
 
   // antd locale
-  const antLocales = ref<Locale>({ locale: i18n.locale });
+  const antLocales = ref<Locale>({ locale: appStore.locale });
 
   /**
    * Admin logo
@@ -83,7 +84,8 @@ export const useAppMixin = () => {
 
   useEffect(
     () => {
-      AntLocales[i18n.locale as keyof typeof AntLocales]?.()
+      // 修改 antd 语言
+      AntLocales[appStore.locale as keyof typeof AntLocales]?.()
         .then((locales) => {
           antLocales.value = locales;
         })
@@ -91,8 +93,21 @@ export const useAppMixin = () => {
           warn(process.env.NODE_ENV === 'production', err.message);
         });
     },
-    () => i18n.locale,
+    () => appStore.locale,
   );
+
+  // 设置用户语言
+  useEffect(() => {
+    userManager
+      .getUser()
+      .then((user) => {
+        const userLocale = user?.profile.locale || sietLocale.value;
+        if (userLocale && appStore.locale !== userLocale) {
+          appStore.setLocale(userLocale);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return reactive({
     antLocales,

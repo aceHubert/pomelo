@@ -4,9 +4,11 @@
 
   var env = window._ENV || {};
 
-  env.infrastructureApiBase = '/api';
+  // env.infrastructureApiBase = '/api';
   env.infrastructureGraphqlBase = '/graphql';
   env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5002/graphql';
+
+  env.adminOrigin = 'https://localhost:5011';
 
   env.oidc = {
     authority: 'http://localhost:5001/',

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueI18n, { type IVueI18n } from 'vue-i18n';
+import { defaultSettings } from '@/configs/settings.config';
 import zhCN from './langs/zh-CN_basic.json';
 import enUS from './langs/en-US.json';
 
@@ -31,8 +32,8 @@ Object.defineProperties(VueI18n.prototype, {
 });
 
 export const i18n = new VueI18n({
-  locale: 'zh-CN',
-  fallbackLocale: 'zh-CN',
+  locale: defaultSettings.language.defaultLocale,
+  fallbackLocale: defaultSettings.language.fallbackLocale,
   messages: {
     'en-US': enUS,
     'zh-CN': zhCN,
@@ -40,7 +41,9 @@ export const i18n = new VueI18n({
   silentFallbackWarn: process.env.NODE_ENV === 'production',
 }) as VueI18n & IVueI18n;
 
-export const useI18n = () => i18n;
+export const supportLanguages = defaultSettings.language.supportLanguages.filter((item) =>
+  Object.hasOwnProperty.call(i18n.messages, item.locale),
+);
 
 /**
  * 扩展VueI18n.tv方法添加到 Vue 实例中

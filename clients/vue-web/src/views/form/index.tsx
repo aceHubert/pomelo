@@ -2,18 +2,13 @@ import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composi
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
-import {
-  useTemplateApi,
-  getFrameworkSchema,
-  OptionPresetKeys,
-  FormMetaPresetKeys,
-  useLocationMixin,
-  useDeviceType,
-} from '@ace-pomelo/shared-client';
+import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { Modal } from 'ant-design-vue';
 import { Dialog } from 'vant';
 import { SkeletonLoader, Result } from '@/components';
-import { useI18n, useOptions, useEffect, expose } from '@/hooks';
+import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
+import { useLocationMixin } from '@/mixins';
+import { useTemplateApi, FormMetaPresetKeys } from '@/fetch/apis';
 
 const MobileForm = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopForm = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -23,7 +18,7 @@ export default defineComponent({
   head() {
     return {
       title: this.title as string,
-      link: (this.links as string[]).map((href) => ({ href, rel: 'stylesheet' })),
+      link: ((this.links as string[]) ?? []).map((href) => ({ href, rel: 'stylesheet' })),
       style: this.cssText
         ? [
             {
@@ -53,10 +48,10 @@ export default defineComponent({
 
     // from /f/:id
     const formRes = createResource(async (id: number) => {
-      const { data: form } = await templateApi.getForm({
-        params: {
+      const { form } = await templateApi.getForm({
+        variables: {
           id,
-          metaKeys: Object.values(FormMetaPresetKeys),
+          keys: Object.values(FormMetaPresetKeys),
         },
       });
 
@@ -81,7 +76,7 @@ export default defineComponent({
     const metas = computed(() => {
       if (formRes.$result?.metas?.length) {
         return formRes.$result.metas.reduce((acc, cur) => {
-          acc[cur.metaKey] = cur.metaValue;
+          acc[cur.key] = cur.value;
           return acc;
         }, {} as Record<string, string>);
       }
@@ -94,8 +89,8 @@ export default defineComponent({
       return $loading
         ? ''
         : $error
-        ? i18n.tv('form.page_load_error_title', '表单加载错误')
-        : $result?.title ?? i18n.tv('form.page_not_found_title', '未找到表单');
+        ? i18n.tv('form_template.page_load_error_title', '表单加载错误')
+        : $result?.title ?? i18n.tv('form_template.page_not_found_title', '未找到表单');
     });
 
     // stylesheets
@@ -103,9 +98,7 @@ export default defineComponent({
       const { $error, $loading, $result } = formRes;
       return $error || $loading
         ? []
-        : JSON.parse(
-            $result?.metas?.find(({ metaKey }) => metaKey === FormMetaPresetKeys.StyleLink)?.metaValue || '[]',
-          );
+        : JSON.parse($result?.metas?.find(({ key }) => key === FormMetaPresetKeys.StyleLink)?.value || '[]');
     });
 
     // css text
@@ -113,7 +106,7 @@ export default defineComponent({
       const { $error, $loading, $result } = formRes;
       return $error || $loading
         ? ''
-        : $result?.metas?.find(({ metaKey }) => metaKey === FormMetaPresetKeys.CssText)?.metaValue || '';
+        : $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.CssText)?.value || '';
     });
 
     // page metas
@@ -126,7 +119,7 @@ export default defineComponent({
         'og:image':
           (!featureImage || isAbsoluteUrl(featureImage)
             ? featureImage
-            : `${trailingSlash(siteUrl.value)}${
+            : `${trailingSlash(siteUrl.value ?? '/')}${
                 featureImage.startsWith('/') ? featureImage.slice(1) : featureImage
               }}`) || '',
       };
@@ -142,12 +135,11 @@ export default defineComponent({
     const submitingRef = ref(false);
     const onSubmit = (value: any) => {
       const { $result } = formRes;
-      const submitAction =
-        $result?.metas?.find(({ metaKey }) => metaKey === FormMetaPresetKeys.SubmitAction)?.metaValue || '';
+      const submitAction = $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitAction)?.value || '';
       const submitSuccessRedirect =
-        $result?.metas?.find(({ metaKey }) => metaKey === FormMetaPresetKeys.SubmitSuccessRedirect)?.metaValue || '';
+        $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitSuccessRedirect)?.value || '';
       const submitSuccessTips =
-        $result?.metas?.find(({ metaKey }) => metaKey === FormMetaPresetKeys.SubmitSuccessTips)?.metaValue ||
+        $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitSuccessTips)?.value ||
         (i18n.tv('form_template.index.submit_success_text', '提交成功') as string);
 
       submitingRef.value = true;

@@ -1,11 +1,12 @@
 import moment from 'moment';
 import { computed, defineComponent, ref } from '@vue/composition-api';
+import { createResource } from '@vue-async/resource-manager';
 import { useRouter } from 'vue2-helpers/vue-router';
-import { Alert, Button, Form, Card, DatePicker, Input, Select, Icon } from 'ant-design-vue';
-import { useDeviceType, copyTextToClipboard } from '@ace-pomelo/shared-client';
+import { Alert, Button, Form, Card, DatePicker, Input, Select, Icon, Result } from 'ant-design-vue';
+import { copyTextToClipboard } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useApiResourceApi } from '@/fetch/apis';
 
 // Types
@@ -83,7 +84,6 @@ export default Form.create({})(
       const deviceType = useDeviceType();
       const apiResourceApi = useApiResourceApi();
 
-      const apiResourceName = ref('');
       const apiSecret = ref<ApiSecretModel>();
 
       const presetTypeOptions = computed(() =>
@@ -114,17 +114,19 @@ export default Form.create({})(
           : {};
       });
 
-      apiResourceApi
-        .getBasicInfo({
-          variables: {
-            id: props.apiResourceId,
-          },
-          catchError: true,
-          loading: true,
-        })
-        .then(({ apiResource }) => {
-          apiResourceName.value = apiResource.name;
-        });
+      const $apiResourceRes = createResource((id: number) =>
+        apiResourceApi
+          .getBasicInfo({
+            variables: {
+              id,
+            },
+            loading: true,
+            catchError: true,
+          })
+          .then(({ apiResource }) => apiResource),
+      );
+
+      $apiResourceRes.read(props.apiResourceId);
 
       const adding = ref(false);
       const handleAdd = () => {
@@ -166,157 +168,173 @@ export default Form.create({})(
         });
       };
 
-      return () => (
-        <PageBreadcrumb
-          breadcrumb={
-            apiResourceName.value
-              ? (routeBreadcrumb) => {
-                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                    key: 'apiResourceName',
-                    label: apiResourceName.value,
-                    path: '',
-                  });
-                  return routeBreadcrumb;
-                }
-              : true
-          }
-        >
-          <Card bordered={false} size="small">
-            {apiSecret.value ? (
-              <div>
-                <Alert
-                  type="warning"
-                  banner
-                  message={i18n.tv('page_api_secrets.generate.secret_generated_tip_title', '重要提醒')}
-                  description={i18n.tv(
-                    'page_api_secrets.generate.secret_generated_tip_content',
-                    '密匙已生成，请妥善保管，一旦离开此页面，密匙将不可查看。',
-                  )}
-                ></Alert>
-                <p class="mt-2 px-4 py-2 gray lighten-4">
-                  {apiSecret.value.value}
-                  <a
-                    href="javascript:;"
-                    class="ml-2"
-                    onClick={() => {
-                      if (copyTextToClipboard(apiSecret.value!.value)) {
-                        message.success(i18n.tv('page_api_secrets.generate.copy_success', '复制成功') as string);
-                      } else {
-                        message.error(i18n.tv('page_api_secrets.generate.copy_faild', '复制失败') as string);
-                      }
-                    }}
-                  >
-                    <Icon type="copy" />
-                  </a>
-                </p>
-                <Button class="mt-2" type="primary" onClick={() => router.back()}>
-                  {i18n.tv('page_api_secrets.generate.back_btn_text', '返回')}
-                </Button>
-              </div>
-            ) : (
-              <Form
-                form={props.form}
-                layout={formLayout.value}
-                labelCol={formItemLayout.value.labelCol}
-                wrapperCol={formItemLayout.value.wrapperCol}
-              >
-                <Form.Item
-                  label={i18n.tv('page_api_secrets.generate.form.description_label', '说明')}
-                  help={i18n.tv('page_api_secrets.generate.form.description_help', '密匙作何使用？')}
+      return () => {
+        const { $result: apiResource, $loading } = $apiResourceRes;
+
+        if ($loading) return;
+
+        return apiResource ? (
+          <PageBreadcrumb
+            breadcrumb={
+              apiResource.displayName || apiResource.name
+                ? (routeBreadcrumb) => {
+                    routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                      key: 'apiResourceName',
+                      label: apiResource.displayName || apiResource.name,
+                      path: '',
+                    });
+                    return routeBreadcrumb;
+                  }
+                : true
+            }
+          >
+            <Card bordered={false} size="small">
+              {apiSecret.value ? (
+                <div>
+                  <Alert
+                    type="warning"
+                    banner
+                    message={i18n.tv('page_api_secrets.generate.secret_generated_tip_title', '重要提醒')}
+                    description={i18n.tv(
+                      'page_api_secrets.generate.secret_generated_tip_content',
+                      '密匙已生成，请妥善保管，一旦离开此页面，密匙将不可查看。',
+                    )}
+                  ></Alert>
+                  <p class="mt-2 px-4 py-2 gray lighten-4">
+                    {apiSecret.value.value}
+                    <a
+                      href="javascript:;"
+                      class="ml-2"
+                      onClick={() => {
+                        if (copyTextToClipboard(apiSecret.value!.value)) {
+                          message.success(i18n.tv('page_api_secrets.generate.copy_success', '复制成功') as string);
+                        } else {
+                          message.error(i18n.tv('page_api_secrets.generate.copy_faild', '复制失败') as string);
+                        }
+                      }}
+                    >
+                      <Icon type="copy" />
+                    </a>
+                  </p>
+                  <Button class="mt-2" type="primary" onClick={() => router.back()}>
+                    {i18n.tv('page_api_secrets.generate.back_btn_text', '返回')}
+                  </Button>
+                </div>
+              ) : (
+                <Form
+                  form={props.form}
+                  layout={formLayout.value}
+                  labelCol={formItemLayout.value.labelCol}
+                  wrapperCol={formItemLayout.value.wrapperCol}
                 >
-                  <Input
-                    v-decorator={[
-                      'description',
-                      {
-                        rules: [
-                          {
-                            required: true,
-                            message: i18n.tv('page_api_secrets.generate.form.type_required', '请输入说明'),
-                          },
-                        ],
-                      },
-                    ]}
-                    placeholder={i18n.tv('page_api_secrets.generate.form.type_placeholder', '请输入说明')}
-                    style="width:268px"
-                  ></Input>
-                </Form.Item>
-                <Form.Item label={i18n.tv('page_api_secrets.generate.form.type_label', '类型')}>
-                  <Select
-                    v-decorator={[
-                      'type',
-                      {
-                        initialValue: 'SharedSecret',
-                        rules: [
-                          {
-                            required: true,
-                            message: i18n.tv('page_api_secrets.generate.form.type_required', '请选择密匙类型'),
-                          },
-                        ],
-                      },
-                    ]}
-                    placeholder={i18n.tv('page_api_secrets.generate.form.type_placeholder', '请选择密匙类型')}
-                    style="width:268px"
-                    options={presetTypeOptions.value}
-                  ></Select>
-                </Form.Item>
-                <Form.Item label={i18n.tv('page_api_secrets.generate.form.expires_at_label', '过期时间')}>
-                  <Select
-                    v-decorator={[
-                      'expiresAt',
-                      {
-                        initialValue: 2592000,
-                        rules: [
-                          {
-                            required: true,
-                            message: i18n.tv('page_api_secrets.generate.form.expires_at_required', '请选择过期时间'),
-                          },
-                        ],
-                      },
-                    ]}
-                    placeholder={i18n.tv('page_api_secrets.generate.form.expires_at_placeholder', '请选择过期时间')}
-                    class="mr-2"
-                    style="width:120px"
-                    options={presetExpiresAtOptions.value}
-                  ></Select>
-                  {props.form.getFieldValue('expiresAt') === 'custom' && (
-                    <DatePicker
+                  <Form.Item
+                    label={i18n.tv('page_api_secrets.generate.form.description_label', '说明')}
+                    help={i18n.tv('page_api_secrets.generate.form.description_help', '密匙作何使用？')}
+                  >
+                    <Input
                       v-decorator={[
-                        'expiresAtDate',
+                        'description',
                         {
                           rules: [
                             {
                               required: true,
-                              message: i18n.tv(
-                                'page_api_secrets.generate.form.expires_at_date_required',
-                                '请选择过期时间',
-                              ),
+                              message: i18n.tv('page_api_secrets.generate.form.type_required', '请输入说明'),
                             },
                           ],
                         },
                       ]}
-                      disabledDate={(current) => current && current < moment().endOf('day')}
-                      showToday={false}
-                      placeholder={i18n.tv(
-                        'page_api_secrets.generate.form.expires_at_date_placeholder',
-                        '请选择过期时间',
-                      )}
-                      style="width:140px"
-                    ></DatePicker>
-                  )}
-                </Form.Item>
-                <Form.Item wrapperCol={buttonItemLayout.value.wrapperCol}>
-                  <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
-                    {i18n.tv('page_api_secrets.generate.form.submit_btn_text', '生成密匙')}
-                  </Button>
-                  <Button class="ml-2" loading={adding.value} onClick={() => router.back()}>
-                    {i18n.tv('page_api_secrets.generate.form.cancle_btn_text', '取消')}
-                  </Button>
-                </Form.Item>
-              </Form>
-            )}
+                      placeholder={i18n.tv('page_api_secrets.generate.form.type_placeholder', '请输入说明')}
+                      style="width:268px"
+                    ></Input>
+                  </Form.Item>
+                  <Form.Item label={i18n.tv('page_api_secrets.generate.form.type_label', '类型')}>
+                    <Select
+                      v-decorator={[
+                        'type',
+                        {
+                          initialValue: 'SharedSecret',
+                          rules: [
+                            {
+                              required: true,
+                              message: i18n.tv('page_api_secrets.generate.form.type_required', '请选择密匙类型'),
+                            },
+                          ],
+                        },
+                      ]}
+                      placeholder={i18n.tv('page_api_secrets.generate.form.type_placeholder', '请选择密匙类型')}
+                      style="width:268px"
+                      options={presetTypeOptions.value}
+                    ></Select>
+                  </Form.Item>
+                  <Form.Item label={i18n.tv('page_api_secrets.generate.form.expires_at_label', '过期时间')}>
+                    <Select
+                      v-decorator={[
+                        'expiresAt',
+                        {
+                          initialValue: 2592000,
+                          rules: [
+                            {
+                              required: true,
+                              message: i18n.tv('page_api_secrets.generate.form.expires_at_required', '请选择过期时间'),
+                            },
+                          ],
+                        },
+                      ]}
+                      placeholder={i18n.tv('page_api_secrets.generate.form.expires_at_placeholder', '请选择过期时间')}
+                      class="mr-2"
+                      style="width:120px"
+                      options={presetExpiresAtOptions.value}
+                    ></Select>
+                    {props.form.getFieldValue('expiresAt') === 'custom' && (
+                      <DatePicker
+                        v-decorator={[
+                          'expiresAtDate',
+                          {
+                            rules: [
+                              {
+                                required: true,
+                                message: i18n.tv(
+                                  'page_api_secrets.generate.form.expires_at_date_required',
+                                  '请选择过期时间',
+                                ),
+                              },
+                            ],
+                          },
+                        ]}
+                        disabledDate={(current) => current && current < moment().endOf('day')}
+                        showToday={false}
+                        placeholder={i18n.tv(
+                          'page_api_secrets.generate.form.expires_at_date_placeholder',
+                          '请选择过期时间',
+                        )}
+                        style="width:140px"
+                      ></DatePicker>
+                    )}
+                  </Form.Item>
+                  <Form.Item wrapperCol={buttonItemLayout.value.wrapperCol}>
+                    <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
+                      {i18n.tv('page_api_secrets.generate.form.submit_btn_text', '生成密匙')}
+                    </Button>
+                    <Button class="ml-2" loading={adding.value} onClick={() => router.back()}>
+                      {i18n.tv('page_api_secrets.generate.form.cancle_btn_text', '取消')}
+                    </Button>
+                  </Form.Item>
+                </Form>
+              )}
+            </Card>
+          </PageBreadcrumb>
+        ) : (
+          <Card bordered={false} size="small">
+            <Result status="error" subTitle={i18n.tv('page_api_resource_detail.not_found', 'API资源不存在！')}>
+              <template slot="extra">
+                <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                  {i18n.tv('common.btn_text.go_back', '返回')}
+                </Button>
+              </template>
+            </Result>
           </Card>
-        </PageBreadcrumb>
-      );
+        );
+      };
     },
   }),
 );

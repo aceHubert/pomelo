@@ -17,10 +17,10 @@ import {
   type LayoutType,
   type ContentWidth,
 } from 'antdv-layout-pro/types';
-import { OptionPresetKeys, useDeviceMixin, useLocationMixin } from '@ace-pomelo/shared-client';
+import { OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
 import { useUserManager, useI18n, useOptions } from '@/hooks';
-import { useAppMixin } from '@/mixins';
+import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
 import { loadingRef } from '@/shared';
 import { getDefaultMenus } from '@/configs/menu.config';
 import IconDarkTheme from '@/assets/icons/dark-theme.svg?inline';
@@ -199,7 +199,7 @@ export default defineComponent({
           theme={appMixin.theme}
           primaryColor={appMixin.primaryColor}
           device={deviceMixin.device}
-          i18nRender={(...args: Parameters<typeof i18n.tv>) => i18n.tv(...args) as string}
+          i18nRender={(...args: [string, string, Record<string, string>]) => i18n.tv(...args) as string}
         >
           {
             // device 变化重新渲染导致 wujie Vue组件初始化使用 Promise 执行$refs找不到问题

@@ -4,7 +4,7 @@
 
   var env = window._ENV || {};
 
-  env.infrastructureApiBase = 'https://localhost:5002/api';
+  // env.infrastructureApiBase = 'https://localhost:5002/api';
   env.infrastructureGraphqlBase = 'https://localhost:5002/graphql';
   env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5002/graphql';
   env.identityGraphqlBase = 'https://localhost:5003/graphql';
@@ -21,7 +21,7 @@
     silent_redirect_uri: baseUrl + '/signin-silent.html',
     // these two will be done dynamically from the buttons clicked, but are
     // needed if you want to use the silent_renew
-    response_type: 'id_token token',
+    response_type: 'code',
     scope: 'openid profile offline_access',
     // will revoke (reference) access tokens at logout time
     revokeAccessTokenOnSignout: true,

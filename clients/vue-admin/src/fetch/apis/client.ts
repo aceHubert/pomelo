@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '../graphql';
-import { request } from '../graphql/requests/identity-request';
+import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
+import { request } from '../graphql/identity-request';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '../graphql';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 import type { PagedArgs, Paged } from './types';
 
 export interface ClientModel {
@@ -241,7 +241,7 @@ export const useClientApi = defineRegistApi('client', {
           createdAt
         }
       }
-    ` as TypedQueryDocumentNode<{ client: ClientModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ client: ClientModel | null }, { clientId: string }>,
     getBasicInfo: gql`
       query getClient($clientId: String!) {
         client(clientId: $clientId) {
@@ -253,7 +253,7 @@ export const useClientApi = defineRegistApi('client', {
         }
       }
     ` as TypedQueryDocumentNode<
-      { client: Pick<ClientModel, 'applicationType' | 'clientId' | 'clientName' | 'enabled' | 'createdAt'> },
+      { client: Pick<ClientModel, 'applicationType' | 'clientId' | 'clientName' | 'enabled' | 'createdAt'> | null },
       { clientId: string }
     >,
     create: gql`
@@ -284,7 +284,7 @@ export const useClientApi = defineRegistApi('client', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ clientCorsOrigins: ClientCorsOriginsModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ clientCorsOrigins: ClientCorsOriginsModel | undefined }, { clientId: string }>,
     createCorsOrigin: gql`
       mutation createClientCorsOrigin($clientId: String!, $model: NewClientCorsOriginInput!) {
         corsOrigin: createClientCorsOrigin(clientId: $clientId, model: $model) {
@@ -295,6 +295,17 @@ export const useClientApi = defineRegistApi('client', {
     ` as TypedMutationDocumentNode<
       { corsOrigin: ClientCorsOriginModel },
       { clientId: string; model: NewClientCorsOriginInput }
+    >,
+    createCorsOrigins: gql`
+      mutation createClientCorsOrigins($clientId: String!, $model: [NewClientCorsOriginInput!]!) {
+        corsOrigins: createClientCorsOrigin(clientId: $clientId, model: $model) {
+          id
+          origin
+        }
+      }
+    ` as TypedMutationDocumentNode<
+      { corsOrigins: ClientCorsOriginModel[] },
+      { clientId: string; model: NewClientCorsOriginInput[] }
     >,
     deleteCorsOrigin: gql`
       mutation deleteClientCorsOrigin($id: ID!) {
@@ -313,7 +324,7 @@ export const useClientApi = defineRegistApi('client', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ clientClaims: ClientClaimsModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ clientClaims: ClientClaimsModel | null }, { clientId: string }>,
     createClaim: gql`
       mutation createClientClaim($clientId: String!, $model: NewClientClaimInput!) {
         claim: createClientClaim(clientId: $clientId, model: $model) {
@@ -331,7 +342,7 @@ export const useClientApi = defineRegistApi('client', {
           value
         }
       }
-    ` as TypedMutationDocumentNode<{ claims: ClientClaimModel[] }, { clientId: string; model: NewClientClaimInput }>,
+    ` as TypedMutationDocumentNode<{ claims: ClientClaimModel[] }, { clientId: string; model: NewClientClaimInput[] }>,
     deleteClaim: gql`
       mutation deleteClientClaim($id: ID!) {
         result: deleteClientClaim(id: $id)
@@ -348,7 +359,7 @@ export const useClientApi = defineRegistApi('client', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ clientGrantTypes: ClientGrantTypesModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ clientGrantTypes: ClientGrantTypesModel | null }, { clientId: string }>,
     createGrantType: gql`
       mutation createClientGrantType($clientId: String!, $model: NewClientGrantTypeInput!) {
         grantType: createClientGrantType(clientId: $clientId, model: $model) {
@@ -369,7 +380,7 @@ export const useClientApi = defineRegistApi('client', {
       }
     ` as TypedMutationDocumentNode<
       { grantTypes: ClientGrantTypeModel[] },
-      { clientId: string; model: NewClientGrantTypeInput }
+      { clientId: string; model: NewClientGrantTypeInput[] }
     >,
     deleteGrantType: gql`
       mutation deleteClientGrantType($id: ID!) {
@@ -387,7 +398,7 @@ export const useClientApi = defineRegistApi('client', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ clientScopes: ClientScopesModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ clientScopes: ClientScopesModel | null }, { clientId: string }>,
     createScope: gql`
       mutation createClientScope($clientId: String!, $model: NewClientScopeInput!) {
         scope: createClientScope(clientId: $clientId, model: $model) {
@@ -403,7 +414,7 @@ export const useClientApi = defineRegistApi('client', {
           scope
         }
       }
-    ` as TypedMutationDocumentNode<{ scopes: ClientScopeModel[] }, { clientId: string; model: NewClientScopeInput }>,
+    ` as TypedMutationDocumentNode<{ scopes: ClientScopeModel[] }, { clientId: string; model: NewClientScopeInput[] }>,
     deleteScope: gql`
       mutation deleteClientScope($id: ID!) {
         result: deleteClientScope(id: $id)
@@ -420,7 +431,7 @@ export const useClientApi = defineRegistApi('client', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ clientRedirectUris: ClientRedirectUrisModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ clientRedirectUris: ClientRedirectUrisModel | null }, { clientId: string }>,
     createRedirectUri: gql`
       mutation createClientRedirectUri($clientId: String!, $model: NewClientRedirectUriInput!) {
         redirectUri: createClientRedirectUri(clientId: $clientId, model: $model) {
@@ -431,6 +442,17 @@ export const useClientApi = defineRegistApi('client', {
     ` as TypedMutationDocumentNode<
       { redirectUri: ClientRedirectUriModel },
       { clientId: string; model: NewClientRedirectUriInput }
+    >,
+    createRedirectUris: gql`
+      mutation createClientRedirectUris($clientId: String!, $model: [NewClientRedirectUriInput!]!) {
+        redirectUris: createClientRedirectUris(clientId: $clientId, model: $model) {
+          id
+          redirectUri
+        }
+      }
+    ` as TypedMutationDocumentNode<
+      { redirectUris: ClientRedirectUriModel[] },
+      { clientId: string; model: NewClientRedirectUriInput[] }
     >,
     deleteRedirectUri: gql`
       mutation deleteClientRedirectUri($id: ID!) {
@@ -449,7 +471,7 @@ export const useClientApi = defineRegistApi('client', {
         }
       }
     ` as TypedQueryDocumentNode<
-      { clientPostLogoutRedirectUris: ClientPostLogoutRedirectUrisModel },
+      { clientPostLogoutRedirectUris: ClientPostLogoutRedirectUrisModel | null },
       { clientId: string }
     >,
     createPostLogoutRedirectUri: gql`
@@ -462,6 +484,17 @@ export const useClientApi = defineRegistApi('client', {
     ` as TypedMutationDocumentNode<
       { postLogoutRedirectUri: ClientPostLogoutRedirectUriModel },
       { clientId: string; model: NewClientPostLogoutRedirectUriInput }
+    >,
+    createPostLogoutRedirectUris: gql`
+      mutation createClientPostLogoutRedirectUris($clientId: String!, $model: [NewClientPostLogoutRedirectUriInput!]!) {
+        postLogoutRedirectUris: createClientPostLogoutRedirectUris(clientId: $clientId, model: $model) {
+          id
+          postLogoutRedirectUri
+        }
+      }
+    ` as TypedMutationDocumentNode<
+      { postLogoutRedirectUris: ClientPostLogoutRedirectUriModel[] },
+      { clientId: string; model: NewClientPostLogoutRedirectUriInput[] }
     >,
     deletePostLogoutRedirectUri: gql`
       mutation deleteClientPostLogoutRedirectUri($id: ID!) {
@@ -482,7 +515,7 @@ export const useClientApi = defineRegistApi('client', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ clientSecrets: ClientSecretsModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ clientSecrets: ClientSecretsModel | null }, { clientId: string }>,
     createSecret: gql`
       mutation createClientSecret($clientId: String!, $model: NewClientSecretInput!) {
         clientSecret: createClientSecret(clientId: $clientId, model: $model) {
@@ -515,7 +548,7 @@ export const useClientApi = defineRegistApi('client', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ clientProperties: ClientPropertiesModel }, { clientId: string }>,
+    ` as TypedQueryDocumentNode<{ clientProperties: ClientPropertiesModel | null }, { clientId: string }>,
     createProperty: gql`
       mutation createClientProperty($clientId: String!, $model: NewClientPropertyInput!) {
         clientProperty: createClientProperty(clientId: $clientId, model: $model) {
@@ -527,6 +560,18 @@ export const useClientApi = defineRegistApi('client', {
     ` as TypedMutationDocumentNode<
       { clientProperty: ClientPropertyModel },
       { clientId: string; model: NewClientPropertyInput }
+    >,
+    createProperties: gql`
+      mutation createClientProperties($clientId: String!, $model: [NewClientPropertyInput!]!) {
+        clientProperties: createClientProperties(clientId: $clientId, model: $model) {
+          id
+          key
+          value
+        }
+      }
+    ` as TypedMutationDocumentNode<
+      { clientProperty: ClientPropertyModel[] },
+      { clientId: string; model: NewClientPropertyInput[] }
     >,
     deleteProperty: gql`
       mutation deleteClientProperty($id: ID!) {

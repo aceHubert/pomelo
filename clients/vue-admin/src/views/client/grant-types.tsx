@@ -1,10 +1,10 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
-import { Card, Button, Form, Alert, Select, Table } from 'ant-design-vue';
-import { useDeviceType } from '@ace-pomelo/shared-client';
+import { Card, Button, Form, Alert, Select, Table, Result } from 'ant-design-vue';
+import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
 import { PageBreadcrumb } from '@/layouts/components';
-import { useI18n } from '@/hooks';
+import { useI18n, useDeviceType } from '@/hooks';
 import { useClientApi } from '@/fetch/apis';
 
 // Types
@@ -71,6 +71,7 @@ export default Form.create({})(
       },
     },
     setup(props: ClientGrantTypeProps) {
+      const router = useRouter();
       const i18n = useI18n();
       const deviceType = useDeviceType();
       const clientApi = useClientApi();
@@ -112,11 +113,13 @@ export default Form.create({})(
             variables: {
               clientId: props.clientId,
             },
+            loading: true,
             catchError: true,
           })
           .then(({ clientGrantTypes }) => {
-            clientName.value = clientGrantTypes.clientName;
+            if (!clientGrantTypes) return;
 
+            clientName.value = clientGrantTypes.clientName;
             return clientGrantTypes.grantTypes;
           });
       });
@@ -140,7 +143,7 @@ export default Form.create({})(
             })
             .then(({ grantTypes }) => {
               props.form.resetFields();
-              $grantTypesRes.$result.push(...grantTypes);
+              $grantTypesRes.$result!.push(...grantTypes);
             })
             .catch((err) => {
               message.error(err.message);
@@ -174,8 +177,8 @@ export default Form.create({})(
               })
               .then(({ result }) => {
                 result &&
-                  $grantTypesRes.$result.splice(
-                    $grantTypesRes.$result.findIndex((item) => item.id === id),
+                  $grantTypesRes.$result!.splice(
+                    $grantTypesRes.$result!.findIndex((item) => item.id === id),
                     1,
                   );
               })
@@ -186,23 +189,27 @@ export default Form.create({})(
         });
       };
 
-      return () => (
-        <PageBreadcrumb
-          breadcrumb={
-            clientName.value
-              ? (routeBreadcrumb) => {
-                  routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
-                    key: 'clientName',
-                    label: clientName.value,
-                    path: '',
-                  });
-                  return routeBreadcrumb;
-                }
-              : true
-          }
-        >
-          <Card bordered={false} size="small">
-            {$grantTypesRes.$loaded && (
+      return () => {
+        const { $result: grantTypes, $loading } = $grantTypesRes;
+
+        if ($loading) return;
+
+        return grantTypes ? (
+          <PageBreadcrumb
+            breadcrumb={
+              clientName.value
+                ? (routeBreadcrumb) => {
+                    routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
+                      key: 'clientName',
+                      label: clientName.value,
+                      path: '',
+                    });
+                    return routeBreadcrumb;
+                  }
+                : true
+            }
+          >
+            <Card bordered={false} size="small">
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
                 <Form.Item label={i18n.tv('page_client_grant_types.form.grant_type_label', '授权类型')} class="mb-2">
                   <Select
@@ -232,28 +239,37 @@ export default Form.create({})(
                   </Button>
                 </Form.Item>
               </Form>
-            )}
-            <Alert
-              type="warning"
-              banner
-              showIcon={false}
-              message="Grant types are a way to specify how a client wants to interact with IdertityServer."
-            />
-            <Table
-              class="mt-3"
-              size="small"
-              bordered={true}
-              pagination={false}
-              columns={columns.value}
-              dataSource={$grantTypesRes.$result}
-              loading={$grantTypesRes.$loading}
-              locale={{
-                emptyText: i18n.tv('page_client_grant_types.empty_text', '暂无授权类型配置！'),
-              }}
-            />
+              <Alert
+                type="warning"
+                banner
+                showIcon={false}
+                message="Grant types are a way to specify how a client wants to interact with IdertityServer."
+              />
+              <Table
+                class="mt-3"
+                size="small"
+                bordered={true}
+                pagination={false}
+                columns={columns.value}
+                dataSource={grantTypes}
+                locale={{
+                  emptyText: i18n.tv('page_client_grant_types.empty_text', '暂无授权类型配置！'),
+                }}
+              />
+            </Card>
+          </PageBreadcrumb>
+        ) : (
+          <Card bordered={false} size="small">
+            <Result status="error" subTitle={i18n.tv('page_client_detail.not_found', '客户端不存在！')}>
+              <template slot="extra">
+                <Button key="console" type="primary" onClick={() => router.go(-1)}>
+                  {i18n.tv('common.btn_text.go_back', '返回')}
+                </Button>
+              </template>
+            </Result>
           </Card>
-        </PageBreadcrumb>
-      );
+        );
+      };
     },
   }),
 );
