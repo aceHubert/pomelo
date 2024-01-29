@@ -1,6 +1,7 @@
 import tinycolor from 'tinycolor2';
 import { defineStore } from 'pinia';
 import { ref, shallowRef } from '@vue/composition-api';
+import { warn } from '@ace-util/core';
 import { i18n, supportLanguages as i18nSupportLanguages } from '@/i18n';
 import { defaultSettings } from '@/configs/settings.config';
 
@@ -70,13 +71,20 @@ export const useAppStore = defineStore('app', () => {
    * 设置语言（使用缓存到本地）
    */
   const setLocale = (userLocale: string) => {
-    const { locale: newLocale } =
-      supportLanguages.value.find((lang) => lang.locale === userLocale || lang.alternate === userLocale) || {};
+    const newLocale = supportLanguages.value.find(
+      (lang) => lang.locale === userLocale || lang.alternate === userLocale,
+    )?.locale;
 
     if (newLocale) {
       locale.value = newLocale;
       // 修改 i18n 的 locale
       newLocale !== i18n.locale && (i18n.locale = newLocale);
+    } else {
+      warn(
+        process.env.NODE_ENV === 'production',
+        `[appStore] setLocale: locale ${userLocale} not found, reset i18n.locale to ${locale.value}`,
+      );
+      i18n.locale = locale.value;
     }
   };
 

@@ -40,7 +40,7 @@ export const defaultSettings: {
     i18nRender('site_title', 'Pomelo Admin'),
   logo: `${process.env.BASE_URL}static/images/logo.png`,
   layout: {
-    type: LayoutType.SiderMenu,
+    type: LayoutType.MixedMenu,
     contentWidth: ContentWidth.Fluid,
     fixedHeader: true,
     fixSiderbar: true,
@@ -50,7 +50,7 @@ export const defaultSettings: {
     multiTab: false,
   },
   color: {
-    theme: Theme.Light,
+    theme: Theme.Dark,
     primaryColor: '#FA541C',
   },
   language: {

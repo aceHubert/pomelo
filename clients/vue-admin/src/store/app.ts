@@ -1,6 +1,7 @@
 import tinycolor from 'tinycolor2';
 import { defineStore } from 'pinia';
 import { ref, shallowRef } from '@vue/composition-api';
+import { warn, equals } from '@ace-util/core';
 import { i18n, supportLanguages as i18nSupportLanguages } from '@/i18n';
 import { defaultSettings } from '@/configs/settings.config';
 import { STORAGE_PREFIX } from './utils';
@@ -26,7 +27,12 @@ export const useAppStore = defineStore(
      * 设置布局（使用缓存到本地）
      */
     const setLayout = (layoutConfig: Partial<LayoutConfig>) => {
-      layout.value = { ...layout.value, ...layoutConfig };
+      for (const key in layoutConfig) {
+        if (!equals(layout.value[key], layoutConfig[key])) {
+          layout.value = { ...layout.value, ...layoutConfig };
+          return;
+        }
+      }
     };
 
     /**
@@ -47,7 +53,9 @@ export const useAppStore = defineStore(
      * 设置 theme（不会缓存，如需要缓存请使用 setColor）
      */
     const setTheme = (themeVal: Theme) => {
-      theme.value = themeVal;
+      if (themeVal && themeVal !== theme.value) {
+        theme.value = themeVal;
+      }
     };
 
     const primaryColor = ref(color.value.primaryColor);
@@ -55,7 +63,7 @@ export const useAppStore = defineStore(
      * 设置 primary color（不会缓存，如需要缓存请使用 setColor）
      */
     const setPrimaryColor = (color: string) => {
-      if (color && new tinycolor(color).isValid()) {
+      if (color && new tinycolor(color).isValid() && color !== primaryColor.value) {
         primaryColor.value = color;
       }
     };
@@ -82,13 +90,20 @@ export const useAppStore = defineStore(
      * 设置语言（使用缓存到本地）
      */
     const setLocale = (userLocale: string) => {
-      const { locale: newLocale } =
-        supportLanguages.value.find((lang) => lang.locale === userLocale || lang.alternate === userLocale) || {};
+      const newLocale = supportLanguages.value.find(
+        (lang) => lang.locale === userLocale || lang.alternate === userLocale,
+      )?.locale;
 
       if (newLocale) {
         locale.value = newLocale;
         // 修改 i18n 的 locale
         newLocale !== i18n.locale && (i18n.locale = newLocale);
+      } else {
+        warn(
+          process.env.NODE_ENV === 'production',
+          `[appStore] setLocale: locale ${userLocale} not found, reset i18n.locale to ${locale.value}`,
+        );
+        i18n.locale = locale.value;
       }
     };
 
@@ -116,7 +131,7 @@ export const useAppStore = defineStore(
       key: `${STORAGE_PREFIX}/app-store`,
       paths: ['layout', 'theme', 'primaryColor', 'locale'],
       afterRestore: (ctx) => {
-        // 初始设置 locale (从缓存中读取)
+        // 初始设置 (从缓存中读取)
         ctx.store.setLocale(ctx.store.locale);
         ctx.store.setTheme(ctx.store.theme);
         ctx.store.setPrimaryColor(ctx.store.primaryColor);

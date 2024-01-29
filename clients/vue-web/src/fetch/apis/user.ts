@@ -36,6 +36,18 @@ export const useUserApi = defineRegistApi('user', {
         }
       }
     ` as TypedQueryDocumentNode<{ user: UserModel | null }, { id: string }>,
+    getMetas: gql`
+      query getUserMetas($userId: ID!, $keys: [String!]!) {
+        metas: userMetas(userId: $userId, metaKeys: $keys) {
+          id
+          key: metaKey
+          value: metaValue
+        }
+      }
+    ` as TypedQueryDocumentNode<
+      { metas: { id: number; key: string; value: string }[] },
+      { userId: string; keys: string[] }
+    >,
     updateMetaByKey: gql`
       mutation updateUserMetaByKey($userId: ID!, $key: String!, $value: String!) {
         result: updateUserMetaByKey(userId: $userId, metaKey: $key, metaValue: $value)

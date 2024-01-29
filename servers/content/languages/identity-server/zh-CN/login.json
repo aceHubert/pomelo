@@ -10,7 +10,8 @@
     "remember_me_label": "记住我？",
     "forgot_password_label": "忘记密码",
     "user_policy_label": "已阅读并同意",
-    "user_policy_link_text": "用户协议"
+    "user_policy_link_text": "用户协议",
+    "user_policy_check_required": "请阅读并同意用户协议！"
   },
   "wrapper": {
     "title": "登录",

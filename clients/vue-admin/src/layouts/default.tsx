@@ -154,7 +154,7 @@ export default defineComponent({
     };
 
     const handleLocaleChange = (locale: string) => {
-      appMixin.setLocale(locale);
+      i18n.locale = locale;
       // do something else
     };
 
