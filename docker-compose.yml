@@ -7,7 +7,7 @@
 #   ENV_FILE=.env.local
 
 # > mkdir release
-# > docker-compose --env-file .env.docker.local --build --force-recreate up -d
+# > docker compose --env-file .env.docker.local up --build --force-recreate  -d
 
 version: '3.1'
 
@@ -22,10 +22,12 @@ services:
       context: ${BUILD_CONTEXT:-.}
       dockerfile: Dockerfile
       args:
-        - BUILD_IGNORE=${BUILD_IGNORE:-false}
-        - BUILD_OPTION=${BUILD_OPTION}
-        - RUNTIME_ENV=${RUNTIME_ENV}
-        - RUNTIME_APPS=${RUNTIME_APPS}
+        BUILD_IGNORE: ${BUILD_IGNORE:-false}
+        BUILD_OPTION: ${BUILD_OPTION:-vue}
+        RUNTIME_ENV: ${RUNTIME_ENV:-production}
+        RUNTIME_APPS: ${RUNTIME_APPS:-identity-server,identity-api,infrastructure-api,client-admin,client-web}
+        BUILDKIT_INLINE_CACHE: true
+        BUILDKIT_CONTEXT_KEEP_GIT_DIR: true
       cache_from:
         - pomelo:latest
       target: deploy

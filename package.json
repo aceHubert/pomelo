@@ -8,7 +8,7 @@
     "build:vue": "yarn build:submodules && yarn build:vue-clients && yarn build:servers",
     "build:vue:local": "cross-env ENV_JS=env/env.local.js yarn build:vue-clients && yarn build:servers",
     "build:vue-clients": "yarn workspaces foreach -vtR --from '@ace-pomelo/{vue-web,vue-admin}' run build",
-    "build:servers": "yarn workspaces foreach -vtR --from '@ace-pomelo/{identity-server,identity-api,infrastructure-api}' run build",
+    "build:servers": "yarn workspaces foreach -vtR --topological-dev --from '@ace-pomelo/{identity-server,identity-api,infrastructure-api}' run build",
     "build:submodules": "grunt --verbose",
     "build:submodules:formily-antdv": "grunt build:formily-antdv --verbose",
     "build:submodules:formily-vant": "grunt build:formily-vant --verbose",

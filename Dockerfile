@@ -6,7 +6,7 @@ ARG NODE_VERSION="16.14.0-alpine"
 # true: 不编译代码，直接使用缓存；false: 编译代码
 ARG BUILD_IGNORE="false"
 # 编译选项 yarn build:${BUILD_OPTION}
-ARG BUILD_OPTION="servers"
+ARG BUILD_OPTION="vue"
 # 运行环境
 ARG RUNTIME_ENV="production"
 # 运行指定应用

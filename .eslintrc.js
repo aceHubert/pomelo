@@ -143,6 +143,7 @@ module.exports = {
         '@typescript-eslint/consistent-type-imports': 'off',
         '@typescript-eslint/no-this-alias': ['error', { allowedNames: ['vm'] }],
         '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
+        '@typescript-eslint/no-namespace': ['error', { allowDeclarations: true }],
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/no-empty-interface': [
           'error',
