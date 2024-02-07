@@ -4,63 +4,101 @@ import { NewMediaValidator, MediaMetaDataValidator } from './new-media.validator
 
 @InputType({ description: 'Crop image Option' })
 export abstract class ImageCropOptions {
-  @Field((type) => Int, { description: 'Left position' })
+  /**
+   * Left position
+   */
+  @Field((type) => Int)
   left!: number;
 
-  @Field((type) => Int, { description: 'Top position' })
+  /**
+   * Top position
+   */
+  @Field((type) => Int)
   top!: number;
 
-  @Field((type) => Int, { description: 'Scale width' })
+  /**
+   * Scale width
+   */
+  @Field((type) => Int)
   width!: number;
 
-  @Field((type) => Int, { description: 'Scale height' })
+  /**
+   * Scale height
+   */
+  @Field((type) => Int)
   height!: number;
 }
 
 @InputType()
 export class FileUploadOptionsInput {
-  @Field({ nullable: true, description: 'File name (with extension)' })
+  /**
+   * File name (with extension)
+   */
   fileName?: string;
 
-  @Field((type) => ImageCropOptions, { description: 'Image crop options' })
+  /**
+   * Image crop options
+   */
+  @Field((type) => ImageCropOptions)
   crop?: ImageCropOptions;
 }
 
 @InputType()
 export class ImageCropOptionsInput extends ImageCropOptions {
-  @Field({ defaultValue: false, description: 'Create new media if set "true", default is "false"' })
+  /**
+   * Create new media if set "true"
+   */
+  @Field({ defaultValue: false })
   replace?: boolean;
 }
 
 @InputType()
 export class NewMediaInput extends NewMediaValidator {
-  @Field({ description: 'File name (without extension)' })
+  /**
+   * File name (without extension)
+   */
   fileName!: string;
 
-  @Field({ description: 'Original file name (without extension)' })
+  /**
+   * Original file name (without extension)
+   */
   originalFileName!: string;
 
-  @Field({ description: 'Extension' })
+  /**
+   * Extension
+   */
   extension!: string;
 
-  @Field({ description: 'Mime type' })
+  /**
+   * Mime type
+   */
   mimeType!: string;
 
-  @Field({ description: 'Path' })
+  /**
+   * Path
+   */
   path!: string;
 
-  @Field((type) => [NewMetaInput!], { nullable: true, description: 'New metas' })
+  /**
+   * New metas
+   */
   metas?: NewMetaInput[];
 }
 
 @InputType()
 export class MediaMetaDataInput extends MediaMetaDataValidator {
-  @Field({ description: 'File size' })
+  /**
+   * File size
+   */
   fileSize!: number;
 
-  @Field({ nullable: true, description: 'Image width (Optional)' })
+  /**
+   * Image width
+   */
   width?: number;
 
-  @Field({ nullable: true, description: 'Image height (Optional)' })
+  /**
+   * Image height
+   */
   height?: number;
 }

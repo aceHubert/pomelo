@@ -15,38 +15,38 @@ export class NewUserDto extends NewUserValidator {
   /**
    * First name
    */
-  firstName?: string | undefined;
+  firstName?: string;
 
   /**
    * Last name
    */
-  lastName?: string | undefined;
+  lastName?: string;
 
   /**
    * Avator
    */
-  avator?: string | undefined;
+  avator?: string;
 
   /**
    * Description
    */
-  description?: string | undefined;
+  description?: string;
 
   /**
    * Admin color
    */
-  adminColor?: string | undefined;
+  adminColor?: string;
 
   /**
    * User role
    */
-  capabilities?: UserRole | undefined;
+  capabilities?: UserRole;
 
   /**
    * Locale
    * @default Site Default
    */
-  locale?: string | undefined;
+  locale?: string;
 
   /**
    * Email

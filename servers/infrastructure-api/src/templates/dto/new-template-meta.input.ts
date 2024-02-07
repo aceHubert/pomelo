@@ -4,6 +4,9 @@ import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 
 @InputType({ description: 'New template meta input' })
 export class NewTemplateMetaInput extends NewMetaInput implements INewTemplateMetaInput {
-  @Field(() => ID, { description: 'Template Id' })
+  /**
+   * Template Id
+   */
+  @Field(() => ID)
   templateId!: number;
 }

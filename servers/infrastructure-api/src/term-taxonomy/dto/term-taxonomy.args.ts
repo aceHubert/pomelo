@@ -3,25 +3,35 @@ import { TermTaxonomyArgsValidator } from './term-taxonomy-args.validator';
 
 @ArgsType()
 export class TermTaxonomyArgs extends TermTaxonomyArgsValidator {
-  @Field({ description: 'Taxonomy name' })
+  /**
+   * Taxonomy name
+   */
   taxonomy!: string;
 
-  @Field({ nullable: true, description: 'Search keywork (fuzzy searching from term name)' })
+  /**
+   * Fuzzy searching from term name
+   */
   keyword?: string;
 
-  @Field((type) => ID, {
-    nullable: true,
-    description: 'Parent id (it will search for all if none value is provided, 0 is root parent id)',
-  })
+  /**
+   * Parent id, it will search for all if none value is provided, 0 is root parent id
+   */
+  @Field((type) => ID)
   parentId?: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Group(it will search for all if none value is provided)' })
+  /**
+   * Group, it will search for all if none value is provided, 0 is default group
+   */
+  @Field((type) => Int)
   group?: number;
 }
 
 @ArgsType()
 export class CategoryTermTaxonomyArgs extends OmitType(TermTaxonomyArgs, ['taxonomy'] as const) {
-  @Field((type) => Boolean, { nullable: true, description: 'With default category, default: false' })
+  /**
+   * With default category
+   */
+  @Field({ defaultValue: false })
   includeDefault?: boolean;
 }
 

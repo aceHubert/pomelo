@@ -4,25 +4,40 @@ import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'Api scope model' })
 export class ApiScope implements Omit<ApiScopeModel, 'apiResourceId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Name' })
+  /**
+   * Name
+   */
   name!: string;
 
-  @Field({ nullable: true, description: 'Display name' })
+  /**
+   * Display name
+   */
   displayName?: string;
 
-  @Field({ nullable: true, description: 'Description' })
+  /**
+   * Description
+   */
   description?: string;
 
-  @Field({ description: 'Emphasize' })
+  /**
+   * Emphasize
+   */
   emphasize!: boolean;
 
-  @Field({ description: 'Required' })
+  /**
+   * Required
+   */
   required!: boolean;
 
-  @Field({ description: 'Show in discovery document' })
+  /**
+   * Show in discovery document
+   */
   showInDiscoveryDocument!: boolean;
 }
 

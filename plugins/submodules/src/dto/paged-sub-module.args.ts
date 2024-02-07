@@ -4,13 +4,21 @@ import { PagedSubModuleArgsValidator } from './paged-sub-module-args.validator';
 
 @ArgsType()
 export class PagedSubModuleArgs extends PagedSubModuleArgsValidator {
-  @Field({ nullable: true, description: 'Sub-module name' })
+  /**
+   * Sub-module name
+   */
   name?: string;
 
-  @Field((type) => Int, { nullable: true, description: 'Paged offset', defaultValue: 0 })
+  /**
+   * Paged offset
+   */
+  @Field((type) => Int, { defaultValue: 0 })
   offset?: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Paged limit', defaultValue: 20 })
+  /**
+   * Paged limit
+   */
+  @Field((type) => Int, { defaultValue: 20 })
   limit?: number;
 }
 
@@ -18,6 +26,8 @@ export class PagedSubModuleArgs extends PagedSubModuleArgsValidator {
 export class PagedObsSubModuleArgs extends OmitType(PagedSubModuleArgs, ['offset'] as const) {
   @IsOptional()
   @IsString()
-  @Field({ nullable: true, description: 'Market' })
+  /**
+   * Marker
+   */
   marker?: string;
 }

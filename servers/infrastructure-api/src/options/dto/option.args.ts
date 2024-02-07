@@ -7,6 +7,9 @@ import { OptionArgsValidator } from './option-args.validator';
  */
 @ArgsType()
 export class OptionArgs extends OptionArgsValidator {
-  @Field((type) => OptionAutoload, { nullable: true, description: 'Is option load automatically in application start' })
+  /**
+   * Is option load automatically in application start
+   */
+  @Field((type) => OptionAutoload)
   autoload?: OptionAutoload;
 }

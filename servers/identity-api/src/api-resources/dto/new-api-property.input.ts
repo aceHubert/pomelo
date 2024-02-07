@@ -1,11 +1,15 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
 import { NewApiPropertyValidator } from './new-api-property.validator';
 
 @InputType({ description: 'New identity resource property input' })
 export class NewApiPropertyInput extends NewApiPropertyValidator {
-  @Field({ description: 'Property key' })
+  /**
+   * Property key
+   */
   key!: string;
 
-  @Field({ description: 'Property value' })
+  /**
+   * Property value
+   */
   value!: string;
 }

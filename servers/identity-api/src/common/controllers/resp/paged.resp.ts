@@ -25,5 +25,6 @@ export abstract class Count {
   /**
    * Count
    */
+  @ApiResponseProperty()
   count!: number;
 }

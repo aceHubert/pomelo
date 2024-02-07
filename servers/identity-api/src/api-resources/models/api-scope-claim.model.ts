@@ -4,10 +4,15 @@ import { ApiScope } from './api-scope.model';
 
 @ObjectType({ description: 'Api scope claim model' })
 export class ApiScopeClaim implements Omit<ApiScopeClaimModel, 'apiScopeId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 }
 
@@ -16,6 +21,8 @@ export class ApiScopeClaims
   extends PickType(ApiScope, ['id', 'name', 'displayName'] as const)
   implements ApiScopeClaimsModel
 {
-  @Field(() => [ApiScopeClaim], { description: 'Api scope claims' })
+  /**
+   * Api scope claims
+   */
   scopeClaims!: ApiScopeClaim[];
 }

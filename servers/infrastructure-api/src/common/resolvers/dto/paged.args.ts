@@ -2,11 +2,17 @@ import { ArgsType, Field, Int } from '@nestjs/graphql';
 
 @ArgsType()
 export class PagedArgs {
-  @Field((type) => Int, { nullable: true, defaultValue: 0, description: 'Page offset' })
-  offset!: number;
+  /**
+   * Page offset
+   */
+  @Field((type) => Int, { defaultValue: 0 })
+  offset?: number;
 
-  @Field((type) => Int, { nullable: true, defaultValue: 20, description: 'Page size' })
-  limit!: number;
+  /**
+   * Page size
+   */
+  @Field((type) => Int, { defaultValue: 20 })
+  limit?: number;
 
   // get startIndex(): number {
   //   return this.offset;

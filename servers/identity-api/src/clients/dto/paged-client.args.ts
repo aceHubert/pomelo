@@ -3,12 +3,20 @@ import { PagedClientArgsValidator } from './paged-client-args.validator';
 
 @ArgsType()
 export class PagedClientArgs extends PagedClientArgsValidator {
-  @Field({ nullable: true, description: 'Fuzzy search by field "clientName"' })
+  /**
+   * Fuzzy search by field "clientName"
+   */
   clientName?: string;
 
-  @Field((type) => Int, { nullable: true, description: 'Page offset, Default: 0' })
+  /**
+   * Page offset
+   */
+  @Field((type) => Int, { defaultValue: 0 })
   offset?: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Page size, Default: 20' })
+  /**
+   * Page size
+   */
+  @Field((type) => Int, { defaultValue: 20 })
   limit?: number;
 }

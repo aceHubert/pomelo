@@ -1,4 +1,4 @@
-import { Field, ObjectType, ID, OmitType, PickType } from '@nestjs/graphql';
+import { Field, ObjectType, ID, Int, OmitType, PickType } from '@nestjs/graphql';
 import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/infrastructure-datasource';
 // import { FieldAuthorized, UserRole } from '@ace-pomelo/authorization';
 import { Meta } from '@/common/resolvers/models/meta.model';
@@ -6,48 +6,80 @@ import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'Template model' })
 export class Template {
-  @Field((type) => ID, { description: 'Template Id' })
+  /**
+   * Template Id
+   */
+  @Field((type) => ID)
   id!: number;
 
-  @Field({ description: 'Name (alias path)' })
+  /**
+   * Name (alias path)
+   */
   name!: string;
 
-  @Field({ description: 'Title' })
+  /**
+   * Title
+   */
   title!: string;
 
-  @Field({ description: 'Short description' })
+  /**
+   * Short description
+   */
   excerpt!: string;
 
-  @Field({ description: 'Content' })
+  /**
+   * Content
+   */
   content!: string;
 
   // @FieldAuthorized(UserRole.Administrator)
-  @Field((type) => ID, { description: 'Author id' })
+  /**
+   * Author id
+   */
+  @Field((type) => ID)
   author!: number;
 
   // @FieldAuthorized(UserRole.Administrator)
-  @Field((type) => TemplateStatus, { description: 'Status' })
+  /**
+   * Status
+   */
+  @Field((type) => TemplateStatus)
   status!: TemplateStatus;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 
-  @Field((type) => TemplateCommentStatus, { description: 'Comment status' })
+  /**
+   * Comment status
+   */
+  @Field((type) => TemplateCommentStatus)
   commentStatus!: TemplateCommentStatus;
 
-  @Field({ description: 'Comment count' })
+  /**
+   * Comment count
+   */
+  @Field((type) => Int)
   commentCount!: number;
 
-  @Field({ description: 'Latest update time' })
+  /**
+   * Latest update time
+   */
   updatedAt!: Date;
 
-  @Field({ description: 'Creation time' })
+  /**
+   * Creation time
+   */
   createdAt!: Date;
 }
 
 @ObjectType({ description: 'Template meta' })
 export class TemplateMeta extends Meta {
-  @Field((type) => ID, { description: 'Template Id' })
+  /**
+   * Template Id
+   */
+  @Field((type) => ID)
   templateId!: number;
 }
 
@@ -66,24 +98,33 @@ export class TemplateOption extends PickType(Template, ['id', 'title'] as const)
 
 @ObjectType({ description: 'Template count by status' })
 export class TemplateStatusCount extends Count {
-  @Field((type) => TemplateStatus, { description: 'Template status' })
+  /**
+   * Template status
+   */
+  @Field((type) => TemplateStatus, {})
   status!: TemplateStatus;
 }
 
 @ObjectType({ description: `Template count by day` })
 export class TemplateDayCount extends Count {
-  @Field({ description: 'Day (format: yyyyMMdd)' })
+  /**
+   * Day (format: yyyyMMdd)
+   */
   day!: string;
 }
 
 @ObjectType({ description: `Template count by month` })
 export class TemplateMonthCount extends Count {
-  @Field({ description: 'Month (format: yyyyMM)' })
+  /**
+   * Month (format: yyyyMM)
+   */
   month!: string;
 }
 
 @ObjectType({ description: `Template count by year` })
 export class TemplateYearCount extends Count {
-  @Field({ description: 'Year (format: yyyy)' })
+  /**
+   * Year (format: yyyy)
+   */
   year!: string;
 }

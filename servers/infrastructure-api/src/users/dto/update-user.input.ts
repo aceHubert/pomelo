@@ -8,31 +8,40 @@ import { NewUserInput } from './new-user.input';
 export class UpdateUserInput extends PartialType(
   PickType(NewUserInput, ['firstName', 'lastName', 'url', 'avator', 'description', 'adminColor'] as const),
 ) {
-  @Field((type) => UserStatus, { nullable: true, description: 'User status' })
+  /**
+   * User status
+   */
+  @Field((type) => UserStatus)
   @IsOptional()
   @IsEnum(UserStatus)
   status?: UserStatus;
 
-  @Field({ nullable: true, description: 'Display name' })
+  /**
+   * Display name
+   */
   @IsOptional()
   @IsString()
   displayName?: string;
 
-  @Field({ nullable: true, description: 'Nick name' })
+  /**
+   * Nick name
+   */
   @IsOptional()
   @IsString()
   nickName?: string;
 
-  @Field((type) => UserRole, {
-    nullable: true,
-    description: 'Capabilities, set null to forbidden all capabilities',
-  })
+  /**
+   * Capabilities, set null to forbidden all capabilities
+   */
+  @Field((type) => UserRole)
   @IsOptional()
   @ValidateIf((o) => o.capabilities !== null)
   @IsEnum(UserRole)
   capabilities?: UserRole | null;
 
-  @Field({ nullable: true, description: 'Locale, set null to reset as using site default locale' })
+  /**
+   * Locale, set null to reset as using site default locale
+   */
   @IsOptional()
   @ValidateIf((o) => o.locale !== null)
   @IsLocale()

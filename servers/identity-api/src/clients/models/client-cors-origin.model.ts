@@ -4,10 +4,15 @@ import { Client } from './cleint.model';
 
 @ObjectType({ description: 'Client corsOrigin model' })
 export class ClientCorsOrigin implements Omit<ClientCorsOriginModel, 'clientId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Origin' })
+  /**
+   * Origin
+   */
   origin!: string;
 }
 
@@ -16,6 +21,8 @@ export class ClientCorsOrigins
   extends PickType(Client, ['clientId', 'clientName'] as const)
   implements ClientCorsOriginsModel
 {
-  @Field(() => [ClientCorsOrigin], { description: 'Client corsOrigins' })
+  /**
+   * Client corsOrigins
+   */
   corsOrigins!: ClientCorsOrigin[];
 }

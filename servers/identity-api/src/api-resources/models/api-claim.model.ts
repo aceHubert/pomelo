@@ -4,10 +4,15 @@ import { ApiResource } from './api-resource.model';
 
 @ObjectType({ description: 'Api claim model' })
 export class ApiClaim implements Omit<ApiClaimModel, 'apiResourceId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 }
 
@@ -16,6 +21,8 @@ export class ApiClaims
   extends PickType(ApiResource, ['id', 'name', 'displayName', 'nonEditable'] as const)
   implements ApiClaimsModel
 {
-  @Field(() => [ApiClaim], { description: 'Api claims' })
+  /**
+   * Api claims
+   */
   claims!: ApiClaim[];
 }

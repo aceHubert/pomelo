@@ -4,43 +4,70 @@ import { PagedTemplateArgsValidator, CagetoryArgsValidator, TagArgsValidator } f
 
 @ArgsType()
 class PagedTemplateArgs extends PagedTemplateArgsValidator {
-  @Field({ nullable: true, description: 'Fuzzy search by field "title"' })
+  /**
+   * Fuzzy search by field "title"
+   */
   keyword?: string;
 
-  @Field({ nullable: true, description: 'Author id' })
+  /**
+   * Author id
+   */
   author?: string;
 
-  @Field((type) => TemplateStatus, { nullable: true, description: 'Status' })
+  /**
+   * Status
+   */
+  @Field((type) => TemplateStatus)
   status?: TemplateStatus;
 
-  @Field({ description: 'Type (Required)' })
+  /**
+   * Type (Required)
+   */
   type!: string;
 
-  @Field({ description: 'Date，format: year(YYYY)/month(YYYYMM)/day(YYYYMMDD)' })
+  /**
+   * Date，format: year(YYYY)/month(YYYYMM)/day(YYYYMMDD)
+   */
   date?: string;
 
-  @Field((type) => Int, { nullable: true, description: 'Page offset, Default: 0' })
+  /**
+   * Page offset
+   */
+  @Field((type) => Int, { defaultValue: 0 })
   offset?: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Page size, Default: 20' })
+  /**
+   * Page size
+   */
+  @Field((type) => Int, { defaultValue: 20 })
   limit?: number;
 }
 
 @ArgsType()
 class CategoryArgs extends CagetoryArgsValidator {
-  @Field((type) => Int, { nullable: true, description: 'Category id' })
+  /**
+   * Category id
+   */
+  @Field((type) => Int)
   categoryId?: number;
 
-  @Field({ nullable: true, description: `Category name (Can't set categoryId and categoryName in the same time.)` })
+  /**
+   * Category name, warning: Can't set categoryId and categoryName in the same time
+   */
   categoryName?: string;
 }
 
 @ArgsType()
 class TagArgs extends TagArgsValidator {
-  @Field((type) => Int, { nullable: true, description: 'Tag id' })
+  /**
+   * Tag id
+   */
+  @Field((type) => Int)
   tagId?: number;
 
-  @Field({ nullable: true, description: `Tag name (Can't set tagId and tagName in the same time.)` })
+  /**
+   * Tag name, warning: Can't set tagId and tagName in the same time
+   */
   tagName?: string;
 }
 

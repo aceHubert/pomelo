@@ -4,22 +4,36 @@ import { Client } from './cleint.model';
 
 @ObjectType({ description: 'Client secret model' })
 export class ClientSecret implements Omit<ClientSecretModel, 'clientId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 
-  @Field({ description: 'Value' })
+  /**
+   * Value
+   */
   value!: string;
 
-  @Field(() => Int, { description: 'Expires lifetime in seconds from creation time' })
+  /**
+   * Expires lifetime in seconds from creation time
+   */
+  @Field(() => Int)
   expiresAt?: number;
 
-  @Field({ description: 'Description' })
+  /**
+   * Description
+   */
   description?: string;
 
-  @Field({ description: 'Creation time' })
+  /**
+   * Creation time
+   */
   createdAt!: Date;
 }
 
@@ -28,6 +42,9 @@ export class ClientSecretWithoutValue extends OmitType(ClientSecret, ['value'] a
 
 @ObjectType({ description: 'Client secrets model' })
 export class ClientSecrets extends PickType(Client, ['clientId', 'clientName'] as const) {
-  @Field(() => [ClientSecretWithoutValue], { description: 'Client secrets' })
+  /**
+   * Client secrets
+   */
+  @Field(() => [ClientSecretWithoutValue!]!)
   secrets!: Omit<ClientSecret, 'value'>[];
 }

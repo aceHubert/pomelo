@@ -5,28 +5,46 @@ import { NewTemplateValidator } from './new-template.validator';
 
 @InputType({ description: 'New template input' })
 export class NewTemplateInput extends NewTemplateValidator {
-  @Field({ nullable: true, description: 'Title' })
+  /**
+   * Title
+   */
   title?: string;
 
-  @Field({ nullable: true, description: 'Identity name (generate by title if not provider)' })
+  /**
+   * Identity name (generate by title if not provider)
+   */
   name?: string;
 
-  @Field({ nullable: true, description: 'Short description' })
+  /**
+   * Short description
+   */
   excerpt?: string;
 
-  @Field({ nullable: true, description: 'Content' })
+  /**
+   * Content
+   */
   content?: string;
 
-  @Field((type) => TemplateStatus, { nullable: true, description: 'Status' })
+  /**
+   * Status
+   */
+  @Field((type) => TemplateStatus, { defaultValue: TemplateStatus.Publish })
   status?: TemplateStatus;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 
-  @Field((type) => TemplateCommentStatus, { nullable: true, description: 'Comment status' })
+  /**
+   * Comment status
+   */
+  @Field((type) => TemplateCommentStatus, { defaultValue: TemplateCommentStatus.Closed })
   commentStatus?: TemplateCommentStatus;
 
-  @Field((type) => [NewMetaInput!], { nullable: true, description: 'New metas' })
+  /**
+   * New metas
+   */
   metas?: NewMetaInput[];
 }
 

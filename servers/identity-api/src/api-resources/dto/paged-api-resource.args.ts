@@ -3,18 +3,26 @@ import { PagedApiResourceArgsValidator } from './paged-api-resource-args.validat
 
 @ArgsType()
 export class PagedApiResourceArgs extends PagedApiResourceArgsValidator {
-  @Field({ nullable: true, description: 'Fuzzy search by "keywordField" field' })
+  /**
+   * Fuzzy search by "keywordField" field
+   */
   keyword?: string;
 
-  @Field((type) => String, {
-    nullable: true,
-    description: 'Field name for searching by keyword, allowed options: "name", "displayName", default: "name"',
-  })
+  /**
+   * Field name for searching by keyword, allowed options: "name", "displayName"
+   */
+  @Field((type) => String, { defaultValue: 'name' })
   keywordField?: 'name' | 'displayName';
 
-  @Field((type) => Int, { nullable: true, description: 'Page offset, Default: 0' })
+  /**
+   * Page offset, Default: 0
+   */
+  @Field((type) => Int)
   offset?: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Page size, Default: 20' })
+  /**
+   * Page size, Default: 20
+   */
+  @Field((type) => Int)
   limit?: number;
 }

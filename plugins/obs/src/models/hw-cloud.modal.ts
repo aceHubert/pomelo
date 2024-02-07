@@ -3,24 +3,37 @@ import { GraphQLJSONObject } from 'graphql-type-json';
 
 @ObjectType({ description: 'Signed url modal' })
 export class ObsUploadSignedUrlModel {
-  @Field({ description: 'Signed url' })
+  /**
+   * Signed url
+   */
   url!: string;
 
-  @Field(() => GraphQLJSONObject, { description: 'Request headers' })
+  /**
+   * Request headers
+   */
+  @Field(() => GraphQLJSONObject)
   headers!: Record<string, any>;
 }
 
 @ObjectType({ description: 'Post upload signature' })
 export class ObsPostUploadSignatureModel {
-  @Field({ description: 'Upload url' })
+  /**
+   * Upload url
+   */
   url!: string;
 
-  @Field({ description: 'OriginPolicy' })
+  /**
+   * OriginPolicy
+   */
   originPolicy!: string;
 
-  @Field({ description: 'Policy' })
+  /**
+   * Policy
+   */
   policy!: string;
 
-  @Field({ description: 'Signature' })
+  /**
+   * Signature
+   */
   signature!: string;
 }

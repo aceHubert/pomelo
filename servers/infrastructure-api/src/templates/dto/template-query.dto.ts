@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType, PickType, IntersectionType } from '@nestjs/swagger';
+import { ApiProperty, ApiHideProperty, OmitType, PickType, IntersectionType } from '@nestjs/swagger';
 import { TemplateStatus } from '@ace-pomelo/infrastructure-datasource';
 import { PagedTemplateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
 
@@ -16,6 +16,12 @@ class PagedTemplateQueryDto extends PagedTemplateArgsValidator {
   /**
    * Status
    */
+  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
+  @ApiProperty({
+    enum: TemplateStatus,
+    required: false,
+    description: 'Status',
+  })
   status?: TemplateStatus;
 
   /**
@@ -48,8 +54,7 @@ class CategoryQueryDto extends CagetoryArgsValidator {
   categoryId?: number;
 
   /**
-   * Category name
-   * Can't set categoryId and categoryName in the same time.
+   * Category name, warning: Can't set categoryId and categoryName in the same time
    */
   categoryName?: string;
 }
@@ -61,8 +66,7 @@ class TagQueryDto extends TagArgsValidator {
   tagId?: number;
 
   /**
-   * Tag name
-   * Can't set tagId and tagName in the same time.
+   * Tag name, warning: Can't set tagId and tagName in the same time
    */
   tagName?: string;
 }

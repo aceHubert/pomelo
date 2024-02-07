@@ -3,18 +3,30 @@ import { PagedMediaArgsValidator } from './media-args.validator';
 
 @ArgsType()
 export class PagedMediaArgs extends PagedMediaArgsValidator {
-  @Field({ nullable: true, description: 'Fuzzy search by field "original fileName"' })
+  /**
+   * Fuzzy search by field "original fileName"
+   */
   keyword?: string;
 
-  @Field({ nullable: true, description: 'File extensions' })
+  /**
+   * File extensions
+   */
   extensions?: string[];
 
-  @Field({ nullable: true, description: 'Mime type' })
+  /**
+   * Mime type
+   */
   mimeTypes?: string[];
 
-  @Field((type) => Int, { nullable: true, description: 'Page offset, Default: 0' })
+  /**
+   * Page offset
+   */
+  @Field((type) => Int, { defaultValue: 0 })
   offset?: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Page size, Default: 20' })
+  /**
+   * Page size
+   */
+  @Field((type) => Int, { defaultValue: 20 })
   limit?: number;
 }

@@ -4,16 +4,19 @@ import { NewOptionValidator } from './new-option.validator';
 
 @InputType({ description: 'New option inpupt' })
 export class NewOptionInput extends NewOptionValidator {
-  @Field({ description: 'Name' })
+  /**
+   * Name
+   */
   optionName!: string;
 
-  @Field({ description: 'Value' })
+  /**
+   * Value
+   */
   optionValue!: string;
 
-  @Field((type) => OptionAutoload, {
-    nullable: true,
-    defaultValue: OptionAutoload.No,
-    description: 'Is option load automatically in application start (default: no)',
-  })
-  autoload!: OptionAutoload;
+  /**
+   * Is option load automatically in application start
+   */
+  @Field((type) => OptionAutoload, { defaultValue: OptionAutoload.No })
+  autoload?: OptionAutoload;
 }

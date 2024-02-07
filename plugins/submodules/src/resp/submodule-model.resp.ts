@@ -1,7 +1,6 @@
 import moment, { MomentInput } from 'moment';
 import { Type, Transform } from 'class-transformer';
 import { ApiResponseProperty, PickType, OmitType } from '@nestjs/swagger';
-import { PagedResponse } from '@/common/controllers/resp/paged.resp';
 import { SubModuleConfig } from '../interfaces/submodule-config.interface';
 
 export class VersionModel {
@@ -211,8 +210,18 @@ export class PagedSubModuleItemModel extends PickType(SubModuleModelResp, ['name
   createdAt!: MomentInput;
 }
 
-export class PagedSubModuleModelResp extends PagedResponse(PagedSubModuleItemModel) {
-  // something else
+export class PagedSubModuleModelResp {
+  /**
+   * Paged data items
+   */
+  @ApiResponseProperty()
+  rows!: PagedSubModuleItemModel[];
+
+  /**
+   * Data total count
+   */
+  @ApiResponseProperty()
+  total!: number;
 }
 
 export class ObsSubModuleModelResp extends OmitType(SubModuleModelResp, ['id', 'tags'] as const) {

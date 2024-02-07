@@ -1,93 +1,158 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { ClientAuthMethod, SigningAlgorithmWithNone, SubjectTypes, TokenFormat } from 'oidc-provider';
 import { NewClientValidator } from './new-client.validator';
 
 @InputType({ description: 'New client input' })
 export class NewClientInput extends NewClientValidator {
-  @Field((type) => String, { nullable: true, description: 'Application type, allows options: "web", "native"' })
+  /**
+   * Application type,
+   * allows options: "web", "native"
+   */
+  @Field((type) => String)
   applicationType?: 'web' | 'native';
 
-  @Field({ description: 'Client id (UUID)' })
+  /**
+   * Client id (UUID)
+   */
   clientId!: string;
 
-  @Field({ description: 'Client name' })
+  /**
+   * Client name
+   */
   clientName!: string;
 
-  @Field({ nullable: true, description: 'Client uri' })
+  /**
+   * Client uri
+   */
   clientUri?: string;
 
-  @Field({ nullable: true, description: 'Default max age' })
+  /**
+   * Default max age
+   */
   defaultMaxAge?: number;
 
-  @Field((type) => String, { nullable: true, description: 'IdToken signed response alg, default: "RS256"' })
+  /**
+   * IdToken signed response alg,
+   * allowed options: "PS256", "PS384", "PS512", "ES256", "ES256K", "ES384", "ES512", "EdDSA", "RS256", "RS384", "RS512", "HS256", "HS384", "HS512", "none"
+   */
+  @Field((type) => String, { defaultValue: 'RS256' })
   idTokenSignedResponseAlg?: SigningAlgorithmWithNone;
 
-  @Field({ nullable: true, description: 'Initiate login uri' })
+  /**
+   * Initiate login uri
+   */
   initiateLoginUri?: string;
 
-  @Field({ nullable: true, description: 'Jwks uri' })
+  /**
+   * Jwks uri
+   */
   jwksUri?: string;
 
-  @Field({ nullable: true, description: 'Logo uri' })
+  /**
+   * Logo uri
+   */
   logoUri?: string;
 
-  @Field({ nullable: true, description: 'Policy uri' })
+  /**
+   * Policy uri
+   */
   policyUri?: string;
 
-  @Field({ nullable: true, description: 'Require authTime' })
+  /**
+   * Require authTime
+   */
   requireAuthTime?: boolean;
 
-  @Field({ nullable: true, description: 'Sector Identifier uri' })
+  /**
+   * Sector Identifier uri
+   */
   sectorIdentifierUri?: string;
 
-  @Field((type) => String, { nullable: true, description: 'Subject type' })
+  /**
+   * Subject type,
+   * allowed options: "pairwise", "public"
+   */
+  @Field((type) => String)
   subjectType?: SubjectTypes;
 
-  @Field((type) => String, {
-    nullable: true,
-    description: 'Token endpoint auth method, default: "client_secret_basic"',
-  })
+  /**
+   * Token endpoint auth method,
+   * allowed options: 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth',        'self_signed_tls_client_auth', 'none'
+   */
+  @Field((type) => String, { defaultValue: 'client_secret_basic' })
   tokenEndpointAuthMethod?: ClientAuthMethod;
 
-  @Field({ nullable: true, description: 'IdToken lifetime in seconds, default: 600' })
+  /**
+   * IdToken lifetime in seconds
+   */
+  @Field((type) => Int, { defaultValue: 600 })
   idTokenLifetime?: number;
 
-  @Field((type) => String, { nullable: true, description: 'AccessToken format, default: "opaque"' })
+  /**
+   * AccessToken format,
+   * allowed options: "jwt", "opaque"
+   */
+  @Field((type) => String, { defaultValue: 'jwt' })
   accessTokenTormat?: TokenFormat;
 
-  @Field({ nullable: true, description: 'AccessToken lifetime in seconds, default: 3600' })
+  /**
+   * AccessToken lifetime in seconds
+   */
+  @Field((type) => Int, { defaultValue: 3600 })
   accessTokenLifetime?: number;
 
-  @Field((type) => String, { nullable: true, description: 'RefreshToken expiration type, default: "absolute"' })
+  /**
+   * RefreshToken expiration type,
+   * allowed options: "absolute", "sliding"
+   */
+  @Field((type) => String, { defaultValue: 'absolute' })
   refreshTokenExpiration?: 'absolute' | 'sliding';
 
-  @Field({
-    nullable: true,
-    description: 'RefreshToken lifetime in seconds in case of "absolute" expiration type, default: 2592000',
-  })
+  /**
+   * RefreshToken lifetime in seconds in case of "absolute" expiration type
+   */
+  @Field((type) => Int, { defaultValue: 2592000 })
   refreshTokenAbsoluteLifetime?: number;
 
-  @Field({
-    nullable: true,
-    description: 'RefreshToken lifetime in seconds in case of "sliding" expiration type, default: 1296000',
-  })
+  /**
+   * RefreshToken lifetime in seconds in case of "sliding" expiration type
+   */
+  @Field((type) => Int, { defaultValue: 1296000 })
   refreshTokenSlidingLifetime?: number;
 
-  @Field({ nullable: true, description: 'Authorization code lifetime in seconds, default: 300' })
+  /**
+   * Authorization code lifetime in seconds
+   */
+  @Field((type) => Int, { defaultValue: 300 })
   authorizationCodeLifetime?: number;
 
-  @Field({ nullable: true, description: 'Device code lifetime in seconds, default: 300' })
+  /**
+   * Device code lifetime in seconds
+   */
+  @Field((type) => Int, { defaultValue: 300 })
   deviceCodeLifetime?: number;
 
-  @Field({ nullable: true, description: 'Backchannel authentication request lifetime in seconds, default: 1800' })
+  /**
+   * Backchannel authentication request lifetime in seconds
+   */
+  @Field((type) => Int, { defaultValue: 1800 })
   backchannelAuthenticationRequestLifetime?: number;
 
-  @Field({ nullable: true, description: 'Backchannel user code lifetime in seconds, default: 1800' })
+  /**
+   * Backchannel user code lifetime in seconds
+   */
+  @Field((type) => Int, { defaultValue: 1800 })
   requireConsent?: boolean;
 
-  @Field({ nullable: true, description: 'Backchannel user code lifetime in seconds, default: 1800' })
+  /**
+   * Backchannel user code lifetime in seconds
+   */
+  @Field((type) => Int, { defaultValue: 1800 })
   requirePkce?: boolean;
 
-  @Field({ nullable: true, description: 'Enabled, default: true' })
+  /**
+   * Enabled
+   */
+  @Field({ defaultValue: true })
   enabled?: boolean;
 }

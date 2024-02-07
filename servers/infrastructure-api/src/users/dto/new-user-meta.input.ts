@@ -4,6 +4,9 @@ import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 
 @InputType({ description: 'New user meta input' })
 export class NewUserMetaInput extends NewMetaInput implements INewUserMetaInput {
-  @Field(() => ID, { description: 'User Id' })
+  /**
+   * User Id
+   */
+  @Field(() => ID)
   userId!: number;
 }

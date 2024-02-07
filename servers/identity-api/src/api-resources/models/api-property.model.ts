@@ -4,13 +4,20 @@ import { ApiResource } from './api-resource.model';
 
 @ObjectType({ description: 'Api resource property model' })
 export class ApiProperty implements Omit<ApiPropertyModel, 'apiResourceId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Property key' })
+  /**
+   * Property key
+   */
   key!: string;
 
-  @Field({ description: 'Property value' })
+  /**
+   * Property value
+   */
   value!: string;
 }
 
@@ -19,6 +26,8 @@ export class ApiProperties
   extends PickType(ApiResource, ['id', 'name', 'displayName', 'nonEditable'] as const)
   implements ApiPropertiesModel
 {
-  @Field(() => [ApiProperty], { description: 'Api resource properties' })
+  /**
+   * Api resource properties
+   */
   properties!: ApiProperty[];
 }

@@ -4,40 +4,56 @@ import { GraphQLJSONObject } from 'graphql-type-json';
 
 @ObjectType()
 export class EventMessageSubscriotion {
-  @Field({ description: 'Event name' })
+  /**
+   * Event name
+   */
   eventName!: string;
 }
 
 @ObjectType()
 export class StringPayloadEventMessageSubscriotion extends EventMessageSubscriotion {
-  @Field({ nullable: true, description: 'String payload' })
+  /**
+   * String payload
+   */
   payload?: string;
 }
 
 @ObjectType()
 export class IntPayloadEventMessageSubscriotion extends EventMessageSubscriotion {
-  @Field(() => Int, { nullable: true, description: 'Number payload' })
+  /**
+   * Number payload
+   */
+  @Field(() => Int)
   payload?: number;
 }
 
 @ObjectType()
 export class BooleanPayloadEventMessageSubscriotion extends EventMessageSubscriotion {
-  @Field({ nullable: true, description: 'Boolean payload' })
+  /**
+   * Boolean payload
+   */
   payload?: boolean;
 }
 
 @ObjectType()
 export class ObjectPayloadEventMessageSubscriotion extends EventMessageSubscriotion {
-  @Field(() => GraphQLJSONObject, { nullable: true, description: 'Object payload' })
+  /**
+   * Object payload
+   */
+  @Field(() => GraphQLJSONObject)
   payload?: Record<string, any>;
 }
 
 @ObjectType()
 export class ContentMessageSubscriotion {
-  @Field({ description: 'Message content' })
+  /**
+   * Message content
+   */
   content!: string;
 
-  @Field({ nullable: true, description: 'URL' })
+  /**
+   * URL
+   */
   to?: string;
 }
 

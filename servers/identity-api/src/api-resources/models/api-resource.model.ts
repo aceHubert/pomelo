@@ -4,31 +4,50 @@ import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'Api resource model' })
 export class ApiResource implements ApiResourceModel {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Name' })
+  /**
+   * Name
+   */
   name!: string;
 
-  @Field({ nullable: true, description: 'Display name' })
+  /**
+   * Display name
+   */
   displayName?: string;
 
-  @Field({ nullable: true, description: 'Description' })
+  /**
+   * Description
+   */
   description?: string;
 
-  @Field({ description: 'Last accessed time' })
+  /**
+   * Last accessed time
+   */
   lastAccessed?: Date;
 
-  @Field({ description: 'Non editable' })
+  /**
+   * Non editable
+   */
   nonEditable!: boolean;
 
-  @Field({ description: 'Enabled' })
+  /**
+   * Enabled
+   */
   enabled!: boolean;
 
-  @Field({ description: 'Updated at' })
+  /**
+   * Updated at
+   */
   updatedAt!: Date;
 
-  @Field({ description: 'Created at' })
+  /**
+   * Created at
+   */
   createdAt!: Date;
 }
 

@@ -1,14 +1,11 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
-import { BaseResolver } from '@ace-pomelo/shared-server';
 import { UnpkgSubModuleService } from './unpkg.service';
 import { PagedSubModuleArgs } from './dto/paged-sub-module.args';
 import { SubModuleModel, SubModuleManifestModel, PagedSubModuleModel } from './models/submodule.model';
 
 @Resolver(() => SubModuleModel)
-export class UnpkgSubModuleResolver extends BaseResolver {
-  constructor(private readonly unpkgService: UnpkgSubModuleService) {
-    super();
-  }
+export class UnpkgSubModuleResolver {
+  constructor(private readonly unpkgService: UnpkgSubModuleService) {}
 
   @Query((returns) => PagedSubModuleModel, { description: 'Get paged micro front-end sub modules.' })
   async unpkgSubModules(@Args() args: PagedSubModuleArgs): Promise<PagedSubModuleModel> {
@@ -21,7 +18,7 @@ export class UnpkgSubModuleResolver extends BaseResolver {
           description: item.package.description,
           version: item.package.version,
           publisher: item.package.publisher,
-          createdAt: item.package.date,
+          createdAt: new Date(item.package.date),
         };
       }),
       total,
@@ -58,7 +55,7 @@ export class UnpkgSubModuleResolver extends BaseResolver {
         unpackedSize,
       },
       configuration,
-      createdAt,
+      createdAt: new Date(createdAt),
     };
   }
 
@@ -79,7 +76,7 @@ export class UnpkgSubModuleResolver extends BaseResolver {
       name: pkgName,
       description,
       tags: Object.entries(distTags).map(([name, version]) => ({ name, version })),
-      versions: Object.entries(time).map(([version, createdAt]) => ({ version, createdAt })),
+      versions: Object.entries(time).map(([version, createdAt]) => ({ version, createdAt: new Date(createdAt) })),
       readme,
       readmeFilename,
     };

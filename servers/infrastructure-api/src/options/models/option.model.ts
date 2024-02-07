@@ -3,15 +3,25 @@ import { OptionAutoload, OptionModel } from '@ace-pomelo/infrastructure-datasour
 
 @ObjectType({ description: 'Option model' })
 export class Option implements OptionModel {
-  @Field(() => ID, { description: 'Option id' })
+  /**
+   * Option id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Option name' })
+  /**
+   * Option name
+   */
   optionName!: string;
 
-  @Field({ description: 'Option value' })
+  /**
+   * Option value
+   */
   optionValue!: string;
 
-  @Field((type) => OptionAutoload, { description: 'Is option load automatically in application start' })
+  /**
+   * Is option load automatically in application start
+   */
+  @Field((type) => OptionAutoload)
   autoload!: OptionAutoload;
 }

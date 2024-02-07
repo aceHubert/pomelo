@@ -2,12 +2,21 @@ import { Field, InputType, ID, Int } from '@nestjs/graphql';
 
 @InputType({ description: 'New term relationship input' })
 export class NewTermRelationshipInput {
-  @Field((type) => ID, { description: 'Object id (Post, Link, etc...)' })
+  /**
+   * Object id, Post, Link, etc...
+   */
+  @Field((type) => ID)
   objectId!: number;
 
-  @Field((type) => ID, { description: 'Taxonomy id' })
+  /**
+   * Taxonomy id
+   */
+  @Field((type) => ID)
   termTaxonomyId!: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Order (default: 0)' })
+  /**
+   * Order
+   */
+  @Field((type) => Int, { defaultValue: 0 })
   order?: number;
 }

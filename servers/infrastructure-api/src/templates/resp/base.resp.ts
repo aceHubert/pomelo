@@ -1,4 +1,4 @@
-import { ApiResponseProperty, OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiHideProperty, ApiResponseProperty, OmitType, PickType } from '@nestjs/swagger';
 import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/infrastructure-datasource';
 import { PagedResponse, Count } from '@/common/controllers/resp/paged.resp';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
@@ -43,7 +43,13 @@ export class TemplateModelResp {
   /**
    * Status
    */
-  @ApiResponseProperty()
+  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
+  @ApiProperty({
+    enum: TemplateStatus,
+    readOnly: true,
+    description: 'Status',
+  })
+  // @ApiResponseProperty()
   status!: TemplateStatus;
 
   /**
@@ -55,7 +61,13 @@ export class TemplateModelResp {
   /**
    * Comment status
    */
-  @ApiResponseProperty()
+  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
+  @ApiProperty({
+    enum: TemplateCommentStatus,
+    readOnly: true,
+    description: 'Comment status',
+  })
+  // @ApiResponseProperty()
   commentStatus!: TemplateCommentStatus;
 
   /**
@@ -101,6 +113,13 @@ export class TemplateStatusCount extends Count {
   /**
    * Template status
    */
+  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
+  @ApiProperty({
+    enum: TemplateStatus,
+    readOnly: true,
+    description: 'Template status',
+  })
+  // @ApiResponseProperty()
   status!: TemplateStatus;
 }
 
@@ -108,6 +127,7 @@ export class TemplateDayCount extends Count {
   /**
    * Day (format: yyyyMMdd)
    */
+  @ApiResponseProperty()
   day!: string;
 }
 
@@ -115,6 +135,7 @@ export class TemplateMonthCount extends Count {
   /**
    * Month (format: yyyyMM)
    */
+  @ApiResponseProperty()
   month!: string;
 }
 
@@ -122,5 +143,6 @@ export class TemplateYearCount extends Count {
   /**
    * Year (format: yyyy)
    */
+  @ApiResponseProperty()
   year!: string;
 }

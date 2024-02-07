@@ -1,7 +1,6 @@
 import { Resolver, Args, Query } from '@nestjs/graphql';
 import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { BaseResolver } from '@ace-pomelo/shared-server';
 import { ObsUploadSignedUrlModel, ObsPostUploadSignatureModel } from './models/hw-cloud.modal';
 import { Action } from './action';
 
@@ -14,10 +13,8 @@ import type {
 
 @Authorized()
 @Resolver()
-export class ObsResolver extends BaseResolver {
-  constructor(private readonly obsService: ObsService) {
-    super();
-  }
+export class ObsResolver {
+  constructor(private readonly obsService: ObsService) {}
 
   /**
    * Get huawei cloud obs "PUT" methos upload signed url

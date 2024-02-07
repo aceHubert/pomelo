@@ -4,10 +4,15 @@ import { IdentityResource } from './identity-resource.model';
 
 @ObjectType({ description: 'Identity claim model' })
 export class IdentityClaim implements Omit<IdentityClaimModel, 'identityResourceId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 }
 
@@ -16,6 +21,8 @@ export class IdentityClaims
   extends PickType(IdentityResource, ['id', 'name', 'displayName', 'nonEditable'] as const)
   implements IdentityClaimsModel
 {
-  @Field(() => [IdentityClaim], { description: 'Identity claims' })
+  /**
+   * Identity claims
+   */
   claims!: IdentityClaim[];
 }

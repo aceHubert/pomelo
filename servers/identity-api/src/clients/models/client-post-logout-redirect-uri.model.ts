@@ -4,10 +4,15 @@ import { Client } from './cleint.model';
 
 @ObjectType({ description: 'Client post logout redirect uri model' })
 export class ClientPostLogoutRedirectUri implements Omit<ClientPostLogoutRedirectUriModel, 'clientId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Redirect uri' })
+  /**
+   * Redirect uri
+   */
   postLogoutRedirectUri!: string;
 }
 
@@ -16,6 +21,8 @@ export class ClientPostLogoutRedirectUris
   extends PickType(Client, ['clientId', 'clientName'] as const)
   implements ClientPostLogoutRedirectUrisModel
 {
-  @Field(() => [ClientPostLogoutRedirectUri], { description: 'Client post logout redirect uris' })
+  /**
+   * Client post logout redirect uris
+   */
   postLogoutRedirectUris!: ClientPostLogoutRedirectUri[];
 }

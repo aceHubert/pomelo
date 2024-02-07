@@ -4,18 +4,27 @@ import { Client } from './cleint.model';
 
 @ObjectType({ description: 'Client claim model' })
 export class ClientClaim implements Omit<ClientClaimModel, 'clientId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 
-  @Field({ description: 'Value' })
+  /**
+   * Value
+   */
   value!: string;
 }
 
 @ObjectType({ description: 'Client claims model' })
 export class ClientClaims extends PickType(Client, ['clientId', 'clientName'] as const) implements ClientClaimsModel {
-  @Field(() => [ClientClaim], { description: 'Client claims' })
+  /**
+   * Client claims
+   */
   claims!: ClientClaim[];
 }

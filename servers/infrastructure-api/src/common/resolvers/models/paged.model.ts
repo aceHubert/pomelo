@@ -23,10 +23,16 @@ export function PagedResponse<TItemsFieldValue>(
 ) {
   @ObjectType({ isAbstract: true, description: 'Paged model' })
   abstract class PagedClass {
-    @Field((type) => [itemsFieldValue], { description: 'Paged data items' })
+    /**
+     * Paged data items
+     */
+    @Field((type) => [itemsFieldValue])
     rows!: TItemsFieldValue[];
 
-    @Field((type) => Int, { description: 'Date total count' })
+    /**
+     * Date total count
+     */
+    @Field((type) => Int)
     total!: number;
   }
   return PagedClass;
@@ -34,6 +40,9 @@ export function PagedResponse<TItemsFieldValue>(
 
 @ObjectType({ isAbstract: true, description: 'Count model' })
 export abstract class Count {
-  @Field((type) => Int, { description: 'Count' })
+  /**
+   * Count
+   */
+  @Field((type) => Int)
   count!: number;
 }

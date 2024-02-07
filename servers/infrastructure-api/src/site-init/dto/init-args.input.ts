@@ -3,18 +3,29 @@ import { SiteInitArgsValidator } from './init-args.validator';
 
 @InputType({ description: 'Site initial arguments input' })
 export class SiteInitArgsInput extends SiteInitArgsValidator {
-  @Field({ description: 'Site title' })
+  /**
+   * Site title
+   */
   title!: string;
 
-  @Field({ description: 'Admin initial password' })
+  /**
+   * Admin initial password
+   */
   password!: string;
 
-  @Field({ description: 'Admin initial email' })
+  /**
+   * Admin initial email
+   */
   email!: string;
 
-  @Field({ description: 'Home url' })
+  /**
+   * Home url
+   */
   homeUrl!: string;
 
-  @Field({ defaultValue: 'zh-CN', description: 'Site default using language' })
+  /**
+   * Site default using language
+   */
+  @Field({ defaultValue: 'en-US' })
   locale!: string;
 }

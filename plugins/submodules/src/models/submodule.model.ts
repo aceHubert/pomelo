@@ -1,88 +1,131 @@
-import { MomentInput } from 'moment';
 import { Field, Int, ObjectType, PickType, OmitType } from '@nestjs/graphql';
 import { GraphQLJSON, GraphQLJSONObject } from 'graphql-type-json';
-import { PagedResponse } from '@/common/resolvers/models/paged.model';
-import { GraphQLMomentISODateTime } from '@/common/graphql/moment-iso-date.scalar';
 import { SubModuleConfig } from '../interfaces/submodule-config.interface';
 
 @ObjectType()
 export class VersionModel {
-  @Field({ description: 'Version' })
+  /**
+   * Version
+   */
   version!: string;
 
-  @Field((type) => GraphQLMomentISODateTime, { description: 'Created time' })
-  createdAt!: MomentInput;
+  /**
+   * Created time
+   */
+  createdAt!: Date;
 }
 
 @ObjectType()
 export class TagModel {
-  @Field({ description: 'Tag name' })
+  /**
+   * Tag name
+   */
   name!: string;
 
-  @Field({ description: 'Tag version' })
+  /**
+   * Tag version
+   */
   version!: string;
 }
 
 @ObjectType()
 export class AuhtorModel {
-  @Field({ nullable: true, description: 'Author name' })
+  /**
+   * Author name
+   */
   name?: string;
 
-  @Field({ nullable: true, description: 'Author username' })
+  /**
+   * Author username
+   */
   username?: string;
 
-  @Field({ nullable: true, description: 'Author email' })
+  /**
+   * Author email
+   */
   email?: string;
 }
 
 @ObjectType()
 export class DistInfo {
-  @Field({ description: 'Tarball URL' })
+  /**
+   * Tarball URL
+   */
   tarball!: string;
 
-  @Field((type) => Int, { nullable: true, description: 'Number of files in the tarball' })
+  /**
+   * Number of files in the tarball
+   */
+  @Field((type) => Int)
   fileCount?: number;
 
-  @Field((type) => Int, { nullable: true, description: 'Total size in bytes of the unpacked files in the tarball' })
+  /**
+   * Total size in bytes of the unpacked files in the tarball
+   */
+  @Field((type) => Int)
   unpackedSize?: number;
 }
 
 @ObjectType()
 export class ModuleConfig implements SubModuleConfig {
-  @Field({ description: 'Module export name' })
+  /**
+   * Module export name
+   */
   moduleName!: string;
 
-  @Field({ description: 'Entry' })
+  /**
+   * Entry
+   */
   entry!: string;
 
-  @Field((type) => [String], { nullable: true, description: 'Extract styles' })
+  /**
+   * Extract styles
+   */
+  @Field((type) => [String])
   styles?: string | string[];
 
-  @Field((type) => GraphQLJSONObject, { nullable: true, description: 'Args schema' })
+  /**
+   * Args schema
+   */
+  @Field((type) => GraphQLJSONObject)
   args?: {};
 }
 
 @ObjectType()
 export class SubModuleModel {
-  @Field({ description: 'Unique package name' })
+  /**
+   * Unique package name
+   */
   id!: string;
 
-  @Field({ description: 'Sub-module package name' })
+  /**
+   * Sub-module package name
+   */
   name!: string;
 
-  @Field({ nullable: true, description: 'Description' })
+  /**
+   * Description
+   */
   description?: string;
 
-  @Field((type) => [VersionModel], { description: 'Versions' })
+  /**
+   * Versions
+   */
   versions!: VersionModel[];
 
-  @Field((type) => [TagModel], { description: 'Tags' })
+  /**
+   * Tags
+   */
   tags!: TagModel[];
 
-  @Field({ nullable: true, description: 'README contents' })
+  /**
+   * README contents
+   */
   readme?: string;
 
-  @Field({ nullable: true, description: 'Name of the README file' })
+  /**
+   * Name of the README file
+   */
   readmeFilename?: string;
 }
 
@@ -94,40 +137,68 @@ export class SubModuleManifestModel extends PickType(SubModuleModel, [
   'readme',
   'readmeFilename',
 ] as const) {
-  @Field({ description: 'Package version number' })
+  /**
+   * Package version number
+   */
   version!: string;
 
-  @Field({ nullable: true, description: 'Package main entry' })
+  /**
+   * Package main entry
+   */
   main?: string;
 
-  @Field((type) => AuhtorModel, { description: 'Package publisher' })
+  /**
+   * Package publisher
+   */
   publisher!: AuhtorModel;
 
-  @Field((type) => DistInfo, { description: 'Dist info' })
+  /**
+   * Dist info
+   */
   dist!: DistInfo;
 
-  @Field((type) => GraphQLJSON, { nullable: true, description: 'Sub-module configs' })
+  /**
+   * Sub-module configs
+   */
+  @Field((type) => GraphQLJSON)
   configuration?: ModuleConfig | Record<string, ModuleConfig>;
 
-  @Field((type) => GraphQLMomentISODateTime, { description: 'Publishing timestamp' })
-  createdAt!: MomentInput;
+  /**
+   * Publishing timestamp
+   */
+  createdAt!: Date;
 }
 
 @ObjectType()
 export class PagedSubModuleItemModel extends PickType(SubModuleModel, ['name', 'description'] as const) {
-  @Field({ description: 'Latest package version number' })
+  /**
+   * Latest package version number
+   */
   version!: string;
 
-  @Field({ description: 'Package publisher' })
+  /**
+   * Package publisher
+   */
   publisher!: AuhtorModel;
 
-  @Field((type) => GraphQLMomentISODateTime, { description: 'Publishing timestamp for the latest version' })
-  createdAt!: MomentInput;
+  /**
+   * Publishing timestamp for the latest version
+   */
+  createdAt!: Date;
 }
 
 @ObjectType()
-export class PagedSubModuleModel extends PagedResponse(PagedSubModuleItemModel) {
-  // something else
+export class PagedSubModuleModel {
+  /**
+   * Paged data items
+   */
+  rows!: PagedSubModuleItemModel[];
+
+  /**
+   * Data total count
+   */
+  @Field((type) => Int)
+  total!: number;
 }
 
 @ObjectType()
@@ -142,30 +213,40 @@ export class ObsSubModuleManifestModel extends PickType(SubModuleModel, [
   'readme',
   'readmeFilename',
 ] as const) {
-  @Field({ description: 'Package version number' })
+  /**
+   * Package version number
+   */
   version!: string;
 
-  @Field({ nullable: true, description: 'Package main entry' })
+  /**
+   * Package main entry
+   */
   main?: string;
 
-  @Field((type) => GraphQLJSON, { nullable: true, description: 'Sub-module configs' })
+  /**
+   * Sub-module configs
+   */
+  @Field((type) => GraphQLJSON)
   configuration?: ModuleConfig | Record<string, ModuleConfig>;
 }
 
 @ObjectType()
 export class PagedObsSubModuleItemModel extends PickType(SubModuleModel, ['name', 'description'] as const) {
-  @Field({ description: 'Latest package version number' })
+  /**
+   * Latest package version number
+   */
   version!: string;
 }
 
 @ObjectType()
 export class PagedObsSubModuleModel {
   /**
-   * Paged rows
+   * Paged data items
    */
-  @Field((type) => [PagedObsSubModuleItemModel], { description: 'Paged data items' })
   rows!: PagedObsSubModuleItemModel[];
 
-  @Field({ description: 'Next marker' })
+  /**
+   * Next marker
+   */
   nextMarker!: string;
 }

@@ -5,12 +5,19 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
  */
 @ObjectType({ isAbstract: true, description: 'Meta model' })
 export abstract class Meta {
-  @Field((type) => ID, { description: 'Meta Id' })
+  /**
+   * Meta Id
+   */
+  @Field((type) => ID)
   id!: number;
 
-  @Field({ description: 'Meta key' })
+  /**
+   * Meta key
+   */
   metaKey!: string;
 
-  @Field((type) => String, { nullable: true, description: 'Meta value' })
+  /**
+   * Meta value
+   */
   metaValue?: string;
 }

@@ -4,15 +4,22 @@ import { Client } from './cleint.model';
 
 @ObjectType({ description: 'Client scope model' })
 export class ClientScope implements Omit<ClientScopeModel, 'clientId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Scope' })
+  /**
+   * Scope
+   */
   scope!: string;
 }
 
 @ObjectType({ description: 'Client scopes model' })
 export class ClientScopes extends PickType(Client, ['clientId', 'clientName'] as const) implements ClientScopesModel {
-  @Field(() => [ClientScope], { description: 'Client scopes' })
+  /**
+   * Client scopes
+   */
   scopes!: ClientScope[];
 }

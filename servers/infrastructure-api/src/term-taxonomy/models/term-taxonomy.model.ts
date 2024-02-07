@@ -3,45 +3,77 @@ import { Meta } from '@/common/resolvers/models/meta.model';
 
 @ObjectType({ description: 'Term taxonomy model' })
 export class TermTaxonomy {
-  @Field(() => ID, { description: 'Term Id' })
+  /**
+   * Term Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Name' })
+  /**
+   * Name
+   */
   name!: string;
 
-  @Field({ description: 'Slug' })
+  /**
+   * Slug
+   */
   slug!: string;
 
-  @Field({ description: 'Taxonomy name' })
+  /**
+   * Taxonomy name
+   */
   taxonomy!: string;
 
-  @Field({ description: 'Taxonomy description' })
+  /**
+   * Taxonomy description
+   */
   description!: string;
 
-  @Field((type) => ID, { defaultValue: 0, description: 'Parent taxonomy id (nested taxonomy)' })
+  /**
+   * Parent taxonomy id (nested taxonomy)
+   */
+  @Field((type) => ID)
   parentId!: number;
 
-  @Field((type) => Int, { defaultValue: 0, description: 'Group' })
+  /**
+   * Group
+   */
+  @Field((type) => Int)
   group!: number;
 
-  @Field((type) => Int, { defaultValue: 0, description: 'Count' })
+  /**
+   * Count
+   */
+  @Field((type) => Int)
   count!: number;
 }
 
 @ObjectType({ description: 'Term relationship model' })
 export class TermRelationship {
-  @Field(() => ID, { description: 'Object id (Post, Link, etc...)' })
+  /**
+   * Object id, Post, Link, etc...
+   */
+  @Field(() => ID)
   objectId!: number;
 
-  @Field(() => ID, { description: 'Term taxonomy id' })
+  /**
+   * Term taxonomy id
+   */
+  @Field(() => ID)
   termTaxonomyId!: number;
 
-  @Field((type) => Int, { description: 'Order (default: 0)' })
+  /**
+   * Order
+   */
+  @Field((type) => Int)
   order!: number;
 }
 
 @ObjectType({ description: 'Term taxonomy meta model' })
 export class TermTaxonomyMeta extends Meta {
-  @Field((type) => ID, { description: 'Term Taxonomy Id' })
+  /**
+   * Term Taxonomy Id
+   */
+  @Field((type) => ID)
   termTaxonomyId!: number;
 }

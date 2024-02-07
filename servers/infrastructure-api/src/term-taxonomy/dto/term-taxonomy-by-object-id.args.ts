@@ -5,24 +5,31 @@ import { Field, ArgsType, ID, Int } from '@nestjs/graphql';
  */
 @ArgsType()
 export class TermTaxonomyByObjectIdArgs {
-  @Field((type) => ID, { description: 'Object id (Post, Link, etc...)' })
+  /**
+   * Object id, Post, Link, etc...
+   */
+  @Field((type) => ID)
   objectId!: number;
 
-  @Field({ description: 'Taxonomy name' })
+  /**
+   * Taxonomy name
+   */
   taxonomy!: string;
 
-  @Field((type) => ID, {
-    nullable: true,
-    description: 'Parent id (it will search for all if none value is provided, 0 is root parent id)',
-  })
+  /**
+   * Parent id, it will search for all if none value is provided, 0 is root parent id
+   */
+  @Field((type) => ID)
   parentId?: number;
 
-  @Field((type) => Int, {
-    nullable: true,
-    description: 'Group(it will search for all if none value is provided)',
-  })
+  /**
+   * Group, it will search for all if none value is provided, 0 is default group
+   */
+  @Field((type) => Int)
   group?: number;
 
-  @Field((type) => Boolean, { nullable: true, description: 'Sort（ default: asc）' })
+  /**
+   * Sort, default: asc
+   */
   desc?: boolean;
 }

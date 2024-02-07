@@ -1,5 +1,5 @@
 import { IsArray, IsInt, IsEnum } from 'class-validator';
-import { ApiProperty, PartialType, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiHideProperty, PartialType, PickType } from '@nestjs/swagger';
 import { TemplateStatus } from '@ace-pomelo/infrastructure-datasource';
 import { NewTemplateDto, NewFormTemplateDto, NewPageTemplateDto, NewPostTemplateDto } from './new-template.dto';
 
@@ -25,6 +25,12 @@ export class BulkUpdateTemplateStatusDto {
   /**
    * Status
    */
+  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
+  @ApiProperty({
+    enum: TemplateStatus,
+    required: false,
+    description: 'Status',
+  })
   @IsEnum(TemplateStatus)
   status!: TemplateStatus;
 }

@@ -4,10 +4,15 @@ import { Client } from './cleint.model';
 
 @ObjectType({ description: 'Client redirect uri model' })
 export class ClientRedirectUri implements Omit<ClientRedirectUriModel, 'clientId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Redirect uri' })
+  /**
+   * Redirect uri
+   */
   redirectUri!: string;
 }
 
@@ -16,6 +21,8 @@ export class ClientRedirectUris
   extends PickType(Client, ['clientId', 'clientName'] as const)
   implements ClientRedirectUrisModel
 {
-  @Field(() => [ClientRedirectUri], { description: 'Client redirect uris' })
+  /**
+   * Client redirect uris
+   */
   redirectUris!: ClientRedirectUri[];
 }

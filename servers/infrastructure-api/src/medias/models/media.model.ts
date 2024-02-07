@@ -1,25 +1,39 @@
-import { Field, ID, ObjectType, OmitType, IntersectionType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType, OmitType, IntersectionType } from '@nestjs/graphql';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'File data' })
 class FileData {
-  @Field({ description: 'File name' })
+  /**
+   * File name
+   */
   fileName!: string;
 
-  @Field({ description: 'File path' })
+  /**
+   * File path
+   */
   path!: string;
 
-  @Field({ description: 'Full file path include domain' })
+  /**
+   * Full file path include domain
+   */
   fullPath!: string;
 
-  @Field({ description: 'File size, unit: KB' })
+  /**
+   * File size, unit: KB
+   */
   fileSize!: number;
 
-  @Field({ nullable: true, description: 'Image width' })
+  /**
+   * Image width
+   */
+  @Field((type) => Int)
   width?: number;
 
-  @Field({ nullable: true, description: 'Image height' })
+  /**
+   * Image height
+   */
+  @Field((type) => Int)
   height?: number;
 }
 
@@ -28,40 +42,69 @@ class ScaleImageFileData extends OmitType(FileData, ['fileSize'] as const) {}
 
 @ObjectType({ description: 'File model' })
 class File {
-  @Field((type) => FileData, { description: 'Original file' })
+  /**
+   * Original file
+   */
+  @Field((type) => FileData)
   original!: FileData;
 
-  @Field((type) => ScaleImageFileData, { description: 'Thumbnail' })
+  /**
+   * Thumbnail
+   */
+  @Field((type) => ScaleImageFileData)
   thumbnail?: ScaleImageFileData;
 
-  @Field((type) => ScaleImageFileData, { description: 'Scaled(2560*1440) image' })
+  /**
+   * Scaled(2560*1440) image
+   */
+  @Field((type) => ScaleImageFileData, {})
   scaled?: ScaleImageFileData;
 
-  @Field((type) => ScaleImageFileData, { description: 'Large image' })
+  /**
+   * Large image
+   */
+  @Field((type) => ScaleImageFileData)
   large?: ScaleImageFileData;
 
-  @Field((type) => ScaleImageFileData, { description: 'Medium image' })
+  /**
+   * Medium image
+   */
+  @Field((type) => ScaleImageFileData)
   medium?: ScaleImageFileData;
 
-  @Field((type) => ScaleImageFileData, { description: 'Medium-Large image' })
+  /**
+   * Medium-Large image
+   */
+  @Field((type) => ScaleImageFileData)
   mediumLarge?: ScaleImageFileData;
 }
 
 @ObjectType({ description: 'Media model' })
 export class Media extends IntersectionType(OmitType(File, ['original'] as const), FileData) {
-  @Field((type) => ID, { description: 'Media id' })
+  /**
+   * Media id
+   */
+  @Field((type) => ID)
   id!: number;
 
-  @Field({ description: 'Original file name' })
+  /**
+   * Original file name
+   */
   originalFileName!: string;
 
-  @Field({ description: 'File extension' })
+  /**
+   * File extension
+   */
   extension!: string;
 
-  @Field({ description: 'File mime type' })
+  /**
+   * File mime type
+   */
   mimeType!: string;
 
-  @Field({ description: 'Creation time' })
+  /**
+   * Creation time
+   */
   createdAt!: Date;
 }
 
@@ -72,6 +115,9 @@ export class PagedMedia extends PagedResponse(Media) {
 
 @ObjectType({ description: 'Media meta' })
 export class MediaMeta extends Meta {
-  @Field((type) => ID, { description: 'Media Id' })
+  /**
+   * Media Id
+   */
+  @Field((type) => ID)
   mediaId!: number;
 }

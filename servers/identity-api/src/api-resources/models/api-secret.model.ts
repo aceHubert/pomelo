@@ -4,22 +4,36 @@ import { ApiResource } from './api-resource.model';
 
 @ObjectType({ description: 'Api secret model' })
 export class ApiSecret implements Omit<ApiSecretModel, 'apiResourceId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Type' })
+  /**
+   * Type
+   */
   type!: string;
 
-  @Field({ description: 'Value' })
+  /**
+   * Value
+   */
   value!: string;
 
-  @Field(() => Int, { description: 'Expires at ' })
+  /**
+   * Expires at
+   */
+  @Field(() => Int)
   expiresAt?: number;
 
-  @Field({ description: 'Description' })
+  /**
+   * Description
+   */
   description?: string;
 
-  @Field({ description: 'Creation time' })
+  /**
+   * Creation time
+   */
   createdAt!: Date;
 }
 
@@ -31,7 +45,9 @@ export class ApiSecrets
   extends PickType(ApiResource, ['id', 'name', 'displayName', 'nonEditable'] as const)
   implements Omit<ApiSecretsModel, 'secrets'>
 {
-  // secret value will not be exposed
-  @Field(() => [ApiSecretWithoutValue], { description: 'Api secrets' })
+  /**
+   * Api secrets
+   */
+  @Field(() => [ApiSecretWithoutValue!]!)
   secrets!: Omit<ApiSecret, 'value'>[];
 }

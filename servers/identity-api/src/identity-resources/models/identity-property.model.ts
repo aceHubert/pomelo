@@ -4,13 +4,20 @@ import { IdentityResource } from './identity-resource.model';
 
 @ObjectType({ description: 'Identity resource property model' })
 export class IdentityProperty implements Omit<IdentityPropertyModel, 'identityResourceId'> {
-  @Field(() => ID, { description: 'Id' })
+  /**
+   * Id
+   */
+  @Field(() => ID)
   id!: number;
 
-  @Field({ description: 'Property key' })
+  /**
+   * Property key
+   */
   key!: string;
 
-  @Field({ description: 'Property value' })
+  /**
+   * Property value
+   */
   value!: string;
 }
 
@@ -19,6 +26,8 @@ export class IdentityProperties
   extends PickType(IdentityResource, ['id', 'name', 'displayName', 'nonEditable'] as const)
   implements IdentityPropertiesModel
 {
-  @Field(() => [IdentityProperty], { description: 'Identity resource properties' })
+  /**
+   * Identity resource properties
+   */
   properties!: IdentityProperty[];
 }

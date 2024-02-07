@@ -1,4 +1,4 @@
-import { ApiResponseProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { OptionAutoload } from '@ace-pomelo/infrastructure-datasource';
 
 export class OptionResp {
@@ -23,6 +23,12 @@ export class OptionResp {
   /**
    * Is option load automatically in application start
    */
-  @ApiResponseProperty()
+  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
+  @ApiProperty({
+    enum: OptionAutoload,
+    readOnly: true,
+    description: 'Is option load automatically in application start',
+  })
+  // @ApiResponseProperty()
   autoload!: OptionAutoload;
 }

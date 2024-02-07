@@ -4,39 +4,64 @@ import { NewUserValidator } from './new-user.validator';
 
 @InputType({ description: 'New user input' })
 export class NewUserInput extends NewUserValidator {
-  @Field({ description: 'Login name' })
+  /**
+   * Login name
+   */
   loginName!: string;
 
-  @Field({ description: 'Login password' })
+  /**
+   * Login password
+   */
   loginPwd!: string;
 
-  @Field({ nullable: true, description: 'First name' })
-  firstName?: string | undefined;
+  /**
+   * First name
+   */
+  firstName?: string;
 
-  @Field({ nullable: true, description: 'Last name' })
-  lastName?: string | undefined;
+  /**
+   * Last name
+   */
+  lastName?: string;
 
-  @Field({ nullable: true, description: 'Avator' })
-  avator?: string | undefined;
+  /**
+   * Avator
+   */
+  avator?: string;
 
-  @Field({ nullable: true, description: 'Description' })
-  description?: string | undefined;
+  /**
+   * Description
+   */
+  description?: string;
 
-  @Field({ nullable: true, description: 'Admin color' })
-  adminColor?: string | undefined;
+  /**
+   * Admin color
+   */
+  adminColor?: string;
 
-  @Field(() => UserRole, { nullable: true, description: 'User role' })
-  capabilities?: UserRole | undefined;
+  /**
+   * User role
+   */
+  @Field(() => UserRole)
+  capabilities?: UserRole;
 
-  @Field({ nullable: true, description: 'Locale' })
-  locale?: string | undefined;
+  /**
+   * Locale
+   */
+  locale?: string;
 
-  @Field({ description: 'Email' })
+  /**
+   * Email
+   */
   email!: string;
 
-  @Field({ description: 'Mobile' })
+  /**
+   * Mobile
+   */
   mobile!: string;
 
-  @Field({ description: 'Client url' })
+  /**
+   * Client url
+   */
   url!: string;
 }

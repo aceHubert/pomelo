@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
 import { UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { UserRole } from '../enums/user-role.enum';
 import { PagedUserArgsValidator } from './user-args.validator';
@@ -12,6 +12,12 @@ export class PagedUserQueryDto extends PagedUserArgsValidator {
   /**
    * Status
    */
+  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
+  @ApiProperty({
+    enum: UserStatus,
+    required: false,
+    description: 'Status',
+  })
   status?: UserStatus;
 
   /**

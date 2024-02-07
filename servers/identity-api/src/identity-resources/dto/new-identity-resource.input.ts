@@ -1,29 +1,45 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
 import { NewIdentityResourceValidator } from './new-identity-resource.validator';
 
 @InputType({ description: 'New client input' })
 export class NewIdentityResourceInput extends NewIdentityResourceValidator {
-  @Field({ description: 'Name' })
+  /**
+   * Name
+   */
   name!: string;
 
-  @Field({ nullable: true, description: 'Display name' })
+  /**
+   * Display name
+   */
   displayName?: string;
 
-  @Field({ nullable: true, description: 'Description' })
+  /**
+   * Description
+   */
   description?: string;
 
-  @Field({ nullable: true, description: 'Emphasize' })
+  /**
+   * Emphasize
+   */
   emphasize?: boolean;
 
-  @Field({ nullable: true, description: 'Required' })
+  /**
+   * Required
+   */
   required?: boolean;
 
-  @Field({ nullable: true, description: 'Show in discovery document' })
+  /**
+   * Show in discovery document
+   */
   showInDiscoveryDocument?: boolean;
 
-  @Field({ nullable: true, description: 'Non editable' })
+  /**
+   * Non editable
+   */
   nonEditable?: boolean;
 
-  @Field({ nullable: true, description: 'Enabled' })
+  /**
+   * Enabled
+   */
   enabled?: boolean;
 }

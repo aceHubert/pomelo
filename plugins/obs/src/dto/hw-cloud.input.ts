@@ -7,33 +7,56 @@ import {
 
 @ArgsType()
 export class ObsCreateUploadSignedUrlOptionsArgs extends ObsCreateUploadSignedUrlOptionsValiator {
-  @Field({ description: 'Bucket name' })
+  /**
+   * Bucket name
+   */
   bucket!: string;
 
-  @Field({ nullable: true, description: 'Object name' })
+  /**
+   * Object name
+   */
   key?: string;
 
-  @Field(() => Int, { nullable: true, description: 'Expires(unit: second), default: 300' })
+  /**
+   * Expires(unit: second)
+   */
+  @Field(() => Int, { defaultValue: 300 })
   expires?: number;
 
-  @Field(() => GraphQLJSONObject, { nullable: true, description: 'Request query params' })
+  /**
+   * Request query params
+   */
+  @Field(() => GraphQLJSONObject)
   queryParams?: Record<string, any>;
 
-  @Field(() => GraphQLJSONObject, { nullable: true, description: 'Request headers' })
+  /**
+   * Request headers
+   */
+  @Field(() => GraphQLJSONObject)
   headers?: Record<string, any>;
 }
 
 @ArgsType()
 export class ObsCreatePostUploadSignatureOptionsArgs extends ObsCreatePostUploadSignatureOptionsValiator {
-  @Field({ description: 'Bucket name' })
+  /**
+   * Bucket name
+   */
   bucket!: string;
 
-  @Field({ nullable: true, description: 'Object name' })
+  /**
+   * Object name
+   */
   key?: string;
 
-  @Field(() => Int, { nullable: true, description: 'Expires(unit: second), default: 300' })
+  /**
+   * Expires(unit: second)
+   */
+  @Field(() => Int, { defaultValue: 300 })
   expires?: number;
 
-  @Field(() => GraphQLJSONObject, { nullable: true, description: 'Request form params' })
+  /**
+   * Request form params
+   */
+  @Field(() => GraphQLJSONObject)
   formParams?: Record<string, any>;
 }

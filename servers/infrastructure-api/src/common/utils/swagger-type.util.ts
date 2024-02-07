@@ -1,5 +1,5 @@
 import { Type } from '@nestjs/common';
-import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { uuid } from '@ace-pomelo/shared-server';
 
 export class DescribeType<T extends Type<unknown> | Function | [Function] | string | Record<string, any>> {
@@ -35,8 +35,9 @@ export function createDynamicType<
   Object.defineProperty(DynamicClass, 'name', { value: name || `DynamicClass_${uuid(8)}` });
 
   fields.forEach((propertyKey) => {
-    let type = data[propertyKey];
-    let nullable: boolean | undefined, description: string | undefined;
+    let type = data[propertyKey],
+      nullable: boolean | undefined,
+      description: string | undefined;
     if (type instanceof DescribeType) {
       nullable = type.nullable;
       description = type.description;
@@ -48,8 +49,8 @@ export function createDynamicType<
           type,
           nullable,
           description,
+          readOnly: isResponseProperty,
         }),
-        isResponseProperty && ApiResponseProperty(),
       ]
         .filter(Boolean)
         .forEach((decorator) => (decorator as PropertyDecorator)(target, key));
@@ -69,8 +70,7 @@ export function createResponseSuccessType<
   T extends Record<string, Type<unknown> | Function | [Function] | string | Record<string, any>>,
 >(data: T, name?: string) {
   class SuccessResponseClass extends createDynamicType(data, true) {
-    @ApiProperty({ description: 'Success' })
-    @ApiResponseProperty()
+    @ApiProperty({ description: 'Success', readOnly: true })
     success!: true;
   }
 
@@ -82,23 +82,18 @@ export function createResponseSuccessType<
 }
 
 export class ResponseFaildType {
-  @ApiProperty({ default: false, description: 'Faild' })
-  @ApiResponseProperty()
+  @ApiProperty({ default: false, description: 'Faild', readOnly: true })
   success!: false;
 
-  @ApiProperty({ description: 'Error message' })
-  @ApiResponseProperty()
+  @ApiProperty({ description: 'Error message', readOnly: true })
   message!: string;
 
-  @ApiProperty({ description: 'Status code' })
-  @ApiResponseProperty()
+  @ApiProperty({ description: 'Status code', readOnly: true })
   statusCode!: number;
 
-  @ApiProperty({ description: 'Timestamp' })
-  @ApiResponseProperty()
+  @ApiProperty({ description: 'Timestamp', readOnly: true })
   timestamp!: string;
 
-  @ApiProperty({ description: 'Request URL' })
-  @ApiResponseProperty()
+  @ApiProperty({ description: 'Request URL', readOnly: true })
   path!: string;
 }

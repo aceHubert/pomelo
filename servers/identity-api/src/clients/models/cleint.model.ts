@@ -5,92 +5,158 @@ import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'Client model' })
 export class Client implements Omit<ClientModel, 'id'> {
-  @Field((type) => String, { description: 'Application type' })
+  /**
+   * Application type
+   */
+  @Field((type) => String)
   applicationType?: 'web' | 'native';
 
-  @Field({ description: 'Client id' })
+  /**
+   * Client id
+   */
   clientId!: string;
 
-  @Field({ description: 'Client name' })
+  /**
+   * Client name
+   */
   clientName!: string;
 
-  @Field({ description: 'Client uri' })
+  /**
+   * Client uri
+   */
   clientUri?: string;
 
-  @Field((type) => Int, { description: 'Default max age' })
+  /**
+   * Default max age
+   */
+  @Field((type) => Int)
   defaultMaxAge?: number;
 
-  @Field((type) => String, { description: 'IdToken signed response alg, default: "RS256"' })
+  /**
+   * IdToken signed response alg
+   */
+  @Field((type) => String)
   idTokenSignedResponseAlg?: SigningAlgorithmWithNone;
 
-  @Field({ description: 'Initiate login uri' })
+  /**
+   * Initiate login uri
+   */
   initiateLoginUri?: string;
 
-  @Field({ description: 'Jwks uri' })
+  /**
+   * Jwks uri
+   */
   jwksUri?: string;
 
-  @Field({ description: 'Logo uri' })
+  /**
+   * Logo uri
+   */
   logoUri?: string;
 
-  @Field({ description: 'Policy uri' })
+  /**
+   * Policy uri
+   */
   policyUri?: string;
 
-  @Field({ description: 'Require authTime' })
+  /**
+   * Require authTime
+   */
   requireAuthTime?: boolean;
 
-  @Field({ description: 'Sector Identifier uri' })
+  /**
+   * Sector Identifier uri
+   */
   sectorIdentifierUri?: string;
 
-  @Field((type) => String, { description: 'Subject type' })
+  /**
+   * Subject type
+   */
+  @Field((type) => String)
   subjectType?: SubjectTypes;
 
-  @Field((type) => String, { description: 'Token endpoint auth method, default: "client_secret_basic"' })
+  /**
+   * Token endpoint auth method
+   */
+  @Field((type) => String)
   tokenEndpointAuthMethod?: ClientAuthMethod;
 
-  @Field((type) => Int, { description: 'IdToken lifetime in seconds, default: 600' })
+  /**
+   * IdToken lifetime in seconds
+   */
+  @Field((type) => Int)
   idTokenLifetime?: number;
 
-  @Field((type) => String, { description: 'AccessToken format, default: "opaque"' })
+  /**
+   * AccessToken format
+   */
+  @Field((type) => String)
   accessTokenTormat?: TokenFormat;
 
-  @Field((type) => Int, { description: 'AccessToken lifetime in seconds, default: 3600' })
+  /**
+   * AccessToken lifetime in seconds
+   */
+  @Field((type) => Int)
   accessTokenLifetime?: number;
 
-  @Field((type) => String, { description: 'RefreshToken expiration type, default: "absolute"' })
+  /**
+   * RefreshToken expiration type
+   */
+  @Field((type) => String)
   refreshTokenExpiration?: 'absolute' | 'sliding';
 
-  @Field((type) => Int, {
-    description: 'RefreshToken lifetime in seconds in case of "absolute" expiration type, default: 2592000',
-  })
+  /**
+   * RefreshToken lifetime in seconds in case of "absolute" expiration type
+   */
+  @Field((type) => Int)
   refreshTokenAbsoluteLifetime?: number;
 
-  @Field((type) => Int, {
-    description: 'RefreshToken lifetime in seconds in case of "sliding" expiration type, default: 1209600',
-  })
+  /**
+   * RefreshToken lifetime in seconds in case of "sliding" expiration type
+   */
+  @Field((type) => Int)
   refreshTokenSlidingLifetime?: number;
 
-  @Field((type) => Int, { description: 'AuthorizationCode lifetime in seconds, default: 300' })
+  /**
+   * AuthorizationCode lifetime in seconds
+   */
+  @Field((type) => Int)
   authorizationCodeLifetime?: number;
 
-  @Field((type) => Int, { description: 'DeviceCode lifetime in seconds, default: 300' })
+  /**
+   * DeviceCode lifetime in seconds
+   */
+  @Field((type) => Int)
   deviceCodeLifetime?: number;
 
-  @Field((type) => Int, { description: 'BackchannelAuthenticationRequest lifetime in seconds, default: 300' })
+  /**
+   * BackchannelAuthenticationRequest lifetime in seconds
+   */
+  @Field((type) => Int)
   backchannelAuthenticationRequestLifetime?: number;
 
-  @Field({ description: 'Require consent, default: false' })
+  /**
+   * Require consent
+   */
   requireConsent?: boolean;
 
-  @Field({ description: 'Require Proof Key for Code Exchange (PKCE), default: false' })
+  /**
+   * Require Proof Key for Code Exchange (PKCE)
+   */
   requirePkce?: boolean;
 
-  @Field({ description: 'Enabled' })
+  /**
+   * Enabled
+   */
   enabled!: boolean;
 
-  @Field({ description: 'Latest update time' })
+  /**
+   * Latest update time
+   */
   updatedAt!: Date;
 
-  @Field({ description: 'Creation time' })
+  /**
+   * Creation time
+   */
   createdAt!: Date;
 }
 
