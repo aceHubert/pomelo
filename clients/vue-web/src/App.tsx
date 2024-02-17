@@ -1,6 +1,6 @@
-import { defineComponent, ref, computed, watch, h } from '@vue/composition-api';
+import { defineComponent, ref, computed, h } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { useI18n } from '@/hooks';
+import { useI18n, expose } from '@/hooks';
 import { sanitizeComponent } from '@/components';
 import { useAppStore } from '@/store';
 
@@ -22,7 +22,6 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const i18n = useI18n();
-    const layoutRef = ref<any>();
 
     // 防止初始化闪烁
     const routerReadyRef = ref(false);
@@ -37,33 +36,33 @@ export default defineComponent({
       return title;
     });
 
-    watch(
-      () => route.path,
-      () => {
-        let layoutName = route.meta?.layout;
-        if (!layoutName && route.matched.length) {
-          layoutName = sanitizeComponent(route.matched.slice(-1)[0].components.default).options.layout;
-        }
-        if (typeof layoutName === 'function') {
-          layoutName = layoutName();
-        }
-        if (!layoutName || !layouts[`_${layoutName}` as keyof typeof layouts]) {
-          layoutName = 'default';
-        }
-        layoutRef.value = layouts[`_${layoutName}` as keyof typeof layouts];
-      },
-      { immediate: true },
-    );
-
-    return {
+    expose({
       siteTitle,
-      layout: layoutRef,
-      routerReady: routerReadyRef,
+    });
+
+    const getLayout = () => {
+      let layoutName = route.meta?.layout;
+      if (!layoutName && route.matched.length) {
+        const component = sanitizeComponent(route.matched.slice(-1)[0].components.default);
+        layoutName = component.options.layout;
+        // antd Form.create({})(WrappedComponent)
+        if (!layoutName && component.options.WrappedComponent) {
+          layoutName = sanitizeComponent(component.options.WrappedComponent).options.layout;
+        }
+      }
+      if (typeof layoutName === 'function') {
+        layoutName = layoutName();
+      }
+      if (!layoutName || !layouts[`_${layoutName}` as keyof typeof layouts]) {
+        layoutName = 'default';
+      }
+      return layouts[`_${layoutName}` as keyof typeof layouts];
     };
-  },
-  render() {
-    if (!this.routerReady) return h('div');
-    // @ts-ignore
-    return h(this.layout || 'router-view');
+
+    return () => {
+      if (!routerReadyRef.value) return h('div');
+
+      return h(getLayout() || 'router-view');
+    };
   },
 });
