@@ -6,7 +6,7 @@ import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pom
 import type { PagedArgs, Paged } from './types';
 
 export interface IdentityResourceModel {
-  id: number;
+  id: string;
   name: string;
   displayName?: string;
   description?: string;
@@ -40,7 +40,7 @@ export interface NewIdentityResourceInput {
 export interface UpdateIdentityResourceInput extends Partial<NewIdentityResourceInput> {}
 
 export interface IdentityClaimModel {
-  id: number;
+  id: string;
   type: string;
 }
 
@@ -54,7 +54,7 @@ export interface NewIdentityClaimInput {
 }
 
 export interface IdentityPropertyModel {
-  id: number;
+  id: string;
   key: string;
   value: string;
 }
@@ -105,7 +105,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
           createdAt
         }
       }
-    ` as TypedQueryDocumentNode<{ identityResource: IdentityResourceModel | null }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ identityResource: IdentityResourceModel | null }, { id: string }>,
     create: gql`
       mutation createIdentityResource($model: NewIdentityResourceInput!) {
         identityResource: createIdentityResource(model: $model) {
@@ -141,7 +141,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ identityClaims: IdentityClaimsModel | null }, { identityResourceId: number }>,
+    ` as TypedQueryDocumentNode<{ identityClaims: IdentityClaimsModel | null }, { identityResourceId: string }>,
     createClaim: gql`
       mutation createIdentityClaim($identityResourceId: ID!, $model: NewIdentityClaimInput!) {
         claim: createIdentityClaim(identityResourceId: $identityResourceId, model: $model) {
@@ -151,13 +151,13 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
       }
     ` as TypedMutationDocumentNode<
       { claim: IdentityClaimModel },
-      { identityResourceId: number; model: NewIdentityClaimInput }
+      { identityResourceId: string; model: NewIdentityClaimInput }
     >,
     deleteClaim: gql`
       mutation deleteIdentityClaim($id: ID!) {
         result: deleteIdentityClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getProperties: gql`
       query getIdentityProperties($identityResourceId: ID!) {
         identityProperties(identityResourceId: $identityResourceId) {
@@ -171,7 +171,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ identityProperties: IdentityPropertiesModel | null }, { identityResourceId: number }>,
+    ` as TypedQueryDocumentNode<{ identityProperties: IdentityPropertiesModel | null }, { identityResourceId: string }>,
     createProperty: gql`
       mutation createIdentityProperty($identityResourceId: ID!, $model: NewIdentityPropertyInput!) {
         property: createIdentityProperty(identityResourceId: $identityResourceId, model: $model) {
@@ -182,13 +182,13 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
       }
     ` as TypedMutationDocumentNode<
       { property: IdentityPropertyModel },
-      { identityResourceId: number; model: NewIdentityPropertyInput }
+      { identityResourceId: string; model: NewIdentityPropertyInput }
     >,
     deleteProperty: gql`
       mutation deleteIdentityProperty($id: ID!) {
         result: deleteIdentityProperty(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
   },
   request,
 });

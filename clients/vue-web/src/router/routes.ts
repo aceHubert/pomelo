@@ -8,7 +8,7 @@ export const routes: Array<RouteConfig> = [
     name: 'form',
     component: () => import(/* webpackChunkName: "form" */ '../views/form'),
     props: (route) => ({
-      id: Number(route.params.id),
+      id: route.params.id,
     }),
   },
   {
@@ -17,7 +17,7 @@ export const routes: Array<RouteConfig> = [
     name: 'post',
     component: () => import(/* webpackChunkName: "post" */ '../views/post'),
     props: (route) => ({
-      id: Number(route.params.id),
+      id: route.params.id,
     }),
   },
   {
@@ -26,7 +26,7 @@ export const routes: Array<RouteConfig> = [
     name: 'page',
     component: () => import(/* webpackChunkName: "page" */ '../views/page'),
     props: (route) => ({
-      id: Number(route.params.id),
+      id: route.params.id,
     }),
   },
   {

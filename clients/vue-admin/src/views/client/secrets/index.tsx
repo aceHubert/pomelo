@@ -35,12 +35,10 @@ export default defineComponent({
 
     const clientName = ref('');
 
-    const $secretsRes = createResource(() => {
+    const $secretsRes = createResource((clientId: string) => {
       return clientApi
         .getSecrets({
-          variables: {
-            clientId: props.clientId,
-          },
+          variables: { clientId },
         })
         .then(({ clientSecrets }) => {
           if (!clientSecrets) return;
@@ -51,10 +49,10 @@ export default defineComponent({
     });
 
     // 加载客户端密匙
-    $secretsRes.read();
+    $secretsRes.read(props.clientId);
 
     const deleting = ref(false);
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
       Modal.confirm({
         title: i18n.tv('page_client_secrets.delete_confirm.title', '确认'),
         content: i18n.tv('page_client_secrets.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
@@ -81,7 +79,7 @@ export default defineComponent({
             })
             .then(() => {
               // 刷新客户端密匙
-              $secretsRes.read();
+              $secretsRes.read(props.clientId);
             })
             .catch((err) => {
               message.error(err.message);

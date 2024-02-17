@@ -8,7 +8,7 @@ import type { TermTaxonomyModel } from '../term-taxonomy';
 import type { Paged } from '../types';
 
 export interface PagedPostTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {
-  tagId?: number;
+  tagId?: string;
 }
 
 export interface PostTemplateModel
@@ -46,11 +46,11 @@ export const usePostApi = defineRegistApi('template_post', {
         $offset: Int
         $limit: Int
         $keyword: String
-        $author: String
+        $author: ID
         $status: TemplateStatus
         $date: String
-        $categoryId: Int
-        $tagId: Int
+        $categoryId: ID
+        $tagId: ID
         $queryStatusCounts: Boolean! = false
         $querySelfCounts: Boolean! = false
       ) {
@@ -130,7 +130,7 @@ export const usePostApi = defineRegistApi('template_post', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ post: PostTemplateModel | null }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ post: PostTemplateModel | null }, { id: string; metaKeys?: string[] }>,
     // 创建文章
     create: gql`
       mutation createPost($newPostTemplate: NewPostTemplateInput! = {}) {
@@ -181,7 +181,7 @@ export const usePostApi = defineRegistApi('template_post', {
       }
     ` as TypedMutationDocumentNode<
       { result: boolean; featureImageResult: boolean; templateResult: boolean },
-      { id: number; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
+      { id: string; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
     >,
   },
   request,

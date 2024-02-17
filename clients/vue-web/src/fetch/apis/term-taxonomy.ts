@@ -9,7 +9,7 @@ export type TermTaxonomyModel = {
   slug: string;
   taxonomy: PresetTaxonomy | string;
   description: string;
-  parentId: number;
+  parentId: string;
   group: number;
   count: number;
 };

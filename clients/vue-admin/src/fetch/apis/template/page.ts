@@ -39,10 +39,10 @@ export const usePageApi = defineRegistApi('template_page', {
         $offset: Int
         $limit: Int
         $keyword: String
-        $author: String
+        $author: ID
         $status: TemplateStatus
         $date: String
-        $categoryId: Int
+        $categoryId: ID
         $queryStatusCounts: Boolean! = false
         $querySelfCounts: Boolean! = false
       ) {
@@ -103,7 +103,7 @@ export const usePageApi = defineRegistApi('template_page', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ page: PageTemplateModel | null }, { id: number; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ page: PageTemplateModel | null }, { id: string; metaKeys?: string[] }>,
     // 创建表单
     create: gql`
       mutation createPage($newPageTemplate: NewPageTemplateInput! = {}) {
@@ -139,7 +139,7 @@ export const usePageApi = defineRegistApi('template_page', {
       }
     ` as TypedMutationDocumentNode<
       { result: boolean; featureImageResult: boolean },
-      { id: number; updatePage: UpdatePageTemplateInput; featureImage?: string }
+      { id: string; updatePage: UpdatePageTemplateInput; featureImage?: string }
     >,
   },
   request,

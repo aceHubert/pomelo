@@ -14,7 +14,7 @@ import type { ApiScopeClaimsModel } from '@/fetch/apis/api-resource';
 
 type ApiScopeClaimProps = {
   form: WrappedFormUtils;
-  apiScopeId: number;
+  apiScopeId: string;
 };
 
 export default Form.create({})(
@@ -27,7 +27,7 @@ export default Form.create({})(
     },
     props: {
       apiScopeId: {
-        type: Number,
+        type: String,
         required: true,
       },
     },
@@ -66,12 +66,10 @@ export default Form.create({})(
       );
 
       const apiScopeName = ref('');
-      const $scopeClaimsRes = createResource(() => {
+      const $scopeClaimsRes = createResource((apiScopeId: string) => {
         return apiResourceApi
           .getScopeClaims({
-            variables: {
-              apiScopeId: props.apiScopeId,
-            },
+            variables: { apiScopeId },
             loading: true,
             catchError: true,
           })
@@ -83,7 +81,7 @@ export default Form.create({})(
           });
       });
 
-      $scopeClaimsRes.read();
+      $scopeClaimsRes.read(props.apiScopeId);
 
       const adding = ref(false);
       const handleAdd = () => {
@@ -111,7 +109,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: number) => {
+      const handleDelete = (id: string) => {
         Modal.confirm({
           title: i18n.tv('page_api_scope_claims.delete_confirm.title', '确认'),
           content: i18n.tv('page_api_scope_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
@@ -128,9 +126,7 @@ export default Form.create({})(
           onOk() {
             return apiResourceApi
               .deleteScopeClaim({
-                variables: {
-                  id,
-                },
+                variables: { id },
                 loading: () => {
                   deleting.value = true;
                   return () => (deleting.value = false);

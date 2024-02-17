@@ -16,7 +16,7 @@ export default defineComponent({
   },
   props: {
     id: {
-      type: Number,
+      type: String,
       required: true,
     },
   },
@@ -27,12 +27,10 @@ export default defineComponent({
 
     const isEditModalVisable = ref(false);
 
-    const $detailRes = createResource((id: number) => {
+    const $detailRes = createResource((id: string) => {
       return apiResourceApi
         .get({
-          variables: {
-            id,
-          },
+          variables: { id },
         })
         .then(({ apiResource }) => apiResource);
     });

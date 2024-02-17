@@ -12,7 +12,7 @@ import { useApiResourceApi } from '@/fetch/apis';
 import type { ApiSecretsModel } from '@/fetch/apis/api-resource';
 
 type ApiSecretProps = {
-  apiResourceId: number;
+  apiResourceId: string;
 };
 
 export default defineComponent({
@@ -24,7 +24,7 @@ export default defineComponent({
   },
   props: {
     apiResourceId: {
-      type: Number,
+      type: String,
       required: true,
     },
   },
@@ -35,11 +35,11 @@ export default defineComponent({
 
     const apiResourceName = ref('');
 
-    const $secretsRes = createResource(() => {
+    const $secretsRes = createResource((apiResourceId: string) => {
       return apiResourceApi
         .getSecrets({
           variables: {
-            apiResourceId: props.apiResourceId,
+            apiResourceId,
           },
         })
         .then(({ apiSecrets }) => {
@@ -51,10 +51,10 @@ export default defineComponent({
     });
 
     // 加载客户端密匙
-    $secretsRes.read();
+    $secretsRes.read(props.apiResourceId);
 
     const deleting = ref(false);
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
       Modal.confirm({
         title: i18n.tv('page_api_secrets.delete_confirm.title', '确认'),
         content: i18n.tv('page_api_secrets.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
@@ -71,9 +71,7 @@ export default defineComponent({
         onOk() {
           return apiResourceApi
             .deleteSecret({
-              variables: {
-                id,
-              },
+              variables: { id },
               loading: () => {
                 deleting.value = true;
                 return () => (deleting.value = false);
@@ -81,7 +79,7 @@ export default defineComponent({
             })
             .then(() => {
               // 刷新客户端密匙
-              $secretsRes.read();
+              $secretsRes.read(props.apiResourceId);
             })
             .catch((err) => {
               message.error(err.message);

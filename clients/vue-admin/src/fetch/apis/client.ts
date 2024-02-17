@@ -76,7 +76,7 @@ export interface NewClientInput {
 export interface UpdateClientInput extends Omit<NewClientInput, 'clientId'> {}
 
 export interface ClientClaimModel {
-  id: number;
+  id: string;
   type: string;
   value: string;
 }
@@ -91,7 +91,7 @@ export interface NewClientClaimInput {
 }
 
 export interface ClientCorsOriginModel {
-  id: number;
+  id: string;
   origin: string;
 }
 
@@ -104,7 +104,7 @@ export interface NewClientCorsOriginInput {
 }
 
 export interface ClientScopeModel {
-  id: number;
+  id: string;
   scope: string;
 }
 
@@ -117,7 +117,7 @@ export interface NewClientScopeInput {
 }
 
 export interface ClientGrantTypeModel {
-  id: number;
+  id: string;
   grantType: string;
 }
 
@@ -130,7 +130,7 @@ export interface NewClientGrantTypeInput {
 }
 
 export interface ClientRedirectUriModel {
-  id: number;
+  id: string;
   redirectUri: string;
 }
 
@@ -143,7 +143,7 @@ export interface NewClientRedirectUriInput {
 }
 
 export interface ClientPostLogoutRedirectUriModel {
-  id: number;
+  id: string;
   postLogoutRedirectUri: string;
 }
 
@@ -156,7 +156,7 @@ export interface NewClientPostLogoutRedirectUriInput {
 }
 
 export interface ClientSecretModel {
-  id: number;
+  id: string;
   type: string;
   value: string;
   expiresAt?: number;
@@ -175,7 +175,7 @@ export interface NewClientSecretInput {
 }
 
 export interface ClientPropertyModel {
-  id: number;
+  id: string;
   key: string;
   value: string;
 }
@@ -311,7 +311,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientCorsOrigin($id: ID!) {
         result: deleteClientCorsOrigin(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getClaims: gql`
       query getClientClaims($clientId: String!) {
         clientClaims(clientId: $clientId) {
@@ -347,7 +347,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientClaim($id: ID!) {
         result: deleteClientClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getGrantTypes: gql`
       query getClientGrantTypes($clientId: String!) {
         clientGrantTypes(clientId: $clientId) {
@@ -386,7 +386,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientGrantType($id: ID!) {
         result: deleteClientGrantType(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getScopes: gql`
       query getClientScopes($clientId: String!) {
         clientScopes(clientId: $clientId) {
@@ -419,7 +419,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientScope($id: ID!) {
         result: deleteClientScope(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getRedirectUris: gql`
       query getClientRedirectUris($clientId: String!) {
         clientRedirectUris(clientId: $clientId) {
@@ -458,7 +458,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientRedirectUri($id: ID!) {
         result: deleteClientRedirectUri(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getPostLogoutRedirectUris: gql`
       query getClientPostLogoutRedirectUris($clientId: String!) {
         clientPostLogoutRedirectUris(clientId: $clientId) {
@@ -500,7 +500,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientPostLogoutRedirectUri($id: ID!) {
         result: deleteClientPostLogoutRedirectUri(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getSecrets: gql`
       query getClientSecrets($clientId: String!) {
         clientSecrets(clientId: $clientId) {
@@ -535,7 +535,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientSecret($id: ID!) {
         result: deleteClientSecret(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
     getProperties: gql`
       query getClientProperties($clientId: String!) {
         clientProperties(clientId: $clientId) {
@@ -577,7 +577,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientProperty($id: ID!) {
         result: deleteClientProperty(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
   },
   request,
 });

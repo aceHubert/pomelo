@@ -12,7 +12,7 @@ export enum TemplatePageType {
 }
 
 export interface TemplateModel {
-  id: number;
+  id: string;
   title: string;
   name: string;
   excerpt: string;
@@ -29,8 +29,8 @@ export interface TemplateModel {
 }
 
 export interface TemplateMetaModel {
-  id: number;
-  templateId: number;
+  id: string;
+  templateId: string;
   key: string;
   value: string;
 }
@@ -75,8 +75,8 @@ export interface PostTemplateModel
 }
 
 export interface MetaModel {
-  id: number;
-  templateId: number;
+  id: string;
+  templateId: string;
   metaKey: string;
   metaValue: string;
 }
@@ -132,7 +132,7 @@ export const useTemplateApi = defineRegistApi('template', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: string; metaKeys?: string[] }>,
     // 获取表单
     getForm: gql`
       query getForm($id: ID!, $metaKeys: [String!]) {
@@ -151,7 +151,7 @@ export const useTemplateApi = defineRegistApi('template', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ form?: FormTemplateModel }, { id: number; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ form?: FormTemplateModel }, { id: string; metaKeys?: string[] }>,
     // 获取页面别名路径
     getAliasPaths: gql`
       query getAliasPaths {
@@ -179,7 +179,7 @@ export const useTemplateApi = defineRegistApi('template', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { id: number; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ page?: PageTemplateModel }, { id: string; metaKeys?: string[] }>,
     // 通过别名获取页面
     getPageByName: gql`
       query getPage($name: String, $metaKeys: [String!]) {
@@ -232,7 +232,7 @@ export const useTemplateApi = defineRegistApi('template', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: string; metaKeys?: string[] }>,
   },
   request,
 });

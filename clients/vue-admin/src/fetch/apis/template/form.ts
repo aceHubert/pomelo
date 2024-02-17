@@ -26,9 +26,9 @@ export const useFormApi = defineRegistApi('template_form', {
         $limit: Int
         $keyword: String
         $status: TemplateStatus
-        $author: String
+        $author: ID
         $date: String
-        $categoryId: Int
+        $categoryId: ID
         $queryStatusCounts: Boolean! = false
         $querySelfCounts: Boolean! = false
       ) {
@@ -83,7 +83,7 @@ export const useFormApi = defineRegistApi('template_form', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ form: FormTemplateModel | null }, { id: number; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ form: FormTemplateModel | null }, { id: string; metaKeys?: string[] }>,
     // 创建表单
     create: gql`
       mutation createForm($newFormTemplate: NewFormTemplateInput! = {}) {
@@ -148,7 +148,7 @@ export const useFormApi = defineRegistApi('template_form', {
         featureImageResult: boolean;
       },
       {
-        id: number;
+        id: string;
         updateForm: UpdateFormTemplateInput;
         submitAction?: string;
         submitSuccessRedirect?: string;

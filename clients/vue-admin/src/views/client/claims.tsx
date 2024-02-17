@@ -73,12 +73,10 @@ export default Form.create({})(
 
       const clientName = ref('');
 
-      const $claimsRes = createResource(() => {
+      const $claimsRes = createResource((clientId: string) => {
         return clientApi
           .getClaims({
-            variables: {
-              clientId: props.clientId,
-            },
+            variables: { clientId },
             catchError: true,
           })
           .then(({ clientClaims }) => {
@@ -89,7 +87,7 @@ export default Form.create({})(
           });
       });
 
-      $claimsRes.read();
+      $claimsRes.read(props.clientId);
 
       const adding = ref(false);
       const handleAdd = () => {
@@ -117,7 +115,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: number) => {
+      const handleDelete = (id: string) => {
         Modal.confirm({
           title: i18n.tv('page_client_claims.delete_confirm.title', '确认'),
           content: i18n.tv('page_client_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

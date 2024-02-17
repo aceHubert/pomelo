@@ -76,12 +76,10 @@ export default Form.create({})(
         accept: 'image/*',
       });
 
-      const $detailRes = createResource(() => {
+      const $detailRes = createResource((clientId: string) => {
         return clientApi
           .get({
-            variables: {
-              clientId: props.clientId,
-            },
+            variables: { clientId },
             catchError: true,
             loading: true,
           })
@@ -114,7 +112,7 @@ export default Form.create({})(
       });
 
       // 加载客户端详情
-      $detailRes.read();
+      $detailRes.read(props.clientId);
 
       const updateClientSubmiting = ref(false);
       const handleUpdate = () => {

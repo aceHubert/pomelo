@@ -26,7 +26,7 @@ export default defineComponent({
   },
   props: {
     identityResourceId: {
-      type: Number,
+      type: String,
       required: true,
     },
   },
@@ -71,12 +71,10 @@ export default defineComponent({
     );
 
     const identityResourceName = ref('');
-    const $propertiesRes = createResource(() => {
+    const $propertiesRes = createResource((identityResourceId: string) => {
       return identityResourceApi
         .getProperties({
-          variables: {
-            identityResourceId: props.identityResourceId,
-          },
+          variables: { identityResourceId },
           loading: true,
           catchError: true,
         })
@@ -88,7 +86,7 @@ export default defineComponent({
         });
     });
 
-    $propertiesRes.read();
+    $propertiesRes.read(props.identityResourceId);
 
     const adding = ref(false);
     const handleAdd = (form: WrappedFormUtils) => {
@@ -117,7 +115,7 @@ export default defineComponent({
     };
 
     const deleting = ref(false);
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
       Modal.confirm({
         title: i18n.tv('page_identity_resource_properties.delete_confirm.title', '提示'),
         content: i18n.tv(

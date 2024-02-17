@@ -14,7 +14,7 @@ import type { ClientRedirectUrisModel } from '@/fetch/apis/client';
 
 type ClientRedirectUriProps = {
   form: WrappedFormUtils;
-  clientId: number;
+  clientId: string;
 };
 
 export default Form.create({})(
@@ -67,12 +67,10 @@ export default Form.create({})(
 
       const clientName = ref('');
 
-      const $redirectUrisRes = createResource(() => {
+      const $redirectUrisRes = createResource((clientId: string) => {
         return clientApi
           .getRedirectUris({
-            variables: {
-              clientId: props.clientId,
-            },
+            variables: { clientId },
             loading: true,
             catchError: true,
           })
@@ -84,7 +82,7 @@ export default Form.create({})(
           });
       });
 
-      $redirectUrisRes.read();
+      $redirectUrisRes.read(props.clientId);
 
       const adding = ref(false);
       const handleAdd = () => {
@@ -112,7 +110,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: number) => {
+      const handleDelete = (id: string) => {
         Modal.confirm({
           title: i18n.tv('page_client_redirect_uris.delete_confirm.title', '提示'),
           content: i18n.tv('page_client_redirect_uris.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

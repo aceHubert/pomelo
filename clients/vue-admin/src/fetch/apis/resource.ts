@@ -45,7 +45,7 @@ export interface PagedMediaArgs extends PagedArgs {
 }
 
 export interface Media extends Omit<File, 'original'>, FileData {
-  id: number;
+  id: string;
   originalFileName: string;
   extension: string;
   mimeType: string;
@@ -292,7 +292,7 @@ export const useResApi = defineRegistApi(
             }
           }
         }
-      ` as TypedQueryDocumentNode<{ media: Media | null }, { id: number }>,
+      ` as TypedQueryDocumentNode<{ media: Media | null }, { id: string }>,
       getObsUploadSignedUrl: gql`
         query gethwCloudObsUploadSignedUrl(
           $bucket: String!

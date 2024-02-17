@@ -106,14 +106,14 @@ export default defineComponent({
 
     const postData = reactive<
       Pick<PostTemplateModel, 'title' | 'excerpt' | 'status'> & {
-        id?: number;
+        id?: string;
         content?: any;
         featureImage?: string;
         allowComment?: boolean;
         templatePageType?: TemplatePageType;
       }
     >({
-      id: props.id ? Number(props.id) : void 0,
+      id: props.id,
       title: '',
       excerpt: '',
       content: '',
@@ -262,12 +262,12 @@ export default defineComponent({
           actionCapability.publish = true;
         } else {
           // 只能操作自己的
-          if (user?.profile.sub === post.author) {
+          if (user?.profile.sub === String(post.author)) {
             actionCapability.operate = true;
           }
         }
 
-        isSelfContentRef.value = user?.profile.sub === post.author;
+        isSelfContentRef.value = user?.profile.sub === String(post.author);
 
         // cache content when schema framework changed
         watch(schemaFrameworkRef, (value, old) => {
@@ -587,6 +587,7 @@ export default defineComponent({
             ),
           },
           on: {
+            logoClick: () => router.back(),
             update: handleUpdate,
             publish: handelPublish,
             saveToDraft: handleSaveToDraft,

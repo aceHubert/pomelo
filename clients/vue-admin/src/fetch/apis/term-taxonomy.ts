@@ -14,7 +14,7 @@ export type TermTaxonomyModel = {
   slug: string;
   taxonomy: PresetTaxonomy | string;
   description: string;
-  parentId: number;
+  parentId: string;
   group: number;
   count: number;
 };
@@ -30,14 +30,14 @@ export type NewTermTaxonomyInput = {
   slug?: string;
   taxonomy: string;
   description: string;
-  parentId?: number;
+  parentId?: string;
   group?: number;
   objectId?: number;
 };
 
 export type NewTermRelationshipInput = {
-  objectId: number;
-  termTaxonomyId: number;
+  objectId: string;
+  termTaxonomyId: string;
   order?: number;
 };
 
@@ -89,11 +89,11 @@ export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
       }
     ` as TypedQueryDocumentNode<
       { categories: Omit<TermTaxonomyModel, 'taxonomy'>[]; myCategories?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
-      | { keyword?: string; group?: number; parentId?: number }
+      | { keyword?: string; group?: number; parentId?: string }
       | {
           keyword?: string;
           group?: number;
-          parentId?: number;
+          parentId?: string;
           objectId: string;
           includeDefault?: boolean;
           withMine?: true;

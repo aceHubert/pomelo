@@ -60,7 +60,7 @@ export default defineComponent({
                 type="link"
                 size="small"
                 class="px-0 danger--text as-link"
-                onClick={() => handleDelete(record.id!)}
+                onClick={() => handleDelete(record.id)}
               >
                 {i18n.tv('common.btn_text.delete', '删除')}
               </Button>,
@@ -76,12 +76,10 @@ export default defineComponent({
       getPresetProperties((...args: [string, string]) => i18n.tv(...args) as string),
     );
 
-    const $propertiesRes = createResource(() => {
+    const $propertiesRes = createResource((clientId: string) => {
       return clientApi
         .getProperties({
-          variables: {
-            clientId: props.clientId,
-          },
+          variables: { clientId },
           loading: true,
           catchError: true,
         })
@@ -93,7 +91,7 @@ export default defineComponent({
         });
     });
 
-    $propertiesRes.read();
+    $propertiesRes.read(props.clientId);
 
     const adding = ref(false);
     const handleAdd = (form: WrappedFormUtils) => {
@@ -112,7 +110,7 @@ export default defineComponent({
             },
           })
           .then(() => {
-            $propertiesRes.read();
+            $propertiesRes.read(props.clientId);
             form.resetFields();
           })
           .catch((err) => {
@@ -122,7 +120,7 @@ export default defineComponent({
     };
 
     const deleting = ref(false);
-    const handleDelete = (id: number) => {
+    const handleDelete = (id: string) => {
       Modal.confirm({
         title: i18n.tv('page_client_properties.delete_confirm.title', '提示'),
         content: i18n.tv('page_client_properties.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
@@ -146,7 +144,7 @@ export default defineComponent({
               },
             })
             .then(() => {
-              $propertiesRes.read();
+              $propertiesRes.read(props.clientId);
             })
             .catch((err) => {
               message.error(err.message);

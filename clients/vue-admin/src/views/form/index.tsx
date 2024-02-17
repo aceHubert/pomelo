@@ -7,7 +7,7 @@ import { Card, Descriptions, Popconfirm, Select, Space, Spin } from 'ant-design-
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { OptionPresetKeys, TemplateStatus } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
-import { useFormApi, TemplateType } from '@/fetch/apis';
+import { useFormApi, PresetTemplateType } from '@/fetch/apis';
 import { useI18n, useOptions, useUserManager, useDeviceType } from '@/hooks';
 import { useTemplateMixin, useLocationMixin } from '@/mixins';
 import classes from './index.module.less';
@@ -79,7 +79,6 @@ export default defineComponent({
             queryStatusCounts: formTemplates.queryStatusCounts,
             querySelfCounts: formTemplates.querySelfCounts,
           },
-          catchError: true,
         })
         .then(({ forms, statusCounts, selfCounts }) => {
           formTemplates.rowCount = forms.total;
@@ -119,6 +118,13 @@ export default defineComponent({
             }),
             total: forms.total,
           };
+        })
+        .catch((err) => {
+          message.error(err.message);
+          return {
+            rows: [],
+            total: 0,
+          };
         });
     };
 
@@ -138,7 +144,7 @@ export default defineComponent({
     // 加载月分组
     templateMixin.monthCount.selectKey = (route.query[RouteQueryKey.Date] as string) || '';
     templateMixin
-      .getMonthCounts(TemplateType.Form)
+      .getMonthCounts(PresetTemplateType.Form)
       .then((selectData) => {
         templateMixin.monthCount.selectData = selectData;
       })
@@ -207,7 +213,7 @@ export default defineComponent({
                     }
                     scopedSlots={{
                       default: ({ href }) => (
-                        <a href={href} target="designer">
+                        <a href={href}>
                           {record.status === TemplateStatus.Pending &&
                           record.actionCapability.publish &&
                           !record.isSelfContent

@@ -45,7 +45,7 @@ export const useBasicApi = defineRegistApi('basic', {
           autoload
         }
       }
-    ` as TypedQueryDocumentNode<{ option: OptionModel | null }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ option: OptionModel | null }, { id: string }>,
     // 获取 Option Value
     getOptionValue: gql`
       query getOptionValue($name: String!) {

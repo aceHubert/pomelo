@@ -83,12 +83,10 @@ export default Form.create({})(
       const clientName = ref('');
       const presetOptions = getPresetOptions();
 
-      const $scopesRes = createResource(() => {
+      const $scopesRes = createResource((clientId: string) => {
         return clientApi
           .getScopes({
-            variables: {
-              clientId: props.clientId,
-            },
+            variables: { clientId },
             loading: true,
             catchError: true,
           })
@@ -100,7 +98,7 @@ export default Form.create({})(
           });
       });
 
-      $scopesRes.read();
+      $scopesRes.read(props.clientId);
 
       const adding = ref(false);
       const handleAdd = () => {
@@ -128,7 +126,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: number) => {
+      const handleDelete = (id: string) => {
         Modal.confirm({
           title: i18n.tv('page_client_scopes.delete_confirm.title', '确认'),
           content: i18n.tv('page_client_scopes.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
@@ -145,9 +143,7 @@ export default Form.create({})(
           onOk() {
             return clientApi
               .deleteScope({
-                variables: {
-                  id,
-                },
+                variables: { id },
                 loading: () => {
                   deleting.value = true;
                   return () => (deleting.value = false);

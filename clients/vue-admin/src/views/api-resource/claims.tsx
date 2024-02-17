@@ -14,7 +14,7 @@ import type { ApiClaimsModel } from '@/fetch/apis/api-resource';
 
 type ApiClaimProps = {
   form: WrappedFormUtils;
-  apiResourceId: number;
+  apiResourceId: string;
 };
 
 export default Form.create({})(
@@ -27,7 +27,7 @@ export default Form.create({})(
     },
     props: {
       apiResourceId: {
-        type: Number,
+        type: String,
         required: true,
       },
     },
@@ -67,11 +67,11 @@ export default Form.create({})(
 
       const apiResourceName = ref('');
       const apiResourceNonEditable = ref(true);
-      const $claimsRes = createResource(() => {
+      const $claimsRes = createResource((apiResourceId: string) => {
         return apiResourceApi
           .getClaims({
             variables: {
-              apiResourceId: props.apiResourceId,
+              apiResourceId,
             },
             loading: true,
             catchError: true,
@@ -85,7 +85,7 @@ export default Form.create({})(
           });
       });
 
-      $claimsRes.read();
+      $claimsRes.read(props.apiResourceId);
 
       const adding = ref(false);
       const handleAdd = () => {
@@ -113,7 +113,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: number) => {
+      const handleDelete = (id: string) => {
         Modal.confirm({
           title: i18n.tv('page_api_resource_claims.delete_confirm.title', '确认'),
           content: i18n.tv('page_api_resource_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
@@ -130,9 +130,7 @@ export default Form.create({})(
           onOk() {
             return apiResourceApi
               .deleteClaim({
-                variables: {
-                  id,
-                },
+                variables: { id },
                 loading: () => {
                   deleting.value = true;
                   return () => (deleting.value = false);

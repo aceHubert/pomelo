@@ -10,7 +10,7 @@ export enum UserStatus {
 }
 
 export interface UserModel {
-  id: number;
+  id: string;
   niceName: string;
   displayName: string;
   mobile: string;
@@ -45,14 +45,14 @@ export const useUserApi = defineRegistApi('user', {
         }
       }
     ` as TypedQueryDocumentNode<
-      { metas: { id: number; key: string; value: string }[] },
+      { metas: { id: string; key: string; value: string }[] },
       { userId: string; keys: string[] }
     >,
     updateMetaByKey: gql`
       mutation updateUserMetaByKey($userId: ID!, $key: String!, $value: String!) {
         result: updateUserMetaByKey(userId: $userId, metaKey: $key, metaValue: $value)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { userId: number; key: string; value: string }>,
+    ` as TypedMutationDocumentNode<{ result: boolean }, { userId: string; key: string; value: string }>,
   },
   request,
 });

@@ -147,14 +147,14 @@ export default defineComponent({
 
     const formData = reactive<
       Pick<FormTemplateModel, 'title' | 'content' | 'status'> & {
-        id?: number;
+        id?: string;
         submitAction?: string;
         submitSuccessRedirect?: string;
         submitSuccessTips?: string;
         featureImage?: string;
       }
     >({
-      id: props.id ? Number(props.id) : void 0,
+      id: props.id,
       title: '',
       content: '',
       status: TemplateStatus.Draft,
@@ -300,12 +300,12 @@ export default defineComponent({
         actionCapability.publish = true;
       } else {
         // 只能操作自己的
-        if (user?.profile.sub === form.author) {
+        if (user?.profile.sub === String(form.author)) {
           actionCapability.operate = true;
         }
       }
 
-      isSelfContentRef.value = user?.profile.sub === form.author;
+      isSelfContentRef.value = user?.profile.sub === String(form.author);
 
       // cache content when schema framework changed
       watch(schemaFrameworkRef, (value, old) => {
@@ -597,6 +597,7 @@ export default defineComponent({
             ),
           },
           on: {
+            logoClick: () => router.back(),
             update: handleUpdate,
             publish: handelPublish,
             saveToDraft: handleSaveToDraft,

@@ -152,12 +152,12 @@ export default defineComponent({
 
     const pageData = reactive<
       Pick<PageTemplateModel, 'title' | 'name' | 'content' | 'status'> & {
-        id?: number;
+        id?: string;
         featureImage?: string;
         allowComment?: boolean;
       }
     >({
-      id: props.id ? Number(props.id) : void 0,
+      id: props.id,
       name: '',
       title: '',
       content: '',
@@ -300,12 +300,12 @@ export default defineComponent({
         actionCapability.publish = true;
       } else {
         // 只能操作自己的
-        if (user?.profile.sub === page.author) {
+        if (user?.profile.sub === String(page.author)) {
           actionCapability.operate = true;
         }
       }
 
-      isSelfContentRef.value = user?.profile.sub === page.author;
+      isSelfContentRef.value = user?.profile.sub === String(page.author);
 
       // cache content when schema framework changed
       watch(schemaFrameworkRef, (value, old) => {
@@ -599,6 +599,7 @@ export default defineComponent({
             ),
           },
           on: {
+            logoClick: () => router.back(),
             update: handleUpdate,
             publish: handelPublish,
             saveToDraft: handleSaveToDraft,
