@@ -47,8 +47,8 @@ export default Form.create({
                       message: i18n.tv('identity_resource_form.name_required', '请输入资源名称'),
                     },
                     {
-                      pattern: /^[a-zA-Z.]+$/,
-                      message: i18n.tv('identity_resource_form.name_pattern_invalid', '只允许英文字母或“.”'),
+                      pattern: /^[a-zA-Z_]+$/,
+                      message: i18n.tv('identity_resource_form.name_pattern_invalid', '只允许英文字母或“_”'),
                     },
                     {
                       max: 50,
