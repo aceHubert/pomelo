@@ -142,7 +142,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
               redirectMethod: args.redirectMethod ?? 'replace', // 默认使用 replace 跳转
               extraQueryParams: {
                 ...args.extraQueryParams,
-                locale: i18n.locale, // add locale
+                ui_locales: i18n.locale, // add locale
                 // add extra query params
               },
             });

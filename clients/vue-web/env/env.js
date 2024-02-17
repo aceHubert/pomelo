@@ -4,14 +4,14 @@
 
   var env = window._ENV || {};
 
-  // env.infrastructureApiBase = 'https://apis.pomelo.acehubert.com/infrastructure/api';
-  env.infrastructureGraphqlBase = 'https://apis.pomelo.acehubert.com/infrastructure/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'wss://apis.pomelo.acehubert.com/infrastructure/graphql';
+  // env.infrastructureApiBase = 'https://pomelo-apis.acehubert.com/infrastructure/api';
+  env.infrastructureGraphqlBase = 'https://pomelo-apis.acehubert.com/infrastructure/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'wss://pomelo-apis.acehubert.com/infrastructure/graphql';
 
-  env.adminOrigin = 'https://admin.pomelo.acehubert.com';
+  env.adminOrigin = 'https://pomelo-admin.acehubert.com';
 
   env.oidc = {
-    authority: 'https://auth.pomelo.acehubert.com/',
+    authority: 'https://pomelo-auth.acehubert.com/',
     client_id: clientId,
     redirect_uri: baseUrl + '/signin.html',
     post_logout_redirect_uri: baseUrl,

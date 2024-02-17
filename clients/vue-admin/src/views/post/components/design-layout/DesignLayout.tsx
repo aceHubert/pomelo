@@ -166,14 +166,9 @@ export default defineComponent({
             <Row gutter={16} type="flex" justify="space-between">
               <Col flex={0}>
                 <Space>
-                  {/* <a
-                    href="javascript:;"
-                    class="logo"
-                    title={i18n.tv('common.btn_tips.go_back', '返回上一级')}
-                    onClick={() => router.back()}
-                  > */}
-                  {renderLogo()}
-                  {/* </a> */}
+                  <a href="javascript:;" class="logo" onClick={() => emit('logoClick')}>
+                    {renderLogo()}
+                  </a>
                   {slots.leftActions?.()}
                 </Space>
               </Col>

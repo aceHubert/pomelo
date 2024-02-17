@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { lowerCase } from 'lodash-es';
+import { lowerCase, has } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
@@ -20,7 +20,7 @@ import type { ActionCapability } from '../post/components/design-layout/DesignLa
 
 enum RouteQueryKey {
   Date = 'd',
-  IsSelf = 'self',
+  Self = 'self',
 }
 
 export default defineComponent({
@@ -56,7 +56,7 @@ export default defineComponent({
     const searchQuery = computed<Omit<PagedFormTemplateArgs, 'offset' | 'limit' | 'queryStatusCounts'>>(() => {
       return {
         ...templateMixin.searchQuery,
-        author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUserId.value : void 0,
+        author: has(route.query, RouteQueryKey.Self) ? currentUserId.value : void 0,
         date: (route.query[RouteQueryKey.Date] as string) || void 0,
       };
     });

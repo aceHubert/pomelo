@@ -37,12 +37,10 @@ export default defineComponent({
     });
 
     const drawerVisible = ref(false);
-    const $mediaRes = createResource((id: number) =>
+    const $mediaRes = createResource((id: string) =>
       resApi
         .get({
-          variables: {
-            id,
-          },
+          variables: { id },
         })
         .then(({ media }) => media),
     );
@@ -59,11 +57,15 @@ export default defineComponent({
             disabled={!!uploadMixin.uploading}
             method="PUT"
             customRequest={(options) => handleCustomUpload(options)}
-            onChange={({ file: { status, response } }) => {
+            onChange={({ file: { name, status, response } }) => {
               if (status === 'done') {
                 (refs['mediaList'] as any).addItem(response);
               } else if (status === 'error') {
-                message.error(i18n.tv('page_media.upload_error', '上传失败！') as string);
+                message.error(
+                  i18n.tv('page_media.upload_error', `文件"${name}"上传失败！`, {
+                    name,
+                  }) as string,
+                );
               }
             }}
           >
@@ -80,6 +82,7 @@ export default defineComponent({
             <p class="mt-2 text--secondary">
               {i18n.tv('page_media.upload_multiple_btn_tips', '支持单个或批量媒体文件上传。')}
             </p>
+            {/* TODO: 上传进度 */}
           </Upload.Dragger>
           <MediaList
             ref="mediaList"

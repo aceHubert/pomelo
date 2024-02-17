@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { lowerCase } from 'lodash-es';
+import { lowerCase, has } from 'lodash-es';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
@@ -7,7 +7,7 @@ import { TreeSelect, Select, Card, Descriptions, Popconfirm, Spin, Space } from 
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { OptionPresetKeys, TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
-import { usePostApi, TemplateType } from '@/fetch/apis';
+import { usePostApi, PresetTemplateType } from '@/fetch/apis';
 import { useI18n, useOptions, useUserManager, useDeviceType } from '@/hooks';
 import { useTemplateMixin, useLocationMixin } from '@/mixins';
 import classes from './index.module.less';
@@ -21,7 +21,7 @@ import type { ActionCapability } from './components/design-layout/DesignLayout';
 enum RouteQueryKey {
   CategoryId = 'cid',
   TagId = 'tid',
-  IsSelf = 'self',
+  Self = 'self',
   Date = 'd',
 }
 
@@ -60,10 +60,10 @@ export default defineComponent({
     >(() => {
       return {
         ...templateMixin.searchQuery,
-        author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUserId.value : void 0,
+        author: has(route.query, RouteQueryKey.Self) ? currentUserId.value : void 0,
         date: (route.query[RouteQueryKey.Date] as string) || void 0,
-        categoryId: Number((route.query[RouteQueryKey.CategoryId] as string) || '') || void 0,
-        tagId: Number((route.query[RouteQueryKey.TagId] as string) || '') || void 0,
+        categoryId: (route.query[RouteQueryKey.CategoryId] as string) || void 0,
+        tagId: (route.query[RouteQueryKey.TagId] as string) || void 0,
       };
     });
 
@@ -85,7 +85,6 @@ export default defineComponent({
             queryStatusCounts: postTemplates.queryStatusCounts,
             querySelfCounts: postTemplates.querySelfCounts,
           },
-          catchError: true,
         })
         .then(({ posts, statusCounts, selfCounts }) => {
           postTemplates.rowCount = posts.total;
@@ -125,6 +124,13 @@ export default defineComponent({
             }),
             total: posts.total,
           };
+        })
+        .catch((err) => {
+          message.error(err.message);
+          return {
+            rows: [],
+            total: 0,
+          };
         });
     };
 
@@ -157,7 +163,7 @@ export default defineComponent({
     // 加载月分组
     templateMixin.monthCount.selectKey = (route.query[RouteQueryKey.Date] as string) || '';
     templateMixin
-      .getMonthCounts(TemplateType.Post)
+      .getMonthCounts(PresetTemplateType.Post)
       .then((selectData) => {
         templateMixin.monthCount.selectData = selectData;
       })
@@ -245,7 +251,6 @@ export default defineComponent({
                     record.actionCapability.publish &&
                     !record.isSelfContent)) && (
                   <router-link
-                    custom
                     to={{ name: 'post-edit', params: { id: record.id } }}
                     class={
                       record.status === TemplateStatus.Pending &&
@@ -254,18 +259,13 @@ export default defineComponent({
                         ? 'warning--text'
                         : ''
                     }
-                    scopedSlots={{
-                      default: ({ href }) => (
-                        <a href={href} target="designer">
-                          {record.status === TemplateStatus.Pending &&
-                          record.actionCapability.publish &&
-                          !record.isSelfContent
-                            ? i18n.tv('page_templates.btn_text.review', '审核')
-                            : i18n.tv('common.btn_text.edit', '编辑')}
-                        </a>
-                      ),
-                    }}
-                  ></router-link>
+                  >
+                    {record.status === TemplateStatus.Pending &&
+                    record.actionCapability.publish &&
+                    !record.isSelfContent
+                      ? i18n.tv('page_templates.btn_text.review', '审核')
+                      : i18n.tv('common.btn_text.edit', '编辑')}
+                  </router-link>
                 ),
                 record.isSelfContent && (
                   <a
