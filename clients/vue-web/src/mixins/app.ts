@@ -23,6 +23,8 @@ const AntLocales: Record<string, () => Promise<Locale>> = {
 //   return import(`ant-design-vue/lib/locale/${locale.replace(/-/g, '_')}.js`).then((data) => data.default || data);
 // };
 
+let currentUserId: string | undefined;
+
 /**
  * App 基础配置
  */
@@ -56,6 +58,43 @@ export const useAppMixin = () => {
   const primaryColor = computed(() => appStore.primaryColor);
 
   /**
+   * 初始化用户配置
+   */
+  useEffect(() => {
+    userManager
+      .getUser()
+      .then((user) => {
+        if (!user) return;
+
+        // 缓存防止页面切换多次调用
+        currentUserId !== user.profile.sub &&
+          userApi
+            .getMetas({
+              variables: {
+                userId: user?.profile.sub,
+                keys: [UserMetaPresetKeys.Locale, UserMetaPresetKeys.AdminColor],
+              },
+            })
+            .then(({ metas }) => {
+              // 设置用户语言
+              const userLocale =
+                metas.find((meta) => meta.key === UserMetaPresetKeys.Locale)?.value || sietLocale.value;
+              if (userLocale) {
+                i18n.locale = userLocale;
+              }
+            })
+            .catch((err) => {
+              warn(process.env.NODE_ENV === 'production', err.message);
+            });
+
+        currentUserId = user.profile.sub;
+      })
+      .catch((err) => {
+        warn(process.env.NODE_ENV === 'production', err.message);
+      });
+  }, []);
+
+  /**
    * 持久化保存用户语言
    */
   watch(
@@ -65,19 +104,20 @@ export const useAppMixin = () => {
       userManager
         .getUser()
         .then((user) => {
-          if (user?.profile.sub)
-            userApi
-              .updateMetaByKey({
-                variables: {
-                  userId: user.profile.sub,
-                  key: UserMetaPresetKeys.Locale,
-                  value: locale,
-                },
-              })
-              .then(({ result }) => {
-                // update user store locale
-                result && userManager.storeUser(new User({ ...user, profile: { ...user.profile, locale } }));
-              });
+          if (!user) return;
+
+          userApi
+            .updateMetaByKey({
+              variables: {
+                userId: user.profile.sub,
+                key: UserMetaPresetKeys.Locale,
+                value: locale,
+              },
+            })
+            .then(({ result }) => {
+              // update user store locale
+              result && userManager.storeUser(new User({ ...user, profile: { ...user.profile, locale } }));
+            });
         })
         .catch((err) => {
           warn(process.env.NODE_ENV === 'production', err.message);
@@ -100,36 +140,6 @@ export const useAppMixin = () => {
     },
     () => appStore.locale,
   );
-
-  // 设置用户语言
-  useEffect(() => {
-    userManager
-      .getUser()
-      .then((user) => {
-        user?.profile.sub &&
-          userApi
-            .getMetas({
-              variables: {
-                userId: user?.profile.sub,
-                keys: [UserMetaPresetKeys.Locale, UserMetaPresetKeys.AdminColor],
-              },
-            })
-            .then(({ metas }) => {
-              // 设置用户语言
-              const userLocale =
-                metas.find((meta) => meta.key === UserMetaPresetKeys.Locale)?.value || sietLocale.value;
-              if (userLocale) {
-                i18n.locale = userLocale;
-              }
-            })
-            .catch((err) => {
-              warn(process.env.NODE_ENV === 'production', err.message);
-            });
-      })
-      .catch((err) => {
-        warn(process.env.NODE_ENV === 'production', err.message);
-      });
-  }, []);
 
   return reactive({
     antLocales,

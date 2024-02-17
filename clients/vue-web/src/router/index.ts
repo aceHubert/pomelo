@@ -27,7 +27,7 @@ const AnonymousRouteNames = ['signin', 'session-timeout'];
 const SiteInitRequiredSessionKey = '__SITE_INIT_REQUEST__';
 
 router.beforeEach(async (to, from, next) => {
-  let siteInitRequired = Boolean(sessionStorage.getItem(SiteInitRequiredSessionKey) || 'true');
+  let siteInitRequired = sessionStorage.getItem(SiteInitRequiredSessionKey) !== 'false';
 
   if (siteInitRequired) {
     const siteInitApi = useSiteInitApi();

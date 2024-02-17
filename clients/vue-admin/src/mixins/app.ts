@@ -24,6 +24,8 @@ const AntLocales: Record<string, () => Promise<Locale>> = {
 //   return import(`ant-design-vue/lib/locale/${locale.replace(/-/g, '_')}.js`).then((data) => data.default || data);
 // };
 
+let currentUserId: string | undefined;
+
 /**
  * App 基础配置
  */
@@ -61,24 +63,71 @@ export const useAppMixin = () => {
   const primaryColor = computed(() => appStore.primaryColor);
 
   /**
+   * 初始化用户配置
+   */
+  useEffect(() => {
+    userManager
+      .getUser()
+      .then((user) => {
+        if (!user) return;
+
+        // 缓存防止页面切换多次调用
+        currentUserId !== user.profile.sub &&
+          userApi
+            .getMetas({
+              variables: {
+                userId: user?.profile.sub,
+                keys: [UserMetaPresetKeys.Locale, UserMetaPresetKeys.AdminColor],
+              },
+            })
+            .then(({ metas }) => {
+              // 设置用户语言
+              const userLocale =
+                metas.find((meta) => meta.key === UserMetaPresetKeys.Locale)?.value || sietLocale.value;
+              if (userLocale) {
+                i18n.locale = userLocale;
+              }
+
+              // 设置用户布局、主题颜色
+              const color = metas.find((meta) => meta.key === UserMetaPresetKeys.AdminColor)?.value;
+              if (color) {
+                const { layout, theme, primaryColor } = JSON.parse(color);
+                appStore.setLayout(layout);
+                appStore.setTheme(theme);
+                appStore.setPrimaryColor(primaryColor);
+              }
+            })
+            .catch((err) => {
+              warn(process.env.NODE_ENV === 'production', err.message);
+            });
+
+        currentUserId = user.profile.sub;
+      })
+      .catch((err) => {
+        warn(process.env.NODE_ENV === 'production', err.message);
+      });
+  }, []);
+
+  /**
    * 持久化保存用户布局、主题颜色
    */
   watch([() => appStore.layout, () => appStore.theme, () => appStore.primaryColor], () => {
     userManager
       .getUser()
       .then((user) => {
-        if (user?.profile.sub)
-          userApi.updateMetaByKey({
-            variables: {
-              userId: user.profile.sub,
-              key: UserMetaPresetKeys.AdminColor,
-              value: JSON.stringify({
-                layout: appStore.layout,
-                theme: appStore.theme,
-                primaryColor: appStore.primaryColor,
-              }),
-            },
-          });
+        if (!user) return;
+
+        userApi.updateMetaByKey({
+          variables: {
+            userId: user.profile.sub,
+            key: UserMetaPresetKeys.AdminColor,
+            value: JSON.stringify({
+              layout: appStore.layout,
+              theme: appStore.theme,
+              primaryColor: appStore.primaryColor,
+            }),
+          },
+        });
       })
       .catch((err) => {
         warn(process.env.NODE_ENV === 'production', err.message);
@@ -130,44 +179,6 @@ export const useAppMixin = () => {
     },
     () => i18n.locale,
   );
-
-  useEffect(() => {
-    userManager
-      .getUser()
-      .then((user) => {
-        user?.profile.sub &&
-          userApi
-            .getMetas({
-              variables: {
-                userId: user?.profile.sub,
-                keys: [UserMetaPresetKeys.Locale, UserMetaPresetKeys.AdminColor],
-              },
-            })
-            .then(({ metas }) => {
-              // 设置用户语言
-              const userLocale =
-                metas.find((meta) => meta.key === UserMetaPresetKeys.Locale)?.value || sietLocale.value;
-              if (userLocale) {
-                i18n.locale = userLocale;
-              }
-
-              // 设置用户布局、主题颜色
-              const color = metas.find((meta) => meta.key === UserMetaPresetKeys.AdminColor)?.value;
-              if (color) {
-                const { layout, theme, primaryColor } = JSON.parse(color);
-                appStore.setLayout(layout);
-                appStore.setTheme(theme);
-                appStore.setPrimaryColor(primaryColor);
-              }
-            })
-            .catch((err) => {
-              warn(process.env.NODE_ENV === 'production', err.message);
-            });
-      })
-      .catch((err) => {
-        warn(process.env.NODE_ENV === 'production', err.message);
-      });
-  }, []);
 
   return reactive({
     antLocales,
