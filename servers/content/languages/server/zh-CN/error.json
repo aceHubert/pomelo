@@ -1,11 +1,13 @@
 {
+  "page_title": "发生错误",
+  "title": "发生错误!",
+  "subtitle": "错误 {code}",
   "unauthorized": "拒绝访问，您没有访问权限！",
   "forbidden_field": "拒绝访问，您没有访问字段\"{field}\"的值！",
   "forbidden_capability": "拒绝访问，您没有\"{requiredCapability}\"权限！",
   "forbidden_role": "拒绝访问，需要\"{requiredRole}\"角色权限！",
   "forbidden": "拒绝访问，您没有访问权限！",
   "invalid_token": "无效的token！",
-  "site_datas_init_required": "请初始化网站数据！",
   "file": {
     "limit_part_count": "超出参数数量限制！",
     "limit_file_size": "文件超出上传大小限制！",
