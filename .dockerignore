@@ -2,11 +2,16 @@
 .vscode
 .workflow
 node_modules
+servers/db.lock
+servers/content/uploads/*
+servers/**/public/**/*.ts
+servers/**/public/**/*.less
+servers/**/public/**/*.sass
+servers/**/public/**/*.scss
 **/.git*
 **/.env.development*
 **/.env.sample
 **/.eslintignore
-**/db.lock
 **/iisnode.js
 **/jest.config.json
 **/nest-cli.json

@@ -1,13 +1,17 @@
 # vim: set shiftwidth=2 tabstop=2 softtabstop=-1 expandtab:
 
 # >  cat > .env.docker.local
-#   BUILD_TAG=0.0.1
-#   BUILD_IGNORE=true
-#   DEBUG=true
-#   ENV_FILE=.env.local
+# // Apple M1
+# BUILD_PLATFORM=linux/arm64/v8
+# BUILD_TAG=0.0.1
+# BUILD_IGNORE=true
+# BUILD_OPTION=build:local
+# RUNTIME_ENV=production
+# SERVE_ENV=local
+# SERVE_APPS=''
 
-# > mkdir release
-# > docker compose --env-file .env.docker.local up --build --force-recreate  -d
+
+# > rm -rf release && mkdir release && docker compose --env-file .env.docker.local up --build --force-recreate  -d
 
 version: '3.1'
 
@@ -22,10 +26,12 @@ services:
       context: ${BUILD_CONTEXT:-.}
       dockerfile: Dockerfile
       args:
+        BUILD_PLATFORM: ${BUILD_PLATFORM:-linux/amd64}
         BUILD_IGNORE: ${BUILD_IGNORE:-false}
         BUILD_OPTION: ${BUILD_OPTION:-vue}
         RUNTIME_ENV: ${RUNTIME_ENV:-production}
-        RUNTIME_APPS: ${RUNTIME_APPS:-identity-server,identity-api,infrastructure-api,client-admin,client-web}
+        SERVE_ENV: ${SERVE_ENV:-production}
+        SERVE_APPS: ${SERVE_APPS}
         BUILDKIT_INLINE_CACHE: true
         BUILDKIT_CONTEXT_KEEP_GIT_DIR: true
       cache_from:
@@ -34,7 +40,7 @@ services:
       tags:
         - pomelo:${BUILD_TAG:-latest}
     image: pomelo
-    container_name: pomelo-dev
+    container_name: pomelo-server
     restart: always
     ports:
       - 3001:3001
@@ -44,9 +50,6 @@ services:
       - 3012:3012
     volumes:
       - deploy:/app
-    environment:
-      DEBUG: ${DEBUG:-false}
-      ENV_FILE: ${ENV_FILE:-.env}
     external_links:
       - mysql-default-5.7:mysql
       - redis-default-6.2:redis

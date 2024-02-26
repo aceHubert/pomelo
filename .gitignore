@@ -134,6 +134,12 @@ iisnode.js.debug/
 env.local.js
 env.*.local.js
 
+# local backup files
+*.backup.*
+
+# database initialization lock file
+db.lock
+
 # docker-compose
 /release
 /.cache
