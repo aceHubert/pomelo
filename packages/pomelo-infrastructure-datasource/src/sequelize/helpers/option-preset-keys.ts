@@ -33,10 +33,6 @@ export enum OptionPresetKeys {
   DefaultCategory = 'default_category',
   /** 默认邮箱分类 */
   DefaultEmailCategory = 'default_email_category',
-  /** 默认链接分类 */
-  DefaultLinkCategory = 'default_link_category',
-  /** 默认媒体分类 */
-  DefaultMediaCategory = 'default_media_category',
   /** 评论提示，默认：1 */
   CommentsNotify = 'comments_notify',
   /** 文章显示页大小，默认：10 */

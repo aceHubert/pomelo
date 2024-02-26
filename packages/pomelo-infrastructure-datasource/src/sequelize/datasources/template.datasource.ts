@@ -324,10 +324,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     if (!requestUserId) {
       where['status'] = TemplateStatus.Publish;
       return this.models.Templates.findOne({
-        attributes: this.filterFields(
-          fields.filter((field) => !['status', 'author'].includes(field)), // 匿名用户排除状态和作者
-          this.models.Templates,
-        ),
+        attributes: this.filterFields(fields, this.models.Templates),
         where,
       }).then((template) => template?.toJSON<TemplateModel>());
     } else {

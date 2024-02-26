@@ -62,7 +62,7 @@ export interface PagedTemplateArgs<F extends keyof Attributes<Templates> = 'titl
   /**
    * 创建人id
    */
-  author?: string;
+  author?: number;
 
   /**
    * 状态
