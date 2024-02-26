@@ -10,9 +10,9 @@ import {
   CallHandler,
   SetMetadata,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nTranslation } from 'nestjs-i18n';
-import { DbCheck } from '../utils/db-check.util';
+import { name } from '@ace-pomelo/infrastructure-datasource';
+import { FileEnv } from '@ace-pomelo/shared-server';
 
 const IgnoreDbCheckInterceptorName = Symbol('IgnoreDbCheckInterceptor');
 
@@ -25,10 +25,10 @@ export function IgnoreDbCheckInterceptor(): ClassDecorator & MethodDecorator {
 
 @Injectable()
 export class DbCheckInterceptor implements NestInterceptor {
-  private dbCheck: DbCheck;
+  private fileEnv: FileEnv;
 
-  constructor(private readonly reflector: Reflector, configService: ConfigService) {
-    this.dbCheck = new DbCheck(path.join(configService.getOrThrow('contentPath'), 'db.lock'));
+  constructor(private readonly reflector: Reflector) {
+    this.fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -39,13 +39,13 @@ export class DbCheckInterceptor implements NestInterceptor {
 
     if (!ignored) {
       const i18n = I18nContext.current<I18nTranslation>(context);
-      const initialed = this.dbCheck.hasDatasInitialized();
-      if (!initialed) {
+      const needInitDatas = this.fileEnv.getEnv(name) === 'PENDING';
+      if (needInitDatas) {
         throw new HttpException(
           {
             // 提示要初始化数据库， 并设置 response.siteInitRequired = true
             message:
-              i18n?.tv('error.site_datas_init_required', 'Site datas initialization is required!') ??
+              i18n?.tv('site-init.required', 'Site datas initialization is required!') ??
               'Site datas initialization is required!',
             siteInitRequired: true,
           },

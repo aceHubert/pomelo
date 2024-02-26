@@ -20,43 +20,57 @@ async function bootstrap() {
 
   const host = configService.get<string>('webServer.host', '');
   const port = configService.get<number>('webServer.port', 3000);
-  const globalPrefixUri = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
+  const globalPrefix = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
   const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
-  const oidcPath = normalizeRoutePath(configService.get<string>('OIDC_PATH', '/oidc'));
 
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
+
+  // enable cors
+  if (cors) {
+    if (cors === true) {
+      app.enableCors();
+      logger.debug('cors is enabled');
+    } else {
+      app.enableCors(cors);
+      logger.debug('cors is enabled', cors);
+    }
+  }
+
+  // add grobal prefix
+  app.setGlobalPrefix(globalPrefix);
+
+  // https://expressjs.com/en/guide/behind-proxies.html
+  app.set('trust proxy', (addr: string, i: number) => {
+    logger.debug(`trust proxy, addr: ${addr}, i: ${i}`);
+    return true;
+  });
 
   // set application/x-www-form-urlencoded body parser
   app.use(urlencoded({ extended: false }));
 
   // set layout
-  app.use(expressEjsLayout);
-  app.useStaticAssets(join(__dirname, '../', 'public'));
-  app.setBaseViewsDir(join(__dirname, '../', 'views'));
-  app.set('view engine', 'ejs');
-  app.set('layout', 'layouts/default');
-  app.set('layout extractScripts', true);
-  app.set('layout extractStyles', true);
-  app.set('layout extractMetas', true);
-
-  // enable cors
-  if (cors) {
-    cors === true ? app.enableCors() : app.enableCors(cors);
-  }
-
-  // add grobal prefix
-  app.setGlobalPrefix(globalPrefixUri);
+  app
+    .use(expressEjsLayout)
+    .useStaticAssets(join(__dirname, '../', 'public'), {
+      // https://github.com/nestjs/serve-static/issues/1280
+      prefix: globalPrefix,
+    })
+    .setBaseViewsDir(join(__dirname, '../', 'views'))
+    .setLocal('title', 'Pomelo Identity Server')
+    .setLocal('baseURL', `${globalPrefix}/`)
+    .set('view engine', 'ejs')
+    .set('layout', 'layouts/default')
+    .set('layout extractScripts', true)
+    .set('layout extractStyles', true)
+    .set('layout extractMetas', true);
 
   await app.listen(port, host);
   logger.log(
-    `Application is running on: ${await app.getUrl()}${
-      globalPrefixUri ? ' with global prefix: ' + globalPrefixUri : ''
-    }`,
+    `Application is running on: ${await app.getUrl()}${globalPrefix ? ' with global prefix: ' + globalPrefix : ''}`,
   );
-  !!cors && logger.log('cors is enabled');
   logger.log(
-    `OpenID-Connect discovery endpoint: ${await app.getUrl()}${globalPrefixUri}${oidcPath}/.well-known/openid-configuration`,
+    `OpenID-Connect discovery endpoint: ${await app.getUrl()}${globalPrefix}/.well-known/openid-configuration`,
   );
 
   // hot reload

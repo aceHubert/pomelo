@@ -20,12 +20,12 @@ export class SiteInitController extends BaseController {
    */
   @Get('check')
   async check(@I18n() i18n: I18nContext) {
-    const initialized = this.siteInitService.hasInitialized();
+    const needInitDates = this.siteInitService.initialRequired();
     return this.success({
-      siteInitRequired: !initialized,
-      message: !initialized
-        ? i18n.tv('db-init.controller.init_datas.required', 'Datas initialization is required!')
-        : i18n.tv('db-init.controller.init_datas.completed', 'Datas have already initialized!'),
+      siteInitRequired: needInitDates,
+      message: needInitDates
+        ? i18n.tv('site-init.required', 'Site datas initialization is required!')
+        : i18n.tv('site-init.completed', 'Site datas have already initialized!'),
     });
   }
 
@@ -52,11 +52,11 @@ export class SiteInitController extends BaseController {
       });
 
       return this.success({
-        message: i18n.tv('db-init.controller.init_datas.success', 'Initialize datas successful!'),
+        message: i18n.tv('site-init.success', 'Site datas initialize successful!'),
       });
     } catch (err) {
       this.logger.error(err);
-      return this.faild(i18n.tv('db-init.controller.init_datas.fail', 'An error occurred while initializing datas!'));
+      return this.faild(i18n.tv('site-init.fail', 'An error occurred while initializing site datas!'));
     }
   }
 }

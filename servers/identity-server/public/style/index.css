@@ -1457,134 +1457,162 @@ caption {
 .font-size-xs {
   font-size: 10px !important;
 }
-[data-dpr='2'] .font-size-xs {
+[data-dpr='2'] .font-size-xs,
+.font-size-xs--2x {
   font-size: 20px !important;
 }
-[data-dpr='3'] .font-size-xs {
+[data-dpr='3'] .font-size-xs,
+.font-size-xs--3x {
   font-size: 30px !important;
 }
 .font-xs {
   font-size: 10px !important;
   line-height: 1.4 !important;
 }
-[data-dpr='2'] .font-xs {
+[data-dpr='2'] .font-xs,
+.font-xs--2x {
   font-size: 20px !important;
 }
-[data-dpr='3'] .font-xs {
+[data-dpr='3'] .font-xs,
+.font-xs--3x {
   font-size: 30px !important;
 }
 .font-size-sm {
   font-size: 12px !important;
 }
-[data-dpr='2'] .font-size-sm {
+[data-dpr='2'] .font-size-sm,
+.font-size-sm--2x {
   font-size: 24px !important;
 }
-[data-dpr='3'] .font-size-sm {
+[data-dpr='3'] .font-size-sm,
+.font-size-sm--3x {
   font-size: 36px !important;
 }
 .font-sm {
   font-size: 12px !important;
   line-height: 1.5 !important;
 }
-[data-dpr='2'] .font-sm {
+[data-dpr='2'] .font-sm,
+.font-sm--2x {
   font-size: 24px !important;
 }
-[data-dpr='3'] .font-sm {
+[data-dpr='3'] .font-sm,
+.font-sm--3x {
   font-size: 36px !important;
 }
 .font-size-md {
   font-size: 14px !important;
 }
-[data-dpr='2'] .font-size-md {
+[data-dpr='2'] .font-size-md,
+.font-size-md--2x {
   font-size: 28px !important;
 }
-[data-dpr='3'] .font-size-md {
+[data-dpr='3'] .font-size-md,
+.font-size-md--3x {
   font-size: 42px !important;
 }
 .font-md {
   font-size: 14px !important;
   line-height: 1.43 !important;
 }
-[data-dpr='2'] .font-md {
+[data-dpr='2'] .font-md,
+.font-md--2x {
   font-size: 28px !important;
 }
-[data-dpr='3'] .font-md {
+[data-dpr='3'] .font-md,
+.font-md--3x {
   font-size: 42px !important;
 }
 .font-size-lg {
   font-size: 16px !important;
 }
-[data-dpr='2'] .font-size-lg {
+[data-dpr='2'] .font-size-lg,
+.font-size-lg--2x {
   font-size: 32px !important;
 }
-[data-dpr='3'] .font-size-lg {
+[data-dpr='3'] .font-size-lg,
+.font-size-lg--3x {
   font-size: 48px !important;
 }
 .font-lg {
   font-size: 16px !important;
   line-height: 1.38 !important;
 }
-[data-dpr='2'] .font-lg {
+[data-dpr='2'] .font-lg,
+.font-lg--2x {
   font-size: 32px !important;
 }
-[data-dpr='3'] .font-lg {
+[data-dpr='3'] .font-lg,
+.font-lg--3x {
   font-size: 48px !important;
 }
 .font-size-xl {
   font-size: 18px !important;
 }
-[data-dpr='2'] .font-size-xl {
+[data-dpr='2'] .font-size-xl,
+.font-size-xl--2x {
   font-size: 36px !important;
 }
-[data-dpr='3'] .font-size-xl {
+[data-dpr='3'] .font-size-xl,
+.font-size-xl--3x {
   font-size: 54px !important;
 }
 .font-xl {
   font-size: 18px !important;
   line-height: 1.44 !important;
 }
-[data-dpr='2'] .font-xl {
+[data-dpr='2'] .font-xl,
+.font-xl--2x {
   font-size: 36px !important;
 }
-[data-dpr='3'] .font-xl {
+[data-dpr='3'] .font-xl,
+.font-xl--3x {
   font-size: 54px !important;
 }
 .font-size-xxl {
   font-size: 20px !important;
 }
-[data-dpr='2'] .font-size-xxl {
+[data-dpr='2'] .font-size-xxl,
+.font-size-xxl--2x {
   font-size: 40px !important;
 }
-[data-dpr='3'] .font-size-xxl {
+[data-dpr='3'] .font-size-xxl,
+.font-size-xxl--3x {
   font-size: 60px !important;
 }
 .font-xxl {
   font-size: 20px !important;
   line-height: 1.4 !important;
 }
-[data-dpr='2'] .font-xxl {
+[data-dpr='2'] .font-xxl,
+.font-xxl--2x {
   font-size: 40px !important;
 }
-[data-dpr='3'] .font-xxl {
+[data-dpr='3'] .font-xxl,
+.font-xxl--3x {
   font-size: 60px !important;
 }
 .font-size-xxxl {
   font-size: 28px !important;
 }
-[data-dpr='2'] .font-size-xxxl {
+[data-dpr='2'] .font-size-xxxl,
+.font-size-xxxl--2x {
   font-size: 56px !important;
 }
-[data-dpr='3'] .font-size-xxxl {
+[data-dpr='3'] .font-size-xxxl,
+.font-size-xxxl--3x {
   font-size: 84px !important;
 }
 .font-xxxl {
   font-size: 28px !important;
   line-height: 1.43 !important;
 }
-[data-dpr='2'] .font-xxxl {
+[data-dpr='2'] .font-xxxl,
+.font-xxxl--2x {
   font-size: 56px !important;
 }
-[data-dpr='3'] .font-xxxl {
+[data-dpr='3'] .font-xxxl,
+.font-xxxl--3x {
   font-size: 84px !important;
 }
 .font-weight-black {
@@ -1751,24 +1779,24 @@ caption {
   -webkit-line-clamp: 2 !important;
 }
 .box-shadow-up {
-  -webkit-box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15) !important;
-          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15) !important;
+  -webkit-box-shadow: var(--shadow-1-up, 0 -2px 8px rgba(0, 0, 0, 0.15)) !important;
+          box-shadow: var(--shadow-1-up, 0 -2px 8px rgba(0, 0, 0, 0.15)) !important;
 }
 .box-shadow-down {
-  -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  -webkit-box-shadow: var(--shadow-1-down, 0 2px 8px rgba(0, 0, 0, 0.15)) !important;
+          box-shadow: var(--shadow-1-down, 0 2px 8px rgba(0, 0, 0, 0.15)) !important;
 }
 .box-shadow-left {
-  -webkit-box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15) !important;
-          box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15) !important;
+  -webkit-box-shadow: var(--shadow-1-left, -2px 0 8px rgba(0, 0, 0, 0.15)) !important;
+          box-shadow: var(--shadow-1-left, -2px 0 8px rgba(0, 0, 0, 0.15)) !important;
 }
 .box-shadow-right {
-  -webkit-box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
-          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15) !important;
+  -webkit-box-shadow: var(--shadow-1-right, 2px 0 8px rgba(0, 0, 0, 0.15)) !important;
+          box-shadow: var(--shadow-1-right, 2px 0 8px rgba(0, 0, 0, 0.15)) !important;
 }
 .box-shadow {
-  -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  -webkit-box-shadow: var(--shadow-2, 0 4px 12px rgba(0, 0, 0, 0.15)) !important;
+          box-shadow: var(--shadow-2, 0 4px 12px rgba(0, 0, 0, 0.15)) !important;
 }
 ::-webkit-scrollbar {
   width: 6px;
@@ -1813,6 +1841,11 @@ caption {
   --color-border-inverse: #fff;
   --color-background-light: #fafafa;
   --color-background-base: #f5f5f5;
+  --shadow-1-up: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-1-down: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-1-left: -2px 0 8px rgba(0, 0, 0, 0.15);
+  --shadow-1-right: 2px 0 8px rgba(0, 0, 0, 0.15);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.15);
   --component-background: #fff;
   --body-background: #fff;
 }

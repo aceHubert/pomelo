@@ -7,8 +7,7 @@ export abstract class PagedTemplateArgsValidator {
   abstract keyword?: string;
 
   @IsOptional()
-  @IsString()
-  abstract author?: string;
+  abstract author?: number;
 
   @IsOptional()
   @IsEnum(TemplateStatus)

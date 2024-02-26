@@ -78,11 +78,30 @@ export interface Options {
 }
 
 export interface RequestOptions<TData, Result = TData> {
+  /**
+   * 是否显示 loading
+   * @default false
+   */
   loading?: boolean | LoadingProp;
+  /**
+   * loading 时显示的自定义文本
+   */
   loadingText?: string;
+  /**
+   * 是否使用全局捕获错误，否则 throw 至 catch 中
+   * @default false
+   */
   catchError?: boolean;
+  /**
+   * 对成功数据进行预处理
+   */
   onSuccess?: (data: TData | null | undefined) => Result | null | undefined;
-  onError?: (err: unknown) => void;
+  /**
+   * 对异常进行预处理，当 errorPolicy 为 "all" 时，异常信息会通过 onError 传递，
+   * 或 cacheError 为 false 时，在 throw error 前会调用 onError (error 对象可被修改)。
+   * ErrorPolicy 说明： https://www.apollographql.com/docs/react/data/error-handling#graphql-error-policies
+   */
+  onError?: (err: GraphQLError) => void;
 }
 
 export interface ObserverOptions<TData> {
@@ -188,6 +207,7 @@ export class Request {
 
   sentQuery<TData = any, TVariables extends OperationVariables = OperationVariables, Result = TData>({
     loading = false,
+    loadingText,
     catchError = false,
     onSuccess,
     onError,
@@ -207,16 +227,28 @@ export class Request {
       });
 
       Promise.race([showLoadingPromise, requestPromise]).then((delay) => {
-        delay === delaySymbol && (stopLoading = this.startLoading(loading));
+        delay === delaySymbol && (stopLoading = this.startLoading(loading, loadingText));
       });
     }
 
     // 返回 promise
     return requestPromise
-      .then(({ data, error }) => {
-        if (error) throw error;
+      .then(({ data, error, errors }) => {
+        // "all" errorPolicy
+        if (error || errors?.length) {
+          onError?.(
+            this.formatError(
+              error
+                ? error
+                : new ApolloError({
+                    errorMessage: 'Check details in inner error(s)',
+                    graphQLErrors: errors,
+                  }),
+            ),
+          );
+        }
 
-        stopLoading && stopLoading();
+        stopLoading?.();
         return onSuccess?.(data) ?? data;
       })
       .catch((err) => {
@@ -239,6 +271,7 @@ export class Request {
     Result = TData,
   >({
     loading = false,
+    loadingText,
     catchError = false,
     onSuccess,
     onError,
@@ -258,14 +291,24 @@ export class Request {
       });
 
       Promise.race([showLoadingPromise, requestPromise]).then((delay) => {
-        delay === delaySymbol && (stopLoading = this.startLoading(loading));
+        delay === delaySymbol && (stopLoading = this.startLoading(loading, loadingText));
       });
     }
 
     // 返回 promise
     return requestPromise
       .then(({ data, errors }) => {
-        if (errors?.length) throw new ApolloError({ graphQLErrors: errors });
+        // "all" errorPolicy
+        if (errors?.length) {
+          onError?.(
+            this.formatError(
+              new ApolloError({
+                errorMessage: 'Check details in inner error(s)',
+                graphQLErrors: errors,
+              }),
+            ),
+          );
+        }
 
         stopLoading?.();
         return onSuccess?.(data) ?? data;
@@ -279,7 +322,6 @@ export class Request {
         } else {
           onError?.(error);
         }
-
         throw error;
       });
   }
@@ -301,11 +343,11 @@ export class Request {
     return () => subscription.unsubscribe();
   }
 
-  private startLoading(loading: boolean | LoadingProp): (() => void) | void {
+  private startLoading(loading: boolean | LoadingProp, text?: string): (() => void) | void {
     if (typeof loading === 'function') {
-      return loading();
+      return loading(text);
     } else if (typeof loading === 'boolean' && loading === true) {
-      return this.options.loading();
+      return this.options.loading(text);
     }
     return;
   }

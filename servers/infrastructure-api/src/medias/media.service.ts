@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import moment from 'moment';
 import Jimp from 'jimp';
 import { camelCase } from 'lodash';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   MediaDataSource,
   MediaMetaDataModel,
@@ -25,7 +25,7 @@ const writeFile = promisify(fs.writeFile);
 
 @Injectable()
 export class MediaService {
-  // private readonly logger = new Logger('MediaService');
+  private readonly logger = new Logger('MediaService', { timestamp: true });
 
   constructor(
     @Inject(MEDIA_OPTIONS) private readonly options: FixedMediaOptions,
@@ -45,10 +45,14 @@ export class MediaService {
       ...(this.options.groupBy === 'year' ? [String(year)] : [String(year), String(month + 1).padStart(2, '0')]),
     );
     try {
-      await stat(dest);
+      const stats = await stat(dest);
+      if (!stats.isDirectory()) {
+        this.logger.debug(`Directory not exists, creating directory: ${dest}`);
+        await mkdir(dest, { recursive: true });
+      }
     } catch (err: any) {
       if (err.code === 'ENOENT') {
-        // 目录不在在，创建目录
+        this.logger.debug(`Directory not exists, creating directory: ${dest}`);
         await mkdir(dest, { recursive: true });
       } else {
         throw err;
@@ -62,10 +66,11 @@ export class MediaService {
    */
   private async isExists(path: string): Promise<boolean> {
     try {
-      await stat(path);
-      return true;
+      const stats = await stat(path);
+      return stats.isFile();
     } catch (err: any) {
       if (err.code === 'ENOENT') {
+        this.logger.debug(`File not exists: ${path}`);
         return false;
       }
       throw err;
@@ -172,10 +177,10 @@ export class MediaService {
         metaData.fileSize = Buffer.byteLength(cropedImage);
 
         // 保存图片
-        await image.write(filePath);
+        await image.writeAsync(filePath);
       } else if (!(await this.isExists(filePath))) {
         // 保存图片
-        await image.write(filePath);
+        await image.writeAsync(filePath);
       }
 
       metaData.width = image.getWidth();

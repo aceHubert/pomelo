@@ -1,16 +1,16 @@
 import path from 'path';
 import { UniqueConstraintError } from 'sequelize';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
+  name,
+  version,
   OptionAutoload,
   OptionPresetKeys,
   TermPresetTaxonomy,
   UserMetaPresetKeys,
   InfrastructureService,
 } from '@ace-pomelo/infrastructure-datasource';
-import { md5 } from '@ace-pomelo/shared-server';
-import { DbCheck } from '../common/utils/db-check.util';
+import { md5, FileEnv } from '@ace-pomelo/shared-server';
 import { UserRole } from '../users/enums/user-role.enum';
 import { getDefaultUserRoles } from '../users/constants';
 import { SiteInitArgs } from './interfaces/init-args.interface';
@@ -18,23 +18,22 @@ import { SiteInitArgs } from './interfaces/init-args.interface';
 @Injectable()
 export class SiteInitService {
   private readonly logger = new Logger(SiteInitService.name, { timestamp: true });
-  private readonly dbCheck: DbCheck;
+  private readonly fileEnv: FileEnv;
 
-  constructor(private readonly infrastructureService: InfrastructureService, configService: ConfigService) {
-    this.dbCheck = new DbCheck(path.join(configService.getOrThrow('contentPath'), 'db.lock'));
+  constructor(private readonly infrastructureService: InfrastructureService) {
+    this.fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
   }
 
-  hasInitialized() {
-    return this.dbCheck.hasDatasInitialized();
+  initialRequired() {
+    return this.fileEnv.getEnv(name) === 'PENDING';
   }
 
   /**
    * Initialize the datas
    */
   async initialize(initArgs: SiteInitArgs) {
-    const needInitDatas = !this.hasInitialized();
-    if (needInitDatas) {
-      this.logger.log('Start to initialize datas!');
+    if (this.initialRequired()) {
+      this.logger.debug('Start to initialize datas!');
       try {
         const timezoneOffset = -new Date().getTimezoneOffset();
         await this.infrastructureService.initDatas({
@@ -158,22 +157,6 @@ export class SiteInitService {
               description: '',
               optionName: OptionPresetKeys.DefaultCategory,
             },
-            {
-              name: 'Uncategorized Link',
-              slug: '链接未分类',
-              taxonomy: TermPresetTaxonomy.Category,
-              description: '',
-              group: 1,
-              optionName: OptionPresetKeys.DefaultLinkCategory,
-            },
-            {
-              name: 'Uncategorized Medias',
-              slug: '媒体未分类',
-              taxonomy: TermPresetTaxonomy.Category,
-              description: '',
-              group: 2,
-              optionName: OptionPresetKeys.DefaultMediaCategory,
-            },
           ],
           templates: [
             {
@@ -184,18 +167,19 @@ export class SiteInitService {
             },
           ],
         });
-        this.dbCheck.setDatasInitialized();
-        this.logger.log('Initialize datas successful!');
+        this.fileEnv.setEnv(name, version);
+        this.logger.debug('Initialize datas successful!');
+        // TODO: Add client redirect uris
       } catch (err) {
         if (err instanceof UniqueConstraintError) {
-          this.dbCheck.setDatasInitialized();
-          this.logger.log('Datas already initialized!');
+          this.fileEnv.setEnv(name, version);
+          this.logger.debug('Datas already initialized!');
         } else {
           throw err;
         }
       }
+    } else {
+      this.logger.debug('Datas lready initialized!');
     }
-
-    this.logger.log('Datas lready initialized!');
   }
 }

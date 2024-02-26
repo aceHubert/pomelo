@@ -64,30 +64,34 @@ class LockFile {
   }
 }
 
-export class DbCheck {
-  private readonly dbLockFile: LockFile;
+export class FileEnv {
+  private static instance: FileEnv;
+  private readonly lockFile: LockFile;
 
-  constructor(dbLockFileName?: string) {
-    this.dbLockFile = new LockFile(dbLockFileName || path.join(process.cwd(), 'db.lock'));
+  private constructor(fileName?: string) {
+    this.lockFile = new LockFile(fileName || path.join(process.cwd(), 'env.lock'));
   }
 
-  hasDBInitialed() {
-    return this.dbLockFile.hasFile();
+  static getInstance(fileName?: string) {
+    if (!FileEnv.instance) {
+      FileEnv.instance = new FileEnv(fileName);
+    }
+    return FileEnv.instance;
   }
 
-  hasDatasInitialized() {
-    return this.dbLockFile.getEnvValue('DATAS_INIT_REQUIRED', 'true') === 'false';
+  hasFile() {
+    return this.lockFile.hasFile();
   }
 
-  setDatasInitialized() {
-    this.dbLockFile.setEnvValue('DATAS_INIT_REQUIRED', 'false');
+  hasEnv(key: string) {
+    return this.lockFile.getEnvValue(key) !== undefined;
   }
 
-  getEnv(key: string) {
-    return this.dbLockFile.getEnvValue(key);
+  getEnv(key: string, defaultValue?: string) {
+    return this.lockFile.getEnvValue(key, defaultValue);
   }
 
   setEnv(key: string, value: string) {
-    this.dbLockFile.setEnvValue(key, value);
+    this.lockFile.setEnvValue(key, value);
   }
 }

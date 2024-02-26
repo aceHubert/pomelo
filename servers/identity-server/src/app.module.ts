@@ -15,6 +15,7 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { OidcModule } from 'nest-oidc-provider';
+import { normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { IdentityModule } from '@ace-pomelo/identity-datasource';
 import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.util';
@@ -50,9 +51,9 @@ const logger = new Logger('AppModule', { timestamp: true });
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const contentPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/identity-server');
-        if (!fs.existsSync(contentPath)) {
-          fs.mkdirSync(contentPath, { recursive: true });
+        const loaderPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/server');
+        if (!fs.existsSync(loaderPath)) {
+          fs.mkdirSync(loaderPath, { recursive: true });
         }
         return {
           fallbackLanguage: 'en-US',
@@ -63,7 +64,7 @@ const logger = new Logger('AppModule', { timestamp: true });
             'zh-*': 'zh-CN',
           },
           loaderOptions: {
-            path: contentPath,
+            path: loaderPath,
             includeSubfolders: true,
             watch: isDebug,
           },
@@ -123,8 +124,8 @@ const logger = new Logger('AppModule', { timestamp: true });
       useFactory: (config: ConfigService) => ({
         debug: config.get('debug', false),
         issuer: config.getOrThrow('OIDC_ISSUER'),
-        path: config.get('OIDC_PATH'),
-        resource: config.get('OIDC_RESOURCE'),
+        prefix: normalizeRoutePath(config.get('webServer.globalPrefixUri', '')),
+        path: normalizeRoutePath(config.get('OIDC_PATH', '')),
       }),
       inject: [ConfigService],
     }),
@@ -193,7 +194,8 @@ export class AppModule implements NestModule, OnModuleInit {
     const resolveLang = this.i18n.resolveLanguage(lang);
     // include i18n fa
     if (['en-US', ...this.i18n.getSupportedLanguages()].includes(resolveLang)) {
-      res.cookie('locale', resolveLang, { httpOnly: true });
+      // TODO: 造成oidc-provider中的 headers.get('set-cookie') 变成字符串
+      // res.cookie('locale', resolveLang, { httpOnly: true });
       logger.debug(`Set locale to ${resolveLang} from query`);
       return true;
     }

@@ -11,7 +11,7 @@ class PagedTemplateQueryDto extends PagedTemplateArgsValidator {
   /**
    * Author id
    */
-  author?: string;
+  author?: number;
 
   /**
    * Status

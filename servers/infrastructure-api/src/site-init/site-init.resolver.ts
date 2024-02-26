@@ -14,7 +14,7 @@ export class SiteInitResolver extends BaseResolver {
 
   @Query(() => Boolean, { description: 'It is required to initial database before running site.' })
   checkSiteInitialRequired() {
-    return !this.dbInitService.hasInitialized();
+    return this.dbInitService.initialRequired();
   }
 
   @Mutation(() => Boolean, { description: 'Sync database and initialize datas if database has not been initialized' })

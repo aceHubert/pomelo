@@ -70,9 +70,9 @@ const logger = new Logger('AppModule', { timestamp: true });
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const contentPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/infrastructure-api');
-        if (!fs.existsSync(contentPath)) {
-          fs.mkdirSync(contentPath, { recursive: true });
+        const loaderPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/server');
+        if (!fs.existsSync(loaderPath)) {
+          fs.mkdirSync(loaderPath, { recursive: true });
         }
         return {
           fallbackLanguage: 'en-US',
@@ -83,7 +83,7 @@ const logger = new Logger('AppModule', { timestamp: true });
             'zh-*': 'zh-CN',
           },
           loaderOptions: {
-            path: contentPath,
+            path: loaderPath,
             includeSubfolders: true,
             watch: isDebug,
           },
@@ -152,8 +152,9 @@ const logger = new Logger('AppModule', { timestamp: true });
         return {
           debug: isDebug,
           playground: isDebug,
-          introspection: isDebug,
           path: graphqlPath,
+          introspection: isDebug,
+          useGlobalPrefix: true,
           installSubscriptionHandlers: true,
           cache: new InMemoryLRUCache(),
           autoSchemaFile: path.join(__dirname, 'schema.gql'),
@@ -323,8 +324,8 @@ export class AppModule implements NestModule {
   constructor(private readonly moduleRef: ModuleRef, private readonly configService: ConfigService) {}
 
   configure(consumer: MiddlewareConsumer) {
-    const appConfig = this.moduleRef['container'].applicationConfig;
-    const globalPrefix = normalizeRoutePath(appConfig?.getGlobalPrefix() ?? ''),
+    const appConfig = this.moduleRef['container'].applicationConfig,
+      globalPrefix = normalizeRoutePath(appConfig?.getGlobalPrefix() ?? ''),
       graphqlPath = normalizeRoutePath(this.configService.get<string>('graphql.path', '/graphql'));
 
     consumer

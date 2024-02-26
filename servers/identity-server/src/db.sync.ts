@@ -4,9 +4,8 @@ import dotenv from 'dotenv';
 import { UniqueConstraintError } from 'sequelize';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatabaseManager, version } from '@ace-pomelo/identity-datasource';
-import { DbCheck } from './common/utils/db-check.util';
-import { ensureContentPath } from './common/utils/configuration.util';
+import { DatabaseManager, version, name } from '@ace-pomelo/identity-datasource';
+import { FileEnv } from '@ace-pomelo/shared-server';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
@@ -41,9 +40,11 @@ async function syncDatabase() {
         },
       };
   const tablePrefix = configService.get('IDENTITY_TABLE_PREFIX');
+  const adminURL = configService.get('ADMIN_URL');
+  const webURL = configService.get('WEB_URL');
 
   // db lock file
-  const dbCheck = new DbCheck(path.join(ensureContentPath(configService.get<string>('CONTENT_PATH')), 'db.lock'));
+  const fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
 
   // 初始化数据库
   const dbManager =
@@ -54,20 +55,20 @@ async function syncDatabase() {
     .sync({
       alter: false,
       // match: /_dev$/,
-      when: () =>
-        dbCheck.hasDBInitialed().then((initialized) => !initialized || !dbCheck.getEnv('IDENTITY_DATASOURCE')),
+      // TODO: version compare
+      when: () => fileEnv.hasFile().then((initialized) => !initialized || !fileEnv.getEnv(name)),
     })
     .then((flag) => {
       if (flag) {
-        dbCheck.setEnv('IDENTITY_DATASOURCE', version);
-        logger.log('Initialize database successful!');
+        fileEnv.setEnv(name, 'PENDING');
+        logger.debug('Initialize database successful!');
       }
     });
 
   // 初始化数据
-  const needInitDates = dbCheck.hasDatasInitialed();
+  const needInitDates = fileEnv.getEnv(name) === 'PENDING';
   if (needInitDates) {
-    logger.log('Start to initialize datas!');
+    logger.debug('Start to initialize datas!');
     try {
       await dbManager.initDatas({
         apiResources: [],
@@ -123,6 +124,7 @@ async function syncDatabase() {
         ],
         clients: [
           {
+            applicationType: 'native',
             clientId: '041567b1-3d71-4ea8-9ac2-8f3d28dab170',
             clientName: 'Pomelo Identity Server',
             accessTokenTormat: 'jwt',
@@ -142,6 +144,7 @@ async function syncDatabase() {
             ],
           },
           {
+            applicationType: 'native',
             clientId: 'f6b2c633-4f9e-4b7a-8f2a-9a4b4e9b0b9b',
             clientName: 'Pomelo Identity Api Server',
             accessTokenTormat: 'jwt',
@@ -161,6 +164,7 @@ async function syncDatabase() {
             ],
           },
           {
+            applicationType: 'native',
             clientId: '75a9c633-cfde-4954-b35c-9344ed9b781a',
             clientName: 'Pomelo Infratructure Api Server',
             accessTokenTormat: 'jwt',
@@ -180,6 +184,7 @@ async function syncDatabase() {
             ],
           },
           {
+            applicationType: 'web',
             clientId: '35613c26-6a86-ba04-8ee0-6ced9688c75a',
             clientName: 'Pomelo Admin Managment Web App',
             accessTokenTormat: 'jwt',
@@ -188,8 +193,16 @@ async function syncDatabase() {
             tokenEndpointAuthMethod: 'none',
             scopes: ['openid', 'profile', 'phone', 'email', 'offline_access'],
             grantTypes: ['authorization_code', 'refresh_token'],
-            redirectUris: [],
-            postLogoutRedirectUris: [],
+            corsOrigins: adminURL ? [new URL(adminURL).origin] : [],
+            redirectUris: adminURL
+              ? [
+                  `${adminURL}/signin`,
+                  `${adminURL}/signin.html`,
+                  `${adminURL}/signin-silent`,
+                  `${adminURL}/signin-silent.html`,
+                ]
+              : [],
+            postLogoutRedirectUris: adminURL ? [adminURL] : [],
             secrets: [
               {
                 type: 'SharedSecret',
@@ -199,6 +212,7 @@ async function syncDatabase() {
             ],
           },
           {
+            applicationType: 'web',
             clientId: '3d136433-977f-40c7-8702-a0444a6b2a9f',
             clientName: 'Pomelo Client Web App',
             accessTokenTormat: 'jwt',
@@ -207,8 +221,11 @@ async function syncDatabase() {
             tokenEndpointAuthMethod: 'none',
             scopes: ['openid', 'profile', 'phone', 'email', 'offline_access'],
             grantTypes: ['authorization_code', 'refresh_token'],
-            redirectUris: [],
-            postLogoutRedirectUris: [],
+            corsOrigins: webURL ? [new URL(webURL).origin] : [],
+            redirectUris: webURL
+              ? [`${webURL}/signin`, `${webURL}/signin.html`, `${webURL}/signin-silent`, `${webURL}/signin-silent.html`]
+              : [],
+            postLogoutRedirectUris: webURL ? [webURL] : [],
             secrets: [
               {
                 type: 'SharedSecret',
@@ -219,19 +236,19 @@ async function syncDatabase() {
           },
         ],
       });
-      dbCheck.setDatasInitialed();
-      logger.log('Initialize datas successful!');
+      fileEnv.setEnv(name, version);
+      logger.debug('Initialize datas successful!');
     } catch (err) {
       if (err instanceof UniqueConstraintError) {
-        dbCheck.setDatasInitialed();
-        logger.log('Datas already initialized!');
+        fileEnv.setEnv(name, version);
+        logger.debug('Datas already initialized!');
       } else {
         throw err;
       }
     }
+  } else {
+    logger.debug('Datas already initialized!');
   }
-
-  logger.log('Datas already initialized!');
 }
 
 export { envFilePaths, syncDatabase };

@@ -3,9 +3,8 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatabaseManager, version } from '@ace-pomelo/infrastructure-datasource';
-import { DbCheck } from './common/utils/db-check.util';
-import { ensureContentPath } from './common/utils/configuration.utils';
+import { DatabaseManager, name } from '@ace-pomelo/infrastructure-datasource';
+import { FileEnv } from '@ace-pomelo/shared-server';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
@@ -42,7 +41,7 @@ async function syncDatabase() {
   const tablePrefix = configService.get('INFRASTRUCTURE_TABLE_PREFIX');
 
   // db lock
-  const dbCheck = new DbCheck(path.join(ensureContentPath(configService.get<string>('CONTENT_PATH')), 'db.lock'));
+  const fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
 
   // 初始化数据库
   const dbManager =
@@ -53,12 +52,12 @@ async function syncDatabase() {
     .sync({
       alter: false,
       // match: /_dev$/,
-      when: () =>
-        dbCheck.hasDBInitialed().then((initialized) => !initialized || !dbCheck.getEnv('INFRASTRUCTURE_DATASOURCE')),
+      // TODO: version compare
+      when: () => fileEnv.hasFile().then((initialized) => !initialized || !fileEnv.getEnv(name)),
     })
     .then((flag) => {
       if (flag) {
-        dbCheck.setEnv('INFRASTRUCTURE_DATASOURCE', version);
+        fileEnv.setEnv(name, 'PENDING');
         logger.debug('Initialize database successful!');
       }
       3;

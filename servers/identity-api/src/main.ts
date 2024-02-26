@@ -5,14 +5,12 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { setupSession } from '@ace-pomelo/nestjs-oidc';
-import { normalizeRoutePath } from '@ace-pomelo/shared-server';
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
+import { normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared-server';
 import { AppModule } from './app.module';
+import { version } from './version';
 
 declare const module: any;
 
-const packageName = process.env.npm_package_name;
-const packageVersion = process.env.npm_package_version;
 const logger = new Logger('Main', { timestamp: true });
 
 async function bootstrap() {
@@ -21,7 +19,7 @@ async function bootstrap() {
 
   const host = configService.get<string>('webServer.host', '');
   const port = configService.get<number>('webServer.port', 3000);
-  const globalPrefixUri = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
+  const globalPrefix = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
   const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
   const isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
   const swaggerPath = normalizeRoutePath(configService.get<string>('swagger.path', '/doc'));
@@ -33,54 +31,67 @@ async function bootstrap() {
 
   // enable cors
   if (cors) {
-    cors === true ? app.enableCors() : app.enableCors(cors);
+    if (cors === true) {
+      app.enableCors();
+      logger.debug('cors is enabled');
+    } else {
+      app.enableCors(cors);
+      logger.debug('cors is enabled', cors);
+    }
   }
 
   // add grobal prefix
-  app.setGlobalPrefix(globalPrefixUri);
+  app.setGlobalPrefix(globalPrefix);
 
-  // graphql upload file
-  app.use(
-    configService.get<string>('graphql.path', '/graphql'),
-    graphqlUploadExpress({
-      maxFileSize: configService.get<number>('upload.maxFileSize'),
-      maxFiles: configService.get<number>('upload.maxFiles'),
-    }),
-  );
+  // https://expressjs.com/en/guide/behind-proxies.html
+  app.set('trust proxy', (addr: string, i: number) => {
+    logger.debug(`trust proxy, addr: ${addr}, i: ${i}`);
+    return true;
+  });
 
   // swagger
   if (isSwaggerDebug) {
     const api = new DocumentBuilder()
-      .setTitle(
-        packageName
-          ?.replace('@', '')
-          .replace('/', ' ')
-          .replace(/apis?$/, 'APIs') || 'ace-pomelo identity  APIs',
-      )
+      .setTitle('Pomelo identity APIs')
       .setDescription(
-        `The RESTful API documentation.<br/>graphql support: <a href="${graphqlPath}" target="_blank">Documentation</a>`,
+        `The RESTful API documentation.<br/>graphql support: <a href="${stripForegoingSlash(
+          graphqlPath,
+        )}" target="_blank">Documentation</a>`,
       )
-      .setVersion(packageVersion || '1.0.0')
+      .setVersion(version)
       .addBearerAuth()
+      .addOAuth2({
+        type: 'oauth2',
+        flows: {
+          authorizationCode: {
+            authorizationUrl: configService.get<string>('OIDC_ISSUER') + '/connect/authorize',
+            tokenUrl: configService.get<string>('OIDC_ISSUER') + '/connect/token',
+            scopes: {
+              openid: 'openid',
+              profile: 'profile',
+            },
+          },
+        },
+        // openIdConnectUrl: configService.get<string>('OIDC_ISSUER') + '/.well-known/openid-configuration',
+      })
       .addTag('clients', 'Clients.')
       .addTag('identityResources', 'Identity Resources.')
       .addTag('apiResources', 'Api Resources.')
       .build();
     const document = SwaggerModule.createDocument(app, api);
-    SwaggerModule.setup(swaggerPath, app, document);
+    SwaggerModule.setup(swaggerPath, app, document, {
+      useGlobalPrefix: true,
+    });
   }
 
-  setupSession(app, packageName?.replace('@', '').replace('/', ':') || 'ace-pomelo:identity-api');
+  setupSession(app, 'pomelo:identity-api');
 
   await app.listen(port, host);
   logger.log(
-    `Application is running on: ${await app.getUrl()}${
-      globalPrefixUri ? ' with global prefix: ' + globalPrefixUri : ''
-    }`,
+    `Application is running on: ${await app.getUrl()}${globalPrefix ? ' with global prefix: ' + globalPrefix : ''}`,
   );
-  !!cors && logger.log('cors is enabled');
-  isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${globalPrefixUri}${swaggerPath}`);
-  isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${globalPrefixUri}${graphqlPath}`);
+  isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${globalPrefix}${swaggerPath}`);
+  isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${globalPrefix}${graphqlPath}`);
 
   // hot reload
   if (module.hot) {

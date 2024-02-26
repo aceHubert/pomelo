@@ -96,7 +96,7 @@ export interface ConfigObject {
      */
     dest?: string;
     /**
-     * max file size(KB)
+     * max file size(bytes)
      */
     maxFileSize?: number;
     /**
@@ -188,10 +188,17 @@ export const configuration =
         tablePrefix: process.env.INFRASTRUCTURE_TABLE_PREFIX,
       },
       upload: {
-        dest: process.env.UPLOAD_PATH,
+        dest: process.env.UPLOAD_DEST,
         maxFileSize:
-          process.env.UPLOAD_LIMIT !== void 0 ? bytes.parse(process.env.UPLOAD_LIMIT) / 1024 : 1024 * 1024 * 10,
-        maxFiles: process.env.UPLOAD_MAX_FILES !== void 0 ? parseInt(process.env.UPLOAD_MAX_FILES, 10) : 10,
+          process.env.UPLOAD_LIMIT !== void 0
+            ? !Number.isNaN(parseInt(process.env.UPLOAD_LIMIT))
+              ? parseInt(process.env.UPLOAD_LIMIT, 10)
+              : bytes.parse(process.env.UPLOAD_LIMIT)
+            : 1024 * 1024 * 10,
+        maxFiles:
+          process.env.UPLOAD_MAX_FILES !== void 0 && !Number.isNaN(parseInt(process.env.UPLOAD_MAX_FILES))
+            ? parseInt(process.env.UPLOAD_MAX_FILES, 10)
+            : 10,
       },
     };
 

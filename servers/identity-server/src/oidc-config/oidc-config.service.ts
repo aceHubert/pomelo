@@ -3,7 +3,6 @@ import { get } from 'lodash';
 import { Provider, FindAccount, KoaContextWithOIDC, CookiesSetOptions, errors } from 'oidc-provider';
 import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
-import { ModuleRef } from '@nestjs/core';
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/infrastructure-datasource';
 import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
@@ -21,7 +20,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   constructor(
     @Inject(OIDC_CONFIG_OPTIONS) private readonly options: OidcConfigOptions,
-    private readonly moduleRef: ModuleRef,
     private readonly adapterService: OidcRedisAdapterService,
     private readonly identityResourceDataSource: IdentityResourceDataSource,
     private readonly userDataSource: UserDataSource,
@@ -32,9 +30,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       issuer: this.options.issuer,
       path: normalizeRoutePath(this.options.path!),
       oidc: await this.getConfiguration(),
+      proxy: true,
       factory: (issuer: string, config?: OidcConfiguration) => {
         const provider = new Provider(issuer, config);
-
         // allow http,localhost in development mode
         if (this.options.debug) {
           // Allowing HTTP and/or localhost for implicit response type web clients
@@ -67,11 +65,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           // TODO: multiple client secrets support
         };
 
-        provider.registerGrantType('password', (ctx, next) => {
-          // TODO: Password Grant Type
-          next();
-        });
-
         // checksession session_state
         provider.on('authorization.success', async (ctx: KoaContextWithOIDC, response: Record<string, any>) => {
           if (!response) return;
@@ -92,8 +85,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
-    const appConfig = this.moduleRef['container'].applicationConfig,
-      globalPrefix = normalizeRoutePath(appConfig?.getGlobalPrefix() ?? ''),
+    const globalPrefix = normalizeRoutePath(this.options.prefix ?? ''),
       scopes: OidcConfiguration['scopes'] = [],
       claims: OidcConfiguration['claims'] = {};
 
@@ -307,11 +299,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             <head>
               <meta charset="UTF-8" />
               <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-              <link rel="icon" type="image/x-icon" href="favicon.ico" />
-              <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+              <link rel="icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
+              <link rel="shortcut icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
               <title>${i18n.tv('oidc.config.logout.confirm_page_title', `Logout Request`)}</title>
-              <link rel="stylesheet" href="/style/index.css" />
-              <link rel="stylesheet" href="/style/container.css" />
+              <link rel="stylesheet" href="${globalPrefix}/style/index.css" />
+              <link rel="stylesheet" href="${globalPrefix}/style/container.css" />
               ${primaryColor ? renderPrimaryStyle(primaryColor) : ''}
             </head>
             <body>
@@ -341,7 +333,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             </html>`;
           },
           postLogoutSuccessSource: (ctx) => {
-            // @param ctx - koa request context
             const i18n = getI18nFromContext(ctx);
             const { clientId, clientName } = ctx.oidc.client || {}; // client is defined if the user chose to stay logged in with the OP
             const display = clientName || clientId;
@@ -349,11 +340,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
               <head>
               <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-                <link rel="icon" type="image/x-icon" href="favicon.ico" />
-                <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+                <link rel="icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
+                <link rel="shortcut icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
                 <title>${i18n.tv('oidc.config.logout.success_page_title', `Sign-out Success`)}</title>
-                <link rel="stylesheet" href="/style/index.css" />
-                <link rel="stylesheet" href="/style/container.css" />
+                <link rel="stylesheet" href="${globalPrefix}/style/index.css" />
+                <link rel="stylesheet" href="${globalPrefix}/style/container.css" />
               </head>
               <body>
                 <main class="container">
@@ -379,12 +370,12 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         resourceIndicators: {
           enabled: true,
           defaultResource: (ctx) => {
-            console.log('default resource', this.options.resource, ctx.origin);
+            this.logger.debug('default resource', ctx.origin, ctx.protocol);
 
-            return this.options.resource ?? ctx.origin;
+            return ctx.origin;
           },
           getResourceServerInfo: (ctx, resourceIndicator, client) => {
-            console.log('resource indicator', resourceIndicator);
+            this.logger.debug('resource indicator', resourceIndicator);
 
             const metadata = client.metadata();
             return {
@@ -400,7 +391,8 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             };
           },
           useGrantedResource: (ctx, resourceIndicator) => {
-            console.log('use granted resource', resourceIndicator);
+            this.logger.debug('use granted resource', resourceIndicator);
+
             return true;
           },
         },
@@ -481,7 +473,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           });
 
           grant.addOIDCScope(ctx.oidc.client.scope!);
-          grant.addResourceScope(this.options.resource ?? ctx.origin, ctx.oidc.client.scope!);
+          grant.addResourceScope(ctx.origin, ctx.oidc.client.scope!);
 
           await grant.save();
 
@@ -506,11 +498,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-            <link rel="icon" type="image/x-icon" href="favicon.ico" />
-            <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+            <link rel="icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
+            <link rel="shortcut icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
             <title>${pageTitle}</title>
-            <link rel="stylesheet" href="/style/index.css" />
-            <link rel="stylesheet" href="/style/container.css" />
+            <link rel="stylesheet" href="${globalPrefix}/style/index.css" />
+            <link rel="stylesheet" href="${globalPrefix}/style/container.css" />
           </head>
           <body>
             <main class="container">
@@ -606,7 +598,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     return {
       accountId: id,
       claims: async (use, scope) => {
-        console.log('claims', use, scope);
+        this.logger.debug('claims', use, scope);
 
         if (use === 'extra_token_claims') {
           return {

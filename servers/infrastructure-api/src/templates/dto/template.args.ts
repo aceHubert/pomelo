@@ -1,4 +1,4 @@
-import { Field, ArgsType, Int, IntersectionType, OmitType, PickType } from '@nestjs/graphql';
+import { Field, ArgsType, ID, Int, IntersectionType, OmitType, PickType } from '@nestjs/graphql';
 import { TemplateStatus } from '@ace-pomelo/infrastructure-datasource';
 import { PagedTemplateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
 
@@ -12,7 +12,8 @@ class PagedTemplateArgs extends PagedTemplateArgsValidator {
   /**
    * Author id
    */
-  author?: string;
+  @Field((type) => ID)
+  author?: number;
 
   /**
    * Status
@@ -48,7 +49,7 @@ class CategoryArgs extends CagetoryArgsValidator {
   /**
    * Category id
    */
-  @Field((type) => Int)
+  @Field((type) => ID)
   categoryId?: number;
 
   /**
@@ -62,7 +63,7 @@ class TagArgs extends TagArgsValidator {
   /**
    * Tag id
    */
-  @Field((type) => Int)
+  @Field((type) => ID)
   tagId?: number;
 
   /**

@@ -31,7 +31,6 @@ export class NewTemplateDto extends NewTemplateValidator {
   @ApiProperty({
     enum: TemplateStatus,
     required: false,
-    default: TemplateStatus.Publish,
     description: 'Status',
   })
   status?: TemplateStatus;
@@ -49,7 +48,6 @@ export class NewTemplateDto extends NewTemplateValidator {
   @ApiProperty({
     enum: TemplateCommentStatus,
     required: false,
-    default: TemplateCommentStatus.Closed,
     description: 'Comment status',
   })
   commentStatus?: TemplateCommentStatus;

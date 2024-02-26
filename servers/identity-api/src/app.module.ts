@@ -55,9 +55,9 @@ import '@/common/extends/i18n.extend';
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const contentPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/identity-api');
-        if (!fs.existsSync(contentPath)) {
-          fs.mkdirSync(contentPath, { recursive: true });
+        const loaderPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/server');
+        if (!fs.existsSync(loaderPath)) {
+          fs.mkdirSync(loaderPath, { recursive: true });
         }
         return {
           fallbackLanguage: 'en-US',
@@ -68,7 +68,7 @@ import '@/common/extends/i18n.extend';
             'zh-*': 'zh-CN',
           },
           loaderOptions: {
-            path: contentPath,
+            path: loaderPath,
             includeSubfolders: true,
             watch: isDebug,
           },
@@ -138,6 +138,7 @@ import '@/common/extends/i18n.extend';
           playground: isDebug,
           introspection: isDebug,
           path: graphqlPath,
+          useGlobalPrefix: true,
           installSubscriptionHandlers: true,
           cache: new InMemoryLRUCache(),
           autoSchemaFile: path.join(__dirname, 'schema.gql'),

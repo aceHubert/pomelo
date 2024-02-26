@@ -86,7 +86,7 @@ export abstract class OidcAdapterServiceFactory {
     ]);
 
     if (!client) return;
-    if (!client.enabled) throw new errors.InvalidClient('client has disabled');
+    if (!client.enabled) throw new errors.InvalidClient('client is disabled');
 
     return omitBy(
       {
@@ -122,6 +122,7 @@ export abstract class OidcAdapterServiceFactory {
         post_logout_redirect_uris: client.postLogoutRedirectUris?.map(
           ({ postLogoutRedirectUri }) => postLogoutRedirectUri,
         ),
+        client_secret: client.secrets?.[0]?.value,
         client_secrets: client.secrets?.map(({ type, value, expiresAt }) => ({ type, value, expiresAt })),
         extra_properties: client.properties?.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
       },
