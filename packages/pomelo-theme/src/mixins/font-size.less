@@ -3,11 +3,11 @@
 .fontSize(@fontSize,@designDpr:1) {
   font-size: (@fontSize / @designDpr);
 
-  [data-dpr='2'] & {
+  [data-dpr='2'] &, &--2x {
     font-size: (@fontSize / @designDpr * 2);
   }
 
-  [data-dpr='3'] & {
+  [data-dpr='3'] &, &--3x {
     font-size: (@fontSize / @designDpr * 3);
   }
 }
