@@ -13,15 +13,14 @@ const getCdnConfig = require('./build.cdn');
 const getEnv = (key, defaultValue) => process.env[key] ?? defaultValue;
 const isEnv = (env) => process.env.NODE_ENV === env;
 
-const assetsPath = 'static';
 const isProd = isEnv('production');
 // dev config
 const devHost = getEnv('DEV_HOST', 'localhost');
 const devPort = Number(getEnv('DEV_PORT', 3000));
 const isMock = getEnv('MOCK') === 'true';
 const isProxy = isMock || getEnv('PROXY') === 'true';
-const proxyInfrastructureOrigin = getEnv('PROXY_INFRASTRUCTURE_ORIGIN', 'http://localhost:5002');
-const proxyIdentityOrigin = getEnv('PROXY_IDENTITY_ORIGIN', 'http://localhost:5003');
+const proxyIdentityOrigin = getEnv('PROXY_IDENTITY_ORIGIN', 'http://localhost:5002');
+const proxyInfrastructureOrigin = getEnv('PROXY_INFRASTRUCTURE_ORIGIN', 'http://localhost:5003');
 const isHttps = getEnv('HTTPS') === 'true';
 const proxyTarget = (to) => (isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to);
 
@@ -31,7 +30,10 @@ const envJs = (isProxy ? 'env/env.dev.proxy.js' : getEnv('ENV_JS')) || 'env/env.
 const webConfigFile = getEnv('WEBCONFIG_FILE');
 // public path
 const publicPath = getEnv('BASE_URL', '/');
+// assets path
+const assetsPath = 'static';
 
+// @ts-ignore
 module.exports = defineConfig({
   publicPath,
   assetsDir: assetsPath,
@@ -106,6 +108,10 @@ module.exports = defineConfig({
             },
             '/infrastructure/graphql': {
               target: proxyTarget(proxyInfrastructureOrigin + '/graphql'),
+              changeOrigin: true,
+            },
+            '/identity/api': {
+              target: proxyTarget(proxyIdentityOrigin + '/api'),
               changeOrigin: true,
             },
             '/identity/graphql': {
@@ -361,7 +367,17 @@ module.exports = defineConfig({
             {
               from: envJs,
               to: path.join(assetsPath, 'js/env.js'),
-              transform: async (content) => (await terser.minify(content.toString())).code,
+              transform: async (content) =>
+                (
+                  await terser.minify(content.toString(), {
+                    compress: {
+                      global_defs: {
+                        'process.env.NODE_ENV': process.env.NODE_ENV,
+                        'process.env.BASE_URL': publicPath,
+                      },
+                    },
+                  })
+                ).code,
             },
             webConfigFile && {
               from: webConfigFile,

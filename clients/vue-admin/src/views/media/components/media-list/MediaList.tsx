@@ -16,6 +16,14 @@ import type { OmitVue } from 'antdv-layout-pro/types';
 import type { Pagination as PaginationProps } from 'ant-design-vue/types/pagination';
 import type { Media } from '@/fetch/apis';
 
+export interface UploadingMedia {
+  uid: string;
+  filename: string;
+  extention?: string;
+  path: string;
+  percent: number;
+}
+
 export interface MediaListProps {
   keyword?: string;
   accept?: string;
@@ -58,6 +66,7 @@ export default defineComponent({
     const prefixCls = getPrefixCls('media-list', customizePrefixCls);
 
     const keyword = ref(props.keyword);
+    const uploadingMedias = ref<UploadingMedia[]>([]);
     const $mediasRes = createResource((page: number, pageSize: number, keyword?: string) => {
       return resApi
         .getPaged({
@@ -98,7 +107,19 @@ export default defineComponent({
       $mediasRes.read(1, localPagination.value.pageSize!);
     }, [() => props.accept]);
 
-    const addItem = (file: Media) => {
+    const addItem = (file: (Media & { uid?: string }) | UploadingMedia) => {
+      if ('uid' in file) {
+        const existsIndex = uploadingMedias.value.findIndex((item) => file.uid === item.uid);
+        if ('id' in file) {
+          // 上传成功，移除 uploading item
+          existsIndex >= 0 && uploadingMedias.value.splice(existsIndex, 1);
+        } else {
+          // 上传中，更新上传进度
+          existsIndex >= 0 ? uploadingMedias.value.splice(existsIndex, 1, file) : uploadingMedias.value.unshift(file);
+          return;
+        }
+      }
+
       const { $result: medias } = $mediasRes;
       if (!medias) return;
 
@@ -106,14 +127,27 @@ export default defineComponent({
       const existsIndex = medias.rows.findIndex((row) => file.fileName === row.fileName);
       existsIndex >= 0 && medias.rows.splice(existsIndex, 1);
 
+      delete file.uid;
+
       // 插入到第一个
       medias.rows.unshift(file);
+    };
+
+    const removeItem = (uid: string) => {
+      const existsIndex = uploadingMedias.value.findIndex((item) => uid === item.uid);
+      existsIndex >= 0 && uploadingMedias.value.splice(existsIndex, 1);
     };
 
     const refresh = (force = false) => {
       force && (localPagination.value = Object.assign({}, localPagination.value, { current: 1 }));
       $mediasRes.read(localPagination.value.current!, localPagination.value.pageSize!);
     };
+
+    expose({
+      addItem,
+      removeItem,
+      refresh,
+    });
 
     const previewImage = reactive({
       modalVisible: false,
@@ -222,8 +256,7 @@ export default defineComponent({
     };
 
     const uploadCropSkip = ref(false);
-    const canCrop = (type: string) =>
-      ['image/jpe', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'].includes(type);
+    const canCrop = (type: string) => /^image\/(png|jpe?g|gif|bmp|webp)/i.test(type);
     const handleBeforeUpload = (file: File): Promise<Blob | File> => {
       return new Promise((resolve) => {
         if (canCrop(file.type) && props.cropBeforeUpload) {
@@ -249,7 +282,7 @@ export default defineComponent({
       });
     };
 
-    const handleCustomUpload = uploadMixin.getCustomUploadRequest(props.objectPrefixKey);
+    const handleCustomUpload = uploadMixin.getUploadRequest(props.objectPrefixKey);
 
     const selectedPath = ref('');
     const handleSelect = (media: Media) => {
@@ -310,13 +343,11 @@ export default defineComponent({
       }
     };
 
-    expose({
-      addItem,
-      refresh,
-    });
-
     return () => {
       const { $loading: loading, $result: medias } = $mediasRes;
+
+      const mediaList = [...uploadingMedias.value, ...(medias?.rows ?? [])];
+
       return (
         <Spin spinning={loading} delay={260}>
           <div>
@@ -339,7 +370,6 @@ export default defineComponent({
                   listType="picture-card"
                   class={`${prefixCls}-new-file-uploader`}
                   showUploadList={false}
-                  disabled={uploadMixin.uploading}
                   accept={props.accept}
                   method="PUT"
                   customRequest={(options: any) =>
@@ -349,20 +379,36 @@ export default defineComponent({
                     })
                   }
                   beforeUpload={(file: File) => handleBeforeUpload(file)}
-                  onChange={({ file: { status, response } }) => {
-                    if (status === 'done') {
-                      addItem(response);
-                    } else if (status === 'error') {
-                      message.error(i18n.tv('page_media.upload_error', '上传失败！') as string);
+                  onChange={({ file: { uid, name, originFileObj, type, size, status, response, error }, event }) => {
+                    if (status === 'uploading') {
+                      const { loaded = 0, total = size } = event ?? {};
+                      addItem({
+                        uid,
+                        filename: name,
+                        path: /^image\//i.test(type) ? URL.createObjectURL(originFileObj) : FileUnknownSvg,
+                        percent: Math.floor((loaded / total) * 100),
+                      });
+                    } else {
+                      if (status === 'done') {
+                        addItem({ ...response, uid });
+                      } else if (status === 'error') {
+                        removeItem(uid);
+                        message.error(
+                          error?.message ||
+                            (i18n.tv('page_media.upload_error', `文件"${name}"上传失败！`, {
+                              name,
+                            }) as string),
+                        );
+                      }
                     }
                   }}
                 >
                   <div class={`${prefixCls}-new-file-add`}>
-                    {uploadMixin.uploadProgress > 0 && uploadMixin.uploadProgress < 100 ? (
-                      <Progress type="circle" percent={uploadMixin.uploadProgress} width={80} />
+                    {uploadMixin.uploading ? (
+                      <Progress type="circle" percent={uploadMixin.percent} width={80} />
                     ) : (
                       <p class="primary--text">
-                        <Icon type="upload" style="font-size: 48px" />
+                        <Icon type="upload" class="font-size-lg--3x" />
                       </p>
                     )}
                     <p class="mt-4 text--primary">{i18n.tv('page_media.upload_btn_text', '点击上传媒体文件')}</p>
@@ -370,55 +416,66 @@ export default defineComponent({
                 </Upload>
               </div>
             )}
-            {medias?.rows.length ? (
-              medias.rows.map((media) => (
-                <div class={`${prefixCls}-item`} onClick={() => emit('itemClick', media)}>
-                  <Card hoverable size="small">
-                    <img
-                      slot="cover"
-                      class={`${prefixCls}-item__cover`}
-                      alt="example"
-                      src={media.thumbnail?.fullPath ?? FileUnknownSvg}
-                    />
-                    <p class="mb-0 text-ellipsis">{`${media.originalFileName}${media.extension}`}</p>
-                  </Card>
-                  <Space class={`${prefixCls}-item__actions`} direction="vertical">
-                    {media.thumbnail && (
-                      <Button
-                        shape="round"
-                        size={props.size}
-                        icon="edit"
-                        vOn:click_prevent_stop={() => handleCropImage(media)}
-                      >
-                        {i18n.tv('common.btn_text.edit', '编辑')}
-                      </Button>
-                    )}
-                    {media.thumbnail && (
-                      <Button
-                        shape="round"
-                        size={props.size}
-                        icon="eye"
-                        vOn:click_prevent_stop={() => {
-                          previewImage.media = media;
-                          previewImage.modalVisible = true;
-                        }}
-                      >
-                        {i18n.tv('common.btn_text.preview', '预览')}
-                      </Button>
-                    )}
-                    {props.selectable && (
-                      <Button
-                        shape="round"
-                        size={props.size}
-                        icon="select"
-                        vOn:click_prevent_stop={() => handleSelect(media)}
-                      >
-                        {i18n.tv('common.btn_text.select', '选择')}
-                      </Button>
-                    )}
-                  </Space>
-                </div>
-              ))
+            {mediaList.length ? (
+              mediaList.map((media) =>
+                'uid' in media ? (
+                  <div class={`${prefixCls}-item`}>
+                    <Card hoverable size="small">
+                      <img slot="cover" alt={`${media.filename}${media.extention ?? ''}`} src={media.path} />
+                      <p class="mb-0 text-ellipsis">{`${media.filename}${media.extention ?? ''}`}</p>
+                    </Card>
+                    <div class={`${prefixCls}-item__prograss`}>
+                      <Progress type="circle" percent={media.percent} width={80} />
+                    </div>
+                  </div>
+                ) : (
+                  <div class={`${prefixCls}-item`} onClick={() => emit('itemClick', media)}>
+                    <Card hoverable size="small">
+                      <img
+                        slot="cover"
+                        alt={`${media.originalFileName}${media.extension}`}
+                        src={media.thumbnail?.fullPath ?? FileUnknownSvg}
+                      />
+                      <p class="mb-0 text-ellipsis">{`${media.originalFileName}${media.extension}`}</p>
+                    </Card>
+                    <Space class={`${prefixCls}-item__actions`} direction="vertical">
+                      {media.thumbnail && (
+                        <Button
+                          shape="round"
+                          size={props.size}
+                          icon="edit"
+                          vOn:click_prevent_stop={() => handleCropImage(media)}
+                        >
+                          {i18n.tv('common.btn_text.edit', '编辑')}
+                        </Button>
+                      )}
+                      {media.thumbnail && (
+                        <Button
+                          shape="round"
+                          size={props.size}
+                          icon="eye"
+                          vOn:click_prevent_stop={() => {
+                            previewImage.media = media;
+                            previewImage.modalVisible = true;
+                          }}
+                        >
+                          {i18n.tv('common.btn_text.preview', '预览')}
+                        </Button>
+                      )}
+                      {props.selectable && (
+                        <Button
+                          shape="round"
+                          size={props.size}
+                          icon="select"
+                          vOn:click_prevent_stop={() => handleSelect(media)}
+                        >
+                          {i18n.tv('common.btn_text.select', '选择')}
+                        </Button>
+                      )}
+                    </Space>
+                  </div>
+                ),
+              )
             ) : !props.showUploader ? (
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}

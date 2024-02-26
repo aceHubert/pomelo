@@ -3,7 +3,7 @@ import axios from 'axios';
 import { hasIn } from 'lodash-es';
 import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
 import { createCatchErrorPlugin, createLoadingPlugin, createRetryPlugin } from '@ace-fetch/axios';
-import { loadingRef, errorRef, SharedError } from '@/shared';
+import { siteInitRequiredRef, loadingRef, errorRef, SharedError } from '@/shared';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
 
@@ -73,7 +73,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
 
   const { data = {} } = error.response as { data: any };
   if (data.siteInitRequired) {
-    // TODO: 初始化数据
+    siteInitRequiredRef.value = true;
   }
   const message = data.message ?? error.message;
   return Promise.reject(new Error(message?.length > 100 ? message.substring(0, 100) + '...' : message));

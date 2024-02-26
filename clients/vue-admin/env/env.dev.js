@@ -4,10 +4,10 @@
 
   var env = window._ENV || {};
 
-  // env.infrastructureApiBase = 'https://localhost:5002/api';
-  env.infrastructureGraphqlBase = 'https://localhost:5002/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5002/graphql';
-  env.identityGraphqlBase = 'https://localhost:5003/graphql';
+  // env.infrastructureApiBase = 'https://localhost:5003/api';
+  env.infrastructureGraphqlBase = 'https://localhost:5003/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5003/graphql';
+  env.identityGraphqlBase = 'https://localhost:5002/graphql';
 
   env.oidc = {
     authority: 'http://localhost:5001/',

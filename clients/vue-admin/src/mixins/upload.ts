@@ -8,16 +8,12 @@ export const useUpload = () => {
   const resApi = useResApi();
 
   const uploadProcessData = ref<[number, number][]>([]);
-  const uploadProgress = computed(() => {
-    if (uploadProcessData.value.length === 0) {
-      return 0;
-    }
-    const sum = uploadProcessData.value.reduce((a, b) => a + b[0], 0);
-    const total = uploadProcessData.value.reduce((a, b) => a + b[1], 0);
-    return Math.floor((sum / total) * 100);
-  });
-  const uploading = computed(() => uploadProcessData.value.length > 0);
-  const getCustomUploadRequest =
+
+  /**
+   * 获取上传请求
+   * @param objectKeyPrefix OBS object key 前缀
+   */
+  const getUploadRequest =
     (_objectKeyPrefix = 'medias/item_') =>
     async (options: {
       file: File;
@@ -82,9 +78,26 @@ export const useUpload = () => {
       //   .catch(onError);
     };
 
+  /**
+   * 上传中
+   */
+  const uploading = computed(() => uploadProcessData.value.length > 0);
+
+  /**
+   * 总体上传进度
+   */
+  const percent = computed(() => {
+    if (uploadProcessData.value.length === 0) {
+      return 0;
+    }
+    const loaded = uploadProcessData.value.reduce((a, b) => a + b[0], 0);
+    const total = uploadProcessData.value.reduce((a, b) => a + b[1], 0);
+    return Math.floor((loaded / total) * 100);
+  });
+
   return reactive({
     uploading,
-    uploadProgress,
-    getCustomUploadRequest,
+    percent,
+    getUploadRequest,
   });
 };

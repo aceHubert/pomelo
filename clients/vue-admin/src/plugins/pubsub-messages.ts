@@ -5,10 +5,11 @@ import { notification } from '@/components/antdv-helper';
 
 // Types
 import type { UnwrapRef } from '@vue/composition-api';
-import type { Plugin, MessageConfig } from '@/types';
+import type { MessageConfig } from 'antdv-layout-pro/types';
+import type { Plugin } from '@/types';
 import type { Message } from '@/fetch/apis';
 
-const pubSubMessagePlugin: Plugin = (app, inject) => {
+const plugin: Plugin = ({ app }, inject) => {
   const basicApi = useBasicApi();
 
   const messages = reactive({
@@ -188,7 +189,7 @@ const pubSubMessagePlugin: Plugin = (app, inject) => {
   inject('pubSubMessages', messages);
 };
 
-export default pubSubMessagePlugin;
+export default plugin;
 
 declare module 'vue/types/vue' {
   interface Vue {

@@ -5,9 +5,9 @@ import { createClient } from 'graphql-ws';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { onError } from '@apollo/client/link/error';
 import { createUploadFetch, isServerError, isServerParseError } from '@ace-pomelo/shared-client';
+import { siteInitRequiredRef } from '@/shared';
 import { userManager } from '@/auth';
 import { i18n } from '@/i18n';
-import { errorRef, SharedError } from '@/shared';
 
 // http link
 export const createHttpLink = (uri: string | UriFunction) =>
@@ -106,8 +106,8 @@ export const errorLink = onError(({ networkError, graphQLErrors, operation, forw
     ) {
       return tryLogin();
     } else if (graphQLErrors.some((err) => err.extensions?.siteInitRequired)) {
-      // TODO: 需要初始化数据库(graphql resolver执行中产生的错误)
-      errorRef.value = new SharedError('表不存在，或需要初始化数据库！', 400);
+      // 需要初始化站点(graphql resolver执行中产生的错误)
+      siteInitRequiredRef.value = true;
       return;
     }
   }
@@ -123,8 +123,8 @@ export const errorLink = onError(({ networkError, graphQLErrors, operation, forw
         typeof networkError.result !== 'string' &&
         networkError.result.siteInitRequired
       ) {
-        // TODO: 需要初始化(以 http code 返回，中间件优先于graphql resolver执行时产生的错误)
-        errorRef.value = new SharedError('表不存在，或需要初始化数据库！', 400);
+        // 需要初始化站点(以 http code 返回，中间件优先于graphql resolver执行时产生的错误)
+        siteInitRequiredRef.value = true;
         return;
       }
     }

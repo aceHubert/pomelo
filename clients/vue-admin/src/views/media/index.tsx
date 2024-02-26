@@ -7,6 +7,7 @@ import { message } from '@/components';
 import { useI18n } from '@/hooks';
 import { useUpload, useLocationMixin } from '@/mixins';
 import { useResApi } from '@/fetch/apis';
+import FileUnknownSvg from '@/assets/icons/file-unknown-fill.svg';
 import { MediaList } from './components';
 import { formatFileSize } from './utils/format';
 import classes from './index.module.less';
@@ -45,7 +46,7 @@ export default defineComponent({
         .then(({ media }) => media),
     );
 
-    const handleCustomUpload = uploadMixin.getCustomUploadRequest();
+    const handleCustomUpload = uploadMixin.getUploadRequest();
 
     return () => {
       const { $loading: loading, $result: media } = $mediaRes;
@@ -57,23 +58,35 @@ export default defineComponent({
             disabled={!!uploadMixin.uploading}
             method="PUT"
             customRequest={(options) => handleCustomUpload(options)}
-            onChange={({ file: { name, status, response } }) => {
-              if (status === 'done') {
-                (refs['mediaList'] as any).addItem(response);
-              } else if (status === 'error') {
-                message.error(
-                  i18n.tv('page_media.upload_error', `文件"${name}"上传失败！`, {
-                    name,
-                  }) as string,
-                );
+            onChange={({ file: { uid, name, originFileObj, type, size, status, response, error }, event }) => {
+              if (status === 'uploading') {
+                const { loaded = 0, total = size } = event ?? {};
+                (refs['mediaList'] as any).addItem({
+                  uid,
+                  filename: name,
+                  path: /^image\//i.test(type) ? URL.createObjectURL(originFileObj) : FileUnknownSvg,
+                  percent: Math.floor((loaded / total) * 100),
+                });
+              } else {
+                if (status === 'done') {
+                  (refs['mediaList'] as any).addItem({ ...response, uid });
+                } else if (status === 'error') {
+                  (refs['mediaList'] as any).removeItem(uid);
+                  message.error(
+                    error?.message ||
+                      (i18n.tv('page_media.upload_error', `文件"${name}"上传失败！`, {
+                        name,
+                      }) as string),
+                  );
+                }
               }
             }}
           >
-            {uploadMixin.uploadProgress > 0 && uploadMixin.uploadProgress < 100 ? (
-              <Progress type="circle" percent={uploadMixin.uploadProgress} width={80} />
+            {uploadMixin.uploading ? (
+              <Progress type="circle" percent={uploadMixin.percent} width={80} />
             ) : (
               <p class="primary--text">
-                <Icon type="upload" style="font-size: 48px" />
+                <Icon type="upload" class="font-size-lg--3x" />
               </p>
             )}
             <p class="mt-4 text--primary">

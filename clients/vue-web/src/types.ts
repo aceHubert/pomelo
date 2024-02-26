@@ -7,7 +7,7 @@ class Helper<Props> {
 }
 export type DefineComponent<Props> = Helper<Props>['Return'];
 
-export type Plugin = (app: ComponentOptions<Vue>, inject: (key: string, value: any) => void) => void;
+export type Plugin = (context: { app: ComponentOptions<Vue> }, inject: (key: string, value: any) => void) => void;
 
 export enum DeviceType {
   Desktop = 'desktop',

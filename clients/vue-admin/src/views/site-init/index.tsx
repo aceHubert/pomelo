@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue2-helpers/vue-router';
 import { Form, Input, Select, Button } from 'ant-design-vue';
 import { message } from '@/components';
 import { useI18n, useDeviceType } from '@/hooks';
+import { siteInitRequiredRef } from '@/shared';
 import { useSiteInitApi } from '@/fetch/apis';
 import classes from './index.module.less';
 
@@ -47,9 +48,10 @@ export default Form.create({})(
         if (isAbsoluteUrl(redirect)) {
           absoluteGo(redirect, true);
           return;
-        } else {
-          router.replace(redirect);
         }
+
+        siteInitRequiredRef.value = false;
+        router.replace(redirect);
       };
 
       const loading = ref(false);
@@ -70,6 +72,10 @@ export default Form.create({})(
                   password: sha256(values.password).toString(),
                 },
               },
+              loading: () => {
+                loading.value = true;
+                return () => (loading.value = false);
+              },
             })
             .then(() => {
               message.success({
@@ -79,9 +85,6 @@ export default Form.create({})(
             })
             .catch((err) => {
               message.error(err.message);
-            })
-            .finally(() => {
-              loading.value = false;
             });
         });
       };
@@ -100,6 +103,7 @@ export default Form.create({})(
                 v-decorator={[
                   'title',
                   {
+                    initialValue: 'Pomelo',
                     rules: [
                       {
                         required: true,
@@ -159,6 +163,7 @@ export default Form.create({})(
                 v-decorator={[
                   'homeUrl',
                   {
+                    initialValue: location.origin,
                     rules: [
                       {
                         required: true,

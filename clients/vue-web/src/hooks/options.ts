@@ -5,8 +5,8 @@ import { warn } from '@ace-util/core';
 import type { Ref } from '@vue/composition-api';
 
 export function useOptions(key: string): Ref<string | undefined>;
-export function useOptions(): Ref<Record<string, string>>;
-export function useOptions(key?: string): Ref<string | undefined> | Ref<Record<string, string>> {
+export function useOptions(): Readonly<Record<string, string>>;
+export function useOptions(key?: string): Ref<string | undefined> | Readonly<Record<string, string>> {
   const instance = getCurrentInstance();
   if (!instance) {
     warn(process.env.NODE_ENV === 'production', 'method can only be used inside setup() or functional components');
@@ -17,7 +17,7 @@ export function useOptions(key?: string): Ref<string | undefined> | Ref<Record<s
   const options = instance.proxy.$config;
 
   if (key) {
-    return toRef(options.value, key);
+    return toRef(options, key);
   }
   return options;
 }

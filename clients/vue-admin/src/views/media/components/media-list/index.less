@@ -12,43 +12,91 @@
     padding: 0 8px;
     margin-bottom: 16px;
     width: 0;
-    flex: 0 0 240px;
+    flex: 0 0 236px;
     position: relative;
 
-    &__cover {
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      object-fit: contain;
-    }
+    .@{ant-prefix}-card-cover{
+      background-color: @grey-2;
 
+      .theme-dark &{
+        background-color: @grey-10;
+      }
 
-    .@{ant-prefix}-card{
-      &-cover{
-        width: 100%;
-        padding-top: 100%;
-        background-color: var(--theme-primary-1, @primary-10);
-        position: relative;
+      img {
+        aspect-ratio: 1 / 1;
       }
     }
 
-    &__actions{
+    &__prograss, &__actions{
       position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
+      inset: 0 8px;
       background: rgba(0,0,0,.5);
       color: #fff;
       justify-content: center;
       align-items: center;
+    }
+
+    &__prograss{
+      display: flex;
+    }
+
+    &__actions{
       display: none;
     }
 
     &:hover &__actions{
       display: flex;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+
+      .theme-dark &{
+        box-shadow: 0 1px 2px -2px rgba(255, 255, 255, 0.34), 0 3px 6px 0 rgba(255, 255, 255, 0.18), 0 5px 12px 4px rgba(255, 255, 255, 0.06);
+      }
+    }
+  }
+
+  @media screen and (max-width: 1400Px) {
+    margin-left: -6px;
+    margin-right: -6px;
+    &-item {
+      padding: 0 6px;
+      margin-bottom: 12px;
+      flex-basis: 16.66%;
+
+      &__actions, &__prograss{
+        inset: 0 6px;
+      }
+    }
+  }
+
+  @media screen and (max-width: 1200Px) {
+    &-item {
+      flex-basis: 20%;
+    }
+  }
+
+  @media screen and (max-width: 992Px) {
+    margin-left: -4px;
+    margin-right: -4px;
+    &-item {
+      padding: 0 4px;
+      margin-bottom: 8px;
+      flex-basis: 25%;
+
+      &__actions, &__prograss{
+        inset: 0 4px;
+      }
+    }
+  }
+
+  @media screen and (max-width: 768Px) {
+    &-item {
+      flex-basis: 33.33%;
+    }
+  }
+
+  @media screen and (max-width: 576Px) {
+    &-item {
+      flex-basis: 50%;
     }
   }
 
@@ -69,7 +117,7 @@
     }
 
     &-add{
-      padding: 30px 0;
+      padding: 48px 0;
     }
   }
 
@@ -79,7 +127,6 @@
   }
 
   &-crop-results{
-
     &__wrapper{
       display: flex;
       align-items: stretch;
@@ -109,22 +156,6 @@
         height: 100%;
         object-fit: contain;
       }
-    }
-  }
-
-  @media screen and (max-width: 1200Px) {
-    margin-left: -4px;
-    margin-right: -4px;
-    &-item {
-      padding: 0 4px;
-      margin-bottom: 8px;
-      flex-basis: 25%;
-    }
-  }
-
-  @media screen and (max-width: 540Px) {
-    &-item {
-      flex-basis: 50%;
     }
   }
 }

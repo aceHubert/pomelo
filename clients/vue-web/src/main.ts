@@ -1,11 +1,15 @@
 /* eslint-disable import/order */
 import Vue, { type ComponentOptions } from 'vue';
+import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
+import { absoluteGo, setQueryValues, getEnv } from '@ace-util/core';
+import { Modal } from './components';
 import { afetch } from './fetch';
 import { i18n } from './i18n';
 import { router } from './router';
 import { pinia } from './store';
+import { siteInitRequiredRef } from '@/shared';
 import App from './App';
 import '@ace-pomelo/theme/lib/index.less';
 import './assets/styles/index.less';
@@ -56,17 +60,89 @@ async function createApp() {
     });
   }
 
+  const context = {
+    app,
+    router,
+    pinia,
+  };
   for (const plugin of plugins) {
     if (typeof plugin === 'function') {
-      await plugin(app, inject);
+      await plugin(context, inject);
     }
   }
 
-  return {
-    app,
-  };
+  return context;
+}
+
+// preset anonymous routes
+const AnonymousRouteNames = ['signin', 'session-timeout'];
+function auth(this: Vue, to: Route, from: Route, next: Next) {
+  const userManager = this.$userManager;
+
+  if (siteInitRequiredRef.value) {
+    absoluteGo(
+      setQueryValues(
+        { redirect: window.location.href },
+        getEnv('siteInitURL', `${window.location.origin}/admin/site-init`, window._ENV),
+      ),
+    );
+  } else if (to.name === 'signout') {
+    userManager.signout();
+  } else if ((to.name && AnonymousRouteNames.includes(to.name)) || to.meta?.anonymous === true) {
+    next();
+  } else if (window.name === 'preview') {
+    // 从管理端预览打开预览页面时，先尝试登录
+    userManager.getUser().then((user) => {
+      if (user) return next();
+
+      // try sign-in silent
+      userManager
+        .signinSilent()
+        .catch(() => {})
+        .finally(() => {
+          next();
+        });
+    });
+  } else {
+    next();
+  }
+}
+
+function clearModals(this: Vue) {
+  // clear all modals
+  Modal.destroyAll();
 }
 
 createApp().then(({ app }) => {
-  new Vue(app).$mount('#app');
+  const _app = new Vue(app);
+
+  router.beforeEach(auth.bind(_app));
+
+  router.afterEach(clearModals.bind(_app));
+
+  router.isReady().then(() => {
+    auth.call(_app, router.currentRoute, router.currentRoute, (path) => {
+      // If not redirected
+      if (!path || typeof path === 'function') {
+        typeof path === 'function' && path.call(null, _app);
+        _app.$mount('#app');
+        return;
+      }
+
+      // Add a one-time afterEach hook to
+      // mount the app wait for redirect and route gets resolved
+      const unregisterHook = router.afterEach(() => {
+        unregisterHook();
+        _app.$mount('#app');
+      });
+
+      // Push the path and let route to be resolved
+      router.push(path, undefined, (err) => {
+        if (err) {
+          // eslint-disable-next-line no-console
+          console.error(err);
+        }
+      });
+    });
+  });
 });
