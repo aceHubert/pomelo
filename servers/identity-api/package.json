@@ -1,6 +1,6 @@
 {
   "name": "@ace-pomelo/identity-api",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "identity apis for pomelo",
   "author": "Hubert<yi.xiang@live.cn>",
   "private": true,
@@ -10,8 +10,8 @@
     "start:webpack": "run -T nest build --webpack --webpackPath webpack-hmr.config.js --watch",
     "start:debug": "run -T nest build --debug --watch",
     "start:prod": "NODE_ENV=production node dist/main",
-    "build": "rimraf dist && yarn build:version && run -T nest build",
     "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "build": "rimraf dist && yarn build:version && run -T nest build",
     "test": "run -T jest",
     "test:watch": "run -T jest --watch",
     "test:cov": "run -T jest --coverage",

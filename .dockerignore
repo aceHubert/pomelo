@@ -3,6 +3,8 @@
 .workflow
 node_modules
 servers/db.lock
+servers/content/plugins/*
+servers/content/themes/*
 servers/content/uploads/*
 servers/**/public/**/*.ts
 servers/**/public/**/*.less
@@ -11,6 +13,8 @@ servers/**/public/**/*.scss
 **/.git*
 **/.env.development*
 **/.env.sample
+**/env.config.sample.js
+**/env.config.sample.js.map
 **/.eslintignore
 **/iisnode.js
 **/jest.config.json

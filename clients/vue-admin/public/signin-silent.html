@@ -17,7 +17,6 @@
     </script>
     <script src="./static/js/env.js"></script>
     <script>
-      debugger;
       const settings = window._ENV ? window._ENV.oidc || {} : {};
       new oidc.UserManager(settings).signinSilentCallback();
     </script>

@@ -123,8 +123,10 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       useFactory: (config: ConfigService) => ({
         debug: config.get('debug', false),
-        issuer: config.getOrThrow('OIDC_ISSUER'),
-        prefix: normalizeRoutePath(config.get('webServer.globalPrefixUri', '')),
+        issuer: `${config.get(
+          'ORIGIN',
+          'http://localhost:' + config.get<number>('webServer.port', 3000),
+        )}${normalizeRoutePath(config.get<string>('webServer.globalPrefixUri', ''))}`,
         path: normalizeRoutePath(config.get('OIDC_PATH', '')),
       }),
       inject: [ConfigService],

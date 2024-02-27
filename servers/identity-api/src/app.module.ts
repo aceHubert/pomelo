@@ -48,7 +48,7 @@ import '@/common/extends/i18n.extend';
       envFilePath:
         process.env.ENV_FILE ??
         (process.env.NODE_ENV === 'production'
-          ? ['.env.production.local', '.env.production', '.env.local', '.env']
+          ? ['.env.production', '.env']
           : ['.env.development.local', '.env.development']),
       load: [configuration()],
     }),
@@ -107,7 +107,10 @@ import '@/common/extends/i18n.extend';
       isGlobal: true,
       disableController: true,
       useFactory: (config: ConfigService) => ({
-        origin: config.getOrThrow('OIDC_ORIGIN'),
+        origin: `${config.get(
+          'ORIGIN',
+          'http://localhost:' + config.get<number>('webServer.port', 3000),
+        )}${normalizeRoutePath(config.get<string>('webServer.globalPrefixUri', ''))}`,
         issuer: config.getOrThrow('OIDC_ISSUER'),
         clientMetadata: {
           client_id: config.getOrThrow('OIDC_CLIENT_ID'),

@@ -13,7 +13,7 @@ const logger = new Logger('DbSync', { timestamp: true });
 const envFilePaths = process.env.ENV_FILE
   ? [process.env.ENV_FILE]
   : process.env.NODE_ENV === 'production'
-  ? ['.env.production.local', '.env.production', '.env.local', '.env']
+  ? ['.env.production', '.env']
   : ['.env.development.local', '.env.development'];
 let config: Record<string, any> = {};
 for (const envFilePath of envFilePaths) {
@@ -40,8 +40,6 @@ async function syncDatabase() {
         },
       };
   const tablePrefix = configService.get('IDENTITY_TABLE_PREFIX');
-  const adminURL = configService.get('ADMIN_URL');
-  const webURL = configService.get('WEB_URL');
 
   // db lock file
   const fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
@@ -56,7 +54,7 @@ async function syncDatabase() {
       alter: false,
       // match: /_dev$/,
       // TODO: version compare
-      when: () => fileEnv.hasFile().then((initialized) => !initialized || !fileEnv.getEnv(name)),
+      when: !fileEnv.getEnv(name),
     })
     .then((flag) => {
       if (flag) {
@@ -70,6 +68,13 @@ async function syncDatabase() {
   if (needInitDates) {
     logger.debug('Start to initialize datas!');
     try {
+      const origin = configService.get(
+        'ORIGIN',
+        'http://localhost:' + configService.get<number>('webServer.port', 3000),
+      );
+      const adminURL = configService.get('ADMIN_URL', origin + '/admin');
+      const webURL = configService.get('WEB_URL', origin);
+
       await dbManager.initDatas({
         apiResources: [],
         identityResources: [
@@ -80,7 +85,7 @@ async function syncDatabase() {
             required: true,
             showInDiscoveryDocument: true,
             nonEditable: true,
-            claims: ['sub', 'role'],
+            claims: ['sub'],
           },
           {
             name: 'profile',
@@ -91,6 +96,7 @@ async function syncDatabase() {
             showInDiscoveryDocument: true,
             nonEditable: true,
             claims: [
+              'role',
               'login_name',
               'display_name',
               'nice_name',

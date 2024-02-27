@@ -12,11 +12,6 @@ export interface OidcConfigOptions {
   issuer: string;
 
   /**
-   * server global prefix
-   */
-  prefix?: string;
-
-  /**
    * path base
    * @default /oidc
    */

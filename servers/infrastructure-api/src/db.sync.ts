@@ -12,7 +12,7 @@ const logger = new Logger('DbSync', { timestamp: true });
 const envFilePaths = process.env.ENV_FILE
   ? [process.env.ENV_FILE]
   : process.env.NODE_ENV === 'production'
-  ? ['.env.production.local', '.env.production', '.env.local', '.env']
+  ? ['.env.production', '.env']
   : ['.env.development.local', '.env.development'];
 let config: Record<string, any> = {};
 for (const envFilePath of envFilePaths) {
@@ -53,7 +53,7 @@ async function syncDatabase() {
       alter: false,
       // match: /_dev$/,
       // TODO: version compare
-      when: () => fileEnv.hasFile().then((initialized) => !initialized || !fileEnv.getEnv(name)),
+      when: !fileEnv.getEnv(name),
     })
     .then((flag) => {
       if (flag) {

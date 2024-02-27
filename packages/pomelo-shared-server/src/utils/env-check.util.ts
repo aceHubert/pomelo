@@ -60,7 +60,7 @@ class LockFile {
       envVars.push(`${key}="${value}"`);
     }
     // write everything back to the file system
-    fs.writeFileSync(this.fileName, envVars.join(os.EOL));
+    fs.writeFileSync(this.fileName, envVars.join(os.EOL), { flag: 'w' });
   }
 }
 
@@ -77,10 +77,6 @@ export class FileEnv {
       FileEnv.instance = new FileEnv(fileName);
     }
     return FileEnv.instance;
-  }
-
-  hasFile() {
-    return this.lockFile.hasFile();
   }
 
   hasEnv(key: string) {

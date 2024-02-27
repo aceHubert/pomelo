@@ -25,6 +25,10 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     private readonly userDataSource: UserDataSource,
   ) {}
 
+  private get globalPrefix() {
+    return normalizeRoutePath(new url.URL(this.options.issuer).pathname);
+  }
+
   async createModuleOptions() {
     return {
       issuer: this.options.issuer,
@@ -85,8 +89,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
-    const globalPrefix = normalizeRoutePath(this.options.prefix ?? ''),
-      scopes: OidcConfiguration['scopes'] = [],
+    const scopes: OidcConfiguration['scopes'] = [],
       claims: OidcConfiguration['claims'] = {};
 
     // identity resources
@@ -178,17 +181,17 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           const params = new url.URLSearchParams({});
           params.set(
             'returnUrl',
-            `${globalPrefix}${
+            `${this.globalPrefix}${
               // @ts-expect-error type error
               normalizeRoutePath(ctx.oidc.provider.pathFor('authorization'))
             }?${new url.URLSearchParams(interaction.params as Record<string, any>).toString()}`,
           );
 
-          return `${globalPrefix}/login?${params.toString()}`;
+          return `${this.globalPrefix}/login?${params.toString()}`;
         },
       },
       discovery: {
-        check_session_iframe: url.resolve(this.options.issuer, `${globalPrefix}/connect/checksession`),
+        check_session_iframe: url.resolve(this.options.issuer, `${this.globalPrefix}/connect/checksession`),
       },
       ttl: {
         DeviceCode: (ctx, token, client) => {
@@ -299,11 +302,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             <head>
               <meta charset="UTF-8" />
               <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-              <link rel="icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
-              <link rel="shortcut icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
+              <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
+              <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
               <title>${i18n.tv('oidc.config.logout.confirm_page_title', `Logout Request`)}</title>
-              <link rel="stylesheet" href="${globalPrefix}/style/index.css" />
-              <link rel="stylesheet" href="${globalPrefix}/style/container.css" />
+              <link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
+              <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />
               ${primaryColor ? renderPrimaryStyle(primaryColor) : ''}
             </head>
             <body>
@@ -340,11 +343,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
               <head>
               <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-                <link rel="icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
-                <link rel="shortcut icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
+                <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
+                <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
                 <title>${i18n.tv('oidc.config.logout.success_page_title', `Sign-out Success`)}</title>
-                <link rel="stylesheet" href="${globalPrefix}/style/index.css" />
-                <link rel="stylesheet" href="${globalPrefix}/style/container.css" />
+                <link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
+                <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />
               </head>
               <body>
                 <main class="container">
@@ -498,11 +501,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-            <link rel="icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
-            <link rel="shortcut icon" type="image/x-icon" href="${globalPrefix}/favicon.ico" />
+            <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
+            <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
             <title>${pageTitle}</title>
-            <link rel="stylesheet" href="${globalPrefix}/style/index.css" />
-            <link rel="stylesheet" href="${globalPrefix}/style/container.css" />
+            <link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
+            <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />
           </head>
           <body>
             <main class="container">
