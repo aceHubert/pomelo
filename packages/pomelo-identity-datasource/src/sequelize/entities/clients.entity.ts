@@ -56,6 +56,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       applicationType: {
         type: DataTypes.STRING(50),
+        defaultValue: 'web',
         comment: 'Application type ("native" or "web", default: "web")',
       },
       clientId: {
@@ -78,6 +79,8 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       idTokenSignedResponseAlg: {
         type: DataTypes.STRING(250),
+        allowNull: false,
+        defaultValue: 'RS256',
         comment: 'Id token signed response alg (default: RSA256)',
       },
       initiateLoginUri: {
@@ -100,7 +103,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
-        comment: 'Require auth time',
+        comment: 'Require auth time (default: false)',
       },
       sectorIdentifierUri: {
         type: DataTypes.STRING(2000),
@@ -108,55 +111,81 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       subjectType: {
         type: DataTypes.STRING(50),
+        allowNull: false,
+        defaultValue: 'public',
         comment: 'Subject type ("public" or "pairwise", default: "public")',
       },
       tokenEndpointAuthMethod: {
         type: DataTypes.STRING(50),
+        allowNull: false,
+        defaultValue: 'client_secret_basic',
         comment: 'Token endpoint auth method (default: "client_secret_basic")',
       },
       idTokenLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
+        allowNull: false,
+        defaultValue: 600,
         comment: 'Id token lifetime (Seconds, default: 600)',
       },
       accessTokenFormat: {
         type: DataTypes.STRING(50),
-        comment: 'Access token format ("jwt" or "opaque", default: "opaque")',
+        allowNull: false,
+        defaultValue: 'jwt',
+        comment: 'Access token format ("jwt" or "opaque", default: "jwt")',
       },
       accessTokenLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
+        allowNull: false,
+        defaultValue: 3600,
         comment: 'Access token lifetime (Seconds, default: 3600)',
       },
       refreshTokenExpiration: {
         type: DataTypes.STRING(50),
+        allowNull: false,
+        defaultValue: 'absolute',
         comment: 'Refresh token expiration ("absolute" or "sliding", default: "absolute")',
       },
       refreshTokenAbsoluteLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
+        allowNull: false,
+        defaultValue: 2592000,
         comment: 'Refresh token absolute lifetime (Seconds, default: 2592000)',
       },
       refreshTokenSlidingLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
+        allowNull: false,
+        defaultValue: 1296000,
         comment: 'Refresh token sliding lifetime (Seconds, default: 1209600)',
       },
       authorizationCodeLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
+        allowNull: false,
+        defaultValue: 300,
         comment: 'Authorization code lifetime (Seconds, default: 300)',
       },
       deviceCodeLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
+        allowNull: false,
+        defaultValue: 300,
         comment: 'Device code lifetime (Seconds, default: 300)',
       },
       backchannelAuthenticationRequestLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
+        allowNull: false,
+        defaultValue: 300,
         comment: 'Backchannel authentication request lifetime (Seconds, default: 300)',
       },
       requireConsent: {
         type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
         comment: 'Require consent (default: false)',
       },
       requirePkce: {
         type: DataTypes.BOOLEAN,
-        comment: 'Require pkce (default: false)',
+        allowNull: false,
+        defaultValue: true,
+        comment: 'Require pkce (default: true)',
       },
       enabled: {
         type: DataTypes.BOOLEAN,

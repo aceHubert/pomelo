@@ -35,7 +35,7 @@ export class NewClientInput extends NewClientValidator {
    * IdToken signed response alg,
    * allowed options: "PS256", "PS384", "PS512", "ES256", "ES256K", "ES384", "ES512", "EdDSA", "RS256", "RS384", "RS512", "HS256", "HS384", "HS512", "none"
    */
-  @Field((type) => String, { defaultValue: 'RS256' })
+  @Field((type) => String)
   idTokenSignedResponseAlg?: SigningAlgorithmWithNone;
 
   /**
@@ -79,63 +79,63 @@ export class NewClientInput extends NewClientValidator {
    * Token endpoint auth method,
    * allowed options: 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth',        'self_signed_tls_client_auth', 'none'
    */
-  @Field((type) => String, { defaultValue: 'client_secret_basic' })
+  @Field((type) => String)
   tokenEndpointAuthMethod?: ClientAuthMethod;
 
   /**
    * IdToken lifetime in seconds
    */
-  @Field((type) => Int, { defaultValue: 600 })
+  @Field((type) => Int)
   idTokenLifetime?: number;
 
   /**
    * AccessToken format,
    * allowed options: "jwt", "opaque"
    */
-  @Field((type) => String, { defaultValue: 'jwt' })
+  @Field((type) => String)
   accessTokenFormat?: TokenFormat;
 
   /**
    * AccessToken lifetime in seconds
    */
-  @Field((type) => Int, { defaultValue: 3600 })
+  @Field((type) => Int)
   accessTokenLifetime?: number;
 
   /**
    * RefreshToken expiration type,
    * allowed options: "absolute", "sliding"
    */
-  @Field((type) => String, { defaultValue: 'absolute' })
+  @Field((type) => String)
   refreshTokenExpiration?: 'absolute' | 'sliding';
 
   /**
    * RefreshToken lifetime in seconds in case of "absolute" expiration type
    */
-  @Field((type) => Int, { defaultValue: 2592000 })
+  @Field((type) => Int)
   refreshTokenAbsoluteLifetime?: number;
 
   /**
    * RefreshToken lifetime in seconds in case of "sliding" expiration type
    */
-  @Field((type) => Int, { defaultValue: 1296000 })
+  @Field((type) => Int)
   refreshTokenSlidingLifetime?: number;
 
   /**
    * Authorization code lifetime in seconds
    */
-  @Field((type) => Int, { defaultValue: 300 })
+  @Field((type) => Int)
   authorizationCodeLifetime?: number;
 
   /**
    * Device code lifetime in seconds
    */
-  @Field((type) => Int, { defaultValue: 300 })
+  @Field((type) => Int)
   deviceCodeLifetime?: number;
 
   /**
    * Backchannel authentication request lifetime in seconds
    */
-  @Field((type) => Int, { defaultValue: 1800 })
+  @Field((type) => Int)
   backchannelAuthenticationRequestLifetime?: number;
 
   /**
@@ -151,6 +151,5 @@ export class NewClientInput extends NewClientValidator {
   /**
    * Enabled
    */
-  @Field({ defaultValue: true })
   enabled?: boolean;
 }

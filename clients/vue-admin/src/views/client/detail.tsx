@@ -38,9 +38,9 @@ const getDefaultClientMetadata = (): Partial<ClientModel> => ({
   tokenEndpointAuthMethod: 'client_secret_basic',
   requireAuthTime: false,
   requireConsent: false,
-  requirePkce: false,
+  requirePkce: true,
   idTokenLifetime: 600,
-  accessTokenFormat: 'opaque',
+  accessTokenFormat: 'jwt',
   accessTokenLifetime: 3600,
   refreshTokenExpiration: 'absolute',
   refreshTokenAbsoluteLifetime: 2592000,
@@ -76,6 +76,7 @@ export default Form.create({})(
         accept: 'image/*',
       });
 
+      const defaultClientMetadata = getDefaultClientMetadata();
       const $detailRes = createResource((clientId: string) => {
         return clientApi
           .get({
@@ -298,9 +299,7 @@ export default Form.create({})(
                         type="link"
                         size="small"
                         class={classes.resetBtn}
-                        onClick={() =>
-                          handleFieldChange(getDefaultClientMetadata().defaultMaxAge ?? null, 'defaultMaxAge')
-                        }
+                        onClick={() => handleFieldChange(defaultClientMetadata.defaultMaxAge ?? null, 'defaultMaxAge')}
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
                       </Button>
@@ -338,7 +337,7 @@ export default Form.create({})(
                         type="link"
                         size="small"
                         class={classes.resetBtn}
-                        onClick={() => handleFieldChange(getDefaultClientMetadata().subjectType ?? null, 'subjectType')}
+                        onClick={() => handleFieldChange(defaultClientMetadata.subjectType ?? null, 'subjectType')}
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
                       </Button>
@@ -375,10 +374,7 @@ export default Form.create({})(
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(
-                            getDefaultClientMetadata().sectorIdentifierUri ?? null,
-                            'sectorIdentifierUri',
-                          )
+                          handleFieldChange(defaultClientMetadata.sectorIdentifierUri ?? null, 'sectorIdentifierUri')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
@@ -415,7 +411,7 @@ export default Form.create({})(
                         type="link"
                         size="small"
                         class={classes.resetBtn}
-                        onClick={() => handleFieldChange(getDefaultClientMetadata().jwksUri ?? null, 'jwksUri')}
+                        onClick={() => handleFieldChange(defaultClientMetadata.jwksUri ?? null, 'jwksUri')}
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
                       </Button>
@@ -450,7 +446,7 @@ export default Form.create({})(
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(getDefaultClientMetadata().requireConsent ?? null, 'requireConsent')
+                          handleFieldChange(defaultClientMetadata.requireConsent ?? null, 'requireConsent')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
@@ -483,7 +479,7 @@ export default Form.create({})(
                         type="link"
                         size="small"
                         class={classes.resetBtn}
-                        onClick={() => handleFieldChange(getDefaultClientMetadata().requirePkce ?? null, 'requirePkce')}
+                        onClick={() => handleFieldChange(defaultClientMetadata.requirePkce ?? null, 'requirePkce')}
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
                       </Button>
@@ -535,7 +531,7 @@ export default Form.create({})(
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(getDefaultClientMetadata().idTokenLifetime ?? null, 'idTokenLifetime')
+                          handleFieldChange(defaultClientMetadata.idTokenLifetime ?? null, 'idTokenLifetime')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
@@ -571,7 +567,7 @@ export default Form.create({})(
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(getDefaultClientMetadata().requireAuthTime ?? null, 'requireAuthTime')
+                          handleFieldChange(defaultClientMetadata.requireAuthTime ?? null, 'requireAuthTime')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
@@ -609,7 +605,7 @@ export default Form.create({})(
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(getDefaultClientMetadata().accessTokenFormat ?? null, 'accessTokenFormat')
+                          handleFieldChange(defaultClientMetadata.accessTokenFormat ?? null, 'accessTokenFormat')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
@@ -648,10 +644,7 @@ export default Form.create({})(
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(
-                            getDefaultClientMetadata().accessTokenLifetime ?? null,
-                            'accessTokenLifetime',
-                          )
+                          handleFieldChange(defaultClientMetadata.accessTokenLifetime ?? null, 'accessTokenLifetime')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
@@ -692,7 +685,7 @@ export default Form.create({})(
                         class={classes.resetBtn}
                         onClick={() =>
                           handleFieldChange(
-                            getDefaultClientMetadata().refreshTokenExpiration ?? null,
+                            defaultClientMetadata.refreshTokenExpiration ?? null,
                             'refreshTokenExpiration',
                           )
                         }
@@ -738,7 +731,7 @@ export default Form.create({})(
                           class={classes.resetBtn}
                           onClick={() =>
                             handleFieldChange(
-                              getDefaultClientMetadata().refreshTokenAbsoluteLifetime ?? null,
+                              defaultClientMetadata.refreshTokenAbsoluteLifetime ?? null,
                               'refreshTokenAbsoluteLifetime',
                             )
                           }
@@ -785,7 +778,7 @@ export default Form.create({})(
                           class={classes.resetBtn}
                           onClick={() =>
                             handleFieldChange(
-                              getDefaultClientMetadata().refreshTokenSlidingLifetime ?? null,
+                              defaultClientMetadata.refreshTokenSlidingLifetime ?? null,
                               'refreshTokenSlidingLifetime',
                             )
                           }
@@ -831,7 +824,7 @@ export default Form.create({})(
                         class={classes.resetBtn}
                         onClick={() =>
                           handleFieldChange(
-                            getDefaultClientMetadata().authorizationCodeLifetime ?? null,
+                            defaultClientMetadata.authorizationCodeLifetime ?? null,
                             'authorizationCodeLifetime',
                           )
                         }
@@ -872,7 +865,7 @@ export default Form.create({})(
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(getDefaultClientMetadata().deviceCodeLifetime ?? null, 'deviceCodeLifetime')
+                          handleFieldChange(defaultClientMetadata.deviceCodeLifetime ?? null, 'deviceCodeLifetime')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
@@ -915,7 +908,7 @@ export default Form.create({})(
                         class={classes.resetBtn}
                         onClick={() =>
                           handleFieldChange(
-                            getDefaultClientMetadata().backchannelAuthenticationRequestLifetime ?? null,
+                            defaultClientMetadata.backchannelAuthenticationRequestLifetime ?? null,
                             'backchannelAuthenticationRequestLifetime',
                           )
                         }

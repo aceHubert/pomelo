@@ -25,7 +25,6 @@ export class NewTemplateDto extends NewTemplateValidator {
 
   /**
    * Status
-   * @default publish
    */
   @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
@@ -42,7 +41,6 @@ export class NewTemplateDto extends NewTemplateValidator {
 
   /**
    * Comment status
-   * @default closed
    */
   @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({

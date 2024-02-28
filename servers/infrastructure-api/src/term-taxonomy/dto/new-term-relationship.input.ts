@@ -17,6 +17,6 @@ export class NewTermRelationshipInput {
   /**
    * Order
    */
-  @Field((type) => Int, { defaultValue: 0 })
+  @Field((type) => Int)
   order?: number;
 }

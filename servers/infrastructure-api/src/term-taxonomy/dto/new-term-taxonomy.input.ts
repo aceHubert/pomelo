@@ -27,13 +27,13 @@ export class NewTermTaxonomyInput extends NewTermTaxonomyValidator {
   /**
    * Parent(taxonomy) id
    */
-  @Field((type) => ID, { defaultValue: 0 })
+  @Field((type) => ID)
   parentId?: number;
 
   /**
    * Group
    */
-  @Field((type) => Int, { defaultValue: 0 })
+  @Field((type) => Int)
   group?: number;
 
   /**
