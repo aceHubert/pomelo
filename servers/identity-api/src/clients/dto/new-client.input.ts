@@ -93,7 +93,7 @@ export class NewClientInput extends NewClientValidator {
    * allowed options: "jwt", "opaque"
    */
   @Field((type) => String, { defaultValue: 'jwt' })
-  accessTokenTormat?: TokenFormat;
+  accessTokenFormat?: TokenFormat;
 
   /**
    * AccessToken lifetime in seconds
@@ -139,15 +139,13 @@ export class NewClientInput extends NewClientValidator {
   backchannelAuthenticationRequestLifetime?: number;
 
   /**
-   * Backchannel user code lifetime in seconds
+   * Require consent
    */
-  @Field((type) => Int, { defaultValue: 1800 })
   requireConsent?: boolean;
 
   /**
-   * Backchannel user code lifetime in seconds
+   * Require PKCE
    */
-  @Field((type) => Int, { defaultValue: 1800 })
   requirePkce?: boolean;
 
   /**

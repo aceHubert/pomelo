@@ -17,7 +17,7 @@ export interface ClientsAttributes {
   subjectType?: string;
   tokenEndpointAuthMethod?: string;
   idTokenLifetime?: number;
-  accessTokenTormat?: string;
+  accessTokenFormat?: string;
   accessTokenLifetime?: number;
   refreshTokenExpiration?: string;
   refreshTokenAbsoluteLifetime?: number;

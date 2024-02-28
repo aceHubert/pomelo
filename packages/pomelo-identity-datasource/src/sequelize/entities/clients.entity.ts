@@ -27,7 +27,7 @@ export default class Clients extends Model<
 
   // customize extend
   public idTokenLifetime?: number;
-  public accessTokenTormat?: string;
+  public accessTokenFormat?: string;
   public accessTokenLifetime?: number;
   public refreshTokenExpiration?: string;
   public refreshTokenAbsoluteLifetime?: number;
@@ -118,7 +118,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
         comment: 'Id token lifetime (Seconds, default: 600)',
       },
-      accessTokenTormat: {
+      accessTokenFormat: {
         type: DataTypes.STRING(50),
         comment: 'Access token format ("jwt" or "opaque", default: "opaque")',
       },

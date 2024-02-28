@@ -21,7 +21,7 @@ export interface ClientModel {
   subjectType?: string;
   tokenEndpointAuthMethod?: string;
   idTokenLifetime?: number;
-  accessTokenTormat?: string;
+  accessTokenFormat?: string;
   accessTokenLifetime?: number;
   refreshTokenExpiration?: string;
   refreshTokenAbsoluteLifetime?: number;
@@ -61,7 +61,7 @@ export interface NewClientInput {
   subjectType?: string;
   tokenEndpointAuthMethod?: string;
   idTokenLifetime?: number;
-  accessTokenTormat?: string;
+  accessTokenFormat?: string;
   accessTokenLifetime?: number;
   refreshTokenExpiration?: string;
   refreshTokenAbsoluteLifetime?: number;
@@ -226,7 +226,7 @@ export const useClientApi = defineRegistApi('client', {
           subjectType
           tokenEndpointAuthMethod
           idTokenLifetime
-          accessTokenTormat
+          accessTokenFormat
           accessTokenLifetime
           refreshTokenExpiration
           refreshTokenAbsoluteLifetime

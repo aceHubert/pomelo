@@ -60,17 +60,17 @@ export abstract class NewClientValidator implements NewClientInput {
   ])
   abstract idTokenSignedResponseAlg?: SigningAlgorithmWithNone;
 
-  @ValidateIf((client) => client.clientUri !== '')
+  @ValidateIf((client) => client.initiateLoginUri !== '')
   @IsOptional()
   @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract initiateLoginUri?: string;
 
-  @ValidateIf((client) => client.clientUri !== '')
+  @ValidateIf((client) => client.jwksUri !== '')
   @IsOptional()
   @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract jwksUri?: string;
 
-  @ValidateIf((client) => client.clientUri !== '')
+  @ValidateIf((client) => client.logoUri !== '')
   @IsOptional()
   @IsUrl({
     require_tld: false,
@@ -80,7 +80,7 @@ export abstract class NewClientValidator implements NewClientInput {
   })
   abstract logoUri?: string;
 
-  @ValidateIf((client) => client.clientUri !== '')
+  @ValidateIf((client) => client.policyUri !== '')
   @IsOptional()
   @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract policyUri?: string;
@@ -89,7 +89,7 @@ export abstract class NewClientValidator implements NewClientInput {
   @IsBoolean()
   abstract requireAuthTime?: boolean;
 
-  @ValidateIf((client) => client.clientUri !== '')
+  @ValidateIf((client) => client.sectorIdentifierUri !== '')
   @IsOptional()
   @IsUrl({ require_tld: false, require_protocol: true, protocols: ['http', 'https'] })
   abstract sectorIdentifierUri?: string;
@@ -116,7 +116,7 @@ export abstract class NewClientValidator implements NewClientInput {
 
   @IsOptional()
   @IsIn(['opaque', 'jwt'])
-  abstract accessTokenTormat?: TokenFormat;
+  abstract accessTokenFormat?: TokenFormat;
 
   @IsOptional()
   @IsNumber()

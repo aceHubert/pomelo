@@ -90,7 +90,7 @@ export class Client implements Omit<ClientModel, 'id'> {
    * AccessToken format
    */
   @Field((type) => String)
-  accessTokenTormat?: TokenFormat;
+  accessTokenFormat?: TokenFormat;
 
   /**
    * AccessToken lifetime in seconds

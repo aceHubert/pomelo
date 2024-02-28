@@ -40,7 +40,7 @@ const getDefaultClientMetadata = (): Partial<ClientModel> => ({
   requireConsent: false,
   requirePkce: false,
   idTokenLifetime: 600,
-  accessTokenTormat: 'opaque',
+  accessTokenFormat: 'opaque',
   accessTokenLifetime: 3600,
   refreshTokenExpiration: 'absolute',
   refreshTokenAbsoluteLifetime: 2592000,
@@ -98,7 +98,7 @@ export default Form.create({})(
                     | 'requireConsent'
                     | 'requirePkce'
                     | 'idTokenLifetime'
-                    | 'accessTokenTormat'
+                    | 'accessTokenFormat'
                     | 'accessTokenLifetime'
                     | 'refreshTokenExpiration'
                     | 'refreshTokenAbsoluteLifetime'
@@ -594,29 +594,29 @@ export default Form.create({})(
                   {client.enabled ? (
                     <Space>
                       <Radio.Group
-                        key="accessTokenTormat"
-                        value={client.accessTokenTormat}
+                        key="accessTokenFormat"
+                        value={client.accessTokenFormat}
                         size="small"
                         style="white-space: nowrap;"
-                        onChange={(e) => handleFieldChange(e.target.value, 'accessTokenTormat')}
+                        onChange={(e) => handleFieldChange(e.target.value, 'accessTokenFormat')}
                       >
                         <Radio.Button value="opaque">Opaque</Radio.Button>
                         <Radio.Button value="jwt">JWT</Radio.Button>
                       </Radio.Group>
                       <Button
-                        key="accessTokenTormat"
+                        key="accessTokenFormat"
                         type="link"
                         size="small"
                         class={classes.resetBtn}
                         onClick={() =>
-                          handleFieldChange(getDefaultClientMetadata().accessTokenTormat ?? null, 'accessTokenTormat')
+                          handleFieldChange(getDefaultClientMetadata().accessTokenFormat ?? null, 'accessTokenFormat')
                         }
                       >
                         {i18n.tv('common.btn_text.reset', '重置')}
                       </Button>
                     </Space>
                   ) : (
-                    <Tag color="blue">{client.accessTokenTormat}</Tag>
+                    <Tag color="blue">{client.accessTokenFormat}</Tag>
                   )}
                 </Descriptions.Item>
                 <Descriptions.Item>
