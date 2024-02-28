@@ -1,4 +1,7 @@
+import iterate from 'iterare';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
+import { I18nContext, I18nValidationException, I18nValidationError } from 'nestjs-i18n';
+import { mapChildrenToValidationErrors, formatI18nErrors } from 'nestjs-i18n/dist/utils';
 import { BaseError as SequelizeBaseError } from 'sequelize';
 import { isHttpError } from 'http-errors';
 import { Request, Response } from 'express';
@@ -12,58 +15,57 @@ export class AllExceptionFilter implements ExceptionFilter {
     // log
     this.logger.error(exception, exception.stack);
 
-    const type = host.getType();
-    if (type === 'http') {
-      const http = host.switchToHttp();
+    const i18n = I18nContext.current();
+    switch (host.getType()) {
+      case 'http':
+        const http = host.switchToHttp();
 
-      const request = http.getRequest<Request>();
-      const response = http.getResponse<Response>();
-      const status = this.getHttpCodeFromError(exception);
-      const description = this.getDescriptionFromError(exception);
+        const request = http.getRequest<Request>();
+        const response = http.getResponse<Response>();
+        const status = this.getHttpCodeFromError(exception);
+        const description = this.getDescriptionFromError(exception, i18n);
 
-      const responseData = Object.assign({}, description, {
-        statusCode: status,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-      });
-      if (responseData.message && Array.isArray(responseData.message)) {
-        responseData.message = responseData.message.join('; ');
-      }
-
-      this.logger.error(exception, exception.stack);
-
-      if (isJsonRequest(request.headers)) {
-        return response.status(status).json(responseData);
-      } else {
-        let viewName = 'error',
-          layout: string | false = false;
-        switch (status) {
-          case HttpStatus.NOT_FOUND:
-            viewName = '404';
-            layout = false;
-            break;
-          default:
-            break;
+        const responseData = Object.assign({}, description, {
+          statusCode: status,
+          timestamp: new Date().toISOString(),
+          path: request.url,
+        });
+        if (responseData.message && Array.isArray(responseData.message)) {
+          responseData.message = responseData.message.join('; ');
         }
 
-        return response.render(
-          viewName,
-          {
-            ...responseData,
-            layout,
-          },
-          (err, html) => {
-            if (err) {
-              this.logger.error(err);
-              return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Internal Server Error');
-            }
-            return response.send(html);
-          },
-        );
-      }
-    } else {
-      // todo:其它情况
-      return;
+        if (isJsonRequest(request.headers)) {
+          return response.status(status).json(responseData);
+        } else {
+          let viewName = 'error',
+            layout: string | false = false;
+          switch (status) {
+            case HttpStatus.NOT_FOUND:
+              viewName = '404';
+              layout = false;
+              break;
+            default:
+              break;
+          }
+
+          return response.render(
+            viewName,
+            {
+              ...responseData,
+              layout,
+            },
+            (err, html) => {
+              if (err) {
+                this.logger.error(err);
+                return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Internal Server Error');
+              }
+              return response.send(html);
+            },
+          );
+        }
+      default:
+        // todo:其它情况
+        return exception;
     }
   }
 
@@ -83,9 +85,22 @@ export class AllExceptionFilter implements ExceptionFilter {
    * 获取实际的错误描述
    * @param exception Error
    */
-  private getDescriptionFromError(exception: Error): { message: string | string[]; [key: string]: any } {
+  private getDescriptionFromError(
+    exception: Error,
+    i18n?: I18nContext,
+  ): { message: string | string[]; [key: string]: any } {
     const description =
-      exception instanceof HttpException
+      exception instanceof I18nValidationException
+        ? {
+            message: this.flattenValidationErrors(
+              i18n
+                ? formatI18nErrors(exception.errors, i18n.service, {
+                    lang: i18n.lang,
+                  })
+                : exception.errors,
+            ),
+          }
+        : exception instanceof HttpException
         ? exception.getResponse()
         : exception instanceof SequelizeBaseError
         ? ((exception as any).original || exception).message // 部分 sequelize error 格式化 error 到original
@@ -98,5 +113,15 @@ export class AllExceptionFilter implements ExceptionFilter {
           message: exception.message,
           ...description,
         };
+  }
+
+  private flattenValidationErrors(validationErrors: I18nValidationError[]): string[] {
+    return iterate(validationErrors)
+      .map((error) => mapChildrenToValidationErrors(error))
+      .flatten()
+      .filter((item) => !!item.constraints)
+      .map((item) => Object.values(item.constraints!))
+      .flatten()
+      .toArray();
   }
 }
