@@ -14,7 +14,14 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import { ParseQueryPipe, ValidatePayloadExistsPipe, ApiAuthCreate, User, RequestUser } from '@ace-pomelo/shared-server';
+import {
+  createResponseSuccessType,
+  ParseQueryPipe,
+  ValidatePayloadExistsPipe,
+  ApiAuthCreate,
+  User,
+  RequestUser,
+} from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   PagedTemplateArgs,
@@ -24,7 +31,6 @@ import {
 } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { PostTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { PostTemplateOptionQueryDto, PagedPostTemplateQueryDto } from './dto/template-query.dto';

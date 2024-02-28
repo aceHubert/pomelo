@@ -9,8 +9,12 @@ import {
 } from '@ace-pomelo/infrastructure-datasource';
 import { Anonymous, Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { ParseQueryPipe, ValidatePayloadExistsPipe, ApiAuthCreate } from '@ace-pomelo/shared-server';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
+import {
+  createResponseSuccessType,
+  ParseQueryPipe,
+  ValidatePayloadExistsPipe,
+  ApiAuthCreate,
+} from '@ace-pomelo/shared-server';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyMetaDto } from './dto/new-term-taxonomy-meta.dto';

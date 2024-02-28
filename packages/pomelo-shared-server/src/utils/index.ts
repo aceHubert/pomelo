@@ -5,4 +5,5 @@ export * from './get-request.util';
 export * from './json-safely-parse.util';
 export * from './crypto.util';
 export * from './path.util';
+export * from './swagger-type.util';
 export * from './uuid.util';

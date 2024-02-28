@@ -28,8 +28,8 @@ import {
   User,
   RequestUser,
   md5,
+  createResponseSuccessType,
 } from '@ace-pomelo/shared-server';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { UserAction } from '@/common/actions';
 import { NewUserDto } from './dto/new-user.dto';

@@ -4,8 +4,15 @@ import { Controller, Query, Param, Body, Get, Post, Put, Delete, ParseIntPipe, R
 import { OptionDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { User, ApiAuthCreate, ParseQueryPipe, ValidatePayloadExistsPipe, RequestUser } from '@ace-pomelo/shared-server';
-import { describeType, createResponseSuccessType } from '@/common/utils/swagger-type.util';
+import {
+  describeType,
+  createResponseSuccessType,
+  User,
+  ApiAuthCreate,
+  ParseQueryPipe,
+  ValidatePayloadExistsPipe,
+  RequestUser,
+} from '@ace-pomelo/shared-server';
 import { OptionAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { OptionQueryDto } from './dto/option-query.dto';

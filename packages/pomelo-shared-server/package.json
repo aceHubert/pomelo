@@ -37,5 +37,25 @@
     "graphql": "^16.0.0",
     "graphql-parse-resolve-info": "^4.12.0"
   },
+  "peerDependenciesMeta": {
+    "@nestjs/graphql": {
+      "optional": true
+    },
+    "@nestjs/swagger": {
+      "optional": true
+    },
+    "class-transformer": {
+      "optional": true
+    },
+    "class-validator": {
+      "optional": true
+    },
+    "graphql": {
+      "optional": true
+    },
+    "graphql-parse-resolve-info": {
+      "optional": true
+    }
+  },
   "packageManager": "yarn@3.1.0"
 }

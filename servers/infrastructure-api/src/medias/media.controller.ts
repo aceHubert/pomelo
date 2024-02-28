@@ -24,13 +24,14 @@ import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { MediaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import {
   isAbsoluteUrl,
+  createResponseSuccessType,
+  describeType,
   User,
   ApiAuthCreate,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   RequestUser,
 } from '@ace-pomelo/shared-server';
-import { createResponseSuccessType, describeType } from '@/common/utils/swagger-type.util';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { MediaAction } from '@/common/actions';
 import { FixedMediaOptions } from './interfaces/media-options.interface';

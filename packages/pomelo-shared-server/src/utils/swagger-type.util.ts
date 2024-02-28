@@ -1,6 +1,6 @@
 import { Type } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { uuid } from '@ace-pomelo/shared-server';
+import { uuid } from './uuid.util';
 
 export class DescribeType<T extends Type<unknown> | Function | [Function] | string | Record<string, any>> {
   constructor(readonly type: T, private readonly options: { nullable?: boolean; description?: string } = {}) {}

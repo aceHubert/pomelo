@@ -21,6 +21,7 @@ import { ModuleRef } from '@nestjs/core';
 import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
+  createResponseSuccessType,
   ApiAuthCreate,
   User,
   ParseQueryPipe,
@@ -35,7 +36,6 @@ import {
   TemplateStatus,
   TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
-import { createResponseSuccessType } from '@/common/utils/swagger-type.util';
 import { TemplateAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { NewTemplateMetaDto } from './dto/new-template-meta.dto';
