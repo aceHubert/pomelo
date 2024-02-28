@@ -1,11 +1,10 @@
-import iterate from 'iterare';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
-import { I18nContext, I18nValidationException, I18nValidationError } from 'nestjs-i18n';
-import { mapChildrenToValidationErrors, formatI18nErrors } from 'nestjs-i18n/dist/utils';
+import { I18nContext, I18nValidationException } from 'nestjs-i18n';
 import { BaseError as SequelizeBaseError } from 'sequelize';
 import { isHttpError } from 'http-errors';
 import { Request, Response } from 'express';
 import { isJsonRequest } from '../utils/is-json-request.util';
+import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.utils';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -92,7 +91,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     const description =
       exception instanceof I18nValidationException
         ? {
-            message: this.flattenValidationErrors(
+            message: flattenValidationErrors(
               i18n
                 ? formatI18nErrors(exception.errors, i18n.service, {
                     lang: i18n.lang,
@@ -113,15 +112,5 @@ export class AllExceptionFilter implements ExceptionFilter {
           message: exception.message,
           ...description,
         };
-  }
-
-  private flattenValidationErrors(validationErrors: I18nValidationError[]): string[] {
-    return iterate(validationErrors)
-      .map((error) => mapChildrenToValidationErrors(error))
-      .flatten()
-      .filter((item) => !!item.constraints)
-      .map((item) => Object.values(item.constraints!))
-      .flatten()
-      .toArray();
   }
 }

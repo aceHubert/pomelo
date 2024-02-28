@@ -1,0 +1,22 @@
+{
+  "IS_DEFINED": "{property}未定义",
+  "IS_NOT_EMPTY": "{property}不能为空",
+  "IS_STRING": "{property}必须是一个字符串",
+  "IS_OBJECT": "{property}必须是一个对象",
+  "IS_ARRAY": "{property}必须是一个数组",
+  "IS_BOOLEAN": "{property}必须是一个布尔值",
+  "IS_NUMBER": "{property}必须是一个数字",
+  "IS_INT": "{property}必须是一个整数",
+  "IS_POSITIVE": "{property}必须是一个正数",
+  "IS_NEGATIVE": "{property}必须是一个负数",
+  "IS_EMAIL": "{property}必须是一个邮箱地址",
+  "IS_PHONE_NUMBER": "{property}必须是一个电话号码",
+  "IS_URL": "{property}必须是一个URL",
+  "IS_LOCALE": "{property}必须是一个有效的区域设置",
+  "IS_UUID": "{property}必须是一个UUID",
+  "IS_ENUM": "{property}值: \"{value}\"不在枚举值范围内",
+  "MIN": "{property}值: \"{value}\"必须大于等于{constraints.0}",
+  "MIN_LENGTH": "{property}值长度必须大于等于{constraints.0}",
+  "MAX": "{property}值: \"{value}\"必须小于待于{constraints.0}",
+  "MAX_LENGTH": "{property}值长度必须小于等于{constraints.0}"
+}
