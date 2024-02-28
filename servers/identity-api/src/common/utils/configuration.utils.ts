@@ -167,7 +167,7 @@ export const configuration =
                 collate: process.env.IDENTITY_DATABASE_COLLATE || '',
               },
             },
-        tablePrefix: process.env.IDENTITY_TABLE_PREFIX,
+        tablePrefix: process.env.TABLE_PREFIX,
       },
     };
 

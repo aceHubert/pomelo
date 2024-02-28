@@ -136,7 +136,7 @@ export const configuration =
                   collate: process.env.INFRASTRUCTURE_DATABASE_COLLATE || '',
                 },
               },
-          tablePrefix: process.env.INFRASTRUCTURE_TABLE_PREFIX,
+          tablePrefix: process.env.TABLE_PREFIX,
         },
         identity: {
           connection: process.env.IDENTITY_DATABASE_CONNECTION
@@ -153,7 +153,7 @@ export const configuration =
                   collate: process.env.IDENTITY_DATABASE_COLLATE || '',
                 },
               },
-          tablePrefix: process.env.IDENTITY_TABLE_PREFIX,
+          tablePrefix: process.env.TABLE_PREFIX,
         },
       },
     };

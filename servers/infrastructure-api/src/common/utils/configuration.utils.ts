@@ -185,7 +185,7 @@ export const configuration =
                 collate: process.env.INFRASTRUCTURE_DATABASE_COLLATE || '',
               },
             },
-        tablePrefix: process.env.INFRASTRUCTURE_TABLE_PREFIX,
+        tablePrefix: process.env.TABLE_PREFIX,
       },
       upload: {
         dest: process.env.UPLOAD_DEST,

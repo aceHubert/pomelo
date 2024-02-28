@@ -38,7 +38,7 @@ async function syncDatabase() {
           collate: configService.get('INFRASTRUCTURE_DATABASE_COLLATE', ''),
         },
       };
-  const tablePrefix = configService.get('INFRASTRUCTURE_TABLE_PREFIX');
+  const tablePrefix = configService.get('TABLE_PREFIX');
 
   // db lock
   const fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
