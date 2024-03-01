@@ -3,40 +3,36 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    var $form = $(this);
-    var $submit = $form.find('button[type="submit"]');
-    var $errorToast = $('#errorToast');
-
-    function showError(message) {
-      $errorToast.find('.toast-body').html(message);
-
-      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
-      errorToast.show();
-      return () => errorToast.hide();
-    }
+    const $form = $(this);
+    const $submit = $form.find('button[type="submit"]');
 
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
       return;
     }
-    const data = $form.serializeArray().reduce(function (obj, item) {
+    const data = $form.serializeArray().reduce((obj, item) => {
       obj[item.name] = item.value;
       return obj;
     }, {});
 
     // if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/.test(data.password)) {
-    //   return showError(locales.passwordInvalid);
+    //   showPopover($form.find('#password'), locales.passwordInvalid);
+    //   return;
     // }
 
-    data.password = data.password.sha256();
-    data.remember = data.remember === 'on' ? true : false;
-    if ($form.find('#userPolicy').length) {
+    let $userPolicy;
+    if (($userPolicy = $form.find('#userPolicy')).length) {
       if (data.userPolicy !== 'on') {
-        return showError(locales.userPolicyInvalid);
+        const hide = showPopover($userPolicy, locales.userPolicyInvalid);
+        $userPolicy.on('change', hide);
+        return;
       } else {
         data.userPolicy = true;
       }
     }
+
+    data.password = data.password.sha256();
+    data.remember = data.remember === 'on' ? true : false;
 
     $submit.attr('disabled', 'disabled');
     axios({
@@ -44,11 +40,11 @@ $(document).ready(function () {
       method: $form.attr('method') || 'POST',
       data,
     })
-      .then(function (res) {
-        var data = res.data;
+      .then((res) => {
+        const data = res.data;
         if (!data.success) throw new Error(data.message);
         if (data.message) {
-          showError(data.message);
+          showToast(data.message, 'success');
           setTimeout(() => {
             absoluteGo(data.next, true);
           }, 3000);
@@ -56,22 +52,29 @@ $(document).ready(function () {
           absoluteGo(data.next, true);
         }
       })
-      .catch(function (err) {
-        var data = err.response ? err.response.data : err;
-        showError(data.message);
+      .catch((err) => {
+        const data = err.response ? err.response.data : err;
+        showToast(data.message);
       })
-      .finally(function () {
+      .finally(() => {
         $submit.removeAttr('disabled');
       });
   });
 
+  $(document)
+    .on('input', ':password', function () {
+      if ($(this).val().length) {
+        $(this).addClass('has-value');
+      } else {
+        $(this).removeClass('has-value');
+      }
+    })
+    .find(':password')
+    .trigger('input');
+
   $('.toggle-password').click(function () {
     $(this).toggleClass('slash');
-    var input = $($(this).attr('toggle'));
-    if (input.attr('type') == 'password') {
-      input.attr('type', 'text');
-    } else {
-      input.attr('type', 'password');
-    }
+    const input = $($(this).data('target'));
+    input.attr('type', input.attr('type') == 'password' ? 'text' : 'password');
   });
 });

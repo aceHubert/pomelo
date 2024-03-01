@@ -141,7 +141,7 @@ export class PasswordController extends BaseController {
                 maxlength="16"
                 value=""
               />
-              <span toggle="#oldPassword" class="toggle-password eye"></span>
+              <span class="toggle-password eye" data-target="#oldPassword" ></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
                 ${i18n.tv('password.modify.form.old_password_invalid', 'Please input old password!')}
               </div>
@@ -171,7 +171,7 @@ export class PasswordController extends BaseController {
                 maxlength="16"
                 value=""
               />
-              <span toggle="#newPassword" class="toggle-password eye"></span>
+              <span class="toggle-password eye" data-target="#newPassword" ></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
                 ${i18n.tv(
                   'password.modify.form.new_password_invalid',
@@ -203,22 +203,14 @@ export class PasswordController extends BaseController {
                 maxlength="16"
                 value=""
               />
-              <span toggle="#confirmPassword" class="toggle-password eye"></span>
+              <span class="toggle-password eye" data-target="#confirmPassword" ></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
                 ${i18n.tv('password.modify.form.confirm_password_invalid', 'Please input confirm password!')}
               </div>
             </div>
           </div>
         </div>
-      </form>
-      <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
-        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body"></div>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>`;
+      </form>`;
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
@@ -365,15 +357,7 @@ export class PasswordController extends BaseController {
             </div>
           </div>
         </div>
-      </form>
-      <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
-        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body"></div>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>`;
+      </form>`;
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
@@ -546,7 +530,7 @@ export class PasswordController extends BaseController {
               maxlength="16"
               value=""
             />
-            <span toggle="#newPassword" class="toggle-password eye"></span>
+            <span class="toggle-password eye" data-target="#newPassword" ></span>
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
               ${i18n.tv(
                 'password.reset.form.new_password_invalid',
@@ -578,22 +562,14 @@ export class PasswordController extends BaseController {
               maxlength="16"
               value=""
             />
-            <span toggle="#confirmPassword" class="toggle-password eye"></span>
+            <span class="toggle-password eye" data-target="#confirmPassword" ></span>
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
               ${i18n.tv('password.reset.form.confirm_password_invalid', 'Please input confirm password!')}
             </div>
           </div>
         </div>
       </div>
-    </form>
-    <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
-        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body"></div>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>`;
+    </form>`;
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',

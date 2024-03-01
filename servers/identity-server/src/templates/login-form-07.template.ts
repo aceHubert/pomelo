@@ -68,18 +68,6 @@ form .row:first-child {
     display: none;
   }
 }
-form ::placeholder {
-  font-size: 12px;
-  display: block;
-  margin-bottom: 0;
-  color: var(--text-secondary);
-}
-form ::-ms-input-placeholder {
-  font-size: 12px;
-  display: block;
-  margin-bottom: 0;
-  color: var(--text-secondary);
-}
 .form-control {
   overflow: hidden;
   margin-bottom: 0;
@@ -92,34 +80,6 @@ form ::-ms-input-placeholder {
 }
 .form-control.password ~ .eye{
   filter: invert(1);
-}
-.form-control::-webkit-input-placeholder {
-  /* Chrome/Opera/Safari */
-  font-size: 12px;
-  display: block;
-  margin-bottom: 0;
-  color: var(--text-secondary) !important;
-}
-.form-control::-moz-placeholder {
-  /* Firefox 19+ */
-  font-size: 12px;
-  display: block;
-  margin-bottom: 0;
-  color: var(--text-secondary) !important;
-}
-.form-control:-ms-input-placeholder {
-  /* IE 10+ */
-  font-size: 12px;
-  display: block;
-  margin-bottom: 0;
-  color: var(--text-secondary) !important;
-}
-.form-control:-moz-placeholder {
-  /* Firefox 18- */
-  font-size: 12px;
-  display: block;
-  margin-bottom: 0;
-  color: var(--text-secondary) !important;
 }
 .contents .form-control#username{
   border-bottom: 1px solid #e6edf1;

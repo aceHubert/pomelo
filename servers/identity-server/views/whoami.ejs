@@ -6,8 +6,14 @@
     <link rel="icon" type="image/x-icon" href="<%= baseURL %>favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="<%= baseURL %>favicon.ico" />
     <title>Who am I?</title>
+    <% if (process.env.NODE_ENV === 'production') { %>
+    <link rel="stylesheet" href="<%= baseURL %>style/index.min.css" />
+    <link rel="stylesheet" href="<%= baseURL %>style/container.min.css" />
+    <%} else { %>
     <link rel="stylesheet" href="<%= baseURL %>style/index.css" />
     <link rel="stylesheet" href="<%= baseURL %>style/container.css" />
+    <% } %>
+    <%- style %>
   </head>
   <body>
     <main class="container">

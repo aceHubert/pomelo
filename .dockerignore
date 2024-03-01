@@ -10,6 +10,7 @@ servers/**/public/**/*.ts
 servers/**/public/**/*.less
 servers/**/public/**/*.sass
 servers/**/public/**/*.scss
+**/Gruntfile.js
 **/.git*
 **/.env.development*
 **/.env.sample

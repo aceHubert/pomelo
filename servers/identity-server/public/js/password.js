@@ -1,33 +1,32 @@
 $(document).ready(function () {
+  const PasswordRegex = /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/;
+
   $('#password-modify-form').on('submit', function (e) {
     e.preventDefault();
     e.stopPropagation();
 
-    var $form = $(this);
-    var $submit = $('button[type="submit"], input[type="submit"]');
-    var $errorToast = $('#errorToast');
-
-    function showError(message) {
-      $errorToast.find('.toast-body').html(message);
-
-      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
-      errorToast.show();
-      return () => errorToast.hide();
-    }
+    const $form = $(this);
+    const $submit = $('button[type="submit"], input[type="submit"]');
 
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
       return;
     }
-    const data = $form.serializeArray().reduce(function (obj, item) {
+    const data = $form.serializeArray().reduce((obj, item) => {
       obj[item.name] = item.value;
       return obj;
     }, {});
 
-    if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/.test(data.newPassword)) {
-      return showError(locales.passwordInvalid);
+    if (!PasswordRegex.test(data.newPassword)) {
+      const $newPassword = $form.find('#newPassword');
+      const hide = showPopover($newPassword, locales.passwordInvalid);
+      $newPassword.on('input', hide);
+      return;
     } else if (data.newPassword !== data.confirmPassword) {
-      return showError(locales.dismatchPassword);
+      const $confirmPassword = $form.find('#confirmPassword');
+      const hide = showPopover($confirmPassword, locales.dismatchPassword);
+      $confirmPassword.on('input', hide);
+      return;
     }
 
     data.oldPassword = data.oldPassword.sha256();
@@ -40,12 +39,12 @@ $(document).ready(function () {
       method: $form.attr('method') || 'POST',
       data,
     })
-      .then(function (res) {
-        var data = res.data;
+      .then((res) => {
+        const data = res.data;
         if (!data.success) throw new Error(data.message);
         $form[0].reset();
         if (data.message) {
-          showError(data.message);
+          showToast(data.message, 'success');
           setTimeout(() => {
             absoluteGo(data.next, true);
           }, 3000);
@@ -53,11 +52,11 @@ $(document).ready(function () {
           absoluteGo(data.next, true);
         }
       })
-      .catch(function (err) {
-        var data = err.response ? err.response.data : err;
-        showError(data.message);
+      .catch((err) => {
+        const data = err.response ? err.response.data : err;
+        showToast(data.message);
       })
-      .finally(function () {
+      .finally(() => {
         $submit.removeAttr('disabled');
       });
   });
@@ -66,23 +65,14 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    var $form = $(this);
-    var $submit = $('button[type="submit"], input[type="submit"]');
-    var $errorToast = $('#errorToast');
-
-    function showError(message) {
-      $errorToast.find('.toast-body').html(message);
-
-      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
-      errorToast.show();
-      return () => errorToast.hide();
-    }
+    const $form = $(this);
+    const $submit = $('button[type="submit"], input[type="submit"]');
 
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
       return;
     }
-    const data = $form.serializeArray().reduce(function (obj, item) {
+    const data = $form.serializeArray().reduce((obj, item) => {
       obj[item.name] = item.value;
       return obj;
     }, {});
@@ -93,22 +83,22 @@ $(document).ready(function () {
       method: $form.attr('method') || 'POST',
       data,
     })
-      .then(function (res) {
-        var data = res.data;
+      .then((res) => {
+        const data = res.data;
         if (!data.success) throw new Error(data.message);
         $form[0].reset();
         $submit.remove();
-        showError('<span class="success--text">' + data.message + '</span>');
+        showToast('<span class="success--text">' + data.message + '</span>', 'success');
 
         // 修改路由但不刷新页面，使浏览器刷新返回到上一页
         const returnUrl = getUrlParams('returnUrl');
         window.history.replaceState(null, '', returnUrl ? returnUrl : '/');
       })
-      .catch(function (err) {
-        var data = err.response ? err.response.data : err;
-        showError(data.message);
+      .catch((err) => {
+        const data = err.response ? err.response.data : err;
+        showToast(data.message);
       })
-      .finally(function () {
+      .finally(() => {
         $submit.removeAttr('disabled');
       });
   });
@@ -117,31 +107,28 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    var $form = $(this);
-    var $submit = $('button[type="submit"], input[type="submit"]');
-    var $errorToast = $('#errorToast');
-
-    function showError(message) {
-      $errorToast.find('.toast-body').html(message);
-
-      var errorToast = bootstrap.Toast.getOrCreateInstance($errorToast[0]);
-      errorToast.show();
-      return () => errorToast.hide();
-    }
+    const $form = $(this);
+    const $submit = $('button[type="submit"], input[type="submit"]');
 
     if (!$form[0].checkValidity()) {
       $form.addClass('was-validated');
       return;
     }
-    const data = $form.serializeArray().reduce(function (obj, item) {
+    const data = $form.serializeArray().reduce((obj, item) => {
       obj[item.name] = item.value;
       return obj;
     }, {});
 
-    if (!/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/.test(data.newPassword)) {
-      return showError(locales.passwordInvalid);
+    if (!PasswordRegex.test(data.newPassword)) {
+      const $newPassword = $form.find('#newPassword');
+      const hide = showPopover($newPassword, locales.passwordInvalid);
+      $newPassword.on('input', hide);
+      return;
     } else if (data.newPassword !== data.confirmPassword) {
-      return showError(locales.dismatchPassword);
+      const $confirmPassword = $form.find('#confirmPassword');
+      const hide = showPopover($confirmPassword, locales.dismatchPassword);
+      $confirmPassword.on('input', hide);
+      return;
     }
 
     data.password = data.newPassword.sha256();
@@ -155,11 +142,11 @@ $(document).ready(function () {
       data,
     })
       .then(function (res) {
-        var data = res.data;
+        const data = res.data;
         if (!data.success) throw new Error(data.message);
         $form[0].reset();
         if (data.message) {
-          showError(data.message);
+          showToast(data.message, 'success');
           setTimeout(() => {
             absoluteGo(data.next, true);
           }, 3000);
@@ -167,11 +154,11 @@ $(document).ready(function () {
           absoluteGo(data.next, true);
         }
       })
-      .catch(function (err) {
-        var data = err.response ? err.response.data : err;
-        showError(data.message);
+      .catch((err) => {
+        const data = err.response ? err.response.data : err;
+        showToast(data.message);
       })
-      .finally(function () {
+      .finally(() => {
         $submit.removeAttr('disabled');
       });
   });
@@ -180,17 +167,24 @@ $(document).ready(function () {
     e.preventDefault();
     e.stopPropagation();
 
-    var returnUrl = getUrlParams('returnUrl');
+    const returnUrl = getUrlParams('returnUrl');
     returnUrl ? absoluteGo(returnUrl, true) : history.back();
   });
 
+  $(document)
+    .on('input', ':password', function () {
+      if ($(this).val().length) {
+        $(this).addClass('has-value');
+      } else {
+        $(this).removeClass('has-value');
+      }
+    })
+    .find(':password')
+    .trigger('input');
+
   $('.toggle-password').click(function () {
     $(this).toggleClass('slash');
-    var input = $($(this).attr('toggle'));
-    if (input.attr('type') == 'password') {
-      input.attr('type', 'text');
-    } else {
-      input.attr('type', 'password');
-    }
+    const input = $($(this).attr('toggle'));
+    input.attr('type', input.attr('type') == 'password' ? 'text' : 'password');
   });
 });

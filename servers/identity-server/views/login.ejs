@@ -1,4 +1,8 @@
+<% if (process.env.NODE_ENV === 'production') { %>
+<link rel="stylesheet" href="<%= baseURL %>style/login.min.css" />
+<%} else { %>
 <link rel="stylesheet" href="<%= baseURL %>style/login.css" />
+<% } %>
 <%- primaryStyleVars %>
 <div id="app"><%- content %> <%- include('partials/footer') %></div>
 <%- include('partials/axios') %> <%- include('partials/crypto') %>
@@ -9,5 +13,9 @@
       '<%= tv("login.form.user_policy_check_required", "Please read and agree to the User Privacy Agreement!", i18nLang) %>',
   };
 </script>
+<% if (process.env.NODE_ENV === 'production') { %>
+<script src="<%= baseURL %>js/login.min.js"></script>
+<%} else { %>
 <script src="<%= baseURL %>js/login.js"></script>
+<% } %>
 <%- contentFor('title') %> <%= tv('login.page_title', 'Sign In', i18nLang) %>

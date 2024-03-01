@@ -1,6 +1,5 @@
-const packageJson = require('./package.json');
-
 module.exports = function (grunt) {
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-copy');
 
@@ -12,7 +11,7 @@ module.exports = function (grunt) {
       new (require('less-plugin-clean-css'))({ compatibility: 'ie9,-properties.merging' }),
     ],
     modifyVars: {},
-    banner: `/*! ${packageJson.name} v${packageJson.version} | ${packageJson.license} License */\n`,
+    banner: `/*!<%= pkg.name %> V<%= pkg.version %> | <%= pkg.license %> License */\n`,
   };
 
   grunt.initConfig({
@@ -52,13 +51,19 @@ module.exports = function (grunt) {
         files: [{ expand: true, cwd: './src/', src: ['**'], dest: 'lib/' }],
       },
     },
+    watch: {
+      dist: {
+        files: ['./src/**/*.less'],
+        tasks: ['less'],
+      },
+      lib: {
+        files: ['./src/**'],
+        tasks: ['copy'],
+      },
+    },
   });
 
-  grunt.registerTask('default', [
-    'copy:lib',
-    'less:development@light',
-    'less:development@dark',
-    'less:production@light',
-    'less:production@dark',
-  ]);
+  grunt.registerTask('default', ['less', 'copy']);
+
+  grunt.registerTask('dev', ['default', 'watch']);
 };

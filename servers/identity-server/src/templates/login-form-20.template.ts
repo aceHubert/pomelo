@@ -51,6 +51,11 @@ body:after {
 .content {
   padding: 7em 0;
 }
+.content a {
+  color: var(--text-color);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
 .heading-section {
   font-size: 28px;
   color: #fff;
@@ -124,10 +129,6 @@ body:after {
 .form-control.password ~ .eye {
   filter: brightness(2);
 }
-.content a {
-  color: var(--text-color);
-  text-decoration: none;
-}
 .form-check{
   padding-left: 1.75em;
 }
@@ -147,6 +148,7 @@ body:after {
 }
 .form-check-label{
   color: var(--theme-primary);
+  font-size: 0.875rem;
 }
 .form-check-input.is-valid, .was-validated .form-check-input:valid {
   border-color: var(--theme-primary);

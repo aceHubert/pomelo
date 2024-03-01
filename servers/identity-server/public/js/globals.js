@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-console */
 
 const bannerShown = sessionStorage.getItem('__BANNER_SHOWN__') === '1';
 !bannerShown &&
@@ -77,10 +77,10 @@ function isAbsoluteUrl(url) {
  * @param {string?} key
  */
 function getUrlParams(key) {
-  var args = {};
-  var pairs = location.search.substring(1).split('&');
-  for (var i = 0; i < pairs.length; i++) {
-    var pos = pairs[i].indexOf('=');
+  const args = {};
+  const pairs = location.search.substring(1).split('&');
+  for (const i = 0; i < pairs.length; i++) {
+    const pos = pairs[i].indexOf('=');
     if (pos === -1) {
       continue;
     }
@@ -118,4 +118,63 @@ function appendParams(url, params) {
     url = baseWithSearch;
   }
   return url;
+}
+
+function showToast(message, type, $toastEl) {
+  if ((!$toastEl || !$toastEl.length) && !($toastEl = $('#errorToast')).length) {
+    $toastEl = $(`<div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
+      <div id="errorToast" class="toast ${
+        type === 'success' ? 'green' : 'red'
+      } lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+        ${
+          type === 'success'
+            ? `<img src="../icon/check-fill.svg" class="pr-1" style="width: 1.5rem; height: 1.5rem;
+              filter: invert(57%) sepia(25%) saturate(7387%) hue-rotate(124deg) brightness(105%) contrast(80%)"
+              alt="Success">`
+            : `<img src="../icon/close-fill.svg" class="pr-1" style="width: 1.5rem; height: 1.5rem;
+              filter: invert(14%) sepia(80%) saturate(4823%) hue-rotate(350deg) brightness(125%) contrast(95%)"
+              alt="Error">`
+        }
+          <span class="content">${message}</span>
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    </div>`)
+      .appendTo('body')
+      .find('#errorToast');
+  } else {
+    $($('.toast-body .content', $toastEl).get().concat($('.toast-body', $toastEl).get()))
+      .first()
+      .html(message);
+  }
+
+  const toast = bootstrap.Toast.getOrCreateInstance($toastEl);
+  toast.show();
+  return () => toast.hide();
+}
+
+function showPopover($targetEl, message, config) {
+  const popover = bootstrap.Popover.getOrCreateInstance(
+    $targetEl,
+    Object.assign(
+      {
+        content: message,
+        trigger: 'manual',
+        offset: $targetEl.is(':checkbox') ? [-15, 12] : [0, 12],
+        popperConfig: function (defaultBsPopperConfig) {
+          return Object.assign(defaultBsPopperConfig, {
+            // bootstrap 5.1.0 不支持部分位置
+            placement: config?.placement || 'bottom-start',
+          });
+        },
+      },
+      config,
+    ),
+  );
+  popover.show();
+  $targetEl.focus();
+  return () => popover.hide();
 }

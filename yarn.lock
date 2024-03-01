@@ -396,6 +396,19 @@ __metadata:
     class-validator: ^0.13.2
     graphql: ^16.0.0
     graphql-parse-resolve-info: ^4.12.0
+  peerDependenciesMeta:
+    "@nestjs/graphql":
+      optional: true
+    "@nestjs/swagger":
+      optional: true
+    class-transformer:
+      optional: true
+    class-validator:
+      optional: true
+    graphql:
+      optional: true
+    graphql-parse-resolve-info:
+      optional: true
   languageName: unknown
   linkType: soft
 
@@ -8832,6 +8845,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"async@npm:^2.6.0":
+  version: 2.6.4
+  resolution: "async@npm:2.6.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fasync%2F-%2Fasync-2.6.4.tgz"
+  dependencies:
+    lodash: ^4.17.14
+  checksum: a52083fb32e1ebe1d63e5c5624038bb30be68ff07a6c8d7dfe35e47c93fc144bd8652cbec869e0ac07d57dde387aa5f1386be3559cdee799cb1f789678d88e19
+  languageName: node
+  linkType: hard
+
 "async@npm:^2.6.4":
   version: 2.6.4
   resolution: "async@npm:2.6.4"
@@ -9253,6 +9275,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"body@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "body@npm:5.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fbody%2F-%2Fbody-5.1.0.tgz"
+  dependencies:
+    continuable-cache: ^0.3.1
+    error: ^7.0.0
+    raw-body: ~1.1.0
+    safe-json-parse: ~1.0.1
+  checksum: 58a5a46b6de80c82ee2f6e00bdc0084be1697d50e47cfa0d53ff6daf70b0e5ec20359c134d41710d0fa8046ecd67e06128c134c821f090e40a31ed452a9b6b7f
+  languageName: node
+  linkType: hard
+
 "bonjour-service@npm:^1.0.11":
   version: 1.1.1
   resolution: "bonjour-service@npm:1.1.1"
@@ -9435,6 +9469,13 @@ __metadata:
   dependencies:
     streamsearch: ^1.1.0
   checksum: 32801e2c0164e12106bf236291a00795c3c4e4b709ae02132883fe8478ba2ae23743b11c5735a0aae8afe65ac4b6ca4568b91f0d9fed1fdbc32ede824a73746e
+  languageName: node
+  linkType: hard
+
+"bytes@npm:1":
+  version: 1.0.0
+  resolution: "bytes@npm:1.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fbytes%2F-%2Fbytes-1.0.0.tgz"
+  checksum: 6e475440d7e32971611d2bc592695fee484ee91ca1cd49f99c855560131f71670d3d185210f6cdd1704f12281f0cfcee5cb1c1f6788cb2f676b410464b7d6885
   languageName: node
   linkType: hard
 
@@ -10444,6 +10485,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"continuable-cache@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "continuable-cache@npm:0.3.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fcontinuable-cache%2F-%2Fcontinuable-cache-0.3.1.tgz"
+  checksum: d88b9891cdc76533bf018613ec80c7f8f3ce7159fa8c1402dae7be546c4b0566ef0c18e488b08da66b8a8f5aab7c91ce9910e4c32d965d902ffe34e095ccc2cb
+  languageName: node
+  linkType: hard
+
 "conventional-changelog-angular@npm:^5.0.11":
   version: 5.0.13
   resolution: "conventional-changelog-angular@npm:5.0.13"
@@ -11142,6 +11190,15 @@ __metadata:
     supports-color:
       optional: true
   checksum: 3dbad3f94ea64f34431a9cbf0bafb61853eda57bff2880036153438f50fb5a84f27683ba0d8e5426bf41a8c6ff03879488120cf5b3a761e77953169c0600a708
+  languageName: node
+  linkType: hard
+
+"debug@npm:^3.1.0":
+  version: 3.2.7
+  resolution: "debug@npm:3.2.7::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fdebug%2F-%2Fdebug-3.2.7.tgz"
+  dependencies:
+    ms: ^2.1.1
+  checksum: b3d8c5940799914d30314b7c3304a43305fd0715581a919dacb8b3176d024a782062368405b47491516d2091d6462d4d11f2f4974a405048094f8bfebfa3071c
   languageName: node
   linkType: hard
 
@@ -11913,6 +11970,15 @@ __metadata:
   dependencies:
     stackframe: ^1.3.4
   checksum: 3b916d2d14c6682f287c8bfa28e14672f47eafe832701080e420e7cdbaebb2c50293868256a95706ac2330fe078cf5664713158b49bc30d7a5f2ac229ded0e18
+  languageName: node
+  linkType: hard
+
+"error@npm:^7.0.0":
+  version: 7.2.1
+  resolution: "error@npm:7.2.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Ferror%2F-%2Ferror-7.2.1.tgz"
+  dependencies:
+    string-template: ~0.2.1
+  checksum: 9c790d20a386947acfeabb0d1c39173efe8e5a38cb732b5f06c11a25c23ce8ac4dafbb7aa240565e034580a49aba0703e743d0274c6228500ddf947a1b998568
   languageName: node
   linkType: hard
 
@@ -12961,6 +13027,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"faye-websocket@npm:~0.10.0":
+  version: 0.10.0
+  resolution: "faye-websocket@npm:0.10.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Ffaye-websocket%2F-%2Ffaye-websocket-0.10.0.tgz"
+  dependencies:
+    websocket-driver: ">=0.5.1"
+  checksum: 5a2989ec5effc832bd219e3af934966b5a2a2605dd83b995a04edae5d34207ef930635f5c8456b8b7b4209bfb8f7ea991e41594f150a04faa53fca1ee4eb31b6
+  languageName: node
+  linkType: hard
+
 "fb-watchman@npm:^2.0.0":
   version: 2.0.2
   resolution: "fb-watchman@npm:2.0.2"
@@ -13474,6 +13549,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gaze@npm:^1.1.0":
+  version: 1.1.3
+  resolution: "gaze@npm:1.1.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fgaze%2F-%2Fgaze-1.1.3.tgz"
+  dependencies:
+    globule: ^1.0.0
+  checksum: d5fd375a029c07346154806a076bde21290598179d01ffbe7bc3e54092fa65814180bd27fc2b577582737733eec77cdbb7a572a4e73dff934dde60317223cde6
+  languageName: node
+  linkType: hard
+
 "generate-function@npm:^2.3.1":
   version: 2.3.1
   resolution: "generate-function@npm:2.3.1"
@@ -13730,6 +13814,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"glob@npm:~7.1.1":
+  version: 7.1.7
+  resolution: "glob@npm:7.1.7::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fglob%2F-%2Fglob-7.1.7.tgz"
+  dependencies:
+    fs.realpath: ^1.0.0
+    inflight: ^1.0.4
+    inherits: 2
+    minimatch: ^3.0.4
+    once: ^1.3.0
+    path-is-absolute: ^1.0.0
+  checksum: b61f48973bbdcf5159997b0874a2165db572b368b931135832599875919c237fc05c12984e38fe828e69aa8a921eb0e8a4997266211c517c9cfaae8a93988bb8
+  languageName: node
+  linkType: hard
+
 "glob@npm:~7.1.6":
   version: 7.1.7
   resolution: "glob@npm:7.1.7"
@@ -13866,6 +13964,17 @@ __metadata:
   version: 0.1.4
   resolution: "globjoin@npm:0.1.4"
   checksum: 0a47d88d566122d9e42da946453ee38b398e0021515ac6a95d13f980ba8c1e42954e05ee26cfcbffce1ac1ee094d0524b16ce1dd874ca52408d6db5c6d39985b
+  languageName: node
+  linkType: hard
+
+"globule@npm:^1.0.0":
+  version: 1.3.4
+  resolution: "globule@npm:1.3.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fglobule%2F-%2Fglobule-1.3.4.tgz"
+  dependencies:
+    glob: ~7.1.1
+    lodash: ^4.17.21
+    minimatch: ~3.0.2
+  checksum: 258b6865c77d54fbd4c91dd6931d99baf81b1485fdf4bd2c053b1a10eab015163cb646e6c96812d5c8b027fb07adfc0b7c7fb13bbbb571f3c12ea60bd7fda2f5
   languageName: node
   linkType: hard
 
@@ -14029,6 +14138,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"grunt-babel@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "grunt-babel@npm:8.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fgrunt-babel%2F-%2Fgrunt-babel-8.0.0.tgz"
+  peerDependencies:
+    "@babel/core": ^7.0.0
+    grunt: ">=0.4.0"
+  checksum: dad61e7bbc52d9e2a614a1a4bf65bfb20b86bf30e2b06a776bd37d0032ea7766022e29ea285fe477fa0cba28bdd7d4969c851ed4eba6c42ab527aa36568f8a85
+  languageName: node
+  linkType: hard
+
 "grunt-cli@npm:^1.4.3, grunt-cli@npm:~1.4.3":
   version: 1.4.3
   resolution: "grunt-cli@npm:1.4.3"
@@ -14075,6 +14194,18 @@ __metadata:
     less: ^4.1.1
     lodash: ^4.17.21
   checksum: f5e1a86033c9f728677f337a3c4cef1f836e0104866f8c7c5a2cc5c1f405df75a97f2b783a5697eace09a8ce1a4bac9a28be171770af2d3cad7152ea1a319f4b
+  languageName: node
+  linkType: hard
+
+"grunt-contrib-watch@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "grunt-contrib-watch@npm:1.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fgrunt-contrib-watch%2F-%2Fgrunt-contrib-watch-1.1.0.tgz"
+  dependencies:
+    async: ^2.6.0
+    gaze: ^1.1.0
+    lodash: ^4.17.10
+    tiny-lr: ^1.1.1
+  checksum: 04f3e8b0ccf2556a6d23e3663fb1d24da780ab23de33dfafe9dc70073014e66f5f48a1d8b02c8d42d4a17f0f20fd83074c91d3ab844e97b8e72579bdfbc947aa
   languageName: node
   linkType: hard
 
@@ -17044,6 +17175,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"livereload-js@npm:^2.3.0":
+  version: 2.4.0
+  resolution: "livereload-js@npm:2.4.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Flivereload-js%2F-%2Flivereload-js-2.4.0.tgz"
+  checksum: da6bcd195f45c8ae1b6a2ef79a60ce08a5d8dd34cb38e9e00a3f5c86611eb4eb7ff52ea9fd16b5b978b384573c2d602f526e7769d06560be8f9182604a6b681e
+  languageName: node
+  linkType: hard
+
 "load-bmfont@npm:^1.4.1":
   version: 1.4.1
   resolution: "load-bmfont@npm:1.4.1"
@@ -17350,6 +17488,13 @@ __metadata:
 "lodash@npm:4.17.21, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.5, lodash@npm:^4.7.0, lodash@npm:~4.17.19, lodash@npm:~4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
+  checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
+  languageName: node
+  linkType: hard
+
+"lodash@npm:^4.17.10":
+  version: 4.17.21
+  resolution: "lodash@npm:4.17.21::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Flodash%2F-%2Flodash-4.17.21.tgz"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
   languageName: node
   linkType: hard
@@ -18039,6 +18184,15 @@ __metadata:
     lru-cache: 2
     sigmund: ~1.0.0
   checksum: c2c5209302f9621aedd6c685477a8e1e4fc1a6caa8b42da8dcd8b44060941dcbcc3b4664d727a50f45028b91e6ac22987ee14ffc8a68d56a7ef4ee84ff582fde
+  languageName: node
+  linkType: hard
+
+"minimatch@npm:~3.0.2":
+  version: 3.0.8
+  resolution: "minimatch@npm:3.0.8::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fminimatch%2F-%2Fminimatch-3.0.8.tgz"
+  dependencies:
+    brace-expansion: ^1.1.7
+  checksum: 850cca179cad715133132693e6963b0db64ab0988c4d211415b087fc23a3e46321e2c5376a01bf5623d8782aba8bdf43c571e2e902e51fdce7175c7215c29f8b
   languageName: node
   linkType: hard
 
@@ -18787,6 +18941,13 @@ __metadata:
 "object-assign@npm:4.x, object-assign@npm:^4, object-assign@npm:^4.0.1, object-assign@npm:^4.1.1":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
+  checksum: fcc6e4ea8c7fe48abfbb552578b1c53e0d194086e2e6bbbf59e0a536381a292f39943c6e9628af05b5528aa5e3318bb30d6b2e53cadaf5b8fe9e12c4b69af23f
+  languageName: node
+  linkType: hard
+
+"object-assign@npm:^4.1.0":
+  version: 4.1.1
+  resolution: "object-assign@npm:4.1.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fobject-assign%2F-%2Fobject-assign-4.1.1.tgz"
   checksum: fcc6e4ea8c7fe48abfbb552578b1c53e0d194086e2e6bbbf59e0a536381a292f39943c6e9628af05b5528aa5e3318bb30d6b2e53cadaf5b8fe9e12c4b69af23f
   languageName: node
   linkType: hard
@@ -20622,6 +20783,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"qs@npm:^6.4.0":
+  version: 6.11.2
+  resolution: "qs@npm:6.11.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fqs%2F-%2Fqs-6.11.2.tgz"
+  dependencies:
+    side-channel: ^1.0.4
+  checksum: e812f3c590b2262548647d62f1637b6989cc56656dc960b893fe2098d96e1bd633f36576f4cd7564dfbff9db42e17775884db96d846bebe4f37420d073ecdc0b
+  languageName: node
+  linkType: hard
+
 "query-registry@npm:^2.6.0":
   version: 2.6.0
   resolution: "query-registry@npm:2.6.0"
@@ -20755,6 +20925,16 @@ __metadata:
     iconv-lite: 0.4.24
     unpipe: 1.0.0
   checksum: ba1583c8d8a48e8fbb7a873fdbb2df66ea4ff83775421bfe21ee120140949ab048200668c47d9ae3880012f6e217052690628cf679ddfbd82c9fc9358d574676
+  languageName: node
+  linkType: hard
+
+"raw-body@npm:~1.1.0":
+  version: 1.1.7
+  resolution: "raw-body@npm:1.1.7::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fraw-body%2F-%2Fraw-body-1.1.7.tgz"
+  dependencies:
+    bytes: 1
+    string_decoder: 0.10
+  checksum: 75ab1815ac54992abccccdffb27bd9ad9f5b6f5fb66e740474ad0d1bd3c1425e407b2be5eb34e0bef3da2c66bfa6a2c2b77498596f5b9999ead2d449fff0226f
   languageName: node
   linkType: hard
 
@@ -21602,10 +21782,12 @@ __metadata:
     eslint-plugin-vue: ^8.0.3
     glob-gitignore: ^1.0.14
     grunt: ^1.5.3
+    grunt-babel: ^8.0.0
     grunt-cli: ^1.4.3
     grunt-contrib-clean: ^2.0.1
     grunt-contrib-copy: ^1.0.0
     grunt-contrib-less: ^3.0.0
+    grunt-contrib-watch: ^1.1.0
     grunt-run: ^0.8.1
     grunt-submodule: ^0.1.0-rc3
     html-webpack-plugin: ^5.1.0
@@ -21714,6 +21896,13 @@ __metadata:
   version: 0.4.2
   resolution: "safe-identifier@npm:0.4.2"
   checksum: 67e28ed89a74cf20b827419003d3cb60a0ebaec0771c2c818f4b2239bf4f96e01ad90aa8db6dc57ee90c0c438b6f46323e4b5a3d955d18d8c4e158ea035cabdd
+  languageName: node
+  linkType: hard
+
+"safe-json-parse@npm:~1.0.1":
+  version: 1.0.1
+  resolution: "safe-json-parse@npm:1.0.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fsafe-json-parse%2F-%2Fsafe-json-parse-1.0.1.tgz"
+  checksum: aea585d967fb373903aae99e6e31157a68ebebdc9d0011bc86732b6c700994768349e30d4fb6dfdc346106004a85104187d0b48964fe1caff90b0886df5827eb
   languageName: node
   linkType: hard
 
@@ -22631,6 +22820,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"string-template@npm:~0.2.1":
+  version: 0.2.1
+  resolution: "string-template@npm:0.2.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fstring-template%2F-%2Fstring-template-0.2.1.tgz"
+  checksum: 042cdcf4d4832378f12fbf45b42f479990f330cc409e6dc184838801efbc8352ccf9428fe169f8f8cfff2b864879d4ba1ef8b5f41d63d1d71844c48005a1683f
+  languageName: node
+  linkType: hard
+
 "string-width-cjs@npm:string-width@^4.2.0, string-width@npm:^1.0.2 || 2 || 3 || 4, string-width@npm:^4.1.0, string-width@npm:^4.2.0, string-width@npm:^4.2.3":
   version: 4.2.3
   resolution: "string-width@npm:4.2.3"
@@ -22710,6 +22906,13 @@ __metadata:
     define-properties: ^1.2.0
     es-abstract: ^1.22.1
   checksum: 13d0c2cb0d5ff9e926fa0bec559158b062eed2b68cd5be777ffba782c96b2b492944e47057274e064549b94dd27cf81f48b27a31fee8af5b574cff253e7eb613
+  languageName: node
+  linkType: hard
+
+"string_decoder@npm:0.10":
+  version: 0.10.31
+  resolution: "string_decoder@npm:0.10.31::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fstring_decoder%2F-%2Fstring_decoder-0.10.31.tgz"
+  checksum: fe00f8e303647e5db919948ccb5ce0da7dea209ab54702894dd0c664edd98e5d4df4b80d6fabf7b9e92b237359d21136c95bf068b2f7760b772ca974ba970202
   languageName: node
   linkType: hard
 
@@ -23474,6 +23677,20 @@ __metadata:
   version: 1.7.1
   resolution: "timm@npm:1.7.1"
   checksum: c80df538ec7fae50a0e3183931b20fbe97f6f2c06907d9675eb7b9d90b3f788af7742285c730192db3b066c4ab22ebae75f8d21970c5b03f38d928d5bb2a0339
+  languageName: node
+  linkType: hard
+
+"tiny-lr@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "tiny-lr@npm:1.1.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Ftiny-lr%2F-%2Ftiny-lr-1.1.1.tgz"
+  dependencies:
+    body: ^5.1.0
+    debug: ^3.1.0
+    faye-websocket: ~0.10.0
+    livereload-js: ^2.3.0
+    object-assign: ^4.1.0
+    qs: ^6.4.0
+  checksum: d32912d4ce09ea905649905162f4f76c141523822efe6a54861affe0b2be336b6f30ec244a8a5857aa59f3fb94a029d3eb4a33444de89ddd5118fa4687292fe8
   languageName: node
   linkType: hard
 

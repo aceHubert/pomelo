@@ -305,8 +305,13 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
               <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
               <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
               <title>${i18n.tv('oidc.config.logout.confirm_page_title', `Logout Request`)}</title>
-              <link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
-              <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />
+              ${
+                process.env.NODE_ENV === 'production'
+                  ? `<link rel="stylesheet" href="${this.globalPrefix}/style/index.min.css" />
+                    <link rel="stylesheet" href="${this.globalPrefix}/style/container.min.css" />`
+                  : `<link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
+                    <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />`
+              }
               ${primaryColor ? renderPrimaryStyle(primaryColor) : ''}
             </head>
             <body>
@@ -346,8 +351,13 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
                 <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
                 <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
                 <title>${i18n.tv('oidc.config.logout.success_page_title', `Sign-out Success`)}</title>
-                <link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
-                <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />
+                ${
+                  process.env.NODE_ENV === 'production'
+                    ? `<link rel="stylesheet" href="${this.globalPrefix}/style/index.min.css" />
+                      <link rel="stylesheet" href="${this.globalPrefix}/style/container.min.css" />`
+                    : `<link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
+                      <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />`
+                }
               </head>
               <body>
                 <main class="container">
@@ -504,8 +514,13 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
             <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
             <title>${pageTitle}</title>
-            <link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
-            <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />
+            ${
+              process.env.NODE_ENV === 'production'
+                ? `<link rel="stylesheet" href="${this.globalPrefix}/style/index.min.css" />
+                  <link rel="stylesheet" href="${this.globalPrefix}/style/container.min.css" />`
+                : `<link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
+                  <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />`
+            }
           </head>
           <body>
             <main class="container">

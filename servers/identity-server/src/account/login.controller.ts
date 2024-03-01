@@ -158,7 +158,7 @@ export class LoginController extends BaseController {
                 maxlength="16"
                 value=""
               />
-              <span toggle="#password" class="toggle-password eye"></span>
+              <span data-target="#password" class="toggle-password eye"></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
                 ${i18n.tv(
                   'login.form.password_invalid',
@@ -203,15 +203,7 @@ export class LoginController extends BaseController {
               </div>`
             : ''
         }
-      </form>
-      <div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
-        <div id="errorToast" class="toast red lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body"></div>
-            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      </div>`;
+      </form>`;
     } else {
       const missingScopes = new Set(prompt.details.missingOIDCScope as string[]);
       const resourceMap = new Map<string, string>();
