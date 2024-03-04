@@ -1,3 +1,6 @@
+# debug locally
+# act -W ./.github/workflows/deploy.yml --secret-file ./.github/.secrets --var-file ./.github/.vars -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest
+
 name: Deploy
 
 on:
@@ -25,7 +28,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16.14'
-      - name: Cache install
+      - name: Cache main install
         uses: actions/cache@v3
         id: cache
         with:
@@ -64,12 +67,12 @@ jobs:
         with:
           registry: ghcr.io # 声明镜像源
           username: ${{ github.actor }} # 当前github 用户名
-          password: ${{ secrets.HUB_GITHUB_TOKEN }} # 需要去 https://github.com/settings/tokens 生成一个 名为 token，注意此token 需要读写 packages 等权限
+          password: ${{ secrets.GITHUB_TOKEN }} # 需要去 https://github.com/settings/tokens 生成一个 名为 token，注意此token 需要读写 packages 等权限
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '16.14'
-      - name: Restore install cache
+      - name: Restore main install cache
         uses: actions/cache/restore@v3
         with:
           path: |
@@ -94,8 +97,8 @@ jobs:
         env:
           IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
   deploy:
-    needs: build
-    runs-on: self-hosted
+    # needs: build
+    runs-on: ubuntu-latest
     environment:
       name: 'production'
     steps:
@@ -107,8 +110,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
           script: | # 重启更新镜像
-            cd /opt/pomelo/
-            docker login -u ${{ github.actor }} -p ${{ secrets.HUB_GITHUB_TOKEN }} https://ghcr.io
-            docker compose up -e IMAGE_REPOSITORY=ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }} -d --build --force-recreate --no-start
+            cd ${{ env.CONTENT_DIR }}
+            echo "IMAGE_REPOSITORY=ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }}" > .env.${{ github.run_id }}
+            docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} https://ghcr.io
+            docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
         env:
+          CONTENT_DIR: /opt/pomelo
           IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
