@@ -5,8 +5,8 @@
   "scripts": {
     "serve:clients": "yarn workspaces foreach -vpitR --from '@ace-pomelo/{vue-web,vue-admin}' run serve",
     "serve:servers": "yarn workspaces foreach -vpitR --from '@ace-pomelo/{identity-server,identity-api,infrastructure-api}' run start:webpack",
-    "build:": "yarn build:submodules && yarn build:clients && yarn build:servers",
     "build:local": "cross-env ENV_JS=env/env.local.js BASE_URL=/ yarn build:clients && yarn build:servers",
+    "build:prod": "yarn build:submodules && yarn build:clients && yarn build:servers",
     "build:clients": "yarn workspaces foreach -vtR --from '@ace-pomelo/{vue-web,vue-admin}' run build",
     "build:servers": "yarn workspaces foreach -vtR --topological-dev --from '@ace-pomelo/{identity-server,identity-api,infrastructure-api}' run build",
     "build:submodules": "grunt --verbose",

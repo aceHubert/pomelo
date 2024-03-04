@@ -144,6 +144,7 @@ __metadata:
     "@ace-pomelo/identity-datasource": "workspace:^"
     "@ace-pomelo/infrastructure-datasource": "workspace:^"
     "@ace-pomelo/shared-server": "workspace:^"
+    "@ace-pomelo/theme": "workspace:^"
     "@apollo/server": ^4.9.1
     "@apollo/utils.keyvaluecache": ^2.1.0
     "@nestjs/apollo": ^11.0.0

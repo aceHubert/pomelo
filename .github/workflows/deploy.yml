@@ -1,0 +1,114 @@
+name: Deploy
+
+on:
+  # release:
+  #   types: [published]
+  push: # push 到主分支自动 发布
+    branches: ['master']
+    paths-ignore: # 忽略一些不必要的文件
+      - '.gitignore'
+      - 'README.md'
+      - '.vscode/**'
+      - '.devcontainer/**'
+  pull_request:
+    branches: ['master']
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.14'
+      - name: Cache install
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-node-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Cache submodules
+        uses: actions/cache@v3
+        id: submodules-cache
+        with:
+          path: .submodules
+          key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-submodules-
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --mode=skip-build && npx vue-demi-fix
+      - name: Build Submodules
+        if: steps.submodules-cache.outputs.cache-hit != 'true'
+        run: yarn build:submodules
+  build:
+    needs: cache
+    runs-on: ubuntu-latest
+    environment:
+      name: 'production'
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io # 声明镜像源
+          username: ${{ github.actor }} # 当前github 用户名
+          password: ${{ secrets.HUB_GITHUB_TOKEN }} # 需要去 https://github.com/settings/tokens 生成一个 名为 token，注意此token 需要读写 packages 等权限
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.14'
+      - name: Restore install cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-node-${{ hashFiles('yarn.lock') }}
+      - name: Restore submodules cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .submodules
+          key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
+      - name: Build
+        run: yarn build:clients && yarn build:servers
+      - name: Show Dir
+        run: ls
+      - name: Build the  Docker image
+        run:
+          | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
+          docker build . --file Dockerfile --target deploy --cache-from ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true  --build-arg BUILDKIT_INLINE_CACHE=1 --tag ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest --tag ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }}
+          docker push ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }}
+          docker push ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest
+        env:
+          IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    environment:
+      name: 'production'
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
+          username: ${{ secrets.SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
+          key: ${{ secrets.SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
+          port: ${{ secrets.SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
+          script: | # 重启更新镜像
+            cd /opt/pomelo/
+            docker login -u ${{ github.actor }} -p ${{ secrets.HUB_GITHUB_TOKEN }} https://ghcr.io
+            docker compose up -e IMAGE_REPOSITORY=ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }} -d --build --force-recreate --no-start
+        env:
+          IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
