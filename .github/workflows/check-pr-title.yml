@@ -7,11 +7,13 @@ on:
       - edited
       - synchronize
 
+
+permissions:
+  statuses: write
+
 jobs:
   lint:
-    runs-on: ubuntu-latest    
-    permissions:
-      statuses: write
+    runs-on: ubuntu-latest
     steps:
       - uses: aslafy-z/conventional-pr-title-action@v3
         with:

@@ -16,6 +16,15 @@ on:
   pull_request:
     branches: ['master']
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+  DOCKER_COMPOSE_DIR: /opt/pomelo
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   cache:
     runs-on: ubuntu-latest
@@ -52,7 +61,7 @@ jobs:
       - name: Build Submodules
         if: steps.submodules-cache.outputs.cache-hit != 'true'
         run: yarn build:submodules
-  build:
+  docker-build:
     needs: cache
     runs-on: ubuntu-latest
     environment:
@@ -65,9 +74,9 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io # 声明镜像源
+          registry: ${{ env.REGISTRY }} # 声明镜像源
           username: ${{ github.actor }} # 当前github 用户名
-          password: ${{ secrets.GITHUB_TOKEN }} # 需要去 https://github.com/settings/tokens 生成一个 名为 token，注意此token 需要读写 packages 等权限
+          password: ${{ secrets.GITHUB_TOKEN }} # 当前github token
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
@@ -91,13 +100,11 @@ jobs:
       - name: Build the  Docker image
         run:
           | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker build . --file Dockerfile --target deploy --cache-from ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true  --build-arg BUILDKIT_INLINE_CACHE=1 --tag ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest --tag ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }}
-          docker push ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }}
-          docker push ghcr.io/${{ env.IMAGE_REPOSITORY }}:latest
-        env:
-          IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-  deploy:
-    # needs: build
+          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true  --build-arg BUILDKIT_INLINE_CACHE=1 --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest
+  ssh-deploy:
+    needs: docker-build
     runs-on: ubuntu-latest
     environment:
       name: 'production'
@@ -110,10 +117,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
           script: | # 重启更新镜像
-            cd ${{ env.CONTENT_DIR }}
-            echo "IMAGE_REPOSITORY=ghcr.io/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}-${{ github.ref_name }}" > .env.${{ github.run_id }}
-            docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} https://ghcr.io
+            cd ${{ env.DOCKER_COMPOSE_DIR }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
+            docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} https://${{ env.REGISTRY }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
-        env:
-          CONTENT_DIR: /opt/pomelo
-          IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+            rm -f .env.${{ github.run_id }}
