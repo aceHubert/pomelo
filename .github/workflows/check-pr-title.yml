@@ -9,10 +9,12 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
+    permissions:
+      statuses: write
     steps:
-      - uses: aslafy-z/conventional-pr-title-action@main
+      - uses: aslafy-z/conventional-pr-title-action@v3
         with:
-          preset: conventional-changelog-angular@^5.0.6
+          preset: "@commitlint/config-conventional@^12.1.4"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

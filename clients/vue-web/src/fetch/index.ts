@@ -122,11 +122,16 @@ afetch.use(
       return data;
     },
     handler: (error) => {
-      errorRef.value = new SharedError(
-        error.message || 'System error!',
-        (axios.isAxiosError(error) ? error.response?.status : (error as any).code) || 500,
-      );
-      return new Promise(() => {});
+      errorRef.value =
+        error instanceof SharedError
+          ? error
+          : new SharedError(
+              error.message || 'System error!',
+              (axios.isAxiosError(error) ? error.response?.status : (error as any).code) || 500,
+            );
+      return new Promise(() => {
+        // stop next
+      });
     },
   }),
 );
