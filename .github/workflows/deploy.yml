@@ -10,11 +10,13 @@ on:
     branches: ['master']
     paths-ignore: # 忽略一些不必要的文件
       - '.gitignore'
+      - 'nginx.conf'
+      - 'Gruntfile.js'
       - 'README.md'
       - '.vscode/**'
       - '.devcontainer/**'
-  pull_request:
-    branches: ['master']
+  # pull_request:
+  #   branches: ['master']
 
 env:
   REGISTRY: ghcr.io

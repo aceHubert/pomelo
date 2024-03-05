@@ -140,6 +140,9 @@ env.*.local.js
 # database initialization lock file
 db.lock
 
+# act env files
+/.github/.*
+
 # docker-compose
 /release
 /.cache
