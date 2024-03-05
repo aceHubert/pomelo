@@ -9,9 +9,11 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
+    permissions:
+      statuses: write
     steps:
-      - uses: aslafy-z/conventional-pr-title-action@main
+      - uses: aslafy-z/conventional-pr-title-action@v3
         with:
           preset: "@commitlint/config-conventional@^12.1.4"
         env:
