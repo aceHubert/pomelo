@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { computed, defineComponent, ref } from '@vue/composition-api';
-import { Icon, Progress, Spin, Drawer, Descriptions, Upload } from 'ant-design-vue';
+import { Icon, Spin, Drawer, Descriptions, Upload } from 'ant-design-vue';
 import { createResource } from '@vue-async/resource-manager';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { message } from '@/components';
@@ -82,13 +82,9 @@ export default defineComponent({
               }
             }}
           >
-            {uploadMixin.uploading ? (
-              <Progress type="circle" percent={uploadMixin.percent} width={80} />
-            ) : (
-              <p class="primary--text">
-                <Icon type="upload" class="font-size-lg--3x" />
-              </p>
-            )}
+            <p class="primary--text">
+              <Icon type="upload" class="font-size-lg--3x" />
+            </p>
             <p class="mt-4 text--primary">
               {i18n.tv('page_media.upload_dragger_btn_text', '点击或拖拽至此上传媒体文件')}
             </p>

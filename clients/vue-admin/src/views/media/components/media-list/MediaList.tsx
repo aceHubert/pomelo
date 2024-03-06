@@ -404,13 +404,9 @@ export default defineComponent({
                   }}
                 >
                   <div class={`${prefixCls}-new-file-add`}>
-                    {uploadMixin.uploading ? (
-                      <Progress type="circle" percent={uploadMixin.percent} width={80} />
-                    ) : (
-                      <p class="primary--text">
-                        <Icon type="upload" class="font-size-lg--3x" />
-                      </p>
-                    )}
+                    <p class="primary--text">
+                      <Icon type="upload" class="font-size-lg--3x" />
+                    </p>
                     <p class="mt-4 text--primary">{i18n.tv('page_media.upload_btn_text', '点击上传媒体文件')}</p>
                   </div>
                 </Upload>
