@@ -224,6 +224,7 @@ export default defineComponent({
         })
         .then(({ page }) => {
           pageData.id = page.id;
+          router.replace({ name: 'page-edit', params: { id: page.id } });
           return {
             ...page,
             title: '',

@@ -180,6 +180,7 @@ export default defineComponent({
         })
         .then(({ post }) => {
           postData.id = post.id;
+          router.replace({ name: 'post-edit', params: { id: post.id } });
           return {
             ...post,
             title: '',

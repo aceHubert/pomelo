@@ -59,7 +59,15 @@
       position: relative;
     }
 
-    .dn-workspace-panel-item{
+    .dn-workspace-panel-item, .dn-reactions-setter{
+      .@{ant-prefix}-formily-array-base-remove{
+        color: inherit;
+
+        &:hover{
+          color: @var-primary;
+        }
+      }
+
       .@{ant-prefix}-formily-form-item-label{
         color: inherit;
       }
