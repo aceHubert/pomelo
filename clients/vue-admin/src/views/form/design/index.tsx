@@ -220,6 +220,7 @@ export default defineComponent({
         })
         .then(({ form }) => {
           formData.id = form.id;
+          router.replace({ name: 'form-edit', params: { id: form.id } });
           return {
             ...form,
             title: '',
