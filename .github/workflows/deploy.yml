@@ -36,7 +36,7 @@ jobs:
         with:
           submodules: recursive
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '16.14'
       - name: Cache main install
@@ -80,7 +80,7 @@ jobs:
           username: ${{ github.actor }} # 当前github 用户名
           password: ${{ secrets.GITHUB_TOKEN }} # 当前github token
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '16.14'
       - name: Restore main install cache
@@ -122,6 +122,6 @@ jobs:
             cd ${{ env.DOCKER_COMPOSE_DIR }}
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
             docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} https://${{ env.REGISTRY }}
-            docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d            
-            docker images --filter "dangling=true" -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | xargs --no-run-if-empty docker rmi 
+            docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
+            docker images --filter "dangling=true" -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | xargs --no-run-if-empty docker rmi
             rm -f .env.${{ github.run_id }}
