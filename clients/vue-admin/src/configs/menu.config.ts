@@ -171,7 +171,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
               },
               {
                 key: 'client-grant-types',
-                title: (i18nRender) => i18nRender('menu.clients.grant_types', '授权类型'),
+                title: (i18nRender) => i18nRender('menu.clients.grant_types', '授权模式'),
                 path: '/clients/:clientId/grant-types',
                 icon: IconDetails,
                 position: 'sub',

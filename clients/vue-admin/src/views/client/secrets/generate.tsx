@@ -59,7 +59,7 @@ const getPresetExpiresAtOptions = (
     label: i18nRender('page_client_secrets.secret_expires_custom', '自定义'),
   },
   {
-    value: undefined,
+    value: null,
     label: i18nRender('page_client_secrets.secret_expires_never', '永不过期'),
   },
 ];
@@ -270,7 +270,7 @@ export default Form.create({})(
                       options={presetTypeOptions.value}
                     ></Select>
                   </Form.Item>
-                  <Form.Item label={i18n.tv('page_client_secrets.generate.form.expires_at_label', '过期时间')}>
+                  <Form.Item label={i18n.tv('page_client_secrets.generate.form.expires_at_label', '过期时间')} required>
                     <Select
                       v-decorator={[
                         'expiresAt',
@@ -278,11 +278,22 @@ export default Form.create({})(
                           initialValue: 2592000,
                           rules: [
                             {
-                              required: true,
-                              message: i18n.tv(
-                                'page_client_secrets.generate.form.expires_at_required',
-                                '请选择过期时间',
-                              ),
+                              validator: (rule, value, callback) => {
+                                if (value === void 0) {
+                                  callback(
+                                    i18n.tv('page_client_secrets.generate.form.expires_at_required', '请选择过期时间'),
+                                  );
+                                } else if (value === 'custom' && !props.form.getFieldValue('expiresAtDate')) {
+                                  callback(
+                                    i18n.tv(
+                                      'page_client_secrets.generate.form.expires_at_date_required',
+                                      '请选择过期时间',
+                                    ),
+                                  );
+                                } else {
+                                  callback();
+                                }
+                              },
                             },
                           ],
                         },
@@ -302,11 +313,10 @@ export default Form.create({})(
                           {
                             rules: [
                               {
-                                required: true,
-                                message: i18n.tv(
-                                  'page_client_secrets.generate.form.expires_at_date_required',
-                                  '请选择过期时间！',
-                                ),
+                                validator: (rule, value, callback) => {
+                                  props.form.validateFields(['expiresAt'], { force: true });
+                                  callback();
+                                },
                               },
                             ],
                           },

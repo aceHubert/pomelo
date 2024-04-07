@@ -7,7 +7,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "mock:server": "DOTENV_CONFIG_PATH=.env.development run -T nodemon -r dotenv/config -w mock/apis mock/server.js",
-    "serve:mock": "run -T cross-env MOCK=1 concurrently \"yarn mock:server\" \"vue-cli-service serve\"",
+    "serve:mock": "run -T cross-env MOCK=1 concurrently \"yarn mock:server\" \"yarn serve\"",
     "build": "vue-cli-service build",
     "build:analyzer": "vue-cli-service build --report",
     "test:tsc": "run -T tsc --project tsconfig.json --noEmit",
@@ -19,6 +19,7 @@
     "@ace-fetch/core": "^0.2.2",
     "@ace-fetch/vue": "^0.2.2",
     "@ace-pomelo/shared-client": "workspace:^",
+    "@ace-pomelo/theme": "workspace:^",
     "@ace-util/core": "^0.1.1",
     "@apollo/client": "^3.6.9",
     "@ckeditor/ckeditor5-build-balloon": "^40.0.0",

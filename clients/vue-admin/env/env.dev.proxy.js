@@ -6,7 +6,7 @@
 
   // env.infrastructureApiBase = '/infrastructure/api';
   env.infrastructureGraphqlBase = '/infrastructure/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5002/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'ws://localhost:5003/graphql';
   env.identityGraphqlBase = '/identity/graphql';
 
   env.oidc = {

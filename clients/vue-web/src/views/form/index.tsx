@@ -1,13 +1,11 @@
+import { isString, isPlainObject } from 'lodash-es';
 import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composition-api';
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
 import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
-import { Modal } from 'ant-design-vue';
-import { Dialog } from 'vant';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
-import { useLocationMixin } from '@/mixins';
 import { useTemplateApi, FormMetaPresetKeys } from '@/fetch/apis';
 
 const MobileForm = () => import(/* webpackChunkName: "mobile" */ './mobile');
@@ -43,7 +41,6 @@ export default defineComponent({
     const fetch = getActiveFetch();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const deviceType = useDeviceType();
-    const localtionMixin = useLocationMixin();
     const templateApi = useTemplateApi();
 
     // from /f/:id
@@ -132,57 +129,31 @@ export default defineComponent({
       cssText,
     });
 
-    const submitingRef = ref(false);
     const onSubmit = (value: any) => {
       const { $result } = formRes;
-      const submitAction = $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitAction)?.value || '';
-      const submitSuccessRedirect =
-        $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitSuccessRedirect)?.value || '';
-      const submitSuccessTips =
-        $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitSuccessTips)?.value ||
-        (i18n.tv('form_template.index.submit_success_text', '提交成功') as string);
+      const submitAction = $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitAction)?.value;
+      const submitSuccessRedirect = $result?.metas?.find(
+        ({ key }) => key === FormMetaPresetKeys.SubmitSuccessRedirect,
+      )?.value;
+      const submitSuccessTips = $result?.metas?.find(({ key }) => key === FormMetaPresetKeys.SubmitSuccessTips)?.value;
 
-      submitingRef.value = true;
-      return fetch?.client
-        .post(submitAction, value)
-        .then(() => {
-          // redirect
-          let alert: Promise<any>;
-          if (deviceType.isMobile) {
-            alert = Dialog.alert({
-              title: i18n.tv('form_template.index.submit_success_title', '提示') as string,
-              message: submitSuccessTips,
-            });
-          } else {
-            alert = new Promise((resolve, reject) => {
-              Modal.success({
-                title: i18n.tv('form_template.index.submit_success_title', '提示') as string,
-                content: submitSuccessTips,
-                onOk: () => resolve(null),
-                onCancel: reject,
-              });
-            });
-          }
+      if (!submitAction)
+        return Promise.reject(
+          new Error(i18n.tv('form_template.index.submit_action_not_found', '未找到提交地址！') as string),
+        );
 
-          alert.then(() => {
-            if (submitSuccessRedirect) {
-              localtionMixin.goTo(submitSuccessRedirect, true);
-            }
-          });
-        })
-        .catch((err) => {
-          if (deviceType.isMobile) {
-            Dialog.alert({
-              title: i18n.tv('form_template.index.submit_failed_title', '提交失败') as string,
-              message: err.message,
-            });
-          } else {
-            Modal.error({
-              title: i18n.tv('form_template.index.submit_failed_title', '提交失败'),
-              content: err.message,
-            });
-          }
-        });
+      return fetch?.client.post(submitAction, value).then((result) => {
+        // return from server
+        const _result = isPlainObject(result)
+          ? (result as { message?: string; redirect?: string })
+          : isString(result)
+          ? { redirect: result }
+          : {};
+        return {
+          tips: _result.message ?? submitSuccessTips,
+          redirect: _result.redirect ?? submitSuccessRedirect,
+        };
+      });
     };
 
     const renderError = ref<false | string>(false);

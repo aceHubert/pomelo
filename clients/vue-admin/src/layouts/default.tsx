@@ -1,25 +1,27 @@
 import { defineComponent, ref, computed, onMounted, nextTick } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { absoluteGo, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
+import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { Icon, Space, Tooltip, Menu, Spin } from 'ant-design-vue';
 import {
   ConfigProvider,
   LayoutAdmin,
   AvatarDropdown,
   LocaleDropdown,
+  MessageDropdown,
   SettingDrawer,
   type AvatarDropdownAction,
 } from 'antdv-layout-pro';
 import {
   Theme,
   type MenuConfig,
+  type MessageConfig,
   type BreadcrumbConfig,
   type LayoutType,
   type ContentWidth,
 } from 'antdv-layout-pro/types';
 import { OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
-import { useUserManager, useI18n, useOptions } from '@/hooks';
+import { useUserManager, usePubSubMessage, useI18n, useOptions } from '@/hooks';
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
 import { loadingRef } from '@/shared';
 import { getDefaultMenus } from '@/configs/menu.config';
@@ -39,8 +41,9 @@ export default defineComponent({
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
     const userManager = useUserManager();
+    const pubSubMessage = usePubSubMessage();
 
-    const currentUser = ref<{ name: string; photo: string }>();
+    const currentUser = ref<{ name: string; photo?: string }>();
     const menus = ref<MenuConfig[]>([]);
     const settingDrawerVisible = ref(false);
 
@@ -135,11 +138,14 @@ export default defineComponent({
     const handleActionClick = (key: AvatarDropdownAction | 'password-modify') => {
       switch (key) {
         case 'password-modify':
-          absoluteGo(
+          locationMixin.goTo(
             `${trailingSlash(userManager.settings.authority)}password/modify?returnUrl=${encodeURIComponent(
               location.href,
             )}&clientId=${userManager.settings.client_id}`,
           );
+          break;
+        case 'setting-drawer':
+          settingDrawerVisible.value = !settingDrawerVisible.value;
           break;
         case 'signout':
           // 以免多次调用跳转循环
@@ -151,6 +157,20 @@ export default defineComponent({
           router.push({ name: key });
           break;
       }
+    };
+
+    const handleMessageView = (message: MessageConfig<string | { href: string; target?: '_self' | '_blank' }>) => {
+      if (typeof message.to === 'string') {
+        window.open(message.to, '_blank');
+      } else if (message.to) {
+        window.open(message.to.href, message.to.target);
+      }
+    };
+
+    const handleMessageRead = (message: MessageConfig) => {
+      pubSubMessage.value = pubSubMessage.value.filter((item) => item !== message);
+      pubSubMessage.count -= 1;
+      // TODO: make as read in server
     };
 
     const handleLocaleChange = (locale: string) => {
@@ -178,7 +198,7 @@ export default defineComponent({
             photo:
               user.profile.picture ?? user.profile.avatar
                 ? `${homeUrl}${user.profile.picture ?? user.profile.avatar}`
-                : `${process.env.BASE_URL}static/images/head_default.jpg`,
+                : void 0, //`${process.env.BASE_URL}static/images/head_default.jpg`,
           };
         }
       });
@@ -189,6 +209,10 @@ export default defineComponent({
         <Menu.Item key="password-modify">
           <Icon type="key" />
           {i18n.tv('layout_default.avatar_menu_item.modify_password', '修改密码')}
+        </Menu.Item>,
+        <Menu.Item key="setting-drawer">
+          <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
+          {i18n.tv('layout_default.page_style_setting_title', '显示设置')}
         </Menu.Item>,
       ];
 
@@ -243,14 +267,12 @@ export default defineComponent({
                   scopedSlots={{
                     headerActions: () => (
                       <Space size="middle">
-                        <Tooltip
-                          placement="bottom"
-                          title={i18n.tv('layout_default.page_style_setting_title', '显示设置')}
-                        >
-                          <span onClick={() => (settingDrawerVisible.value = !settingDrawerVisible.value)}>
-                            <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
-                          </span>
-                        </Tooltip>
+                        <MessageDropdown
+                          count={pubSubMessage.count}
+                          messages={pubSubMessage.value}
+                          onView={handleMessageView}
+                          onRead={handleMessageRead}
+                        ></MessageDropdown>
                         <LocaleDropdown
                           locale={i18n.locale}
                           supportLanguages={appMixin.supportLanguages}
@@ -278,14 +300,13 @@ export default defineComponent({
                         <div id="_popoverContainer"></div>
                         <Space direction="vertical" align="center" size="middle">
                           {collapsed && (
-                            <Tooltip
-                              placement="right"
-                              title={i18n.tv('layout_default.page_style_setting_title', '显示设置')}
-                            >
-                              <span onClick={() => (settingDrawerVisible.value = !settingDrawerVisible.value)}>
-                                <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
-                              </span>
-                            </Tooltip>
+                            <MessageDropdown
+                              count={pubSubMessage.count}
+                              messages={pubSubMessage.value}
+                              placement="rightBottom"
+                              onView={handleMessageView}
+                              onRead={handleMessageRead}
+                            ></MessageDropdown>
                           )}
                           {collapsed && (
                             <LocaleDropdown
@@ -303,6 +324,8 @@ export default defineComponent({
 
                           <AvatarDropdown
                             src={currentUser.value?.photo}
+                            name={currentUser.value?.name}
+                            nameVisible={!collapsed}
                             avatarProps={{
                               size: collapsed ? 'small' : 'default',
                             }}
@@ -316,18 +339,13 @@ export default defineComponent({
                                 ? undefined
                                 : () => (
                                     <Space vShow={!collapsed}>
-                                      <Tooltip
-                                        placement="top"
-                                        title={i18n.tv('layout_default.page_style_setting_title', '显示设置')}
-                                      >
-                                        <span
-                                          onClick={() => (settingDrawerVisible.value = !settingDrawerVisible.value)}
-                                        >
-                                          <Icon
-                                            component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme}
-                                          />
-                                        </span>
-                                      </Tooltip>
+                                      <MessageDropdown
+                                        count={pubSubMessage.count}
+                                        messages={pubSubMessage.value}
+                                        placement="topRight"
+                                        onView={handleMessageView}
+                                        onRead={handleMessageRead}
+                                      ></MessageDropdown>
                                       <LocaleDropdown
                                         // class={['d-block pt-4', { 'text-center': collapsed }]}
                                         locale={i18n.locale}

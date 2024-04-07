@@ -180,7 +180,7 @@ export const usePostApi = defineRegistApi('template_post', {
         )
       }
     ` as TypedMutationDocumentNode<
-      { result: boolean; featureImageResult: boolean; templateResult: boolean },
+      { result: null; featureImageResult: null; templateResult: null },
       { id: string; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
     >,
   },

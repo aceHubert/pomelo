@@ -1,9 +1,8 @@
 @import '~@ace-pomelo/theme/lib/index';
 @import (reference, multiple) '@ace-pomelo/theme/lib/themes/default';
 @import (multiple) '@ace-pomelo/theme/lib/core/colors';
-@import 'antdv-layout-pro/style/index';
-@import (reference, multiple) 'antdv-layout-pro/style/themes/default';
 @import (multiple) 'antdv-layout-pro/style/component-reset';
+@import (reference, multiple) 'antdv-layout-pro/style/themes/default';
 
 :root {
   // set ckeditor theme
@@ -46,8 +45,8 @@
 .theme-dark {
   @import (reference, multiple) '@ace-pomelo/theme/lib/themes/dark';
   @import (multiple) '@ace-pomelo/theme/lib/core/colors';
-  @import (reference, multiple) 'antdv-layout-pro/style/themes/dark';
   @import (multiple) 'antdv-layout-pro/style/component-reset';
+  @import (reference, multiple) 'antdv-layout-pro/style/themes/dark';
   @import (reference) 'variables';
 
   :root & {
@@ -110,4 +109,5 @@
   border-color: var(--ck-color-base-border);
 }
 
+@import 'antdv-layout-pro/style/index';
 @import '../../components/index';

@@ -17,15 +17,23 @@ export interface OptionModel {
 }
 
 export type Message =
-  | { content: string; to?: string }
-  // post review
-  | { eventName: 'createPostReview' | 'updatePostReview'; objectPayload: { id: string } }
-  // page review
-  | { eventName: 'createPageReview' | 'updatePageReview'; objectPayload: { id: string } }
-  // form review
-  | { eventName: 'createFormReview' | 'updateFormReview'; objectPayload: { id: string } }
-  // tempalte review
-  | { eventName: 'createTemplateReview' | 'updateTemplateReview'; objectPayload: { id: string } };
+  // event message
+  // | { eventName: string }
+  // post/form/page/template review
+  | {
+      eventName:
+        | 'createPostReview'
+        | 'updatePostReview'
+        | 'createPageReview'
+        | 'updatePageReview'
+        | 'createFormReview'
+        | 'updateFormReview'
+        | 'createTemplateReview'
+        | 'updateTemplateReview';
+      objectPayload: { id: string };
+    }
+  // content message
+  | { content: string; to?: string };
 
 export const useBasicApi = defineRegistApi('basic', {
   apis: {
@@ -63,7 +71,7 @@ export const useBasicApi = defineRegistApi('basic', {
             eventName
             stringPayload: payload
           }
-          ... on IntPayloadEventMessageSubscriotion {
+          ... on NumberPayloadEventMessageSubscriotion {
             eventName
             numberPayload: payload
           }
@@ -82,7 +90,7 @@ export const useBasicApi = defineRegistApi('basic', {
         }
       }
     ` as TypedSubscriptionDocumentNode<{
-      message: Message;
+      message: Message | null;
     }>,
   },
   request,

@@ -138,7 +138,7 @@ export const usePageApi = defineRegistApi('template_page', {
         )
       }
     ` as TypedMutationDocumentNode<
-      { result: boolean; featureImageResult: boolean },
+      { result: null; featureImageResult: null },
       { id: string; updatePage: UpdatePageTemplateInput; featureImage?: string }
     >,
   },

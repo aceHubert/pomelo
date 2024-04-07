@@ -4,9 +4,9 @@
 
   var env = window._ENV || {};
 
-  // env.infrastructureApiBase = 'https://localhost:5003/api';
-  env.infrastructureGraphqlBase = 'https://localhost:5003/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5003/graphql';
+  // env.infrastructureApiBase = 'http://localhost:5003/api';
+  env.infrastructureGraphqlBase = 'http://localhost:5003/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'ws://localhost:5003/graphql';
 
   env.siteInitURL = 'https://localhost:5011/site-init';
 

@@ -30,21 +30,23 @@ const getPresetOptions = () => [
     value: 'device_code',
     label: 'DeviceCode',
   },
-  {
-    value: 'implicit',
-    label: 'Implicit',
-  },
+  // 已过时
+  // {
+  //   value: 'implicit',
+  //   label: 'Implicit',
+  // },
   {
     value: 'jwt-bearer',
     label: 'JwtBearer',
   },
-  {
-    value: 'password',
-    label: 'Password',
-  },
+  //   // 已过时
+  // {
+  //   value: 'password',
+  //   label: 'Password',
+  // },
   {
     value: 'refresh_token',
-    label: 'Refresh_token',
+    label: 'RefreshToken',
   },
   {
     value: 'saml2-bearer',
@@ -61,7 +63,7 @@ export default Form.create({})(
     name: 'ClientGrantType',
     head() {
       return {
-        title: this.$tv('page_client_grant_types.page_title', '授权类型') as string,
+        title: this.$tv('page_client_grant_types.page_title', '授权模式') as string,
       };
     },
     props: {
@@ -81,7 +83,7 @@ export default Form.create({})(
           [
             {
               key: 'grantType',
-              title: i18n.tv('page_client_grant_types.table_header.grant_type_label', '授权类型'),
+              title: i18n.tv('page_client_grant_types.table_header.grant_type_label', '授权模式'),
               dataIndex: 'grantType',
               width: 200,
             },
@@ -209,7 +211,7 @@ export default Form.create({})(
           >
             <Card bordered={false} size="small">
               <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
-                <Form.Item label={i18n.tv('page_client_grant_types.form.grant_type_label', '授权类型')} class="mb-2">
+                <Form.Item label={i18n.tv('page_client_grant_types.form.grant_type_label', '授权模式')} class="mb-2">
                   <Select
                     v-decorator={[
                       'grantTypes',
@@ -219,7 +221,7 @@ export default Form.create({})(
                             required: true,
                             message: i18n.tv(
                               'page_client_grant_types.form.grant_type_required',
-                              '请选择/输入授权类型！',
+                              '请选择/输入授权模式！',
                             ),
                           },
                         ],
@@ -227,7 +229,7 @@ export default Form.create({})(
                     ]}
                     mode="tags"
                     style="min-width: 250px"
-                    placeholder={i18n.tv('page_client_grant_types.form.grant_type_placeholder', '请选择/输入授权类型')}
+                    placeholder={i18n.tv('page_client_grant_types.form.grant_type_placeholder', '请选择/输入授权模式')}
                     options={presetOptions}
                   ></Select>
                 </Form.Item>
@@ -251,7 +253,7 @@ export default Form.create({})(
                 columns={columns.value}
                 dataSource={grantTypes}
                 locale={{
-                  emptyText: i18n.tv('page_client_grant_types.empty_text', '暂无授权类型配置！'),
+                  emptyText: i18n.tv('page_client_grant_types.empty_text', '暂无授权模式配置！'),
                 }}
               />
             </Card>

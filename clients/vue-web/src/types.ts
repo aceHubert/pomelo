@@ -42,3 +42,21 @@ export type LocaleConfig = {
   locale: string;
   alternate?: string;
 };
+
+/**
+ * Message
+ */
+export interface MessageConfig<T = any> {
+  /**
+   * 标题
+   */
+  title: string;
+  /**
+   * 内容
+   */
+  content: string;
+  /**
+   * href, 显示 View 按纽
+   */
+  to?: T;
+}

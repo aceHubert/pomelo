@@ -190,7 +190,7 @@ export const useApiResourceApi = defineRegistApi('api', {
       mutation updateApiResource($id: ID!, $model: UpdateApiResourceInput!) {
         result: updateApiResource(id: $id, model: $model)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string; model: UpdateApiResourceInput }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string; model: UpdateApiResourceInput }>,
     getClaims: gql`
       query getApiClaims($apiResourceId: ID!) {
         apiClaims(apiResourceId: $apiResourceId) {
@@ -216,7 +216,7 @@ export const useApiResourceApi = defineRegistApi('api', {
       mutation deleteApiClaim($id: ID!) {
         result: deleteApiClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getPagedScope: gql`
       query getApiScopes($keyword: String, $keywordField: String, $apiResourceId: ID, $offset: Int, $limit: Int) {
         apiScopes(
@@ -256,12 +256,12 @@ export const useApiResourceApi = defineRegistApi('api', {
       mutation updateApiScope($id: ID!, $model: UpdateApiScopeInput!) {
         result: updateApiScope(id: $id, model: $model)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string; model: UpdateApiScopeInput }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string; model: UpdateApiScopeInput }>,
     deleteScope: gql`
       mutation deleteApiScope($id: ID!) {
         result: deleteApiScope(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getScopeClaims: gql`
       query getApiScopeClaims($apiScopeId: ID!) {
         apiScopeClaims(apiScopeId: $apiScopeId) {
@@ -290,7 +290,7 @@ export const useApiResourceApi = defineRegistApi('api', {
       mutation deleteApiScopeClaim($id: ID!) {
         result: deleteApiScopeClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getSecrets: gql`
       query getApiSecrets($apiResourceId: ID!) {
         apiSecrets(apiResourceId: $apiResourceId) {
@@ -323,7 +323,7 @@ export const useApiResourceApi = defineRegistApi('api', {
       mutation deleteApiSecret($id: ID!) {
         result: deleteApiSecret(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
     getProperties: gql`
       query getApiProperties($apiResourceId: ID!) {
         apiProperties(apiResourceId: $apiResourceId) {
@@ -354,7 +354,7 @@ export const useApiResourceApi = defineRegistApi('api', {
       mutation deleteApiProperty($id: ID!) {
         result: deleteApiProperty(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
   request,
 });

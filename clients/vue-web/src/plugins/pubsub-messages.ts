@@ -5,8 +5,7 @@ import { notification } from '@/components/antdv-helper';
 
 // Types
 import type { UnwrapRef } from '@vue/composition-api';
-import type { MessageConfig } from 'antdv-layout-pro/types';
-import type { Plugin } from '@/types';
+import type { MessageConfig, Plugin } from '@/types';
 
 type To =
   | string
@@ -73,65 +72,9 @@ const plugin: Plugin = ({ app }, inject) => {
             content = message.content;
             to = message.to;
           } else if (message.eventName) {
-            let existMessage;
-            switch (message.eventName) {
-              case 'createPostReview':
-              case 'updatePostReview':
-              case 'createPageReview':
-              case 'updatePageReview':
-              case 'createFormReview':
-              case 'updateFormReview':
-              case 'createTemplateReview':
-              case 'updateTemplateReview':
-                if (
-                  (existMessage = messages.value.find(
-                    (item) =>
-                      item.originalData &&
-                      'eventName' in item.originalData &&
-                      item.originalData.eventName === message.eventName &&
-                      message.objectPayload.id === message.objectPayload.id,
-                  ))
-                ) {
-                  // 相同类型消息不添加
-                  notice(existMessage);
-                } else {
-                  title = '申请审核';
-                  content = /^create/.test(message.eventName)
-                    ? /Post/.test(message.eventName)
-                      ? '用户新建了一篇文章需要您审核！'
-                      : /Page/.test(message.eventName)
-                      ? '用户新建了页面需要您审核！'
-                      : /Form/.test(message.eventName)
-                      ? '用户新建了表单需要您审核！'
-                      : '用户新建了自定义模版需要您审核！'
-                    : /Post/.test(message.eventName)
-                    ? '用户修改了文章内容需要您审核！'
-                    : /Page/.test(message.eventName)
-                    ? '用户修改了页面需要您审核！'
-                    : /Form/.test(message.eventName)
-                    ? '用户修改了表单需要您审核！'
-                    : '用户修改了自定义模版需要您审核！';
-                  to = /Template/.test(message.eventName)
-                    ? void 0
-                    : app.router!.resolve({
-                        name: `${
-                          /Post/.test(message.eventName)
-                            ? 'post'
-                            : /Page/.test(message.eventName)
-                            ? 'page'
-                            : /Form/.test(message.eventName)
-                            ? 'form'
-                            : ''
-                        }-edit`,
-                        params: {
-                          id: message.objectPayload.id,
-                        },
-                      }).href;
-                }
-                break;
-              default:
-                break;
-            }
+            // eslint-disable-next-line no-console
+            console.log('message.eventName', message.eventName);
+            // TODO: handle event message types
           } else {
             // TODO: handle other message types
           }

@@ -272,7 +272,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation updateClient($clientId: String!, $model: UpdateClientInput!) {
         result: updateClient(clientId: $clientId, model: $model)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { clientId: string; model: UpdateClientInput }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { clientId: string; model: UpdateClientInput }>,
     getCorsOrigins: gql`
       query getClientCorsOrigins($clientId: String!) {
         clientCorsOrigins(clientId: $clientId) {
@@ -311,7 +311,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientCorsOrigin($id: ID!) {
         result: deleteClientCorsOrigin(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getClaims: gql`
       query getClientClaims($clientId: String!) {
         clientClaims(clientId: $clientId) {
@@ -347,7 +347,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientClaim($id: ID!) {
         result: deleteClientClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getGrantTypes: gql`
       query getClientGrantTypes($clientId: String!) {
         clientGrantTypes(clientId: $clientId) {
@@ -386,7 +386,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientGrantType($id: ID!) {
         result: deleteClientGrantType(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getScopes: gql`
       query getClientScopes($clientId: String!) {
         clientScopes(clientId: $clientId) {
@@ -419,7 +419,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientScope($id: ID!) {
         result: deleteClientScope(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getRedirectUris: gql`
       query getClientRedirectUris($clientId: String!) {
         clientRedirectUris(clientId: $clientId) {
@@ -458,7 +458,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientRedirectUri($id: ID!) {
         result: deleteClientRedirectUri(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getPostLogoutRedirectUris: gql`
       query getClientPostLogoutRedirectUris($clientId: String!) {
         clientPostLogoutRedirectUris(clientId: $clientId) {
@@ -500,7 +500,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientPostLogoutRedirectUri($id: ID!) {
         result: deleteClientPostLogoutRedirectUri(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getSecrets: gql`
       query getClientSecrets($clientId: String!) {
         clientSecrets(clientId: $clientId) {
@@ -535,7 +535,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientSecret($id: ID!) {
         result: deleteClientSecret(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getProperties: gql`
       query getClientProperties($clientId: String!) {
         clientProperties(clientId: $clientId) {
@@ -577,7 +577,7 @@ export const useClientApi = defineRegistApi('client', {
       mutation deleteClientProperty($id: ID!) {
         result: deleteClientProperty(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
   request,
 });

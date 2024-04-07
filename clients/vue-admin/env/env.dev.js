@@ -5,9 +5,9 @@
   var env = window._ENV || {};
 
   // env.infrastructureApiBase = 'https://localhost:5003/api';
-  env.infrastructureGraphqlBase = 'https://localhost:5003/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5003/graphql';
-  env.identityGraphqlBase = 'https://localhost:5002/graphql';
+  env.infrastructureGraphqlBase = 'http://localhost:5003/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'ws://localhost:5003/graphql';
+  env.identityGraphqlBase = 'http://localhost:5002/graphql';
 
   env.oidc = {
     authority: 'http://localhost:5001/',

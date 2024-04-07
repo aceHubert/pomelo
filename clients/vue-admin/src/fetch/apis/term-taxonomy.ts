@@ -146,7 +146,7 @@ export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
       mutation deleteRelationship($objectId: ID!, $termTaxonomyId: ID!) {
         result: deleteTermRelationship(objectId: $objectId, termTaxonomyId: $termTaxonomyId)
       }
-    ` as TypedMutationDocumentNode<{ result: Boolean }, { objectId: string; termTaxonomyId: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { objectId: string; termTaxonomyId: string }>,
   },
   request,
 });

@@ -279,40 +279,40 @@ export const useTemplateApi = defineRegistApi('template', {
       mutation update($id: ID!, $updateTemplate: UpdateTemplateInput!) {
         result: updateTemplate(id: $id, model: $updateTemplate)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; updateTemplate: UpdateTemplateInput }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number; updateTemplate: UpdateTemplateInput }>,
     // 修改模版状态
     updateStatus: gql`
       mutation updateStatus($id: ID!, $status: TemplateStatus!) {
         result: updateTemplateStatus(id: $id, status: $status)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string; status: TemplateStatus }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string; status: TemplateStatus }>,
     bulkUpdateStatus: gql`
       mutation bulkUpdateStatus($ids: [ID!]!, $status: TemplateStatus!) {
         result: bulkUpdateTemplateStatus(ids: $ids, status: $status)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { ids: string[]; status: TemplateStatus }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { ids: string[]; status: TemplateStatus }>,
     // 重置模版(必须是trush状态)
     restore: gql`
       mutation restore($id: ID!) {
         result: restoreTemplate(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     bulkRestore: gql`
       mutation bulkRestore($ids: [ID!]!) {
         result: bulkRestoreTemplate(ids: $ids)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { ids: string[] }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { ids: string[] }>,
     // 删除模版(必须是trush状态)
     delete: gql`
       mutation delete($id: ID!) {
         result: deleteTemplate(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     bulkDelete: gql`
       mutation bulkDelete($ids: [ID!]!) {
         result: bulkDeleteTemplate(ids: $ids)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { ids: string[] }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { ids: string[] }>,
     // 创建模版 meta
     createMeta: gql`
       mutation createTemplateMeta($newMeta: NewTemplateMetaInput!) {
@@ -342,26 +342,26 @@ export const useTemplateApi = defineRegistApi('template', {
         )
       }
     ` as TypedMutationDocumentNode<
-      { result: boolean },
+      { result: null },
       { templateId: string; metaKey: string; metaValue: string; createIfNotExists?: boolean }
     >,
     updateMeta: gql`
       mutation updateTemplateMeta($id: ID!, $metaValue: String!) {
         result: updateTemplateMeta(id: $id, metaValue: $metaValue)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string; metaValue: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string; metaValue: string }>,
     // 删除模版 meta
     deleteMetaByKey: gql`
       mutation deleteTemplateMetaByKey($templateId: ID!, $key: String!) {
         result: deleteTemplateMetaByKey(templateId: $templateId, metaKey: $key)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { templateId: string; key: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { templateId: string; key: string }>,
     // 删除模版 meta
     deleteMeta: gql`
       mutation deleteTemplateMeta($id: ID!) {
         result: deleteTemplateMeta(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
   request,
 });

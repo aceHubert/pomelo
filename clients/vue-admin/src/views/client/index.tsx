@@ -90,7 +90,7 @@ export default Form.create({})(
             }}
             class="primary-7--text hover:primary-6--text active:primary-8--text"
           >
-            {i18n.tv('page_clients.action_btn_text.grant_type', '授权类型')}
+            {i18n.tv('page_clients.action_btn_text.grant_type', '授权模式')}
           </router-link>,
           <router-link
             to={{

@@ -127,7 +127,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
       mutation updateIdentityResource($id: ID!, $model: UpdateIdentityResourceInput!) {
         result: updateIdentityResource(id: $id, model: $model)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: number; model: UpdateIdentityResourceInput }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number; model: UpdateIdentityResourceInput }>,
     getClaims: gql`
       query getIdentityClaims($identityResourceId: ID!) {
         identityClaims(identityResourceId: $identityResourceId) {
@@ -157,7 +157,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
       mutation deleteIdentityClaim($id: ID!) {
         result: deleteIdentityClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
     getProperties: gql`
       query getIdentityProperties($identityResourceId: ID!) {
         identityProperties(identityResourceId: $identityResourceId) {
@@ -188,7 +188,7 @@ export const useIdentityResourceApi = defineRegistApi('identity_resource', {
       mutation deleteIdentityProperty($id: ID!) {
         result: deleteIdentityProperty(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
   request,
 });

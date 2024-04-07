@@ -31,7 +31,8 @@
       "load_error_text": "表单加载错误！",
       "submit_success_text": "提交成功",
       "submit_success_title": "提示",
-      "submit_failed_title": "提交失败"
+      "submit_failed_title": "提交失败",
+      "submit_action_not_found": "未找到提交地址！"
     }
   },
   "post_template": {

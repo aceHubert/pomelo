@@ -2,11 +2,12 @@ import { defineComponent, ref, computed } from '@vue/composition-api';
 import { promisify, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { createForm } from '@formily/core';
 import { createSchemaField } from '@formily/vue';
-import { Card, Rate } from 'ant-design-vue';
+import { Card, Rate, Modal } from 'ant-design-vue';
 import { Form, FormButtonGroup, Submit } from '@formily/antdv';
 import * as Antdv from '@formily/antdv';
 import { OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { Spin, Result } from '@/components';
+import { useLocationMixin } from '@/mixins';
 import { useI18n, useOptions } from '@/hooks';
 import { FormMetaPresetKeys } from '@/fetch/apis';
 import { checkSchemaValid, type IFormilySchema } from './utils';
@@ -34,7 +35,7 @@ export interface DesktopFormProps {
   framework: SchemaFramework;
   loading?: boolean;
   error?: Error;
-  onSubmit: (value: any) => Promise<any>;
+  onSubmit: (value: any) => Promise<{ tips?: string; redirect?: string } | undefined>;
   onSubmitFailed?: (errors: any) => void;
 }
 
@@ -59,6 +60,7 @@ export default defineComponent({
   setup(props: DesktopFormProps, { listeners }) {
     const i18n = useI18n();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
+    const localtionMixin = useLocationMixin();
 
     const schema = computed(() => {
       if (props.framework === 'FORMILYJS') {
@@ -96,8 +98,32 @@ export default defineComponent({
 
       submitingRef.value = true;
       return promisify(submit(value))
-        .then(() => {
-          form.reset('*');
+        .then((result) => {
+          // 没有 redirect 时需要默认提示
+          const tips =
+            result?.tips ??
+            (!result?.redirect ? i18n.tv('form_template.index.submit_success_text', '提交成功') : void 0);
+          (tips
+            ? new Promise((resolve, reject) => {
+                Modal.success({
+                  title: i18n.tv('form_template.index.submit_success_title', '提示') as string,
+                  content: tips,
+                  onOk: () => resolve(null),
+                  onCancel: reject,
+                });
+              })
+            : Promise.resolve(null)
+          ).then(() => {
+            form.reset('*');
+
+            result?.redirect && localtionMixin.goTo(result?.redirect, true);
+          });
+        })
+        .catch((err) => {
+          Modal.error({
+            title: i18n.tv('form_template.index.submit_failed_title', '提交失败'),
+            content: err.message,
+          });
         })
         .finally(() => {
           submitingRef.value = false;

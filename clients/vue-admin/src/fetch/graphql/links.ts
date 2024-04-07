@@ -38,6 +38,9 @@ export const createWebsocketLink = (url: string | (() => string | Promise<string
   new GraphQLWsLink(
     createClient({
       url,
+      retryAttempts: Infinity,
+      shouldRetry: () => true,
+      keepAlive: 10000,
       connectionParams: async () => {
         const token = await userManager
           .getUser()

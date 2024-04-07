@@ -141,11 +141,11 @@ export const useFormApi = defineRegistApi('template_form', {
       }
     ` as TypedMutationDocumentNode<
       {
-        result: boolean;
-        submitActionResult: boolean;
-        submitSuccessRedirectResult: boolean;
-        submitSuccessTipsResult: boolean;
-        featureImageResult: boolean;
+        result: null;
+        submitActionResult: null;
+        submitSuccessRedirectResult: null;
+        submitSuccessTipsResult: null;
+        featureImageResult: null;
       },
       {
         id: string;

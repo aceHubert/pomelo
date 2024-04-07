@@ -35,7 +35,8 @@
       "load_error_text": "Form loading error!",
       "submit_success_text": "Submitted successfully",
       "submit_success_title": "Tips",
-      "submit_failed_title": "Submission Failed"
+      "submit_failed_title": "Submission Failed",
+      "submit_action_not_found": "Submission address not found!"
     }
   },
   "post_template": {

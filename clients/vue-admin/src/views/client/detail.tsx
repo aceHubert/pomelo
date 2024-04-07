@@ -156,8 +156,8 @@ export default Form.create({})(
               return () => (updateStatusSubmiting.value = false);
             },
           })
-          .then(({ result }) => {
-            result && ($detailRes.$result!.enabled = checked);
+          .then(() => {
+            $detailRes.$result!.enabled = checked;
           })
           .catch((err) => {
             message.error(err.message);
@@ -174,8 +174,8 @@ export default Form.create({})(
               },
             },
           })
-          .then(({ result }) => {
-            result && set($detailRes.$result!, field, value);
+          .then(() => {
+            set($detailRes.$result!, field, value);
           })
           .catch((err) => {
             message.error(err.message);

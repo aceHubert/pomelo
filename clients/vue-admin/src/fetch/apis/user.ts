@@ -52,7 +52,7 @@ export const useUserApi = defineRegistApi('user', {
       mutation updateUserMetaByKey($userId: ID!, $key: String!, $value: String!) {
         result: updateUserMetaByKey(userId: $userId, metaKey: $key, metaValue: $value)
       }
-    ` as TypedMutationDocumentNode<{ result: boolean }, { userId: string; key: string; value: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { userId: string; key: string; value: string }>,
   },
   request,
 });

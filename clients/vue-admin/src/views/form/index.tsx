@@ -211,18 +211,13 @@ export default defineComponent({
                         ? 'warning--text'
                         : ''
                     }
-                    scopedSlots={{
-                      default: ({ href }) => (
-                        <a href={href}>
-                          {record.status === TemplateStatus.Pending &&
-                          record.actionCapability.publish &&
-                          !record.isSelfContent
-                            ? i18n.tv('page_templates.btn_text.review', '审核')
-                            : i18n.tv('common.btn_text.edit', '编辑')}
-                        </a>
-                      ),
-                    }}
-                  ></router-link>
+                  >
+                    {record.status === TemplateStatus.Pending &&
+                    record.actionCapability.publish &&
+                    !record.isSelfContent
+                      ? i18n.tv('page_templates.btn_text.review', '审核')
+                      : i18n.tv('common.btn_text.edit', '编辑')}
+                  </router-link>
                 ),
                 record.isSelfContent && (
                   <a

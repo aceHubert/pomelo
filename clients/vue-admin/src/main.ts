@@ -89,10 +89,12 @@ function auth(this: Vue, to: Route, from: Route, next: Next) {
   } else {
     userManager.getUser().then(function (user) {
       if (user === null || user.expired) {
-        userManager.signin({ noInteractive: true });
+        userManager.signin({
+          noInteractive: true,
+          redirect_uri: `${window.location.origin}${to.fullPath}`,
+        });
       } else {
         next();
-
         // if (user.profile.ut !== '1') {
         //   next({ name: '403.8', replace: true });
         // } else {

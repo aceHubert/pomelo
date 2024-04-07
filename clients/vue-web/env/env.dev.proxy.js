@@ -6,7 +6,7 @@
 
   // env.infrastructureApiBase = '/infrastructure/api';
   env.infrastructureGraphqlBase = '/infrastructure/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'wss://localhost:5003/graphql';
+  env.infrastructureGraphqlSubscriptionBase = 'ws://localhost:5003/graphql';
 
   env.siteInitURL = 'https://localhost:5011/site-init';
 
