@@ -12,10 +12,12 @@ import type { OmitVue } from '../../types';
 export type AvatarDropdownAction = 'profile' | 'settings' | 'signout' | string;
 
 export type AvatarDropdownProps = {
-  /** 显示名 */
-  name?: string;
   /** 头像图片路径 */
   src?: string;
+  /** 显示名 */
+  name?: string;
+  /** 是否显示用户名 */
+  nameVisible?: boolean;
   /** 头像大小 */
   avatarProps?: Omit<OmitVue<AvatarProps>, 'src'>;
   /** 当没有头像图片但有用户名（显示用户名第一个字母），显示的文字颜色 */
@@ -35,11 +37,12 @@ export default defineComponent({
   name: 'AvatarDropdown',
   props: {
     ...props,
-    name: String,
     src: String,
+    name: String,
+    nameVisible: { type: Boolean, default: true },
     avatarProps: Object,
-    avatarColor: { type: String, default: '#fff' },
-    avatarBackgroundColor: { type: String, default: '#f67280' },
+    avatarColor: String,
+    avatarBackgroundColor: String,
     popoverDisabled: { type: Boolean, default: false },
     prefixCls: String,
     i18nKeyPrefix: { type: String, default: 'components.avatar_dropdown' },
@@ -115,7 +118,7 @@ export default defineComponent({
             {slots.avatar?.() ??
               (props.src ? (
                 <Avatar
-                  class={`${prefixCls}__avatar`}
+                  key="image avatar"
                   props={{
                     ...props.avatarProps,
                     src: props.src,
@@ -125,7 +128,7 @@ export default defineComponent({
                 />
               ) : props.name ? (
                 <Avatar
-                  class={`${prefixCls}__avatar`}
+                  key="name avatar"
                   style={{ color: props.avatarColor, backgroundColor: props.avatarBackgroundColor }}
                   props={{
                     ...props.avatarProps,
@@ -137,7 +140,8 @@ export default defineComponent({
                 </Avatar>
               ) : (
                 <Avatar
-                  class={`${prefixCls}__avatar`}
+                  key="default avatar"
+                  style={{ color: props.avatarColor, backgroundColor: props.avatarBackgroundColor }}
                   props={{
                     ...props.avatarProps,
                     size: props.avatarProps?.size ?? 'small',
@@ -146,14 +150,16 @@ export default defineComponent({
                 />
               ))}
           </div>
-          <div class={[`${prefixCls}-name__wrapper`, { 'pl-2': slots.name || props.name || slots.description }]}>
-            {(slots.name || props.name) && (
-              <p class={`${prefixCls}__name`} title={slots.name?.() ?? props.name}>
-                {slots.name?.() ?? props.name}
-              </p>
-            )}
-            {slots.description && <div class={`${prefixCls}__description`}>{slots.description()}</div>}
-          </div>
+          {props.nameVisible && (
+            <div class={[`${prefixCls}-name__wrapper`, { 'pl-2': slots.name || props.name || slots.description }]}>
+              {(slots.name || props.name) && (
+                <p class={`${prefixCls}__name`} title={slots.name?.() ?? props.name}>
+                  {slots.name?.() ?? props.name}
+                </p>
+              )}
+              {slots.description && <div class={`${prefixCls}__description`}>{slots.description()}</div>}
+            </div>
+          )}
         </div>
       );
 

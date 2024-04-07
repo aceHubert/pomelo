@@ -29,8 +29,8 @@ export default defineComponent({
     prefixCls: String,
     i18nKeyPrefix: { type: String, default: 'components.message_dropdown' },
   },
-  emits: ['showMore', 'itemView', 'makeAsRead', 'visibleChange'],
-  setup(props: MessageDropdownProps, { emit, slots }) {
+  emits: ['showMore', 'view', 'read', 'visibleChange'],
+  setup(props: MessageDropdownProps, { emit, listeners, slots }) {
     const configProvider = useConfigProvider();
 
     const customizePrefixCls = props.prefixCls;
@@ -61,7 +61,7 @@ export default defineComponent({
             overlayClassName: `${prefixCls}-overlay ${popoverProps?.overlayClassName ?? ''}`,
           }}
         >
-          <span class={`${prefixCls}-wrapper`}>
+          <span class={`${prefixCls}__wrapper`}>
             {slots.default ? (
               slots.default(props.count)
             ) : (
@@ -84,18 +84,19 @@ export default defineComponent({
                         <List.Item>
                           <List.Item.Meta title={item.title} description={item.content}></List.Item.Meta>
                           <div class={`${prefixCls}-list__content`}>
-                            {item.to ? (
-                              <Button type="link" onClick={() => emit('itemView', item)}>
-                                {configProvider.i18nRender(`${props.i18nKeyPrefix}.item.view_link_text`, 'View')}
-                              </Button>
-                            ) : (
-                              <Button type="link" onClick={() => emit('makeAsRead', item)}>
+                            {listeners.read && (
+                              <Button type="link" size="small" onClick={() => emit('read', item)}>
                                 {configProvider.i18nRender(
                                   `${props.i18nKeyPrefix}.item.make_as_read_link_text`,
                                   'Make as read',
                                 )}
                               </Button>
                             )}
+                            {item.to && listeners.view ? (
+                              <Button type="link" size="small" onClick={() => emit('view', item)}>
+                                {configProvider.i18nRender(`${props.i18nKeyPrefix}.item.view_link_text`, 'View')}
+                              </Button>
+                            ) : null}
                           </div>
                         </List.Item>
                       ),

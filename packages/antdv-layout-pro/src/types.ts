@@ -204,8 +204,17 @@ export interface ColorConfig {
 /**
  * Message
  */
-export interface MessageConfig {
+export interface MessageConfig<T = any> {
+  /**
+   * 标题
+   */
   title: string;
+  /**
+   * 内容
+   */
   content: string;
-  to?: string;
+  /**
+   * href, 显示 View 按纽
+   */
+  to?: T;
 }

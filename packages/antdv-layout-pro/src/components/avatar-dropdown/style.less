@@ -13,11 +13,13 @@
     display: flex;
     flex: none;
     cursor: pointer;
-  }
 
-  &__avatar {
-    top: 50%;
-    transform: translateY(-50%);
+    .@{ant-prefix}-avatar {
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-primary, @text-color);
+      background-color: @var-primary;
+    }
   }
 
   &-name__wrapper{
