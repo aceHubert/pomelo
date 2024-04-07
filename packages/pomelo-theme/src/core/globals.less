@@ -231,7 +231,7 @@ each(@flex-wraps,{
   }
 });
 
-@justify-contents: start, end, center, space-between, space-around;
+@justify-contents: flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, space-evenly;
 
 each(@justify-contents,{
   .justify-content-@{value} {
@@ -239,13 +239,54 @@ each(@justify-contents,{
   }
 });
 
-@align-items: start, end, center, baseline, stretch;
+@justify-items: flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, space-evenly, self-start, self-end;
+
+each(@justify-items,{
+  .justify-items-@{value} {
+    justify-items: @value !important;
+  }
+});
+
+@justify-selfs: auto, flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, self-start, self-end;
+
+each(@justify-selfs,{
+  .justify-self-@{value} {
+    justify-self: @value !important;
+  }
+});
+
+@align-contents: baseline, flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, space-evenly;
+
+each(@align-contents,{
+  .align-content-@{value} {
+    align-content: @value !important;
+  }
+});
+
+@align-items: baseline, flex-start, flex-end, start, end, center, stretch, self-start, self-end;
 
 each(@align-items,{
   .align-items-@{value} {
     align-items: @value !important;
   }
 });
+
+@align-selfs: auto, baseline, flex-start, flex-end, start, end, center, stretch;
+
+each(@align-selfs,{
+  .align-self-@{value} {
+    align-self: @value !important;
+  }
+});
+
+each(range(16),.(@v,@k){
+  @key: @k;
+  @value: @v * @spacing-width;
+
+  .flex-gap-@{key} {
+    gap: @value !important;
+  }
+}); // 1-16
 
 .flex-none {
   flex: none !important;

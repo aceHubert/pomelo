@@ -9,6 +9,7 @@ module.exports = function (grunt) {
     plugins: [
       new (require('less-plugin-autoprefix'))({ browsers: ['> 1%', 'last 2 versions', 'not ie <= 8'] }),
       new (require('less-plugin-clean-css'))({ compatibility: 'ie9,-properties.merging' }),
+      new (require('less-plugin-npm-import'))(),
     ],
     modifyVars: {},
     banner: `/*!<%= pkg.name %> V<%= pkg.version %> | <%= pkg.license %> License */\n`,
