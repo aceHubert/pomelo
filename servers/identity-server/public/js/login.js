@@ -41,7 +41,7 @@ $(document).ready(function () {
       data,
     })
       .then(async (res) => {
-        const data = await res.json();
+        const data = res.data;
         if (!data.success) throw new Error(data.message);
         if (data.message) {
           showToast(data.message, 'success');
