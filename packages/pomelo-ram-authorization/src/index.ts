@@ -1,4 +1,3 @@
-import './types';
 export * from './core';
 export * from './interfaces/ram-authorization-options.interface';
 export * from './ram-authorized.guard';

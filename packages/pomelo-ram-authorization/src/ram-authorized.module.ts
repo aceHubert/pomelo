@@ -14,9 +14,7 @@ const DefaultRamAuthorizationOptions: Partial<RamAuthorizationOptions> = {
   userProperty: 'user',
 };
 
-@Module({
-  exports: [RAM_AUTHORIZATION_OPTIONS],
-})
+@Module({})
 export class RamAuthorizationModule {
   static forRoot(options: RamAuthorizationOptions): DynamicModule {
     options = { ...DefaultRamAuthorizationOptions, ...options };
@@ -31,6 +29,7 @@ export class RamAuthorizationModule {
           useValue: options,
         },
       ],
+      exports: [RAM_AUTHORIZATION_OPTIONS],
     };
   }
 
@@ -40,6 +39,7 @@ export class RamAuthorizationModule {
       global: true,
       imports: options.imports || [],
       providers: this.createAsyncProviders(options),
+      exports: [RAM_AUTHORIZATION_OPTIONS],
     };
   }
 

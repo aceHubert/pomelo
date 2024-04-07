@@ -7,11 +7,11 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
-import { getRequest, RequestUser } from '@ace-pomelo/shared-server';
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
 import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
 import { RamAuthorizationOptions } from './interfaces/ram-authorization-options.interface';
+import { getContextObject } from './utils/get-context-object';
 import { RAM_AUTHORIZATION_OPTIONS, RAM_AUTHORIZATION_ACTION_KEY } from './constants';
 
 /**
@@ -25,8 +25,8 @@ export class RamAuthorizedGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = getRequest(context);
-    if (!request) {
+    const cxt = getContextObject(context);
+    if (!cxt) {
       throw Error(`context type: ${context.getType()} not supported`);
     }
 
@@ -37,7 +37,7 @@ export class RamAuthorizedGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    const user = request[this.options.userProperty!] as RequestUser;
+    const user = cxt[this.options.userProperty!] as Record<string, any> | undefined;
     if (!user) {
       // 没有的提供 token, return 401
       throw new UnauthorizedException("Access denied, You don't have permission for this action!");
@@ -122,7 +122,7 @@ export class RamAuthorizedGuard implements CanActivate {
    * @param rams 策略
    * @returns
    */
-  private hasRamPermission(user: RequestUser, action: string): boolean {
+  private hasRamPermission(user: Record<string, any>, action: string): boolean {
     console.log('ram check', user.ramsClaim, action);
     return true;
     // const hasRam = (userRamsClaim: string[]): boolean => {
