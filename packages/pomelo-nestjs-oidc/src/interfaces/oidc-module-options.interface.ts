@@ -11,8 +11,14 @@ type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T
 export type ExtraHeader = string | (() => string);
 
 export type OidcModuleOptions = {
+  /**
+   * The url to the login controller
+   */
   origin: string;
 
+  /**
+   * Authorization parameters to be sent to the authorization endpoint
+   */
   authParams: AuthorizationParameters & {
     /** The OIDC/OAuth2 post-logout redirect URI */
     post_logout_redirect_uri?: string;
@@ -48,11 +54,21 @@ export type OidcModuleOptions = {
   defaultHttpOptions?: HttpOptions;
 
   /**
+   * check user role permission
+   * @param user user info
+   * @param roles roles on method or class
+   */
+  checkRolePremissionFactory?: (user: Express.User, roles: string[]) => boolean;
+
+  /**
    * Disable to register Login Controllers
    * @default false
    */
   disableController?: boolean;
 
+  /**
+   * is global module
+   */
   isGlobal?: boolean;
 } & XOR<
   {
@@ -75,9 +91,12 @@ export interface OidcOptionsFactory {
 }
 
 export interface OidcModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  /**
+   * is global module
+   */
   isGlobal?: boolean;
   /**
-   * Disable to register Login Middleware & Controller
+   * Disable to register Login Controller
    * @default false
    */
   disableController?: boolean;

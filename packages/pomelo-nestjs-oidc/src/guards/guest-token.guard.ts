@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { OidcService } from '../oidc.service';
-import { AUTHORIZATION_KEY } from '../oidc.constants';
+import { AUTHORIZATION_KEY, ALLOWANONYMOUS_KEY } from '../oidc.constants';
 import { hasDecorator } from '../utils/has-decorator';
 import { getContextObject } from '../utils/get-context-object';
 
@@ -16,18 +16,25 @@ export class GuestTokenGuard implements CanActivate {
       throw Error(`context type: ${context.getType()} not supported`);
     }
 
+    const anonymous = hasDecorator(ALLOWANONYMOUS_KEY, context, this.reflector);
+
+    // @Anonymous() decorator, return true
+    if (anonymous) return true;
+
     const authorized = hasDecorator(AUTHORIZATION_KEY, context, this.reflector);
 
     // no @Authorized() decorator, return true
-    if (authorized !== true) return true;
+    if (!authorized) return true;
 
     if (ctx.isAuthenticated()) {
       if (ctx.user.expired) {
         if (ctx.user.refresh_token) {
           const params = ctx.params;
-          const idpKey = this.oidcService.getIdpInfosKey(params.tenantId, params.channelType as any);
           await this.oidcService
-            .requestTokenRefresh(ctx.user.refresh_token, idpKey)
+            .requestTokenRefresh(ctx.user.refresh_token, {
+              tenantId: params.tenantId,
+              channelType: params.channelType as any,
+            })
             .then((data) => {
               this.oidcService.updateUserToken(data, ctx);
               data.refresh_expires_in && this.oidcService.updateSessionDuration(data.refresh_expires_in as number, ctx);

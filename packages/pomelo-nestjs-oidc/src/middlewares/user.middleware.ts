@@ -8,12 +8,12 @@ export class UserMiddleware implements NestMiddleware {
 
   async use(req: any, res: any, next: Function) {
     try {
-      const jwt = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-      if (!jwt) throw new Error('No JWT found in request!');
+      const accessToken = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+      if (!accessToken) throw new Error('No bearer token found in request!');
 
       const { tenantId, channelType } = this.oidcService.getMultitenantParamsFromRequest(req);
 
-      const payload = await this.oidcService.verifyToken(jwt, tenantId, channelType);
+      const payload = await this.oidcService.verifyToken(accessToken, tenantId, channelType);
 
       payload['tenant_id'] = tenantId;
       payload['channel_type'] = channelType;

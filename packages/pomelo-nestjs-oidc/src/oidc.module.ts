@@ -1,6 +1,5 @@
 import { APP_GUARD } from '@nestjs/core';
 import { DynamicModule, MiddlewareConsumer, Module, NestModule, Provider, RequestMethod } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import {
   AuthMultitenantMultiChannelController,
   AuthMultitenantController,
@@ -11,29 +10,12 @@ import {
 import { GuestTokenGuard, TokenGuard, TenancyGuard } from './guards';
 import { OidcModuleAsyncOptions, OidcModuleOptions, OidcOptionsFactory } from './interfaces';
 import { UserMiddleware, LoginMiddleware } from './middlewares';
-import { UserInfoService } from './userinfo.service';
-import { ClaimsService } from './claims.service';
 import { OidcService } from './oidc.service';
+import { SessionSerializer } from './session.serializer';
+import { mergeDefaults } from './utils/merge-defaults';
 import { OIDC_MODULE_OPTIONS } from './oidc.constants';
-import { mergeDefaults } from './utils';
-import { SessionSerializer } from './utils/session.serializer';
 
-@Module({
-  imports: [JwtModule.register({})],
-  providers: [
-    SessionSerializer,
-    TokenGuard,
-    GuestTokenGuard,
-    UserInfoService,
-    ClaimsService,
-    OidcService,
-    {
-      provide: APP_GUARD,
-      useClass: TenancyGuard,
-    },
-  ],
-  exports: [OIDC_MODULE_OPTIONS, UserInfoService, ClaimsService, OidcService],
-})
+@Module({})
 export class OidcModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
@@ -54,12 +36,6 @@ export class OidcModule implements NestModule {
     return {
       module: OidcModule,
       global: isGlobal,
-      providers: [
-        {
-          provide: OIDC_MODULE_OPTIONS,
-          useValue: mergeDefaults(options),
-        },
-      ],
       controllers:
         options.disableController === true
           ? []
@@ -70,6 +46,21 @@ export class OidcModule implements NestModule {
               LoginCallbackController,
               TenantSwitchController,
             ],
+      providers: [
+        {
+          provide: OIDC_MODULE_OPTIONS,
+          useValue: mergeDefaults(options),
+        },
+        SessionSerializer,
+        TokenGuard,
+        GuestTokenGuard,
+        OidcService,
+        {
+          provide: APP_GUARD,
+          useClass: TenancyGuard,
+        },
+      ],
+      exports: [OIDC_MODULE_OPTIONS, OidcService],
     };
   }
 
@@ -77,8 +68,6 @@ export class OidcModule implements NestModule {
     return {
       module: OidcModule,
       global: options.isGlobal,
-      imports: options.imports,
-      providers: [...this.createAsyncProviders(options)],
       controllers:
         options.disableController === true
           ? []
@@ -89,6 +78,19 @@ export class OidcModule implements NestModule {
               LoginCallbackController,
               TenantSwitchController,
             ],
+      imports: options.imports,
+      providers: [
+        ...this.createAsyncProviders(options),
+        SessionSerializer,
+        TokenGuard,
+        GuestTokenGuard,
+        OidcService,
+        {
+          provide: APP_GUARD,
+          useClass: TenancyGuard,
+        },
+      ],
+      exports: [OIDC_MODULE_OPTIONS, OidcService],
     };
   }
 

@@ -5,6 +5,7 @@ export * from './guards';
 export * from './interfaces';
 export * from './middlewares';
 export * from './templates';
+export * from './session';
 export * from './oidc.module';
 export * from './oidc.service';
 export * from './oidc.strategy';

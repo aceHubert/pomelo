@@ -1,6 +1,6 @@
 import { SessionOptions } from 'express-session';
 import { v4 as uuid } from 'uuid';
-import { ChannelType } from '../../interfaces';
+import { ChannelType } from '../interfaces';
 
 const session: SessionOptions = {
   secret: process.env.SESSION_SECRET || uuid(), // to sign session id

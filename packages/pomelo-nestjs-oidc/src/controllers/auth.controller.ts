@@ -1,7 +1,8 @@
 import { Controller, Get, Header, Next, Param, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { User, UserProfile } from '../helpers/user';
 import { IsAvailableRouteForMultitenant, CurrentUser } from '../decorators';
-import { Params, User } from '../interfaces';
+import { Params } from '../interfaces';
 import { OidcService } from '../oidc.service';
 
 @IsAvailableRouteForMultitenant(false)
@@ -11,7 +12,7 @@ export class AuthController {
 
   @Get('/user')
   @Header('Cache-Control', 'no-store, max-age=0')
-  user(@CurrentUser() user?: User): User['profile'] | { isGuest: true } {
+  user(@CurrentUser() user?: User): UserProfile | { isGuest: true } {
     return user?.profile ?? { isGuest: true };
   }
 

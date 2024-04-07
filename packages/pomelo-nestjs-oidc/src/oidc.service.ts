@@ -2,13 +2,11 @@ import passport from 'passport';
 import { v4 as uuid } from 'uuid';
 import { HttpStatus, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { JWKS } from 'jose';
-import { Client, Issuer, custom, TokenSet, IdTokenClaims } from 'openid-client';
-import { Params, ChannelType, User, UserProfile, OidcModuleOptions } from './interfaces';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { Client, Issuer, custom, TokenSet } from 'openid-client';
+import { User as OidcUser, UserProfile } from './helpers/user';
+import { Params, ChannelType, OidcModuleOptions } from './interfaces';
 import { renderPopupPage, renderMsgPage } from './templates';
-import { JwtUtils } from './utils';
-import { ClaimsService } from './claims.service';
-import { UserInfoService } from './userinfo.service';
 import { OidcStrategy } from './oidc.strategy';
 import { OIDC_MODULE_OPTIONS, SESSION_STATE_COOKIE } from './oidc.constants';
 
@@ -20,17 +18,13 @@ export class OidcService {
   idpInfos: {
     [tokenName: string]: {
       trustIssuer: Issuer<Client>;
-      tokenStore: JWKS.KeyStore;
+      keyStore: ReturnType<typeof createRemoteJWKSet>;
       client: Client;
       strategy: OidcStrategy;
     };
   } = {};
 
-  constructor(
-    @Inject(OIDC_MODULE_OPTIONS) public options: OidcModuleOptions,
-    private claimsService: ClaimsService,
-    private userinfoService: UserInfoService,
-  ) {
+  constructor(@Inject(OIDC_MODULE_OPTIONS) public options: OidcModuleOptions) {
     this.isMultitenant = !!this.options.issuerOrigin;
   }
 
@@ -74,14 +68,15 @@ export class OidcService {
       }
       const trustIssuer = await Issuer.discover(issuer);
       const client = new trustIssuer.Client(clientMetadata);
-      const tokenStore = await trustIssuer.keystore();
 
+      this.assertIssuerConfiguration(trustIssuer, 'jwks_uri');
+      const keyStore = await createRemoteJWKSet(new URL(trustIssuer.metadata.jwks_uri!));
       const idpKey = this.getIdpInfosKey(tenantId, channelType);
 
       this.idpInfos[idpKey] = {
         trustIssuer,
         client,
-        tokenStore,
+        keyStore,
         // @ts-expect-error client is required in OidcStrategy, will set it later
         strategy,
       };
@@ -89,7 +84,16 @@ export class OidcService {
       this.options.authParams.redirect_uri = this.options.authParams.redirect_uri ?? redirectUri;
       this.options.authParams.nonce = this.options.authParams.nonce === 'true' ? uuid() : this.options.authParams.nonce;
 
-      strategy = new OidcStrategy(this, idpKey, tenantId, channelType);
+      strategy = new OidcStrategy({
+        client,
+        params: this.options.authParams,
+        usePKCE: this.options.usePKCE,
+        loadUserInfo: this.options.loadUserInfo,
+        filterProtocolClaims: this.options.filterProtocolClaims,
+        mergeClaimsStrategy: this.options.mergeClaimsStrategy,
+        tenantId,
+        channelType,
+      });
       this.idpInfos[idpKey].strategy = strategy;
 
       return strategy;
@@ -104,9 +108,9 @@ export class OidcService {
           },
         };
         this.logger.error(errorMsg);
-        throw new Error();
+        throw err;
       }
-      this.logger.error(`Error accessing the issuer/tokenStore, Error: ${err.stack}`);
+      this.logger.error(`Error accessing the issuer/keyStore, Error: ${err.stack}`);
       this.logger.log('Terminating application');
       process.exit(1);
     }
@@ -227,14 +231,12 @@ export class OidcService {
     if (!req.isAuthenticated()) {
       return res.sendStatus(401);
     }
-    const { tenantId, channelType } = this.getMultitenantParams(params, req.session);
 
     if (req.user.expired) {
       if (!req.user.refresh_token) {
         res.status(401).send('refresh_token is missing!');
       } else {
-        const idpKey = this.getIdpInfosKey(tenantId, channelType);
-        return await this.requestTokenRefresh(req.user.refresh_token, idpKey)
+        return await this.requestTokenRefresh(req.user.refresh_token, this.getMultitenantParams(params, req.session))
           .then((data) => {
             this.updateUserToken(data, req);
             data.refresh_expires_in && this.updateSessionDuration(data.refresh_expires_in as number, req);
@@ -273,9 +275,9 @@ export class OidcService {
   /**
    * send refresh token request
    * @param refreshToken refresh token
-   * @param idpKey idp key
    */
-  requestTokenRefresh(refreshToken: string, idpKey: string): Promise<TokenSet> {
+  requestTokenRefresh(refreshToken: string, params: Params): Promise<TokenSet> {
+    const idpKey = this.getIdpInfosKey(params.tenantId, params.channelType);
     return this.idpInfos[idpKey].client.refresh(refreshToken);
   }
 
@@ -295,67 +297,17 @@ export class OidcService {
    */
   updateUserToken(tokenset: TokenSet, req: Request) {
     if (req.user) {
-      req.user = this.buildUser(tokenset);
+      req.user = new OidcUser({
+        id_token: tokenset.id_token,
+        session_state: tokenset.session_state,
+        access_token: tokenset.access_token!,
+        refresh_token: tokenset.refresh_token,
+        token_type: tokenset.token_type || 'Bearer',
+        scope: tokenset.scope,
+        profile: tokenset.profile,
+        expires_at: tokenset.expires_at,
+      });
     }
-  }
-
-  /**
-   * get idp infos key
-   */
-  getIdpInfosKey(tenantId?: string, channelType?: ChannelType): string {
-    return `${tenantId ?? 'common'}.${channelType ?? 'none'}`;
-  }
-
-  /**
-   * build user
-   */
-  buildUser(tokenset: TokenSet, verifySub?: string) {
-    const user = new User({
-      id_token: tokenset.id_token,
-      session_state: tokenset.session_state,
-      access_token: tokenset.access_token!,
-      refresh_token: tokenset.refresh_token,
-      token_type: tokenset.token_type || 'Bearer',
-      scope: tokenset.scope,
-      profile: tokenset.profile,
-      expires_at: tokenset.expires_at,
-    });
-
-    if (verifySub) {
-      if (verifySub !== user.profile.sub) {
-        this.logger.debug('current user does not match user returned from signin. sub from signin:', user.profile.sub);
-        throw new UnauthorizedException(tokenset, { description: 'login_required' });
-      }
-      this.logger.debug('current user matches user returned from signin');
-    }
-
-    return user;
-  }
-
-  /**
-   * process userinfo claims from id token and userinfo endpoint(optional)
-   */
-  async processClaims(tokenset: TokenSet, idpKey: string, skipUserInfo = false, validateSub = true): Promise<void> {
-    tokenset.profile = this.claimsService.filterProtocolClaims(tokenset.claims());
-
-    if (skipUserInfo || !this.options.loadUserInfo || !tokenset.access_token) {
-      this.logger.debug('not loading user info');
-      return;
-    }
-
-    this.logger.debug('loading user info');
-    const claims = await this.userinfoService.getClaims(tokenset.access_token!, this, idpKey);
-    this.logger.debug('user info claims received from user info endpoint');
-
-    if (validateSub && claims.sub !== tokenset.profile.sub) {
-      throw new Error('subject from UserInfo response does not match subject in ID Token');
-    }
-
-    tokenset.profile = this.claimsService.mergeClaims(
-      tokenset.profile,
-      this.claimsService.filterProtocolClaims(claims as IdTokenClaims),
-    );
-    this.logger.debug('user info claims received, updated profile:', tokenset.profile);
   }
 
   /**
@@ -366,12 +318,27 @@ export class OidcService {
    */
   async verifyToken(accessToken: string, tenantId?: string, channelType?: ChannelType) {
     const idpKey = this.getIdpInfosKey(tenantId, channelType);
-    let keyStore;
-    if (!(keyStore = this.idpInfos[idpKey]?.tokenStore)) {
-      await this.createStrategy(tenantId, channelType);
-      keyStore = this.idpInfos[idpKey]?.tokenStore;
+    if (accessToken.split('.').length !== 3) {
+      // opaque token
+      let client;
+      if (!(client = this.idpInfos[idpKey]?.client)) {
+        await this.createStrategy(tenantId, channelType);
+        client = this.idpInfos[idpKey]!.client;
+      }
+      const { active, ...payload } = await client.introspect(accessToken, 'access_token');
+      this.logger.debug(`Token introspection: ${active}`);
+      if (!active) throw new UnauthorizedException('Token is not active');
+
+      return payload;
+    } else {
+      // jwt token
+      let keyStore;
+      if (!(keyStore = this.idpInfos[idpKey]?.keyStore)) {
+        await this.createStrategy(tenantId, channelType);
+        keyStore = this.idpInfos[idpKey]!.keyStore;
+      }
+      return (await jwtVerify(accessToken, keyStore)).payload;
     }
-    return JwtUtils.verify(accessToken, keyStore);
   }
 
   getPrefixFromRequest(req: Request) {
@@ -407,6 +374,16 @@ export class OidcService {
     const channelType = this.options.channelType ? undefined : args.find((arg) => arg?.channelType)?.channelType;
     return { tenantId, channelType };
   }
+
+  private getIdpInfosKey(tenantId?: string, channelType?: ChannelType): string {
+    return `${tenantId ?? 'common'}.${channelType ?? 'none'}`;
+  }
+
+  private assertIssuerConfiguration(issuer: Issuer, endpoint: string) {
+    if (!issuer[endpoint]) {
+      throw new TypeError(`${endpoint} must be configured on the issuer`);
+    }
+  }
 }
 
 declare module 'openid-client' {
@@ -415,8 +392,8 @@ declare module 'openid-client' {
   }
 }
 
-declare module 'express' {
-  interface Request {
-    user?: User;
+declare global {
+  namespace Express {
+    class User extends OidcUser {}
   }
 }

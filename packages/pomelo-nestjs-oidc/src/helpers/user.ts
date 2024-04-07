@@ -1,7 +1,7 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-import { Timer } from '../utils/timer';
+import { Timer } from './timer';
 import { IdTokenClaims } from './claims.interface';
 
 /**
