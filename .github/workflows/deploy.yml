@@ -102,7 +102,7 @@ jobs:
       - name: Build the  Docker image
         run:
           | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true  --build-arg BUILDKIT_INLINE_CACHE=1 --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
+          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest
   ssh-deploy:
@@ -118,10 +118,10 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
           key: ${{ secrets.SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
-          script: | # 重启更新镜像
+          script: | # 发布镜像并删除之前的镜像
             cd ${{ env.DOCKER_COMPOSE_DIR }}
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
             docker login -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} https://${{ env.REGISTRY }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
-            docker images --filter "dangling=true" -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | xargs --no-run-if-empty docker rmi
+            docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             rm -f .env.${{ github.run_id }}

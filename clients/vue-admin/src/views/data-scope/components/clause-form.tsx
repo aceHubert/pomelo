@@ -248,8 +248,8 @@ export default defineComponent({
           ships.push(ship);
         }
       }
-      // 如果可先值为数级，操作只允许等于和不等于
-      if (Array.isArray(field._allowedValues)) {
+      // 如果可选项时，操作只允许等于和不等于
+      if (Array.isArray(field._allowedValues) && field._allowedValues.length) {
         return ships.filter(({ value: operator }) => [ClauseOperator.Equal, ClauseOperator.Unequal].includes(operator));
       } else {
         return ships;
