@@ -1,6 +1,6 @@
 import { ExecutionContext } from '@nestjs/common';
 
-export function getRequest<Req = any>(context: ExecutionContext) {
+export function getContextObject<Req = any>(context: ExecutionContext) {
   switch (context.getType<string>()) {
     case 'http':
       return context.switchToHttp().getRequest<Req>();
