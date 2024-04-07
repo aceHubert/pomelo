@@ -1,16 +1,25 @@
 import * as url from 'url';
-import { get } from 'lodash';
-import { Provider, FindAccount, KoaContextWithOIDC, CookiesSetOptions, errors } from 'oidc-provider';
+import { get, omitBy, isNil } from 'lodash';
+import {
+  Provider,
+  FindAccount,
+  KoaContextWithOIDC,
+  CookiesSetOptions,
+  ClientMetadata,
+  ClientAuthMethod,
+  SigningAlgorithmWithNone,
+  errors,
+} from 'oidc-provider';
 import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/infrastructure-datasource';
-import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
+import { ClientDataSource, IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
 import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { renderPrimaryStyle } from '../common/utils/render-primary-style-tag.util';
-import { OidcRedisAdapterService } from '../oidc-adapter/oidc-redis-adapter.service';
-import { OidcConfigAdapter } from './oidc-adapter';
 import { getI18nFromContext } from './i18n.helper';
+import { OidcConfigAdapter } from './oidc-config.adapter';
+import { OidcConfigStorage } from './oidc-config.storage';
 import { OidcConfigOptions } from './interfaces/oidc-config-options.interface';
 import { OIDC_CONFIG_OPTIONS } from './constants';
 
@@ -20,8 +29,8 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   constructor(
     @Inject(OIDC_CONFIG_OPTIONS) private readonly options: OidcConfigOptions,
-    private readonly adapterService: OidcRedisAdapterService,
     private readonly identityResourceDataSource: IdentityResourceDataSource,
+    private readonly clientDataSource: ClientDataSource,
     private readonly userDataSource: UserDataSource,
   ) {}
 
@@ -59,14 +68,13 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
         // Update client secret comparison and multiple client secrets support
         // use SHA256 of input to compare with stored value
+        const constantEquals = require('oidc-provider/lib/helpers/constant_equals');
         provider.Client.prototype.compareClientSecret = function compareClientSecret(actual: string) {
-          const constantEquals = require('oidc-provider/lib/helpers/constant_equals');
-          console.log(this.clientSecret);
+          actual = sha256(actual, { enabledHmac: true }).toString();
           console.log(this.metadata()['client_secrets']);
-          // original client secret comparison
-          return constantEquals(this.clientSecret, sha256(actual).toString(), 1000);
-
           // TODO: multiple client secrets support
+
+          return constantEquals(this.clientSecret, actual, 1000);
         };
 
         // checksession session_state
@@ -79,13 +87,113 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           }
         });
 
+        // server error
+        provider.on('server_error', (ctx: KoaContextWithOIDC, error: Error) => {
+          this.logger.error(error);
+        });
+
         return provider;
       },
     };
   }
 
   createAdapterFactory() {
-    return (modelName: string) => new OidcConfigAdapter(modelName, this.adapterService);
+    return (modelName: string) =>
+      new OidcConfigAdapter(
+        modelName,
+        new OidcConfigStorage(this.options.storage, (clientId) =>
+          this.clientDataSource
+            .get(clientId, [
+              'applicationType',
+              'clientId',
+              'clientName',
+              'clientUri',
+              'defaultMaxAge',
+              'idTokenSignedResponseAlg',
+              'initiateLoginUri',
+              'jwksUri',
+              'logoUri',
+              'policyUri',
+              'requireAuthTime',
+              'sectorIdentifierUri',
+              'subjectType',
+              'tokenEndpointAuthMethod',
+              'idTokenLifetime',
+              'accessTokenFormat',
+              'accessTokenLifetime',
+              'refreshTokenExpiration',
+              'refreshTokenAbsoluteLifetime',
+              'refreshTokenSlidingLifetime',
+              'authorizationCodeLifetime',
+              'deviceCodeLifetime',
+              'backchannelAuthenticationRequestLifetime',
+              'requireConsent',
+              'requirePkce',
+              'enabled',
+              'corsOrigins',
+              'grantTypes',
+              'scopes',
+              'redirectUris',
+              'postLogoutRedirectUris',
+              'secrets',
+              'properties',
+            ])
+            .then((client) => {
+              if (!client) return;
+              if (!client.enabled) throw new errors.InvalidClient('client is disabled!');
+
+              // TODO: multiple client secrets support
+              const secret = client.secrets?.find((secret) => secret.type === 'SharedSecret');
+
+              return omitBy(
+                {
+                  application_type: client.applicationType,
+                  client_id: client.clientId,
+                  client_secret: secret?.value,
+                  client_secret_expires_at: secret?.expiresAt,
+                  client_name: client.clientName,
+                  client_uri: client.clientUri,
+                  default_max_age: client.defaultMaxAge,
+                  id_token_signed_response_alg: client.idTokenSignedResponseAlg as SigningAlgorithmWithNone,
+                  initiate_login_uri: client.initiateLoginUri,
+                  jwks_uri: client.jwksUri,
+                  logo_uri: client.logoUri,
+                  policy_uri: client.policyUri,
+                  require_auth_time: client.requireAuthTime,
+                  sector_identifier_uri: client.sectorIdentifierUri,
+                  subject_type: client.subjectType,
+                  token_endpoint_auth_method: client.tokenEndpointAuthMethod as ClientAuthMethod,
+                  id_token_lifetime: client.idTokenLifetime,
+                  access_token_format: client.accessTokenFormat,
+                  access_token_lifetime: client.accessTokenLifetime,
+                  refresh_token_expiration: client.refreshTokenExpiration,
+                  refresh_token_absolute_lifetime: client.refreshTokenAbsoluteLifetime,
+                  refresh_token_sliding_lifetime: client.refreshTokenSlidingLifetime,
+                  authorization_code_lifetime: client.authorizationCodeLifetime,
+                  device_code_lifetime: client.deviceCodeLifetime,
+                  backchannel_authentication_request_lifetime: client.backchannelAuthenticationRequestLifetime,
+                  require_consent: client.requireConsent,
+                  require_pkce: client.requirePkce,
+                  allowed_cors_origins: client.corsOrigins?.map(({ origin }) => origin),
+                  scope: client.scopes?.map(({ scope }) => scope).join(' '),
+                  grant_types: client.grantTypes?.map(({ grantType }) => grantType),
+                  response_types: client.grantTypes?.some(({ grantType }) =>
+                    ['authorization_code', 'implicit'].includes(grantType),
+                  )
+                    ? undefined
+                    : [],
+                  redirect_uris: client.redirectUris?.map(({ redirectUri }) => redirectUri),
+                  post_logout_redirect_uris: client.postLogoutRedirectUris?.map(
+                    ({ postLogoutRedirectUri }) => postLogoutRedirectUri,
+                  ),
+                  client_secrets: client.secrets?.map(({ type, value, expiresAt }) => ({ type, value, expiresAt })),
+                  extra_properties: client.properties?.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
+                },
+                isNil,
+              ) as ClientMetadata;
+            }),
+        ),
+      );
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
@@ -201,7 +309,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           return client.metadata()['authorization_code_ttl'] || 5 * 60; // 5 minutes in seconds
         },
         IdToken: (ctx, token, client) => {
-          return client.metadata()['id_token_ttl'] || 5 * 60; // 5 minutes in seconds
+          return client.metadata()['id_token_ttl'] || 60 * 60; // 1 hour in seconds
         },
         ClientCredentials: (ctx, token) => {
           return token.resourceServer?.accessTokenTTL || 5 * 60; // 5 minutes in seconds
@@ -257,21 +365,38 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         } as CookiesSetOptions,
       },
       jwks: {
-        keys: [
-          {
-            p: 'xtPNYqTMy_AhvR7emZXo-ddOXQ3PekXLzefL7QC0X27Gsia2KZ3Zu1R6FE7fAT3cGGw4pfzS625H1jOH9zJJKiqzOigu63ison0vHsxFlAX2iu776DVqs6d7aOhYYklbY5xCUWP-wHAODRr1y6M5CCoUyzbS0SnQ0JGbbLQyGQ8',
-            kty: 'RSA',
-            q: 'qPsoMPzpx_bs49HFAHc4TNalOP_HM6eEwLAHMjrLc2gJIUeiAGlT8BdcPZtowSX82-hbZV8Ob81zpzJubTgivWs31w9rVX-j2hmKEH03ZgQSfY5ediMckssQjmRECpT2vN8VvNz23spePIN9P30flWaJuFg_vwgSx7Y3WsdmxUs',
-            d: 'eb1_2nVLoKqZLJLarDVMmy2xVgW7WfwDLTQqmjxk5M93xeKoNob2RU9exRs9H38i6hZ9is5X60omRC-jk-_vqif9ZHbB-RNO9QpBS0YtfxS7le540FssJX4dVH-irgHtls81ukMx2vEy0TFQl-cTNQm7MSjS0a-nOqaSK8xU5SAnb3Z0ais4B1bMAs8pWxWM-dnUbEVN4fdCnHsFTRBpEYscdyTCzTs6ppgeTtkuonhSmO3TtrDRotPhqBDwCVbH8XxBsomwvl9KY1U4BIq9Y-EWq27oQDjEdmo9smh_0fh0OMJIZ51XKMwrxctrF7o7sg6NS7oeDpCMufmCLegBoQ',
-            e: 'AQAB',
-            use: 'sig',
-            kid: '93J_YBZFn9dR-xu18kOV7A2EEeU4-w824Nnw1D6fFVo',
-            qi: 'QTOHT0K-o_Jk8pnTcFRV_waouTrMYF3VjzCz_zIEid1SV8aYNVx_GTHlIhT5vwLLd-dzT3mrum38AwU9dcMOM_pI3FSYKTL3kHue7NgrSHnW4V84TVbW6Kgux6ogDpzjNaNjhYwUCk366-dZYVrRU6p21L2pcqSguhlDRODeYy4',
-            dp: 'XXKaq2wtXQSFtu9VS_YrQ5GwIQgmpZ88RJBXRhL4s4nLFVwgbbrk5Ki1n-nZ4imC0m-6yDjloQV5-fDKTKJzxL_A8OqF8uIKsWwIw37ajNGoqG_eMas5dSqYVBwvvjIgI9cDTGGlECkaUYqET6ttWKr-juw7dVcj74Mf-51Nln0',
-            dq: 'GPTW7706jbTTMaZWcQYqg3aj-jIUanWQLqEQvwNd7tJrnsWkkGj945Sfo92i7_u7R4MelG8gg7SVIxlYo7rJrq36FkIJuRvbyCdDc8H6f4-UZ4SyQMJYwvlIna8DOYjck_JilH0R3L-IgWluAwVot7joGBi4eW8ozuQDct3GONc',
-            n: 'gz4PqkAZ9yHmBccYwdgmVvXHFPNOH23Hgl9N6kQ_4PUaq5YkbCMXD58g7sKHEbz4QbuCagjWgKHHh-QjdJx3GSFZkCvShQZmpphvIOC9fLDpCRrG9c8jAVtov74z3t6p09q5zI-zDBtpwjuAbR25-oeQZtWrjZqRPc80mRMr-EdK4lJFPagIk718oWIPqvTojQhdYXsHtESMp6X8mdFgPRMPX2RM3thEtlWdxxLS6bAlJocYAtw8sW4Xm5sQEaWeYZ4Rg-vtywDZlJluMPDXEIfhswrg_Jitod-zGW4uHe0WR32oOAXA8VUpqB1X4eBLSBjVqu44gZcrTvU5_O_iZQ',
-          },
-        ],
+        keys: this.options.debug
+          ? [
+              {
+                p: 'xtPNYqTMy_AhvR7emZXo-ddOXQ3PekXLzefL7QC0X27Gsia2KZ3Zu1R6FE7fAT3cGGw4pfzS625H1jOH9zJJKiqzOigu63ison0vHsxFlAX2iu776DVqs6d7aOhYYklbY5xCUWP-wHAODRr1y6M5CCoUyzbS0SnQ0JGbbLQyGQ8',
+                kty: 'RSA',
+                q: 'qPsoMPzpx_bs49HFAHc4TNalOP_HM6eEwLAHMjrLc2gJIUeiAGlT8BdcPZtowSX82-hbZV8Ob81zpzJubTgivWs31w9rVX-j2hmKEH03ZgQSfY5ediMckssQjmRECpT2vN8VvNz23spePIN9P30flWaJuFg_vwgSx7Y3WsdmxUs',
+                d: 'eb1_2nVLoKqZLJLarDVMmy2xVgW7WfwDLTQqmjxk5M93xeKoNob2RU9exRs9H38i6hZ9is5X60omRC-jk-_vqif9ZHbB-RNO9QpBS0YtfxS7le540FssJX4dVH-irgHtls81ukMx2vEy0TFQl-cTNQm7MSjS0a-nOqaSK8xU5SAnb3Z0ais4B1bMAs8pWxWM-dnUbEVN4fdCnHsFTRBpEYscdyTCzTs6ppgeTtkuonhSmO3TtrDRotPhqBDwCVbH8XxBsomwvl9KY1U4BIq9Y-EWq27oQDjEdmo9smh_0fh0OMJIZ51XKMwrxctrF7o7sg6NS7oeDpCMufmCLegBoQ',
+                e: 'AQAB',
+                use: 'sig',
+                kid: '93J_YBZFn9dR-xu18kOV7A2EEeU4-w824Nnw1D6fFVo',
+                qi: 'QTOHT0K-o_Jk8pnTcFRV_waouTrMYF3VjzCz_zIEid1SV8aYNVx_GTHlIhT5vwLLd-dzT3mrum38AwU9dcMOM_pI3FSYKTL3kHue7NgrSHnW4V84TVbW6Kgux6ogDpzjNaNjhYwUCk366-dZYVrRU6p21L2pcqSguhlDRODeYy4',
+                dp: 'XXKaq2wtXQSFtu9VS_YrQ5GwIQgmpZ88RJBXRhL4s4nLFVwgbbrk5Ki1n-nZ4imC0m-6yDjloQV5-fDKTKJzxL_A8OqF8uIKsWwIw37ajNGoqG_eMas5dSqYVBwvvjIgI9cDTGGlECkaUYqET6ttWKr-juw7dVcj74Mf-51Nln0',
+                dq: 'GPTW7706jbTTMaZWcQYqg3aj-jIUanWQLqEQvwNd7tJrnsWkkGj945Sfo92i7_u7R4MelG8gg7SVIxlYo7rJrq36FkIJuRvbyCdDc8H6f4-UZ4SyQMJYwvlIna8DOYjck_JilH0R3L-IgWluAwVot7joGBi4eW8ozuQDct3GONc',
+                n: 'gz4PqkAZ9yHmBccYwdgmVvXHFPNOH23Hgl9N6kQ_4PUaq5YkbCMXD58g7sKHEbz4QbuCagjWgKHHh-QjdJx3GSFZkCvShQZmpphvIOC9fLDpCRrG9c8jAVtov74z3t6p09q5zI-zDBtpwjuAbR25-oeQZtWrjZqRPc80mRMr-EdK4lJFPagIk718oWIPqvTojQhdYXsHtESMp6X8mdFgPRMPX2RM3thEtlWdxxLS6bAlJocYAtw8sW4Xm5sQEaWeYZ4Rg-vtywDZlJluMPDXEIfhswrg_Jitod-zGW4uHe0WR32oOAXA8VUpqB1X4eBLSBjVqu44gZcrTvU5_O_iZQ',
+              },
+            ]
+          : [
+              {
+                p: '6HNWC_HiGTYi0G6az7OHnwMJmg7sDoklM-gZfAAqprct2S3gJhF62OaeNeWzk0-WBoaTXJsXNhUgrY-2QzmfOHcNVFxN8WksnaquUv1T2xLMj66Jv_9v_DZvJ_brjadDh44GwxQMW2bNmeRWtwN-smivy6ZAQfcugeiDdFf-gvs',
+                kty: 'RSA',
+                q: 'kOi371MWComLWNcwLH8h1eE5RKZg0spAuRIpGQndAUzS_6rQcPiSCGZxORrPqRgWXVg9v0VfOJH7F5JMZ_dfEDWuHggc7A-M4nfqh5mWXLVmg5eCwkIbhDgtATFbStRrvoAc1WURf1yqUq2F-wDzpkSyecUe5uwB6Vo2smMTCPc',
+                d: 'akaY6fjSGDslSzzVHQ3RuxukCz-ELaaH607mPMNExn5lA2a8kvMvfT7Wa95swnoXdvgpCN5dTLL9BYAeWaygW2NKswPewqlO6QuHLkxA-HkENBX5XeItnuzWAkjVpMr32ME0bXKtgXVYmtpSGzag8PpO2PJesYpiI-LshNdNpNdPx2de1L3I9R4Svw1LwpAkFBAerR4tO9PAG-j_SDLlb2z9f-rZ8WeDn3tfpDhAGN46GzsnZcDoQntc96iPFipMXva0Qm1rVaO5rpjQBekU09lJJSsnFU78jC1ydCkxu4XTFaGQRpE3-2hHEP1A0S7MF6wscRWPBAeo-9Icrz5-aQ',
+                e: 'AQAB',
+                use: 'sig',
+                kid: 'g7ZgwvoGo2Xm9ZYG9FFfVBAq3jcW6C5Tu4vMJ1Ufwxc',
+                qi: 'rwcrUe2riSXVdoiTfO6VW3QS5nlYoNRJPWRW7TukaejMPKF7_RUm3WEcjEaX7SRb4R0p5aHla4I_biRV_zy-3p6b4vKebP-fyaoWm2SUMskbNBhGH5PXPwLw8snXHNcm3ixFVzmECbWj1fSjYSl4AUPRNTIkspiay8nDj5dcxJk',
+                dp: 'Ooiol1Nuovid5aykcT79HM6QAWpWiQaCBsMgf7gvBVJFSlYiBpQKQko4dswD30mANt52hzBKtQS2-N2igOUmsfpQsfiYa_0XDhDn2uAN2LGwL1I9P8rb8T_n18F26XHAMIdULpWC0xVdGq6EI4vOwLBZ7EdOEQ5keLQLPiXWYjc',
+                alg: 'PS256',
+                dq: 'RJIbF-DVOT9E9VE-to-iTzc4hkfE4XpbjjgNwo9sSUU1Q05tPEgjsl3njgIl6fo_-wPalDwbhwVtMAZGqZvhHCaKsiNcrEfffvsHvArtoAkm7XYwpgPqSXLbuQjGDm7eXVL6UfB1izMqVd1O3SviH_e6DO0-Zj-f1_CcmWVQiJk',
+                n: 'g5Qv8HSDqoVoz-29e3Gnni4EbLJRaKPC_skFDppcJeR9P0kTNTnmt-dBnwJQk10MZT_FMleQtF9qxrc70DGmEN30GEBjYv9g_yuYPjrJEuZclvpKZksYI1XnwbQ51GFdnjeGggMq4OXJvRmvVuQTkzhmKBGt8FEItNwvWuQRgf-A_p1qPdzweE2F_P0hg2-UdqKLIAeqgKQNJXtYgVmKkI4qZiaS0sURO5FUem7ZGA00w1f0hiwKrPfYERTWTgvY4xFBvtVsz_Sk5FQThl7o2ZJc9di5UE4thpQHgUzNp0ukFn_Icu75l7O2LZ5gActoE_sEw-6y7ia48nERpEk4LQ',
+              },
+            ],
       },
       features: {
         devInteractions: { enabled: false },
@@ -543,6 +668,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       },
       extraClientMetadata: {
         properties: [
+          'client_secrets',
           'id_token_ttl',
           'access_token_format',
           'access_token_ttl',
@@ -560,6 +686,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         validator: (ctx, key, value) => {
           if (value) {
             switch (key) {
+              case 'client_secrets':
+                if (!Array.isArray(value)) {
+                  throw new errors.InvalidClientMetadata(`invalid ${key} value, must be an array of strings!`);
+                }
+                break;
               case 'access_token_format':
                 if (!['opaque', 'jwt'].includes(value as string)) {
                   throw new errors.InvalidClientMetadata(`invalid ${key} value, must be one of [opaque, jwt]!`);
@@ -624,10 +755,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             // TODO: add rams
             ram: [],
           };
-        } else if (
-          use === 'userinfo' ||
-          (use === 'id_token' && ctx.oidc.client?.metadata().access_token_format === 'jwt') // jwt token can not read from userinfo endpoint
-        ) {
+        } else if (use === 'userinfo' || use === 'id_token') {
           const userMetas = await this.userDataSource.getMetas(Number(id), Object.values(UserMetaPresetKeys), [
             'metaKey',
             'metaValue',
@@ -693,7 +821,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     const sessionId = ctx.oidc.session.jti;
     const clientId = ctx.oidc.client.clientId;
     const { origin } = new url.URL(ctx.oidc.params.redirect_uri as string);
-    const salt = random(16);
+    const salt = random(16).toString();
     const hash = sha256(`${clientId}${origin}${sessionId}${salt}`).toBase64Url();
 
     return `${hash}.${salt}`;

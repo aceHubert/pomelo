@@ -1,9 +1,9 @@
-import * as crypto from 'crypto';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Fields } from '@ace-pomelo/shared-server';
+import { VoidResolver } from 'graphql-scalars';
+import { Authorized } from '@ace-pomelo/nestjs-oidc';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Fields, random, sha256 } from '@ace-pomelo/shared-server';
 import { ApiResourceDataSource } from '@ace-pomelo/identity-datasource';
 import { ApiResourceAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
@@ -60,32 +60,18 @@ export class ApiResourceResolver extends BaseResolver {
   }
 
   @RamAuthorized(ApiResourceAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update api scope.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update api scope.' })
   async updateApiResource(
     @Args('id', { type: () => ID, description: 'Api resource id' }) id: number,
     @Args('model') input: UpdateApiResourceInput,
-  ): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.update(id, input);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.apiResourceDataSource.update(id, input);
   }
 
   @RamAuthorized(ApiResourceAction.Delete)
-  @Mutation((returns) => Boolean, { description: 'Delete api scope.' })
-  async deleteApiResource(
-    @Args('id', { type: () => ID, description: 'Api resource id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.delete(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope.' })
+  async deleteApiResource(@Args('id', { type: () => ID, description: 'Api resource id' }) id: number): Promise<void> {
+    await this.apiResourceDataSource.delete(id);
   }
 
   @RamAuthorized(ApiResourceAction.Claims)
@@ -110,15 +96,9 @@ export class ApiResourceResolver extends BaseResolver {
   }
 
   @RamAuthorized(ApiResourceAction.DeleteClaim)
-  @Mutation((returns) => Boolean, { description: 'Delete api claim permanently.' })
-  async deleteApiClaim(@Args('id', { type: () => ID, description: 'Api claim id' }) id: number): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.deleteClaim(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api claim permanently.' })
+  async deleteApiClaim(@Args('id', { type: () => ID, description: 'Api claim id' }) id: number): Promise<void> {
+    await this.apiResourceDataSource.deleteClaim(id);
   }
 
   @RamAuthorized(ApiResourceAction.ScopeDetail)
@@ -154,30 +134,18 @@ export class ApiResourceResolver extends BaseResolver {
   }
 
   @RamAuthorized(ApiResourceAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update api scope.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update api scope.' })
   async updateApiScope(
     @Args('id', { type: () => ID, description: 'Api scope id' }) id: number,
     @Args('model') input: UpdateApiScopeInput,
-  ): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.updateScope(id, input);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.apiResourceDataSource.updateScope(id, input);
   }
 
   @RamAuthorized(ApiResourceAction.Delete)
-  @Mutation((returns) => Boolean, { description: 'Delete api scope.' })
-  async deleteApiScope(@Args('id', { type: () => ID, description: 'Api scope id' }) id: number): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.deleteScope(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope.' })
+  async deleteApiScope(@Args('id', { type: () => ID, description: 'Api scope id' }) id: number): Promise<void> {
+    await this.apiResourceDataSource.deleteScope(id);
   }
 
   @RamAuthorized(ApiResourceAction.ScopeClaims)
@@ -202,17 +170,11 @@ export class ApiResourceResolver extends BaseResolver {
   }
 
   @RamAuthorized(ApiResourceAction.DeleteScopeClaim)
-  @Mutation((returns) => Boolean, { description: 'Delete api scope claim permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope claim permanently.' })
   async deleteApiScopeClaim(
     @Args('id', { type: () => ID, description: 'Api scope claim id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.deleteScopeClaim(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.apiResourceDataSource.deleteScopeClaim(id);
   }
 
   @RamAuthorized(ApiResourceAction.Secrets)
@@ -235,32 +197,23 @@ export class ApiResourceResolver extends BaseResolver {
     @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }) apiResourceId: number,
     @Args('model', { type: () => NewApiSecretInput }) input: NewApiSecretInput,
   ): Promise<ApiSecret | undefined> {
-    let randomSecret = crypto.randomBytes(32).toString('base64');
-
-    // https://base64.guru/standards/base64url
-    randomSecret = randomSecret.replace(/=/g, ''); // Remove any trailing '='s
-    randomSecret = randomSecret.replace(/\+/g, '-'); // '+' => '-'
-    randomSecret = randomSecret.replace(/\//g, '_'); // '/' => '_'
+    const randomSecret = random(32).toBase64();
 
     return this.apiResourceDataSource
       .createSecret(apiResourceId, {
         ...input,
         // SHA256 加密
-        value: crypto.createHash('SHA256').update(randomSecret).digest('hex'),
+        value: sha256(randomSecret, {
+          enabledHmac: true,
+        }).toString(),
       })
       .then((secret) => ({ ...secret, value: randomSecret } as ApiSecret)); // value 返回原始值
   }
 
   @RamAuthorized(ApiResourceAction.DeleteSecret)
-  @Mutation((returns) => Boolean, { description: 'Delete api secret permanently.' })
-  async deleteApiSecret(@Args('id', { type: () => ID, description: 'Api secret id' }) id: number): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.deleteSecret(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api secret permanently.' })
+  async deleteApiSecret(@Args('id', { type: () => ID, description: 'Api secret id' }) id: number): Promise<void> {
+    await this.apiResourceDataSource.deleteSecret(id);
   }
 
   @RamAuthorized(ApiResourceAction.Properties)
@@ -285,16 +238,10 @@ export class ApiResourceResolver extends BaseResolver {
   }
 
   @RamAuthorized(ApiResourceAction.DeleteProperty)
-  @Mutation((returns) => Boolean, { description: 'Delete api scope property permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope property permanently.' })
   async deleteApiProperty(
     @Args('id', { type: () => ID, description: 'Api resopurce property id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.apiResourceDataSource.deleteProperty(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.apiResourceDataSource.deleteProperty(id);
   }
 }

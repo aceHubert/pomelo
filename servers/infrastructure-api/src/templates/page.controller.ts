@@ -31,7 +31,7 @@ import {
   TemplatePresetType,
   TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { PageTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
@@ -251,7 +251,6 @@ export class PageTemplateController extends BaseController {
    */
   @Get()
   @Anonymous()
-  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged pages template models',
     type: () => createResponseSuccessType({ data: PagedPageTemplateResp }, 'PagedPageTemplateSuccessResp'),

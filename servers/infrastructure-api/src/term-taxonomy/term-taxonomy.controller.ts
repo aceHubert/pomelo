@@ -7,7 +7,7 @@ import {
   TermPresetTaxonomy,
   OptionPresetKeys,
 } from '@ace-pomelo/infrastructure-datasource';
-import { Anonymous, Authorized } from '@ace-pomelo/authorization';
+import { Anonymous, Authorized } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
   createResponseSuccessType,

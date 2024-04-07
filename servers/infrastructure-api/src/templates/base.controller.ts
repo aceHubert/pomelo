@@ -18,7 +18,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
   createResponseSuccessType,
@@ -372,7 +372,6 @@ export class TemplateController extends createMetaController(
    */
   @Get()
   @Anonymous()
-  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged template models',
     type: () => createResponseSuccessType({ data: PagedTemplateResp }, 'PagedTemplateSuccessResp'),

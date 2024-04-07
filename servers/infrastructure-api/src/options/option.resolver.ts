@@ -1,10 +1,10 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { GraphQLJSONObject } from 'graphql-type-json';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { JSONObjectResolver, VoidResolver } from 'graphql-scalars';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { OptionDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { User, Fields, RequestUser } from '@ace-pomelo/shared-server';
-import { ResolveTree } from 'graphql-parse-resolve-info';
 import { OptionAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { NewOptionInput } from './dto/new-option.input';
@@ -32,7 +32,7 @@ export class OptionResolver extends BaseResolver {
   }
 
   @Anonymous()
-  @Query((returns) => GraphQLJSONObject, { description: 'Get autoload options(key/value), cache by memory.' })
+  @Query((returns) => JSONObjectResolver, { description: 'Get autoload options(key/value), cache by memory.' })
   autoloadOptions(): Promise<Dictionary<string>> {
     return this.optionDataSource.getAutoloadOptions();
   }
@@ -53,33 +53,21 @@ export class OptionResolver extends BaseResolver {
   }
 
   @RamAuthorized(OptionAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update option.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update option.' })
   async updateOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,
     @Args('model') model: UpdateOptionInput,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.optionDataSource.update(id, model, Number(requestUser.sub));
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.optionDataSource.update(id, model, Number(requestUser.sub));
   }
 
   @RamAuthorized(OptionAction.Delete)
-  @Mutation((returns) => Boolean, { description: 'Delete option permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete option permanently.' })
   async deleteOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.optionDataSource.delete(id, Number(requestUser.sub));
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.optionDataSource.delete(id, Number(requestUser.sub));
   }
 }

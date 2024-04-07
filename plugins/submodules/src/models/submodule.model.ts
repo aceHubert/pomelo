@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType, PickType, OmitType } from '@nestjs/graphql';
-import { GraphQLJSON, GraphQLJSONObject } from 'graphql-type-json';
+import { JSONResolver, JSONObjectResolver } from 'graphql-scalars';
 import { SubModuleConfig } from '../interfaces/submodule-config.interface';
 
 @ObjectType()
@@ -87,7 +87,7 @@ export class ModuleConfig implements SubModuleConfig {
   /**
    * Args schema
    */
-  @Field((type) => GraphQLJSONObject)
+  @Field((type) => JSONObjectResolver)
   args?: {};
 }
 
@@ -160,7 +160,7 @@ export class SubModuleManifestModel extends PickType(SubModuleModel, [
   /**
    * Sub-module configs
    */
-  @Field((type) => GraphQLJSON)
+  @Field((type) => JSONResolver)
   configuration?: ModuleConfig | Record<string, ModuleConfig>;
 
   /**
@@ -226,7 +226,7 @@ export class ObsSubModuleManifestModel extends PickType(SubModuleModel, [
   /**
    * Sub-module configs
    */
-  @Field((type) => GraphQLJSON)
+  @Field((type) => JSONObjectResolver)
   configuration?: ModuleConfig | Record<string, ModuleConfig>;
 }
 

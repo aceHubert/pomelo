@@ -38,6 +38,7 @@
     "express-ejs-layouts": "^2.5.1",
     "jimp": "^0.22.8",
     "lodash": "^4.17.21",
+    "lru-cache": "^10.2.0",
     "mysql2": "^2.3.3",
     "nest-oidc-provider": "^1.1.1",
     "nestjs-i18n": "^10.0.0",

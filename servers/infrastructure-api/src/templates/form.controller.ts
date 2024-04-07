@@ -29,7 +29,7 @@ import {
   TemplatePresetType,
   TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { FormTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
@@ -109,8 +109,8 @@ export class FormTemplateController extends BaseController {
   async get(
     @Param('id', ParseIntPipe) id: number,
     @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-    @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
   ) {
     const result = await this.templateDataSource.get(
       id,
@@ -141,7 +141,6 @@ export class FormTemplateController extends BaseController {
    */
   @Get()
   @Anonymous()
-  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged from template models',
     type: () => createResponseSuccessType({ data: PagedFormTemplateResp }, 'PagedFormTemplateSuccessResp'),

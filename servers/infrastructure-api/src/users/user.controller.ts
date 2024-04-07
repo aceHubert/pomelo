@@ -19,7 +19,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
-import { Authorized } from '@ace-pomelo/authorization';
+import { Authorized } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
   ParseQueryPipe,

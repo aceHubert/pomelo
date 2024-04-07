@@ -1,6 +1,6 @@
 import { isObject } from 'class-validator';
 import { Field, Int, ObjectType, createUnionType } from '@nestjs/graphql';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import { JSONObjectResolver } from 'graphql-scalars';
 
 @ObjectType()
 export class EventMessageSubscriotion {
@@ -19,7 +19,7 @@ export class StringPayloadEventMessageSubscriotion extends EventMessageSubscriot
 }
 
 @ObjectType()
-export class IntPayloadEventMessageSubscriotion extends EventMessageSubscriotion {
+export class NumberPayloadEventMessageSubscriotion extends EventMessageSubscriotion {
   /**
    * Number payload
    */
@@ -40,7 +40,7 @@ export class ObjectPayloadEventMessageSubscriotion extends EventMessageSubscriot
   /**
    * Object payload
    */
-  @Field(() => GraphQLJSONObject)
+  @Field(() => JSONObjectResolver)
   payload?: Record<string, any>;
 }
 
@@ -63,7 +63,7 @@ export const MessageSubscriotion = createUnionType({
   types: () => [
     EventMessageSubscriotion,
     StringPayloadEventMessageSubscriotion,
-    IntPayloadEventMessageSubscriotion,
+    NumberPayloadEventMessageSubscriotion,
     BooleanPayloadEventMessageSubscriotion,
     ObjectPayloadEventMessageSubscriotion,
     ContentMessageSubscriotion,
@@ -75,7 +75,7 @@ export const MessageSubscriotion = createUnionType({
       } else if (typeof value.payload === 'string') {
         return StringPayloadEventMessageSubscriotion;
       } else if (typeof value.payload === 'number') {
-        return IntPayloadEventMessageSubscriotion;
+        return NumberPayloadEventMessageSubscriotion;
       } else if (typeof value.payload === 'boolean') {
         return BooleanPayloadEventMessageSubscriotion;
       } else {

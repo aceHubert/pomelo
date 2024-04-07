@@ -25,7 +25,6 @@ import {
 } from 'nestjs-i18n';
 import { normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { OidcModule, OidcService } from '@ace-pomelo/nestjs-oidc';
-import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
 import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.utils';
@@ -142,7 +141,6 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService],
     }),
-    AuthorizationModule,
     RamAuthorizationModule.forRoot({
       serviceName: 'basic',
     }),
@@ -151,7 +149,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       useFactory: (config: ConfigService, oidcService: OidcService) => {
         const isDebug = config.get<boolean>('graphql.debug', false);
         const graphqlPath = config.get<string>('graphql.path', '/graphql');
-        const graphqlSubscriptionPath = config.get<string>('graphql.subscription_path', '/graphql');
+        const graphqlSubscriptionPath = config.get<string>('graphql.subscription_path', graphqlPath);
         return {
           debug: isDebug,
           playground: isDebug,
@@ -212,26 +210,8 @@ const logger = new Logger('AppModule', { timestamp: true });
               },
             },
           },
-          context: async ({ req, extra }: any) => {
-            // if (connection) {
-            //   // check connection for metadata
-            //   return {
-            //     user: connection.context.user, // from onConnect callback
-            //     // ...connection.context.request, // for nestjs-i18n
-            //   };
-            // } else
-            // graphql-ws
-            if (extra) {
-              return {
-                user: extra.user, // from onConnect callback
-                connectionParams: extra.connectionParams, // for nestjs-i18n
-              };
-            } else {
-              return {
-                user: req.user, // from express-jwt
-                req, // for nestjs-i18n
-              };
-            }
+          context: (ctx: any) => {
+            return ctx.extra ?? ctx.req;
           },
         };
       },

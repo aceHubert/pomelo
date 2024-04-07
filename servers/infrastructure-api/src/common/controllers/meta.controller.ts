@@ -188,8 +188,13 @@ export function createMetaController<
       type: () => createResponseSuccessType({}, `Update${_upperFirstModelName}MetaModelSuccessResp`),
     })
     async updateMeta(@Param('id', ParseIntPipe) id: number, @Body('metaValue') metaValue: string) {
-      await this.metaDataSource.updateMeta(id, metaValue);
-      return this.success();
+      try {
+        await this.metaDataSource.updateMeta(id, metaValue);
+        return this.success();
+      } catch (e: any) {
+        this.logger.error(e);
+        return this.faild(e.message);
+      }
     }
 
     /**
@@ -209,8 +214,13 @@ export function createMetaController<
       @Body('metaValue') metaValue: string,
       @Body('createIfNotExists') createIfNotExists?: boolean,
     ) {
-      await this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
-      return this.success();
+      try {
+        await this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
+        return this.success();
+      } catch (e: any) {
+        this.logger.error(e);
+        return this.faild(e.message);
+      }
     }
 
     /**
@@ -224,8 +234,13 @@ export function createMetaController<
       type: () => createResponseSuccessType({}, `Delete${_upperFirstModelName}MetaModelSuccessResp`),
     })
     async deleteMeta(@Param('id', ParseIntPipe) id: number) {
-      await this.metaDataSource.deleteMeta(id);
-      return this.success();
+      try {
+        await this.metaDataSource.deleteMeta(id);
+        return this.success();
+      } catch (e: any) {
+        this.logger.error(e);
+        return this.faild(e.message);
+      }
     }
 
     /**
@@ -242,8 +257,13 @@ export function createMetaController<
       @Param(`${_camelCaseModelName}Id`, ParseIntPipe) modelId: number,
       @Param('metaKey') metaKey: string,
     ) {
-      await this.metaDataSource.deleteMetaByKey(modelId, metaKey);
-      return this.success();
+      try {
+        await this.metaDataSource.deleteMetaByKey(modelId, metaKey);
+        return this.success();
+      } catch (e: any) {
+        this.logger.error(e);
+        return this.faild(e.message);
+      }
     }
   }
 

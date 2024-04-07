@@ -6,10 +6,7 @@ import { MESSAGE_OPTIONS } from './constants';
 
 // Types
 
-@Module({
-  providers: [MessageService, MessageResolver],
-  exports: [MessageService],
-})
+@Module({})
 export class MessageModule {
   static forRoot(options: MessageOptions): DynamicModule {
     const { isGlobal, ...restOptions } = options;
@@ -21,7 +18,10 @@ export class MessageModule {
           provide: MESSAGE_OPTIONS,
           useValue: restOptions,
         },
+        MessageService,
+        MessageResolver,
       ],
+      exports: [MessageService],
     };
   }
 
@@ -30,7 +30,8 @@ export class MessageModule {
       module: MessageModule,
       global: options.isGlobal,
       imports: options.imports || [],
-      providers: this.createAsyncProviders(options),
+      providers: [...this.createAsyncProviders(options), MessageService, MessageResolver],
+      exports: [MessageService],
     };
   }
 

@@ -1,8 +1,8 @@
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Controller, Query, Get, HttpStatus } from '@nestjs/common';
-import { Authorized } from '@ace-pomelo/authorization';
+import { Authorized } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { ApiAuthCreate, BaseController, ParseQueryPipe, createResponseSuccessType } from '@ace-pomelo/shared-server';
+import { ApiAuthCreate, ParseQueryPipe, createResponseSuccessType } from '@ace-pomelo/shared-server';
 import { ObsUploadSignedUrlResp, ObsPostUploadSignatureResp } from './resp/hw-cloud.resp';
 import { Action } from './action';
 
@@ -13,10 +13,8 @@ import type { ObsCreateUploadSignedUrlOptionsDto, ObsCreatePostUploadSignatureOp
 @ApiTags('resources')
 @Authorized()
 @Controller('api/res/obs')
-export class ObsController extends BaseController {
-  constructor(private readonly obsService: ObsService) {
-    super();
-  }
+export class ObsController {
+  constructor(private readonly obsService: ObsService) {}
 
   /**
    * Get huawei cloud obs "PUT" method upload signed url
@@ -30,9 +28,10 @@ export class ObsController extends BaseController {
   })
   getHWCloudObsUploadSignedUrl(@Query(ParseQueryPipe) options: ObsCreateUploadSignedUrlOptionsDto) {
     const result = this.obsService.createUploadSignedUrl(options);
-    return this.success({
+    return {
+      success: true,
       data: result,
-    });
+    };
   }
 
   /**
@@ -48,8 +47,9 @@ export class ObsController extends BaseController {
   })
   getHWCloudObsPostUploadSignature(@Query(ParseQueryPipe) options: ObsCreatePostUploadSignatureOptionsDto) {
     const result = this.obsService.createPostUploadSignature(options);
-    return this.success({
+    return {
+      success: true,
       data: result,
-    });
+    };
   }
 }

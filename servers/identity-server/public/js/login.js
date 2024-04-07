@@ -40,8 +40,8 @@ $(document).ready(function () {
       method: $form.attr('method') || 'POST',
       data,
     })
-      .then((res) => {
-        const data = res.data;
+      .then(async (res) => {
+        const data = await res.json();
         if (!data.success) throw new Error(data.message);
         if (data.message) {
           showToast(data.message, 'success');

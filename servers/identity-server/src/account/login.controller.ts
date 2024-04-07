@@ -11,7 +11,7 @@ import { KoaContextWithOIDC } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
-import { getLoginTemplate, getConsentTemplate } from '@/templates';
+import { getLoginTemplate, getConsentTemplate } from '@/common/templates';
 import { LoginDto } from './dto/login.dto';
 
 @Controller('/login')

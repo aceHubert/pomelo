@@ -10,23 +10,22 @@ import { MediaResolver } from './media.resolver';
 import { MediaService } from './media.service';
 import { MEDIA_OPTIONS } from './constants';
 
-@Module({
-  controllers: [MediaController],
-  providers: [MediaResolver, MediaService],
-  exports: [MediaService],
-})
+@Module({})
 export class MediaModule {
   static forRoot(options: MediaOptions): DynamicModule {
     return {
       module: MediaModule,
       global: options.isGlobal,
-
+      controllers: [MediaController],
       providers: [
         {
           provide: MEDIA_OPTIONS,
           useValue: this.fixOptions(options),
         },
+        MediaResolver,
+        MediaService,
       ],
+      exports: [MediaService],
     };
   }
 
@@ -34,8 +33,10 @@ export class MediaModule {
     return {
       module: MediaModule,
       global: options.isGlobal,
+      controllers: [MediaController],
       imports: options.imports || [],
-      providers: this.createAsyncProviders(options),
+      providers: [...this.createAsyncProviders(options), MediaResolver, MediaService],
+      exports: [MediaService],
     };
   }
 

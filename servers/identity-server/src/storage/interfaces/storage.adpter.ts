@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
+import { jsonSafelyParse } from '@ace-pomelo/shared-server';
 
-export abstract class StorageFactory {
+export abstract class StorageAdpter {
   protected readonly logger: Logger;
 
   constructor() {
@@ -26,4 +27,25 @@ export abstract class StorageFactory {
    * @param key Key
    */
   abstract del(key: string): void | Promise<void>;
+
+  /**
+   * Dispose storage
+   */
+  abstract dispose(): void | Promise<void>;
+
+  /**
+   * encode payload to string
+   */
+  protected encode(payload: any) {
+    if (payload === undefined) return payload;
+
+    return JSON.stringify(payload);
+  }
+
+  /**
+   * decode payload from string
+   */
+  protected decode<T = any>(payload: string): T | undefined {
+    return jsonSafelyParse<T>(payload);
+  }
 }

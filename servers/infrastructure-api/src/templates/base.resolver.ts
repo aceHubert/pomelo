@@ -2,9 +2,10 @@ import DataLoader from 'dataloader';
 import { upperFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
+import { VoidResolver } from 'graphql-scalars';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
@@ -333,15 +334,15 @@ export class TemplateResolver extends createMetaResolver(
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
-      await this.messageService.publish({
-        excludes: [requestUser.sub],
-        message: {
+      await this.messageService.publish(
+        {
           eventName: 'createTemplateReview',
           payload: {
             id,
           },
         },
-      });
+        { excludes: [requestUser.sub] },
+      );
     }
 
     return {
@@ -361,50 +362,42 @@ export class TemplateResolver extends createMetaResolver(
   }
 
   @RamAuthorized(TemplateAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update template (must not be in "trash" status).' })
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Update template (must not be in "trash" status).',
+  })
   async updateTemplate(
     @Args('id', { type: () => ID, description: 'Form id' }) id: number,
     @Args('model', { type: () => UpdateTemplateInput }) model: UpdateTemplateInput,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.update(id, model, Number(requestUser.sub));
+  ): Promise<void> {
+    await this.templateDataSource.update(id, model, Number(requestUser.sub));
 
-      // 修改（当状态为需要审核并且有任何修改）审核消息推送
-      if (model.status === TemplateStatus.Pending) {
-        await this.messageService.publish({
-          excludes: [requestUser.sub],
-          message: {
-            eventName: 'updateTemplateReview',
-            payload: {
-              id,
-            },
+    // 修改（当状态为需要审核并且有任何修改）审核消息推送
+    if (model.status === TemplateStatus.Pending) {
+      await this.messageService.publish(
+        {
+          eventName: 'updateTemplateReview',
+          payload: {
+            id,
           },
-        });
-      }
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
+        },
+        { excludes: [requestUser.sub] },
+      );
     }
   }
 
   @RamAuthorized(TemplateAction.UpdateStatus)
-  @Mutation((returns) => Boolean, {
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
     description: 'Update template stauts (must not be in "trash" status)',
   })
   async updateTemplateStatus(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @Args('status', { type: () => TemplateStatus, description: 'status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
-  ): Promise<Boolean> {
-    try {
-      await this.templateDataSource.updateStatus(id, status, Number(requestUser.sub));
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.templateDataSource.updateStatus(id, status, Number(requestUser.sub));
   }
 
   @RamAuthorized(TemplateAction.BulkUpdateStatus)
@@ -415,14 +408,8 @@ export class TemplateResolver extends createMetaResolver(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @Args('status', { type: () => TemplateStatus, description: 'Status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.bulkUpdateStatus(ids, status, Number(requestUser.sub));
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.templateDataSource.bulkUpdateStatus(ids, status, Number(requestUser.sub));
   }
 
   @RamAuthorized(TemplateAction.Restore)
@@ -430,14 +417,8 @@ export class TemplateResolver extends createMetaResolver(
   async restoreTemplate(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.restore(id, Number(requestUser.sub));
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.templateDataSource.restore(id, Number(requestUser.sub));
   }
 
   @RamAuthorized(TemplateAction.BulkRestore)
@@ -445,14 +426,8 @@ export class TemplateResolver extends createMetaResolver(
   async bulkRestoreTemplate(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.bulkRestore(ids, Number(requestUser.sub));
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.templateDataSource.bulkRestore(ids, Number(requestUser.sub));
   }
 
   @RamAuthorized(TemplateAction.Delete)
@@ -462,14 +437,8 @@ export class TemplateResolver extends createMetaResolver(
   async deleteTemplate(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.delete(id, Number(requestUser.sub));
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.templateDataSource.delete(id, Number(requestUser.sub));
   }
 
   @RamAuthorized(TemplateAction.BulkDelete)
@@ -479,13 +448,7 @@ export class TemplateResolver extends createMetaResolver(
   async bulkDeleteTemplate(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.bulkDelete(ids, Number(requestUser.sub));
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.templateDataSource.bulkDelete(ids, Number(requestUser.sub));
   }
 }

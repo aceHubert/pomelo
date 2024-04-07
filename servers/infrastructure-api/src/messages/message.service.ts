@@ -1,17 +1,28 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { MessageOptions } from './interfaces/message-options.interface';
-import { Message } from './interfaces/message.interface';
-import { MESSAGE_OPTIONS, MessageTrigger } from './constants';
+import { TriggerName, ContentMessage, EventMessage } from './interfaces/message.interface';
+import { MESSAGE_OPTIONS } from './constants';
 
 @Injectable()
 export class MessageService {
   constructor(@Inject(MESSAGE_OPTIONS) private readonly options: MessageOptions) {}
 
-  publish(message: Message) {
-    return this.options.pubSub.publish(MessageTrigger.Message, {
-      includes: message.includes,
-      excludes: message.excludes,
-      [MessageTrigger.Message]: message.message,
+  publish(
+    message: ContentMessage | EventMessage,
+    {
+      includes,
+      excludes,
+      triggerName = TriggerName.Message,
+    }: {
+      includes?: Array<string | number> | ((sub: string) => boolean | Promise<boolean>);
+      excludes?: Array<string | number> | ((sub: string) => boolean | Promise<boolean>);
+      triggerName?: TriggerName;
+    } = {},
+  ) {
+    return this.options.pubSub.publish(triggerName, {
+      includes,
+      excludes,
+      message,
     });
   }
 
@@ -24,6 +35,6 @@ export class MessageService {
   }
 
   asyncIterator() {
-    return this.options.pubSub.asyncIterator(MessageTrigger.Message);
+    return this.options.pubSub.asyncIterator(Object.values(TriggerName));
   }
 }

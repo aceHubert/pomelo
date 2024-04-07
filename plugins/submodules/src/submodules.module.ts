@@ -9,30 +9,36 @@ import {
 } from './interfaces/submodule-options.interface';
 import { SUBMODULE_OPTIONS } from './constants';
 
-@Module({
-  controllers: [UnpkgSubModuleController],
-  providers: [UnpkgSubModuleResolver, UnpkgSubModuleService],
-})
+@Module({})
 export class SubModuleModule {
   private static logger = new Logger(SubModuleModule.name, { timestamp: true });
 
   static forRoot(options: UnpkgSubModuleOptions): DynamicModule {
+    const { isGlobal, ...restOptions } = options;
     return {
       module: SubModuleModule,
+      global: isGlobal,
+      controllers: [UnpkgSubModuleController],
       providers: [
         {
           provide: SUBMODULE_OPTIONS,
-          useValue: options,
+          useValue: restOptions,
         },
+        UnpkgSubModuleResolver,
+        UnpkgSubModuleService,
       ],
+      exports: [SUBMODULE_OPTIONS],
     };
   }
 
   static forRootAsync(options: SubModuleAsyncOptions): DynamicModule {
     return {
       module: SubModuleModule,
-      imports: options!.imports || [],
-      providers: this.createAsyncProviders(options),
+      global: options.isGlobal,
+      controllers: [UnpkgSubModuleController],
+      imports: options!.imports,
+      providers: [...this.createAsyncProviders(options), UnpkgSubModuleResolver, UnpkgSubModuleService],
+      exports: [SUBMODULE_OPTIONS],
     };
   }
 

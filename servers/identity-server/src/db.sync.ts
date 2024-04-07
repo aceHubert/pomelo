@@ -138,7 +138,6 @@ async function syncDatabase() {
             requirePkce: true,
             tokenEndpointAuthMethod: 'client_secret_basic',
             scopes: ['openid', 'profile', 'offline_access'],
-            grantTypes: ['authorization_code', 'client_credentials'],
             redirectUris: [],
             postLogoutRedirectUris: [],
             secrets: [
@@ -158,7 +157,7 @@ async function syncDatabase() {
             requirePkce: true,
             tokenEndpointAuthMethod: 'client_secret_basic',
             scopes: ['openid', 'profile', 'offline_access'],
-            grantTypes: ['authorization_code', 'client_credentials'],
+            grantTypes: ['client_credentials'],
             redirectUris: [],
             postLogoutRedirectUris: [],
             secrets: [
@@ -178,7 +177,7 @@ async function syncDatabase() {
             requirePkce: true,
             tokenEndpointAuthMethod: 'client_secret_basic',
             scopes: ['openid', 'profile', 'offline_access'],
-            grantTypes: ['authorization_code', 'client_credentials'],
+            grantTypes: ['client_credentials'],
             redirectUris: [],
             postLogoutRedirectUris: [],
             secrets: [

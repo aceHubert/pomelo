@@ -3,9 +3,10 @@ import { Inject } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
+import { VoidResolver } from 'graphql-scalars';
 import { FileUpload } from 'graphql-upload/Upload.js';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { MediaDataSource } from '@ace-pomelo/infrastructure-datasource';
@@ -125,7 +126,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     };
   }
 
-  @Mutation(() => [Media])
+  @Mutation(() => [Media], { description: 'Upload files.' })
   @RamAuthorized(MediaAction.Upload)
   async uploadFiles(
     @Args('files', { type: () => [GraphQLUpload] }) files: FileUpload[],
@@ -189,7 +190,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     );
   }
 
-  @Mutation(() => Media)
+  @Mutation(() => Media, { nullable: true, description: 'Crop image.' })
   async cropImage(
     @Args('id', { type: () => ID, description: 'Media id' }) id: number,
     @Args('options', { type: () => ImageCropOptionsInput }) options: ImageCropOptionsInput,
@@ -278,7 +279,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     return;
   }
 
-  @Query(() => Media)
+  @Query(() => Media, { nullable: true, description: 'Get media by id.' })
   @RamAuthorized(MediaAction.Detail)
   async media(
     @Args('id', { type: () => ID, description: 'Media id' }) id: number,
@@ -303,7 +304,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     return;
   }
 
-  @Query(() => PagedMedia)
+  @Query(() => PagedMedia, { description: 'Get paged medias.' })
   @RamAuthorized(MediaAction.PagedList)
   async medias(@Args() args: PagedMediaArgs, @Fields() fields: ResolveTree): Promise<PagedMedia> {
     const { rows, ...rest } = await this.mediaDataSource.getPaged(args, [
@@ -338,7 +339,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     };
   }
 
-  @Mutation(() => Media)
+  @Mutation(() => Media, { description: 'Create a new media.' })
   @RamAuthorized(MediaAction.Create)
   async createMedia(
     @Args('model', { type: () => NewMediaInput }) model: NewMediaInput,
@@ -359,20 +360,14 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     };
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => VoidResolver, { nullable: true, description: 'Delete media.' })
   async updateMedia(
     @Args('id', { type: () => ID, description: 'Media id' }) id: number,
     @Args('model', { type: () => UpdateMediaInput }) model: UpdateMediaInput,
     @Args('metaData', { type: () => MediaMetaDataInput, nullable: true }) metaData: MediaMetaDataInput | undefined,
     @User()
     requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.mediaDataSource.update(id, model, metaData ?? 'NONE', Number(requestUser.sub));
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.mediaDataSource.update(id, model, metaData ?? 'NONE', Number(requestUser.sub));
   }
 }

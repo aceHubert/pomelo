@@ -12,7 +12,7 @@
     "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json"
   },
   "devDependencies": {
-    "@ace-pomelo/authorization": "workspace:^",
+    "@ace-pomelo/nestjs-oidc": "workspace:^",
     "@ace-pomelo/ram-authorization": "workspace:^",
     "@ace-pomelo/shared-server": "workspace:^",
     "@nestjs/common": "^9.0.0",
@@ -20,7 +20,7 @@
     "@nestjs/graphql": "^11.0.0"
   },
   "peerDependencies": {
-    "@ace-pomelo/authorization": "workspace:^",
+    "@ace-pomelo/nestjs-oidc": "workspace:^",
     "@ace-pomelo/ram-authorization": "workspace:^",
     "@ace-pomelo/shared-server": "workspace:^",
     "@nestjs/common": "^9.0.0",

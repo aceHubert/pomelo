@@ -24,15 +24,28 @@ export interface UnpkgSubModuleOptions {
    * checking on https://www.jsdocs.io/package/query-registry
    */
   cached?: boolean;
+
+  /**
+   * is global module
+   */
+  isGlobal?: boolean;
 }
 
 export interface SubModuleOptionsFactory {
-  createSubModuleOptions: () => Promise<UnpkgSubModuleOptions> | UnpkgSubModuleOptions;
+  createSubModuleOptions: () =>
+    | Promise<Omit<UnpkgSubModuleOptions, 'isGlobal'>>
+    | Omit<UnpkgSubModuleOptions, 'isGlobal'>;
 }
 
 export interface SubModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  /**
+   * is global module
+   */
+  isGlobal?: boolean;
   useExisting?: Type<SubModuleOptionsFactory>;
   useClass?: Type<SubModuleOptionsFactory>;
-  useFactory?: (...args: any[]) => Promise<UnpkgSubModuleOptions> | UnpkgSubModuleOptions;
+  useFactory?: (
+    ...args: any[]
+  ) => Promise<Omit<UnpkgSubModuleOptions, 'isGlobal'>> | Omit<UnpkgSubModuleOptions, 'isGlobal'>;
   inject?: any[];
 }

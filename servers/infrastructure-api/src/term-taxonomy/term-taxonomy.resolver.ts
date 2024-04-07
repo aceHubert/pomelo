@@ -1,6 +1,10 @@
 import DataLoader from 'dataloader';
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { VoidResolver } from 'graphql-scalars';
+import { Anonymous, Authorized } from '@ace-pomelo/nestjs-oidc';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { Fields } from '@ace-pomelo/shared-server';
 import {
   OptionDataSource,
@@ -9,9 +13,6 @@ import {
   OptionPresetKeys,
   TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
-import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { TermTaxonomyAction } from '@/common/actions';
 import { NewTermTaxonomyInput } from './dto/new-term-taxonomy.input';
@@ -184,58 +185,40 @@ export class TermTaxonomyResolver extends createMetaResolver(
   }
 
   @RamAuthorized(TermTaxonomyAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update term taxonomy.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update term taxonomy.' })
   async updateTermTaxonomy(
     @Args('id', { type: () => ID, description: 'Term id' }) id: number,
     @Args('model', { type: () => UpdateTermTaxonomyInput }) model: UpdateTermTaxonomyInput,
-  ): Promise<boolean> {
-    try {
-      await this.termTaxonomyDataSource.update(id, model);
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.termTaxonomyDataSource.update(id, model);
   }
 
   @RamAuthorized(TermTaxonomyAction.Delete)
-  @Mutation((returns) => Boolean, { description: 'Delete term taxonomy permanently (include term relationship).' })
-  async deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<boolean> {
-    try {
-      await this.termTaxonomyDataSource.delete(id);
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Delete term taxonomy permanently (include term relationship).',
+  })
+  async deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<void> {
+    await this.termTaxonomyDataSource.delete(id);
   }
 
   @RamAuthorized(TermTaxonomyAction.BulkDelete)
-  @Mutation((returns) => Boolean, { description: 'Delete term taxonomies permanently (include term relationship).' })
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Delete term taxonomies permanently (include term relationship).',
+  })
   async bulkDeleteTermTaxonomy(
     @Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[],
-  ): Promise<boolean> {
-    try {
-      await this.termTaxonomyDataSource.bulkDelete(ids);
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.termTaxonomyDataSource.bulkDelete(ids);
   }
 
   @RamAuthorized(TermTaxonomyAction.DeleteRelationship)
-  @Mutation((returns) => Boolean, { description: 'Delete term relationship permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete term relationship permanently.' })
   async deleteTermRelationship(
     @Args('objectId', { type: () => ID, description: 'Object id' }) objectId: number,
     @Args('termTaxonomyId', { type: () => ID, description: 'Term taxonomy id' }) termTaxonomyId: number,
-  ): Promise<boolean> {
-    try {
-      await this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
   }
 }

@@ -46,7 +46,7 @@ declare module '@types/oidc-provider' {
       | undefined;
     /**
      * IdToken lifetime in seconds
-     * @default 600
+     * @default 3600
      */
     id_token_ttl?: number | undefined;
     /**

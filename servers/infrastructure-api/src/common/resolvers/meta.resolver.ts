@@ -3,6 +3,7 @@ import { camelCase, lowerCase, upperFirst } from 'lodash';
 import { ModuleRef } from '@nestjs/core';
 import { Type, applyDecorators } from '@nestjs/common';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
+import { VoidResolver } from 'graphql-scalars';
 import { Fields } from '@ace-pomelo/shared-server';
 import { MetaDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { ResolveTree } from 'graphql-parse-resolve-info';
@@ -243,27 +244,29 @@ export function createMetaResolver<
      * 修改元数据
      */
     @AuthDecorate('updateMeta')
-    @Mutation((returns) => Boolean, {
+    @Mutation((returns) => VoidResolver, {
+      nullable: true,
       name: `update${_upperCamelCaseResolverName}Meta`,
       description: `Update ${_descriptionName} meta value.`,
     })
-    updateMeta(
+    async updateMeta(
       @Args('id', { type: () => ID, description: `${_descriptionName} meta id` })
       id: number,
       @Args('metaValue') metaValue: string,
     ) {
-      return this.metaDataSource.updateMeta(id, metaValue);
+      await this.metaDataSource.updateMeta(id, metaValue);
     }
 
     /**
      * 根据 metaKey 修改元数据
      */
     @AuthDecorate('updateMetaByKey')
-    @Mutation((returns) => Boolean, {
+    @Mutation((returns) => VoidResolver, {
+      nullable: true,
       name: `update${_upperCamelCaseResolverName}MetaByKey`,
       description: `Update ${_descriptionName} meta value by meta key.`,
     })
-    updateMetaByKey(
+    async updateMetaByKey(
       @Args(`${_camelCaseResolverName}Id`, {
         type: () => ID,
         description: `${_descriptionName} Id`,
@@ -277,41 +280,43 @@ export function createMetaResolver<
       })
       createIfNotExists?: boolean,
     ) {
-      return this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
+      await this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
     }
 
     /**
      * 删除元数据
      */
     @AuthDecorate('deleteMeta')
-    @Mutation((returns) => Boolean, {
+    @Mutation((returns) => VoidResolver, {
+      nullable: true,
       name: `delete${_upperCamelCaseResolverName}Meta`,
       description: `Delete ${_descriptionName} meta`,
     })
-    deleteMeta(
+    async deleteMeta(
       @Args('id', { type: () => ID, description: `${_descriptionName} meta Id` })
       id: number,
     ) {
-      return this.metaDataSource.deleteMeta(id);
+      await this.metaDataSource.deleteMeta(id);
     }
 
     /**
      * 根据 metaKey 删除元数据
      */
     @AuthDecorate('deleteMetaByKey')
-    @Mutation((returns) => Boolean, {
+    @Mutation((returns) => VoidResolver, {
+      nullable: true,
       name: `delete${_upperCamelCaseResolverName}MetaByKey`,
       description: `Delete ${_descriptionName} meta by meta key.`,
     })
-    deleteMetaByKey(
+    async deleteMetaByKey(
       @Args(`${_camelCaseResolverName}Id`, {
         type: () => ID,
         description: `${_descriptionName} Id`,
       })
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
-    ) {
-      return this.metaDataSource.deleteMetaByKey(modelId, metaKey);
+    ): Promise<void> {
+      await this.metaDataSource.deleteMetaByKey(modelId, metaKey);
     }
   }
 

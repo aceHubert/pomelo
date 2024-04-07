@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import { JSONObjectResolver } from 'graphql-scalars';
 
 @ObjectType({ description: 'Signed url modal' })
 export class ObsUploadSignedUrlModel {
@@ -11,7 +11,7 @@ export class ObsUploadSignedUrlModel {
   /**
    * Request headers
    */
-  @Field(() => GraphQLJSONObject)
+  @Field(() => JSONObjectResolver)
   headers!: Record<string, any>;
 }
 

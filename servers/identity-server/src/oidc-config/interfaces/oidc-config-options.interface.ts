@@ -1,5 +1,11 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
 
+export interface Storage {
+  get<T>(key: string): T | null | undefined | Promise<T | null | undefined>;
+  set<T>(key: string, value: T, expiresIn?: number): void | Promise<void>;
+  del(key: string): void | Promise<void>;
+}
+
 export interface OidcConfigOptions {
   /**
    * allow localhost redirect_uri...
@@ -16,6 +22,11 @@ export interface OidcConfigOptions {
    * @default /oidc
    */
   path?: string;
+
+  /**
+   * storage
+   */
+  storage: Storage;
 
   /**
    * is global module

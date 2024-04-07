@@ -3,28 +3,33 @@ import ejs from 'ejs';
 import { pickBy } from 'lodash';
 import { Request, Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
-import { Controller, Get, Post, Query, Body, Req, Res, Logger, Param } from '@nestjs/common';
+import { Inject, Controller, Get, Post, Query, Body, Req, Res, Logger, Param } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { OidcService } from 'nest-oidc-provider';
 import { md5, random, normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
-import { RedisService } from '@/storage/redis.service';
-import { getPasswordModifyTemplate, getPasswordForgotTemplate, getPasswordResetTemplate } from '@/templates';
+import { getPasswordModifyTemplate, getPasswordForgotTemplate, getPasswordResetTemplate } from '@/common/templates';
+import { AccountOptions } from './interfaces/account-options.interface';
 import { PasswordModifyDto, PasswordForgotDto, PasswordResetDto } from './dto/password.dto';
+import { ACCOUNT_OPTIONS } from './constants';
 
 @Controller('/password')
 export class PasswordController extends BaseController {
   logger = new Logger(PasswordController.name, { timestamp: true });
 
   constructor(
+    @Inject(ACCOUNT_OPTIONS) private readonly options: AccountOptions,
     private readonly moduleRef: ModuleRef,
-    private readonly redisService: RedisService,
     private readonly oidcService: OidcService,
     private readonly userDataSource: UserDataSource,
   ) {
     super();
+  }
+
+  private get storage() {
+    return this.options.storage;
   }
 
   //#region Modify password
@@ -388,7 +393,7 @@ export class PasswordController extends BaseController {
 
     // TODO: Mobile phone find password
 
-    const code = random(10);
+    const code = random(10).toString();
 
     let params: Record<string, any> = {};
 
@@ -397,7 +402,7 @@ export class PasswordController extends BaseController {
       params = query;
     }
 
-    await this.redisService.set(
+    await this.storage.set(
       this.passwordResetCodeKeyFor(code),
       { accountId: String(user.id), clientId: clientId || params.client_id, returnUrl },
       60 * 30,
@@ -426,7 +431,7 @@ export class PasswordController extends BaseController {
 
   @Get('reset/:code')
   async reset(@Param('code') code: string, @Req() req: Request, @Res() res: Response, @I18n() i18n: I18nContext) {
-    const stored = await this.redisService.get<{ accountId: string; clientId?: string; returnUrl?: string }>(
+    const stored = await this.storage.get<{ accountId: string; clientId?: string; returnUrl?: string }>(
       this.passwordResetCodeKeyFor(code),
     );
 
@@ -587,7 +592,7 @@ export class PasswordController extends BaseController {
 
   @Post('reset/:code')
   async checkReset(@Param('code') code: string, @Body() input: PasswordResetDto, @I18n() i18n: I18nContext) {
-    const stored = await this.redisService.get<{ accountId: string; clientId?: string; returnUrl?: string }>(
+    const stored = await this.storage.get<{ accountId: string; clientId?: string; returnUrl?: string }>(
       this.passwordResetCodeKeyFor(code),
     );
     if (!stored) {
@@ -597,7 +602,7 @@ export class PasswordController extends BaseController {
     try {
       const { accountId, clientId } = stored;
       await this.userDataSource.resetLoginPwd(Number(accountId), md5(input.password));
-      await this.redisService.del(this.passwordResetCodeKeyFor(code));
+      await this.storage.del(this.passwordResetCodeKeyFor(code));
 
       let returnUrl = stored.returnUrl;
       if (!returnUrl && clientId) {

@@ -20,7 +20,7 @@ import { IdentityModule } from '@ace-pomelo/identity-datasource';
 import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
-import { StorageModule } from './storage/storage.module';
+import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
@@ -43,9 +43,12 @@ const logger = new Logger('AppModule', { timestamp: true });
     }),
     StorageModule.forRootAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService) => ({
-        redis: config.getOrThrow('REDIS_URL'),
-      }),
+      useFactory: (config: ConfigService) => {
+        const redisConnection = config.get('REDIS_URL');
+        return {
+          use: redisConnection ? new RedisStorage(redisConnection) : new MemeryStorage(),
+        };
+      },
       inject: [ConfigService],
     }),
     I18nModule.forRootAsync({
@@ -117,21 +120,28 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService],
     }),
-    AccountModule,
+    AccountModule.forRootAsync({
+      useFactory: (storageOptions: StorageOptions) => ({
+        storage: storageOptions.use,
+      }),
+      inject: [STORAGE_OPTIONS],
+    }),
     // All routes proxy to oidc provider, must be the last one
     OidcConfigModule.forRootAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService) => ({
+      useFactory: (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('debug', false),
         issuer: `${config.get(
           'ORIGIN',
           'http://localhost:' + config.get<number>('webServer.port', 3000),
         )}${normalizeRoutePath(config.get<string>('webServer.globalPrefixUri', ''))}`,
         path: normalizeRoutePath(config.get('OIDC_PATH', '')),
+        storage: storageOptions.use,
       }),
-      inject: [ConfigService],
+      inject: [ConfigService, STORAGE_OPTIONS],
     }),
     OidcModule.forRootAsync({
+      imports: [OidcConfigModule],
       useExisting: OidcConfigService,
     }),
   ],

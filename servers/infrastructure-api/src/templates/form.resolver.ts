@@ -1,5 +1,9 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { VoidResolver } from 'graphql-scalars';
+import { Anonymous, Authorized } from '@ace-pomelo/nestjs-oidc';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
@@ -9,9 +13,6 @@ import {
   TemplatePresetType,
   TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
-import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { TemplateAction, FormTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
@@ -123,15 +124,15 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
-      await this.messageService.publish({
-        excludes: [requestUser.sub],
-        message: {
+      await this.messageService.publish(
+        {
           eventName: 'createFormReview',
           payload: {
             id,
           },
         },
-      });
+        { excludes: [requestUser.sub] },
+      );
     }
 
     return {
@@ -146,32 +147,38 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
   }
 
   @RamAuthorized(FormTemplateAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update form template (must not be in "trash" status).' })
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Update form template (must not be in "trash" status).',
+  })
   async updateFormTemplate(
     @Args('id', { type: () => ID, description: 'Form id' }) id: number,
     @Args('model', { type: () => UpdateFormTemplateInput }) model: UpdateFormTemplateInput,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.update(id, model, Number(requestUser.sub));
+  ): Promise<void> {
+    await this.templateDataSource.update(id, model, Number(requestUser.sub));
 
-      // 修改（当状态为需要审核并且有任何修改）审核消息推送
-      if (model.status === TemplateStatus.Pending) {
-        await this.messageService.publish({
-          excludes: [requestUser.sub],
-          message: {
-            eventName: 'updateFormReview',
-            payload: {
-              id,
-            },
+    // 修改（当状态为需要审核并且有任何修改）审核消息推送
+    if (model.status === TemplateStatus.Pending) {
+      await this.messageService.publish(
+        {
+          eventName: 'updateFormReview',
+          payload: {
+            id,
           },
-        });
-      }
-
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
+        },
+        { excludes: [requestUser.sub] },
+      );
     }
+
+    await this.messageService.publish(
+      {
+        eventName: 'updateFormReview',
+        payload: {
+          id,
+        },
+      },
+      { includes: [requestUser.sub] },
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { Field, ArgsType, Int } from '@nestjs/graphql';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import { JSONObjectResolver } from 'graphql-scalars';
 import {
   ObsCreateUploadSignedUrlOptionsValiator,
   ObsCreatePostUploadSignatureOptionsValiator,
@@ -26,13 +26,13 @@ export class ObsCreateUploadSignedUrlOptionsArgs extends ObsCreateUploadSignedUr
   /**
    * Request query params
    */
-  @Field(() => GraphQLJSONObject)
+  @Field(() => JSONObjectResolver)
   queryParams?: Record<string, any>;
 
   /**
    * Request headers
    */
-  @Field(() => GraphQLJSONObject)
+  @Field(() => JSONObjectResolver)
   headers?: Record<string, any>;
 }
 
@@ -57,6 +57,6 @@ export class ObsCreatePostUploadSignatureOptionsArgs extends ObsCreatePostUpload
   /**
    * Request form params
    */
-  @Field(() => GraphQLJSONObject)
+  @Field(() => JSONObjectResolver)
   formParams?: Record<string, any>;
 }

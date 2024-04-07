@@ -1,5 +1,4 @@
 import { Module, DynamicModule, Provider } from '@nestjs/common';
-import { OidcAdapterModule } from '../oidc-adapter/oidc-adapter.module';
 import { OidcConfigService } from './oidc-config.service';
 import {
   OidcConfigOptions,
@@ -13,11 +12,7 @@ const defaultOptions: Partial<OidcConfigOptions> = {
   path: '/oidc',
 };
 
-@Module({
-  imports: [OidcAdapterModule],
-  providers: [OidcConfigService],
-  exports: [OidcConfigService],
-})
+@Module({})
 export class OidcConfigModule {
   static forRoot(options: OidcConfigOptions): DynamicModule {
     const { isGlobal, ...restOptions } = options;
@@ -29,7 +24,9 @@ export class OidcConfigModule {
           provide: OIDC_CONFIG_OPTIONS,
           useValue: { ...defaultOptions, ...restOptions },
         },
+        OidcConfigService,
       ],
+      exports: [OIDC_CONFIG_OPTIONS, OidcConfigService],
     };
   }
 
@@ -38,7 +35,8 @@ export class OidcConfigModule {
       module: OidcConfigModule,
       global: options.isGlobal,
       imports: options.imports || [],
-      providers: this.createAsyncProviders(options),
+      providers: [...this.createAsyncProviders(options), OidcConfigService],
+      exports: [OIDC_CONFIG_OPTIONS, OidcConfigService],
     };
   }
 

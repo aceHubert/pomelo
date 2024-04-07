@@ -1,5 +1,9 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, ResolveField, Parent, Query, Mutation, Args, ID } from '@nestjs/graphql';
+import { ResolveTree } from 'graphql-parse-resolve-info';
+import { VoidResolver } from 'graphql-scalars';
+import { Anonymous, Authorized } from '@ace-pomelo/nestjs-oidc';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
@@ -10,9 +14,6 @@ import {
   TemplatePresetType,
   TermPresetTaxonomy,
 } from '@ace-pomelo/infrastructure-datasource';
-import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Anonymous, Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { TemplateAction, PostTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
@@ -139,9 +140,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
   }
 
   @Anonymous()
-  @ResolveField((returns) => [TermTaxonomy!], {
-    description: 'Categories',
-  })
+  @ResolveField((returns) => [TermTaxonomy!], { description: 'Categories' })
   categories(@Parent() { id: objectId }: { id: number }, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
     return this.termTaxonomyDataSource.getListByObjectId(
       {
@@ -153,9 +152,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
   }
 
   @Anonymous()
-  @ResolveField((returns) => [TermTaxonomy!], {
-    description: 'Tags',
-  })
+  @ResolveField((returns) => [TermTaxonomy!], { description: 'Tags' })
   tags(@Parent() { id: objectId }: { id: number }, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
     return this.termTaxonomyDataSource.getListByObjectId(
       {
@@ -225,15 +222,15 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
-      await this.messageService.publish({
-        excludes: [requestUser.sub],
-        message: {
+      await this.messageService.publish(
+        {
           eventName: 'createPostReview',
           payload: {
             id,
           },
         },
-      });
+        { excludes: [requestUser.sub] },
+      );
     }
 
     return {
@@ -252,32 +249,28 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
   }
 
   @RamAuthorized(PostTemplateAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update post template (must not be in "trash" status).' })
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Update post template (must not be in "trash" status).',
+  })
   async updatePostTemplate(
     @Args('id', { type: () => ID, description: 'Post id' }) id: number,
     @Args('model', { type: () => UpdatePostTemplateInput }) model: UpdatePostTemplateInput,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.templateDataSource.update(id, model, Number(requestUser.sub));
+  ): Promise<void> {
+    await this.templateDataSource.update(id, model, Number(requestUser.sub));
 
-      // 修改（当状态为需要审核并且有任何修改）审核消息推送
-      if (model.status === TemplateStatus.Pending) {
-        await this.messageService.publish({
-          excludes: [requestUser.sub],
-          message: {
-            eventName: 'updatePostReview',
-            payload: {
-              id,
-            },
+    // 修改（当状态为需要审核并且有任何修改）审核消息推送
+    if (model.status === TemplateStatus.Pending) {
+      await this.messageService.publish(
+        {
+          eventName: 'updatePostReview',
+          payload: {
+            id,
           },
-        });
-      }
-
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
+        },
+        { excludes: [requestUser.sub] },
+      );
     }
   }
 }

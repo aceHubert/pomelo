@@ -1,26 +1,27 @@
 import { Module, Provider, DynamicModule } from '@nestjs/common';
 import { ObsOptions, ObsOptionsFactory, ObsAsyncOptions } from './interfaces/obs-options.interface';
 import { ObsController } from './obs.controller';
+import { ObsResolver } from './obs.resolver';
 import { ObsService } from './obs.service';
 import { OBS_OPTIONS } from './constants';
 
-@Module({
-  controllers: [ObsController],
-  providers: [ObsService],
-  exports: [ObsService],
-})
+@Module({})
 export class FileModule {
   static forRoot(options: ObsOptions): DynamicModule {
     const { isGlobal, ...restOptions } = options;
     return {
       module: FileModule,
       global: isGlobal,
+      controllers: [ObsController],
       providers: [
         {
           provide: OBS_OPTIONS,
           useValue: restOptions,
         },
+        ObsService,
+        ObsResolver,
       ],
+      exports: [ObsService],
     };
   }
 
@@ -28,8 +29,10 @@ export class FileModule {
     return {
       module: FileModule,
       global: options.isGlobal,
-      imports: options.imports || [],
-      providers: this.createAsyncProviders(options),
+      controllers: [ObsController],
+      imports: options.imports,
+      providers: [...this.createAsyncProviders(options), ObsService, ObsResolver],
+      exports: [ObsService],
     };
   }
 

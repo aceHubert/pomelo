@@ -1,8 +1,9 @@
 import { ModuleRef } from '@nestjs/core';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
+import { VoidResolver } from 'graphql-scalars';
+import { Authorized } from '@ace-pomelo/nestjs-oidc';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { Fields, User, RequestUser, md5 } from '@ace-pomelo/shared-server';
 import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { UserAction } from '@/common/actions';
@@ -87,53 +88,31 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   }
 
   @RamAuthorized(UserAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update user.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update user.' })
   async updateUser(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.userDataSource.update(id, model, Number(requestUser.sub));
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.userDataSource.update(id, model, Number(requestUser.sub));
   }
 
   @RamAuthorized(UserAction.UpdateStatus)
-  @Mutation((returns) => Boolean, {
-    description: 'Update user stauts',
-  })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update user stauts' })
   async updateUserStatus(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @Args('status', { type: () => UserStatus, description: 'status' }) status: UserStatus,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.userDataSource.updateStatus(id, status, Number(requestUser.sub));
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.userDataSource.updateStatus(id, status, Number(requestUser.sub));
   }
 
   @RamAuthorized(UserAction.Delete)
-  @Mutation((returns) => Boolean, {
-    description: 'Delete user permanently.',
-  })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete user permanently.' })
   async deleteUser(
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @User() requestUser: RequestUser,
-  ): Promise<boolean> {
-    try {
-      await this.userDataSource.delete(id, Number(requestUser.sub));
-      return true;
-    } catch (e: any) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.userDataSource.delete(id, Number(requestUser.sub));
   }
 }

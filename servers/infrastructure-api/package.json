@@ -19,7 +19,6 @@
     "test:e2e": "run -T jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@ace-pomelo/authorization": "workspace:^",
     "@ace-pomelo/infrastructure-datasource": "workspace:^",
     "@ace-pomelo/nestjs-oidc": "workspace:^",
     "@ace-pomelo/ram-authorization": "workspace:^",
@@ -42,8 +41,8 @@
     "express": "^4.17.1",
     "graphql": "^16.0.0",
     "graphql-parse-resolve-info": "^4.12.0",
+    "graphql-scalars": "^1.22.5",
     "graphql-subscriptions": "^2.0.0",
-    "graphql-type-json": "^0.3.2",
     "graphql-upload": "^15.0.2",
     "graphql-ws": "^5.11.2",
     "jimp": "^0.22.8",

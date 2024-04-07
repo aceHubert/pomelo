@@ -20,7 +20,6 @@ import {
 } from 'nestjs-i18n';
 import { normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { OidcModule } from '@ace-pomelo/nestjs-oidc';
-import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
 import { IdentityModule } from '@ace-pomelo/identity-datasource';
 import { configuration } from './common/utils/configuration.utils';
@@ -127,7 +126,6 @@ import '@/common/extends/i18n.extend';
       }),
       inject: [ConfigService],
     }),
-    AuthorizationModule,
     RamAuthorizationModule.forRoot({
       serviceName: 'basic',
     }),
@@ -142,15 +140,9 @@ import '@/common/extends/i18n.extend';
           introspection: isDebug,
           path: graphqlPath,
           useGlobalPrefix: true,
-          installSubscriptionHandlers: true,
           cache: new InMemoryLRUCache(),
           autoSchemaFile: path.join(__dirname, 'schema.gql'),
-          context: async ({ req }: any) => {
-            return {
-              user: req.user, // from express-jwt
-              req, // for nestjs-i18n
-            };
-          },
+          context: async ({ req }: any) => req,
         };
       },
       inject: [ConfigService],

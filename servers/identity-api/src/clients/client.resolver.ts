@@ -1,9 +1,9 @@
-import * as crypto from 'crypto';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { Fields } from '@ace-pomelo/shared-server';
+import { VoidResolver } from 'graphql-scalars';
+import { Authorized } from '@ace-pomelo/nestjs-oidc';
+import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Fields, random, sha256 } from '@ace-pomelo/shared-server';
 import { ClientDataSource } from '@ace-pomelo/identity-datasource';
 import { ClientAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
@@ -69,18 +69,12 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.Update)
-  @Mutation((returns) => Boolean, { description: 'Update client.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update client.' })
   async updateClient(
     @Args('clientId', { description: 'Client id' }) clientId: string,
     @Args('model', { type: () => UpdateClientInput }) input: UpdateClientInput,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.update(clientId, input);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.clientDataSource.update(clientId, input);
   }
 
   @RamAuthorized(ClientAction.Claims)
@@ -114,17 +108,9 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.DeleteClaim)
-  @Mutation((returns) => Boolean, { description: 'Delete client claim permanently.' })
-  async deleteClientClaim(
-    @Args('id', { type: () => ID, description: 'Client claim id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deleteClaim(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete client claim permanently.' })
+  async deleteClientClaim(@Args('id', { type: () => ID, description: 'Client claim id' }) id: number): Promise<void> {
+    await this.clientDataSource.deleteClaim(id);
   }
 
   @RamAuthorized(ClientAction.CorsOrigins)
@@ -158,17 +144,11 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.DeleteCorsOrigin)
-  @Mutation((returns) => Boolean, { description: 'Delete client cors origin permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete client cors origin permanently.' })
   async deleteClientCorsOrigin(
     @Args('id', { type: () => ID, description: 'Client cors origin id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deleteCorsOrigin(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.clientDataSource.deleteCorsOrigin(id);
   }
 
   @RamAuthorized(ClientAction.GrantTypes)
@@ -202,17 +182,11 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.DeleteGrantType)
-  @Mutation((returns) => Boolean, { description: 'Delete client grant type permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete client grant type permanently.' })
   async deleteClientGrantType(
     @Args('id', { type: () => ID, description: 'Client grant type id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deleteGrantType(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.clientDataSource.deleteGrantType(id);
   }
 
   @RamAuthorized(ClientAction.Scopes)
@@ -246,17 +220,9 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.DeleteScope)
-  @Mutation((returns) => Boolean, { description: 'Delete client scope permanently.' })
-  async deleteClientScope(
-    @Args('id', { type: () => ID, description: 'Client scope id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deleteScope(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete client scope permanently.' })
+  async deleteClientScope(@Args('id', { type: () => ID, description: 'Client scope id' }) id: number): Promise<void> {
+    await this.clientDataSource.deleteScope(id);
   }
 
   @RamAuthorized(ClientAction.RedirectUris)
@@ -290,17 +256,11 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.DeleteRedirectUri)
-  @Mutation((returns) => Boolean, { description: 'Delete client redirect uri permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete client redirect uri permanently.' })
   async deleteClientRedirectUri(
     @Args('id', { type: () => ID, description: 'Client redirect uri id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deleteRedirectUri(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.clientDataSource.deleteRedirectUri(id);
   }
 
   @RamAuthorized(ClientAction.PostLogoutRedirectUris)
@@ -343,17 +303,14 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.DeletePostLogoutRedirectUri)
-  @Mutation((returns) => Boolean, { description: 'Delete client post logout redirect uri permanently.' })
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Delete client post logout redirect uri permanently.',
+  })
   async deleteClientPostLogoutRedirectUri(
     @Args('id', { type: () => ID, description: 'Client post logout redirect uri id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deletePostLogoutRedirectUri(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.clientDataSource.deletePostLogoutRedirectUri(id);
   }
 
   @RamAuthorized(ClientAction.Secrets)
@@ -376,33 +333,21 @@ export class ClientResolver extends BaseResolver {
     @Args('clientId', { description: 'Client id' }) clientId: string,
     @Args('model', { type: () => NewClientSecretInput }) input: NewClientSecretInput,
   ): Promise<ClientSecret | undefined> {
-    let randomSecret = crypto.randomBytes(32).toString('base64');
-
-    randomSecret = randomSecret.replace(/=/g, ''); // Remove any trailing '='s
-    randomSecret = randomSecret.replace(/\+/g, ''); // Remove '+'
-    randomSecret = randomSecret.replace(/\//g, ''); // Remove '/'
+    const randomSecret = random(32).toBase64Url();
 
     return this.clientDataSource
       .createSecret(clientId, {
         ...input,
         // SHA256 加密
-        value: crypto.createHash('SHA256').update(randomSecret).digest('hex'),
+        value: sha256(randomSecret, { enabledHmac: true }).toString(),
       })
       .then((secret) => ({ ...secret, value: randomSecret } as ClientSecret)); // value 返回原始值
   }
 
   @RamAuthorized(ClientAction.DeleteSecret)
-  @Mutation((returns) => Boolean, { description: 'Delete client secret permanently.' })
-  async deleteClientSecret(
-    @Args('id', { type: () => ID, description: 'Client secret id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deleteSecret(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete client secret permanently.' })
+  async deleteClientSecret(@Args('id', { type: () => ID, description: 'Client secret id' }) id: number): Promise<void> {
+    await this.clientDataSource.deleteSecret(id);
   }
 
   @RamAuthorized(ClientAction.Properties)
@@ -436,16 +381,10 @@ export class ClientResolver extends BaseResolver {
   }
 
   @RamAuthorized(ClientAction.DeleteProperty)
-  @Mutation((returns) => Boolean, { description: 'Delete client property permanently.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete client property permanently.' })
   async deleteClientProperty(
     @Args('id', { type: () => ID, description: 'Client property id' }) id: number,
-  ): Promise<boolean> {
-    try {
-      await this.clientDataSource.deleteProperty(id);
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
-    }
+  ): Promise<void> {
+    await this.clientDataSource.deleteProperty(id);
   }
 }

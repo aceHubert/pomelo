@@ -1,12 +1,11 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
+import { StorageAdpter } from './storage.adpter';
 
 export interface StorageOptions {
   /**
-   * redis url
+   * storage
    */
-  redis?: string;
-
-  // TODO: add more storage options
+  use: StorageAdpter;
 
   /**
    * is global module

@@ -1,13 +1,15 @@
-import { Module, DynamicModule, Provider } from '@nestjs/common';
-import { RedisService } from './redis.service';
+import { Module, DynamicModule, Provider, Inject, OnApplicationShutdown } from '@nestjs/common';
 import { StorageOptions, StorageAsyncOptions, StorageOptionsFactory } from './interfaces/storage-options.interface';
 import { STORAGE_OPTIONS } from './constants';
 
-@Module({
-  providers: [RedisService],
-  exports: [RedisService],
-})
-export class StorageModule {
+@Module({})
+export class StorageModule implements OnApplicationShutdown {
+  constructor(@Inject(STORAGE_OPTIONS) private readonly options: StorageOptions) {}
+
+  onApplicationShutdown() {
+    this.options.use.dispose();
+  }
+
   static forRoot(options: StorageOptions): DynamicModule {
     const { isGlobal, ...restOptions } = options;
     return {
@@ -19,6 +21,7 @@ export class StorageModule {
           useValue: restOptions,
         },
       ],
+      exports: [STORAGE_OPTIONS],
     };
   }
 
@@ -28,6 +31,7 @@ export class StorageModule {
       global: options.isGlobal,
       imports: options.imports || [],
       providers: this.createAsyncProviders(options),
+      exports: [STORAGE_OPTIONS],
     };
   }
 
