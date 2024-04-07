@@ -128,6 +128,13 @@ export class OptionDataSource extends BaseDataSource {
   }
 
   /**
+   * 清除 Options 缓存
+   */
+  reset(): void {
+    super.resetOptions();
+  }
+
+  /**
    * 删除 Options
    * @param id Option Id
    * @param requestUserId 请求用户 Id

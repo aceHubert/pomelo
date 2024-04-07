@@ -8,8 +8,8 @@ export interface MetaDataSource<MetaReturnType, NewMetaInputType> {
   isMetaExists(modelId: number, metaKey: string): Promise<boolean>;
   createMeta(model: NewMetaInputType): Promise<MetaReturnType>;
   bulkCreateMeta(modelId: number, models: NewMetaInput[]): Promise<MetaReturnType[]>;
-  updateMeta(id: number, metaValue: string): Promise<boolean>;
-  updateMetaByKey(modelId: number, metaKey: string, metaValue: string, createIfNotExists?: boolean): Promise<boolean>;
-  deleteMeta(id: number): Promise<boolean>;
-  deleteMetaByKey(modelId: number, metaKey: string): Promise<boolean>;
+  updateMeta(id: number, metaValue: string): Promise<void>;
+  updateMetaByKey(modelId: number, metaKey: string, metaValue: string, createIfNotExists?: boolean): Promise<void>;
+  deleteMeta(id: number): Promise<void>;
+  deleteMetaByKey(modelId: number, metaKey: string): Promise<void>;
 }

@@ -77,9 +77,9 @@ export class LinkDataSource extends BaseDataSource {
       await this.models.Links.update(model, {
         where: { id },
       });
+    } else {
+      throw new ValidationError(this.translate('datasource.link.link_does_not_exist', 'Link does not exist!'));
     }
-
-    throw new ValidationError(this.translate('datasource.link.link_does_not_exist', 'Link does not exist!'));
   }
 
   /**
@@ -100,8 +100,8 @@ export class LinkDataSource extends BaseDataSource {
       }
 
       await link.destroy();
+    } else {
+      throw new ValidationError(this.translate('datasource.link.link_does_not_exist', 'Link does not exist!'));
     }
-
-    throw new ValidationError(this.translate('datasource.link.link_does_not_exist', 'Link does not exist!'));
   }
 }

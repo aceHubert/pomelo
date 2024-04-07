@@ -299,22 +299,20 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * 修改元数据
    * @param id meta Id
    */
-  updateMeta(id: number, metaValue: string): Promise<boolean> {
-    return this.metaModel
-      .update(
-        {
-          metaValue,
-        },
-        {
-          where: {
-            id,
-            metaKey: {
-              [Op.notLike]: '$%',
-            },
+  async updateMeta(id: number, metaValue: string): Promise<void> {
+    await this.metaModel.update(
+      {
+        metaValue,
+      },
+      {
+        where: {
+          id,
+          metaKey: {
+            [Op.notLike]: '$%',
           },
         },
-      )
-      .then(([count]) => count > 0);
+      },
+    );
   }
 
   /**
@@ -322,64 +320,60 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param modelId 实体 Id
    * @param metaKey meta key
    * @param metaValue meta value
+   * @param createIfNotExists 如果不存在是否创建
    */
-  updateMetaByKey(modelId: number, metaKey: string, metaValue: string, createIfNotExists = false): Promise<boolean> {
+  async updateMetaByKey(modelId: number, metaKey: string, metaValue: string, createIfNotExists = false): Promise<void> {
     const fixedKey = this.fixMetaKey(metaKey);
     if (!createIfNotExists) {
-      return this.metaModel
-        .update(
-          {
-            metaValue,
-          },
-          {
-            where: {
-              [this.metaModelIdFieldName]: modelId,
-              metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
-            },
-          },
-        )
-        .then(([count]) => count > 0);
-    }
-    return this.isMetaExists(modelId, metaKey).then((isExists) => {
-      if (!isExists) {
-        // 如果不存在则创建
-        return this.metaModel
-          .create({
+      await this.metaModel.update(
+        {
+          metaValue,
+        },
+        {
+          where: {
             [this.metaModelIdFieldName]: modelId,
-            metaKey: fixedKey,
-            metaValue,
-          })
-          .then(() => true);
-      }
-      return this.metaModel
-        .update(
-          { metaValue },
-          {
-            where: {
-              [this.metaModelIdFieldName]: modelId,
-              metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
-            },
+            metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
           },
-        )
-        .then(([count]) => count > 0);
-    });
+        },
+      );
+      return;
+    }
+
+    const isExists = await this.isMetaExists(modelId, metaKey);
+
+    if (!isExists) {
+      // 如果不存在则创建
+      await this.metaModel.create({
+        [this.metaModelIdFieldName]: modelId,
+        metaKey: fixedKey,
+        metaValue,
+      });
+    } else {
+      await this.metaModel.update(
+        { metaValue },
+        {
+          where: {
+            [this.metaModelIdFieldName]: modelId,
+            metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
+          },
+        },
+      );
+    }
   }
 
   /**
    * 根据 Id 删除元数据
    * @param id Template id
    */
-  deleteMeta(id: number): Promise<boolean> {
-    return this.metaModel
-      .destroy({
-        where: {
-          id,
-          metaKey: {
-            [Op.notLike]: '$%',
-          },
+  async deleteMeta(id: number): Promise<void> {
+    await this.metaModel.destroy({
+      where: {
+        id,
+        metaKey: {
+          [Op.notLike]: '$%',
         },
-      })
-      .then((count) => count > 0);
+      },
+    });
   }
 
   /**
@@ -387,15 +381,13 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param modelId 实体 Id
    * @param metaKey meta key
    */
-  deleteMetaByKey(modelId: number, metaKey: string): Promise<boolean> {
+  async deleteMetaByKey(modelId: number, metaKey: string): Promise<void> {
     const fixedKey = this.fixMetaKey(metaKey);
-    return this.metaModel
-      .destroy({
-        where: {
-          [this.metaModelIdFieldName]: modelId,
-          metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
-        },
-      })
-      .then((count) => count > 0);
+    await this.metaModel.destroy({
+      where: {
+        [this.metaModelIdFieldName]: modelId,
+        metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
+      },
+    });
   }
 }

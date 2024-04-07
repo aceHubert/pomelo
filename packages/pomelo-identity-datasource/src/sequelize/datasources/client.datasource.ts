@@ -276,7 +276,9 @@ export class ClientDataSource extends BaseDataSource {
       }).then((count) => count > 0);
 
       if (exists)
-        throw new ValidationError(this.translate('datasource.client.claim_has_existed', 'Claim has already existed!'));
+        throw new ValidationError(
+          this.translate('datasource.client.claim_has_existed', 'Client claim has already existed!'),
+        );
 
       return this.models.ClientClaims.create({
         ...input,
@@ -394,7 +396,7 @@ export class ClientDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.client.cors_origin_has_existed', 'Cors origin has already existed!'),
+          this.translate('datasource.client.cors_origin_has_existed', 'Client cors origin has already existed!'),
         );
 
       return this.models.ClientCorsOrigins.create({
@@ -510,7 +512,9 @@ export class ClientDataSource extends BaseDataSource {
       }).then((count) => count > 0);
 
       if (exists)
-        throw new ValidationError(this.translate('datasource.client.scope_has_existed', 'Scope has already existed!'));
+        throw new ValidationError(
+          this.translate('datasource.client.scope_has_existed', 'Client scope has already existed!'),
+        );
 
       return this.models.ClientScopes.create({
         ...input,
@@ -628,7 +632,7 @@ export class ClientDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.client.grant_type_has_existed', 'GrantType has already existed!'),
+          this.translate('datasource.client.grant_type_has_existed', 'Client grant type has already existed!'),
         );
 
       return this.models.ClientGrantTypes.create({
@@ -747,7 +751,7 @@ export class ClientDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.client.redirect_uri_has_existed', 'RedirectUri has already existed!'),
+          this.translate('datasource.client.redirect_uri_has_existed', 'Client redirect uri has already existed!'),
         );
 
       return this.models.ClientRedirectUris.create({
@@ -873,7 +877,7 @@ export class ClientDataSource extends BaseDataSource {
         throw new ValidationError(
           this.translate(
             'datasource.client.post_logout_redirect_uri_has_existed',
-            'PostLogoutRedirectUri has already existed!',
+            'Client post logout redirect uri has already existed!',
           ),
         );
 
@@ -1070,7 +1074,7 @@ export class ClientDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.client.property_has_existed', 'Property has already existed.'),
+          this.translate('datasource.client.property_has_existed', 'Client property has already existed.'),
         );
 
       return this.models.ClientProperties.create({

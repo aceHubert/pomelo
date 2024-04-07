@@ -4,10 +4,7 @@ import { dataSources } from './sequelize';
 import { IdentityService } from './identity.service';
 import { IDENTITY_OPTIONS } from './constants';
 
-@Module({
-  providers: [...dataSources, IdentityService],
-  exports: [...dataSources, IdentityService],
-})
+@Module({})
 export class IdentityModule {
   private static readonly logger = new Logger(IdentityModule.name, { timestamp: true });
 
@@ -24,7 +21,10 @@ export class IdentityModule {
           provide: IDENTITY_OPTIONS,
           useValue: restOptions,
         },
+        ...dataSources,
+        IdentityService,
       ],
+      exports: [IDENTITY_OPTIONS, ...dataSources, IdentityService],
     };
   }
 
@@ -32,8 +32,9 @@ export class IdentityModule {
     return {
       module: IdentityModule,
       global: options.isGlobal,
-      imports: options.imports || [],
-      providers: [...this.createAsyncProviders(options)],
+      imports: options.imports,
+      providers: [...this.createAsyncProviders(options), ...dataSources, IdentityService],
+      exports: [IDENTITY_OPTIONS, ...dataSources, IdentityService],
     };
   }
 

@@ -333,8 +333,15 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         where,
       });
       if (template) {
-        // 是否有编辑权限
-        await this.hasEditCapability(template, requestUserId);
+        // 如果是已发布的状态，可以直接返回
+        if (template.status !== TemplateStatus.Publish) {
+          try {
+            // 是否有编辑权限
+            await this.hasEditCapability(template, requestUserId);
+          } catch {
+            return;
+          }
+        }
 
         return template.toJSON<TemplateModel>();
       }
@@ -387,8 +394,12 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (template) {
         // 如果是已发布的状态，可以直接返回
         if (template.status !== TemplateStatus.Publish) {
-          // 是否有编辑权限
-          await this.hasEditCapability(template, requestUserId);
+          try {
+            // 是否有编辑权限
+            await this.hasEditCapability(template, requestUserId);
+          } catch {
+            return;
+          }
         }
 
         return template.toJSON<TemplateModel>();
@@ -1267,10 +1278,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         await t.rollback();
         throw err;
       }
+    } else {
+      throw new ValidationError(
+        this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
+      );
     }
-    throw new ValidationError(
-      this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
-    );
   }
 
   /**
@@ -1311,11 +1323,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
       template.name = await this.fixName(name, template.name);
       template.save();
+    } else {
+      throw new ValidationError(
+        this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
+      );
     }
-
-    throw new ValidationError(
-      this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
-    );
   }
 
   /**
@@ -1372,11 +1384,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         await t.rollback();
         throw err;
       }
+    } else {
+      throw new ValidationError(
+        this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
+      );
     }
-
-    throw new ValidationError(
-      this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
-    );
   }
 
   /**
@@ -1514,11 +1526,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         t.rollback();
         throw err;
       }
+    } else {
+      throw new ValidationError(
+        this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
+      );
     }
-
-    throw new ValidationError(
-      this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
-    );
   }
 
   /**
@@ -1639,11 +1651,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         await t.rollback();
         throw err;
       }
+    } else {
+      throw new ValidationError(
+        this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
+      );
     }
-
-    throw new ValidationError(
-      this.translate('datasource.template.template_does_not_exist', 'Template does not exist!'),
-    );
   }
 
   /**

@@ -124,8 +124,8 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       idTokenLifetime: {
         type: isMysql ? DataTypes.MEDIUMINT({ unsigned: true }) : DataTypes.MEDIUMINT(),
         allowNull: false,
-        defaultValue: 600,
-        comment: 'Id token lifetime (Seconds, default: 600)',
+        defaultValue: 3600,
+        comment: 'Id token lifetime (Seconds, default: 3600)',
       },
       accessTokenFormat: {
         type: DataTypes.STRING(50),

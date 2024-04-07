@@ -213,7 +213,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
 
     if (nonEditable)
       throw new ValidationError(
-        this.translate('datasource.identity_resource.resource_non_editable', 'IdentityResource is not editable!'),
+        this.translate('datasource.identity_resource.resource_non_editable', 'Identity resource is not editable!'),
       );
 
     await this.models.IdentityResources.update(input, {
@@ -236,15 +236,15 @@ export class IdentityResourceDataSource extends BaseDataSource {
     if (resource) {
       if (resource.nonEditable)
         throw new ValidationError(
-          this.translate('datasource.identity_resource.resource_non_editable', 'IdentityResource is not editable!'),
+          this.translate('datasource.identity_resource.resource_non_editable', 'Identity resource is not editable!'),
         );
 
       await resource.destroy();
+    } else {
+      throw new ValidationError(
+        this.translate('datasource.identity_resource.resource_does_not_exist', 'Identity resource does not exist!'),
+      );
     }
-
-    throw new ValidationError(
-      this.translate('datasource.identity_resource.resource_does_not_exist', 'IdentityResource does not exist!'),
-    );
   }
 
   /**
@@ -303,7 +303,10 @@ export class IdentityResourceDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.identity_resource.claim_has_existed', 'Claim has already existed!'),
+          this.translate(
+            'datasource.identity_resource.claim_has_existed',
+            'Identity resource claim has already existed!',
+          ),
         );
 
       return this.models.IdentityClaims.create({
@@ -422,7 +425,10 @@ export class IdentityResourceDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.identity_resource.property_has_existed', 'Property has already existed.'),
+          this.translate(
+            'datasource.identity_resource.property_has_existed',
+            'Identity resource property has already existed.',
+          ),
         );
 
       return this.models.IdentityProperties.create({

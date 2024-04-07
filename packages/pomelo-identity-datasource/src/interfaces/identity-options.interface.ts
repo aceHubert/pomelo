@@ -3,11 +3,6 @@ import { Options } from 'sequelize';
 
 export interface IdentityOptions {
   /**
-   * is global module
-   */
-  isGlobal?: boolean;
-
-  /**
    * database connection
    * https://sequelize.org/docs/v6/getting-started/#connecting-to-a-database
    */
@@ -24,6 +19,11 @@ export interface IdentityOptions {
    * @param fallback fallback value
    */
   translate?: (key: string, fallback: string, args?: Record<string, any>) => string;
+
+  /**
+   * is global module
+   */
+  isGlobal?: boolean;
 }
 
 export interface IdentityOptionsFactory {
@@ -31,6 +31,9 @@ export interface IdentityOptionsFactory {
 }
 
 export interface IdentityAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  /**
+   * is global module
+   */
   isGlobal?: boolean;
   useExisting?: Type<IdentityOptionsFactory>;
   useClass?: Type<IdentityOptionsFactory>;

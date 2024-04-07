@@ -8,10 +8,7 @@ import { dataSources } from './sequelize';
 import { InfrastructureService } from './infrastructure.service';
 import { INFRASTRUCTURE_OPTIONS } from './constants';
 
-@Module({
-  providers: [...dataSources, InfrastructureService],
-  exports: [...dataSources, InfrastructureService],
-})
+@Module({})
 export class InfrastructureModule {
   private static readonly logger = new Logger(InfrastructureModule.name, { timestamp: true });
 
@@ -28,7 +25,10 @@ export class InfrastructureModule {
           provide: INFRASTRUCTURE_OPTIONS,
           useValue: restOptions,
         },
+        ...dataSources,
+        InfrastructureService,
       ],
+      exports: [INFRASTRUCTURE_OPTIONS, ...dataSources, InfrastructureService],
     };
   }
 
@@ -36,8 +36,9 @@ export class InfrastructureModule {
     return {
       module: InfrastructureModule,
       global: options.isGlobal,
-      imports: options.imports || [],
-      providers: [...this.createAsyncProviders(options)],
+      imports: options.imports,
+      providers: [...this.createAsyncProviders(options), ...dataSources, InfrastructureService],
+      exports: [INFRASTRUCTURE_OPTIONS, ...dataSources, InfrastructureService],
     };
   }
 

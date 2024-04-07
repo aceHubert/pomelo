@@ -563,8 +563,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         await t.rollback();
         throw err;
       }
+    } else {
+      throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
     }
-    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
   }
 
   /**
@@ -599,9 +600,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
       user.email = email;
       await user.save();
+    } else {
+      throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
     }
-
-    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
   }
 
   /**
@@ -636,9 +637,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
       user.mobile = mobile;
       await user.save();
+    } else {
+      throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
     }
-
-    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
   }
 
   /**
@@ -712,9 +713,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
       user.loginPwd = newPwd;
       await user.save();
+    } else {
+      throw new ValidationError(this.translate('datasource.user.old_password_incorrect', 'Old password is incorrect!'));
     }
-
-    throw new ValidationError(this.translate('datasource.user.old_password_incorrect', 'Old password is incorrect!'));
   }
 
   /**
@@ -730,8 +731,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       }
       user.loginPwd = password;
       user.save();
+    } else {
+      throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
     }
-    throw new ValidationError(this.translate('datasource.user.user_does_not_exist', 'User does not exist!'));
   }
 
   /**

@@ -118,9 +118,9 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       await this.models.Comments.update(model, {
         where: { id },
       });
+    } else {
+      throw new ValidationError(this.translate('datasource.comment.comment_does_not_exist', 'Comment does not exist!'));
     }
-
-    throw new ValidationError(this.translate('datasource.comment.comment_does_not_exist', 'Comment does not exist!'));
   }
 
   /**
@@ -155,8 +155,8 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
         await t.rollback();
         throw err;
       }
+    } else {
+      throw new ValidationError(this.translate('datasource.comment.comment_does_not_exist', 'Comment does not exist!'));
     }
-
-    throw new ValidationError(this.translate('datasource.comment.comment_does_not_exist', 'Comment does not exist!'));
   }
 }
