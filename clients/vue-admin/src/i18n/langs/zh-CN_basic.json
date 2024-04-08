@@ -29,7 +29,8 @@
       "preview": "预览",
       "select": "选择",
       "skip": "跳过",
-      "crop": "裁切"
+      "crop": "裁切",
+      "skip_crop": "跳过裁切"
     },
     "btn_tips": {
       "go_back": "返回上一级"

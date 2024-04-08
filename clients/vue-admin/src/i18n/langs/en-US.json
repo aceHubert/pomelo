@@ -9,6 +9,7 @@
       "cancel": "Cancel",
       "collapse": "Collapse",
       "confirm": "Confirm",
+      "close": "Close",
       "create": "Create",
       "add": "Add",
       "edit": "Edit",
@@ -29,7 +30,7 @@
       "select": "Select",
       "skip": "Skip",
       "crop": "Crop",
-      "close": "Close"
+      "skip_crop": "Skip Crop"
     },
     "btn_tips": {
       "go_back": "Go back"

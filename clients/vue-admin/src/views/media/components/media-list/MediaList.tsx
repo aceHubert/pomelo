@@ -149,60 +149,60 @@ export default defineComponent({
       refresh,
     });
 
-    const previewImage = reactive({
-      modalVisible: false,
-      media: null as Media | null,
-    });
-
     const cropImage = reactive({
       path: '',
       resultImage: '',
       coordinates: { width: 0, height: 0, left: 0, top: 0 },
     });
 
-    const createCropContent = () => (
-      <div class={`${prefixCls}-crop`}>
-        <Cropper
-          src={cropImage.path}
-          onChange={({ coordinates, canvas }) => {
-            cropImage.coordinates = coordinates;
-            cropImage.resultImage = canvas.toDataURL();
-          }}
-        ></Cropper>
-        {cropImage.resultImage && (
-          <div class={`${prefixCls}-crop-results`}>
-            <div class={`${prefixCls}-crop-results__wrapper`}>
-              <div class={`${prefixCls}-crop-results__coordinates`}>
-                <p class="font-weight-bold mb-1">{i18n.tv('page_media.image_crop.result_title', '结果')}:</p>
-                <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_left', '左')}: ${
-                  cropImage.coordinates.left
-                }`}</p>
-                <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_top', '上')}: ${
-                  cropImage.coordinates.top
-                }`}</p>
-                <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_width', '宽度')}: ${
-                  cropImage.coordinates.width
-                }`}</p>
-                <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_height', '高度')}: ${
-                  cropImage.coordinates.height
-                }`}</p>
-              </div>
-              <div class={`${prefixCls}-crop-results__preview`}>
-                <img src={cropImage.resultImage} />
+    const createCropContent = (close?: Function) => () =>
+      (
+        <div class={`${prefixCls}-crop`}>
+          {close && <Icon type="close" class={`${prefixCls}-crop__close-icon`} onClick={() => close()} />}
+          <Cropper
+            src={cropImage.path}
+            onChange={({ coordinates, canvas }) => {
+              cropImage.coordinates = coordinates;
+              cropImage.resultImage = canvas.toDataURL();
+            }}
+            onError={(err) => {
+              message.error(err.message);
+            }}
+          ></Cropper>
+          {cropImage.resultImage && (
+            <div class={`${prefixCls}-crop-results`}>
+              <div class={`${prefixCls}-crop-results__wrapper`}>
+                <div class={`${prefixCls}-crop-results__coordinates`}>
+                  <p class="font-weight-bold mb-1">{i18n.tv('page_media.image_crop.result_title', '结果')}:</p>
+                  <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_left', '左')}: ${
+                    cropImage.coordinates.left
+                  }`}</p>
+                  <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_top', '上')}: ${
+                    cropImage.coordinates.top
+                  }`}</p>
+                  <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_width', '宽度')}: ${
+                    cropImage.coordinates.width
+                  }`}</p>
+                  <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_height', '高度')}: ${
+                    cropImage.coordinates.height
+                  }`}</p>
+                </div>
+                <div class={`${prefixCls}-crop-results__preview`}>
+                  <img src={cropImage.resultImage} />
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    );
+          )}
+        </div>
+      );
 
     const cropImageReplace = ref(false);
     const handleCropImage = (media: Media) => {
       cropImage.path = media.fullPath;
       cropImageReplace.value = false;
       Modal.confirm({
-        icon: ' ',
-        content: createCropContent,
+        icon: () => null,
+        content: createCropContent(),
         width: 798,
         cancelText: i18n.tv('common.btn_text.close', '关闭') as string,
         okText: i18n.tv('common.btn_text.crop', '裁切') as string,
@@ -258,15 +258,18 @@ export default defineComponent({
     const uploadCropSkip = ref(false);
     const canCrop = (type: string) => /^image\/(png|jpe?g|gif|bmp|webp)/i.test(type);
     const handleBeforeUpload = (file: File): Promise<Blob | File> => {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         if (canCrop(file.type) && props.cropBeforeUpload) {
           cropImage.path = URL.createObjectURL(file);
           uploadCropSkip.value = false;
           Modal.confirm({
-            icon: ' ',
-            content: createCropContent,
+            icon: () => null,
+            content: createCropContent(() => {
+              reject();
+              Modal.destroyAll();
+            }),
             width: 798,
-            cancelText: i18n.tv('common.btn_text.skip', '跳过') as string,
+            cancelText: i18n.tv('common.btn_text.skip_crop', '跳过裁切') as string,
             okText: i18n.tv('common.btn_text.crop', '裁切') as string,
             onCancel: () => {
               uploadCropSkip.value = true;
@@ -282,7 +285,29 @@ export default defineComponent({
       });
     };
 
-    const handleCustomUpload = uploadMixin.getUploadRequest(props.objectPrefixKey);
+    const handleUpload = (options: any) => {
+      uploadMixin.getUploadRequest(props.objectPrefixKey)({
+        ...options,
+        fileOptions: uploadCropSkip.value ? {} : { crop: cropImage.coordinates },
+      });
+    };
+
+    const handlePreview = (media: Media) => {
+      Modal.info({
+        icon: () => null,
+        title: `${media.originalFileName}${media.extension}`,
+        content: () => (
+          <div class="text-center">
+            <img alt="example" style="max-width: 100%;" src={media.fullPath} />
+            <p class="mt-2 mb-0 text--secondary font-size-xs">{`${formatFileSize(media.fileSize ?? 0)}, ${
+              media.width ?? 0
+            }px * ${media.height ?? 0}px`}</p>
+          </div>
+        ),
+        width: !media.width ? 750 : media.width < 300 ? 300 : media.width > 750 ? 750 : media.width ?? 520,
+        okText: i18n.tv('common.btn_text.close', '关闭') as string,
+      });
+    };
 
     const selectedPath = ref('');
     const handleSelect = (media: Media) => {
@@ -372,13 +397,8 @@ export default defineComponent({
                   showUploadList={false}
                   accept={props.accept}
                   method="PUT"
-                  customRequest={(options: any) =>
-                    handleCustomUpload({
-                      ...options,
-                      fileOptions: uploadCropSkip.value ? {} : { crop: cropImage.coordinates },
-                    })
-                  }
                   beforeUpload={(file: File) => handleBeforeUpload(file)}
+                  customRequest={(options: any) => handleUpload(options)}
                   onChange={({ file: { uid, name, originFileObj, type, size, status, response, error }, event }) => {
                     if (status === 'uploading') {
                       const { loaded = 0, total = size } = event ?? {};
@@ -450,10 +470,7 @@ export default defineComponent({
                           shape="round"
                           size={props.size}
                           icon="eye"
-                          vOn:click_prevent_stop={() => {
-                            previewImage.media = media;
-                            previewImage.modalVisible = true;
-                          }}
+                          vOn:click_prevent_stop={() => handlePreview(media)}
                         >
                           {i18n.tv('common.btn_text.preview', '预览')}
                         </Button>
@@ -498,30 +515,6 @@ export default defineComponent({
               }}
             />
           </div>
-          <Modal
-            visible={previewImage.modalVisible}
-            width={
-              (previewImage.media?.width ?? 0) < 300
-                ? 300
-                : (previewImage.media?.width ?? 0) > 750
-                ? 750
-                : previewImage.media?.width ?? 520
-            }
-            bodyStyle={{ textAlign: 'center' }}
-            maskClosable={false}
-            footer={null}
-            onCancel={() => (previewImage.modalVisible = false)}
-          >
-            <span
-              slot="title"
-              class="text-ellipsis d-inline-block"
-              style="max-width: 80%;"
-            >{`${previewImage.media?.originalFileName}${previewImage.media?.extension}`}</span>
-            <img alt="example" style="max-width: 100%;" src={previewImage.media?.fullPath} />
-            <p class="mt-2 mb-0 text--secondary font-size-xs">{`${formatFileSize(previewImage.media?.fileSize ?? 0)}, ${
-              previewImage.media?.width
-            }px * ${previewImage.media?.height}px`}</p>
-          </Modal>
         </Spin>
       );
     };
