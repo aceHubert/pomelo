@@ -53,6 +53,12 @@ export class OptionResolver extends BaseResolver {
   }
 
   @RamAuthorized(OptionAction.Update)
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Clear option cache from momery.' })
+  clearOptionCache(): void {
+    this.optionDataSource.reset();
+  }
+
+  @RamAuthorized(OptionAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update option.' })
   async updateOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,

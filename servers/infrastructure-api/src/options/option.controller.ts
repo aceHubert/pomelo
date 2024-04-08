@@ -123,13 +123,28 @@ export class OptionController extends BaseController {
   }
 
   /**
+   * Clear option cache from momery.
+   */
+  @Post('/cache/clear')
+  @RamAuthorized(OptionAction.Update)
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiOkResponse({
+    description: 'no data content',
+    type: () => createResponseSuccessType({}, 'ClearOptionCacheModelSuccessResp'),
+  })
+  clearCache() {
+    this.optionDataSource.reset();
+    return this.success();
+  }
+
+  /**
    * Update option.
    */
   @Put(':id')
   @RamAuthorized(OptionAction.Update)
   @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
-    description: 'Option model',
+    description: 'no data content',
     type: () => createResponseSuccessType({}, 'UpdateOptionModelSuccessResp'),
   })
   async update(
