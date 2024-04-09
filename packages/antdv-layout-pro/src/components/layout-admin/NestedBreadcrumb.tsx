@@ -1,6 +1,6 @@
 import { defineComponent, ref, provide, inject, toRef } from 'vue-demi';
 import { Space } from 'ant-design-vue';
-import { useEffect, useConfigProvider } from '../../shared';
+import { useEffect } from '../../shared';
 import { isVueComponent } from '../../utils';
 import { Breadcrumb } from '../breadcrumb';
 
@@ -19,16 +19,16 @@ export type PresetBreadcrumbItem = BreadcrumbConfig | DefineComponent<any> | '_r
 export type BreadcrumbProp =
   | boolean
   | PresetBreadcrumbItem[]
-  | ((routeBreadcrumbs: BreadcrumbConfig[]) => Exclude<PresetBreadcrumbItem, String>[]);
+  | ((routeBreadcrumbs: BreadcrumbConfig[]) => Exclude<PresetBreadcrumbItem, string>[]);
 
 const BreadcrumbProviderInjectKey: InjectionKey<Ref<BreadcrumbConfig[]>> = Symbol('BreadcrumbProvider');
 
-const BreadcrumbContainerInjectKey: InjectionKey<{
+const NestedBreadcrumbInjectKey: InjectionKey<{
   setBreadcrumb: (breadcrumb: Array<BreadcrumbItem | DefineComponent<any>>) => void;
-}> = Symbol('NestedBreadcrumbContainer');
+}> = Symbol('NestedNestedBreadcrumb');
 
 /**
- * 提供路由面包屑数据给 BreadcrumbContainer 使用
+ * 提供路由面包屑数据给 NestedBreadcrumb 使用
  */
 export const BreadcrumbProvider = defineComponent({
   name: 'BreadcrumbProvider',
@@ -49,8 +49,8 @@ export const BreadcrumbProvider = defineComponent({
  * 面包屑容器
  * 如果嵌套使用时，只显示最外层的面包屑
  */
-export const BreadcrumbContainer = defineComponent({
-  name: 'BreadcrumbContainer',
+export const NestedBreadcrumb = defineComponent({
+  name: 'NestedBreadcrumb',
   props: {
     /**
      * 传入的面包屑数据, 默认值：true
@@ -63,10 +63,8 @@ export const BreadcrumbContainer = defineComponent({
     },
   },
   setup(props, { slots }) {
-    const configProvider = useConfigProvider();
-
     const injectBreadcrumb = inject(BreadcrumbProviderInjectKey, ref([]));
-    const nestedContainer = inject(BreadcrumbContainerInjectKey, void 0);
+    const nestedContainer = inject(NestedBreadcrumbInjectKey, void 0);
 
     const currentBreadcrumbs = ref<Array<BreadcrumbItem | DefineComponent<any>>>([]);
 
@@ -79,7 +77,7 @@ export const BreadcrumbContainer = defineComponent({
     }, [() => props.breadcrumb, injectBreadcrumb]);
 
     provide(
-      BreadcrumbContainerInjectKey,
+      NestedBreadcrumbInjectKey,
       nestedContainer ?? {
         setBreadcrumb: (breadcrumb) => {
           currentBreadcrumbs.value = breadcrumb;
@@ -88,7 +86,7 @@ export const BreadcrumbContainer = defineComponent({
     );
 
     function getBreadcrumbs(config: BreadcrumbProp) {
-      let breadcrumbs: Array<BreadcrumbConfig | DefineComponent<any>> = [];
+      let breadcrumbs: Array<Exclude<PresetBreadcrumbItem, string>> = [];
       if (typeof config === 'boolean') {
         breadcrumbs = config ? injectBreadcrumb.value : [];
       } else if (Array.isArray(config)) {
@@ -102,7 +100,7 @@ export const BreadcrumbContainer = defineComponent({
               break;
           }
           return prev;
-        }, [] as Array<BreadcrumbConfig | DefineComponent<any>>);
+        }, [] as Array<Exclude<PresetBreadcrumbItem, string>>);
       } else if (typeof config === 'function') {
         breadcrumbs = config([...injectBreadcrumb.value]);
       }
@@ -112,9 +110,9 @@ export const BreadcrumbContainer = defineComponent({
 
         const { label, path } = item;
         return {
-          label: typeof label === 'function' ? label((...args) => configProvider.i18nRender(...args)) : label,
-          to: path,
-          isLink: !!path && path.substring(0, path.indexOf('?')) !== location.pathname, // exclude query string
+          label,
+          path,
+          isLink: !!path && (typeof path === 'function' || path.substring(0, path.indexOf('?')) !== location.pathname), // exclude query string
         };
       });
     }

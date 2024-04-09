@@ -1,8 +1,9 @@
 import { ref, reactive, computed } from 'vue-demi';
-import { default as pathToRegexp } from 'path-to-regexp';
 import { warn, pick } from '@ace-util/core';
 import { useEffect, useConfigProvider } from '../shared';
 import {
+  getPathMatch,
+  getPathCompile,
   serializeMenu,
   createMenuKeyMap,
   createMenuPathMap,
@@ -30,6 +31,67 @@ export const useLayoutMixin = () => {
   const menuKeyMap = computed(() => createMenuKeyMap(menus.value));
   const menuPathMap = computed(() => createMenuPathMap(menus.value));
   const flatMenus = computed(() => createFlatMenus(menus.value));
+
+  // 更新菜单/面包屑状态
+  let cachedPath: string | undefined;
+  const currentMatchPath = ref('');
+  /**
+   * 置换路径中的参数
+   * @param pathDefine 路径定义
+   * @param previous.path 上一个路径
+   * @param previous.define 上一个路径定义
+   */
+  const reslovePath = (
+    pathDefine: string,
+    previous: { path?: string; define?: string } = {},
+  ): { path: string; resolved: boolean } => {
+    const config = menuPathMap.value.get(pathDefine);
+    const { path: previousPath = cachedPath, define: previousPathDefine = currentMatchPath.value } = previous;
+    if (previousPath && config?.regex.keys.length) {
+      const requiredParamKeys = config.regex.keys.map((key) => String(key.name));
+      let matched = getPathMatch<Record<string, any>>(previousPathDefine)(previousPath, {
+        decode: decodeURIComponent,
+      });
+      // remove search
+      const splitPath = previousPath.split('?');
+      if (splitPath.length > 1) {
+        matched = getPathMatch(previousPathDefine.split('?')[0])(splitPath[0], {
+          decode: decodeURIComponent,
+        });
+      }
+      if (matched) {
+        const previousParamKeys = Object.keys(matched.params);
+        process.env.NODE_ENV === 'production' &&
+          warn(
+            requiredParamKeys.every((requiredKey) => previousParamKeys.includes(requiredKey)),
+            `Path params "${requiredParamKeys.join(', ')}" is required but miss some keys "${requiredParamKeys
+              .filter((requiredKey) => !previousParamKeys.includes(requiredKey))
+              .join(', ')}" from path "${previousPath}".`,
+          );
+        try {
+          return {
+            path: getPathCompile(pathDefine)(pick(matched.params, requiredParamKeys), {
+              encode: encodeURIComponent,
+            }),
+            resolved: true,
+          };
+        } catch (err: any) {
+          warn(process.env.NODE_ENV === 'production', err.message);
+          return { path: pathDefine, resolved: false };
+        }
+      } else {
+        warn(
+          process.env.NODE_ENV === 'production',
+          `Params "${requiredParamKeys.join(
+            ', ',
+          )}" in path "${pathDefine}" are required but can't get it from path ${previousPath}`,
+        );
+        return { path: pathDefine, resolved: false };
+      }
+    } else {
+      return { path: pathDefine, resolved: true };
+    }
+  };
 
   // multiTab
   const multiTabRoutes = reactive<{
@@ -83,10 +145,15 @@ export const useLayoutMixin = () => {
   const goBackPath = computed(() => {
     const menu = menuKeyMap.value.get(currSiderMenuKey.value);
     if (menu?.position === 'sub') {
-      return menu.parent?.redirect || menu.parent?.path;
-    }
+      const back = menu.parent?.redirect || menu.parent?.path;
+      if (!back) return;
 
-    return null;
+      const { path, resolved } = reslovePath(back);
+      if (resolved) {
+        return path;
+      }
+    }
+    return;
   });
 
   const setTopCurrMenuKey = (key?: string) => {
@@ -113,10 +180,6 @@ export const useLayoutMixin = () => {
   const setMenuBreadcrumb = (list: Array<BreadcrumbConfig>) => {
     menuBreadcrumbs.value = list;
   };
-
-  // 更新菜单/面包屑状态
-  let cachedPath: string | undefined;
-  const currentMatchPath = ref('');
 
   const getMatchedPath = (path: string) => {
     const pathWithoutQuery = path.split('?')[0];
@@ -216,58 +279,6 @@ export const useLayoutMixin = () => {
       });
     }
     multiTabRoutes.current = fullPath;
-  };
-
-  /**
-   * 置换路径中的参数
-   * @param pathDefine 路径定义
-   * @param previous.path 上一个路径
-   * @param previous.define 上一个路径定义
-   */
-  const reslovePath = (
-    pathDefine: string,
-    previous: { path?: string; define?: string } = {},
-  ): { path: string; resolved: boolean } => {
-    const config = menuPathMap.value.get(pathDefine);
-    const { path: previousPath = cachedPath, define: previousPathDefine = currentMatchPath.value } = previous;
-    if (previousPath && config?.regex.keys.length) {
-      const requiredParamKeys = config.regex.keys.map((key) => String(key.name));
-      let matched = pathToRegexp.match<Record<string, any>>(previousPathDefine)(previousPath, {
-        decode: decodeURIComponent,
-      });
-      // remove search
-      const splitPath = previousPath.split('?');
-      if (splitPath.length > 1) {
-        matched = pathToRegexp.match<Record<string, any>>(previousPathDefine.split('?')[0])(splitPath[0], {
-          decode: decodeURIComponent,
-        });
-      }
-      if (matched) {
-        const previousParamKeys = Object.keys(matched.params);
-        process.env.NODE_ENV === 'production' &&
-          warn(
-            requiredParamKeys.every((requiredKey) => previousParamKeys.includes(requiredKey)),
-            `Path params "${requiredParamKeys.join(', ')}" is required but miss some keys "${requiredParamKeys
-              .filter((requiredKey) => !previousParamKeys.includes(requiredKey))
-              .join(', ')}" from path "${previousPath}".`,
-          );
-        return {
-          path: pathToRegexp.compile(pathDefine)(pick(matched.params, requiredParamKeys), {
-            encode: encodeURIComponent,
-          }),
-          resolved: true,
-        };
-      } else {
-        warn(
-          process.env.NODE_ENV === 'production',
-          `Params "${requiredParamKeys.join(
-            ', ',
-          )}" in path "${pathDefine}" are required but can't get it from path ${previousPath}`,
-        );
-        return { path: pathDefine, resolved: false };
-      }
-    }
-    return { path: pathDefine, resolved: false };
   };
 
   useEffect(() => {

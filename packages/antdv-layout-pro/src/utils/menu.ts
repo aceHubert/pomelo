@@ -1,15 +1,9 @@
 import { omit, groupBy } from 'lodash-es';
-import pathToRegexp from 'path-to-regexp';
-import { warn } from '@ace-util/core';
+import { getPathRegex } from './path';
 
 // Types
-import type { Key, RegExpOptions, ParseOptions } from 'path-to-regexp';
+import type { PathRegExp } from './path';
 import type { MenuConfig, BreadcrumbConfig } from '../types';
-
-export interface PathRegExp extends RegExp {
-  // An array to be populated with the keys found in the path.
-  keys: Key[];
-}
 
 export interface MenuConfigWithRedirect extends Omit<MenuConfig, 'path' | 'children'> {
   path?: string;
@@ -27,25 +21,6 @@ export type MenuPathMap = Map<
     parent?: Omit<MenuConfigWithRedirect, 'children'>;
   }
 >;
-
-function attachKeys(regex: RegExp, keys: Key[]): PathRegExp {
-  const pathRegex = regex as PathRegExp;
-  pathRegex.keys = keys;
-  return pathRegex;
-}
-
-function compilePathRegex(path: string, pathToRegexpOptions?: RegExpOptions & ParseOptions): PathRegExp {
-  const keys: Key[] = [];
-  const regex = pathToRegexp(path, keys, pathToRegexpOptions);
-  if (process.env.NODE_ENV !== 'production') {
-    const _keys: any = Object.create(null);
-    keys.forEach((key: Key) => {
-      warn(!_keys[key.name], `Duplicate param keys in route with path: "${path}"`);
-      _keys[key.name] = true;
-    });
-  }
-  return attachKeys(regex, keys);
-}
 
 /**
  * 将不可点击的菜单转换成 redirect
@@ -138,8 +113,8 @@ export function createMenuPathMap(
     if (v.path) {
       pathMap.set(v.path, {
         ...v,
-        regex: compilePathRegex(v.path),
-        aliasRegexs: v.alias?.map((item) => compilePathRegex(item)),
+        regex: getPathRegex(v.path),
+        aliasRegexs: v.alias?.map((item) => getPathRegex(item)),
         parent: parent ? omit(parent, 'children') : undefined,
       });
     }

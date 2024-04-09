@@ -1,5 +1,5 @@
 import { composeExport } from '../../utils';
-import { BreadcrumbProvider, BreadcrumbContainer } from './BreadcrumbContainer';
+import { BreadcrumbProvider, NestedBreadcrumb } from './NestedBreadcrumb';
 import LayoutAdminBase from './LayoutAdmin';
 
 // Types
@@ -7,7 +7,7 @@ import type { Plugin } from 'vue-demi';
 
 const LayoutAdmin = composeExport(LayoutAdminBase, {
   BreadcrumbProvider,
-  BreadcrumbContainer,
+  NestedBreadcrumb,
 });
 
 export default LayoutAdmin;

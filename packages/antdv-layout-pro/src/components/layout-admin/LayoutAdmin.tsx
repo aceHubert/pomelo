@@ -12,7 +12,7 @@ import {
 import { Drawer, Tabs, Icon, Layout, Menu } from 'ant-design-vue';
 import debounce from 'lodash.debounce';
 import SVGInject from '@iconfu/svg-inject';
-import { isAbsoluteUrl } from '@ace-util/core';
+import { isAbsoluteUrl, warn } from '@ace-util/core';
 import { useLayoutMixin } from '../../mixins';
 import { useEffect, useConfigProvider } from '../../shared';
 import { Theme, DeviceType, LayoutType, ContentWidth } from '../../types';
@@ -258,17 +258,22 @@ export default defineComponent({
       const next = menu?.redirect || menu?.path;
       if (!next) return;
 
-      const resolved = layoutMixin.reslovePath(next);
+      const { resolved, path } = layoutMixin.reslovePath(next);
+
+      if (!resolved) {
+        warn(process.env.NODE_ENV === 'production', `Can't resolve path: ${path}`);
+        return;
+      }
 
       // 如果是顶部菜单，且有侧边菜单，点击顶部菜单时，不切换路由，只切换菜单
       // 等待侧边菜单选择后，再切换路由
       if (menu.position === 'top' && menu.children?.some((item) => item.position === 'side')) {
-        return layoutMixin.setPath(resolved.path, false);
+        return layoutMixin.setPath(path, false);
       }
 
-      layoutMixin.setPath(resolved.path);
-
-      emit('menuClick', resolved.path, next);
+      emit('menuClick', path, () => {
+        layoutMixin.setPath(path);
+      });
     };
 
     let handleContentScroll: () => void;
@@ -442,7 +447,7 @@ export default defineComponent({
                     onClick={() => {
                       if (layoutMixin.goBackPath) {
                         // 只切换菜单，路由不变
-                        layoutMixin.setPath(layoutMixin.goBackPath);
+                        layoutMixin.setPath(layoutMixin.goBackPath, false);
                       } else {
                         sideChildDrawerVisable.value = true;
                       }
@@ -578,9 +583,10 @@ export default defineComponent({
                         theme={configProvider.theme === Theme.Dark ? 'dark' : 'light'}
                         selectable={false}
                         onClick={() => {
-                          const resolved = layoutMixin.reslovePath(layoutMixin.goBackPath!);
                           // 切换菜单，并且切换路由
-                          emit('menuClick', resolved.path, layoutMixin.goBackPath);
+                          emit('menuClick', layoutMixin.goBackPath!, () => {
+                            layoutMixin.setPath(layoutMixin.goBackPath!);
+                          });
                         }}
                       >
                         <Menu.Item key="go-back">

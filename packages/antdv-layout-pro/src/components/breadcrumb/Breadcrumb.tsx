@@ -2,15 +2,15 @@ import { snakeCase } from 'lodash-es';
 import { defineComponent, getCurrentInstance, ref, watch } from 'vue-demi';
 import { Breadcrumb } from 'ant-design-vue';
 import { useConfigProvider } from '../../shared';
-import { isVueComponent } from '../../utils';
+import { isVueComponent, getPathRegex } from '../../utils';
 
 // Types
 import type VueRouter from 'vue-router';
 import type { DefineComponent } from '../../types';
 
 export interface BreadcrumbItem {
-  label: string;
-  to: string;
+  label: string | ((i18nRender: (key: string, fallback: string, args?: any) => string) => string);
+  path: string;
   isLink?: boolean;
 }
 
@@ -61,32 +61,27 @@ export default defineComponent({
       const matched = router.currentRoute.matched;
       matched.forEach(({ name, path, meta: { title } }, index) => {
         // item.name !== 'index' && this.breadList.push(item)
+        const label = (i18nRender: (key: string, fallback: string, args?: any) => string) =>
+          title
+            ? typeof title === 'function'
+              ? title(i18nRender)
+              : i18nRender(`${props.i18nKeyPrefix}.${snakeCase(title)}`, title)
+            : name
+            ? i18nRender(`${props.i18nKeyPrefix}.${snakeCase(name)}`, name)
+            : 'Please set "title" in route meta';
         if (index > 0) {
           const prevRoute = matched[index - 1];
           const { resolved } = router.resolve(prevRoute.path);
           if (resolved.name === name) {
             // 嵌套路由与parent 路由相同，直接修改上一个的 label
-            items[index - 1].label =
-              (title &&
-                (configProvider.i18nRender(
-                  `${props.i18nKeyPrefix}.breadcrumb.${snakeCase(title)}`,
-                  title,
-                ) as string)) ||
-              (name &&
-                (configProvider.i18nRender(`${props.i18nKeyPrefix}.breadcrumb.${snakeCase(name)}`, name) as string)) ||
-              '';
+            items[index - 1].label = label;
             return;
           }
           items[index - 1].isLink = true; // 最后一个不可点击
         }
         items.push({
-          label:
-            (title &&
-              (configProvider.i18nRender(`${props.i18nKeyPrefix}.breadcrumb.${snakeCase(title)}`, title) as string)) ||
-            (name &&
-              (configProvider.i18nRender(`${props.i18nKeyPrefix}.breadcrumb.${snakeCase(name)}`, name) as string)) ||
-            '',
-          to: path,
+          label,
+          path: path,
         });
       });
       return items;
@@ -113,6 +108,9 @@ export default defineComponent({
       );
     }
 
+    const renderLabel = (label: BreadcrumbItem['label']) =>
+      typeof label === 'function' ? label(configProvider.i18nRender) : label;
+
     return () => (
       <Breadcrumb>
         {currentBreadItems.value?.map((item, index) => (
@@ -120,9 +118,22 @@ export default defineComponent({
             {isVueComponent(item) ? (
               <item key={index} />
             ) : item.isLink ? (
-              <router-link to={{ path: item.to || '/' }}>{item.label}</router-link>
+              <router-link
+                to={{ path: item.path }}
+                custom
+                scopedSlots={{
+                  default: ({ href, navigate }) =>
+                    getPathRegex(href).keys.length ? (
+                      <a href="javascript:;"> {renderLabel(item.label)}</a>
+                    ) : (
+                      <a href={href} onClick={navigate}>
+                        {renderLabel(item.label)}
+                      </a>
+                    ),
+                }}
+              ></router-link>
             ) : (
-              item.label
+              renderLabel(item.label)
             )}
           </Breadcrumb.Item>
         ))}
