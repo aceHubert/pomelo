@@ -259,10 +259,9 @@ export const getDefaultMenus = (): MenuConfig[] => [
                   {
                     key: 'api-scope-claims',
                     title: (i18nRender) => i18nRender('menu.api_resources.scope_claims', '授权范围声明'),
-                    path: '/api-scopes/:id/claims',
+                    path: '/api-scopes/:scopeId/claims',
                     icon: IconDetails,
                     position: 'sub',
-                    display: false,
                   },
                 ],
               },

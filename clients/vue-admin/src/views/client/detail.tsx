@@ -497,7 +497,7 @@ export default Form.create({})(
                 scopedSlots={{
                   title: () => (
                     <div class="d-flex justify-content-space-between">
-                      <span>{i18n.tv('page_client_detail.token_title', 'Token')}</span>
+                      <span>{i18n.tv('page_client_detail.token_title', '令牌')}</span>
                     </div>
                   ),
                 }}

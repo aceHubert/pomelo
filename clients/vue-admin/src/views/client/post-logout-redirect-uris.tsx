@@ -217,13 +217,12 @@ export default Form.create({})(
                 showIcon={false}
                 scopedSlots={{
                   message: () => (
-                    <span>
-                      Specifies allowed URIs to redirect to after logout. See the
-                      <a target="_blank" href="https://openid.net/specs/openid-connect-session-1_0.html" class="mx-1">
-                        OIDC Connect Session Management spec
-                      </a>
-                      for more details.
-                    </span>
+                    <span
+                      domPropsInnerHTML={i18n.tv(
+                        'page_client_post_logout_redirect_uris.alert_message',
+                        '设置指定注销后允许重定向到的uri，查看<a target="_blank" href="https://openid.net/specs/openid-connect-session-1_0.html" class="mx-1">OIDC会话管理规范</a>了解更多详细信息。',
+                      )}
+                    ></span>
                   ),
                 }}
               />

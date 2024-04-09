@@ -192,7 +192,7 @@ export default defineComponent({
               type="warning"
               banner
               showIcon={false}
-              message="Dictionary to hold any custom client-specific values as needed."
+              message={i18n.tv('page_client_properties.alert_message', '设置客户端自定义属性。')}
             />
             <Table
               class="mt-3"

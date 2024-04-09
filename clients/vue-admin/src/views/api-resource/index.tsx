@@ -86,25 +86,25 @@ export default defineComponent({
         </router-link>,
         <router-link
           to={{
-            name: 'api-claims',
+            name: 'api-scopes',
             params: {
               id: `${record.id}`,
             },
           }}
           class="primary-7--text hover:primary-6--text active:primary-8--text"
         >
-          {i18n.tv('page_api_resources.action_btn_text.claims', '声明')}
+          {i18n.tv('page_api_resources.action_btn_text.scopes', '授权范围')}
         </router-link>,
         <router-link
           to={{
-            name: 'api-scopes',
+            name: 'api-claims',
             params: {
               id: `${record.id}`,
             },
           }}
           class="primary-8--text hover:primary-7--text active:primary-9--text"
         >
-          {i18n.tv('page_api_resources.action_btn_text.scopes', '授权范围')}
+          {i18n.tv('page_api_resources.action_btn_text.claims', '声明')}
         </router-link>,
       ];
 

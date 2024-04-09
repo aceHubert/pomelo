@@ -182,12 +182,23 @@ export default defineComponent({
     //   setColor({ theme: value ?? appMixin.theme === Theme.Dark ? Theme.Light : Theme.Dark });
     // };
 
-    const handleMenuClick = (path: string) => {
+    const handleMenuClick = (path: string, complete: () => void) => {
       if (!path) return;
       if (isAbsoluteUrl(path) && location.href === path) return;
       if (route.fullPath === path) return;
 
-      locationMixin.goTo(path);
+      locationMixin.goTo(path, {
+        onComplete: complete,
+      });
+    };
+
+    const handleBreadcrumbChange = (breadcrumb: BreadcrumbConfig[]) => {
+      menuBreadcrumbs.value = breadcrumb.map(({ path, ...rest }) => ({
+        ...rest,
+        // replaceState 导制vue-router 与当前实际路由不一致，push/replace 时重复路由 UI 不刷新；
+        // 增加临时方案 query 增加随机数解决 isSameRotue 问题
+        path: path && `${path}${path.indexOf('?') >= 0 ? '&' : '?'}_t=${parseInt(String(Math.random() * 1000000))}`,
+      }));
     };
 
     onMounted(() => {
@@ -397,28 +408,18 @@ export default defineComponent({
                       </div>
                     ),
                   }}
-                  onMenuClick={(next) => handleMenuClick(next)}
-                  onBreadcrumbChange={(breadcrumb) => {
-                    menuBreadcrumbs.value = breadcrumb.map(({ path, ...rest }) => ({
-                      ...rest,
-                      // replaceState 导制vue-router 与当前实际路由不一致，push/replace 时重复路由 UI 不刷新；
-                      // 增加临时方案 query 增加随机数解决 isSameRotue 问题
-                      path:
-                        path &&
-                        `${path}${path.indexOf('?') >= 0 ? '&' : '?'}_t=${parseInt(String(Math.random() * 1000000))}`,
-                    }));
-                  }}
+                  onMenuClick={handleMenuClick}
+                  onBreadcrumbChange={handleBreadcrumbChange}
                 >
                   <LayoutAdmin.BreadcrumbProvider breadcrumb={menuBreadcrumbs.value}>
-                    {/* 在嵌套模式下显示最后一个 */}
-                    <LayoutAdmin.BreadcrumbContainer breadcrumb={!disablePageBreadcrumb.value}>
+                    <LayoutAdmin.NestedBreadcrumb breadcrumb={!disablePageBreadcrumb.value}>
                       <Spin
                         class={classes.loading}
                         spinning={loadingRef.value}
                         tip={i18n.tv('common.tips.loading_text', 'Loading...') as string}
                       ></Spin>
                       <RouterView></RouterView>
-                    </LayoutAdmin.BreadcrumbContainer>
+                    </LayoutAdmin.NestedBreadcrumb>
                   </LayoutAdmin.BreadcrumbProvider>
                 </LayoutAdmin>
                 <SettingDrawer

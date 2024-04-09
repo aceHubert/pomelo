@@ -208,7 +208,6 @@ export default defineComponent({
                     record.actionCapability.publish &&
                     !record.isSelfContent)) && (
                   <router-link
-                    custom
                     to={{ name: 'page-edit', params: { id: record.id } }}
                     class={
                       record.status === TemplateStatus.Pending &&

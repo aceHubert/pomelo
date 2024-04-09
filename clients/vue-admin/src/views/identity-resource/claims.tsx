@@ -202,7 +202,7 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="Allows settings claims for the client (will be included in the access token)."
+                message={i18n.tv('page_identity_resource_claims.alert_message', '设置资源允许的声明。')}
               />
               <Table
                 class="mt-3"

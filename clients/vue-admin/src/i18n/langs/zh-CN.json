@@ -445,7 +445,9 @@
   },
   "page_client_detail": {
     "initial_login_uri_label": "初始化登录URI",
-    "not_found": "客户端不存在！"
+    "not_found": "客户端不存在！",
+    "authentication_title": "认证",
+    "token_title": "令牌"
   },
   "page_identity_resource_detail": {
     "not_found": "Identity资源不存在！"
@@ -457,6 +459,40 @@
     "page_title": "自定义属性"
   },
   "page_identity_resource_properties": {
-    "page_title": "自定义属性"
+    "page_title": "自定义属性",
+    "alert_message": "设置资源自定义属性。"
+  },
+  "page_client_grant_types": {
+    "alert_message": "设置客户端与授权服务器之间的授权模式，以便客户端能够获得访问令牌。"
+  },
+  "page_client_claims": {
+    "alert_message": "设置客户端声明（会被添加到 access token 中）。"
+  },
+  "page_client_scopes": {
+    "alert_message": "设置客户端可以访问的资源范围，默认情况下客户端没有任何访问资源的权限。"
+  },
+  "page_client_cors_origins": {
+    "alert_message": "设置 JavaScript 客户端的跨域策略。"
+  },
+  "page_client_redirect_uris": {
+    "alert_message": "设置指定允许返回令牌或授权码的uri。"
+  },
+  "page_client_post_logout_redirect_uris": {
+    "alert_message": "设置指定注销后允许重定向到的uri。查看<a target=\"_blank\" href=\"https://openid.net/specs/openid-connect-session-1_0.html\" class=\"mx-1\">OIDC会话管理规范</a>了解更多详细信息。"
+  },
+  "page_client_properties": {
+    "alert_message": "设置客户端自定义属性。"
+  },
+  "page_identity_resource_claims": {
+    "alert_message": "设置资源允许的声明。"
+  },
+  "page_api_resource_claims": {
+    "alert_message": "设置API资源允许的声明"
+  },
+  "page_api_resource_properties": {
+    "alert_message": "设置API资源自定义属性。"
+  },
+  "page_api_scope_claims": {
+    "alert_message": "设置API授权范围允许的声明。"
   }
 }

@@ -243,7 +243,10 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="Grant types are a way to specify how a client wants to interact with IdertityServer."
+                message={i18n.tv(
+                  'page_client_grant_types.alert_message',
+                  '设置客户端与授权服务器之间的授权模式，以便客户端能够获得访问令牌。',
+                )}
               />
               <Table
                 class="mt-3"

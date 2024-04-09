@@ -213,7 +213,10 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="By default a client has no access to any resources - specify the allowed resources by adding the corresponding scopes names"
+                message={i18n.tv(
+                  'page_client_scopes.alert_message',
+                  '设置客户端可以访问的资源范围，默认情况下客户端没有任何访问资源的权限。',
+                )}
               />
               <Table
                 class="mt-3"

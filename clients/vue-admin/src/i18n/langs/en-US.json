@@ -470,7 +470,8 @@
     "authentication_title": "Authentication",
     "field_description_tips": "Description",
     "initial_login_uri_label": "Initial Login URI",
-    "not_found": "Client does not exist!"
+    "not_found": "Client does not exist!",
+    "token_title": "Token"
   },
   "page_client_grant_types": {
     "page_title": "Client Grant Types",
@@ -488,7 +489,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this grant type permanently?"
     },
-    "empty_text": "No grant types!"
+    "empty_text": "No grant types!",
+    "alert_message": "Grant types are a way to specify how a client wants to interact with IdertityServer."
   },
   "page_client_claims": {
     "page_title": "Claims",
@@ -510,7 +512,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this claim permanently?"
     },
-    "empty_text": "No claims!"
+    "empty_text": "No claims!",
+    "alert_message": "Allows settings claims for the client (will be included in the access token)."
   },
   "page_client_scopes": {
     "page_title": "Client Scopes",
@@ -528,7 +531,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this scope permanently?"
     },
-    "empty_text": "No scopes!"
+    "empty_text": "No scopes!",
+    "alert_message": "By default a client has no access to any resources - specify the allowed resources by adding the corresponding scopes names."
   },
   "page_client_cors_origins": {
     "page_title": "Allowed CORS Origins",
@@ -547,7 +551,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this cors origin permanently?"
     },
-    "empty_text": "No cors origins!"
+    "empty_text": "No cors origins!",
+    "alert_message": "If specified, will be used by the default CORS policy service implementations to build a CORS policy for JavaScript clients."
   },
   "page_client_redirect_uris": {
     "page_title": "Client Redirect URIs",
@@ -566,7 +571,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this redirect uri permanently?"
     },
-    "empty_text": "No redirect uris!"
+    "empty_text": "No redirect uris!",
+    "alert_message": "Specifies the allowed URIs to return tokens or authorization codes to."
   },
   "page_client_post_logout_redirect_uris": {
     "page_title": "Client Post Logout Redirect URIs",
@@ -585,7 +591,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this post logout redirect uri permanently?"
     },
-    "empty_text": "No post logout redirect uris!"
+    "empty_text": "No post logout redirect uris!",
+    "alert_message": "Specifies allowed URIs to redirect to after logout, See the <a target=\"_blank\" href=\"https://openid.net/specs/openid-connect-session-1_0.html\" class=\"mx-1\">OIDC Connect Session Management spec</a> for more details."
   },
   "page_client_secrets": {
     "page_title": "Client Secrets",
@@ -665,7 +672,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this property permanently?"
     },
-    "empty_text": "No properties!"
+    "empty_text": "No properties!",
+    "alert_message": "Dictionary to hold any custom client specific values as needed."
   },
   "page_identity_resources": {
     "page_title": "Identity Resources",
@@ -742,7 +750,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this claim permanently?"
     },
-    "empty_text": "No claims!"
+    "empty_text": "No claims!",
+    "alert_message": "Allows settings claims for the identity resource."
   },
   "page_identity_resource_properties": {
     "page_title:": "Identity Resource Properties",
@@ -759,7 +768,8 @@
       "content": "Are you sure to delete this property permanently?"
     },
     "empty_text": "No properties!",
-    "page_title": "Identity Resource Properties"
+    "page_title": "Identity Resource Properties",
+    "alert_message": "Dictionary to hold any custom identity resource specific values as needed."
   },
   "page_api_resources": {
     "page_title": "API Resources",
@@ -846,7 +856,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this claim permanently?"
     },
-    "empty_text": "No claims!"
+    "empty_text": "No claims!",
+    "alert_message": "Allows settings claims for the api resource."
   },
   "page_api_scopes": {
     "page_title": "API Resource Scopes",
@@ -890,7 +901,8 @@
       "title": "@:common.dialog.title.comfirm",
       "content": "Are you sure to delete this claim permanently?"
     },
-    "empty_text": "No scope claims!"
+    "empty_text": "No scope claims!",
+    "alert_message": "Allows settings claims for the api scope."
   },
   "page_api_secrets": {
     "page_title": "API Secrets",
@@ -946,5 +958,8 @@
     },
     "empty_text": "No properties!",
     "page_title": "API Resource Properties"
+  },
+  "page_api_resource_properties": {
+    "alert_message": "Dictionary to hold any custom api resource specific values as needed."
   }
 }

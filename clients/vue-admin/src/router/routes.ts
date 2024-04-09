@@ -204,9 +204,9 @@ export const routes: Array<RouteConfig> = [
       },
       {
         name: 'api-scope-claims',
-        path: '/api-scopes/:id/claims',
+        path: '/api-scopes/:scopeId/claims',
         component: () => import(/* webpackChunkName: "api-resources" */ '../views/api-resource/scopes/claims'),
-        props: (route) => ({ apiScopeId: route.params.id }),
+        props: (route) => ({ apiScopeId: route.params.scopeId }),
       },
       {
         name: 'api-secrets',

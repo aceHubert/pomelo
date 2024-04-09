@@ -333,7 +333,7 @@ export default Form.create({})(
                   </Form.Item>
                   <Form.Item wrapperCol={buttonItemLayout.value.wrapperCol}>
                     <Button type="primary" loading={adding.value} onClick={() => handleAdd()}>
-                      {i18n.tv('page_client_secrets.generate.form.submit_btn_text', '生成密匙')}
+                      {i18n.tv('page_client_secrets.generate.form.submit_btn_text', '生成')}
                     </Button>
                     <Button class="ml-2" loading={adding.value} onClick={() => router.back()}>
                       {i18n.tv('page_client_secrets.generate.form.cancle_btn_text', '取消')}

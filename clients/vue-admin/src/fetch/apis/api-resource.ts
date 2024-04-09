@@ -49,6 +49,7 @@ export interface NewApiClaimInput {
 
 export interface ApiScopeModel {
   id: string;
+  apiResourceId: string;
   name: string;
   displayName?: string;
   description?: string;
@@ -63,7 +64,7 @@ export interface PagedApiScopeArgs extends PagedArgs {
   apiResourceId?: string;
 }
 
-export interface PagedApiScopeModel extends Paged<ApiScopeModel> {}
+export interface PagedApiScopeModel extends Paged<Omit<ApiScopeModel, 'apiResourceId'>> {}
 
 export interface NewApiScopeInput {
   name: string;
@@ -81,7 +82,7 @@ export interface ApiScopeClaimModel {
   type: string;
 }
 
-export interface ApiScopeClaimsModel extends Pick<ApiScopeModel, 'id' | 'name' | 'displayName'> {
+export interface ApiScopeClaimsModel extends Pick<ApiScopeModel, 'id' | 'apiResourceId' | 'name' | 'displayName'> {
   scopeClaims: ApiScopeClaimModel[];
 }
 
@@ -251,7 +252,10 @@ export const useApiResourceApi = defineRegistApi('api', {
           showInDiscoveryDocument
         }
       }
-    ` as TypedMutationDocumentNode<{ scope: ApiScopeModel }, { apiResourceId: string; model: NewApiScopeInput }>,
+    ` as TypedMutationDocumentNode<
+      { scope: Omit<ApiScopeModel, 'apiResourceId'> },
+      { apiResourceId: string; model: NewApiScopeInput }
+    >,
     updateScope: gql`
       mutation updateApiScope($id: ID!, $model: UpdateApiScopeInput!) {
         result: updateApiScope(id: $id, model: $model)
@@ -266,6 +270,7 @@ export const useApiResourceApi = defineRegistApi('api', {
       query getApiScopeClaims($apiScopeId: ID!) {
         apiScopeClaims(apiScopeId: $apiScopeId) {
           id
+          apiResourceId
           name
           displayName
           scopeClaims {

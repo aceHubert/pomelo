@@ -11,7 +11,7 @@ export const useLocationMixin = () => {
   /**
    * 修改 router query
    * @param query
-   * @param option
+   * @param replace 使用 replace 方式
    */
   function updateRouteQuery(query: Record<string, string | undefined>, replace?: boolean): Promise<Route>;
   function updateRouteQuery(
@@ -47,11 +47,8 @@ export const useLocationMixin = () => {
         delete newQuery[key];
       }
     }
-    if (replace) {
-      return router.replace({ path, query: newQuery }, onComplete, onAbort);
-    } else {
-      return router.push({ path, query: newQuery }, onComplete, onAbort);
-    }
+
+    return router[replace ? 'replace' : 'push']({ path, query: newQuery }, onComplete, onAbort);
   }
 
   /**
@@ -59,10 +56,32 @@ export const useLocationMixin = () => {
    * @param {Rawlocation} url 目标URL
    * @param {boolean} replace 是否使用replace方式跳转
    */
-  const goTo = (url: RawLocation, replace = false) => {
+  function goTo(url: RawLocation, replace?: boolean): void;
+  function goTo(
+    url: RawLocation,
+    options: {
+      replace?: boolean;
+      onComplete?: (route: Route) => void;
+      onAbort?: (e: Error) => void;
+    },
+  ): void;
+  function goTo(
+    url: RawLocation,
+    options:
+      | boolean
+      | {
+          replace?: boolean;
+          onComplete?: (route: Route) => void;
+          onAbort?: (e: Error) => void;
+        } = false,
+  ): Promise<Route> | void {
     if (!url) {
       throw new Error('invalid url');
     }
+
+    const replace = typeof options === 'boolean' ? options : options.replace;
+    const { onComplete, onAbort } =
+      typeof options === 'boolean' ? ({} as { onComplete: undefined; onAbort: undefined }) : options;
 
     if (typeof url === 'string') {
       // prevent goTo('javascript?')
@@ -78,8 +97,8 @@ export const useLocationMixin = () => {
       }
     }
 
-    router[replace ? 'replace' : 'push'](url);
-  };
+    return router[replace ? 'replace' : 'push'](url, onComplete, onAbort);
+  }
 
   return reactive({
     updateRouteQuery,

@@ -212,7 +212,7 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="Specifies the allowed URIs to return tokens or authorization codes to."
+                message={i18n.tv('page_client_redirect_uris.alert_message', '设置指定允许返回令牌或授权码的uri。')}
               />
               <Table
                 class="mt-3"

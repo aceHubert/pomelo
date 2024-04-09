@@ -127,6 +127,9 @@ export default defineComponent({
             <List
               layout="horizontal"
               dataSource={secrets}
+              locale={{
+                emptyText: i18n.tv('page_api_secrets.empty_text', '暂无资源密匙！'),
+              }}
               scopedSlots={{
                 renderItem: (item: ApiSecretsModel['secrets'][0]) => (
                   <List.Item>

@@ -201,7 +201,9 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="Allows settings claims for the client (will be included in the access token)."
+                message={i18n.tv('page_api_resource_claims.alert_message', '设置API资源允许的声明。', {
+                  name: apiResourceName.value,
+                })}
               />
               <Table
                 class="mt-3"

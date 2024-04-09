@@ -88,7 +88,7 @@ export default defineComponent({
           to={{
             name: 'api-scope-claims',
             params: {
-              id: `${record.id}`,
+              scopeId: `${record.id}`,
             },
           }}
         >

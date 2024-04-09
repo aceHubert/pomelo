@@ -193,7 +193,7 @@ export default defineComponent({
               type="warning"
               banner
               showIcon={false}
-              message="Dictionary to hold any custom api-resource-specific values as needed."
+              message={i18n.tv('page_api_resource_properties.alert_message', '设置API资源自定义属性。')}
             />
             <Table
               class="mt-3"

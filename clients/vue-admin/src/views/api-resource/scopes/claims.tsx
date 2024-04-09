@@ -65,7 +65,8 @@ export default Form.create({})(
           ].filter(Boolean) as Column[],
       );
 
-      const apiScopeName = ref('');
+      const apiResourceId = ref<string>();
+      const apiScopeName = ref<string>();
       const $scopeClaimsRes = createResource((apiScopeId: string) => {
         return apiResourceApi
           .getScopeClaims({
@@ -76,7 +77,8 @@ export default Form.create({})(
           .then(({ apiScopeClaims }) => {
             if (!apiScopeClaims) return;
 
-            apiScopeName.value = apiScopeClaims.name;
+            apiResourceId.value = apiScopeClaims.apiResourceId;
+            apiScopeName.value = apiScopeClaims.displayName || apiScopeClaims.name;
             return apiScopeClaims.scopeClaims;
           });
       });
@@ -156,9 +158,21 @@ export default Form.create({})(
             breadcrumb={
               apiScopeName.value
                 ? (routeBreadcrumb) => {
+                    routeBreadcrumb = routeBreadcrumb.map((item) => {
+                      if (item.key === 'api-scopes' && apiResourceId.value) {
+                        const route = router.match({ path: item.path });
+                        return route
+                          ? {
+                              ...item,
+                              path: router.resolve({ params: { id: apiResourceId.value } }, route).href,
+                            }
+                          : item;
+                      }
+                      return item;
+                    });
                     routeBreadcrumb.splice(routeBreadcrumb.length - 1, 0, {
                       key: 'apiScopeName',
-                      label: apiScopeName.value,
+                      label: apiScopeName.value ?? '',
                       path: '',
                     });
                     return routeBreadcrumb;
@@ -167,7 +181,7 @@ export default Form.create({})(
             }
           >
             <Card bordered={false} size="small">
-              <Form form={props.form} layout={deviceType.isMobile ? '' : 'inline'}>
+              <Form form={props.form} layout={deviceType.isMobile ? 'horizontal' : 'inline'}>
                 <Form.Item label={i18n.tv('page_api_scope_claims.form.type_label', '声明类型')} class="mb-2">
                   <Input
                     v-decorator={[
@@ -195,7 +209,7 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="Allows settings claims for the api (will be included in the access token)."
+                message={i18n.tv('page_api_scope_claims.alert_message', `设置API授权范围允许的声明。`)}
               />
               <Table
                 class="mt-3"

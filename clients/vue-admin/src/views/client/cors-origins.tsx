@@ -200,7 +200,7 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="If specified, will be used by the default CORS policy service implementations to build a CORS policy for JavaScript clients."
+                message={i18n.tv('page_client_cors_origins.alert_message', '设置 JavaScript 客户端的跨域策略。')}
               />
               <Table
                 class="mt-3"

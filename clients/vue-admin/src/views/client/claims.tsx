@@ -220,7 +220,7 @@ export default Form.create({})(
                 type="warning"
                 banner
                 showIcon={false}
-                message="Allows settings claims for the client (will be included in the access token)."
+                message={i18n.tv('page_client_claims.alert_message', '设置客户端声明（会被添加到 access token 中）。')}
               />
               <Table
                 class="mt-3"

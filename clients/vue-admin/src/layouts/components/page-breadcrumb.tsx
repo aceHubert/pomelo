@@ -6,32 +6,31 @@ import { useEffect } from '@/hooks';
 // Types
 import type { PropType } from '@vue/composition-api';
 import type { BreadcrumbConfig } from 'antdv-layout-pro/types';
-import type {
-  PresetBreadcrumbItem,
-  BreadcrumbProp,
-} from 'antdv-layout-pro/components/layout-admin/BreadcrumbContainer';
+import type { PresetBreadcrumbItem, BreadcrumbProp } from 'antdv-layout-pro/components/layout-admin/NestedBreadcrumb';
 
 /**
- * 页面面包屑（增加 _client，_enterprise 组件）
+ * 页面面包屑
  */
 export const PageBreadcrumb = defineComponent({
   name: 'PageBreadcrumb',
   props: {
     /**
-     * 传入的面包屑数据, 默认值：true
-     * 当为 true 时，使用路由的面包屑数据
-     * 当为 false 时，不显示面包屑
+     * 传入的面包屑数据
+     * ，当为 true 时，为通过路由计算的数组
+     * ，当为 false 时，不显示面包屑
+     * ，当为 Function 时，参数为路由计算的数组
+     * ，默认值：true
      */
     breadcrumb: {
       type: [Boolean, Array, Function] as PropType<
         | boolean
         | Array<PresetBreadcrumbItem>
-        | ((routeBreadcrumbs: BreadcrumbConfig[]) => Exclude<PresetBreadcrumbItem, String>[])
+        | ((routeBreadcrumbs: BreadcrumbConfig[]) => Exclude<PresetBreadcrumbItem, string>[])
       >,
       default: true,
     },
   },
-  emits: ['clientChange', 'enterpriseChange'],
+  // emits: ['clientChange', 'enterpriseChange'],
   setup(props, { slots }) {
     const currentBreadcrumbs = ref<BreadcrumbProp>([]);
 
@@ -49,7 +48,9 @@ export const PageBreadcrumb = defineComponent({
           cachedPropBreadcrumb = [...props.breadcrumb];
           currentBreadcrumbs.value = format(props.breadcrumb);
         }
-        return;
+        return () => {
+          currentBreadcrumbs.value = [];
+        };
 
         // 格式化面包屑数据
         function format(
@@ -130,9 +131,9 @@ export const PageBreadcrumb = defineComponent({
     );
 
     return () => (
-      <LayoutAdmin.BreadcrumbContainer breadcrumb={currentBreadcrumbs.value}>
+      <LayoutAdmin.NestedBreadcrumb breadcrumb={currentBreadcrumbs.value}>
         {slots.default?.()}
-      </LayoutAdmin.BreadcrumbContainer>
+      </LayoutAdmin.NestedBreadcrumb>
     );
   },
 });
