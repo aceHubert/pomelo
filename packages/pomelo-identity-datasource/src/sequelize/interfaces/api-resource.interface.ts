@@ -70,7 +70,7 @@ export interface NewApiScopeInput extends Omit<CreationAttributes<ApiScopes>, 'a
 export interface UpdateApiScopeInput extends Partial<NewApiScopeInput> {}
 
 export interface ApiScopeClaimModel extends Attributes<ApiScopeClaims> {}
-export interface ApiScopeClaimsModel extends Pick<ApiScopeModel, 'id' | 'name' | 'displayName'> {
+export interface ApiScopeClaimsModel extends Pick<ApiScopeModel, 'id' | 'apiResourceId' | 'name' | 'displayName'> {
   scopeClaims: Array<Pick<ApiScopeClaimModel, 'id' | 'type'>>;
 }
 export interface NewApiScopeClaimInput extends Omit<CreationAttributes<ApiScopeClaims>, 'apiScopeId'> {}

@@ -18,7 +18,7 @@ export class ApiScopeClaim implements Omit<ApiScopeClaimModel, 'apiScopeId'> {
 
 @ObjectType({ description: 'Api scope claims model' })
 export class ApiScopeClaims
-  extends PickType(ApiScope, ['id', 'name', 'displayName'] as const)
+  extends PickType(ApiScope, ['id', 'apiResourceId', 'name', 'displayName'] as const)
   implements ApiScopeClaimsModel
 {
   /**

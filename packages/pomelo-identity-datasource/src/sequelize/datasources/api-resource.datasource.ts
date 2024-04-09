@@ -589,7 +589,7 @@ export class ApiResourceDataSource extends BaseDataSource {
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ApiScopeClaimsModel | undefined> {
     return this.models.ApiScopes.findByPk(apiScopeId, {
-      attributes: ['id', 'name', 'displayName'],
+      attributes: ['id', 'apiResourceId', 'name', 'displayName'],
       include: [
         {
           model: this.models.ApiScopeClaims,
