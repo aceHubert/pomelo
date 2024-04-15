@@ -6,9 +6,9 @@ import Jimp from 'jimp';
 import { camelCase } from 'lodash';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
-  MediaDataSource,
   MediaMetaDataModel,
   ImageScaleModel,
+  OptionDataSource,
   OptionPresetKeys,
   MediaModel,
 } from '@ace-pomelo/infrastructure-datasource';
@@ -29,7 +29,7 @@ export class MediaService {
 
   constructor(
     @Inject(MEDIA_OPTIONS) private readonly options: FixedMediaOptions,
-    private readonly mediaDataSource: MediaDataSource,
+    private readonly optionDataSource: OptionDataSource,
   ) {}
 
   /**
@@ -189,9 +189,9 @@ export class MediaService {
       if (this.isImageScaleable(options.mimeType)) {
         const imageScales: ImageScaleModel[] = [];
         // thumbnail
-        const width = await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeWidth);
-        const height = await this.mediaDataSource.getOption(OptionPresetKeys.ThumbnailSizeHeight);
-        const crop = await this.mediaDataSource.getOption<'0' | '1'>(OptionPresetKeys.ThumbnailCrop);
+        const width = await this.optionDataSource.getOptionValue(OptionPresetKeys.ThumbnailSizeWidth);
+        const height = await this.optionDataSource.getOptionValue(OptionPresetKeys.ThumbnailSizeHeight);
+        const crop = await this.optionDataSource.getOptionValue<'0' | '1'>(OptionPresetKeys.ThumbnailCrop);
         const thumbnail = await this.scaleToThumbnail(
           image,
           (imgOptions) => this.getImageDestWithSuffix(filePath, `${imgOptions.width}x${imgOptions.height}`),
@@ -213,15 +213,15 @@ export class MediaService {
         scaled && imageScales.push({ ...scaled, name: ImageScaleType.Scaled });
 
         // other sizes
-        const mediumWidth = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.MediumSizeWidth))!);
-        const mediumHeight = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.MediumSizeHeight))!);
-        const largeWidth = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.LargeSizeWidth))!);
-        const largeHeight = parseInt((await this.mediaDataSource.getOption(OptionPresetKeys.LargeSizeHeight))!);
+        const mediumWidth = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumSizeWidth))!);
+        const mediumHeight = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumSizeHeight))!);
+        const largeWidth = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.LargeSizeWidth))!);
+        const largeHeight = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.LargeSizeHeight))!);
         const mediumLargeWidth = parseInt(
-          (await this.mediaDataSource.getOption(OptionPresetKeys.MediumLargeSizeWidth))!,
+          (await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumLargeSizeWidth))!,
         );
         const mediumLargeHeight = parseInt(
-          (await this.mediaDataSource.getOption(OptionPresetKeys.MediumLargeSizeHeight))!,
+          (await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumLargeSizeHeight))!,
         );
         const resizeArr = [
           { name: ImageScaleType.Large, width: largeWidth, height: largeHeight, quality: 80 },
@@ -263,7 +263,7 @@ export class MediaService {
    * @param metaData Media metadata
    */
   async toFileModel(media: MediaModel, metaData?: MediaMetaDataModel): Promise<File> {
-    const siteUrl = await this.mediaDataSource.getOption(OptionPresetKeys.SiteUrl);
+    const siteUrl = await this.optionDataSource.getOptionValue(OptionPresetKeys.SiteUrl);
     const { imageScales = [], fileSize, width, height } = metaData ?? { fileSize: 0 };
     return {
       original: {
