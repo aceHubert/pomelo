@@ -28,26 +28,52 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     super(moduleRef);
   }
 
+  private async getFieldsValue<F extends keyof UserModel>(
+    idOrUserName: number | string,
+    fields: F[],
+  ): Promise<Pick<UserModel, 'id' | F> | undefined> {
+    const id = typeof idOrUserName === 'number' ? idOrUserName : undefined,
+      username = id ? undefined : (idOrUserName as string),
+      region = username ? await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion) : undefined;
+
+    if (id) {
+      return this.models.Users.findByPk(id, {
+        attributes: ['id', ...fields],
+      }).then((user) => user?.toJSON() as any as UserModel);
+    } else {
+      return this.models.Users.findOne({
+        attributes: ['id', ...fields],
+        where: {
+          [Op.or]: [
+            { loginName: username! },
+            isEmail(username!) && { email: username },
+            isPhoneNumber(username!, region) && { mobile: username },
+          ].filter(Boolean) as any,
+        },
+      }).then((user) => user?.toJSON() as any as UserModel);
+    }
+  }
+
   /**
-   * 获取当前用户信息
+   * 获取当前用户信息（可以获取除密码以外的所有字段）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
-   * @param fields 返回的字段（除密码以外的字段）
-   * @param requestUserId 请求的用户Id
+   * @param fields 返回的字段
+   * @param requestUserIdOrUsername 请求的用户Id 或者通过用户名/邮箱/手机号码查询
    */
-  async get(fields: string[], requestUserId: number): Promise<UserModel | undefined>;
+  async get(fields: string[], requestUserIdOrUsername: number | string): Promise<UserModel | undefined>;
   /**
-   * 匿名获取用户信息
+   * 匿名获取用户信息（只允许获取非敏感信息 "id" ,"loginName", "niceName", "displayName", "url" 字段）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @param id 用户 Id
-   * @param fields 返回的字段（"id" ,"loginName", "niceName", "displayName", "url" 字段）
+   * @param fields 返回的字段
    */
-  async get(id: number, fields: string[]): Promise<UserModel | undefined>;
+  async get(idOrUsername: number | string, fields: string[]): Promise<UserModel | undefined>;
   /**
-   * 获取用户信息 (需要权限验证)
+   * 获取用户信息 (必须要有权限才查以获取)
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -58,29 +84,26 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async get(id: number, fields: string[], requestUserId: number): Promise<UserModel | undefined>;
   async get(
-    ...args: [string[], number] | [number, string[]] | [number, string[], number]
+    ...args: [string[], number | string] | [number | string, string[]] | [number, string[], number]
   ): Promise<UserModel | undefined> {
-    let id: number | undefined, fields: string[], requestUserId: number | undefined;
+    let idOrUserName: number | string, fields: string[], requestUserId: number;
 
-    if (args.length === 2) {
-      if (typeof args[0] === 'number') {
-        [id, fields] = args as [number, string[]];
-      } else {
-        [fields, requestUserId] = args as [string[], number];
+    if (args.length === 3) {
+      [idOrUserName, fields, requestUserId] = args;
+      if (idOrUserName !== requestUserId) {
+        // 查询非自己时是否有获取权限
+        await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
       }
     } else {
-      [id, fields, requestUserId] = args;
-    }
-
-    if (id && requestUserId && id !== requestUserId) {
-      // 查询非自己时，需要权限验证
-      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
-    } else if (!id && requestUserId) {
-      // 查询自己
-      id = requestUserId;
-    } else {
-      // 匿名查询
-      fields = fields.filter((field) => ['id', 'loginName', 'niceName', 'displayName', 'url'].includes(field));
+      if (typeof args[0] === 'number' || typeof args[0] === 'string') {
+        // 匿名查询
+        [idOrUserName, fields] = args as unknown as [number | string, string[]];
+        // 只允许获取非敏感信息
+        fields = fields.filter((field) => ['id', 'loginName', 'niceName', 'displayName', 'url'].includes(field));
+      } else {
+        // 获取当前用户信息
+        [fields, idOrUserName] = args as [string[], number | string];
+      }
     }
 
     // 排除登录密码
@@ -91,35 +114,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       fields.unshift('id');
     }
 
-    return this.models.Users.findByPk(id!, {
-      attributes: this.filterFields(fields, this.models.Users),
-    }).then((user) => user?.toJSON() as any as UserModel);
-  }
-
-  private async getFieldValue<F extends keyof UserModel>(
-    idOrUserName: number | string,
-    field: F,
-  ): Promise<Pick<UserModel, 'id' | F> | undefined> {
-    const id = typeof idOrUserName === 'number' ? idOrUserName : undefined,
-      username = id ? undefined : (idOrUserName as string),
-      region = username ? await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion) : undefined;
-
-    if (id) {
-      return this.models.Users.findByPk(id, {
-        attributes: ['id', field],
-      }).then((user) => user?.toJSON() as any as UserModel);
-    } else {
-      return this.models.Users.findOne({
-        attributes: ['id', field],
-        where: {
-          [Op.or]: [
-            { loginName: username },
-            isEmail(username) && { email: username },
-            isPhoneNumber(username!, region!) && { mobile: username },
-          ].filter(Boolean) as any,
-        },
-      }).then((user) => user?.toJSON() as any as UserModel);
-    }
+    return this.getFieldsValue(idOrUserName, this.filterFields(fields, this.models.Users) as (keyof UserModel)[]);
   }
 
   /**
@@ -127,7 +122,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param idOrUserName 用户 Id 或 登录名/邮箱/手机号码
    */
   async getEmail(idOrUserName: number | string): Promise<Pick<UserModel, 'id' | 'email'> | undefined> {
-    return this.getFieldValue(idOrUserName, 'email');
+    return this.getFieldsValue(idOrUserName, ['email']);
   }
 
   /**
@@ -135,7 +130,16 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param idOrUserName 用户 Id 或 登录名/邮箱/手机号码
    */
   async getMobile(idOrUserName: number | string): Promise<Pick<UserModel, 'id' | 'mobile'> | undefined> {
-    return this.getFieldValue(idOrUserName, 'mobile');
+    return this.getFieldsValue(idOrUserName, ['mobile']);
+  }
+
+  async getId(username: string): Promise<number | undefined> {
+    return this.models.Users.findOne({
+      attributes: ['id'],
+      where: {
+        loginName: username,
+      },
+    }).then((user) => user?.id);
   }
 
   /**
@@ -220,10 +224,10 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
   /**
    * 获取用户角色权限
-   * @param userId 用户 Id
+   * @param id 用户 Id
    */
-  getCapabilities(userId: number): Promise<UserCapability[]> {
-    return this.getUserCapabilities(userId);
+  getCapabilities(id: number): Promise<UserCapability[]> {
+    return this.getUserCapabilities(id);
   }
 
   /**

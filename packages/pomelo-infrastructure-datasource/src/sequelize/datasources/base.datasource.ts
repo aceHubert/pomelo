@@ -267,12 +267,12 @@ export abstract class BaseDataSource implements OnModuleInit {
    * 获取 option value (优先从缓存中取)
    * @param optionName optionName（优先返回带有tablePrefix的value）
    */
-  async getOption<R extends string>(optionName: string): Promise<R | undefined> {
+  protected async getOption<V extends string>(optionName: string): Promise<V | undefined> {
     // 从autoload options缓存中取值
-    let value = (await this.autoloadOptions)[optionName] as R | undefined;
+    let value = (await this.autoloadOptions)[optionName] as V | undefined;
     // 从非autoload options缓存中取值
     if (value === void 0) {
-      value = __OPTIONS__.get(optionName) as R | undefined;
+      value = __OPTIONS__.get(optionName) as V | undefined;
     }
     // 如果缓存中没有，从数据库查询
     if (value === void 0) {
@@ -286,12 +286,12 @@ export abstract class BaseDataSource implements OnModuleInit {
 
       // 先找带有当前table前缀的参数
       value = options.find((option) => option.optionName === `${this.tablePrefix}${optionName}`)?.optionValue as
-        | R
+        | V
         | undefined;
 
       // 如果没有，找不带前缀的参数
       if (value === void 0) {
-        value = options.find((option) => option.optionName === optionName)?.optionValue as R | undefined;
+        value = options.find((option) => option.optionName === optionName)?.optionValue as V | undefined;
       }
 
       // 缓存

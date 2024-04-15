@@ -36,12 +36,17 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   }
 
   /**
-   * metaKey 前缀是$为私有的，返回值去掉$前缀
+   * 移除 metaKey 私有($)和数据表(多应用数据表共享)前缀
    * @param key metaKey
    */
-  private fixMetaKey(key: string) {
+  protected fixMetaKey(key: string) {
+    // remove private prefix
     if (key.startsWith('$')) {
       return key.substr(1);
+    }
+    // remove table prefix
+    if (key.startsWith(this.tablePrefix)) {
+      return key.substr(this.tablePrefix.length);
     }
     return key;
   }
@@ -95,8 +100,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
           const { metaKey, ...rest } = meta.toJSON();
           return {
             ...rest,
-            metaKey:
-              metaKey && metaKey.startsWith(this.tablePrefix) ? metaKey.substr(this.tablePrefix.length) : metaKey,
+            metaKey: this.fixMetaKey(metaKey),
           } as unknown as MetaReturnType;
         }
         return;
@@ -153,8 +157,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
           const { metaKey, ...rest } = meta.toJSON();
           return {
             ...rest,
-            metaKey:
-              metaKey && metaKey.startsWith(this.tablePrefix) ? metaKey.substr(this.tablePrefix.length) : metaKey,
+            metaKey: this.fixMetaKey(metaKey),
           } as unknown as MetaReturnType;
         };
         if (Array.isArray(modelIdOrIds)) {
@@ -173,20 +176,27 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   }
 
   /**
-   * 判断元数据是否在在
-   * 同时也会匹配 metaKey 加上 table 前缀的参数
+   * 判断元数据key是否在在
    * @param modelId  model Id
    * @param metaKeys  meta keys
+   * @returns 是否存在
    */
   async isMetaExists(modelId: number, metaKey: string): Promise<boolean>;
+  /**
+   * 判断多个元数据key是否在在
+   * @param modelId model Id
+   * @param metaKeys meta keys
+   * @returns 不存在或者已存在的 metaKey 数组
+   */
   async isMetaExists(modelId: number, metaKeys: string[]): Promise<false | string[]>;
   async isMetaExists(modelId: number, metaKeys: string | string[]): Promise<boolean | string[]> {
     if (typeof metaKeys === 'string') {
+      const fixedKey = this.fixMetaKey(metaKeys);
       return (
         (await this.metaModel.count({
           where: {
             [this.metaModelIdFieldName]: modelId,
-            metaKey: [this.fixMetaKey(metaKeys), `${this.tablePrefix}${this.fixMetaKey(metaKeys)}`],
+            metaKey: [fixedKey, `${this.tablePrefix}${fixedKey}`],
           },
         })) > 0
       );
@@ -195,9 +205,11 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         attributes: ['metaKey'],
         where: {
           [this.metaModelIdFieldName]: modelId,
-          metaKey: Array.prototype.concat.apply(
-            [],
-            metaKeys.map((metaKey) => [this.fixMetaKey(metaKey), `${this.tablePrefix}${this.fixMetaKey(metaKey)}`]),
+          metaKey: flattenDeep(
+            metaKeys.map((metaKey) => {
+              const fixedKey = this.fixMetaKey(metaKey);
+              return [fixedKey, `${this.tablePrefix}${fixedKey}`];
+            }),
           ),
         },
       });
@@ -214,16 +226,16 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * @param model 元数据实体
    */
   async createMeta(model: NewMetaInputType): Promise<MetaReturnType> {
-    model.metaKey = this.fixMetaKey(model.metaKey);
     const isExists = await this.isMetaExists((model as any)[this.metaModelIdFieldName], model.metaKey);
 
     if (isExists) {
       throw new ValidationError(`The meta key "${model.metaKey}" has existed!`);
     }
 
-    const meta = await this.metaModel.create(model as any);
-    // 排除掉 private 字段
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const meta = await this.metaModel.create({
+      ...model,
+      metaKey: this.fixMetaKey(model.metaKey),
+    } as any);
     return meta.toJSON() as MetaReturnType;
   }
 
@@ -231,6 +243,8 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
    * 批量创建元数据
    * @param modelId  实体 id
    * @param models 元数据实体集合
+   * @param options 选项
+   * @param options.updateOnDuplicate 重复key是否更新，否则抛出异常
    */
   async bulkCreateMeta(
     modelId: number,
@@ -308,7 +322,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         where: {
           id,
           metaKey: {
-            [Op.notLike]: '$%',
+            [Op.notLike]: '$%', // private key 不能修改
           },
         },
       },
@@ -370,7 +384,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
       where: {
         id,
         metaKey: {
-          [Op.notLike]: '$%',
+          [Op.notLike]: '$%', // private key 不能删除
         },
       },
     });

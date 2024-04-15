@@ -17,8 +17,8 @@ export enum UserMetaPresetKeys {
   SuperAdministrator = 'super_administrator',
   /** 待验证的邮箱 */
   VerifingEmail = 'verifing_email',
-  /** 待验证的手机 */
-  VerifingMobile = 'verifing_mobile',
+  /** 待验证的手机号码 */
+  VerifingPhone = 'verifing_phone',
   /**>>> 以下需要添加 table 前缀 <<<*/
   /** 角色权限 */
   Capabilities = 'capabilities',
