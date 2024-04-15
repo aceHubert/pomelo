@@ -121,10 +121,9 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       disableController: true,
       useFactory: (config: ConfigService) => ({
-        origin: `${config.get(
-          'ORIGIN',
-          'http://localhost:' + config.get<number>('webServer.port', 3000),
-        )}${normalizeRoutePath(config.get<string>('webServer.globalPrefixUri', ''))}`,
+        origin: `${config.getOrThrow('ORIGIN')}${normalizeRoutePath(
+          config.get<string>('webServer.globalPrefixUri', ''),
+        )}`,
         issuer: config.getOrThrow('OIDC_ISSUER'),
         clientMetadata: {
           client_id: config.getOrThrow('OIDC_CLIENT_ID'),
