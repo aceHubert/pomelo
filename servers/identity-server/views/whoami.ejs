@@ -18,7 +18,7 @@
     <main class="container">
       <div class="wrapper">
         <h1 class="title">Who am I!</h1>
-        <h2 class="subtitle">You are "<%= account.displayName || account.sub %>".</h2>
+        <h2 class="subtitle">You are "<%= account.display_name || account.login_name || account.sub %>".</h2>
       </div>
     </main>
   </body>

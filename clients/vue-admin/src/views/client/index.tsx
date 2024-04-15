@@ -243,7 +243,7 @@ export default Form.create({})(
             <AsyncTable
               ref="table"
               attrs={{
-                rowKey: 'id',
+                rowKey: 'clientId',
                 size: 'small',
                 bordered: true,
                 scroll: { x: true, y: 0 },

@@ -86,13 +86,73 @@ $(document).ready(function () {
       .then((res) => {
         const data = res.data;
         if (!data.success) throw new Error(data.message);
+
+        if (data.next) {
+          data.message
+            ? showToast('<span class="success--text">' + data.message + '</span>', 'success', {
+                onHidden: () => {
+                  absoluteGo(data.next, true);
+                },
+              })
+            : absoluteGo(data.next, true);
+          return;
+        }
+
+        data.message && showToast('<span class="success--text">' + data.message + '</span>', 'success');
+
         $form[0].reset();
         $submit.remove();
-        showToast('<span class="success--text">' + data.message + '</span>', 'success');
 
         // 修改路由但不刷新页面，使浏览器刷新返回到上一页
         const returnUrl = getUrlParams('returnUrl');
         window.history.replaceState(null, '', returnUrl ? returnUrl : '/');
+      })
+      .catch((err) => {
+        $submit.removeAttr('disabled');
+        const data = err.response ? err.response.data : err;
+        showToast(data.message);
+      });
+  });
+
+  $('#password-code-verify-form').on('submit', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const $form = $(this);
+    const $submit = $('button[type="submit"], input[type="submit"]');
+
+    if (!$form[0].checkValidity()) {
+      $form.addClass('was-validated');
+      return;
+    }
+    const data = $form.serializeArray().reduce((obj, item) => {
+      obj[item.name] = item.value;
+      return obj;
+    }, {});
+
+    $submit.attr('disabled', 'disabled');
+    axios({
+      url: $form.attr('action'),
+      method: $form.attr('method') || 'POST',
+      data,
+    })
+      .then((res) => {
+        const data = res.data;
+        if (!data.success) throw new Error(data.message);
+
+        if (data.next) {
+          data.message
+            ? showToast('<span class="success--text">' + data.message + '</span>', 'success', {
+                delay: 3000,
+                onHidden: () => {
+                  absoluteGo(data.next);
+                },
+              })
+            : absoluteGo(data.next);
+          return;
+        }
+
+        data.message && showToast('<span class="success--text">' + data.message + '</span>', 'success');
       })
       .catch((err) => {
         const data = err.response ? err.response.data : err;
@@ -184,7 +244,7 @@ $(document).ready(function () {
 
   $('.toggle-password').click(function () {
     $(this).toggleClass('slash');
-    const input = $($(this).attr('toggle'));
+    const input = $($(this).data('target'));
     input.attr('type', input.attr('type') == 'password' ? 'text' : 'password');
   });
 });

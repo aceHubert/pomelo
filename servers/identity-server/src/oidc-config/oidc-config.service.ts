@@ -13,10 +13,10 @@ import {
 import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { UserDataSource, UserMetaPresetKeys } from '@ace-pomelo/infrastructure-datasource';
 import { ClientDataSource, IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
 import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { renderPrimaryStyle } from '../common/utils/render-primary-style-tag.util';
+import { AccountProviderService } from '../account-provider/account-provider.service';
 import { getI18nFromContext } from './i18n.helper';
 import { OidcConfigAdapter } from './oidc-config.adapter';
 import { OidcConfigStorage } from './oidc-config.storage';
@@ -29,9 +29,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   constructor(
     @Inject(OIDC_CONFIG_OPTIONS) private readonly options: OidcConfigOptions,
+    private readonly accountProviderService: AccountProviderService,
     private readonly identityResourceDataSource: IdentityResourceDataSource,
     private readonly clientDataSource: ClientDataSource,
-    private readonly userDataSource: UserDataSource,
   ) {}
 
   private get globalPrefix() {
@@ -99,101 +99,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
   createAdapterFactory() {
     return (modelName: string) =>
-      new OidcConfigAdapter(
-        modelName,
-        new OidcConfigStorage(this.options.storage, (clientId) =>
-          this.clientDataSource
-            .get(clientId, [
-              'applicationType',
-              'clientId',
-              'clientName',
-              'clientUri',
-              'defaultMaxAge',
-              'idTokenSignedResponseAlg',
-              'initiateLoginUri',
-              'jwksUri',
-              'logoUri',
-              'policyUri',
-              'requireAuthTime',
-              'sectorIdentifierUri',
-              'subjectType',
-              'tokenEndpointAuthMethod',
-              'idTokenLifetime',
-              'accessTokenFormat',
-              'accessTokenLifetime',
-              'refreshTokenExpiration',
-              'refreshTokenAbsoluteLifetime',
-              'refreshTokenSlidingLifetime',
-              'authorizationCodeLifetime',
-              'deviceCodeLifetime',
-              'backchannelAuthenticationRequestLifetime',
-              'requireConsent',
-              'requirePkce',
-              'enabled',
-              'corsOrigins',
-              'grantTypes',
-              'scopes',
-              'redirectUris',
-              'postLogoutRedirectUris',
-              'secrets',
-              'properties',
-            ])
-            .then((client) => {
-              if (!client) return;
-              if (!client.enabled) throw new errors.InvalidClient('client is disabled!');
-
-              // TODO: multiple client secrets support
-              const secret = client.secrets?.find((secret) => secret.type === 'SharedSecret');
-
-              return omitBy(
-                {
-                  application_type: client.applicationType,
-                  client_id: client.clientId,
-                  client_secret: secret?.value,
-                  client_secret_expires_at: secret?.expiresAt,
-                  client_name: client.clientName,
-                  client_uri: client.clientUri,
-                  default_max_age: client.defaultMaxAge,
-                  id_token_signed_response_alg: client.idTokenSignedResponseAlg as SigningAlgorithmWithNone,
-                  initiate_login_uri: client.initiateLoginUri,
-                  jwks_uri: client.jwksUri,
-                  logo_uri: client.logoUri,
-                  policy_uri: client.policyUri,
-                  require_auth_time: client.requireAuthTime,
-                  sector_identifier_uri: client.sectorIdentifierUri,
-                  subject_type: client.subjectType,
-                  token_endpoint_auth_method: client.tokenEndpointAuthMethod as ClientAuthMethod,
-                  id_token_lifetime: client.idTokenLifetime,
-                  access_token_format: client.accessTokenFormat,
-                  access_token_lifetime: client.accessTokenLifetime,
-                  refresh_token_expiration: client.refreshTokenExpiration,
-                  refresh_token_absolute_lifetime: client.refreshTokenAbsoluteLifetime,
-                  refresh_token_sliding_lifetime: client.refreshTokenSlidingLifetime,
-                  authorization_code_lifetime: client.authorizationCodeLifetime,
-                  device_code_lifetime: client.deviceCodeLifetime,
-                  backchannel_authentication_request_lifetime: client.backchannelAuthenticationRequestLifetime,
-                  require_consent: client.requireConsent,
-                  require_pkce: client.requirePkce,
-                  allowed_cors_origins: client.corsOrigins?.map(({ origin }) => origin),
-                  scope: client.scopes?.map(({ scope }) => scope).join(' '),
-                  grant_types: client.grantTypes?.map(({ grantType }) => grantType),
-                  response_types: client.grantTypes?.some(({ grantType }) =>
-                    ['authorization_code', 'implicit'].includes(grantType),
-                  )
-                    ? undefined
-                    : [],
-                  redirect_uris: client.redirectUris?.map(({ redirectUri }) => redirectUri),
-                  post_logout_redirect_uris: client.postLogoutRedirectUris?.map(
-                    ({ postLogoutRedirectUri }) => postLogoutRedirectUri,
-                  ),
-                  client_secrets: client.secrets?.map(({ type, value, expiresAt }) => ({ type, value, expiresAt })),
-                  extra_properties: client.properties?.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
-                },
-                isNil,
-              ) as ClientMetadata;
-            }),
-        ),
-      );
+      new OidcConfigAdapter(modelName, new OidcConfigStorage(this.options.storage, this.findClient));
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
@@ -738,63 +644,128 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   private findAccount: FindAccount = async (ctx, id) => {
-    const user = await this.userDataSource.get(
-      ['loginName', 'niceName', 'displayName', 'email', 'mobile', 'url', 'updatedAt'],
-      Number(id),
-    );
+    const account = await this.accountProviderService.getAccount(id);
 
-    if (!user) return void 0;
+    if (!account) return;
 
     return {
-      accountId: id,
+      accountId: account.sub,
       claims: async (use, scope) => {
         this.logger.debug('claims', use, scope);
 
         if (use === 'extra_token_claims') {
           return {
-            sub: id,
+            sub: account.sub,
             // TODO: add rams
             ram: [],
           };
         } else if (use === 'userinfo' || use === 'id_token') {
-          const userMetas = await this.userDataSource.getMetas(Number(id), Object.values(UserMetaPresetKeys), [
-            'metaKey',
-            'metaValue',
-          ]);
+          const claims = await this.accountProviderService.getClaims(id);
 
           return {
-            sub: id,
-            login_name: user.loginName,
-            display_name: user.displayName,
-            nice_name: user.niceName,
-            email: userMetas.find((meta) => meta.metaKey === UserMetaPresetKeys.VerifingEmail)?.metaValue ?? user.email,
-            email_verified: user.email,
-            phone_number:
-              userMetas.find((meta) => meta.metaKey === UserMetaPresetKeys.VerifingEmail)?.metaValue ?? user.mobile,
-            phone_number_verified: user.mobile,
-            url: user.url,
-            updated_at: user.updatedAt,
-            ...userMetas.reduce((acc, meta) => {
-              if (
-                meta.metaKey === UserMetaPresetKeys.VerifingEmail ||
-                meta.metaKey === UserMetaPresetKeys.VerifingEmail
-              ) {
-                // ignore
-              } else if (meta.metaKey === UserMetaPresetKeys.Capabilities) {
-                acc['role'] = meta.metaValue;
-              } else {
-                acc[meta.metaKey] = meta.metaValue;
-              }
-              return acc;
-            }, {} as Record<string, any>),
+            ...claims,
+            ...account,
           };
         } else {
           return {
-            sub: id,
+            sub: account.sub,
           };
         }
       },
     };
+  };
+
+  private findClient = (clientId: string): Promise<ClientMetadata | undefined> => {
+    return this.clientDataSource
+      .get(clientId, [
+        'applicationType',
+        'clientId',
+        'clientName',
+        'clientUri',
+        'defaultMaxAge',
+        'idTokenSignedResponseAlg',
+        'initiateLoginUri',
+        'jwksUri',
+        'logoUri',
+        'policyUri',
+        'requireAuthTime',
+        'sectorIdentifierUri',
+        'subjectType',
+        'tokenEndpointAuthMethod',
+        'idTokenLifetime',
+        'accessTokenFormat',
+        'accessTokenLifetime',
+        'refreshTokenExpiration',
+        'refreshTokenAbsoluteLifetime',
+        'refreshTokenSlidingLifetime',
+        'authorizationCodeLifetime',
+        'deviceCodeLifetime',
+        'backchannelAuthenticationRequestLifetime',
+        'requireConsent',
+        'requirePkce',
+        'enabled',
+        'corsOrigins',
+        'grantTypes',
+        'scopes',
+        'redirectUris',
+        'postLogoutRedirectUris',
+        'secrets',
+        'properties',
+      ])
+      .then((client) => {
+        if (!client) return;
+        if (!client.enabled) throw new errors.InvalidClient('client is disabled!');
+
+        // TODO: multiple client secrets support
+        const secret = client.secrets?.find((secret) => secret.type === 'SharedSecret');
+
+        return omitBy(
+          {
+            application_type: client.applicationType,
+            client_id: client.clientId,
+            client_secret: secret?.value,
+            client_secret_expires_at: secret?.expiresAt,
+            client_name: client.clientName,
+            client_uri: client.clientUri,
+            default_max_age: client.defaultMaxAge,
+            id_token_signed_response_alg: client.idTokenSignedResponseAlg as SigningAlgorithmWithNone,
+            initiate_login_uri: client.initiateLoginUri,
+            jwks_uri: client.jwksUri,
+            logo_uri: client.logoUri,
+            policy_uri: client.policyUri,
+            require_auth_time: client.requireAuthTime,
+            sector_identifier_uri: client.sectorIdentifierUri,
+            subject_type: client.subjectType,
+            token_endpoint_auth_method: client.tokenEndpointAuthMethod as ClientAuthMethod,
+            id_token_lifetime: client.idTokenLifetime,
+            access_token_format: client.accessTokenFormat,
+            access_token_lifetime: client.accessTokenLifetime,
+            refresh_token_expiration: client.refreshTokenExpiration,
+            refresh_token_absolute_lifetime: client.refreshTokenAbsoluteLifetime,
+            refresh_token_sliding_lifetime: client.refreshTokenSlidingLifetime,
+            authorization_code_lifetime: client.authorizationCodeLifetime,
+            device_code_lifetime: client.deviceCodeLifetime,
+            backchannel_authentication_request_lifetime: client.backchannelAuthenticationRequestLifetime,
+            require_consent: client.requireConsent,
+            require_pkce: client.requirePkce,
+            allowed_cors_origins: client.corsOrigins?.map(({ origin }) => origin),
+            scope: client.scopes?.map(({ scope }) => scope).join(' '),
+            grant_types: client.grantTypes?.map(({ grantType }) => grantType),
+            response_types: client.grantTypes?.some(({ grantType }) =>
+              ['authorization_code', 'implicit'].includes(grantType),
+            )
+              ? undefined
+              : [],
+            redirect_uris: client.redirectUris?.map(({ redirectUri }) => redirectUri),
+            post_logout_redirect_uris: client.postLogoutRedirectUris?.map(
+              ({ postLogoutRedirectUri }) => postLogoutRedirectUri,
+            ),
+            client_secrets: client.secrets?.map(({ type, value, expiresAt }) => ({ type, value, expiresAt })),
+            extra_properties: client.properties?.reduce((acc, { key, value }) => ({ ...acc, [key]: value }), {}),
+          },
+          isNil,
+        ) as ClientMetadata;
+      });
   };
 
   private isOrigin(value: any) {

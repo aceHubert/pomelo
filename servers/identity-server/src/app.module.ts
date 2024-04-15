@@ -21,6 +21,8 @@ import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
 import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
+import { AccountProviderModule } from './account-provider/account-provider.module';
+import { AccountConfigService } from './account-config/account-config.service';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
@@ -100,7 +102,7 @@ const logger = new Logger('AppModule', { timestamp: true });
           );
         },
       }),
-      inject: [ConfigService, I18nService],
+      inject: [ConfigService],
     }),
     IdentityModule.registerAsync({
       isGlobal: true,
@@ -120,6 +122,11 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService],
     }),
+    AccountProviderModule.forRootAsync({
+      isGlobal: true,
+      imports: [InfrastructureModule],
+      useClass: AccountConfigService,
+    }),
     AccountModule.forRootAsync({
       useFactory: (storageOptions: StorageOptions) => ({
         storage: storageOptions.use,
@@ -131,10 +138,9 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       useFactory: (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('debug', false),
-        issuer: `${config.get(
-          'ORIGIN',
-          'http://localhost:' + config.get<number>('webServer.port', 3000),
-        )}${normalizeRoutePath(config.get<string>('webServer.globalPrefixUri', ''))}`,
+        issuer: `${config.getOrThrow('ORIGIN')}${normalizeRoutePath(
+          config.get<string>('webServer.globalPrefixUri', ''),
+        )}`,
         path: normalizeRoutePath(config.get('OIDC_PATH', '')),
         storage: storageOptions.use,
       }),
