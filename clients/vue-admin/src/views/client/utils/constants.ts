@@ -104,7 +104,7 @@ export const getPresetProperties = (
         ),
         description: i18nRender(
           'page_client_properties.form.preset_keys.consent_page_tmeplate_description',
-          'ejs模版，使用"<%- form %>"占位符渲染表单内容, 表单id为"consent-form"',
+          'ejs模版，使用"<%- form %>"占位符渲染表单内容, 确认表单id为"consent-confirm-form", 取消表单id为"consent-abort-form"',
         ),
       },
       {

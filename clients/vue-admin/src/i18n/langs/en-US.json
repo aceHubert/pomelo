@@ -663,7 +663,7 @@
         "login_page_form_validate_tooltip_title": "Login Page Form Validate Message Display",
         "login_page_form_validate_tooltip_description": "Validate message use tooltip to display, Default: false",
         "consent_page_tmeplate_title": "Consent Page Template",
-        "consent_page_tmeplate_description": "ejs template, use \"<%- form>\" to render form, and form id is \"consent-form\"",
+        "consent_page_tmeplate_description": "ejs template, use \"<%- form>\" to render form, the confirm form id is \"consent-form\" and then abort form id is \"consent-abort-form\"",
         "signout_disabled_title": "Disable signout"
       },
       "add_btn_text": "@:common.btn_text.add"

@@ -1,15 +1,18 @@
 import { Controller, Get, Post, Req, Res, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { OidcService } from 'nest-oidc-provider';
-import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { BaseController } from '@/common/controllers/base.controller';
 import { isJsonRequest } from '@/common/utils/is-json-request.util';
+import { AccountProviderService } from '../account-provider/account-provider.service';
 
 @Controller('/SECURITY')
 export class SecurityController extends BaseController {
   logger = new Logger(SecurityController.name, { timestamp: true });
 
-  constructor(private readonly oidcService: OidcService, private readonly userDataSource: UserDataSource) {
+  constructor(
+    private readonly accountProviderService: AccountProviderService,
+    private readonly oidcService: OidcService,
+  ) {
     super();
   }
 
@@ -43,9 +46,11 @@ export class SecurityController extends BaseController {
     }
 
     if (accountId) {
-      const account = await this.userDataSource.get(['niceName', 'displayName', 'updatedAt'], Number(accountId));
+      const account = await this.accountProviderService.getAccount(accountId);
 
-      if (isJsonRequest(req.headers)) {
+      if (!account) {
+        throw new HttpException('Account not found.', HttpStatus.UNAUTHORIZED);
+      } else if (isJsonRequest(req.headers)) {
         return res.send(this.success({ data: account }));
       } else {
         return res.render('whoami', {

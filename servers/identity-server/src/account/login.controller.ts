@@ -4,14 +4,14 @@ import { Request, Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
 import { Controller, Get, Post, Query, Body, Req, Res, HttpStatus } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { md5, normalizeRoutePath } from '@ace-pomelo/shared-server';
+import { normalizeRoutePath } from '@ace-pomelo/shared-server';
 import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
-import { UserDataSource } from '@ace-pomelo/infrastructure-datasource';
 import { KoaContextWithOIDC } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
 import { getLoginTemplate, getConsentTemplate } from '@/common/templates';
+import { AccountProviderService } from '../account-provider/account-provider.service';
 import { LoginDto } from './dto/login.dto';
 
 @Controller('/login')
@@ -21,8 +21,8 @@ export class LoginController extends BaseController {
   constructor(
     private readonly moduleRef: ModuleRef,
     private readonly oidcService: OidcService,
+    private readonly userProviderService: AccountProviderService,
     private readonly identityResourceDataSource: IdentityResourceDataSource,
-    private readonly userDataSource: UserDataSource,
   ) {
     super();
   }
@@ -67,8 +67,6 @@ export class LoginController extends BaseController {
     if (prompt.name === 'login') {
       const customWrapperTemplate = clientProperties['loginPage.template']
         ? getLoginTemplate(clientProperties['loginPage.template'])
-        : clientProperties['template']
-        ? getLoginTemplate(clientProperties['template'])
         : undefined;
       const formLableDisplay = ['1', 'true'].includes(
         (clientProperties['loginPage.formLableDisplay'] as string) ?? '1',
@@ -220,8 +218,6 @@ export class LoginController extends BaseController {
       }
       const customWrapperTemplate = clientProperties['consentPage.template']
         ? getConsentTemplate(clientProperties['consentPage.template'])
-        : clientProperties['template']
-        ? getConsentTemplate(clientProperties['template'])
         : undefined;
 
       wrapper =
@@ -230,12 +226,12 @@ export class LoginController extends BaseController {
           <%- locales %>
           <div class="wrapper">
             <div class="mb-2 pb-2 border-bottom">
-              <h1 class="title">Confirm</h1>
+              <h1 class="title">${i18n.tv('consent.wrapper.title', 'Confirm')}</h1>
               ${
                 params.redirect_uri
                   ? `<p class="text--secondary">
                       ${i18n.tv(
-                        'login.wrapper.subtitle',
+                        'consent.wrapper.subtitle',
                         `to <strong>${new URL(params.redirect_uri as string).host}</strong>`,
                         {
                           args: {
@@ -246,21 +242,39 @@ export class LoginController extends BaseController {
                   : ''
               }
             </div>
-            <p><strong>${client?.clientName}</strong> want to access your account.</p>
+            <p>${i18n.tv(
+              'consent.wrapper.description',
+              `<strong>${client?.clientName}</strong> want to access your account.`,
+              {
+                args: {
+                  clientName: client?.clientName,
+                },
+              },
+            )}</p>
             <%- form %>
             <div class="text-end mt-4">
-              <a href="/login/abort" class="btn btn-light">Cancel</a>
-              <button type="submit" class="btn btn-primary" form="consent-form">Continue</button>
+              <button type="submit" class="btn btn-light" form="consent-abort-form">${i18n.tv(
+                'consent.wrapper.abort_btn_text',
+                'Abort',
+              )}</button>
+              <button type="submit" class="btn btn-primary" form="consent-confirm-form">${i18n.tv(
+                'consent.wrapper.continue_btn_text',
+                'Continue',
+              )}</button>
             </div>
           </div>
         </div>`;
 
-      form = `<form id="consent-form" action="${normalizeRoutePath(appConfig?.getGlobalPrefix() ?? '')}/login/confirm${
+      form = `
+      <form id="consent-abort-form" action="${normalizeRoutePath(appConfig?.getGlobalPrefix() ?? '')}/login/abort${
+        returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''
+      }" method="GET" autocomplete="off"></form>
+      <form id="consent-confirm-form" action="${normalizeRoutePath(appConfig?.getGlobalPrefix() ?? '')}/login/confirm${
         returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''
       }" method="POST" autocomplete="off">
         ${
           missingScopes.size > 0
-            ? `<p><strong>Requested access:</strong></p>
+            ? `<p>${i18n.tv('consent.form.requested_access_title', '<strong>Requested access:</strong>')}</p>
                 <ul>
                 ${[...missingScopes]
                   .map((scope: string) => `<li>${resourceMap.has(scope) ? resourceMap.get(scope) : scope}</li>`)
@@ -286,7 +300,7 @@ export class LoginController extends BaseController {
   }
 
   @Post()
-  async loginCheck(
+  async check(
     @Query('returnUrl') returnUrl: string | undefined,
     @Body() input: LoginDto,
     @Req() req: Request,
@@ -314,23 +328,20 @@ export class LoginController extends BaseController {
       return this.faild(i18n.tv('login.check.user_policy_invalid', 'Please read and agree to the User Policy!'));
     }
 
-    const verifiedUser = await this.userDataSource.verifyUser(input.username, md5(input.password).toString());
-    if (!verifiedUser) {
+    const verifiedAccountId = await this.userProviderService.verifyAccount(input.username, input.password);
+    if (!verifiedAccountId) {
       return this.faild(
         i18n.tv('login.confirm.incorrect_username_or_password', 'username or password incorrect!'),
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    // sync locale to user
-    // this.userDataSource.updateMetaByKey(verifiedUser.id, 'locale', i18n.lang);
-
     const redirectUrl = await this.oidcService.provider.interactionResult(
       req,
       res,
       {
         login: {
-          accountId: String(verifiedUser.id),
+          accountId: verifiedAccountId,
           remember: input.remember,
         },
       },
@@ -343,7 +354,7 @@ export class LoginController extends BaseController {
   }
 
   @Post('confirm')
-  async loginConfirm(
+  async confirm(
     @Query('returnUrl') returnUrl: string | undefined,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
@@ -393,17 +404,18 @@ export class LoginController extends BaseController {
   }
 
   @Get('abort')
-  async loginAbort(
+  async abort(
     @Body('returnUrl') returnUrl: string | undefined,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
+    @I18n() i18n: I18nContext,
   ) {
     const interaction = await this.ensureInteraction(req, res, returnUrl);
     if (!interaction) return;
 
     const result = {
-      error: 'access_denied',
-      error_description: 'End-user aborted interaction',
+      error: i18n.tv('consent.abort.access_denied', 'access_denied'),
+      error_description: i18n.tv('consent.abort.access_denied_description', 'End-user aborted interaction'),
     };
 
     await this.oidcService.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });

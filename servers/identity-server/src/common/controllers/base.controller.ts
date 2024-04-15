@@ -70,7 +70,7 @@ export abstract class BaseController {
       ${locales
         .map(
           (locale) =>
-            `<a class="btn btn-sm btn-link ${currentLang === locale.lang ? 'btn-disabled' : ''}" href="${
+            `<a class="btn btn-sm btn-link${currentLang === locale.lang ? ' btn-disabled' : ''}" href="${
               currentLang === locale.lang ? 'javascript:;' : getHref(locale.lang)
             }" >${locale.display}</a>`,
         )

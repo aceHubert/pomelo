@@ -12,24 +12,24 @@
   right: 25px;
 
   .btn {
-    color: var(--theme-primary);
+    color: var(--text-secondary);
     text-decoration: none;
 
     &:hover,
     &:focus,
     &:active {
-      color: var(--theme-primary-7);
+      color: var(--text-secondary);
     }
 
     &-disabled,
     &:disabled {
-      color: var(--text-secondary);
+      color: var(--theme-primary);
       cursor: not-allowed;
 
       &:hover,
       &:focus,
       &:active {
-        color: var(--text-secondary);
+        color: var(--theme-primary-7);
       }
     }
   }
@@ -54,7 +54,7 @@
     transform: translate(-50%, -50%);
   }
 
-  .locale-btns{
+  .locale-btns {
     top: 25px;
   }
 }

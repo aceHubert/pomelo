@@ -36,11 +36,27 @@ export class PasswordModifyDto {
 
 export class PasswordForgotDto {
   /**
-   * Username
+   * Username(email or phone number)
    */
   @IsDefined()
   @IsString()
   username!: string;
+}
+
+export class VerifyPhoneCodeDto {
+  /**
+   * Phone number
+   */
+  @IsDefined()
+  @IsString()
+  phone!: string;
+
+  /**
+   * code
+   */
+  @IsDefined()
+  @IsString()
+  code!: string;
 }
 
 export class PasswordResetDto {

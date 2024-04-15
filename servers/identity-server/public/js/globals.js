@@ -79,7 +79,7 @@ function isAbsoluteUrl(url) {
 function getUrlParams(key) {
   const args = {};
   const pairs = location.search.substring(1).split('&');
-  for (const i = 0; i < pairs.length; i++) {
+  for (let i = 0; i < pairs.length; i++) {
     const pos = pairs[i].indexOf('=');
     if (pos === -1) {
       continue;
@@ -120,12 +120,11 @@ function appendParams(url, params) {
   return url;
 }
 
-function showToast(message, type, $toastEl) {
-  if ((!$toastEl || !$toastEl.length) && !($toastEl = $('#errorToast')).length) {
-    $toastEl = $(`<div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
-      <div id="errorToast" class="toast ${
-        type === 'success' ? 'green' : 'red'
-      } lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
+function showToast(message, type, options) {
+  const genToast = () =>
+    `<div id="errorToast" class="toast ${
+      type === 'success' ? 'green' : 'red'
+    } lighten-5" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
         ${
@@ -141,18 +140,25 @@ function showToast(message, type, $toastEl) {
         </div>
         <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-    </div>
-    </div>`)
+    </div>`;
+
+  let $errorToast;
+  if ((!$errorToast || !$errorToast.length) && !($errorToast = $('#errorToast')).length) {
+    $errorToast = $(`<div class="toast-container position-absolute p-3 top-0 start-50 translate-middle-x">
+      ${genToast()}
+      </div>`)
       .appendTo('body')
       .find('#errorToast');
   } else {
-    $($('.toast-body .content', $toastEl).get().concat($('.toast-body', $toastEl).get()))
-      .first()
-      .html(message);
+    const container = $errorToast.parent();
+    $errorToast.remove();
+    $errorToast = $(genToast()).appendTo(container);
   }
 
-  const toast = bootstrap.Toast.getOrCreateInstance($toastEl);
+  const toast = bootstrap.Toast.getOrCreateInstance($errorToast, options);
   toast.show();
+  options?.onShown && $errorToast.on('shown.bs.toast', options.onShown);
+  options?.onHidden && $errorToast.on('hidden.bs.toast', options.onHidden);
   return () => toast.hide();
 }
 
