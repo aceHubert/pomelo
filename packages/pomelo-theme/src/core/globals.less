@@ -231,7 +231,7 @@ each(@flex-wraps,{
   }
 });
 
-@justify-contents: flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, space-evenly;
+@justify-contents: flex-start, flex-end, start, end, center, left, right, stretch, space-between, space-around, space-evenly;
 
 each(@justify-contents,{
   .justify-content-@{value} {
@@ -239,7 +239,7 @@ each(@justify-contents,{
   }
 });
 
-@justify-items: flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, space-evenly, self-start, self-end;
+@justify-items: flex-start, flex-end, start, end, center, left, right, stretch, space-between, space-around, space-evenly, self-start, self-end;
 
 each(@justify-items,{
   .justify-items-@{value} {
@@ -247,7 +247,7 @@ each(@justify-items,{
   }
 });
 
-@justify-selfs: auto, flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, self-start, self-end;
+@justify-selfs: auto, flex-start, flex-end, start, end, center, left, right, stretch, space-between, space-around, self-start, self-end;
 
 each(@justify-selfs,{
   .justify-self-@{value} {
@@ -255,7 +255,7 @@ each(@justify-selfs,{
   }
 });
 
-@align-contents: baseline, flex-start, flex-end, start, end, center, left, right, stretch space-between, space-around, space-evenly;
+@align-contents: baseline, flex-start, flex-end, start, end, center, left, right, stretch, space-between, space-around, space-evenly;
 
 each(@align-contents,{
   .align-content-@{value} {
