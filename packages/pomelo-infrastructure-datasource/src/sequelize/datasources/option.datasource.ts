@@ -73,8 +73,8 @@ export class OptionDataSource extends BaseDataSource {
    * 反回第一个匹配name(优先查找带有tablePrefix)的值
    * @param optionName optionName
    */
-  getOptionValue(optionName: string): Promise<OptionModel['optionValue'] | undefined> {
-    return this.getOption(optionName);
+  getOptionValue<V extends string>(optionName: string): Promise<V | undefined> {
+    return this.getOption<V>(optionName);
   }
 
   /**
