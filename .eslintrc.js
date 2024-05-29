@@ -59,10 +59,6 @@ module.exports = {
     'no-mixed-spaces-and-tabs': ['error'],
     // 换行使用LF
     'linebreak-style': ['error', 'unix'],
-    // 允许非default export
-    'import/prefer-default-export': 'off',
-    'import/no-extraneous-dependencies': 'off',
-    'import/no-named-export': 'off',
     //function前面不空格，prettier rule
     'space-before-function-paren': 'off',
     // -- start TODO: Remove when is https://github.com/babel/babel-eslint/issues/530 fixed
@@ -88,6 +84,10 @@ module.exports = {
         argsIgnorePattern: '^_|^h$',
       },
     ],
+    // 允许非default export
+    'import/prefer-default-export': 'off',
+    'import/no-extraneous-dependencies': 'off',
+    'import/no-named-export': 'off',
     'import/no-named-as-default-member': 'off',
     'import/no-unresolved': 'off',
     'import/order': [

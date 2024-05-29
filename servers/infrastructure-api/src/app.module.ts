@@ -134,7 +134,7 @@ const logger = new Logger('AppModule', { timestamp: true });
           resource: config.get('OIDC_RESOURCE'),
           nonce: 'true',
         },
-        defaultHttpOptions: {
+        httpOptions: {
           timeout: 20000,
         },
       }),

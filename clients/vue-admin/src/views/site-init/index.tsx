@@ -4,7 +4,8 @@ import { isAbsoluteUrl, absoluteGo } from '@ace-util/core';
 import { useRoute, useRouter } from 'vue2-helpers/vue-router';
 import { Form, Input, Select, Button } from 'ant-design-vue';
 import { message } from '@/components';
-import { useI18n, useDeviceType } from '@/hooks';
+import { useI18n } from '@/hooks';
+import { useDeviceMixin } from '@/mixins';
 import { siteInitRequiredRef } from '@/shared';
 import { useSiteInitApi } from '@/fetch/apis';
 import classes from './index.module.less';
@@ -27,7 +28,7 @@ export default Form.create({})(
     },
     setup(props: SiteInitProps) {
       const i18n = useI18n();
-      const deviceType = useDeviceType();
+      const deviceMixin = useDeviceMixin();
       const router = useRouter();
       const route = useRoute();
       const siteInitApi = useSiteInitApi();
@@ -205,7 +206,7 @@ export default Form.create({})(
                 shape="round"
                 size="large"
                 htmlType="submit"
-                block={deviceType.isMobile}
+                block={deviceMixin.isMobile}
                 loading={loading.value}
               >
                 {i18n.tv('page_site_init.form.submit_btn_text', '提交')}

@@ -3,7 +3,8 @@ import { defineComponent, ref, reactive, computed, set } from '@vue/composition-
 import { Button, Card, Descriptions, Icon, Space, Tag } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { Modal, message } from '@/components';
-import { useI18n, useDeviceType } from '@/hooks';
+import { useI18n } from '@/hooks';
+import { useDeviceMixin } from '@/mixins';
 import { useIdentityResourceApi } from '@/fetch/apis';
 import { default as ResourceForm } from './components/IdentityResourceForm';
 import classes from './index.module.less';
@@ -21,7 +22,7 @@ export default defineComponent({
   },
   setup(_, { refs }) {
     const i18n = useI18n();
-    const deviceType = useDeviceType();
+    const deviceMixin = useDeviceMixin();
     const identityResourceApi = useIdentityResourceApi();
 
     const searchQuery = reactive<PagedIdentityResourceArgs>({});
@@ -113,18 +114,18 @@ export default defineComponent({
         {
           key: 'name',
           title: i18n.tv('page_identity_resources.table_header.name_label', '名称'),
-          width: deviceType.isDesktop ? 160 : 320,
+          width: deviceMixin.isDesktop ? 160 : 320,
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => {
             return (
               <div class={classes.name}>
                 <p class="mb-0">{record.name}</p>
                 <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>
-                {!deviceType.isDesktop && renderRowInline(record)}
+                {!deviceMixin.isDesktop && renderRowInline(record)}
               </div>
             );
           },
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           key: 'displayName',
           title: i18n.tv('page_identity_resources.table_header.display_name_label', '显示名称'),
           width: 200,
@@ -135,7 +136,7 @@ export default defineComponent({
             </div>
           ),
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           key: 'required',
           title: i18n.tv('page_identity_resources.table_header.required_label', '是否必须'),
           width: 100,
@@ -146,7 +147,7 @@ export default defineComponent({
             </Tag>
           ),
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           key: 'showInDiscoveryDocument',
           title: i18n.tv('page_identity_resources.table_header.show_in_discovery_document_label', '是否显示在发现文档'),
           width: 100,
@@ -159,7 +160,7 @@ export default defineComponent({
             </Tag>
           ),
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           key: 'description',
           title: i18n.tv('page_identity_resources.table_header.description_label', '描述'),
           width: 300,
@@ -170,7 +171,7 @@ export default defineComponent({
             </div>
           ),
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           key: 'updatedAt',
           dataIndex: 'updatedAt',
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => (

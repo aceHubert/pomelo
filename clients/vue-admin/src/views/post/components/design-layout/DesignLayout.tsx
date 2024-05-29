@@ -15,8 +15,8 @@ import {
   Space,
 } from 'ant-design-vue';
 import { TemplateStatus } from '@ace-pomelo/shared-client';
-import { useI18n, useDeviceType } from '@/hooks';
-import { useAppMixin } from '@/mixins';
+import { useI18n } from '@/hooks';
+import { useAppMixin, useDeviceMixin } from '@/mixins';
 import IconMore from '@/assets/icons/more.svg?inline';
 import './index.less';
 
@@ -113,12 +113,12 @@ export default defineComponent({
   setup(props, { emit, slots }) {
     const i18n = useI18n();
     const appMixin = useAppMixin();
-    const deviceType = useDeviceType();
+    const deviceMixin = useDeviceMixin();
 
     const prefixCls = 'design-layout';
     const headerHeightRef = ref(48);
     const siderWidthRef = ref(300);
-    const siderCollapsedRef = ref(props.siderCollapsed ?? !deviceType.isDesktop);
+    const siderCollapsedRef = ref(props.siderCollapsed ?? !deviceMixin.isDesktop);
 
     watch(
       () => props.siderCollapsed,
@@ -180,7 +180,7 @@ export default defineComponent({
                       // Pending 状态
                       props.actionCapability.publish && !props.isSelfContent ? (
                         // 有发布权限并且不是自己，可以审核
-                        deviceType.isMobile ? (
+                        deviceMixin.isMobile ? (
                           <Dropdown.Button
                             type="primary"
                             disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
@@ -250,7 +250,7 @@ export default defineComponent({
                       ) : null
                     ) : props.status === TemplateStatus.Publish || props.status === TemplateStatus.Private ? (
                       // Publish 或 Private 状态
-                      deviceType.isMobile ? (
+                      deviceMixin.isMobile ? (
                         !props.actionStatus.changed ||
                         props.actionStatus.processing ||
                         props.actionStatus.disabledActions ? (
@@ -342,7 +342,7 @@ export default defineComponent({
                           ),
                         ]
                       )
-                    ) : deviceType.isMobile ? (
+                    ) : deviceMixin.isMobile ? (
                       <Dropdown.Button
                         type="primary"
                         disabled={props.actionStatus.processing || props.actionStatus.disabledActions}
@@ -451,7 +451,7 @@ export default defineComponent({
     };
 
     const renderSider = () => {
-      const useDrawer = props.siderDrawerMode === 'always' || deviceType.isMobile;
+      const useDrawer = props.siderDrawerMode === 'always' || deviceMixin.isMobile;
       return [
         useDrawer ? (
           <Drawer

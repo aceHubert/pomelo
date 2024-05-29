@@ -10,6 +10,7 @@ export const routes: Array<RouteConfig> = [
     component: () => import(/* webpackChunkName: "common" */ '../views/site-init'),
     meta: {
       breadcrumb: false,
+      anonymous: true,
     },
   },
   {

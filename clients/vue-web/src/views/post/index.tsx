@@ -3,7 +3,8 @@ import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { createResource } from '@vue-async/resource-manager';
 import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
-import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
+import { useI18n, useOptions, useEffect, expose } from '@/hooks';
+import { useDeviceMixin } from '@/mixins';
 import { useTemplateApi, PostMetaPresetKeys } from '@/fetch/apis';
 
 const MobilePost = () => import(/* webpackChunkName: "mobile" */ './mobile');
@@ -43,7 +44,7 @@ export default defineComponent({
   },
   setup(props) {
     const i18n = useI18n();
-    const deviceType = useDeviceType();
+    const deviceMixin = useDeviceMixin();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const templateApi = useTemplateApi();
 
@@ -140,22 +141,22 @@ export default defineComponent({
 
       return $loading ? (
         <div>
-          <SkeletonLoader style={{ width: '100%', height: deviceType.isDesktop ? '300px' : '200px' }} />
-          <div class={['mx-auto', { 'px-4': !deviceType.isDesktop }]} style="width: 1180px; max-width: 100%;">
+          <SkeletonLoader style={{ width: '100%', height: deviceMixin.isDesktop ? '300px' : '200px' }} />
+          <div class={['mx-auto', { 'px-4': !deviceMixin.isDesktop }]} style="width: 1180px; max-width: 100%;">
             <SkeletonLoader
               class="mx-auto"
               style={{
                 width: '260px',
-                height: deviceType.isDesktop ? '40px' : '32px',
-                marginTop: deviceType.isDesktop ? '40px' : '32px',
+                height: deviceMixin.isDesktop ? '40px' : '32px',
+                marginTop: deviceMixin.isDesktop ? '40px' : '32px',
               }}
             />
             <SkeletonLoader
               class="mx-auto"
-              style={{ width: '120px', height: '14px', marginTop: deviceType.isDesktop ? '28px' : '14px' }}
+              style={{ width: '120px', height: '14px', marginTop: deviceMixin.isDesktop ? '28px' : '14px' }}
             />
             <SkeletonLoader
-              style={{ height: '14px', marginLeft: '32px', marginTop: deviceType.isDesktop ? '30px' : '20px' }}
+              style={{ height: '14px', marginLeft: '32px', marginTop: deviceMixin.isDesktop ? '30px' : '20px' }}
             />
             <SkeletonLoader style={{ height: '14px', marginTop: '10px' }} />
             <SkeletonLoader style={{ height: '14px', marginTop: '10px' }} />
@@ -179,7 +180,7 @@ export default defineComponent({
           title={i18n.tv('post_template.index.render_error_text', '内容渲染错误！') as string}
           subTitle={renderError.value}
         ></Result>
-      ) : deviceType.isDesktop ? (
+      ) : deviceMixin.isDesktop ? (
         h(DesktopPost, {
           props: {
             title: postData?.title,
