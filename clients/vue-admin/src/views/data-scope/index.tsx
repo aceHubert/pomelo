@@ -6,8 +6,8 @@ import { Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { TemplateStatus } from '@ace-pomelo/shared-client';
 import { useTemplateApi } from '@/fetch/apis';
-import { useI18n, useUserManager, useDeviceType } from '@/hooks';
-import { useTemplateMixin } from '@/mixins';
+import { useI18n, useUserManager } from '@/hooks';
+import { useTemplateMixin, useDeviceMixin } from '@/mixins';
 import { TemplateType } from './constants';
 import classes from './index.module.less';
 
@@ -31,7 +31,7 @@ export default defineComponent({
   setup(_props, { refs }) {
     const route = useRoute();
     const i18n = useI18n();
-    const deviceType = useDeviceType();
+    const deviceMixin = useDeviceMixin();
     const userManager = useUserManager();
     const templateApi = useTemplateApi();
     const templateMixin = useTemplateMixin();
@@ -213,17 +213,17 @@ export default defineComponent({
                 {record.title}
               </router-link>
               <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>
-              {!deviceType.isDesktop && renderRowInline(record)}
+              {!deviceMixin.isDesktop && renderRowInline(record)}
             </div>
           ),
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.author_label', '作者'),
           dataIndex: 'author',
           width: 200,
           customRender: () => `-`,
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.date_label', '日期'),
           dataIndex: 'updatedAt',
           align: 'left',
@@ -245,7 +245,7 @@ export default defineComponent({
     });
 
     return () => (
-      <Card bordered={false} size={deviceType.isMobile ? 'small' : 'default'}>
+      <Card bordered={false} size={deviceMixin.isMobile ? 'small' : 'default'}>
         <SearchForm
           keywordPlaceholder={
             i18n.tv('common.placeholder.search', '"标题"模糊搜索', {

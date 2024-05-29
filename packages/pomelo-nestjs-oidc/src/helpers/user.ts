@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 import { Timer } from './timer';
-import { IdTokenClaims } from './claims.interface';
+import { IdTokenClaims } from './claims';
 
 /**
  * Holds claims represented by a combination of the `id_token` and the user info endpoint.

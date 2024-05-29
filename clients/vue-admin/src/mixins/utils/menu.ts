@@ -4,7 +4,7 @@ import { warn } from '@ace-util/core';
 
 // types
 import type { Key, RegExpOptions, ParseOptions } from 'path-to-regexp';
-import type { MenuConfig, BreadcrumbCofnig } from '@/types';
+import type { MenuConfig, BreadcrumbConfig } from 'antdv-layout-pro/types';
 
 interface PathRegExp extends RegExp {
   // An array to be populated with the keys found in the path.
@@ -98,10 +98,10 @@ export function matchNoRegistPageParentPath(path: string, pathMap: Dictionary<an
 
 // 根据已注册的path，生成breadcrumblist
 export function createBreadcrumbList(
-  list: Array<BreadcrumbCofnig> = [],
+  list: Array<BreadcrumbConfig> = [],
   path: string,
   pathMap: Dictionary<MenuConfig & { parent?: Omit<MenuConfig, 'children'> }>,
-): Array<BreadcrumbCofnig> {
+): Array<BreadcrumbConfig> {
   const menu = pathMap[path];
   menu.breadcrumb !== false && list.unshift({ key: menu.key, path, label: menu.title });
 

@@ -3,7 +3,7 @@
 
 import { Logger } from '@nestjs/common';
 import { UserProfile } from './user';
-import { JwtClaims } from './claims.interface';
+import { JwtClaims } from './claims';
 
 /**
  * Protocol claims that could be removed by default from profile.

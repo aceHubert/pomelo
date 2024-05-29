@@ -4,7 +4,7 @@
 import { Logger, UnauthorizedException } from '@nestjs/common';
 import { BaseClient, TokenSet, UserinfoResponse } from 'openid-client';
 import { User } from './user';
-import { JwtClaims } from './claims.interface';
+import { JwtClaims } from './claims';
 
 export class UserInfoService<TClient extends BaseClient = BaseClient> {
   protected readonly logger = new Logger(UserInfoService.name);

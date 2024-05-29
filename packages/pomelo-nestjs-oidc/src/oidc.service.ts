@@ -36,8 +36,8 @@ export class OidcService {
 
   async createStrategy(tenantId?: string, channelType?: ChannelType) {
     let strategy;
-    if (this.options.defaultHttpOptions) {
-      custom.setHttpOptionsDefaults(this.options.defaultHttpOptions);
+    if (this.options.httpOptions) {
+      custom.setHttpOptionsDefaults(this.options.httpOptions);
     }
 
     try {

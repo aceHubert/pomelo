@@ -51,7 +51,7 @@ export type OidcModuleOptions = {
   /**
    * openid-client http options
    */
-  defaultHttpOptions?: HttpOptions;
+  httpOptions?: HttpOptions;
 
   /**
    * check user role permission

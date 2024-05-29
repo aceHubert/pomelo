@@ -8,8 +8,8 @@ import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { OptionPresetKeys, TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
 import { usePostApi, PresetTemplateType } from '@/fetch/apis';
-import { useI18n, useOptions, useUserManager, useDeviceType } from '@/hooks';
-import { useTemplateMixin, useLocationMixin } from '@/mixins';
+import { useI18n, useOptions, useUserManager } from '@/hooks';
+import { useTemplateMixin, useLocationMixin, useDeviceMixin } from '@/mixins';
 import classes from './index.module.less';
 
 // typed
@@ -38,7 +38,7 @@ export default defineComponent({
     const i18n = useI18n();
     const userManager = useUserManager();
     const homeUrl = useOptions(OptionPresetKeys.Home);
-    const deviceType = useDeviceType();
+    const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
     const templateMixin = useTemplateMixin();
     const postApi = usePostApi();
@@ -373,18 +373,18 @@ export default defineComponent({
                   )}
                 </p>
                 <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>
-                {!deviceType.isDesktop && renderRowInline(record)}
+                {!deviceMixin.isDesktop && renderRowInline(record)}
               </div>
             );
           },
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.author_label', '作者'),
           dataIndex: 'author',
           width: 120,
           customRender: () => `-`,
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.category_label', '分类'),
           dataIndex: 'categories',
           width: 220,
@@ -397,7 +397,7 @@ export default defineComponent({
                 ))
               : `-`,
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.tag_label', '标签'),
           dataIndex: 'tags',
           width: 220,
@@ -410,14 +410,14 @@ export default defineComponent({
                 ))
               : `-`,
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.comment_label', '评论'),
           dataIndex: 'commentCount',
           width: 100,
           customRender: (_: any, record: PagedPostTemplateItem) =>
             record.commentStatus === TemplateCommentStatus.Closed ? '-' : record.commentCount,
         },
-        deviceType.isDesktop && {
+        deviceMixin.isDesktop && {
           title: i18n.tv('page_templates.date_label', '日期'),
           dataIndex: 'updatedAt',
           align: 'left',
@@ -439,7 +439,7 @@ export default defineComponent({
     });
 
     return () => (
-      <Card bordered={false} size={deviceType.isMobile ? 'small' : 'default'}>
+      <Card bordered={false} size={deviceMixin.isMobile ? 'small' : 'default'}>
         <SearchForm
           keywordPlaceholder={
             i18n.tv('common.placeholder.search', '"标题"模糊搜索', {
