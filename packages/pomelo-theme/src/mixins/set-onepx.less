@@ -7,7 +7,7 @@
   pointer-events: none;
 }
 
-.setLine(@color: @border-color-base) {
+.setLine(@color: @var-border-base) {
   ._setLineCommon();
   left: 0;
   top: 0;
@@ -19,7 +19,7 @@
   transform: scale(0.5);
 }
 
-.setTopLine(@color: @border-color-base) {
+.setTopLine(@color: @var-border-base) {
   ._setLineCommon();
   left: 0;
   top: 0;
@@ -31,7 +31,7 @@
   transform: scaleY(0.5);
 }
 
-.setBottomLine(@color: @border-color-base) {
+.setBottomLine(@color: @var-border-base) {
   ._setLineCommon();
   content: ' ';
   position: absolute;
@@ -45,7 +45,7 @@
   transform: scaleY(0.5);
 }
 
-.setLeftLine(@color: @border-color-base) {
+.setLeftLine(@color: @var-border-base) {
   ._setLineCommon();
   left: 0;
   top: 0;
@@ -57,7 +57,7 @@
   transform: scaleX(0.5);
 }
 
-.setRightLine(@color: @border-color-base) {
+.setRightLine(@color: @var-border-base) {
   ._setLineCommon();
   right: 0;
   top: 0;

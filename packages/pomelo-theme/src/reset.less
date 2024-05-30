@@ -1,8 +1,8 @@
 // reset
 
 body {
-  color: var(--text-primary, @text-color);
-  background-color: var(--body-background, @body-background);
+  color: @var-text-primary;
+  background-color: @var-body-background;
 }
 
 input[type='checkbox'] {
@@ -21,16 +21,16 @@ a {
   }
 
   &[disabled] {
-    color: var(--color-disabled, @disabled-color);
+    color: @var-color-disabled;
   }
 }
 
 caption {
-  color: var(--text-secondary, @text-color-secondary);
+  color: @var-text-secondary;
 }
 
 ::selection {
-  color: var(--text-inverse, @text-color-inverse);
+  color: @var-text-inverse;
   background: @var-primary;
 }
 
@@ -38,5 +38,5 @@ caption {
   font-size: @font-size-md;
   display: block;
   margin-bottom: 0;
-  color: var(--text-secondary, @text-color-secondary);
+  color: @var-text-secondary;
 }

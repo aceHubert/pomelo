@@ -5,19 +5,6 @@
 // primary color
 @primary-color: #1890ff; // 全局主色
 
-// var primary color (不可以用于计算)
-@var-primary: var(--theme-primary, @primary-color);
-@var-primary-1: var(--theme-primary-1, @primary-1);
-@var-primary-2: var(--theme-primary-2, @primary-2);
-@var-primary-3: var(--theme-primary-3, @primary-3);
-@var-primary-4: var(--theme-primary-4, @primary-4);
-@var-primary-5: var(--theme-primary-5, @primary-5);
-@var-primary-6: var(--theme-primary-6, @primary-6);
-@var-primary-7: var(--theme-primary-7, @primary-7);
-@var-primary-8: var(--theme-primary-8, @primary-8);
-@var-primary-9: var(--theme-primary-9, @primary-9);
-@var-primary-10: var(--theme-primary-10, @primary-10);
-
 // operator color
 @success-color: #1abd80; // 成功色
 @warning-color: #fda900; // 警告色
@@ -112,3 +99,45 @@
 @font-weight-regular: 400;
 @font-weight-light: 300;
 @font-weight-thin: 100;
+
+// Css var Variables (不可以用于计算)
+// ---
+@var-primary: var(--theme-primary, @primary-color);
+@var-primary-1: var(--theme-primary-1, @primary-1);
+@var-primary-2: var(--theme-primary-2, @primary-2);
+@var-primary-3: var(--theme-primary-3, @primary-3);
+@var-primary-4: var(--theme-primary-4, @primary-4);
+@var-primary-5: var(--theme-primary-5, @primary-5);
+@var-primary-6: var(--theme-primary-6, @primary-6);
+@var-primary-7: var(--theme-primary-7, @primary-7);
+@var-primary-8: var(--theme-primary-8, @primary-8);
+@var-primary-9: var(--theme-primary-9, @primary-9);
+@var-primary-10: var(--theme-primary-10, @primary-10);
+
+@var-text-primary: var(--text-primary, @text-color);
+@var-text-secondary: var(--text-secondary, @text-color-secondary);
+@var-text-disabled: var(--text-disabled, @text-color-disabled);
+@var-text-inverse: var(--text-inverse, @text-color-inverse);
+
+@var-color-success: var(--color-success, @success-color);
+@var-color-warning: var(--color-warning, @warning-color);
+@var-color-error: var(--color-error, @error-color);
+@var-color-danger: var(--color-danger, @error-color);
+@var-color-info: var(--color-info, @info-color);
+@var-color-disabled: var(--color-disabled, @disabled-color);
+
+@var-border-base: var(--color-border-base, @border-color-base);
+@var-border-split: var(--color-border-split, @border-color-split);
+@var-border-inverse: var(--color-border-inverse, @border-color-inverse);
+
+@var-background-light: var(--color-background-light, @background-color-light);
+@var-background-base: var(--color-background-base, @background-color-base);
+
+@var-shadow-1-up: var(--shadow-1-up, @shadow-1-up);
+@var-shadow-1-down: var(--shadow-1-down, @shadow-1-down);
+@var-shadow-1-left: var(--shadow-1-left, @shadow-1-left);
+@var-shadow-1-right: var(--shadow-1-right, @shadow-1-right);
+@var-shadow-2: var(--shadow-2, @shadow-2);
+
+@var-component-background: var(--component-background, @component-background);
+@var-body-background: var(--body-background, @body-background);
