@@ -2,28 +2,28 @@
 
 :root {
   --bs-body-font-size: 14px;
-  --bs-primary: var(--theme-primary);
+  --bs-primary: @var-primary;
 }
 
 .btn-primary {
-  --bs-btn-bg: var(--theme-primary);
-  --bs-btn-border-color: var(--theme-primary);
-  --bs-btn-hover-bg: var(--theme-primary-5);
-  --bs-btn-hover-border-color: var(--theme-primary-5);
-  --bs-btn-focus-shadow-rgb: var(--theme-primary);
-  --bs-btn-active-bg: var(--theme-primary-7);
-  --bs-btn-active-border-color: var(--theme-primary-7);
-  --bs-btn-disabled-bg: var(--theme-primary);
-  --bs-btn-disabled-border-color: var(--theme-primary);
+  --bs-btn-bg: @var-primary;
+  --bs-btn-border-color: @var-primary;
+  --bs-btn-hover-bg: @var-primary-5;
+  --bs-btn-hover-border-color: @var-primary-5;
+  --bs-btn-focus-shadow-rgb: @var-primary;
+  --bs-btn-active-bg: @var-primary-7;
+  --bs-btn-active-border-color: @var-primary-7;
+  --bs-btn-disabled-bg: @var-primary;
+  --bs-btn-disabled-border-color: @var-primary;
 }
 
 .form-control:focus,
 .form-check-input:focus {
-  border-color: var(--theme-primary-3);
-  box-shadow: 0 0 0 0.25rem var(--theme-primary-1);
+  border-color: @var-primary-3;
+  box-shadow: 0 0 0 0.25rem @var-primary-1;
 }
 
 .form-check-input:checked {
-  background-color: var(--theme-primary);
-  border-color: var(--theme-primary);
+  background-color: @var-primary;
+  border-color: @var-primary;
 }

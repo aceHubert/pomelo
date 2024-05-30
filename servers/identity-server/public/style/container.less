@@ -23,14 +23,14 @@ body {
   font-size: 32px;
   font-weight: 700;
   line-height: 32px;
-  color: var(--text-primary, @text-color);
+  color: @var-text-primary;
 }
 
 .subtitle {
   font-size: 18px;
   font-weight: 700;
   line-height: 21px;
-  color: var(--text-secondary, @text-color-secondary);
+  color: @var-text-secondary;
 }
 
 .description {
@@ -53,8 +53,8 @@ pre{
 }
 
 .action-button {
-  background-color: var(--theme-primary);
-  color: var(--text-inverse);
+  background-color: @var-primary;
+  color: @var-text-inverse;
   border-radius: 6px;
   min-width: 64px;
   line-height: 36px;
@@ -68,7 +68,7 @@ pre{
   }
 
   &.secondary {
-    color: var(--text-primary);
+    color: @var-text-primary;
     background-color: @grey-3;
   }
 }

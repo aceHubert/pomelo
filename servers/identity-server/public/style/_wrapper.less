@@ -12,24 +12,24 @@
   right: 25px;
 
   .btn {
-    color: var(--text-secondary);
+    color: @var-text-secondary;
     text-decoration: none;
 
     &:hover,
     &:focus,
     &:active {
-      color: var(--text-secondary);
+      color: @var-text-secondary;
     }
 
     &-disabled,
     &:disabled {
-      color: var(--theme-primary);
+      color: @var-primary;
       cursor: not-allowed;
 
       &:hover,
       &:focus,
       &:active {
-        color: var(--theme-primary-7);
+        color: @var-primary-7;
       }
     }
   }
