@@ -4,12 +4,12 @@ form {
   margin-top: 20px;
 
   a {
-    color: var(--text-color);
+    color: @var-text-primary;
     text-decoration: underline;
 
     &:hover,
     &:focus {
-      color: var(--theme-primary);
+      color: @var-primary;
     }
   }
 }
@@ -69,8 +69,8 @@ form {
   }
 
   .was-validated &:valid:checked {
-    background-color: var(--theme-primary);
-    border-color: var(--theme-primary);
+    background-color: @var-primary;
+    border-color: @var-primary;
   }
 
   .was-validated &:valid:focus {

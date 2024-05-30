@@ -2,7 +2,11 @@
 @import '../../style/themes/index';
 
 @layout-admin-prefix-cls: ~'@{ant-prefix}-layout-admin';
-@layout-admin-header-background: #1f1f1f;
+@layout-admin-header-color: fade(#000, 85%);
+@layout-admin-header-color-dark: fade(#fff, 100%);
+@layout-admin-header-background: #2c394b;
+@layout-admin-header-background-light: #fff;
+@layout-admin-header-background-dark: #1f1f1f;
 @layout-admin-footer-height: 70px;
 
 .@{layout-admin-prefix-cls} {
@@ -50,29 +54,29 @@
       height: 100%;
       display: flex;
       align-items: center;
-      color: @heading-color-dark;
-      background: @layout-header-background;
-      box-shadow: 0 1px 4px @layout-header-background;
+      color: @layout-admin-header-color-dark;
+      background: @layout-admin-header-background;
+      box-shadow: 0 1px 4px lighten(@layout-admin-header-background, 35%);
       position: relative;
 
       &::after{
         .setBottomLine();
         content: none;
-
-        .theme-dark &{
-          content: ' ';
-        }
       }
 
       .theme-reallight &{
-        color: @heading-color;
-        background: @menu-bg;
+        color: @layout-admin-header-color;
+        background: @layout-admin-header-background-light;
         box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
       }
 
       .theme-dark &{
-        background: @layout-admin-header-background;
+        background: @layout-admin-header-background-dark;
         box-shadow: none;
+
+        &::after{
+          content: ' ';
+        }
       }
 
       .header-logo {
@@ -90,10 +94,10 @@
         .logo-content{
           .site-logo,
           .site-name {
-            color: @heading-color-dark;
+            color: @layout-admin-header-color-dark;
 
             .theme-reallight &{
-              color: @heading-color;
+              color: @layout-admin-header-color;
             }
           }
 
@@ -146,7 +150,7 @@
       transition: none !important;
 
       .theme-dark &{
-        background: @layout-admin-header-background;
+        background: @layout-admin-header-background-dark;
       }
 
       &-horizontal {
@@ -159,7 +163,7 @@
             margin-top: 0;
             border-bottom: 0;
           }
-        }
+        }menu
 
         & > .@{ant-prefix}-menu-item,
         & > .@{ant-prefix}-menu-submenu{
@@ -233,7 +237,11 @@
       transition: none !important;
 
       .theme-dark &{
-        background: @layout-admin-header-background;
+        background: @layout-admin-header-background-dark;
+
+        .@{ant-prefix}-menu-item-selected{
+          background-color: @var-primary !important;
+        }
       }
 
       &::-webkit-scrollbar {
@@ -283,27 +291,31 @@
     // }
 
     .top-in-sider {
-      color: @heading-color-dark;
-      background: @layout-header-background;
+      color: @layout-admin-header-color-dark;
+      background: @layout-admin-header-background;
       transition: all 0.2s;
       position: relative;
 
       &::after{
         .setRightLine();
         content: none;
+      }
 
-        .theme-reallight &, .theme-dark &{
+      .theme-reallight &{
+        color: @layout-admin-header-color;
+        background-color: @layout-admin-header-background-light;
+
+        &::after{
           content: ' ';
         }
       }
 
-      .theme-reallight &{
-        color: @heading-color;
-        background-color: @menu-bg;
-      }
-
       .theme-dark &{
-        background-color: @layout-admin-header-background;
+        background-color: @layout-admin-header-background-dark;
+
+        &::after{
+          content: ' ';
+        }
       }
 
       .@{ant-prefix}-menu-inline-collapsed {
@@ -317,7 +329,7 @@
     .sider-logo {
       padding: 8px 16px;
       height: 45px;
-      background-color: @menu-bg;
+      background-color: @layout-admin-header-background-light;
       display: block;
       overflow: hidden;
       white-space: nowrap;
@@ -329,18 +341,18 @@
       &::after{
         .setBottomLine();
         content: none;
-
-        .theme-reallight &, .theme-dark &{
-          content:' ';
-        }
       }
 
       .theme-reallight &, .theme-dark &{
         box-shadow: none;
+
+        &::after{
+          content: ' ';
+        }
       }
 
       .theme-dark &{
-        background-color: @layout-admin-header-background;
+        background-color: @layout-admin-header-background-dark;
       }
 
       .logo-content {
@@ -349,10 +361,10 @@
 
         .site-logo,
         .site-name {
-          color: @heading-color;
+          color: @layout-admin-header-color;
 
           .theme-dark &{
-            color: @heading-color-dark;
+            color: @layout-admin-header-color-dark;
           }
         }
 
