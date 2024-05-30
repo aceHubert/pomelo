@@ -39,22 +39,21 @@ export class OidcService {
     if (this.options.httpOptions) {
       custom.setHttpOptionsDefaults(this.options.httpOptions);
     }
-
+    let issuer, redirectUri, clientMetadata;
     try {
-      let issuer, redirectUri, clientMetadata;
       if (this.options.issuer) {
         issuer = this.options.issuer;
         redirectUri = `${this.options.origin}/login/callback`;
         clientMetadata = this.options.clientMetadata;
       } else {
         if (!tenantId || !channelType) {
-          throw new Error('Missing tenantId or channelType');
+          throw new Error('The params "tenantId" and "channelType" are required!');
         }
 
         if (!this.options.issuerOrigin) {
-          throw new Error('Missing issuer origin');
+          throw new Error('The option "issuerOrigin" is required!');
         }
-        issuer = `${this.options.issuerOrigin}/${tenantId}/.well-known/openid-configuration`;
+        issuer = `${this.options.issuerOrigin}/${tenantId}`;
         redirectUri = `${this.options.origin}/login/callback`;
 
         switch (channelType) {
@@ -102,17 +101,17 @@ export class OidcService {
         const errorMsg = {
           error: err.message,
           debug: {
-            origin: this.options.origin,
+            issuer,
             tenantId,
             channelType,
+            redirectUri,
           },
         };
         this.logger.error(errorMsg);
         throw err;
       }
-      this.logger.error(`Error accessing the issuer/keyStore, Error: ${err.stack}`);
-      this.logger.log('Terminating application');
-      process.exit(1);
+      this.logger.error(`Accessing the issuer/keyStore faild, ${err.stack}`);
+      throw err;
     }
   }
 

@@ -148,7 +148,10 @@ const logger = new Logger('AppModule', { timestamp: true });
       useFactory: (config: ConfigService, oidcService: OidcService) => {
         const isDebug = config.get<boolean>('graphql.debug', false);
         const graphqlPath = config.get<string>('graphql.path', '/graphql');
-        const graphqlSubscriptionPath = config.get<string>('graphql.subscription_path', graphqlPath);
+        // https://github.com/nestjs/graphql/issues/2477
+        const graphqlSubscriptionPath = `${normalizeRoutePath(
+          config.get<string>('webServer.globalPrefixUri', ''),
+        )}${config.get<string>('graphql.subscription_path', graphqlPath)}`;
         return {
           debug: isDebug,
           playground: isDebug,
