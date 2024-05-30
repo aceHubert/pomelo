@@ -26,7 +26,6 @@
   each(.operator-vars(),{
     --color-@{key}: @value;
   })
-  --color-disabled: @disabled-color;
   --color-border-base: @border-color-base;
   --color-border-split: @border-color-split;
   --color-border-inverse: @border-color-inverse;
@@ -65,6 +64,7 @@ each(.primary-vars(), {
   error: @error-color;
   danger: @error-color; // alias to error
   info: @info-color;
+  disabled: @disabled-color;
 }
 
 each(.operator-vars(), {
