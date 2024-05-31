@@ -4,11 +4,19 @@ import { request } from '../graphql/infrastructure-request';
 // Types
 import type { TemplateStatus, TemplateCommentStatus, TypedQueryDocumentNode } from '@ace-pomelo/shared-client';
 import type { TermTaxonomyModel } from './term-taxonomy';
+import type { PagedArgs, Paged } from './types';
 
 export enum TemplatePageType {
   Default = 'default',
   Cover = 'cover',
   FullWidth = 'full-width',
+}
+
+export interface PagedTemplateArgs extends PagedArgs {
+  keyword?: string;
+  type: string;
+  categoryId?: string;
+  metaKeys?: string[];
 }
 
 export interface TemplateModel {
@@ -54,6 +62,10 @@ export interface PageTemplateModel
     | 'metas'
   > {}
 
+export interface PagedPostTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {
+  tagId?: string;
+}
+
 export interface PostTemplateModel
   extends Pick<
     TemplateModel,
@@ -73,6 +85,8 @@ export interface PostTemplateModel
   > {
   tags: Pick<TermTaxonomyModel, 'id' | 'name'>[];
 }
+
+export interface PagedPostTemplateItem extends Omit<PostTemplateModel, 'content'> {}
 
 export interface MetaModel {
   id: string;
@@ -233,6 +247,56 @@ export const useTemplateApi = defineRegistApi('template', {
         }
       }
     ` as TypedQueryDocumentNode<{ post?: PostTemplateModel }, { id: string; metaKeys?: string[] }>,
+    getPosts: gql`
+      query getPostTemplates(
+        $offset: Int
+        $limit: Int
+        $keyword: String
+        $categoryId: ID
+        $tagId: ID
+        $metaKeys: [String!]
+      ) {
+        posts: postTemplates(
+          offset: $offset
+          limit: $limit
+          keyword: $keyword
+          categoryId: $categoryId
+          tagId: $tagId
+        ) {
+          rows {
+            id
+            name
+            title
+            excerpt
+            author
+            status
+            commentStatus
+            commentCount
+            updatedAt
+            createdAt
+            categories {
+              id
+              name
+            }
+            tags {
+              id
+              name
+            }
+            metas(metaKeys: $metaKeys) {
+              id
+              key: metaKey
+              value: metaValue
+            }
+          }
+          total
+        }
+      }
+    ` as TypedQueryDocumentNode<
+      {
+        posts: Paged<PagedPostTemplateItem>;
+      },
+      PagedPostTemplateArgs
+    >,
   },
   request,
 });
