@@ -19,7 +19,17 @@ import { MessageService } from '@/messages/message.service';
 import { NewFormTemplateInput } from './dto/new-template.input';
 import { UpdateFormTemplateInput } from './dto/update-template.input';
 import { PagedFormTemplateArgs, FormTemplateOptionArgs } from './dto/template.args';
-import { FormTemplate, PagedFormTemplate, FormTemplateOption } from './models/form.model';
+import { FormTemplate, PagedFormTemplate, FormTemplateOption, PagedFormTemplateItem } from './models/form.model';
+
+@Authorized()
+@Resolver(() => PagedFormTemplateItem)
+export class PagedFormTemplateItemMetaFieldResolver extends createMetaFieldResolver(
+  PagedFormTemplateItem,
+  TemplateDataSource,
+  {
+    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+  },
+) {}
 
 @Authorized()
 @Resolver(() => FormTemplate)
