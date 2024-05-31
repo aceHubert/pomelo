@@ -4,7 +4,7 @@ import { useAppMixin, useDeviceMixin } from '@/mixins';
 import { useI18n } from '@/hooks';
 import { loadingRef } from '@/shared';
 import { RouterView } from './components';
-import classes from './styles/default.module.less';
+import classes from './default.module.less';
 
 export default defineComponent({
   name: 'BlankLayout',
