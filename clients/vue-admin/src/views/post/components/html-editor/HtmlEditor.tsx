@@ -43,7 +43,7 @@ export default defineComponent({
     const mediaSelector = reactive({
       modalVisible: false,
       accept: '',
-      callback: (_url: string) => {},
+      callback: (() => {}) as (attrs: { src: string; [key: string]: any }) => void,
     });
 
     const contentWidth = computed(() => {
@@ -57,7 +57,7 @@ export default defineComponent({
           ...attrs,
           disabled: props.disabled,
           gallery: {
-            open: (options: { accept: string }, callback: (url: string) => void) => {
+            open: (options: { accept: string }, callback: (attrs: { src: string; [key: string]: any }) => void) => {
               mediaSelector.accept = options.accept;
               mediaSelector.callback = callback;
               mediaSelector.modalVisible = true;
@@ -112,13 +112,22 @@ export default defineComponent({
           >
             <MediaList
               selectable
+              selectConfirm={false}
               accept={mediaSelector.accept}
               size="small"
               pageSize={9}
               showSizeChanger={false}
               objectPrefixKey="templates/html_editor_"
-              onSelect={(path) => {
-                mediaSelector.callback(path);
+              onSelect={(path, media) => {
+                // 使用略缩图，需要js处理
+                media.medium
+                  ? mediaSelector.callback({
+                      src: media.medium.fullPath,
+                      dataSrc: path,
+                      width: media.width,
+                      height: media.height,
+                    })
+                  : mediaSelector.callback(path);
                 mediaSelector.modalVisible = false;
               }}
             />
