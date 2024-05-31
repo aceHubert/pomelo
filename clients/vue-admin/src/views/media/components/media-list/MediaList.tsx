@@ -33,6 +33,7 @@ export interface MediaListProps {
   showSizeChanger?: boolean;
   showUploader?: boolean;
   selectable: boolean;
+  selectConfirm: boolean;
   cropBeforeUpload: boolean;
   objectPrefixKey?: string;
   prefixCls?: string;
@@ -49,6 +50,7 @@ export default defineComponent({
     showSizeChanger: { type: Boolean, default: true },
     showUploader: { type: Boolean, default: true },
     selectable: { type: Boolean, default: false },
+    selectConfirm: { type: Boolean, default: true },
     cropBeforeUpload: { type: Boolean, default: true },
     objectPrefixKey: String,
     prefixCls: String,
@@ -311,7 +313,10 @@ export default defineComponent({
 
     const selectedPath = ref('');
     const handleSelect = (media: Media) => {
-      if (media.thumbnail || media.scaled || media.medium || media.mediumLarge || media.large) {
+      if (
+        props.selectConfirm &&
+        (media.thumbnail || media.scaled || media.medium || media.mediumLarge || media.large)
+      ) {
         selectedPath.value = media.fullPath;
         Modal.confirm({
           icon: ' ',
@@ -360,11 +365,11 @@ export default defineComponent({
           parentContext: currentInstance?.proxy,
           okText: i18n.tv('common.btn_text.select', '选择') as string,
           onOk: () => {
-            emit('select', selectedPath.value);
+            emit('select', selectedPath.value, media);
           },
         });
       } else {
-        emit('select', media.fullPath);
+        emit('select', media.fullPath, media);
       }
     };
 
