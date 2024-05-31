@@ -59,6 +59,16 @@ export class PagedPostTemplateItemTaxonomyFieldResolver extends TaxonomyFieldRes
 }
 
 @Authorized()
+@Resolver(() => PagedPostTemplateItem)
+export class PagedPostTemplateItemMetaFieldResolver extends createMetaFieldResolver(
+  PagedPostTemplateItem,
+  TemplateDataSource,
+  {
+    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+  },
+) {}
+
+@Authorized()
 @Resolver(() => PostTemplate)
 export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, TemplateDataSource, {
   authDecorator: () => RamAuthorized(TemplateAction.MetaList),

@@ -21,7 +21,17 @@ import { MessageService } from '@/messages/message.service';
 import { NewPageTemplateInput } from './dto/new-template.input';
 import { UpdatePageTemplateInput } from './dto/update-template.input';
 import { PagedPageTemplateArgs, PageTemplateOptionArgs } from './dto/template.args';
-import { PageTemplate, PagedPageTemplate, PageTemplateOption } from './models/page.model';
+import { PageTemplate, PagedPageTemplate, PageTemplateOption, PagedPageTemplateItem } from './models/page.model';
+
+@Authorized()
+@Resolver(() => PagedPageTemplateItem)
+export class PagedPageTemplateItemMetaFieldResolver extends createMetaFieldResolver(
+  PagedPageTemplateItem,
+  TemplateDataSource,
+  {
+    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+  },
+) {}
 
 @Authorized()
 @Resolver(() => PageTemplate)
