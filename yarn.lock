@@ -515,6 +515,7 @@ __metadata:
     graphql: ^16.0.0
     graphql-ws: ^5.11.2
     highlight.js: ^11.9.0
+    lazyload: ^2.0.0-rc.2
     lodash-es: ^4.17.21
     moment: ^2.29.4
     oidc-client-ts: ^2.4.0
@@ -16796,6 +16797,13 @@ __metadata:
     picocolors: ^1.0.0
     shell-quote: ^1.7.3
   checksum: 48e4230643e8fdb5c14c11314706d58d9f3fbafe2606be3d6e37da1918ad8bfe39dd87875c726a1b59b9f4da99d87ec3e36d4c528464f0b820f9e91e5cb1c02d
+  languageName: node
+  linkType: hard
+
+"lazyload@npm:^2.0.0-rc.2":
+  version: 2.0.0-rc.2
+  resolution: "lazyload@npm:2.0.0-rc.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Flazyload%2F-%2Flazyload-2.0.0-rc.2.tgz"
+  checksum: 2002b720845fb52287e29a295f81d2c12a78ee167efb18e1f567d5f7265fc253ca5ad5ef358a424bbbc8c725156351eebca17a6347f4bb73fd6ec3fad86196c0
   languageName: node
   linkType: hard
 

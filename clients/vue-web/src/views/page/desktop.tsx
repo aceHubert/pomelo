@@ -1,4 +1,5 @@
-import { defineComponent, computed } from '@vue/composition-api';
+import Lazyload from 'lazyload';
+import { defineComponent, computed, onMounted } from '@vue/composition-api';
 import { createSchemaField, FragmentComponent } from '@formily/vue';
 import { Card } from 'ant-design-vue';
 import { FormGrid, FormCollapse, FormTab, Space } from '@formily/antdv';
@@ -65,6 +66,12 @@ export default defineComponent({
       }
       // TODO: other framework
       return true;
+    });
+
+    onMounted(() => {
+      if (props.framework === 'HTML') {
+        new Lazyload(document.querySelectorAll('img[data-lazy]'));
+      }
     });
 
     // TODO: 外面不包一层，上面的解构类型错误

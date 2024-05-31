@@ -1,5 +1,6 @@
 import moment from 'moment';
 import hljs from 'highlight.js/lib/core';
+import Lazyload from 'lazyload';
 import { defineComponent, computed, onMounted } from '@vue/composition-api';
 import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { OptionPresetKeys, TemplatePageType } from '@ace-pomelo/shared-client';
@@ -52,9 +53,12 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      document.querySelectorAll('pre code').forEach((el) => {
-        hljs.highlightElement(el as HTMLElement);
-      });
+      if (props.framework === 'HTML') {
+        document.querySelectorAll('pre code').forEach((el) => {
+          hljs.highlightElement(el as HTMLElement);
+        });
+        new Lazyload(document.querySelectorAll('img[data-lazy]'));
+      }
     });
 
     return () => (
