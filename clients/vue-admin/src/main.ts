@@ -76,7 +76,6 @@ async function createApp() {
 }
 
 // preset anonymous routes
-const AnonymousRouteNames = ['site-init', 'signin', 'session-timeout'];
 function auth(this: Vue, to: Route, from: Route, next: Next) {
   const userManager = this.$userManager;
 
@@ -84,7 +83,7 @@ function auth(this: Vue, to: Route, from: Route, next: Next) {
     next({ name: 'site-init', query: { redirect: to.fullPath } });
   } else if (to.name === 'signout') {
     userManager.signout();
-  } else if ((to.name && AnonymousRouteNames.includes(to.name)) || to.meta?.anonymous === true) {
+  } else if (to.meta?.anonymous === true) {
     next();
   } else {
     userManager.getUser().then(function (user) {
@@ -94,13 +93,12 @@ function auth(this: Vue, to: Route, from: Route, next: Next) {
           redirect_uri: `${window.location.origin}${to.fullPath}`,
         });
       } else {
-        next();
-        // if (user.profile.ut !== '1') {
-        //   next({ name: '403.8', replace: true });
-        // } else {
-        //   next();
-        //   // console.debug('route to ' + to.path)
-        // }
+        // next();
+        if (user.profile.role === 'subscriber') {
+          next({ name: 'forbidden', replace: true });
+        } else {
+          next();
+        }
       }
     });
   }
@@ -135,7 +133,7 @@ createApp().then(({ app, router }) => {
       });
 
       // Push the path and let route to be resolved
-      router.push(path, undefined, (err) => {
+      router[path.replace ? 'replace' : 'push'](path, undefined, (err) => {
         if (err) {
           // eslint-disable-next-line no-console
           console.error(err);

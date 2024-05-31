@@ -308,8 +308,19 @@ export const routes: Array<RouteConfig> = [
     path: '/signout',
   },
   {
+    name: 'forbidden',
+    path: '/forbidden',
+    component: () => import(/* webpackChunkName: "common" */ '../views/error/forbidden'),
+    meta: {
+      anonymous: true,
+    },
+  },
+  {
     name: 'not-found',
     path: '*',
     component: () => import(/* webpackChunkName: "common" */ '../views/error/page-not-fount'),
+    meta: {
+      anonymous: true,
+    },
   },
 ];

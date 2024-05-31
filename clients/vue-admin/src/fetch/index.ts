@@ -68,6 +68,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
       })
       .catch(() => {
         userManager.signin();
+        return new Promise(() => {});
       });
   }
 
