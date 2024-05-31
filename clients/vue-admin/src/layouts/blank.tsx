@@ -6,7 +6,7 @@ import { useI18n } from '@/hooks';
 import { Spin, ANT_PREFIX_CLS } from '@/components';
 import { loadingRef } from '@/shared';
 import { RouterView } from './components';
-import classes from './styles/blank.module.less';
+import classes from './blank.module.less';
 
 export default defineComponent({
   name: 'BlankLayout',

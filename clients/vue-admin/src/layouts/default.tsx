@@ -28,7 +28,7 @@ import { getDefaultMenus } from '@/configs/menu.config';
 import IconDarkTheme from '@/assets/icons/dark-theme.svg?inline';
 import IconLightTheme from '@/assets/icons/light-theme.svg?inline';
 import { RouterView } from './components';
-import classes from './styles/default.module.less';
+import classes from './default.module.less';
 
 export default defineComponent({
   name: 'DefaultLayout',
