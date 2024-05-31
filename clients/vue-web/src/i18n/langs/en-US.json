@@ -16,6 +16,7 @@
   "page_template": {
     "page_load_error_title": "Page loading error!",
     "page_not_found_title": "Page not found!",
+    "page_home_title": "Home",
     "index": {
       "not_found_text": "Page not found!",
       "schema_error_text": "Page configuration error!",

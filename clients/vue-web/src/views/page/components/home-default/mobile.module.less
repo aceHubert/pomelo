@@ -1,0 +1,51 @@
+@import '@ace-pomelo/theme/lib/mixins/index.less';
+
+.container {
+  margin: auto;
+  width: 1200px;
+  max-width: 100%;
+}
+
+.item {
+  &__title {
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  &__description {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: @text-color-secondary;
+  }
+
+  &__actions {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: @text-color-secondary;
+
+    li {
+      padding-right: 10px;
+      display: inline-block;
+    }
+
+    li + li {
+      padding-left: 10px;
+      position: relative;
+      border-left: none !important;
+
+      &:before {
+        .setLeftLine(@border-color-base);
+        top: 4px;
+        bottom: 4px;
+      }
+    }
+  }
+}
+
+.feature-image {
+  width: 96px;
+  height: 96px;
+  background: @grey-3 no-repeat center center;
+  background-size: cover;
+}
