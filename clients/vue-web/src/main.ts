@@ -11,8 +11,8 @@ import { router } from './router';
 import { pinia } from './store';
 import { siteInitRequiredRef } from '@/shared';
 import App from './App';
-import '@ace-pomelo/theme/lib/index.less';
 import './assets/styles/index.less';
+import '@ace-pomelo/theme/lib/index.less';
 
 // Plugins
 import plugins from './plugins';
@@ -74,8 +74,8 @@ async function createApp() {
   return context;
 }
 
+let initialized = false;
 // preset anonymous routes
-const AnonymousRouteNames = ['signin', 'session-timeout'];
 function auth(this: Vue, to: Route, from: Route, next: Next) {
   const userManager = this.$userManager;
 
@@ -88,23 +88,23 @@ function auth(this: Vue, to: Route, from: Route, next: Next) {
     );
   } else if (to.name === 'signout') {
     userManager.signout();
-  } else if ((to.name && AnonymousRouteNames.includes(to.name)) || to.meta?.anonymous === true) {
+  } else if (to.meta?.anonymous === true) {
     next();
-  } else if (window.name === 'preview') {
-    // 从管理端预览打开预览页面时，先尝试登录
+  } else {
     userManager.getUser().then((user) => {
       if (user) return next();
 
       // try sign-in silent
-      userManager
-        .signinSilent()
-        .catch(() => {})
-        .finally(() => {
-          next();
-        });
+      initialized
+        ? next()
+        : userManager
+            .signinSilent()
+            .catch(() => {})
+            .finally(() => {
+              initialized = true;
+              next();
+            });
     });
-  } else {
-    next();
   }
 }
 

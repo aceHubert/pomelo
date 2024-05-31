@@ -6,7 +6,7 @@ export default defineComponent({
   name: 'PageNotFound',
   head() {
     return {
-      title: this.$tv('page_not_found.page_title', '页面未找到') as string,
+      title: this.$tv('forbidden.page_title', '禁止访问') as string,
     };
   },
   anonymous: true,
@@ -17,12 +17,12 @@ export default defineComponent({
     return () => (
       <Result
         status="error"
-        title={i18n.tv('page_not_found.title', '错误')}
-        subTitle={i18n.tv('page_not_found.subtitle', '页面未找到！')}
+        title={i18n.tv('forbidden.title', '错误')}
+        subTitle={i18n.tv('forbidden.subtitle', '您没有权限访问，如有疑问请联系管理员！')}
         style="background-color: var(--component-background); min-height: 100%;"
       >
         <template slot="extra">
-          <router-link to="/">{i18n.tv('page_not_found.go_home_btn_text', '返回首页')}</router-link>
+          <router-link to={{ name: 'signout' }}>{i18n.tv('forbidden.switch_account', '切换账号')}</router-link>
         </template>
       </Result>
     );
