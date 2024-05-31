@@ -6,6 +6,7 @@ import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client'
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
 import { useTemplateApi, PageMetaPresetKeys } from '@/fetch/apis';
+import { HomeDefault } from './components/home-default';
 
 const MobilePage = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopPage = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -223,7 +224,9 @@ export default defineComponent({
             subTitle={i18n.tv('page_template.index.not_found_text', '未找到页面！') as string}
           ></Result>
         ) : (
-          <div class="text-center">TODO:default home page</div>
+          <div class="px-4 py-5">
+            <HomeDefault />
+          </div>
         )
       ) : deviceType.isDesktop ? (
         h(DesktopPage, {
