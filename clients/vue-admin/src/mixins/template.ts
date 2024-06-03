@@ -1,7 +1,7 @@
 import { lowerCase } from 'lodash-es';
 import { ref, reactive, computed, watch, set } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { TemplateStatus } from '@ace-pomelo/shared-client';
+import { OptionPresetKeys, TemplateStatus } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
 import { useI18n, useOptions } from '@/hooks';
 import { useTemplateApi, useTermTaxonomyApi } from '@/fetch/apis';
@@ -29,7 +29,7 @@ export enum BulkActions {
 export const useTemplateMixin = () => {
   const route = useRoute();
   const i18n = useI18n();
-  const siteLocale = useOptions('locale');
+  const siteLocale = useOptions(OptionPresetKeys.Locale);
   const templateApi = useTemplateApi();
   const termTaxonomyApi = useTermTaxonomyApi();
 

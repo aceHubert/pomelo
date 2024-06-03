@@ -76,6 +76,7 @@ export default defineComponent({
     });
 
     const pageName = computed(() => encodeURIComponent(route.path.substring(1))); // path 去掉开始 "/" 作为 name
+    const isHomePage = computed(() => !pageName.value);
 
     useEffect(() => {
       pageRes.read({
@@ -101,7 +102,9 @@ export default defineComponent({
         ? ''
         : $error
         ? i18n.tv('page_template.page_load_error_title', '页面加载错误')
-        : $result?.title ?? i18n.tv('page_template.page_not_found_title', '未找到页面');
+        : isHomePage.value
+        ? $result?.title ?? i18n.tv('page_template.page_home_title', '首页')
+        : i18n.tv('page_template.page_not_found_title', '未找到页面');
     });
 
     // stylesheets
@@ -145,8 +148,8 @@ export default defineComponent({
 
     const renderError = ref<false | string>(false);
     onErrorCaptured((err, vm, info) => {
-      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
-      renderError.value = info || err.message;
+      warn(process.env.NODE_ENV === 'production', err, vm, info);
+      renderError.value = err.message || info;
       return false;
     });
 
@@ -217,16 +220,16 @@ export default defineComponent({
           subTitle={renderError.value}
         ></Result>
       ) : !pageData ? (
-        pageName.value ? (
+        isHomePage.value ? (
+          <div class="px-4 py-5">
+            <HomeDefault />
+          </div>
+        ) : (
           <Result
             status="error"
             title="404"
             subTitle={i18n.tv('page_template.index.not_found_text', '未找到页面！') as string}
           ></Result>
-        ) : (
-          <div class="px-4 py-5">
-            <HomeDefault />
-          </div>
         )
       ) : deviceType.isDesktop ? (
         h(DesktopPage, {

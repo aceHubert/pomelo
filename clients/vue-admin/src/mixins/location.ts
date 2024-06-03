@@ -1,12 +1,15 @@
 import { reactive } from '@vue/composition-api';
-import { isAbsoluteUrl, absoluteGo } from '@ace-util/core';
+import { isAbsoluteUrl, absoluteGo, trailingSlash } from '@ace-util/core';
 import { useRouter } from 'vue2-helpers/vue-router';
+import { OptionPresetKeys } from '@ace-pomelo/shared-client';
+import { useOptions } from '@/hooks';
 
 // types
 import type { Route, RawLocation } from 'vue-router';
 
 export const useLocationMixin = () => {
   const router = useRouter();
+  const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
 
   /**
    * 修改 router query
@@ -100,8 +103,15 @@ export const useLocationMixin = () => {
     return router[replace ? 'replace' : 'push'](url, onComplete, onAbort);
   }
 
+  const getMediaPath = (path: string) => {
+    return isAbsoluteUrl(path) || /^data:image\//.test(path)
+      ? path
+      : `${trailingSlash(siteUrl.value ?? '/')}${/^\//.test(path) ? path.substring(1) : path}`;
+  };
+
   return reactive({
     updateRouteQuery,
     goTo,
+    getMediaPath,
   });
 };

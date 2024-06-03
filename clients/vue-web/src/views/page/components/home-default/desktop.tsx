@@ -2,6 +2,8 @@ import moment from 'moment';
 import { defineComponent } from '@vue/composition-api';
 import { List, Icon } from 'ant-design-vue';
 import { useI18n } from '@/hooks';
+import { useLocationMixin } from '@/mixins';
+import { safeJSONParse } from '@/utils';
 import classes from './desktop.module.less';
 
 // Types
@@ -23,6 +25,15 @@ export default defineComponent({
   emits: ['itemClick', 'pageChange'],
   setup(props, { emit }) {
     const i18n = useI18n();
+    const locationMixin = useLocationMixin();
+
+    const formatFeatureImage = (data?: string) => {
+      return locationMixin.getMediaPath(
+        data
+          ? safeJSONParse(data)?.thumbnail ?? data
+          : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+      );
+    };
 
     return () => (
       <div class={classes.container}>
@@ -44,10 +55,9 @@ export default defineComponent({
                     <div
                       class={classes.featureImage}
                       style={{
-                        'background-image': `url(${
-                          item.metas.find((meta) => meta.key === 'feature-image')?.value ||
-                          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-                        })`,
+                        'background-image': `url(${formatFeatureImage(
+                          item.metas.find((meta) => meta.key === 'feature-image')?.value,
+                        )})`,
                       }}
                       alt="feature-image"
                     />

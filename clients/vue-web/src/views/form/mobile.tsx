@@ -1,15 +1,15 @@
 import { defineComponent, ref, computed } from '@vue/composition-api';
-import { promisify, trailingSlash, isAbsoluteUrl } from '@ace-util/core';
+import { promisify } from '@ace-util/core';
 import { createForm } from '@formily/core';
 import { createSchemaField, FragmentComponent } from '@formily/vue';
 import { Loading, Dialog } from 'vant';
 import * as Vant from '@formily/vant';
 import { Form, Submit } from '@formily/vant';
-import { OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { Result } from '@/components';
 import { useLocationMixin } from '@/mixins';
-import { useI18n, useOptions } from '@/hooks';
+import { useI18n } from '@/hooks';
 import { FormMetaPresetKeys } from '@/fetch/apis';
+import { safeJSONParse } from '@/utils';
 import { checkSchemaValid, type IFormilySchema } from './utils';
 import { Text } from './components';
 import classes from './mobile.module.less';
@@ -53,8 +53,7 @@ export default defineComponent({
   },
   setup(props: MobileFormProps, { listeners }) {
     const i18n = useI18n();
-    const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
-    const localtionMixin = useLocationMixin();
+    const locationMixin = useLocationMixin();
 
     const schema = computed(() => {
       if (props.framework === 'FORMILYJS') {
@@ -80,9 +79,8 @@ export default defineComponent({
     const featureImage = computed(() => {
       const value = props.metas[FormMetaPresetKeys.FeatureImage];
       if (!value) return undefined;
-      if (isAbsoluteUrl(value)) return value;
 
-      return trailingSlash(siteUrl.value ?? '/') + (value.startsWith('/') ? value.slice(1) : value);
+      return locationMixin.getMediaPath(safeJSONParse(value)?.path ?? value);
     });
 
     const submitingRef = ref(false);

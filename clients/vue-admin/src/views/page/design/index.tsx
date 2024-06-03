@@ -37,7 +37,8 @@ import {
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePageApi, PageMetaPresetKeys } from '@/fetch/apis';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
-import { useDesignerMixin, useFormilyMixin } from '@/mixins';
+import { useDesignerMixin, useFormilyMixin, useLocationMixin } from '@/mixins';
+import { safeJSONParse } from '@/utils';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
 import { MediaList } from '../../media/components';
 import { DesignLayout, HtmlEditor } from '../../post/components';
@@ -120,6 +121,7 @@ export default defineComponent({
     const configProvider = useConfigProvider();
     const userManager = useUserManager();
     const designerMixin = useDesignerMixin();
+    const locationMixin = useLocationMixin();
     const homeUrl = useOptions(OptionPresetKeys.Home);
     const templateApi = useTemplateApi();
     const pageApi = usePageApi();
@@ -168,9 +170,14 @@ export default defineComponent({
     const cachedPageData = ref<typeof pageData>();
     const cacheContentData: Record<string, string> = {};
 
-    const featureImage = reactive({
-      modalVisible: false,
-      selected: '',
+    const featureImageModalVisible = ref(false);
+    const featureImageDisplaySrc = computed(() => {
+      let path: string;
+
+      if (pageData.featureImage && (path = safeJSONParse(pageData.featureImage)?.thumbnail ?? pageData.featureImage)) {
+        return locationMixin.getMediaPath(path);
+      }
+      return null;
     });
 
     // fixed link
@@ -508,11 +515,11 @@ export default defineComponent({
                   )}
                   {settingsDisplayRef.value.includes(Settings.FeatureImage) && (
                     <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>
-                      <div class={classes.featureImageSelector} onClick={() => (featureImage.modalVisible = true)}>
+                      <div class={classes.featureImageSelector} onClick={() => (featureImageModalVisible.value = true)}>
                         {pageData.featureImage ? (
                           <div class={classes.featureImageCover}>
                             <img
-                              src={pageData.featureImage}
+                              src={featureImageDisplaySrc.value}
                               alt="feature-image"
                               style="object-fit: contain; width: 100%; max-height: 120px;"
                             />
@@ -539,21 +546,26 @@ export default defineComponent({
                       </p>
                       <Modal
                         title={i18n.tv('page_templates.feature_image_modal.title', '选择特色图片')}
-                        visible={featureImage.modalVisible}
+                        visible={featureImageModalVisible.value}
                         width={932}
                         footer={null}
-                        onCancel={() => (featureImage.modalVisible = false)}
+                        onCancel={() => (featureImageModalVisible.value = false)}
                       >
                         <MediaList
                           selectable
+                          selectConfirm={false}
                           accept="image/png,image/jpg"
                           size="small"
                           pageSize={9}
                           showSizeChanger={false}
                           objectPrefixKey="templates/page_"
-                          onSelect={(path) => {
-                            pageData.featureImage = path;
-                            featureImage.modalVisible = false;
+                          onSelect={(path, media) => {
+                            pageData.featureImage = JSON.stringify({
+                              id: media.id,
+                              path: media.path,
+                              thumbnail: media.thumbnail?.path,
+                            });
+                            featureImageModalVisible.value = false;
                           }}
                         />
                       </Modal>

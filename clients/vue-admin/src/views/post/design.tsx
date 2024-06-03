@@ -27,8 +27,9 @@ import {
 } from '@ace-pomelo/shared-client';
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
-import { useDesignerMixin } from '@/mixins';
 import { useI18n, useUserManager, useOptions, useDeviceType } from '@/hooks';
+import { useDesignerMixin, useLocationMixin } from '@/mixins';
+import { safeJSONParse } from '@/utils';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
 import { MediaList } from '../media/components';
 import { DesignLayout, DocumentEditor } from './components';
@@ -82,6 +83,7 @@ export default defineComponent({
     const homeUrl = useOptions(OptionPresetKeys.Home);
     const deviceType = useDeviceType();
     const designerMixin = useDesignerMixin();
+    const locationMixin = useLocationMixin();
     const templateApi = useTemplateApi();
     const postApi = usePostApi();
 
@@ -126,9 +128,14 @@ export default defineComponent({
     const cachedPostData = ref<typeof postData>();
     const cacheContentData: Record<string, string> = {};
 
-    const featureImage = reactive({
-      modalVisible: false,
-      selected: '',
+    const featureImageModalVisible = ref(false);
+    const featureImageDisplaySrc = computed(() => {
+      let path: string;
+
+      if (postData.featureImage && (path = safeJSONParse(postData.featureImage)?.thumbnail ?? postData.featureImage)) {
+        return locationMixin.getMediaPath(path);
+      }
+      return null;
     });
 
     // fixed link
@@ -477,11 +484,11 @@ export default defineComponent({
                   )}
                   {settingsDisplayRef.value.includes(Settings.FeatureImage) && (
                     <Collapse.Panel header={i18n.tv('page_templates.feature_image_label', '特色图片')}>
-                      <div class={classes.featureImageSelector} onClick={() => (featureImage.modalVisible = true)}>
+                      <div class={classes.featureImageSelector} onClick={() => (featureImageModalVisible.value = true)}>
                         {postData.featureImage ? (
                           <div class={classes.featureImageCover}>
                             <img
-                              src={postData.featureImage}
+                              src={featureImageDisplaySrc.value}
                               alt="feature-image"
                               style="object-fit: contain; width: 100%; max-height: 120px;"
                             />
@@ -508,21 +515,26 @@ export default defineComponent({
                       </p>
                       <Modal
                         title={i18n.tv('page_templates.feature_image_modal.title', '选择特色图片')}
-                        visible={featureImage.modalVisible}
+                        visible={featureImageModalVisible.value}
                         width={932}
                         footer={null}
-                        onCancel={() => (featureImage.modalVisible = false)}
+                        onCancel={() => (featureImageModalVisible.value = false)}
                       >
                         <MediaList
                           selectable
+                          selectConfirm={false}
                           accept="image/png,image/jpg"
                           size="small"
                           pageSize={9}
                           showSizeChanger={false}
                           objectPrefixKey="templates/post_"
-                          onSelect={(path) => {
-                            postData.featureImage = path;
-                            featureImage.modalVisible = false;
+                          onSelect={(path, media) => {
+                            postData.featureImage = JSON.stringify({
+                              id: media.id,
+                              path: media.path,
+                              thumbnail: media.thumbnail?.path,
+                            });
+                            featureImageModalVisible.value = false;
                           }}
                         />
                       </Modal>

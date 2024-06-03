@@ -158,8 +158,8 @@ export default defineComponent({
 
     const renderError = ref<false | string>(false);
     onErrorCaptured((err, vm, info) => {
-      warn(process.env.NODE_ENV === 'production', info || err.message, vm);
-      renderError.value = info || err.message;
+      warn(process.env.NODE_ENV === 'production', err, vm, info);
+      renderError.value = err.message || info;
       return false;
     });
 
