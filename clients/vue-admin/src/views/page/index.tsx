@@ -230,7 +230,7 @@ export default defineComponent({
                     class="danger--text"
                     onClick={() =>
                       templateMixin.handleDelete(record).then((result) => {
-                        if (result) {
+                        if (result !== false) {
                           pageTemplates.queryStatusCounts = true; // 更新状态数量
                           pageTemplates.querySelfCounts = true; // 更新我的数量
                           refreshTable();
@@ -255,7 +255,7 @@ export default defineComponent({
                   href="javascript:;"
                   onClick={() =>
                     templateMixin.handleRestore(record).then((result) => {
-                      if (result) {
+                      if (result !== false) {
                         pageTemplates.queryStatusCounts = true; // 更新状态数量
                         pageTemplates.querySelfCounts = true; // 更新我的数量
                         refreshTable();
@@ -274,7 +274,7 @@ export default defineComponent({
                   cancelText="No"
                   onConfirm={() =>
                     templateMixin.handleDelete(record).then((result) => {
-                      if (result) {
+                      if (result !== false) {
                         pageTemplates.queryStatusCounts = true; // 更新状态数量
                         pageTemplates.querySelfCounts = true; // 更新我的数量
                         refreshTable();
@@ -381,7 +381,7 @@ export default defineComponent({
           bulkApplying={templateMixin.bulkApplying.value}
           onBulkApply={(action: BulkActions) =>
             templateMixin.handleBulkApply(action, pageTemplates.selectedRowKeys).then((result) => {
-              if (result) {
+              if (result !== false) {
                 pageTemplates.selectedRowKeys = []; // 选中的key清除
                 pageTemplates.queryStatusCounts = true; // 更新状态数量
                 pageTemplates.querySelfCounts = true; // 更新我的数量
