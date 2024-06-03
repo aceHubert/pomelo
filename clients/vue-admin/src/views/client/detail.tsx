@@ -1034,7 +1034,7 @@ export default Form.create({})(
                       <div class={classes.logoImageCover}>
                         <img
                           src={props.form.getFieldValue('logoUri')}
-                          alt="feature-image"
+                          alt="logo-uri"
                           style="object-fit: contain; width: 100%; max-height: 120px;"
                         />
                         <Space class={classes.logoImageCoverActions}>

@@ -2,10 +2,11 @@ import moment from 'moment';
 import hljs from 'highlight.js/lib/core';
 import Lazyload from 'lazyload';
 import { defineComponent, computed, onMounted } from '@vue/composition-api';
-import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
-import { OptionPresetKeys, TemplatePageType } from '@ace-pomelo/shared-client';
-import { useI18n, useOptions } from '@/hooks';
+import { TemplatePageType } from '@ace-pomelo/shared-client';
+import { useI18n } from '@/hooks';
+import { useLocationMixin } from '@/mixins';
 import { PostMetaPresetKeys } from '@/fetch/apis';
+import { safeJSONParse } from '@/utils';
 import classes from './mobile.module.less';
 
 // Types
@@ -38,14 +39,13 @@ export default defineComponent({
   },
   setup(props: MobilePostProps) {
     const i18n = useI18n();
-    const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
+    const locationMixin = useLocationMixin();
 
     const featureImage = computed(() => {
       const value = props.metas[PostMetaPresetKeys.FeatureImage];
       if (!value) return undefined;
-      if (isAbsoluteUrl(value)) return value;
 
-      return trailingSlash(siteUrl.value ?? '/') + (value.startsWith('/') ? value.slice(1) : value);
+      return locationMixin.getMediaPath(safeJSONParse(value)?.path ?? value);
     });
 
     const template = computed(() => {
