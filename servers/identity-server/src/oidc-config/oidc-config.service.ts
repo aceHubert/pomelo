@@ -1,4 +1,6 @@
 import * as url from 'url';
+import wildcard from 'wildcard';
+import psl from 'psl';
 import { get, omitBy, isNil } from 'lodash';
 import {
   Provider,
@@ -62,6 +64,25 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           };
         }
 
+        // Wildcard redirect_uri support
+        // https://github.com/panva/node-oidc-provider/blob/main/recipes/redirect_uri_wildcards.md
+        const { redirectUriAllowed } = provider.Client.prototype;
+
+        const hasWildcardHost = (redirectUri: string) => {
+          const { hostname } = new URL(redirectUri);
+          return hostname.includes('*');
+        };
+
+        const wildcardMatches = (redirectUri: string, wildcardUri: string) => !!wildcard(wildcardUri, redirectUri);
+
+        provider.Client.prototype.redirectUriAllowed = function wildcardRedirectUriAllowed(redirectUri) {
+          const match = redirectUriAllowed.call(this, redirectUri);
+          if (match) return match;
+
+          const wildcardUris = this.redirectUris?.filter(hasWildcardHost) || [];
+          return wildcardUris.some(wildcardMatches.bind(undefined, redirectUri));
+        };
+
         // Skip redirecting invalid request error to client
         // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_redirect.md
         Object.defineProperty(errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
@@ -71,7 +92,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         const constantEquals = require('oidc-provider/lib/helpers/constant_equals');
         provider.Client.prototype.compareClientSecret = function compareClientSecret(actual: string) {
           actual = sha256(actual, { enabledHmac: true }).toString();
-          console.log(this.metadata()['client_secrets']);
           // TODO: multiple client secrets support
 
           return constantEquals(this.clientSecret, actual, 1000);
@@ -575,6 +595,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       },
       extraClientMetadata: {
         properties: [
+          'redirect_uris',
           'client_secrets',
           'id_token_ttl',
           'access_token_format',
@@ -593,6 +614,38 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         validator: (ctx, key, value) => {
           if (value) {
             switch (key) {
+              case 'redirect_uris':
+                for (const redirectUri of value as string[]) {
+                  if (redirectUri.includes('*')) {
+                    const { hostname, href } = new URL(redirectUri);
+
+                    if (href.split('*').length !== 2) {
+                      throw new errors.InvalidClientMetadata(
+                        'redirect_uris with a wildcard may only contain a single one',
+                      );
+                    }
+
+                    if (!hostname.includes('*')) {
+                      throw new errors.InvalidClientMetadata('redirect_uris may only have a wildcard in the hostname');
+                    }
+
+                    const test = hostname.replace('*', 'test');
+
+                    // checks that the wildcard is for a full subdomain e.g. *.panva.cz, not *suffix.panva.cz
+                    if (!wildcard(hostname, test)) {
+                      throw new errors.InvalidClientMetadata(
+                        'redirect_uris with a wildcard must only match the whole subdomain',
+                      );
+                    }
+
+                    if (!psl.get(hostname.split('*.')[1])) {
+                      throw new errors.InvalidClientMetadata(
+                        'redirect_uris with a wildcard must not match an eTLD+1 of a known public suffix domain',
+                      );
+                    }
+                  }
+                }
+                break;
               case 'client_secrets':
                 if (!Array.isArray(value)) {
                   throw new errors.InvalidClientMetadata(`invalid ${key} value, must be an array of strings!`);
