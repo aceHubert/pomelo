@@ -48,7 +48,7 @@
       var msgEl = document.getElementById('msg');
       var homeBtn = document.getElementById('home');
       var redirect = function () {
-        var url = localStorage.getItem('oidc.redirect') || './';
+        var url = localStorage.getItem('po-web/oidc.redirect') || './';
         if (history.replaceState) {
           history.replaceState({}, document.title, url);
           history.go(0);

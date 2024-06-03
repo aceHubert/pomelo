@@ -1,4 +1,5 @@
 import * as Oidc from 'oidc-client-ts';
+import { trailingSlash } from '@ace-util/core';
 import { Modal } from '@/components';
 import { i18n } from '../i18n';
 
@@ -9,9 +10,11 @@ export type SigninSilentArgs = Oidc.SigninSilentArgs;
 export type SigninArgs = Oidc.SigninRedirectArgs & { noInteractive?: boolean };
 export type SignoutArgs = Oidc.SignoutRedirectArgs;
 
-export const RedirectKey = 'oidc.redirect';
-export const LoginNameKey = 'oidc.login_name';
-export const IgnoreRoutes = ['/signin', '/signout', '/internal-access-only'];
+export const RedirectKey = 'po-admin/oidc.redirect';
+export const LoginNameKey = 'po-admin/oidc.login_name';
+export const IgnoreRoutes = ['/signin', '/signout', '/internal-access-only'].map(
+  (path) => `${trailingSlash(process.env.BASE_URL ?? '/')}${path.substring(1)}`,
+);
 
 const innerSigninSilent = Oidc.UserManager.prototype.signinSilent;
 Object.defineProperties(Oidc.UserManager.prototype, {
@@ -23,6 +26,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
         localStorage.setItem(RedirectKey, location.href);
       } else {
         // remove cached redirect url
+        debugger;
         localStorage.removeItem(RedirectKey);
       }
     },
