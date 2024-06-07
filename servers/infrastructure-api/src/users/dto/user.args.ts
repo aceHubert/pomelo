@@ -17,7 +17,7 @@ export class PagedUserArgs extends PagedUserArgsValidator {
   status?: UserStatus;
 
   /**
-   * User Role, set null to filter none role users
+   * User Role
    */
   @Field((type) => UserRole)
   capabilities?: UserRole;

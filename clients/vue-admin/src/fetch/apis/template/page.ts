@@ -59,7 +59,10 @@ export const usePageApi = defineRegistApi('template_page', {
             id
             name
             title
-            author
+            author {
+              id
+              displayName
+            }
             status
             commentStatus
             commentCount
@@ -68,11 +71,11 @@ export const usePageApi = defineRegistApi('template_page', {
           }
           total
         }
-        statusCounts: templateCountByStatus(type: "Page") @include(if: $queryStatusCounts) {
+        statusCounts: templateCountByStatus(type: "page") @include(if: $queryStatusCounts) {
           status
           count
         }
-        selfCounts: templateCountBySelf(type: "Page", includeTrash: false) @include(if: $querySelfCounts)
+        selfCounts: templateCountBySelf(type: "page", includeTrash: false) @include(if: $querySelfCounts)
       }
     ` as TypedQueryDocumentNode<
       {
@@ -90,7 +93,10 @@ export const usePageApi = defineRegistApi('template_page', {
           name
           title
           content
-          author
+          author {
+            id
+            displayName
+          }
           status
           commentStatus
           commentCount
@@ -112,7 +118,10 @@ export const usePageApi = defineRegistApi('template_page', {
           name
           title
           content
-          author
+          author {
+            id
+            displayName
+          }
           status
           commentStatus
           commentCount

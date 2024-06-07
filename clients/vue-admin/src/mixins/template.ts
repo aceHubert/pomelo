@@ -95,7 +95,7 @@ export const useTemplateMixin = () => {
     ];
 
     // 我的数量大于0并且不等于所有的数量里显示
-    if (selfCount.value > 0 && selfCount.value - trushCount !== allCount) {
+    if (selfCount.value > 0 && (trushCount === 0 || selfCount.value - trushCount !== allCount)) {
       options.splice(1, 0, {
         value: { self: '' },
         label: i18n.tv('page_templates.status_options.self', '我的') as string,

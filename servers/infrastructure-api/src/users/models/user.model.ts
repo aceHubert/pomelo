@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, PickType } from '@nestjs/graphql';
 import { UserModel, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
@@ -29,12 +29,12 @@ export class User implements UserModel {
   /**
    * Mobile
    */
-  mobile!: string;
+  mobile?: string;
 
   /**
    * Email
    */
-  email!: string;
+  email?: string;
 
   /**
    * Client url
@@ -57,6 +57,12 @@ export class User implements UserModel {
    */
   createdAt!: Date;
 }
+
+/**
+ * 非敏感用户信息
+ */
+@ObjectType({ description: 'User simple model' })
+export class SimpleUser extends PickType(User, ['id', 'loginName', 'niceName', 'displayName', 'url'] as const) {}
 
 @ObjectType({ description: 'Paged user model' })
 export class PagedUser extends PagedResponse(User) {}

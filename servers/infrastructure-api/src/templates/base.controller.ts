@@ -368,10 +368,10 @@ export class TemplateController extends createMetaController(
   }
 
   /**
-   * Get paged template model
+   * Get paged templates
    */
   @Get()
-  @Anonymous()
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged template models',
     type: () => createResponseSuccessType({ data: PagedTemplateResp }, 'PagedTemplateSuccessResp'),

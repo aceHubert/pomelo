@@ -18,6 +18,7 @@ import {
 import { expose } from 'antdv-layout-pro/shared';
 import {
   OptionPresetKeys,
+  UserCapability,
   TemplateStatus,
   TemplatePageType,
   TemplateCommentStatus,
@@ -28,7 +29,7 @@ import {
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
 import { useI18n, useUserManager, useOptions, useDeviceType } from '@/hooks';
-import { useDesignerMixin, useLocationMixin } from '@/mixins';
+import { useUserMixin, useDesignerMixin, useLocationMixin } from '@/mixins';
 import { safeJSONParse } from '@/utils';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
 import { MediaList } from '../media/components';
@@ -81,6 +82,7 @@ export default defineComponent({
     const i18n = useI18n();
     const userManager = useUserManager();
     const homeUrl = useOptions(OptionPresetKeys.Home);
+    const userMixin = useUserMixin();
     const deviceType = useDeviceType();
     const designerMixin = useDesignerMixin();
     const locationMixin = useLocationMixin();
@@ -158,8 +160,11 @@ export default defineComponent({
     });
 
     const actionCapability = reactive<Required<ActionCapability>>({
-      operate: false,
-      publish: false,
+      canEdit: false,
+      canEditPublished: false,
+      canDelete: false,
+      canDeletePublished: false,
+      canPublish: false,
     });
 
     const isSelfContentRef = ref(false);
@@ -208,7 +213,7 @@ export default defineComponent({
             return post;
           } else {
             message.error('内容不存在', () => {
-              router.replace({ name: ' posts' });
+              router.replace({ name: 'posts' });
             });
             return;
           }
@@ -264,18 +269,35 @@ export default defineComponent({
         actionStatus.changed = false;
         actionStatus.disabledActions = false;
 
-        // TODO: 设置条件管理员权限
-        if (user?.profile.role === 'administrator') {
-          actionCapability.operate = true;
-          actionCapability.publish = true;
-        } else {
-          // 只能操作自己的
-          if (user?.profile.sub === String(post.author)) {
-            actionCapability.operate = true;
+        let hasPermission = (_: UserCapability) => false;
+        if (user?.profile.role) {
+          const role = userMixin.getRole(user.profile.role);
+          hasPermission = role.hasPermission.bind(undefined);
+        }
+
+        actionCapability.canEdit = hasPermission(UserCapability.EditTemplates);
+        actionCapability.canEditPublished = hasPermission(UserCapability.EditPublishedTemplates);
+        actionCapability.canDelete = hasPermission(UserCapability.DeleteTemplates);
+        actionCapability.canDeletePublished = hasPermission(UserCapability.DeletePublishedTemplates);
+        actionCapability.canPublish = hasPermission(UserCapability.PublishTemplates);
+
+        if (user?.profile.sub !== post.author?.id) {
+          actionCapability.canEdit = actionCapability.canEdit && hasPermission(UserCapability.EditOthersTemplates);
+
+          if (status === TemplateStatus.Private) {
+            actionCapability.canDelete = actionCapability.canEdit && hasPermission(UserCapability.EditPrivateTemplates);
+          }
+
+          actionCapability.canDelete =
+            actionCapability.canDelete && hasPermission(UserCapability.DeleteOthersTemplates);
+
+          if (actionCapability.canDelete && status === TemplateStatus.Private) {
+            actionCapability.canDelete =
+              actionCapability.canDelete && hasPermission(UserCapability.DeletePrivateTemplates);
           }
         }
 
-        isSelfContentRef.value = user?.profile.sub === String(post.author);
+        isSelfContentRef.value = user?.profile.sub === String(post.author?.id);
 
         // cache content when schema framework changed
         watch(schemaFrameworkRef, (value, old) => {

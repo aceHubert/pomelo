@@ -18,7 +18,7 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { OptionDataSource, OptionPresetKeys, UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { Authorized } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
@@ -57,7 +57,11 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     return [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
   },
 }) {
-  constructor(protected readonly moduleRef: ModuleRef, private readonly userDataSource: UserDataSource) {
+  constructor(
+    protected readonly moduleRef: ModuleRef,
+    private readonly optionDataSource: OptionDataSource,
+    private readonly userDataSource: UserDataSource,
+  ) {
     super(moduleRef);
   }
 
@@ -143,9 +147,20 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     type: () => createResponseSuccessType({ data: UserModelResp }, 'UserModelSuccessResp'),
   })
   async create(@Body() input: NewUserDto, @User() requestUser: RequestUser) {
+    let capabilities = input.capabilities;
+    if (!capabilities) {
+      capabilities = await this.optionDataSource.getValue(OptionPresetKeys.DefaultRole);
+    }
+
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
       await this.userDataSource.create(
-        { ...input, loginPwd: md5(input.loginPwd).toString(), niceName: input.loginName, displayName: input.loginName },
+        {
+          ...input,
+          loginPwd: md5(input.loginPwd).toString(),
+          niceName: input.loginName,
+          displayName: input.loginName,
+          capabilities,
+        },
         Number(requestUser.sub),
       );
     return this.success({

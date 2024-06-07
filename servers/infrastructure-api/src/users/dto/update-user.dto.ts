@@ -1,4 +1,4 @@
-import { ValidateIf, IsEnum, IsOptional, IsString, IsLocale } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsLocale } from 'class-validator';
 import { ApiProperty, ApiHideProperty, PartialType, PickType } from '@nestjs/swagger';
 import { UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { UserRole } from '../enums/user-role.enum';
@@ -35,18 +35,16 @@ export class UpdateUserDto extends PartialType(
   nickName?: string;
 
   /**
-   * Capabilities, set null to forbidden all capabilities
+   * User Role
    */
   @IsOptional()
-  @ValidateIf((o) => o.capabilities !== null)
   @IsEnum(UserRole)
-  capabilities?: UserRole | null;
+  capabilities?: UserRole;
 
   /**
-   * Locale, set null to reset as using site default locale
+   * Locale
    */
   @IsOptional()
-  @ValidateIf((o) => o.locale !== null)
   @IsLocale()
-  locale?: string | null;
+  locale?: string;
 }

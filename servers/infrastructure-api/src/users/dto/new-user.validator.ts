@@ -25,23 +25,23 @@ export abstract class NewUserValidator implements Omit<NewUserInput, 'niceName' 
 
   @IsOptional()
   @IsString()
-  abstract firstName?: string | undefined;
+  abstract firstName?: string;
 
   @IsOptional()
   @IsString()
-  abstract lastName?: string | undefined;
+  abstract lastName?: string;
 
   @IsOptional()
   @IsString()
-  abstract avator?: string | undefined;
+  abstract avator?: string;
 
   @IsOptional()
   @IsString()
-  abstract description?: string | undefined;
+  abstract description?: string;
 
   @IsOptional()
   @IsString()
-  abstract adminColor?: string | undefined;
+  abstract adminColor?: string;
 
   @IsOptional()
   @IsEnum(UserRole)
@@ -49,7 +49,7 @@ export abstract class NewUserValidator implements Omit<NewUserInput, 'niceName' 
 
   @IsOptional()
   @IsString()
-  abstract locale?: string | undefined;
+  abstract locale?: string;
 
   @IsDefined()
   @IsString()

@@ -9,6 +9,7 @@ import {
   OptionDataSource,
   OptionPresetKeys,
   TemplateDataSource,
+  UserDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
   TemplateStatus,
@@ -18,10 +19,31 @@ import {
 import { TemplateAction, PageTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
+import { createAuthorFieldResolver } from './base.resolver';
 import { NewPageTemplateInput } from './dto/new-template.input';
 import { UpdatePageTemplateInput } from './dto/update-template.input';
 import { PagedPageTemplateArgs, PageTemplateOptionArgs } from './dto/template.args';
 import { PageTemplate, PagedPageTemplate, PageTemplateOption, PagedPageTemplateItem } from './models/page.model';
+
+// #region Author Resolver
+
+@Authorized()
+@Resolver(() => PagedPageTemplateItem)
+export class PagedPageTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedPageTemplateItem, true) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+@Authorized()
+@Resolver(() => PageTemplate)
+export class PageTemplateAuthorResolver extends createAuthorFieldResolver(PageTemplate) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+// #endregion
 
 @Authorized()
 @Resolver(() => PagedPageTemplateItem)
@@ -117,7 +139,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
         requestUser ? Number(requestUser.sub) : undefined,
       );
     } else {
-      return this.optionDataSource.getOptionValue(OptionPresetKeys.PageOnFront).then((id) => {
+      return this.optionDataSource.getValue(OptionPresetKeys.PageOnFront).then((id) => {
         if (id) {
           return this.templateDataSource.get(
             Number(id),
@@ -131,7 +153,6 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     }
   }
 
-  @Anonymous()
   @Query((returns) => PagedPageTemplate, { description: 'Get paged page templates.' })
   pageTemplates(
     @Args() args: PagedPageTemplateArgs,

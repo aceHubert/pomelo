@@ -5,11 +5,11 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
 import { Select, Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { OptionPresetKeys, TemplateStatus } from '@ace-pomelo/shared-client';
+import { OptionPresetKeys, UserCapability, TemplateStatus } from '@ace-pomelo/shared-client';
 import { message } from '@/components';
 import { usePageApi, PresetTemplateType } from '@/fetch/apis';
 import { useI18n, useOptions, useUserManager, useDeviceType } from '@/hooks';
-import { useTemplateMixin, useLocationMixin } from '@/mixins';
+import { useUserMixin, useTemplateMixin, useLocationMixin } from '@/mixins';
 import classes from './index.module.less';
 
 // typed
@@ -34,15 +34,15 @@ export default defineComponent({
   setup(_props, { refs }) {
     const route = useRoute();
     const i18n = useI18n();
+    const userManager = useUserManager();
     const deviceType = useDeviceType();
+    const homeUrl = useOptions(OptionPresetKeys.Home);
+    const userMixin = useUserMixin();
     const locationMixin = useLocationMixin();
     const templateMixin = useTemplateMixin();
-    const userManager = useUserManager();
-    const homeUrl = useOptions(OptionPresetKeys.Home);
     const pageApi = usePageApi();
 
     const currentUserId = ref<string>();
-    const currentUserRole = ref<string>();
 
     const pageTemplates = reactive({
       loading: false,
@@ -62,12 +62,16 @@ export default defineComponent({
     });
 
     // 加载数据
+    let hasPermission = (_: UserCapability) => false;
     const loadData: DataSourceFn = async ({ page, size }) => {
       // 加载数据前确保用户 id 已存在
       if (!currentUserId.value) {
         const user = await userManager.getUser();
         currentUserId.value = user?.profile.sub;
-        currentUserRole.value = user?.profile.role;
+        if (user?.profile.role) {
+          const role = userMixin.getRole(user.profile.role);
+          hasPermission = role.hasPermission.bind(undefined);
+        }
       }
 
       return pageApi
@@ -95,25 +99,35 @@ export default defineComponent({
             rows: pages.rows.map((item) => {
               // 设置操作权限
               const actionCapability: Required<ActionCapability> = {
-                operate: false,
-                publish: false,
+                canEdit: hasPermission(UserCapability.EditTemplates),
+                canEditPublished: hasPermission(UserCapability.EditPublishedTemplates),
+                canDelete: hasPermission(UserCapability.DeleteTemplates),
+                canDeletePublished: hasPermission(UserCapability.DeletePublishedTemplates),
+                canPublish: hasPermission(UserCapability.PublishTemplates),
               };
 
-              // TODO: 设置条件管理员权限
-              if (currentUserRole.value === 'administrator') {
-                actionCapability.operate = true;
-                actionCapability.publish = true;
-              } else {
-                // 只能操作自己的
-                if (currentUserId.value === item.author) {
-                  actionCapability.operate = true;
+              if (currentUserId.value !== item.author?.id) {
+                actionCapability.canEdit =
+                  actionCapability.canEdit && hasPermission(UserCapability.EditOthersTemplates);
+
+                if (item.status === TemplateStatus.Private) {
+                  actionCapability.canDelete =
+                    actionCapability.canEdit && hasPermission(UserCapability.EditPrivateTemplates);
+                }
+
+                actionCapability.canDelete =
+                  actionCapability.canDelete && hasPermission(UserCapability.DeleteOthersTemplates);
+
+                if (item.status === TemplateStatus.Private) {
+                  actionCapability.canDelete =
+                    actionCapability.canDelete && hasPermission(UserCapability.DeletePrivateTemplates);
                 }
               }
 
               return {
                 ...item,
                 actionCapability,
-                isSelfContent: currentUserId.value === item.author,
+                isSelfContent: currentUserId.value === String(item.author?.id),
               };
             }),
             total: pages.total,
@@ -167,7 +181,7 @@ export default defineComponent({
               <span slot="label" class="text--secondary">
                 {i18n.tv('page_templates.author_label', '作者')}
               </span>
-              {`-`}
+              {record.author?.displayName ?? '-'}
             </Descriptions.Item>
             <Descriptions.Item>
               <span slot="label" class="text--secondary">
@@ -200,79 +214,39 @@ export default defineComponent({
           restoring?: boolean;
         },
       ) => {
-        return record.actionCapability.operate
-          ? record.status !== TemplateStatus.Trash
-            ? [
-                (record.isSelfContent ||
-                  (record.status === TemplateStatus.Pending &&
-                    record.actionCapability.publish &&
-                    !record.isSelfContent)) && (
-                  <router-link
-                    to={{ name: 'page-edit', params: { id: record.id } }}
-                    class={
-                      record.status === TemplateStatus.Pending &&
-                      record.actionCapability.publish &&
-                      !record.isSelfContent
-                        ? 'warning--text'
-                        : ''
-                    }
-                  >
-                    {record.status === TemplateStatus.Pending &&
-                    record.actionCapability.publish &&
-                    !record.isSelfContent
-                      ? i18n.tv('page_templates.btn_text.review', '审核')
-                      : i18n.tv('common.btn_text.edit', '编辑')}
+        return record.status !== TemplateStatus.Trash
+          ? [
+              record.status === TemplateStatus.Pending &&
+              !record.isSelfContent &&
+              record.actionCapability.canPublish ? (
+                <router-link to={{ name: 'page-edit', params: { id: record.id } }} class="warning--text">
+                  {i18n.tv('page_templates.btn_text.review', '审核')}
+                </router-link>
+              ) : record.actionCapability.canEdit ? (
+                record.status === TemplateStatus.Pending ? (
+                  <router-link to={{ name: 'page-edit', params: { id: record.id } }}>
+                    {i18n.tv('common.btn_text.edit', '编辑')}
                   </router-link>
-                ),
-                record.isSelfContent && (
-                  <a
-                    href="javascript:;"
-                    class="danger--text"
-                    onClick={() =>
-                      templateMixin.handleDelete(record).then((result) => {
-                        if (result !== false) {
-                          pageTemplates.queryStatusCounts = true; // 更新状态数量
-                          pageTemplates.querySelfCounts = true; // 更新我的数量
-                          refreshTable();
-                        }
-                      })
-                    }
-                  >
-                    {record.deleting && <Spin />}
-                    {record.deleting
-                      ? i18n.tv('common.btn_text.in_operation', '操作中')
-                      : i18n.tv('page_templates.btn_text.move_to_trush', '放入回收站')}
-                  </a>
-                ),
-                <a href={getViewUrl(record)} class="info--text" target="preview">
-                  {record.status === TemplateStatus.Publish
-                    ? i18n.tv('common.btn_text.view', '查看')
-                    : i18n.tv('common.btn_text.preview', '预览')}
-                </a>,
-              ]
-            : record.isSelfContent && [
+                ) : record.status === TemplateStatus.Publish || record.status === TemplateStatus.Future ? (
+                  record.actionCapability.canEditPublished ? (
+                    <router-link to={{ name: 'page-edit', params: { id: record.id } }}>
+                      {i18n.tv('common.btn_text.edit', '编辑')}
+                    </router-link>
+                  ) : null
+                ) : (
+                  <router-link to={{ name: 'page-edit', params: { id: record.id } }}>
+                    {i18n.tv('common.btn_text.edit', '编辑')}
+                  </router-link>
+                )
+              ) : null,
+              ((record.status === TemplateStatus.Publish || record.status === TemplateStatus.Future) &&
+                record.actionCapability.canDeletePublished) ||
+              (!(record.status === TemplateStatus.Publish || record.status === TemplateStatus.Future) &&
+                record.actionCapability.canDelete) ? (
                 <a
                   href="javascript:;"
+                  class="danger--text"
                   onClick={() =>
-                    templateMixin.handleRestore(record).then((result) => {
-                      if (result !== false) {
-                        pageTemplates.queryStatusCounts = true; // 更新状态数量
-                        pageTemplates.querySelfCounts = true; // 更新我的数量
-                        refreshTable();
-                      }
-                    })
-                  }
-                >
-                  {record.restoring && <Spin />}
-                  {record.restoring
-                    ? i18n.tv('common.btn_text.in_operation', '操作中')
-                    : i18n.tv('page_templates.btn_text.restore', '重置')}
-                </a>,
-                <Popconfirm
-                  title={i18n.tv('page_templates.pages.tips.delete_confirm', '确认删除这条页面配置？')}
-                  okText="Ok"
-                  cancelText="No"
-                  onConfirm={() =>
                     templateMixin.handleDelete(record).then((result) => {
                       if (result !== false) {
                         pageTemplates.queryStatusCounts = true; // 更新状态数量
@@ -282,15 +256,58 @@ export default defineComponent({
                     })
                   }
                 >
-                  <a href="javascript:;" class="error--text">
-                    {record.deleting && <Spin />}
-                    {record.deleting
-                      ? i18n.tv('common.btn_text.in_operation', '操作中')
-                      : i18n.tv('common.btn_text.delete', '删除')}
-                  </a>
-                </Popconfirm>,
-              ]
-          : [];
+                  {record.deleting && <Spin />}
+                  {record.deleting
+                    ? i18n.tv('common.btn_text.in_operation', '操作中')
+                    : i18n.tv('page_templates.btn_text.move_to_trush', '放入回收站')}
+                </a>
+              ) : null,
+              <a href={getViewUrl(record)} class="info--text" target="preview">
+                {record.status === TemplateStatus.Publish
+                  ? i18n.tv('common.btn_text.view', '查看')
+                  : i18n.tv('common.btn_text.preview', '预览')}
+              </a>,
+            ]
+          : [
+              <a
+                href="javascript:;"
+                onClick={() =>
+                  templateMixin.handleRestore(record).then((result) => {
+                    if (result !== false) {
+                      pageTemplates.queryStatusCounts = true; // 更新状态数量
+                      pageTemplates.querySelfCounts = true; // 更新我的数量
+                      refreshTable();
+                    }
+                  })
+                }
+              >
+                {record.restoring && <Spin />}
+                {record.restoring
+                  ? i18n.tv('common.btn_text.in_operation', '操作中')
+                  : i18n.tv('page_templates.btn_text.restore', '重置')}
+              </a>,
+              <Popconfirm
+                title={i18n.tv('page_templates.pages.tips.delete_confirm', '确认删除这条内容配置？')}
+                okText="Ok"
+                cancelText="No"
+                onConfirm={() =>
+                  templateMixin.handleDelete(record).then((result) => {
+                    if (result !== false) {
+                      pageTemplates.queryStatusCounts = true; // 更新状态数量
+                      pageTemplates.querySelfCounts = true; // 更新我的数量
+                      refreshTable();
+                    }
+                  })
+                }
+              >
+                <a href="javascript:;" class="error--text">
+                  {record.deleting && <Spin />}
+                  {record.deleting
+                    ? i18n.tv('common.btn_text.in_operation', '操作中')
+                    : i18n.tv('common.btn_text.delete', '删除')}
+                </a>
+              </Popconfirm>,
+            ];
       };
       return [
         // { title: 'id', dataIndex: 'id' },
@@ -338,7 +355,7 @@ export default defineComponent({
           title: i18n.tv('page_templates.author_label', '作者'),
           dataIndex: 'author',
           width: 120,
-          customRender: () => `-`,
+          customRender: (_: any, record: PagedPageTemplateItem) => record.author?.displayName ?? '-',
         },
         deviceType.isDesktop && {
           title: i18n.tv('page_templates.comment_label', '评论'),

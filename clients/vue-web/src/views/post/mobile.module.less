@@ -1,3 +1,5 @@
+@import '@ace-pomelo/theme/lib/mixins/index.less';
+
 .container {
   padding-bottom: 50px;
 }
@@ -12,7 +14,7 @@
     background-size: auto 200px;
 
     .title {
-      margin-top: .6em;
+      margin-top: 0.6em;
       margin-bottom: 0;
       font-size: 24px;
     }
@@ -20,6 +22,19 @@
     .subtitle {
       margin-bottom: 0;
       color: var(--text-secondary, @text-color-secondary);
+
+      span + span {
+        padding-left: 12px;
+        position: relative;
+        border-left: none !important;
+
+        &:before {
+          .setLeftLine();
+          left: 6px;
+          top: 3px;
+          bottom: 3px;
+        }
+      }
     }
 
     .cover& {

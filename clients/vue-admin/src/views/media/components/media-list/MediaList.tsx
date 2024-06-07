@@ -7,7 +7,7 @@ import { message, Modal } from '@/components';
 import { useI18n } from '@/hooks';
 import { useResApi } from '@/fetch/apis';
 import FileUnknownSvg from '@/assets/icons/file-unknown-fill.svg';
-import { useUpload } from '@/mixins';
+import { useUploadMixin } from '@/mixins';
 import { formatFileSize } from '../../utils/format';
 import './index.less';
 
@@ -60,7 +60,7 @@ export default defineComponent({
     const currentInstance = getCurrentInstance();
     const configProvider = useConfigProvider();
     const i18n = useI18n();
-    const uploadMixin = useUpload();
+    const uploadMixin = useUploadMixin();
     const resApi = useResApi();
 
     const customizePrefixCls = props.prefixCls;

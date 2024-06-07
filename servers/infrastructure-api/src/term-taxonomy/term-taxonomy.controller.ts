@@ -79,7 +79,7 @@ export class TermTaxonomyController extends createMetaController(
   async getCategoryList(@Query(ParseQueryPipe) query: CategoryTermTaxonomyQueryDto) {
     let excludes: number[] | undefined;
     if (query.includeDefault !== true) {
-      const defaultCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultCategory);
+      const defaultCategoryId = await this.optionDataSource.getValue(OptionPresetKeys.DefaultCategory);
       excludes = [Number(defaultCategoryId)];
     }
     const result = await this.termTaxonomyDataSource.getList(

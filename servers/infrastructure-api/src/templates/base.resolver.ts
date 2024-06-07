@@ -10,6 +10,7 @@ import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   TermTaxonomyDataSource,
+  UserDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
   TermTaxonomyModel,
@@ -20,7 +21,8 @@ import { TemplateAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
-import { TermTaxonomy } from '../term-taxonomy/models/term-taxonomy.model';
+import { TermTaxonomy } from '@/term-taxonomy/models/term-taxonomy.model';
+import { SimpleUser } from '@/users/models/user.model';
 import { NewTemplateInput } from './dto/new-template.input';
 import { NewTemplateMetaInput } from './dto/new-template-meta.input';
 import { UpdateTemplateInput } from './dto/update-template.input';
@@ -36,6 +38,8 @@ import {
   TemplateMonthCount,
   TemplateYearCount,
 } from './models/base.model';
+
+// #region Taxonomy field resolver
 
 /**
  * Taxonomy base field resolver
@@ -143,6 +147,76 @@ export class TemplateCategoryResolver extends createTaxonomyFieldResolver(Templa
     super(termTaxonomyDataSource);
   }
 }
+// #endregion
+
+// #region Author field resolver
+
+/**
+ * 创建 author field resolver
+ * @param resolverType Resolver type
+ * @param useDataLoader use DataLoader
+ */
+export const createAuthorFieldResolver = (
+  resolverType: Function,
+  /** Use "DataLoader", prefer using in paged items */
+  useDataLoader?: boolean,
+) => {
+  @Resolver(() => resolverType, { isAbstract: true })
+  abstract class AuthorResolver extends BaseResolver {
+    private authorDataLoader;
+
+    constructor(protected readonly userDataSource: UserDataSource) {
+      super();
+
+      this.authorDataLoader = new DataLoader(async (keys: Readonly<Array<{ id: number; fields: string[] }>>) => {
+        if (keys.length) {
+          const results = await userDataSource.getList([...new Set(keys.map((key) => key.id))], keys[0].fields);
+          return keys.map(({ id }) => results.find((item) => item.id === id));
+        } else {
+          return Promise.resolve([]);
+        }
+      });
+    }
+
+    @ResolveField('author', (returns) => SimpleUser, {
+      nullable: true,
+      description: 'Author',
+    })
+    getAuthor(
+      @Parent() { author: id }: { author: number },
+      @Fields() fields: ResolveTree,
+    ): Promise<SimpleUser | undefined> {
+      if (useDataLoader) {
+        return this.authorDataLoader.load({
+          id,
+          fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser),
+        });
+      } else {
+        return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
+      }
+    }
+  }
+
+  return AuthorResolver;
+};
+
+@Authorized()
+@Resolver(() => PagedTemplateItem)
+export class PagedTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedTemplateItem, true) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+@Authorized()
+@Resolver(() => Template)
+export class TemplateAuthorResolver extends createAuthorFieldResolver(Template) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+// #endregion
 
 @Authorized()
 @Resolver(() => Template)
@@ -287,7 +361,6 @@ export class TemplateResolver extends createMetaResolver(
     return this.templateDataSource.getCountByYear(type);
   }
 
-  @Anonymous()
   @Query((returns) => PagedTemplate, { description: 'Get paged templates.' })
   templates(
     @Args() args: PagedBaseTemplateArgs,
@@ -401,7 +474,8 @@ export class TemplateResolver extends createMetaResolver(
   }
 
   @RamAuthorized(TemplateAction.BulkUpdateStatus)
-  @Mutation((returns) => Boolean, {
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
     description: `Update the bulk of templates' status (must not be in "trash" status)`,
   })
   async bulkUpdateTemplateStatus(
@@ -413,7 +487,10 @@ export class TemplateResolver extends createMetaResolver(
   }
 
   @RamAuthorized(TemplateAction.Restore)
-  @Mutation((returns) => Boolean, { description: 'Restore template (must be in "trash" status)' })
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Restore template (must be in "trash" status)',
+  })
   async restoreTemplate(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
@@ -422,7 +499,10 @@ export class TemplateResolver extends createMetaResolver(
   }
 
   @RamAuthorized(TemplateAction.BulkRestore)
-  @Mutation((returns) => Boolean, { description: 'Restore the bulk of templates (must be in "trash" status)' })
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
+    description: 'Restore the bulk of templates (must be in "trash" status)',
+  })
   async bulkRestoreTemplate(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
@@ -431,7 +511,8 @@ export class TemplateResolver extends createMetaResolver(
   }
 
   @RamAuthorized(TemplateAction.Delete)
-  @Mutation((returns) => Boolean, {
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
     description: 'Delete template permanently (must be in "trash" status).',
   })
   async deleteTemplate(
@@ -442,7 +523,8 @@ export class TemplateResolver extends createMetaResolver(
   }
 
   @RamAuthorized(TemplateAction.BulkDelete)
-  @Mutation((returns) => Boolean, {
+  @Mutation((returns) => VoidResolver, {
+    nullable: true,
     description: 'Delete the bulk of templates permanently (must be in "trash" status).',
   })
   async bulkDeleteTemplate(

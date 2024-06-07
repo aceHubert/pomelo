@@ -189,9 +189,9 @@ export class MediaService {
       if (this.isImageScaleable(options.mimeType)) {
         const imageScales: ImageScaleModel[] = [];
         // thumbnail
-        const width = await this.optionDataSource.getOptionValue(OptionPresetKeys.ThumbnailSizeWidth);
-        const height = await this.optionDataSource.getOptionValue(OptionPresetKeys.ThumbnailSizeHeight);
-        const crop = await this.optionDataSource.getOptionValue<'0' | '1'>(OptionPresetKeys.ThumbnailCrop);
+        const width = await this.optionDataSource.getValue(OptionPresetKeys.ThumbnailSizeWidth);
+        const height = await this.optionDataSource.getValue(OptionPresetKeys.ThumbnailSizeHeight);
+        const crop = await this.optionDataSource.getValue<'0' | '1'>(OptionPresetKeys.ThumbnailCrop);
         const thumbnail = await this.scaleToThumbnail(
           image,
           (imgOptions) => this.getImageDestWithSuffix(filePath, `${imgOptions.width}x${imgOptions.height}`),
@@ -213,15 +213,15 @@ export class MediaService {
         scaled && imageScales.push({ ...scaled, name: ImageScaleType.Scaled });
 
         // other sizes
-        const mediumWidth = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumSizeWidth))!);
-        const mediumHeight = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumSizeHeight))!);
-        const largeWidth = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.LargeSizeWidth))!);
-        const largeHeight = parseInt((await this.optionDataSource.getOptionValue(OptionPresetKeys.LargeSizeHeight))!);
+        const mediumWidth = parseInt((await this.optionDataSource.getValue(OptionPresetKeys.MediumSizeWidth))!);
+        const mediumHeight = parseInt((await this.optionDataSource.getValue(OptionPresetKeys.MediumSizeHeight))!);
+        const largeWidth = parseInt((await this.optionDataSource.getValue(OptionPresetKeys.LargeSizeWidth))!);
+        const largeHeight = parseInt((await this.optionDataSource.getValue(OptionPresetKeys.LargeSizeHeight))!);
         const mediumLargeWidth = parseInt(
-          (await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumLargeSizeWidth))!,
+          (await this.optionDataSource.getValue(OptionPresetKeys.MediumLargeSizeWidth))!,
         );
         const mediumLargeHeight = parseInt(
-          (await this.optionDataSource.getOptionValue(OptionPresetKeys.MediumLargeSizeHeight))!,
+          (await this.optionDataSource.getValue(OptionPresetKeys.MediumLargeSizeHeight))!,
         );
         const resizeArr = [
           { name: ImageScaleType.Large, width: largeWidth, height: largeHeight, quality: 80 },
@@ -263,7 +263,7 @@ export class MediaService {
    * @param metaData Media metadata
    */
   async toFileModel(media: MediaModel, metaData?: MediaMetaDataModel): Promise<File> {
-    const siteUrl = await this.optionDataSource.getOptionValue(OptionPresetKeys.SiteUrl);
+    const siteUrl = await this.optionDataSource.getValue(OptionPresetKeys.SiteUrl);
     const { imageScales = [], fileSize, width, height } = metaData ?? { fileSize: 0 };
     return {
       original: {

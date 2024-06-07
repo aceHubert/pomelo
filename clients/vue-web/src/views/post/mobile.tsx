@@ -16,6 +16,7 @@ export interface MobilePostProps {
   title: string;
   excerpt: string;
   content: any;
+  author: string;
   createdAt: string;
   metas: Record<string, string>;
   framework: SchemaFramework;
@@ -27,6 +28,7 @@ export default defineComponent({
     title: String,
     excerpt: String,
     content: String,
+    author: String,
     createdAt: String,
     metas: {
       type: Object,
@@ -81,7 +83,10 @@ export default defineComponent({
           >
             <p class={classes.title}>{props.title || ''}</p>
             {props.createdAt && (
-              <p class={classes.subtitle}>{moment(props.createdAt).locale(i18n.locale).format('L HH:mm')}</p>
+              <p class={classes.subtitle}>
+                <span>{moment(props.createdAt).locale(i18n.locale).format('L HH:mm')}</span>
+                <span>{props.author}</span>
+              </p>
             )}
           </div>
           {props.framework === 'HTML' ? (

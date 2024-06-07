@@ -183,22 +183,24 @@ export default defineComponent({
       ) : deviceMixin.isDesktop ? (
         h(DesktopPost, {
           props: {
-            title: postData?.title,
-            excerpt: postData?.excerpt,
-            content: postData?.schema,
-            createdAt: postData?.createdAt,
+            title: postData.title,
+            excerpt: postData.excerpt,
+            content: postData.schema,
+            author: postData.author?.displayName ?? '-',
+            createdAt: postData.createdAt,
             metas: metas.value,
-            framework: postData?.framework,
+            framework: postData.framework,
           },
         })
       ) : (
         h(MobilePost, {
           props: {
-            title: postData?.title,
-            content: postData?.schema,
-            createdAt: postData?.createdAt,
+            title: postData.title,
+            content: postData.schema,
+            createdAt: postData.createdAt,
+            author: postData.author?.displayName ?? '-',
             metas: metas.value,
-            framework: postData?.framework,
+            framework: postData.framework,
           },
         })
       );

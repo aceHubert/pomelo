@@ -4,4 +4,5 @@ export enum UserRole {
   Author = 'author',
   Contributor = 'contributor',
   Subscriber = 'subscriber',
+  None = 'none',
 }

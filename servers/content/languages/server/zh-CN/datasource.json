@@ -1,4 +1,10 @@
 {
+  "error": {
+    "forbidden_capability": "您没有\"{requiredCapability}\"权限执行此操作！"
+  },
+  "user_capability": {
+    "edit_published_templates": "编辑已发布的模板"
+  },
   "api_resource": {
     "resource_has_existed": "资源已经存在！",
     "resource_non_editable": "资源不可编辑！",
@@ -62,8 +68,5 @@
     "old_password_incorrect": "旧的密码不正确！",
     "new_password_same_with_old": "新的密码不能与旧的相同！",
     "delete_self_forbidden": "不可以删除您自己！"
-  },
-  "error": {
-    "forbidden_capability": "您没有\"{requiredCapability}\"权限执行此操作！"
   }
 }

@@ -26,7 +26,6 @@ Object.defineProperties(Oidc.UserManager.prototype, {
         localStorage.setItem(RedirectKey, location.href);
       } else {
         // remove cached redirect url
-        debugger;
         localStorage.removeItem(RedirectKey);
       }
     },
