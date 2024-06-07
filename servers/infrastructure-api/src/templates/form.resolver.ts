@@ -7,6 +7,7 @@ import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
+  UserDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
   TemplateStatus,
@@ -16,10 +17,31 @@ import {
 import { TemplateAction, FormTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
+import { createAuthorFieldResolver } from './base.resolver';
 import { NewFormTemplateInput } from './dto/new-template.input';
 import { UpdateFormTemplateInput } from './dto/update-template.input';
 import { PagedFormTemplateArgs, FormTemplateOptionArgs } from './dto/template.args';
 import { FormTemplate, PagedFormTemplate, FormTemplateOption, PagedFormTemplateItem } from './models/form.model';
+
+// #region Author Resolver
+
+@Authorized()
+@Resolver(() => PagedFormTemplateItem)
+export class PagedFormTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedFormTemplateItem, true) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+@Authorized()
+@Resolver(() => FormTemplate)
+export class FormTemplateAuthorResolver extends createAuthorFieldResolver(FormTemplate) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+// #endregion
 
 @Authorized()
 @Resolver(() => PagedFormTemplateItem)
@@ -89,7 +111,6 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     );
   }
 
-  @Anonymous()
   @Query((returns) => PagedFormTemplate, { description: 'Get paged form templates.' })
   async formTemplates(
     @Args() args: PagedFormTemplateArgs,

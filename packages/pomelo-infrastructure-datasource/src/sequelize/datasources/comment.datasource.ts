@@ -112,7 +112,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
     if (comment) {
       // 非本人创建的是否可以编辑
       if (comment.userId !== requestUserId) {
-        await this.hasCapability(UserCapability.ModerateComments, requestUserId, true);
+        await this.hasCapability(UserCapability.ModerateComments, requestUserId);
       }
 
       await this.models.Comments.update(model, {
@@ -137,7 +137,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
     if (comment) {
       // 非本人创建的是否可以删除
       if (comment.userId !== requestUserId) {
-        await this.hasCapability(UserCapability.ModerateComments, requestUserId, true);
+        await this.hasCapability(UserCapability.ModerateComments, requestUserId);
       }
       const t = await this.sequelize.transaction();
       try {

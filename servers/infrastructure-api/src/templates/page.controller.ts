@@ -159,7 +159,7 @@ export class PageTemplateController extends BaseController {
           ],
           requestUser ? Number(requestUser.sub) : undefined,
         )
-      : await this.optionDataSource.getOptionValue(OptionPresetKeys.PageOnFront).then((id) => {
+      : await this.optionDataSource.getValue(OptionPresetKeys.PageOnFront).then((id) => {
           if (id) {
             return this.templateDataSource.get(
               Number(id),
@@ -247,10 +247,10 @@ export class PageTemplateController extends BaseController {
   }
 
   /**
-   * Get paged page template model
+   * Get paged page templates
    */
   @Get()
-  @Anonymous()
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged pages template models',
     type: () => createResponseSuccessType({ data: PagedPageTemplateResp }, 'PagedPageTemplateSuccessResp'),

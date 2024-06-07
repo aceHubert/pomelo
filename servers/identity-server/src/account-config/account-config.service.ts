@@ -105,7 +105,7 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
           return;
         },
         getPhoneRegionCode: async () => {
-          return this.optionDataSource.getOptionValue<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
+          return this.optionDataSource.getValue<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
         },
         verifyAccount: async (loginName: string, password: string) => {
           const user = await this.userDataSource.verifyUser(loginName, md5(password).toString());

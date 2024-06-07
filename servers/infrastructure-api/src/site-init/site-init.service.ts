@@ -43,7 +43,6 @@ export class SiteInitService {
               loginPwd: md5(initArgs.password),
               niceName: 'Admin',
               displayName: 'Admin',
-              mobile: '',
               email: initArgs.email,
               url: '',
               metas: [

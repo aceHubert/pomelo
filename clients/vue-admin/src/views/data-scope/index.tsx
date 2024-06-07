@@ -142,7 +142,7 @@ export default defineComponent({
                 loading={record.deleting}
                 onClick={() =>
                   templateMixin.handleDelete(record).then((result) => {
-                    if (result) {
+                    if (result !== false) {
                       dataScopeTemplates.queryStatusCounts = true; // 更新状态数量
                       dataScopeTemplates.querySelfCounts = true; // 更新我的数量
                       refreshTable();
@@ -161,7 +161,7 @@ export default defineComponent({
                 href="javascript:;"
                 onClick={() =>
                   templateMixin.handleRestore(record).then((result) => {
-                    if (result) {
+                    if (result !== false) {
                       dataScopeTemplates.queryStatusCounts = true; // 更新状态数量
                       dataScopeTemplates.querySelfCounts = true; // 更新我的数量
                       refreshTable();
@@ -180,7 +180,7 @@ export default defineComponent({
                 cancelText={i18n.tv('common.btn_text.no', '否')}
                 onConfirm={() =>
                   templateMixin.handleDelete(record).then((result) => {
-                    if (result) {
+                    if (result !== false) {
                       dataScopeTemplates.queryStatusCounts = true; // 更新状态数量
                       dataScopeTemplates.querySelfCounts = true; // 更新我的数量
                       refreshTable();
@@ -258,7 +258,7 @@ export default defineComponent({
           bulkApplying={templateMixin.bulkApplying.value}
           onBulkApply={(action: BulkActions) =>
             templateMixin.handleBulkApply(action, dataScopeTemplates.selectedRowKeys).then((result) => {
-              if (result) {
+              if (result !== false) {
                 dataScopeTemplates.selectedRowKeys = []; // 选中的key清除
                 dataScopeTemplates.queryStatusCounts = true; // 更新状态数量
                 dataScopeTemplates.querySelfCounts = true; // 更新我的数量

@@ -222,10 +222,22 @@ export class PostTemplateController extends BaseController {
   }
 
   /**
-   * Get paged post template model
+   * Get published post templates
+   */
+  @Get('published')
+  @ApiOkResponse({
+    description: 'Paged posts template models',
+    type: () => createResponseSuccessType({ data: PagedPostTemplateResp }, 'PagedPostTemplateSuccessResp'),
+  })
+  async getPublishedPaged(@Query(ParseQueryPipe) query: Omit<PagedPostTemplateQueryDto, 'status'>) {
+    this.getPaged(query);
+  }
+
+  /**
+   * Get paged post templates
    */
   @Get()
-  @Anonymous()
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged posts template models',
     type: () => createResponseSuccessType({ data: PagedPostTemplateResp }, 'PagedPostTemplateSuccessResp'),

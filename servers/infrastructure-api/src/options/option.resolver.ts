@@ -28,13 +28,13 @@ export class OptionResolver extends BaseResolver {
   @Anonymous()
   @Query((returns) => String, { nullable: true, description: 'Get option value by name.' })
   optionValue(@Args('name') name: string): Promise<string | undefined> {
-    return this.optionDataSource.getOptionValue(name);
+    return this.optionDataSource.getValue(name);
   }
 
   @Anonymous()
   @Query((returns) => JSONObjectResolver, { description: 'Get autoload options(key/value), cache by memory.' })
   autoloadOptions(): Promise<Dictionary<string>> {
-    return this.optionDataSource.getAutoloadOptions();
+    return this.optionDataSource.getAutoloads();
   }
 
   @RamAuthorized(OptionAction.List)

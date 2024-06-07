@@ -8,6 +8,7 @@ import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
   TemplateDataSource,
   TermTaxonomyDataSource,
+  UserDataSource,
   PagedTemplateArgs,
   TemplateOptionArgs,
   TemplateStatus,
@@ -18,11 +19,13 @@ import { TemplateAction, PostTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
 import { TermTaxonomy } from '../term-taxonomy/models/term-taxonomy.model';
-import { TaxonomyFieldResolver } from './base.resolver';
+import { TaxonomyFieldResolver, createAuthorFieldResolver } from './base.resolver';
 import { NewPostTemplateInput } from './dto/new-template.input';
 import { UpdatePostTemplateInput } from './dto/update-template.input';
-import { PagedPostTemplateArgs, PostTemplateOptionArgs } from './dto/template.args';
+import { PagedPostTemplateArgs, ClientPagedPostTemplateArgs, PostTemplateOptionArgs } from './dto/template.args';
 import { PostTemplate, PagedPostTemplateItem, PagedPostTemplate, PostTemplateOption } from './models/post.model';
+
+// #region Taxonomy Resolver
 
 @Authorized()
 @Resolver(() => PagedPostTemplateItem)
@@ -58,6 +61,28 @@ export class PagedPostTemplateItemTaxonomyFieldResolver extends TaxonomyFieldRes
   }
 }
 
+// #endregion
+
+// #region Author Resolver
+
+@Authorized()
+@Resolver(() => PagedPostTemplateItem)
+export class PagedPostTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedPostTemplateItem, true) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+@Authorized()
+@Resolver(() => PostTemplate)
+export class PostTemplateAuthorResolver extends createAuthorFieldResolver(PostTemplate) {
+  constructor(protected readonly userDataSource: UserDataSource) {
+    super(userDataSource);
+  }
+}
+
+// #endregion
+
 @Authorized()
 @Resolver(() => PagedPostTemplateItem)
 export class PagedPostTemplateItemMetaFieldResolver extends createMetaFieldResolver(
@@ -66,7 +91,11 @@ export class PagedPostTemplateItemMetaFieldResolver extends createMetaFieldResol
   {
     authDecorator: () => RamAuthorized(TemplateAction.MetaList),
   },
-) {}
+) {
+  constructor(protected readonly moduleRef: ModuleRef) {
+    super(moduleRef);
+  }
+}
 
 @Authorized()
 @Resolver(() => PostTemplate)
@@ -174,6 +203,14 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
   }
 
   @Anonymous()
+  @Query((returns) => PagedPostTemplate, { description: 'Get published post templates.' })
+  async postPublishedTemplates(
+    @Args() args: ClientPagedPostTemplateArgs,
+    @Fields() fields: ResolveTree,
+  ): Promise<PagedPostTemplate> {
+    return this.postTemplates(args, fields);
+  }
+
   @Query((returns) => PagedPostTemplate, { description: 'Get paged post templates.' })
   async postTemplates(
     @Args() args: PagedPostTemplateArgs,

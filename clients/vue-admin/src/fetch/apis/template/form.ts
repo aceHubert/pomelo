@@ -44,18 +44,21 @@ export const useFormApi = defineRegistApi('template_form', {
           rows {
             id
             title
-            author
+            author {
+              id
+              displayName
+            }
             status
             updatedAt
             createdAt
           }
           total
         }
-        statusCounts: templateCountByStatus(type: "Form") @include(if: $queryStatusCounts) {
+        statusCounts: templateCountByStatus(type: "form") @include(if: $queryStatusCounts) {
           status
           count
         }
-        selfCounts: templateCountBySelf(type: "Form", includeTrash: false) @include(if: $querySelfCounts)
+        selfCounts: templateCountBySelf(type: "form", includeTrash: false) @include(if: $querySelfCounts)
       }
     ` as TypedQueryDocumentNode<
       {
@@ -72,7 +75,10 @@ export const useFormApi = defineRegistApi('template_form', {
           id
           title
           content
-          author
+          author {
+            id
+            displayName
+          }
           status
           updatedAt
           createdAt
@@ -91,7 +97,10 @@ export const useFormApi = defineRegistApi('template_form', {
           id
           title
           content
-          author
+          author {
+            id
+            displayName
+          }
           status
           updatedAt
           createdAt

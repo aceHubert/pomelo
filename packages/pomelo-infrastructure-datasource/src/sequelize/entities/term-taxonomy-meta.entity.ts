@@ -16,7 +16,7 @@ export default class TermTaxonomyMeta extends Model<
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
+  const isMysql = sequelize.getDialect() === 'mysql';
   TermTaxonomyMeta.init(
     {
       id: {
@@ -42,7 +42,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
     {
       sequelize,
       tableName: `${prefix}term_taxonomymeta`,
-      indexes: [{ name: 'term_taxonomy_id_vs_meta_key', fields: ['term_taxonomy_id', 'meta_key'], unique: true }],
+      indexes: [{ name: 'term_taxonomy_meta_keys', fields: ['term_taxonomy_id', 'meta_key'], unique: true }],
       createdAt: false,
       updatedAt: false,
       comment: 'Term taxonomy metas',

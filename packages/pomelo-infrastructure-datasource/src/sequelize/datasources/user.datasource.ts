@@ -92,7 +92,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       [idOrUserName, fields, requestUserId] = args;
       if (idOrUserName !== requestUserId) {
         // 查询非自己时是否有获取权限
-        await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
+        await this.hasCapability(UserCapability.EditUsers, requestUserId);
       }
     } else {
       if (typeof args[0] === 'number' || typeof args[0] === 'string') {
@@ -143,6 +143,40 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
+   * 根据 Id 获取用户列表
+   * @param ids 用户 Id 列表
+   * @param fields 返回的字段
+   * @param requestUserId 请求的用户Id
+   */
+  async getList(ids: number[], fields: string[], requestUserId?: number): Promise<UserModel[]> {
+    if (!requestUserId) {
+      fields = fields.filter((field) => ['id', 'loginName', 'niceName', 'displayName', 'url'].includes(field));
+    } else {
+      // 是否有查看用户列表权限
+      await this.hasCapability(UserCapability.ListUsers, requestUserId);
+    }
+
+    // 排除登录密码
+    fields = fields.filter((field) => field !== 'loginPwd');
+
+    return this.models.Users.findAll({
+      attributes: this.filterFields(fields, this.models.Users),
+      where: {
+        id: ids,
+      },
+    }).then((users) =>
+      users.map((user) => {
+        const { mobile, email, ...rest } = user.toJSON() as any as UserModel;
+        return {
+          ...rest,
+          mobile: mobile ? mobile.replace(/(+?\d+)\d{4}(\d{4})$/, '$1****$2') : mobile,
+          email: email ? email.replace(/^(.{1}).*(@.+)/, '$1***$2') : email,
+        };
+      }),
+    );
+  }
+
+  /**
    * 获取用户分页列表
    * @author Hubert
    * @since 2020-10-01
@@ -157,7 +191,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     fields: string[],
     requestUserId: number,
   ): Promise<PagedUserModel> {
-    await this.hasCapability(UserCapability.ListUsers, requestUserId, true);
+    // 是否有查看用户列表权限
+    await this.hasCapability(UserCapability.ListUsers, requestUserId);
 
     const where: WhereOptions<Attributes<User>> = {};
     if (query.keyword) {
@@ -183,11 +218,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$` as keyof UserAttributes] =
-        query.capabilities === null
-          ? {
-              [Op.is]: null,
-            }
-          : query.capabilities;
+        query.capabilities;
     }
 
     // 排除登录密码
@@ -212,10 +243,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       order: [['createdAt', 'DESC']],
     }).then(({ rows, count: total }) => ({
       rows: rows.map((row) => {
-        const { UserMetas, ...rest } = row.toJSON() as any as UserModel & { UserMetas: UserMetaModel[] };
+        const { UserMetas, mobile, email, ...rest } = row.toJSON() as any as UserModel & { UserMetas: UserMetaModel[] };
         return {
-          capabilities: UserMetas.length ? UserMetas[0].metaValue : null,
           ...rest,
+          mobile: mobile ? mobile.replace(/(+?\d+)\d{4}(\d{4})$/, '$1****$2') : mobile,
+          email: email ? email.replace(/^(.{1}).*(@.+)/, '$1***$2') : email,
+          capabilities: UserMetas.length ? UserMetas[0].metaValue : null,
         } as UserWithRoleModel;
       }),
       total,
@@ -331,7 +364,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param requestUserId 请求的用户Id
    */
   async create(model: NewUserInput, requestUserId: number): Promise<UserModel> {
-    await this.hasCapability(UserCapability.CreateUsers, requestUserId, true);
+    // 是否有创建用户权限
+    await this.hasCapability(UserCapability.CreateUsers, requestUserId);
 
     if (model.loginName && (await this.isLoginNameExists(model.loginName))) {
       throw new ValidationError(
@@ -357,11 +391,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         {
           loginName: model.loginName,
           loginPwd: model.loginPwd,
-          niceName: model.loginName,
-          displayName: model.loginName,
+          niceName: model.niceName,
+          displayName: model.displayName,
           mobile: model.mobile,
           email: model.email,
           url: model.url,
+          status: model.status ?? UserStatus.Enabled,
         },
         { transaction: t },
       );
@@ -443,9 +478,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param requestUserId 请求的用户Id
    */
   async update(id: number, model: UpdateUserInput, requestUserId: number): Promise<void> {
-    // 修改非自己信息
+    // 修改非自己信息，是否有修改权限
     if (id !== requestUserId) {
-      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
+      await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
     const user = await this.models.Users.findByPk(id);
@@ -512,7 +547,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
         if (!isUndefined(locale)) {
           await this.models.UserMeta.update(
-            { metaValue: locale === null ? '' : locale },
+            { metaValue: locale },
             {
               where: {
                 userId: id,
@@ -551,7 +586,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
         if (!isUndefined(capabilities)) {
           await this.models.UserMeta.update(
-            { metaValue: capabilities === null ? undefined : capabilities },
+            { metaValue: capabilities },
             {
               where: {
                 userId: id,
@@ -583,9 +618,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param requestUserId 请求的用户Id
    */
   async updateEmail(id: number, email: string, requestUserId: number): Promise<void> {
-    // 修改非自己信息
+    // 修改非自己信息，是否有修改权限
     if (id !== requestUserId) {
-      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
+      await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
     const user = await this.models.Users.findByPk(id);
@@ -620,9 +655,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param requestUserId 请求的用户Id
    */
   async updateMobile(id: number, mobile: string, requestUserId: number): Promise<void> {
-    // 修改非自己信息
+    // 修改非自己信息，是否有修改权限
     if (id !== requestUserId) {
-      await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
+      await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
     const user = await this.models.Users.findByPk(id);
@@ -657,7 +692,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param requestUserId 请求的用户Id
    */
   async updateStatus(id: number, status: UserStatus, requestUserId: number): Promise<void> {
-    await this.hasCapability(UserCapability.EditUsers, requestUserId, true);
+    // 是否有修改权限
+    await this.hasCapability(UserCapability.EditUsers, requestUserId);
 
     await this.models.Users.update(
       { status },
@@ -780,7 +816,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param requestUserId 请求的用户Id
    */
   async delete(id: number, requestUserId: number): Promise<void> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUserId, true);
+    // 是否有删除用户权限
+    await this.hasCapability(UserCapability.DeleteUsers, requestUserId);
 
     if (id === requestUserId) {
       throw new ForbiddenError(this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`));
@@ -814,7 +851,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param requestUserId 请求的用户Id
    */
   async bulkDelete(ids: number[], requestUserId: number): Promise<void> {
-    await this.hasCapability(UserCapability.DeleteUsers, requestUserId, true);
+    // 是否有删除用户权限
+    await this.hasCapability(UserCapability.DeleteUsers, requestUserId);
 
     if (ids.includes(requestUserId)) {
       throw new ForbiddenError(this.translate('datasource.user.delete_self_forbidden', `Could not delete yourself!`));

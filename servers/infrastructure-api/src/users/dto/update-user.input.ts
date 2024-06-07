@@ -1,4 +1,4 @@
-import { ValidateIf, IsEnum, IsOptional, IsString, IsLocale } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsLocale } from 'class-validator';
 import { InputType, Field, PartialType, PickType } from '@nestjs/graphql';
 import { UserStatus } from '@ace-pomelo/infrastructure-datasource';
 import { UserRole } from '../enums/user-role.enum';
@@ -31,19 +31,17 @@ export class UpdateUserInput extends PartialType(
   nickName?: string;
 
   /**
-   * Capabilities, set null to forbidden all capabilities
+   * User Role
    */
   @Field((type) => UserRole)
   @IsOptional()
-  @ValidateIf((o) => o.capabilities !== null)
   @IsEnum(UserRole)
-  capabilities?: UserRole | null;
+  capabilities?: UserRole;
 
   /**
-   * Locale, set null to reset as using site default locale
+   * Locale
    */
   @IsOptional()
-  @ValidateIf((o) => o.locale !== null)
   @IsLocale()
-  locale?: string | null;
+  locale?: string;
 }

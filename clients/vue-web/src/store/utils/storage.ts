@@ -2,7 +2,7 @@ import store from 'store';
 import engine from 'store/src/store-engine';
 import sessStorage from 'store/storages/sessionStorage';
 
-export const STORAGE_PREFIX = 'tpl-h5';
+export const STORAGE_PREFIX = 'po-web';
 
 function defineStorage(store: StoreJsAPI, prefix?: string) {
   const getKey = (key: string) => (prefix ? `${prefix}/${key}` : key);

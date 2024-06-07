@@ -25,7 +25,10 @@ export interface TemplateModel {
   name: string;
   excerpt: string;
   content: string;
-  author: string;
+  author?: {
+    id: string;
+    displayName: string;
+  };
   status: TemplateStatus;
   type: string;
   commentStatus: TemplateCommentStatus;
@@ -128,7 +131,10 @@ export const useTemplateApi = defineRegistApi('template', {
           title
           content
           excerpt
-          author
+          author {
+            id
+            displayName
+          }
           status
           type
           commentStatus
@@ -154,7 +160,10 @@ export const useTemplateApi = defineRegistApi('template', {
           id
           title
           content
-          author
+          author {
+            id
+            displayName
+          }
           status
           updatedAt
           createdAt
@@ -180,7 +189,10 @@ export const useTemplateApi = defineRegistApi('template', {
           name
           title
           content
-          author
+          author {
+            id
+            displayName
+          }
           status
           commentStatus
           commentCount
@@ -202,7 +214,10 @@ export const useTemplateApi = defineRegistApi('template', {
           name
           title
           content
-          author
+          author {
+            id
+            displayName
+          }
           status
           commentStatus
           commentCount
@@ -225,7 +240,10 @@ export const useTemplateApi = defineRegistApi('template', {
           title
           content
           excerpt
-          author
+          author {
+            id
+            displayName
+          }
           status
           commentStatus
           commentCount
@@ -256,7 +274,7 @@ export const useTemplateApi = defineRegistApi('template', {
         $tagId: ID
         $metaKeys: [String!]
       ) {
-        posts: postTemplates(
+        posts: postPublishedTemplates(
           offset: $offset
           limit: $limit
           keyword: $keyword
@@ -268,7 +286,10 @@ export const useTemplateApi = defineRegistApi('template', {
             name
             title
             excerpt
-            author
+            author {
+              id
+              displayName
+            }
             status
             commentStatus
             commentCount

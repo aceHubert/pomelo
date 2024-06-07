@@ -127,10 +127,10 @@ export default Form.create({})(
                         message: i18n.tv('page_site_init.form.password_required', '请输入管理员密码'),
                       },
                       {
-                        pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/,
+                        pattern: /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\\!@#$%&*]{6,}$/,
                         message: i18n.tv(
                           'page_site_init.form.password_invalid',
-                          '请输入6-16位密码并且至少包含数字、大小写字母',
+                          '请输入6位以上密码并且至少包含数字、大小写字母',
                         ),
                       },
                     ],

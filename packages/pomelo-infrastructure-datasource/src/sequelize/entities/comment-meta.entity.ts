@@ -10,7 +10,7 @@ export default class CommentMeta extends Model<CommentMetaAttributes, Omit<Comme
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
+  const isMysql = sequelize.getDialect() === 'mysql';
   CommentMeta.init(
     {
       id: {
@@ -37,10 +37,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
     {
       sequelize,
       tableName: `${prefix}commentmeta`,
-      indexes: [
-        { name: 'comment_id', fields: ['comment_id'] },
-        { name: 'meta_key', fields: ['meta_key'] },
-      ],
+      indexes: [{ name: 'comment_meta_keys', fields: ['comment_id', 'meta_key'], unique: true }],
       createdAt: false,
       updatedAt: false,
       comment: 'Comment metas',

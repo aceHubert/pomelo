@@ -107,7 +107,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
   ): Promise<TermTaxonomy[]> {
     let excludes: number[] | undefined;
     if (args.includeDefault !== true) {
-      const defaultCategoryId = await this.optionDataSource.getOptionValue(OptionPresetKeys.DefaultCategory);
+      const defaultCategoryId = await this.optionDataSource.getValue(OptionPresetKeys.DefaultCategory);
       excludes = [Number(defaultCategoryId)];
     }
     return this.termTaxonomyDataSource

@@ -18,8 +18,8 @@ export default class Users
   public loginPwd!: string;
   public niceName!: string;
   public displayName!: string;
-  public mobile!: string;
-  public email!: string;
+  public mobile?: string;
+  public email?: string;
   public url!: string;
   public status!: UserStatus;
 
@@ -30,7 +30,7 @@ export default class Users
 
 // 初始化
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
+  const isMysql = sequelize.getDialect() === 'mysql';
   Users.init(
     {
       id: {
@@ -62,13 +62,11 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       },
       mobile: {
         type: DataTypes.STRING(50),
-        allowNull: false,
         unique: true,
-        comment: 'Mobile number',
+        comment: 'Phone number',
       },
       email: {
         type: DataTypes.STRING(100),
-        allowNull: false,
         unique: true,
         comment: 'Email address',
       },
@@ -80,14 +78,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
       status: {
         type: DataTypes.TINYINT,
         allowNull: false,
-        defaultValue: UserStatus.Enabled,
-        comment: 'User status (0 for disabled or 1 for enabled, default: 1)',
+        defaultValue: UserStatus.Disabled,
+        comment: 'User status (0 for disabled or 1 for enabled, default: disabled)',
       },
     },
     {
       sequelize,
       tableName: `${prefix}users`,
-      indexes: [{ name: 'nice_name', fields: ['nice_name'] }],
       comment: 'Users',
     },
   );

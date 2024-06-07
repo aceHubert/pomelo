@@ -10,7 +10,7 @@ export default class UserMeta extends Model<UserMetaAttributes, Omit<UserMetaCre
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
+  const isMysql = sequelize.getDialect() === 'mysql';
   UserMeta.init(
     {
       id: {
@@ -36,10 +36,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
     {
       sequelize,
       tableName: `${prefix}usermeta`,
-      indexes: [
-        { name: 'user_id', fields: ['user_id'] },
-        { name: 'meta_key', fields: ['meta_key'] },
-      ],
+      indexes: [{ name: 'user_meta_keys', fields: ['user_id', 'meta_key'], unique: true }],
       createdAt: false,
       updatedAt: false,
       comment: 'User metas',

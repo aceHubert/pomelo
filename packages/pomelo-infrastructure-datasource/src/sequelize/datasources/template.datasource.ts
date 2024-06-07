@@ -88,60 +88,24 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param template Tempate
    * @param requestUserId 登录用户ID
    */
-  private async hasEditCapability(
-    template: Pick<Attributes<Templates>, 'type' | 'status' | 'author'>,
-    requestUserId: number,
-  ) {
-    // 是否有编辑权限
-    const editCapability =
-      template.type === TemplatePresetType.Post
-        ? UserCapability.EditPosts
-        : template.type === TemplatePresetType.Page
-        ? UserCapability.EditPages
-        : template.type === TemplatePresetType.Form
-        ? UserCapability.EditForms
-        : null;
-    editCapability && (await this.hasCapability(editCapability, requestUserId, true));
+  private async hasEditCapability(template: Pick<Attributes<Templates>, 'status' | 'author'>, requestUserId: number) {
+    // 是否有编辑模版权限
+    await this.hasCapability(UserCapability.EditTemplates, requestUserId);
 
-    // 是否有编辑已发布的文章的权限
-    const publishCapability =
-      template.type === TemplatePresetType.Post
-        ? UserCapability.EditPublishedPosts
-        : template.type === TemplatePresetType.Page
-        ? UserCapability.EditPublishedPages
-        : template.type === TemplatePresetType.Form
-        ? UserCapability.EditPublishedForms
-        : null;
-    if (template.status === TemplateStatus.Publish && publishCapability) {
-      await this.hasCapability(publishCapability, requestUserId, true);
+    // 是否有编辑已发布模版权限
+    if (template.status === TemplateStatus.Publish || template.status === TemplateStatus.Future) {
+      await this.hasCapability(UserCapability.EditPublishedTemplates, requestUserId);
     }
 
-    // 是否有编辑别人文章的权限
-    const editOthersCapability =
-      template.type === TemplatePresetType.Post
-        ? UserCapability.EditOthersPosts
-        : template.type === TemplatePresetType.Page
-        ? UserCapability.EditOthersPages
-        : template.type === TemplatePresetType.Form
-        ? UserCapability.EditOthersForms
-        : null;
-    if (template.author !== requestUserId && editOthersCapability) {
-      await this.hasCapability(editOthersCapability, requestUserId, true);
+    if (template.author !== requestUserId) {
+      // 是否有编辑别人模版权限
+      await this.hasCapability(UserCapability.EditOthersTemplates, requestUserId);
 
-      // 是否有编辑私有的(别人)文章权限
-      const editPrivateCapability =
-        template.type === TemplatePresetType.Post
-          ? UserCapability.EditPrivatePosts
-          : template.type === TemplatePresetType.Page
-          ? UserCapability.EditPrivatePages
-          : template.type === TemplatePresetType.Form
-          ? UserCapability.EditPrivateForms
-          : null;
-      if (template.status === TemplateStatus.Private && editPrivateCapability) {
-        await this.hasCapability(editPrivateCapability, requestUserId, true);
+      // 是否有编辑私有的(别人)模版权限
+      if (template.status === TemplateStatus.Private) {
+        await this.hasCapability(UserCapability.EditPrivateTemplates, requestUserId);
       }
     }
-    return Promise.resolve(true);
   }
 
   /**
@@ -149,60 +113,24 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param template Tempate
    * @param requestUserId 登录用户ID
    */
-  private async hasDeleteCapability(
-    template: Pick<Attributes<Templates>, 'type' | 'status' | 'author'>,
-    requestUserId: number,
-  ) {
-    // 是否有删除文章的权限
-    const deleteCapability =
-      template.type === TemplatePresetType.Post
-        ? UserCapability.DeletePosts
-        : template.type === TemplatePresetType.Page
-        ? UserCapability.DeletePages
-        : template.type === TemplatePresetType.Form
-        ? UserCapability.DeleteForms
-        : null;
-    deleteCapability && (await this.hasCapability(deleteCapability, requestUserId, true));
+  private async hasDeleteCapability(template: Pick<Attributes<Templates>, 'status' | 'author'>, requestUserId: number) {
+    // 是否有删除模版权限
+    await this.hasCapability(UserCapability.DeleteTemplates, requestUserId);
 
-    // 是否有删除已发布的文章的权限
-    const deletePublishedCapability =
-      template.type === TemplatePresetType.Post
-        ? UserCapability.DeletePublishedPosts
-        : template.type === TemplatePresetType.Page
-        ? UserCapability.DeletePublishedPages
-        : template.type === TemplatePresetType.Form
-        ? UserCapability.DeletePublishedForms
-        : null;
-    if (template.status === TemplateStatus.Publish && deletePublishedCapability) {
-      await this.hasCapability(deletePublishedCapability, requestUserId, true);
+    // 是否有删除已发布模版权限
+    if (template.status === TemplateStatus.Publish || template.status === TemplateStatus.Future) {
+      await this.hasCapability(UserCapability.DeletePublishedTemplates, requestUserId);
     }
 
-    // 是否有删除别人文章的权限
-    const deleteOthersCapability =
-      template.type === TemplatePresetType.Post
-        ? UserCapability.DeleteOthersPosts
-        : template.type === TemplatePresetType.Page
-        ? UserCapability.DeleteOthersPages
-        : template.type === TemplatePresetType.Form
-        ? UserCapability.DeleteOthersForms
-        : null;
-    if (template.author !== requestUserId && deleteOthersCapability) {
-      await this.hasCapability(deleteOthersCapability, requestUserId, true);
+    // 是否有删除别人模版权限
+    if (template.author !== requestUserId) {
+      await this.hasCapability(UserCapability.DeleteOthersTemplates, requestUserId);
 
-      // 是否有删除私有的文章权限
-      const deletePrivateCapability =
-        template.type === TemplatePresetType.Post
-          ? UserCapability.DeletePrivatePosts
-          : template.type === TemplatePresetType.Page
-          ? UserCapability.DeletePrivatePages
-          : template.type === TemplatePresetType.Form
-          ? UserCapability.DeletePrivateForms
-          : null;
-      if (template.status === TemplateStatus.Private && deletePrivateCapability) {
-        await this.hasCapability(deletePrivateCapability, requestUserId, true);
+      // 是否有删除私有的(别人)模版权限
+      if (template.status === TemplateStatus.Private) {
+        await this.hasCapability(UserCapability.DeletePrivateTemplates, requestUserId);
       }
     }
-    return Promise.resolve(true);
   }
 
   private async checkOperateStatus(status: string) {
@@ -312,41 +240,69 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       fields.unshift('id');
     }
 
+    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
     const where: WhereOptions<Attributes<Templates>> = {
       id,
+      [Op.and]: andWhere,
     };
 
     if (type !== 'NONE') {
-      where.type = type;
+      andWhere.push({
+        type,
+      });
     }
 
     // 匿名用户只能查询 published 的内容
     if (!requestUserId) {
-      where['status'] = TemplateStatus.Publish;
-      return this.models.Templates.findOne({
-        attributes: this.filterFields(fields, this.models.Templates),
-        where,
-      }).then((template) => template?.toJSON<TemplateModel>());
-    } else {
-      const template = await this.models.Templates.findOne({
-        attributes: this.filterFields(fields, this.models.Templates),
-        where,
+      andWhere.push({
+        status: TemplateStatus.Publish,
       });
-      if (template) {
-        // 如果是已发布的状态，可以直接返回
-        if (template.status !== TemplateStatus.Publish) {
-          try {
-            // 是否有编辑权限
-            await this.hasEditCapability(template, requestUserId);
-          } catch {
-            return;
-          }
-        }
+    } else {
+      andWhere.push({
+        // 不包含所有的操作时的状态
+        status: {
+          [Op.notIn]: TemplateOperateStatus,
+        },
+        // 不返回非自己草稿、垃圾箱的内容
+        [Op.not]: {
+          status: [TemplateStatus.Draft, TemplateStatus.Trash],
+          author: {
+            [Op.ne]: requestUserId,
+          },
+        },
+      });
 
-        return template.toJSON<TemplateModel>();
+      // 如果没有编辑别人权限，则不返回非自己的内容
+      const hasEditOthersCapability = await this.hasCapability(UserCapability.EditOthersTemplates, requestUserId)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!hasEditOthersCapability) {
+        andWhere.push({
+          author: requestUserId,
+        });
       }
-      return;
+
+      // 如果没有编辑私有权限，则不返回非自己私有的内容
+      const hasEditPrivateCapability = await this.hasCapability(UserCapability.EditPrivateTemplates, requestUserId)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!hasEditPrivateCapability) {
+        andWhere.push({
+          [Op.not]: {
+            status: TemplateStatus.Private,
+            author: {
+              [Op.ne]: requestUserId,
+            },
+          },
+        });
+      }
     }
+    return this.models.Templates.findOne({
+      attributes: this.filterFields(fields, this.models.Templates),
+      where,
+    }).then((template) => template?.toJSON<TemplateModel>());
   }
 
   /**
@@ -371,41 +327,69 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       fields.unshift('id');
     }
 
+    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
     const where: WhereOptions<Attributes<Templates>> = {
       name,
+      [Op.and]: andWhere,
     };
 
     if (type !== 'NONE') {
-      where.type = type;
+      andWhere.push({
+        type,
+      });
     }
 
     // 匿名用户只能查询 published 的内容
     if (!requestUserId) {
-      where['status'] = TemplateStatus.Publish;
-      return this.models.Templates.findOne({
-        attributes: this.filterFields(fields, this.models.Templates),
-        where,
-      }).then((template) => template?.toJSON<TemplateModel>());
-    } else {
-      const template = await this.models.Templates.findOne({
-        attributes: this.filterFields(fields, this.models.Templates),
-        where,
+      andWhere.push({
+        status: TemplateStatus.Publish,
       });
-      if (template) {
-        // 如果是已发布的状态，可以直接返回
-        if (template.status !== TemplateStatus.Publish) {
-          try {
-            // 是否有编辑权限
-            await this.hasEditCapability(template, requestUserId);
-          } catch {
-            return;
-          }
-        }
+    } else {
+      andWhere.push({
+        // 不包含所有的操作时的状态
+        status: {
+          [Op.notIn]: TemplateOperateStatus,
+        },
+        // 不返回非自己草稿、垃圾箱的内容
+        [Op.not]: {
+          status: [TemplateStatus.Draft, TemplateStatus.Trash],
+          author: {
+            [Op.ne]: requestUserId,
+          },
+        },
+      });
 
-        return template.toJSON<TemplateModel>();
+      // 如果没有编辑别人权限，则不返回非自己的内容
+      const hasEditOthersCapability = await this.hasCapability(UserCapability.EditOthersTemplates, requestUserId)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!hasEditOthersCapability) {
+        andWhere.push({
+          author: requestUserId,
+        });
       }
-      return;
+
+      // 如果没有编辑私有权限，则不返回非自己私有的内容
+      const hasEditPrivateCapability = await this.hasCapability(UserCapability.EditPrivateTemplates, requestUserId)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!hasEditPrivateCapability) {
+        andWhere.push({
+          [Op.not]: {
+            status: TemplateStatus.Private,
+            author: {
+              [Op.ne]: requestUserId,
+            },
+          },
+        });
+      }
     }
+    return this.models.Templates.findOne({
+      attributes: this.filterFields(fields, this.models.Templates),
+      where,
+    }).then((template) => template?.toJSON<TemplateModel>());
   }
 
   /**
@@ -421,31 +405,31 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUser 请求的用户
    */
   async getOptions(query: TemplateOptionArgs, type: string, fields = ['id', 'title']): Promise<TemplateOptionModel[]> {
-    const include: Includeable[] = [];
-    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
-    const where: WhereOptions<Attributes<Templates>> = {
-      status: TemplateStatus.Publish,
-      type,
-      [Op.not]: {
-        title: '',
-      },
-      [Op.and]: andWhere,
-    };
-    const { keywordField = 'title' } = query;
-    if (query.keyword) {
+    const include: Includeable[] = [],
+      andWhere: WhereOptions<Attributes<Templates>>[] = [],
+      where: WhereOptions<Attributes<Templates>> = {
+        status: TemplateStatus.Publish,
+        type,
+        [Op.not]: {
+          title: '',
+        },
+        [Op.and]: andWhere,
+      };
+    const { keywordField = 'title', keyword, author, date, taxonomies = [] } = query;
+    if (keyword) {
       andWhere.push({
         [keywordField]: {
-          [Op.like]: `%${query.keyword}%`,
+          [Op.like]: `%${keyword}%`,
         },
       });
     }
-    if (query.author) {
+    if (author) {
       andWhere.push({
-        author: query.author,
+        author: author,
       });
     }
 
-    if (query.date) {
+    if (date) {
       andWhere.push(
         this.sequelize.where(
           // TODO: 只支持 mssql 和 mysql
@@ -458,19 +442,18 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
                   this.col('createdAt', this.models.Templates),
                   112,
                 ),
-                query.date.length,
+                date.length,
               )
             : this.sequelize.fn(
                 'DATE_FORMAT',
                 this.col('createdAt', this.models.Templates),
-                query.date.length === 4 ? '%Y' : query.date.length === 6 ? '%Y%m' : '%Y%m%d',
+                date.length === 4 ? '%Y' : date.length === 6 ? '%Y%m' : '%Y%m%d',
               ),
-          query.date,
+          date,
         ),
       );
     }
 
-    const { taxonomies = [] } = query;
     for (const { id: taxonomyId, name: taxonomyName, type: taxonomyType } of taxonomies as Array<{
       id?: number;
       name?: string;
@@ -555,77 +538,6 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     });
 
     return templates.map((template) => template.name);
-  }
-
-  /**
-   * 根据状态分组获取模版数量
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @access Authorized
-   * @param type 类型
-   * @param requestUserId 请求的用户ID
-   */
-  async getCountByStatus(type: string, requestUserId: number) {
-    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
-    const where: WhereOptions<Attributes<Templates>> = {
-      type,
-      status: {
-        // 不包含所有的操作时的状态
-        [Op.notIn]: TemplateOperateStatus,
-      },
-      [Op.and]: andWhere,
-    };
-
-    // 如果没有编辑私有权限，则不返回非自己私有的内容
-    const editPrivateCapability =
-      type === TemplatePresetType.Post
-        ? UserCapability.EditPrivatePosts
-        : type === TemplatePresetType.Page
-        ? UserCapability.EditPrivatePages
-        : type === TemplatePresetType.Form
-        ? UserCapability.EditPrivateForms
-        : null;
-    const hasEditPrivateCapability = editPrivateCapability
-      ? await this.hasCapability(editPrivateCapability, requestUserId)
-      : true;
-    if (!hasEditPrivateCapability) {
-      andWhere.push({
-        [Op.not]: {
-          status: TemplateStatus.Private,
-          author: {
-            [Op.ne]: requestUserId,
-          },
-        },
-      });
-    }
-
-    // 如果没有发布权限的，不返回待发布的内容
-    const publishCapability =
-      type === TemplatePresetType.Post
-        ? UserCapability.PublishPosts
-        : type === TemplatePresetType.Page
-        ? UserCapability.PublishPages
-        : type === TemplatePresetType.Form
-        ? UserCapability.PublishForms
-        : null;
-    const hasPublishCapability = publishCapability ? await this.hasCapability(publishCapability, requestUserId) : true;
-    if (!hasPublishCapability) {
-      andWhere.push({
-        [Op.not]: {
-          status: TemplateStatus.Pending,
-          author: {
-            [Op.ne]: requestUserId,
-          },
-        },
-      });
-    }
-
-    return this.models.Templates.count({
-      attributes: ['status'],
-      where,
-      group: 'status',
-    });
   }
 
   /**
@@ -837,42 +749,67 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   }
 
   /**
-   * 获取修改历史记录数量
+   * 根据状态分组获取模版数量
    * @author Hubert
-   * @since 20203-09-14
-   * @param id Template id
-   */
-  getRevisionCount(id: number) {
-    return this.models.Templates.count({
-      where: {
-        type: TemplatePresetType.Revision,
-        parentId: id,
-      },
-    });
-  }
-
-  /**
-   * 获取修改历史记录列表
-   * @author Hubert
-   * @since 20203-09-14
-   * @param id Template id
-   * @param fields 返回字段
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access Authorized
+   * @param type 类型
    * @param requestUserId 请求的用户ID
    */
-  async getRevisions(id: number, fields: string[], requestUserId: number) {
-    const template = await this.models.Templates.findByPk(id, {
-      attributes: ['id', 'type', 'status', 'author'],
-    });
-    if (!template) return [];
-
-    this.hasEditCapability(template, requestUserId);
-    return this.models.Templates.findAll({
-      attributes: this.filterFields(fields, this.models.Templates),
-      where: {
-        type: TemplatePresetType.Revision,
-        parentId: id,
+  async getCountByStatus(type: string, requestUserId: number) {
+    const andWhere: WhereOptions<Attributes<Templates>>[] = [];
+    const where: WhereOptions<Attributes<Templates>> = {
+      type,
+      status: {
+        // 不包含所有的操作时的状态
+        [Op.notIn]: TemplateOperateStatus,
       },
-    }).then((templates) => templates.map((template) => template.toJSON<TemplateModel>()));
+      [Op.and]: andWhere,
+    };
+
+    // 如果没有编辑别人权限，则不返回非自己的内容
+    const hasEditOthersCapability = await this.hasCapability(UserCapability.EditOthersTemplates, requestUserId)
+      .then(() => true)
+      .catch(() => false);
+
+    if (!hasEditOthersCapability) {
+      andWhere.push({
+        author: requestUserId,
+      });
+    }
+
+    // 如果没有编辑私有权限，则不返回非自己私有的内容
+    const hasEditPrivateCapability = await this.hasCapability(UserCapability.EditPrivateTemplates, requestUserId)
+      .then(() => true)
+      .catch(() => false);
+
+    if (!hasEditPrivateCapability) {
+      andWhere.push({
+        [Op.not]: {
+          status: TemplateStatus.Private,
+          author: {
+            [Op.ne]: requestUserId,
+          },
+        },
+      });
+    }
+
+    // 不返回非自己草稿、垃圾箱的内容
+    andWhere.push({
+      [Op.not]: {
+        status: [TemplateStatus.Draft, TemplateStatus.Trash],
+        author: {
+          [Op.ne]: requestUserId,
+        },
+      },
+    });
+
+    return this.models.Templates.count({
+      attributes: ['status'],
+      where,
+      group: 'status',
+    });
   }
 
   /**
@@ -903,23 +840,29 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     const andWhere: WhereOptions<Attributes<Templates>>[] = [];
     const where: WhereOptions<Attributes<Templates>> = {
       type,
+      status: {
+        // 不包含所有的操作时的状态
+        [Op.notIn]: TemplateOperateStatus,
+      },
       [Op.and]: andWhere,
     };
-    const { keywordField = 'title' } = query;
-    if (query.keyword) {
+    const { keywordField = 'title', keyword, author, status, date, taxonomies = [] } = query;
+
+    if (keyword) {
       andWhere.push({
         [keywordField]: {
-          [Op.like]: `%${query.keyword}%`,
+          [Op.like]: `%${keyword}%`,
         },
       });
     }
-    if (query.author) {
+
+    if (author) {
       andWhere.push({
-        author: query.author,
+        author,
       });
     }
 
-    if (query.date) {
+    if (date) {
       andWhere.push(
         this.sequelize.where(
           // TODO: 只支持 mssql 和 mysql
@@ -932,14 +875,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
                   this.col('createdAt', this.models.Templates),
                   112,
                 ),
-                query.date.length,
+                date.length,
               )
             : this.sequelize.fn(
                 'DATE_FORMAT',
                 this.col('createdAt', this.models.Templates),
-                query.date.length === 4 ? '%Y' : query.date.length === 6 ? '%Y%m' : '%Y%m%d',
+                date.length === 4 ? '%Y' : date.length === 6 ? '%Y%m' : '%Y%m%d',
               ),
-          query.date,
+          date,
         ),
       );
     }
@@ -950,22 +893,50 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         status: TemplateStatus.Publish,
       });
     } else {
-      if (query.status) {
+      // 如果没有编辑别人权限，则不返回非自己的内容
+      const hasEditOthersCapability = await this.hasCapability(UserCapability.EditOthersTemplates, requestUserId)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!hasEditOthersCapability) {
         andWhere.push({
-          status: query.status,
+          author: requestUserId,
         });
-      } else {
-        // All 时排除 操作状态下的所有状态和 trash 状态
-        // 及操作状态下的所有状态
+      }
+
+      // 如果没有编辑私有权限，则不返回非自己私有的内容
+      const hasEditPrivateCapability = await this.hasCapability(UserCapability.EditPrivateTemplates, requestUserId)
+        .then(() => true)
+        .catch(() => false);
+
+      if (!hasEditPrivateCapability) {
         andWhere.push({
-          status: {
-            [Op.notIn]: [TemplateStatus.Trash, ...TemplateOperateStatus],
+          [Op.not]: {
+            status: TemplateStatus.Private,
+            author: {
+              [Op.ne]: requestUserId,
+            },
           },
+        });
+      }
+
+      // 不返回非自己草稿、垃圾箱的内容
+      andWhere.push({
+        [Op.not]: {
+          status: [TemplateStatus.Draft, TemplateStatus.Trash],
+          author: {
+            [Op.ne]: requestUserId,
+          },
+        },
+      });
+
+      if (status) {
+        andWhere.push({
+          status,
         });
       }
     }
 
-    const { taxonomies = [] } = query;
     for (const { id: taxonomyId, name: taxonomyName, type: taxonomyType } of taxonomies as Array<{
       id?: number;
       name?: string;
@@ -1032,11 +1003,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       limit,
       order: [
         // 根据 keyword 匹配程度排序
-        !!query.keyword && [
-          this.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
-        WHEN ${keywordField} LIKE '${query.keyword}%' THEN 1
-        WHEN ${keywordField} LIKE '%${query.keyword}%' THEN 2
-        WHEN ${keywordField} LIKE '%${query.keyword}' THEN 3
+        !!keyword && [
+          this.sequelize.literal(`CASE WHEN ${keywordField} = '${keyword}' THEN 0
+        WHEN ${keywordField} LIKE '${keyword}%' THEN 1
+        WHEN ${keywordField} LIKE '%${keyword}%' THEN 2
+        WHEN ${keywordField} LIKE '%${keyword}' THEN 3
         ELSE 4 END`),
           'ASC',
         ],
@@ -1047,6 +1018,47 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       rows: rows.map((row) => row.toJSON()),
       total,
     }));
+  }
+
+  /**
+   * 获取修改历史记录数量
+   * @author Hubert
+   * @since 20203-09-14
+   * @param id Template id
+   */
+  getRevisionCount(id: number) {
+    return this.models.Templates.count({
+      where: {
+        type: TemplatePresetType.Revision,
+        parentId: id,
+      },
+    });
+  }
+
+  /**
+   * 获取修改历史记录列表
+   * @author Hubert
+   * @since 20203-09-14
+   * @param id Template id
+   * @param fields 返回字段
+   * @param requestUserId 请求的用户ID
+   */
+  async getRevisions(id: number, fields: string[], requestUserId: number) {
+    const template = await this.models.Templates.findByPk(id, {
+      attributes: ['id', 'type', 'status', 'author'],
+    });
+    if (!template) return [];
+
+    // 需要有编辑权限才可以查看
+    await this.hasEditCapability(template, requestUserId);
+
+    return this.models.Templates.findAll({
+      attributes: this.filterFields(fields, this.models.Templates),
+      where: {
+        type: TemplatePresetType.Revision,
+        parentId: id,
+      },
+    }).then((templates) => templates.map((template) => template.toJSON<TemplateModel>()));
   }
 
   /**
@@ -1112,32 +1124,21 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     }
 
     // 具有编辑权限才可以新建
-    const editCapability =
-      type === TemplatePresetType.Form
-        ? UserCapability.EditPosts
-        : type === TemplatePresetType.Page
-        ? UserCapability.EditPages
-        : type === TemplatePresetType.Form
-        ? UserCapability.EditForms
-        : null;
-    editCapability && (await this.hasCapability(editCapability, requestUserId, true));
+    await this.hasCapability(UserCapability.EditTemplates, requestUserId);
 
-    // 是否有发布的权限
-    const publishCapability =
-      type === TemplatePresetType.Post
-        ? UserCapability.PublishPosts
-        : type === TemplatePresetType.Page
-        ? UserCapability.PublishPages
-        : type === TemplatePresetType.Form
-        ? UserCapability.PublishForms
-        : null;
-    if (model.status === TemplateStatus.Publish && publishCapability) {
-      await this.hasCapability(publishCapability, requestUserId, true);
+    if (model.status === TemplateStatus.Publish || model.status === TemplateStatus.Future) {
+      // 具有发布权限才可以直接创建发布状态的内容
+      await this.hasCapability(UserCapability.PublishTemplates, requestUserId);
+    } else if (model.status === TemplateStatus.Trash) {
+      // Trash 状态不允许直接创建
+      throw new ForbiddenError(
+        this.translate('datasource.template.trash_status_forbidden_in_creation', 'Do not create "trash" content!'),
+      );
     }
 
-    const { content, commentStatus, metas, ...restModel } = model;
-    const status = model.status ?? TemplateStatus.AutoDraft; // 默认为 auto draft
-    const name = await this.fixName(((restModel as any).name || model.title) ?? '', type); // name 需要取唯一
+    const { status = TemplateStatus.AutoDraft, content, commentStatus, metas, ...restModel } = model;
+
+    const name = await this.fixName(model.name || model.title || '', type); // name 需要取唯一
     const title =
       model.title ?? status === TemplateStatus.AutoDraft
         ? this.translate('datasource.template.status.auto_draft', 'Auto Draft')
@@ -1196,6 +1197,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     // 不可以是操作状态
     if (model.status) {
       await this.checkOperateStatus(model.status);
+
+      // 具有发布权限才可以发布内容
+      if (model.status === TemplateStatus.Publish || model.status === TemplateStatus.Future) {
+        await this.hasCapability(UserCapability.PublishTemplates, requestUserId);
+      }
     }
 
     const template = await this.models.Templates.findByPk(id);
@@ -1206,7 +1212,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         throw new ForbiddenError(
           this.translate(
             'datasource.template.update_forbidden_in_trash_status',
-            `It is in "trush" status, use "restore" function first!`,
+            `Do not update content that status is in "trash"!`,
           ),
         );
       }
@@ -1313,7 +1319,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         throw new ForbiddenError(
           this.translate(
             'datasource.template.update_forbidden_in_trash_status',
-            `It is in "trush" status, use "restore" function first!`,
+            `Do not update content that status is in "trash"!`,
           ),
         );
       }
@@ -1340,11 +1346,16 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUserId 请求的用户ID
    */
   async updateStatus(id: number, status: TemplateStatus, requestUserId: number): Promise<void> {
+    // 不可以是操作状态
+    await this.checkOperateStatus(status);
+
+    // 具有发布权限才可以发布内容
+    if (status === TemplateStatus.Publish || status === TemplateStatus.Future) {
+      await this.hasCapability(UserCapability.PublishTemplates, requestUserId);
+    }
+
     const template = await this.models.Templates.findByPk(id);
     if (template) {
-      // 不可以是操作状态
-      await this.checkOperateStatus(status);
-
       // 状态相同，忽略
       if (template.status === status) {
         return;
@@ -1356,7 +1367,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         throw new ForbiddenError(
           this.translate(
             'datasource.template.update_forbidden_in_trash_status',
-            `It is in "trush" status, use "restore" function first!`,
+            `Do not update content that status is in "trash"!`,
           ),
         );
       }
@@ -1405,6 +1416,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     // 不可以是操作状态
     await this.checkOperateStatus(status);
 
+    // 具有发布权限才可以发布内容
+    if (status === TemplateStatus.Publish || status === TemplateStatus.Future) {
+      await this.hasCapability(UserCapability.PublishTemplates, requestUserId);
+    }
+
     const templates = await this.models.Templates.findAll({
       where: {
         id: ids,
@@ -1420,7 +1436,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       throw new ForbiddenError(
         this.translate(
           'datasource.template.bulk_update_forbidden_in_trash_status',
-          `Id(s} "${ids}" are in "trush" status, use "restore" function first!`,
+          `Do not update content that status is in "trash", Id(s}: "${ids}"!`,
           { ids },
         ),
       );
@@ -1506,11 +1522,20 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     const template = await this.models.Templates.findByPk(id);
     if (template) {
       if (template.status !== TemplateStatus.Trash) {
-        return;
+        throw new ForbiddenError(
+          this.translate(
+            'datasource.template.restore_forbidden_not_in_trash_status',
+            `Do not restore content that status is not in "trash"!`,
+          ),
+        );
+      } else if (template.author !== requestUserId) {
+        throw new ForbiddenError(
+          this.translate(
+            'datasource.template.restore_forbidden_not_author',
+            `Do not restore content that is not yours!`,
+          ),
+        );
       }
-
-      // 是否有编辑权限
-      await this.hasEditCapability(template, requestUserId);
 
       template.status = (metaStatus?.metaValue as TemplateStatus) ?? TemplateStatus.Draft; // 默认恢复为为 draft
       const t = await this.sequelize.transaction();
@@ -1560,8 +1585,21 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     // 权限判断
     await Promise.all(
       templates.map(async (template) => {
-        // 是否有编辑权限
-        await this.hasEditCapability(template, requestUserId);
+        if (template.status !== TemplateStatus.Trash) {
+          throw new ForbiddenError(
+            this.translate(
+              'datasource.template.restore_forbidden_not_in_trash_status',
+              `Do not restore content that status is not in "trash"!`,
+            ),
+          );
+        } else if (template.author !== requestUserId) {
+          throw new ForbiddenError(
+            this.translate(
+              'datasource.template.restore_forbidden_not_author',
+              `Do not restore content that is not yours!`,
+            ),
+          );
+        }
       }),
     );
 
@@ -1625,7 +1663,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       // 非 trash 状态下不可以删除
       if (template.status !== TemplateStatus.Trash) {
         throw new ForbiddenError(
-          this.translate('datasource.template.delete_forbidden_not_in_trash_status', `Must be in "trash" status!`),
+          this.translate(
+            'datasource.template.delete_forbidden_not_in_trash_status',
+            `Do not delete content that status is not in "trash"!`,
+          ),
         );
       }
 
@@ -1688,7 +1729,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       throw new ForbiddenError(
         this.translate(
           'datasource.template.bulk_delete_forbidden_not_in_trash_status',
-          `Id(s} "${ids}" must be in "trash" status!`,
+          `Do not delete content that status is not in "trash", Id(s}: "${ids}"!`,
           { ids },
         ),
       );

@@ -114,7 +114,7 @@ export default defineComponent({
           ).then(() => {
             form.reset('*');
 
-            result?.redirect && localtionMixin.goTo(result?.redirect, true);
+            result?.redirect && locationMixin.goTo(result?.redirect, true);
           });
         })
         .catch((err) => {

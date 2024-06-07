@@ -137,10 +137,10 @@ export class FormTemplateController extends BaseController {
   }
 
   /**
-   * Get paged form template model
+   * Get paged form templates
    */
   @Get()
-  @Anonymous()
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
     description: 'Paged from template models',
     type: () => createResponseSuccessType({ data: PagedFormTemplateResp }, 'PagedFormTemplateSuccessResp'),

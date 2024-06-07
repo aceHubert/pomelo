@@ -21,7 +21,7 @@ export class PagedUserQueryDto extends PagedUserArgsValidator {
   status?: UserStatus;
 
   /**
-   * User Role, set null to filter none role users
+   * User Role
    */
   capabilities?: UserRole;
 

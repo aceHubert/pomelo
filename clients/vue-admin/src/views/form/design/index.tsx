@@ -26,6 +26,7 @@ import { useConfigProvider, expose } from 'antdv-layout-pro/shared';
 import { Theme } from 'antdv-layout-pro/types';
 import {
   TemplateStatus,
+  UserCapability,
   OptionPresetKeys,
   getFrameworkSchema,
   toFrameworkContent,
@@ -35,7 +36,7 @@ import { trailingSlash, equals, warn } from '@ace-util/core';
 import { Modal, message } from '@/components';
 import { useTemplateApi, useFormApi, FormMetaPresetKeys } from '@/fetch/apis';
 import { useI18n, useUserManager, useOptions } from '@/hooks';
-import { useDesignerMixin, useFormilyMixin, useLocationMixin } from '@/mixins';
+import { useUserMixin, useDesignerMixin, useFormilyMixin, useLocationMixin } from '@/mixins';
 import { safeJSONParse } from '@/utils';
 import IconLinkExternal from '@/assets/icons/link-external.svg?inline';
 import { MediaList } from '../../media/components';
@@ -117,9 +118,10 @@ export default defineComponent({
     const i18n = useI18n();
     const configProvider = useConfigProvider();
     const userManager = useUserManager();
+    const homeUrl = useOptions(OptionPresetKeys.Home);
+    const userMixin = useUserMixin();
     const designerMixin = useDesignerMixin();
     const locationMixin = useLocationMixin();
-    const homeUrl = useOptions(OptionPresetKeys.Home);
     const templateApi = useTemplateApi();
     const formApi = useFormApi();
 
@@ -198,8 +200,11 @@ export default defineComponent({
     });
 
     const actionCapability = reactive<Required<ActionCapability>>({
-      operate: false,
-      publish: false,
+      canEdit: false,
+      canEditPublished: false,
+      canDelete: false,
+      canDeletePublished: false,
+      canPublish: false,
     });
 
     const isSelfContentRef = ref(false);
@@ -247,7 +252,7 @@ export default defineComponent({
             return form;
           } else {
             message.error('表单不存在', () => {
-              router.replace({ name: ' forms' });
+              router.replace({ name: 'forms' });
             });
             return;
           }
@@ -302,18 +307,34 @@ export default defineComponent({
       actionStatus.changed = false;
       actionStatus.disabledActions = false;
 
-      // TODO: 设置条件管理员权限
-      if (user?.profile.role === 'administrator') {
-        actionCapability.operate = true;
-        actionCapability.publish = true;
-      } else {
-        // 只能操作自己的
-        if (user?.profile.sub === String(form.author)) {
-          actionCapability.operate = true;
+      let hasPermission = (_: UserCapability) => false;
+      if (user?.profile.role) {
+        const role = userMixin.getRole(user.profile.role);
+        hasPermission = role.hasPermission.bind(undefined);
+      }
+
+      actionCapability.canEdit = hasPermission(UserCapability.EditTemplates);
+      actionCapability.canEditPublished = hasPermission(UserCapability.EditPublishedTemplates);
+      actionCapability.canDelete = hasPermission(UserCapability.DeleteTemplates);
+      actionCapability.canDeletePublished = hasPermission(UserCapability.DeletePublishedTemplates);
+      actionCapability.canPublish = hasPermission(UserCapability.PublishTemplates);
+
+      if (user?.profile.sub !== form.author?.id) {
+        actionCapability.canEdit = actionCapability.canEdit && hasPermission(UserCapability.EditOthersTemplates);
+
+        if (status === TemplateStatus.Private) {
+          actionCapability.canDelete = actionCapability.canEdit && hasPermission(UserCapability.EditPrivateTemplates);
+        }
+
+        actionCapability.canDelete = actionCapability.canDelete && hasPermission(UserCapability.DeleteOthersTemplates);
+
+        if (actionCapability.canDelete && status === TemplateStatus.Private) {
+          actionCapability.canDelete =
+            actionCapability.canDelete && hasPermission(UserCapability.DeletePrivateTemplates);
         }
       }
 
-      isSelfContentRef.value = user?.profile.sub === String(form.author);
+      isSelfContentRef.value = user?.profile.sub === String(form.author?.id);
 
       // cache content when schema framework changed
       watch(schemaFrameworkRef, (value, old) => {
@@ -512,7 +533,7 @@ export default defineComponent({
                   </Collapse.Panel>
                   {settingsDisplayRef.value.includes(Settings.FixedLink) && (
                     <Collapse.Panel header={i18n.tv('page_templates.fixed_link_label', '固定链接')}>
-                      <p>{i18n.tv('page_templates.posts.design.view', '查看文章')}</p>
+                      <p>{i18n.tv('page_templates.forms.design.view', '查看表单')}</p>
                       <a href={fixedLinkRef.value} class={classes.fixedLink} target="preview">
                         {fixedLinkRef.value}
                         <Icon component={IconLinkExternal} class="ml-1" />
@@ -564,7 +585,7 @@ export default defineComponent({
                           size="small"
                           pageSize={9}
                           showSizeChanger={false}
-                          objectPrefixKey="templates/post_"
+                          objectPrefixKey="templates/form_"
                           onSelect={(path, media) => {
                             formData.featureImage = JSON.stringify({
                               id: media.id,

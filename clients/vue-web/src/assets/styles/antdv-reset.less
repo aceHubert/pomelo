@@ -248,6 +248,10 @@ h1, h2, h3, h4, h5, h6 {
 
 // Button
 // ---
+// for compatible
+@btn-ghost-color: @text-color;
+@btn-ghost-bg: transparent;
+@btn-ghost-border: @border-color-base;
 .button-disabled(@color: @btn-disable-color, @background: @btn-disable-bg, @border: @btn-disable-border) {
   &-disabled,
   &.disabled,
@@ -339,6 +343,13 @@ h1, h2, h3, h4, h5, h6 {
 .btn-ghost() {
   .button-variant-other(@btn-ghost-color, @btn-ghost-bg, @btn-ghost-border);
 }
+.btn-dashed() {
+  .button-variant-other(@btn-default-color, @btn-default-bg, @btn-default-border);
+  border-style: dashed;
+}
+.btn-danger() {
+  .button-variant-primary(@btn-danger-color, @btn-danger-bg);
+}
 .btn-link() {
   .button-variant-other(@link-color, transparent, transparent, @link-hover-color, @link-active-color);
   &:hover,
@@ -354,6 +365,18 @@ h1, h2, h3, h4, h5, h6 {
 
   &-primary {
     .btn-primary;
+  }
+
+  &-ghost {
+    .btn-ghost;
+  }
+
+  &-dashed {
+    .btn-dashed;
+  }
+
+  &-danger{
+    .btn-danger;
   }
 
   &-link {

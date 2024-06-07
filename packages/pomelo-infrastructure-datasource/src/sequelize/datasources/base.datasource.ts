@@ -1,4 +1,4 @@
-import { kebabCase } from 'lodash';
+import { words, capitalize } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { ModuleRef } from '@nestjs/core';
 import { Logger, OnModuleInit } from '@nestjs/common';
@@ -223,43 +223,44 @@ export abstract class BaseDataSource implements OnModuleInit {
    * 验证用户是否有功能操作权限
    * @param capability 验证的功能
    * @param requestUserId 请求的用户ID
-   * @param callbackOrThrow 当为 function 时如果验证不过参数 error 将是 ForbiddenError，否则为null; 为 ture 时，验证不过则抛出异常
+   * @param callback 当为 function 时如果验证不过参数 error 将是 ForbiddenError，否则为null;
    */
-  protected async hasCapability(capability: UserCapability, requestUserId: number): Promise<boolean>;
+  protected async hasCapability(capability: UserCapability, requestUserId: number): Promise<void>;
   protected async hasCapability(
     capability: UserCapability,
     requestUserId: number,
-    callbackOrThrow: true | ((error: Error | null) => void),
+    callback: (error?: Error) => void,
   ): Promise<void>;
   protected async hasCapability(
     capability: UserCapability,
     requestUserId: number,
-    callbackOrThrow?: true | ((error: Error | null) => void),
-  ): Promise<boolean | void> {
+    callback?: (error?: Error) => void,
+  ): Promise<void> {
     const userRoleCapabilities = await this.getUserCapabilities(requestUserId);
     const result = userRoleCapabilities.some((userCapability) => userCapability === capability);
 
-    if (callbackOrThrow) {
-      const callback =
-        typeof callbackOrThrow === 'function'
-          ? callbackOrThrow
-          : (error: Error | null) => {
-              if (error) throw error;
-            };
-
-      return callback(
-        !result
-          ? new ForbiddenError(
-              this.translate(
-                'datasource.error.forbidden_capability',
-                `Access denied, You don't have capability "${kebabCase(capability)}" for this action!`,
-                { requiredCapability: kebabCase(capability) },
-              ),
-            )
-          : null,
+    if (!result) {
+      const requiredCapability = this.translate(
+        `datasource.user_capability.${capability}`,
+        words(capability, /[^_]+/g)
+          .map((word) => capitalize(word))
+          .join(' '),
       );
+      const error = new ForbiddenError(
+        this.translate(
+          'datasource.error.forbidden_capability',
+          `Access denied, You don't have capability "${requiredCapability}" for this action!`,
+          { requiredCapability },
+        ),
+      );
+
+      if (callback) {
+        return callback(error);
+      } else {
+        return Promise.reject(error);
+      }
     } else {
-      return result;
+      callback?.();
     }
   }
 

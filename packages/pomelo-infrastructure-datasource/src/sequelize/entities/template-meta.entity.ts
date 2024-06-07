@@ -13,7 +13,7 @@ export default class TemplateMeta extends Model<
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
+  const isMysql = sequelize.getDialect() === 'mysql';
   TemplateMeta.init(
     {
       id: {
@@ -39,7 +39,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
     {
       sequelize,
       tableName: `${prefix}templatemeta`,
-      indexes: [{ name: 'template_id_vs_meta_key', fields: ['template_id', 'meta_key'], unique: true }],
+      indexes: [{ name: 'template_meta_keys', fields: ['template_id', 'meta_key'], unique: true }],
       createdAt: false,
       updatedAt: false,
       comment: 'Template metas',

@@ -4,7 +4,7 @@ import { useResApi } from '@/fetch/apis';
 // Types
 import type { FileUploadOptions } from '@/fetch/apis';
 
-export const useUpload = () => {
+export const useUploadMixin = () => {
   const resApi = useResApi();
 
   const uploadProcessData = ref<[number, number][]>([]);

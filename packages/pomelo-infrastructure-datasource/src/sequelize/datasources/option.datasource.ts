@@ -64,7 +64,7 @@ export class OptionDataSource extends BaseDataSource {
   /**
    * 获取应用程序启动里需要加载的配置项（内存缓存，修改时重新加载）
    */
-  getAutoloadOptions(): Promise<Record<string, string>> {
+  getAutoloads(): Promise<Record<string, string>> {
     return this.autoloadOptions;
   }
 
@@ -73,7 +73,7 @@ export class OptionDataSource extends BaseDataSource {
    * 反回第一个匹配name(优先查找带有tablePrefix)的值
    * @param optionName optionName
    */
-  getOptionValue<V extends string>(optionName: string): Promise<V | undefined> {
+  getValue<V extends string>(optionName: string): Promise<V | undefined> {
     return this.getOption<V>(optionName);
   }
 
@@ -97,7 +97,7 @@ export class OptionDataSource extends BaseDataSource {
    * @param requestUserId 请求用户 Id
    */
   async create(model: NewOptionInput, requestUserId: number): Promise<OptionModel> {
-    await this.hasCapability(UserCapability.ManageOptions, requestUserId, true);
+    await this.hasCapability(UserCapability.ManageOptions, requestUserId);
 
     if (await this.isExists(model.optionName)) {
       throw new ValidationError(
@@ -119,7 +119,7 @@ export class OptionDataSource extends BaseDataSource {
    * @param requestUserId 请求用户 Id
    */
   async update(id: number, model: UpdateOptionInput, requestUserId: number): Promise<void> {
-    await this.hasCapability(UserCapability.ManageOptions, requestUserId, true);
+    await this.hasCapability(UserCapability.ManageOptions, requestUserId);
 
     await this.models.Options.update(model, {
       where: { id },
@@ -140,7 +140,7 @@ export class OptionDataSource extends BaseDataSource {
    * @param requestUserId 请求用户 Id
    */
   async delete(id: number, requestUserId: number): Promise<void> {
-    await this.hasCapability(UserCapability.ManageOptions, requestUserId, true);
+    await this.hasCapability(UserCapability.ManageOptions, requestUserId);
 
     await this.models.Options.destroy({
       where: { id },

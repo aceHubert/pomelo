@@ -5,7 +5,7 @@ import { VoidResolver } from 'graphql-scalars';
 import { Authorized } from '@ace-pomelo/nestjs-oidc';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { Fields, User, RequestUser, md5 } from '@ace-pomelo/shared-server';
-import { UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { OptionDataSource, UserDataSource, UserStatus, OptionPresetKeys } from '@ace-pomelo/infrastructure-datasource';
 import { UserAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { NewUserInput } from './dto/new-user.input';
@@ -33,7 +33,11 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     return RamAuthorized(ramAction);
   },
 }) {
-  constructor(protected readonly moduleRef: ModuleRef, private readonly userDataSource: UserDataSource) {
+  constructor(
+    protected readonly moduleRef: ModuleRef,
+    private readonly optionDataSource: OptionDataSource,
+    private readonly userDataSource: UserDataSource,
+  ) {
     super(moduleRef);
   }
 
@@ -67,9 +71,19 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Args('model', { type: () => NewUserInput }) input: NewUserInput,
     @User() requestUser: RequestUser,
   ): Promise<UserModel> {
+    let capabilities = input.capabilities;
+    if (!capabilities) {
+      capabilities = await this.optionDataSource.getValue(OptionPresetKeys.DefaultRole);
+    }
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
       await this.userDataSource.create(
-        { ...input, loginPwd: md5(input.loginPwd).toString(), niceName: input.loginName, displayName: input.loginName },
+        {
+          ...input,
+          loginPwd: md5(input.loginPwd).toString(),
+          niceName: input.loginName,
+          displayName: input.loginName,
+          capabilities,
+        },
         Number(requestUser.sub),
       );
 

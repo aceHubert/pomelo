@@ -5,7 +5,7 @@ import { createResource } from '@vue-async/resource-manager';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { message } from '@/components';
 import { useI18n } from '@/hooks';
-import { useUpload, useLocationMixin } from '@/mixins';
+import { useUploadMixin, useLocationMixin } from '@/mixins';
 import { useResApi } from '@/fetch/apis';
 import FileUnknownSvg from '@/assets/icons/file-unknown-fill.svg';
 import { MediaList } from './components';
@@ -26,7 +26,7 @@ export default defineComponent({
     const route = useRoute();
     const i18n = useI18n();
     const localtionMixin = useLocationMixin();
-    const uploadMixin = useUpload();
+    const uploadMixin = useUploadMixin();
     const resApi = useResApi();
 
     const searchQuery = computed(() => {

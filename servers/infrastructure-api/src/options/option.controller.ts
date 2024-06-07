@@ -38,7 +38,7 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: {} }, 'AutoloadOptionsModelsSuccessResp'),
   })
   async getAutoloadOptions() {
-    const result = await this.optionDataSource.getAutoloadOptions();
+    const result = await this.optionDataSource.getAutoloads();
     return this.success({
       data: result,
     });
@@ -79,7 +79,7 @@ export class OptionController extends BaseController {
   })
   @ApiNoContentResponse({ description: 'Option not found' })
   async getValue(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
-    const value = await this.optionDataSource.getOptionValue(name);
+    const value = await this.optionDataSource.getValue(name);
     if (value === undefined) {
       res.status(HttpStatus.NO_CONTENT);
     }

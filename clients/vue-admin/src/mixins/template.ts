@@ -95,7 +95,7 @@ export const useTemplateMixin = () => {
     ];
 
     // 我的数量大于0并且不等于所有的数量里显示
-    if (selfCount.value > 0 && selfCount.value - trushCount !== allCount) {
+    if (selfCount.value > 0 && (trushCount === 0 || selfCount.value - trushCount !== allCount)) {
       options.splice(1, 0, {
         value: { self: '' },
         label: i18n.tv('page_templates.status_options.self', '我的') as string,
@@ -264,12 +264,6 @@ export const useTemplateMixin = () => {
             };
           },
         })
-        .then(({ result }) => {
-          if (!result) {
-            message.error(i18n.tv('page_templates.error.move_to_trash_faild.default', '放入回收站失败！') as string);
-          }
-          return result;
-        })
         .catch((err) => {
           message.error(
             i18n.tv('page_templates.error.move_to_trash_faild.with_message', `放入回收站失败, ${err.message}！`, {
@@ -290,12 +284,6 @@ export const useTemplateMixin = () => {
               set(record!, 'deleting', false);
             };
           },
-        })
-        .then(({ result }) => {
-          if (!result) {
-            message.error(i18n.tv('common.error.delete_faild.default', '删除失败！') as string);
-          }
-          return result;
         })
         .catch((err) => {
           message.error(
@@ -324,12 +312,6 @@ export const useTemplateMixin = () => {
             set(record!, 'restoring', false);
           };
         },
-      })
-      .then(({ result }) => {
-        if (!result) {
-          message.error(i18n.tv('page_templates.error.restore_faild.default', '重置失败！') as string);
-        }
-        return result;
       })
       .catch((err) => {
         message.error(
@@ -381,14 +363,8 @@ export const useTemplateMixin = () => {
         ? templateApi.bulkRestore({ variables: { ids } })
         : action === BulkActions.Delete
         ? templateApi.bulkDelete({ variables: { ids } })
-        : Promise.resolve({ result: false })
+        : Promise.resolve({ result: null })
     )
-      .then(({ result }) => {
-        if (!result) {
-          message.error(i18n.tv('common.error.bluk_apply_faild.default', '批量操作失败') as string);
-        }
-        return result;
-      })
       .catch((err) => {
         message.error(
           i18n.tv('common.error.bluk_apply_faild.with_message', `批量操作失败，错误：${err.message}!`, {

@@ -71,7 +71,7 @@ export class LinkDataSource extends BaseDataSource {
     if (link) {
       // 非本人创建的是否可编辑
       if (link.userId !== requestUserId) {
-        await this.hasCapability(UserCapability.ManageLinks, requestUserId, true);
+        await this.hasCapability(UserCapability.ManageLinks, requestUserId);
       }
 
       await this.models.Links.update(model, {
@@ -96,7 +96,7 @@ export class LinkDataSource extends BaseDataSource {
     if (link) {
       // 非本人创建的是否可删除
       if (link.userId !== requestUserId) {
-        await this.hasCapability(UserCapability.ManageLinks, requestUserId, true);
+        await this.hasCapability(UserCapability.ManageLinks, requestUserId);
       }
 
       await link.destroy();

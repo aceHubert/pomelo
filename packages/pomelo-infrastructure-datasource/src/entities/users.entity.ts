@@ -6,8 +6,8 @@ export interface UserAttributes {
   loginPwd: string;
   niceName: string;
   displayName: string;
-  mobile: string;
-  email: string;
+  mobile?: string;
+  email?: string;
   url: string;
   status: number;
   updatedAt: Date;
