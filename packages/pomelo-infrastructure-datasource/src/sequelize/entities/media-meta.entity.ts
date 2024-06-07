@@ -11,7 +11,7 @@ export default class MediaMeta extends Model<MediaMetaAttributes, Omit<MediaMeta
 }
 
 export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
+  const isMysql = sequelize.getDialect() === 'mysql';
   MediaMeta.init(
     {
       id: {
@@ -37,10 +37,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
     {
       sequelize,
       tableName: `${prefix}mediameta`,
-      indexes: [
-        { name: 'media_id', fields: ['media_id'] },
-        { name: 'meta_key', fields: ['meta_key'] },
-      ],
+      indexes: [{ name: 'media_meta_keys', fields: ['media_id', 'meta_key'], unique: true }],
       createdAt: false,
       updatedAt: false,
       comment: 'Media metas',

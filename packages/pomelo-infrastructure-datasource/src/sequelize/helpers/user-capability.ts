@@ -27,45 +27,21 @@ export enum UserCapability {
   DeleteUsers = 'delete_users', // 删除用户
   PromoteUser = 'promote_users', // 升级用户权限
 
-  // posts
-  EditPosts = 'edit_posts', // 编辑（包括新建）文章
-  EditOthersPosts = 'edit_others_post', // 编辑别人的文章
-  EditPublishedPosts = 'edit_published_posts', // 编辑发布的文章
-  EditPrivatePosts = 'edit_private_posts', // 编辑私有（别人）的文章
-  DeletePosts = 'delete_posts', // 删除文章
-  DeleteOthersPosts = 'delete_others_posts', // 删除别人的文章
-  DeletePublishedPosts = 'delete_published_posts', // 删除发布的文章
-  DeletePrivatePosts = 'delete_private_posts', // 删除私有（别人）的方是
-  PublishPosts = 'publish_posts', // 发布审核（别人的）文章
+  // templates
+  EditTemplates = 'edit_templates', // 编辑（包括新建）模版
+  EditOthersTemplates = 'edit_others_templates', // 编辑别人的模版
+  EditPublishedTemplates = 'edit_published_templates', // 编辑发布的模版
+  EditPrivateTemplates = 'edit_private_templates', // 编辑私有（别人）的模版
+  DeleteTemplates = 'delete_templates', // 删除模版
+  DeleteOthersTemplates = 'delete_others_templates', // 删除别人的模版
+  DeletePublishedTemplates = 'delete_published_templates', // 删除发布的模版
+  DeletePrivateTemplates = 'delete_private_templates', // 删除私有（别人）的模版
+  PublishTemplates = 'publish_templates', // 发布审核（别人的）模版
   ModerateComments = 'moderate_comments', // 修改评论
 
-  // pages
-  EditPages = 'edit_pages', // 编辑（包括新建）页面
-  EditOthersPages = 'edit_others_pages', // 编辑别人的页面
-  EditPublishedPages = 'edit_published_pages', // 编辑发布的页面
-  EditPrivatePages = 'edit_private_pages', // 编辑私有（别人）的页面
-  DeletePages = 'delete_pages', // 删除页面
-  DeleteOthersPages = 'delete_others_pages', // 删除别人的页面
-  DeletePublishedPages = 'delete_published_pages', // 删除发布的页面
-  DeletePrivatePages = 'delete_private_pages', // 删除私有（别人）的页面
-  PublishPages = 'publish_pages', // 发布审核（别人的）页面
-
-  // form
-  EditForms = 'edit_forms', // 编辑（包括新建）表单
-  EditOthersForms = 'edit_others_forms', // 编辑别人的表单
-  EditPublishedForms = 'edit_published_forms', // 编辑发布的表单
-  EditPrivateForms = 'edit_private_forms', // 编辑私有（别人）的表单
-  DeleteForms = 'delete_forms', // 删除表单
-  DeleteOthersForms = 'delete_others_forms', // 删除别人的表单
-  DeletePublishedForms = 'delete_published_forms', // 删除发布的表单
-  DeletePrivateForms = 'delete_private_forms', // 删除私有（别人）的表单
-  PublishForms = 'publish_forms', // 发布审核（别人的）表单
-
   // read
-  Read = 'read', // 读取文章、页面
-  ReadPrivatePosts = 'read_private_posts', // 读取私有的文章
-  ReadPrivatePages = 'read_private_pages', // 读取私有的文章
-  ReadPrivateForms = 'read_private_forms', // 读取私有的文章
+  Read = 'read', // 读取模版
+  ReadPrivate = 'read_private', // 读取私有的模版
 
   // others
   EditFiles = 'edit_files', // 编辑文件

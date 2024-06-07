@@ -35,8 +35,8 @@ export class DatabaseManager {
         timestamps: true,
         createdAt: true,
         updatedAt: true,
-        charset: options?.define?.charset || 'utf8',
-        collate: options?.define?.collate || '',
+        charset: options?.define?.charset || 'utf8mb4',
+        collate: options?.define?.collate || 'utf8mb4_unicode_520_ci',
       },
     });
     this.sequelize = typeof uri === 'string' ? new Sequelize(uri, this.options) : new Sequelize(this.options);

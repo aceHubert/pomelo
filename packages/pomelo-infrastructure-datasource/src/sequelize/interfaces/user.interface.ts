@@ -48,11 +48,9 @@ export interface PagedUserArgs extends PagedArgs {
   status?: UserStatus;
 
   /**
-   * 区分 null 和 undefined
-   * null表示搜索没有用户角色的；
-   * undefined 表示不限制用户角色
+   * 角色
    */
-  capabilities?: string | null;
+  capabilities?: string;
 }
 
 /**
@@ -93,15 +91,11 @@ export interface UpdateUserInput
   displayName?: string;
   nickName?: string;
   /**
-   * 区分 null 和 undefined
-   * null 表示重置为无任何用户角色；
-   * undefined 表示不修改用户角色
+   * 角色
    */
-  capabilities?: string | null;
+  capabilities?: string;
   /**
-   * 区分 null 和 undefined
-   * none 表示重置为使用站点默认语言
-   * undefined 表示不修改用户语言
+   * 用户语言
    */
-  locale?: string | null;
+  locale?: string;
 }
