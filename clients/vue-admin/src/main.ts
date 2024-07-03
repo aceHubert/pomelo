@@ -90,7 +90,7 @@ function auth(this: Vue, to: Route, from: Route, next: Next) {
       if (user === null || user.expired) {
         userManager.signin({
           noInteractive: true,
-          redirect_uri: `${window.location.origin}${to.fullPath}`,
+          redirect_uri: `${window.location.origin}${process.env.BASE_URL}${to.fullPath.slice(1)}`,
         });
       } else {
         // next();
