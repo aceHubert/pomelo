@@ -4,9 +4,9 @@ import { createUploadLink } from 'apollo-upload-client';
 import { createClient } from 'graphql-ws';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { onError } from '@apollo/client/link/error';
+import { absoluteGo } from '@ace-util/core';
 import { createUploadFetch, isServerError, isServerParseError } from '@ace-pomelo/shared-client';
-import { siteInitRequiredRef } from '@/shared';
-import { userManager } from '@/auth';
+import { auth } from '@/auth';
 import { i18n } from '@/i18n';
 
 // http link
@@ -38,8 +38,11 @@ export const createWebsocketLink = (url: string | (() => string | Promise<string
   new GraphQLWsLink(
     createClient({
       url,
+      retryAttempts: Infinity,
+      shouldRetry: () => true,
+      keepAlive: 10000,
       connectionParams: async () => {
-        const token = await userManager
+        const token = await auth.userManager
           .getUser()
           .then((user) => user?.access_token)
           .catch(() => '');
@@ -54,7 +57,7 @@ export const createWebsocketLink = (url: string | (() => string | Promise<string
 
 // set Authorization header
 export const authLink = setContext(async (operation, { headers, ...context }) => {
-  const accessToken = await userManager
+  const accessToken = await auth.userManager
     .getUser()
     .then((user) => user?.access_token)
     .catch(() => '');
@@ -84,8 +87,8 @@ const promiseToObservable = <T>(promise: Promise<T>, error?: (error: Error) => v
 export const errorLink = onError(({ networkError, graphQLErrors, operation, forward }) => {
   // 重试登录，refresh token 重新获取 access token，如果再不成功则退出重新登录
   const tryLogin = () => {
-    return promiseToObservable(userManager.signinSilent(), () => {
-      userManager.signin();
+    return promiseToObservable(auth.userManager.signinSilent(), () => {
+      auth.userManager.signin();
     }).flatMap((user) => {
       const headers = {
         ...operation.getContext().headers,
@@ -106,8 +109,8 @@ export const errorLink = onError(({ networkError, graphQLErrors, operation, forw
     ) {
       return tryLogin();
     } else if (graphQLErrors.some((err) => err.extensions?.siteInitRequired)) {
-      // 需要初始化数据库(graphql resolver执行中产生的错误)
-      siteInitRequiredRef.value = true;
+      // 需要初始化站点(graphql resolver执行中产生的错误)
+      absoluteGo(process.env.BASE_URL + 'initialize');
       return;
     }
   }
@@ -123,8 +126,8 @@ export const errorLink = onError(({ networkError, graphQLErrors, operation, forw
         typeof networkError.result !== 'string' &&
         networkError.result.siteInitRequired
       ) {
-        // 需要初始化(以 http code 返回，中间件优先于graphql resolver执行时产生的错误)
-        siteInitRequiredRef.value = true;
+        // 需要初始化站点(以 http code 返回，中间件优先于graphql resolver执行时产生的错误)
+        absoluteGo(process.env.BASE_URL + 'initialize');
         return;
       }
     }

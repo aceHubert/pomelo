@@ -12,19 +12,6 @@ const cdnConfig = {
   ],
   scripts: [
     {
-      packageName: 'vue-router',
-      variableName: 'VueRouter',
-      path: '/dist/vue-router.min.js',
-      defer: false,
-    },
-    {
-      packageName: 'vue-meta',
-      variableName: 'VueMeta',
-      path: '/dist/vue-meta.min.js',
-      defer: false,
-    },
-    // ↑↑↑ 以上添加在 Vue 前禁止 package 遇到 window.Vue 时会主动使用 Vue.use install执行 ↑↑↑
-    {
       // 通过 packageName 从 node_modules 获取版本并拼接上registey path
       packageName: 'vue',
       // 通过 variableName 设置 the webpack config's externals  { packageName: variableName }
@@ -40,6 +27,29 @@ const cdnConfig = {
       packageName: 'vue-demi',
       variableName: 'VueDemi',
       path: '/lib/index.iife.js',
+    },
+    // 以上包依赖 window.Vue, 在变成 Vue2 前引用
+    {
+      packageName: 'vue',
+      // vue-meta/vue-router ... 遇到 window.Vue 时会主动 install
+      // https://qiankun.umijs.org/zh/faq#vue-router-%E6%8A%A5%E9%94%99-uncaught-typeerror-cannot-redefine-property-router
+      variableName: 'Vue2',
+      path: '/static/js/cdn-compatible.js',
+      publicPath: (path, publicPath) => publicPath + path,
+      hash: true,
+      version: false,
+    },
+    {
+      packageName: 'vue-router',
+      variableName: 'VueRouter',
+      path: '/dist/vue-router.min.js',
+      defer: false,
+    },
+    {
+      packageName: 'vue-meta',
+      variableName: 'VueMeta',
+      path: '/dist/vue-meta.min.js',
+      defer: false,
     },
     {
       packageName: 'vue-i18n',

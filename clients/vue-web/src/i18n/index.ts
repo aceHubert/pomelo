@@ -1,8 +1,6 @@
 import Vue from 'vue';
 import VueI18n, { type IVueI18n } from 'vue-i18n';
 import { defaultSettings } from '@/configs/settings.config';
-import zhCN from './langs/zh-CN_basic.json';
-import enUS from './langs/en-US.json';
 
 Vue.use(VueI18n);
 
@@ -34,11 +32,12 @@ Object.defineProperties(VueI18n.prototype, {
 export const i18n = new VueI18n({
   locale: defaultSettings.language.defaultLocale,
   fallbackLocale: defaultSettings.language.fallbackLocale,
-  messages: {
-    'en-US': enUS,
-    'zh-CN': zhCN,
-  },
   silentFallbackWarn: process.env.NODE_ENV === 'production',
+  // set default support languages
+  messages: {
+    'zh-CN': {},
+    'en-US': {},
+  },
 }) as VueI18n & IVueI18n;
 
 export const supportLanguages = defaultSettings.language.supportLanguages.filter((item) =>

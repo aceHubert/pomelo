@@ -72,7 +72,6 @@ async function syncDatabase() {
         'ORIGIN',
         'http://localhost:' + configService.get<number>('webServer.port', 3000),
       );
-      const adminURL = configService.get('ADMIN_URL', origin + '/admin');
       const webURL = configService.get('WEB_URL', origin);
 
       await dbManager.initDatas({
@@ -185,34 +184,6 @@ async function syncDatabase() {
                 type: 'SharedSecret',
                 // XCy6KS_qTG
                 value: '4c2a29bf6b66c4174a121de5e62fb33a25cf123bdb01b9c96c8bbfa53a68b9b2',
-              },
-            ],
-          },
-          {
-            applicationType: 'web',
-            clientId: '35613c26-6a86-ba04-8ee0-6ced9688c75a',
-            clientName: 'Pomelo Admin Managment Web App',
-            accessTokenFormat: 'jwt',
-            requireAuthTime: true,
-            requirePkce: true,
-            tokenEndpointAuthMethod: 'none',
-            scopes: ['openid', 'profile', 'phone', 'email', 'offline_access'],
-            grantTypes: ['authorization_code', 'refresh_token'],
-            corsOrigins: adminURL ? [new URL(adminURL).origin] : [],
-            redirectUris: adminURL
-              ? [
-                  `${adminURL}/signin`,
-                  `${adminURL}/signin.html`,
-                  `${adminURL}/signin-silent`,
-                  `${adminURL}/signin-silent.html`,
-                ]
-              : [],
-            postLogoutRedirectUris: adminURL ? [adminURL] : [],
-            secrets: [
-              {
-                type: 'SharedSecret',
-                // GgXh3G-HEM
-                value: 'd57a107e52f6a0eef6105e7b1aecb42e28e54001295007dd8abfe2744d22ca38',
               },
             ],
           },

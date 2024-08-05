@@ -7,7 +7,7 @@ import { RouterView } from './components';
 import classes from './default.module.less';
 
 export default defineComponent({
-  name: 'BlankLayout',
+  name: 'BefaultLayout',
   setup() {
     const appMixin = useAppMixin();
     const deviceMixin = useDeviceMixin();
@@ -22,19 +22,14 @@ export default defineComponent({
         device={deviceMixin.device}
         i18nRender={(...args: Parameters<typeof i18n.tv>) => i18n.tv(...args) as string}
       >
-        {
-          // device 变化重新渲染导致 wujie Vue组件初始化使用 Promise 执行$refs找不到问题
-          deviceMixin.device && (
-            <div class={classes.layoutContentWrapper}>
-              <Spin
-                class={classes.layoutContentLoading}
-                spinning={loadingRef.value}
-                tip={i18n.tv('common.tips.loading_text', 'Loading...')}
-              ></Spin>
-              <RouterView />
-            </div>
-          )
-        }
+        <div class={classes.layoutContentWrapper}>
+          <Spin
+            class={classes.layoutContentLoading}
+            spinning={loadingRef.value}
+            tip={i18n.tv('common.tips.loading_text', 'Loading...')}
+          ></Spin>
+          <RouterView />
+        </div>
       </ConfigProvider>
     );
   },

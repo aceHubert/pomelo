@@ -4,7 +4,7 @@ import { useRouter } from 'vue2-helpers/vue-router';
 import { SkeletonLoader, Result } from '@/components';
 import { useDeviceMixin } from '@/mixins';
 import { useI18n } from '@/hooks';
-import { useTemplateApi } from '@/fetch/apis';
+import { usePostApi } from '@/fetch/apis';
 
 const MobileComponent = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopComponent = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -15,11 +15,11 @@ export const HomeDefault = defineComponent({
     const i18n = useI18n();
     const router = useRouter();
     const deviceMixin = useDeviceMixin();
-    const templateApi = useTemplateApi();
+    const postApi = usePostApi();
 
     const $postRes = createResource((args: { offset?: number; limit?: number } = {}) => {
-      return templateApi
-        .getPosts({
+      return postApi
+        .getPublishedPaged({
           variables: {
             ...args,
             metaKeys: ['feature-image'],

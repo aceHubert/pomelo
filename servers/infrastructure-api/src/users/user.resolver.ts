@@ -82,6 +82,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
           loginPwd: md5(input.loginPwd).toString(),
           niceName: input.loginName,
           displayName: input.loginName,
+          status: UserStatus.Enabled,
           capabilities,
         },
         Number(requestUser.sub),

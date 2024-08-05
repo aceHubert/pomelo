@@ -2,7 +2,7 @@ import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
 import { request } from '../graphql/infrastructure-request';
 
 // Types
-import type { TypedQueryDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
 
 export enum PresetTaxonomy {
   Category = 'Category',
@@ -18,6 +18,28 @@ export type TermTaxonomyModel = {
   parentId: string;
   group: number;
   count: number;
+};
+
+export type TermRelationshipModel = {
+  objectId: string;
+  termTaxonomyId: string;
+  order: number;
+};
+
+export type NewTermTaxonomyInput = {
+  name: string;
+  slug?: string;
+  taxonomy: string;
+  description: string;
+  parentId?: string;
+  group?: number;
+  objectId?: number;
+};
+
+export type NewTermRelationshipInput = {
+  objectId: string;
+  termTaxonomyId: string;
+  order?: number;
 };
 
 export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
@@ -98,6 +120,34 @@ export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
       { tags: Omit<TermTaxonomyModel, 'taxonomy'>[]; myTags?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
       { keyword?: string; group?: number } | { keyword?: string; group?: number; objectId: string; withMine: true }
     >,
+    create: gql`
+      mutation createTerm($model: NewTermTaxonomyInput!) {
+        term: createTermTaxonomy(model: $model) {
+          id
+          name
+          slug
+          taxonomy
+          description
+          parentId
+          group
+          count
+        }
+      }
+    ` as TypedMutationDocumentNode<{ term: TermTaxonomyModel }, { model: NewTermTaxonomyInput }>,
+    createRelationship: gql`
+      mutation createRelationship($model: NewTermRelationshipInput!) {
+        relationship: createTermRelationship(model: $model) {
+          objectId
+          termTaxonomyId
+          order
+        }
+      }
+    ` as TypedMutationDocumentNode<{ relationship: TermRelationshipModel }, { model: NewTermRelationshipInput }>,
+    deleteRelationship: gql`
+      mutation deleteRelationship($objectId: ID!, $termTaxonomyId: ID!) {
+        result: deleteTermRelationship(objectId: $objectId, termTaxonomyId: $termTaxonomyId)
+      }
+    ` as TypedMutationDocumentNode<{ result: null }, { objectId: string; termTaxonomyId: string }>,
   },
   request,
 });

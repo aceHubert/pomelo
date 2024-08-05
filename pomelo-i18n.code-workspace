@@ -4,10 +4,10 @@
       "path": "."
     },
     {
-      "path": "clients/vue-admin"
+      "path": "clients/vue-web"
     },
     {
-      "path": "clients/vue-web"
+      "path": "clients/react-web"
     }
   ],
   "settings": {

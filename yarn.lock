@@ -400,9 +400,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/vue-admin@workspace:clients/vue-admin":
+"@ace-pomelo/vue-web@workspace:clients/vue-web":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/vue-admin@workspace:clients/vue-admin"
+  resolution: "@ace-pomelo/vue-web@workspace:clients/vue-web"
   dependencies:
     "@ace-fetch/axios": ^0.2.2
     "@ace-fetch/core": ^0.2.2
@@ -435,9 +435,6 @@ __metadata:
     "@formily/vant": "portal:../../.submodules/formily-vant/packages/components"
     "@formily/vant-prototypes": "portal:../../.submodules/formily-vant/packages/prototypes"
     "@formily/vue": ^2.2.0
-    "@sentry/browser": ^6.13.3
-    "@sentry/integrations": ^6.13.3
-    "@types/highlight.js": ^10.1.0
     "@types/lodash-es": ^4.17.6
     "@types/markdown-it": ^12.2.3
     "@types/store": ^2.0.2
@@ -461,7 +458,8 @@ __metadata:
     custom-event-polyfill: ^1.0.7
     graphql: ^16.0.0
     graphql-ws: ^5.11.2
-    highlight.js: ^11.6.0
+    highlight.js: ^10.7.1
+    lazyload: ^2.0.0-rc.2
     lodash-es: ^4.17.21
     markdown-it: ^13.0.1
     moment: ^2.29.4
@@ -473,64 +471,16 @@ __metadata:
     register-service-worker: ^1.7.2
     store: ^2.0.12
     tinycolor2: ^1.6.0
-    vue: ^2.6.14
+    vant: ^2.12.48
+    vue: ^2.6.12
     vue-advanced-cropper: 1.x
     vue-codemirror: 4.0.6
     vue-i18n: ^8.27.2
     vue-meta: ^2.4.0
     vue-router: ^3.5.1
     vue-svg-loader: ^0.16.0
-    vue2-helpers: ^1.x
-    whatwg-fetch: ^3.6.2
-    wujie-vue2: ^1.0.6
-  languageName: unknown
-  linkType: soft
-
-"@ace-pomelo/vue-web@workspace:clients/vue-web":
-  version: 0.0.0-use.local
-  resolution: "@ace-pomelo/vue-web@workspace:clients/vue-web"
-  dependencies:
-    "@ace-fetch/axios": ^0.2.2
-    "@ace-fetch/core": ^0.2.2
-    "@ace-fetch/vue": ^0.2.2
-    "@ace-pomelo/shared-client": "workspace:^"
-    "@ace-pomelo/theme": "workspace:^"
-    "@ace-util/core": ^0.1.1
-    "@apollo/client": ^3.6.9
-    "@formily-portal/vant": "portal:../../.submodules/formily-portal-vant/packages/components"
-    "@formily/core": ^2.2.0
-    "@formily/vant": "portal:../../.submodules/formily-vant/packages/components"
-    "@formily/vant-prototypes": "portal:../../.submodules/formily-vant/packages/prototypes"
-    "@formily/vue": ^2.2.0
-    "@types/store": ^2.0.2
-    "@vue-async/module-loader": ^3.2.2
-    "@vue-async/resource-manager": ^1.0.16
-    "@vue/cli-plugin-babel": ~5.0.0
-    "@vue/cli-plugin-eslint": ~5.0.0
-    "@vue/cli-plugin-router": ~5.0.0
-    "@vue/cli-plugin-typescript": ~5.0.0
-    "@vue/cli-plugin-unit-jest": ~5.0.0
-    "@vue/cli-service": ~5.0.0
-    ant-design-vue: ^1.7.7
-    axios: ^0.27.2
-    babel-preset-vca-jsx: ^0.3.6
-    core-js: ^3.8.3
-    graphql: ^16.0.0
-    graphql-ws: ^5.11.2
-    highlight.js: ^11.9.0
-    lazyload: ^2.0.0-rc.2
-    lodash-es: ^4.17.21
-    moment: ^2.29.4
-    oidc-client-ts: ^2.4.0
-    pinia: ^2.0.17
-    store: ^2.0.12
-    tinycolor2: ^1.6.0
-    vant: ^2.12.48
-    vue: ^2.6.12
-    vue-i18n: ^8.27.2
-    vue-meta: ^2.4.0
-    vue-router: ^3.5.1
     vue2-helpers: 1.x
+    whatwg-fetch: ^3.6.2
   languageName: unknown
   linkType: soft
 
@@ -2829,7 +2779,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:7.x, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.8.4":
+"@babel/runtime@npm:7.x, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.21.0, @babel/runtime@npm:^7.8.4":
   version: 7.22.15
   resolution: "@babel/runtime@npm:7.22.15"
   dependencies:
@@ -3975,9 +3925,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   dependencies:
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-vue2": ^3.0.1
@@ -3990,9 +3940,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   dependencies:
     "@formily/core": ^2.2.2
     "@formily/grid": ^2.2.2
@@ -4014,36 +3964,12 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   dependencies:
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-vue2": ^3.0.1
-  peerDependencies:
-    "@vue/composition-api": ^1.4.0
-    vue: ^2.6.0 || >=3.0.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  languageName: node
-  linkType: soft
-
-"@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
-  version: 0.0.0-use.local
-  resolution: "@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
-  dependencies:
-    "@formily/core": ^2.2.2
-    "@formily/grid": ^2.2.2
-    "@formily/json-schema": ^2.2.2
-    "@formily/reactive": ^2.2.2
-    "@formily/reactive-vue": ^2.2.2
-    "@formily/shared": ^2.2.2
-    "@formily/vue": ^2.2.2
-    "@vue-async/resource-manager": ^1.0.15
-    lodash.get: ^4.4.2
-    lodash.kebabcase: ^4.1.1
-    tinycolor2: ^1.6.0
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -4077,9 +4003,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -4089,9 +4015,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -4101,9 +4027,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -4113,9 +4039,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   dependencies:
     "@monaco-editor/loader": ^1.3.2
     monaco-editor: ^0.34.0
@@ -4129,9 +4055,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
+"@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
+  resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
   dependencies:
     "@formily/core": ^2.0.8
     "@formily/grid": ^2.0.8
@@ -4241,41 +4167,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
-  version: 0.0.0-use.local
-  resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
-  peerDependencies:
-    "@vue/composition-api": ^1.4.0
-    vue: ^2.6.0 || >=3.0.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  languageName: node
-  linkType: soft
-
 "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
   version: 0.0.0-use.local
   resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
-  peerDependencies:
-    "@vue/composition-api": ^1.4.0
-    vue: ^2.6.0 || >=3.0.0
-  peerDependenciesMeta:
-    "@vue/composition-api":
-      optional: true
-  languageName: node
-  linkType: soft
-
-"@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin":
-  version: 0.0.0-use.local
-  resolution: "@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fvue-admin%40workspace%3Aclients%2Fvue-admin"
-  dependencies:
-    "@formily/core": ^2.0.12
-    "@formily/grid": ^2.0.12
-    "@formily/json-schema": ^2.0.12
-    "@formily/reactive": ^2.0.12
-    "@formily/reactive-vue": ^2.0.12
-    "@formily/shared": ^2.0.12
-    "@formily/vue": ^2.0.12
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -6026,82 +5920,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:^6.13.3":
-  version: 6.19.7
-  resolution: "@sentry/browser@npm:6.19.7"
-  dependencies:
-    "@sentry/core": 6.19.7
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
-    tslib: ^1.9.3
-  checksum: 071d00c76c2d0384580474c634c58c6196bbd1a3cf510da1309bd1565c57df7422fca8ceb717db189fa557f2c711a21664ee1ab935dfd9869faf416d388e6f78
-  languageName: node
-  linkType: hard
-
-"@sentry/core@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/core@npm:6.19.7"
-  dependencies:
-    "@sentry/hub": 6.19.7
-    "@sentry/minimal": 6.19.7
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
-    tslib: ^1.9.3
-  checksum: d212e8ef07114549de4a93b81f8bfa217ca1550ca7a5eeaa611e5629faef78ff72663ce561ffa2cff48f3dc556745ef65177044f9965cdd3cbccf617cf3bf675
-  languageName: node
-  linkType: hard
-
-"@sentry/hub@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/hub@npm:6.19.7"
-  dependencies:
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
-    tslib: ^1.9.3
-  checksum: 10bb1c5cba1b0f1e27a3dd0a186c22f94aeaf11c4662890ab07b2774f46f46af78d61e3ba71d76edc750a7b45af86edd032f35efecdb4efa2eaf551080ccdcb1
-  languageName: node
-  linkType: hard
-
-"@sentry/integrations@npm:^6.13.3":
-  version: 6.19.7
-  resolution: "@sentry/integrations@npm:6.19.7"
-  dependencies:
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
-    localforage: ^1.8.1
-    tslib: ^1.9.3
-  checksum: 6ea22ef8d518e6ade96ad00c07f5346c8316264ae6ec353c299e03d1d3cf4b226f639bde07dd5d1da28feaa031338e75df25fc60a083a24d847f4cfde4dbc8e9
-  languageName: node
-  linkType: hard
-
-"@sentry/minimal@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/minimal@npm:6.19.7"
-  dependencies:
-    "@sentry/hub": 6.19.7
-    "@sentry/types": 6.19.7
-    tslib: ^1.9.3
-  checksum: 9153ac426ee056fc34c5be898f83d74ec08f559d69f544c5944ec05e584b62ed356b92d1a9b08993a7022ad42b5661c3d72881221adc19bee5fc1af3ad3864a8
-  languageName: node
-  linkType: hard
-
-"@sentry/types@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/types@npm:6.19.7"
-  checksum: f46ef74a33376ad6ea9b128115515c58eb9369d89293c60aa67abca26b5d5d519aa4d0a736db56ae0d75ffd816643d62187018298523cbc2e6c2fb3a6b2a9035
-  languageName: node
-  linkType: hard
-
-"@sentry/utils@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/utils@npm:6.19.7"
-  dependencies:
-    "@sentry/types": 6.19.7
-    tslib: ^1.9.3
-  checksum: a000223b9c646c64e3565e79cace1eeb75114342b768367c4dddd646476c215eb1bddfb70c63f05e2352d3bce2d7d415344e4757a001605d0e01ac74da5dd306
-  languageName: node
-  linkType: hard
-
 "@sideway/address@npm:^4.1.3":
   version: 4.1.4
   resolution: "@sideway/address@npm:4.1.4"
@@ -6551,15 +6369,6 @@ __metadata:
     fs-capacitor: ^8.0.0
     graphql: 0.13.1 - 16
   checksum: 3e88a03082ce1e1de39b414a096fbd47cf1f97b6027c93cc71a216229bdfb248f54f1afc209e970e1ae3856153c20cf40d458febe348b287be237f62ea84ffc0
-  languageName: node
-  linkType: hard
-
-"@types/highlight.js@npm:^10.1.0":
-  version: 10.1.0
-  resolution: "@types/highlight.js@npm:10.1.0"
-  dependencies:
-    highlight.js: "*"
-  checksum: 284f47e89bfe300f307ad76523a257ff12ed7cf0318cdc0a7fe6965a1d7e21840d133cfc623ec705495550d37341c278c2c9641bafce8b8dbb4bea4acd46f0ec
   languageName: node
   linkType: hard
 
@@ -14332,24 +14141,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highlight.js@npm:*, highlight.js@npm:^11.6.0":
-  version: 11.8.0
-  resolution: "highlight.js@npm:11.8.0"
-  checksum: d2578a57aee7315946ff19379053fd0a28b127baabf7617ab1d28d62cdc4eaf3d75053569cb8479a5afdc7a68f1ba9a6c1d612d8ae399b4b9aa43093b4fb6831
-  languageName: node
-  linkType: hard
-
 "highlight.js@npm:^10.7.1":
   version: 10.7.3
   resolution: "highlight.js@npm:10.7.3"
   checksum: defeafcd546b535d710d8efb8e650af9e3b369ef53e28c3dc7893eacfe263200bba4c5fcf43524ae66d5c0c296b1af0870523ceae3e3104d24b7abf6374a4fea
-  languageName: node
-  linkType: hard
-
-"highlight.js@npm:^11.9.0":
-  version: 11.9.0
-  resolution: "highlight.js@npm:11.9.0"
-  checksum: 4043d31c5de9d27d13387d9a9e5e1939557254b7b85f0fab85d9cae0e420e131a3456ebf6148552020a1d8a216d671d583f2433d6c4de6179b8a66487a8325cb
   languageName: node
   linkType: hard
 
@@ -14760,13 +14555,6 @@ __metadata:
   bin:
     image-size: bin/image-size.js
   checksum: 6709d5cb73e96d5097ae5e9aa746dd36d6a9c8cf645e7eecac72ea07dbd6f312a65183752762fa92e2f3b698d4ed8d85dd55bf5207b6367245996bd16576d8fe
-  languageName: node
-  linkType: hard
-
-"immediate@npm:~3.0.5":
-  version: 3.0.6
-  resolution: "immediate@npm:3.0.6"
-  checksum: f9b3486477555997657f70318cc8d3416159f208bec4cca3ff3442fd266bc23f50f0c9bd8547e1371a6b5e82b821ec9a7044a4f7b944798b25aa3cc6d5e63e62
   languageName: node
   linkType: hard
 
@@ -16963,15 +16751,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lie@npm:3.1.1":
-  version: 3.1.1
-  resolution: "lie@npm:3.1.1"
-  dependencies:
-    immediate: ~3.0.5
-  checksum: 6da9f2121d2dbd15f1eca44c0c7e211e66a99c7b326ec8312645f3648935bc3a658cf0e9fa7b5f10144d9e2641500b4f55bd32754607c3de945b5f443e50ddd1
-  languageName: node
-  linkType: hard
-
 "liftup@npm:~3.0.1":
   version: 3.0.1
   resolution: "liftup@npm:3.0.1"
@@ -17113,15 +16892,6 @@ __metadata:
   version: 3.2.1
   resolution: "loader-utils@npm:3.2.1"
   checksum: 4e3ea054cdc8be1ab1f1238f49f42fdf0483039eff920fb1d442039f3f0ad4ebd11fb8e584ccdf2cb7e3c56b3d40c1832416e6408a55651b843da288960cc792
-  languageName: node
-  linkType: hard
-
-"localforage@npm:^1.8.1":
-  version: 1.10.0
-  resolution: "localforage@npm:1.10.0"
-  dependencies:
-    lie: 3.1.1
-  checksum: f2978b434dafff9bcb0d9498de57d97eba165402419939c944412e179cab1854782830b5ec196212560b22712d1dd03918939f59cf1d4fc1d756fca7950086cf
   languageName: node
   linkType: hard
 
@@ -23852,7 +23622,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.10.0, tslib@npm:^1.8.1, tslib@npm:^1.9.3":
+"tslib@npm:^1.10.0, tslib@npm:^1.8.1":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
@@ -24721,7 +24491,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue2-helpers@npm:1.x, vue2-helpers@npm:^1.x":
+"vue2-helpers@npm:1.x":
   version: 1.2.2
   resolution: "vue2-helpers@npm:1.2.2"
   dependencies:
@@ -25546,26 +25316,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: dd91d055396c42552d8e2d26a0ab10221e73ca356de3db9109e337b8d9df216a0a308ace46a5e0520ed18ffcae3f54c2fa45a96711f94a063c816ef13a30b700
-  languageName: node
-  linkType: hard
-
-"wujie-vue2@npm:^1.0.6":
-  version: 1.0.18
-  resolution: "wujie-vue2@npm:1.0.18"
-  dependencies:
-    wujie: 1.0.18
-  peerDependencies:
-    vue: ^2.6.0
-  checksum: 402107021d186a7fefd49ac5f3613d9fbaa53bf5146f7ea50d7a30bac3027d04f32e6430450d73e1101a50ec6c29f70276a2ef24b40be7059301dea127f8a0ac
-  languageName: node
-  linkType: hard
-
-"wujie@npm:1.0.18":
-  version: 1.0.18
-  resolution: "wujie@npm:1.0.18"
-  dependencies:
-    "@babel/runtime": ^7.18.6
-  checksum: 294a9e814c7a3718852c5573db21892af569450f5a32eefda2cb4bd9f427f0b458fc5105cd033e368917433bff37da9ba6d75fac5124ef2e37b2971a37ce684d
   languageName: node
   linkType: hard
 

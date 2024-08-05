@@ -1,0 +1,113 @@
+@import '~@ace-pomelo/theme/lib/index';
+@import (reference, multiple) '@ace-pomelo/theme/lib/themes/default';
+@import (multiple) '@ace-pomelo/theme/lib/core/colors';
+@import (multiple) 'antdv-layout-pro/style/component-reset';
+@import (reference, multiple) 'antdv-layout-pro/style/themes/default';
+
+:root {
+  // set ckeditor theme
+  --ck-color-text: @text-color;
+  --ck-color-base-background: @component-background;
+  --ck-color-base-border: @border-color-base;
+  --ck-color-input-background: @component-background;
+  --ck-color-input-border: @border-color-base;
+  --ck-color-button-default-hover-background: @var-primary-9;
+  --ck-color-button-default-active-background: @var-primary-9;
+  --ck-color-button-on-color: @var-primary;
+  --ck-color-button-on-background: @var-primary-9;
+  --ck-color-button-on-hover-background: @var-primary-7;
+  --ck-color-button-on-active-background: @var-primary-7;
+  --ck-color-split-button-hover-background: @var-primary-9;
+  --ck-color-dropdown-panel-background: @component-background;
+  --ck-color-dropdown-panel-border: @border-color-split;
+  --ck-color-list-background: var(--ck-color-base-background);
+  --ck-color-list-button-hover-background: var(--ck-color-button-on-color);
+  --ck-color-list-button-on-background: var(--ck-color-button-on-color);
+  --ck-color-list-button-on-background-focus: var(--ck-color-button-on-color);
+  --ck-color-list-button-on-text: var(--ck-color-base-background);
+  --ck-color-focus-border: @var-primary;
+  --ck-color-focus-outer-shadow: @var-primary-7;
+  --ck-color-focus-disabled-shadow: @disabled-color;
+  --ck-focus-ring: 1px solid @var-primary;
+  --ck-focus-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-outer-shadow);
+  --ck-focus-disabled-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-disabled-shadow);
+  --ck-color-widget-blurred-border: @border-color-base;
+  --ck-color-toolbar-background: @body-background;
+  // set dn-app
+  --dn-brand: var(--theme-primary);
+  --dn-brand-hovering: var(--theme-primary-5);
+  --dn-brand-dragging: var(--theme-primary-1);
+  --dn-brand-dropping: var(--theme-primary-2);
+  --dn-brand-moving: var(--theme-primary-3);
+}
+
+// Dark theme
+.theme-dark {
+  @import (reference, multiple) '@ace-pomelo/theme/lib/themes/dark';
+  @import (multiple) '@ace-pomelo/theme/lib/core/colors';
+  @import (multiple) 'antdv-layout-pro/style/component-reset';
+  @import (reference, multiple) 'antdv-layout-pro/style/themes/dark';
+  @import (reference) '../../../assets/styles/variables';
+
+  :root & {
+    // set ckeditor theme
+    --ck-color-text: @text-color;
+    --ck-color-link-default: @link-color;
+    --ck-color-base-foreground: @body-background;
+    --ck-color-base-background: @component-background;
+    --ck-color-base-border: @border-color-base;
+    --ck-color-labeled-field-label-background: @component-background;
+    --ck-color-input-background: @component-background;
+    --ck-color-input-border: @border-color-base;
+    --ck-color-button-default-hover-background: #262626;
+    --ck-color-button-default-active-background: #262626;
+    --ck-color-button-on-color: @var-primary;
+    --ck-color-button-on-background: #303030;
+    --ck-color-button-on-hover-background: #434343;
+    --ck-color-button-on-active-background: #434343;
+    --ck-color-button-on-disabled-background: @disabled-color-dark;
+    --ck-color-split-button-hover-background: #262626;
+    --ck-color-dropdown-panel-background: @component-background;
+    --ck-color-dropdown-panel-border: @border-color-split;
+    --ck-color-list-background: var(--ck-color-base-background);
+    --ck-color-list-button-hover-background: var(--ck-color-button-on-color);
+    --ck-color-list-button-on-background: var(--ck-color-button-on-color);
+    --ck-color-list-button-on-background-focus: var(--ck-color-button-on-color);
+    --ck-color-list-button-on-text: var(--ck-color-base-background);
+    --ck-color-focus-border: @var-primary;
+    --ck-color-focus-outer-shadow: @var-primary-7;
+    --ck-color-focus-disabled-shadow: @disabled-color;
+    --ck-focus-ring: 1px solid @var-primary;
+    --ck-color-shadow-drop: rgba(255, 255, 255, 0.15);
+    --ck-color-shadow-drop-active: rgba(255, 255, 255, 0.2);
+    --ck-color-shadow-inner: rgba(255, 255, 255, 0.1);
+    --ck-inner-shadow: 2px 2px 3px var(--ck-color-shadow-inner) inset;
+    --ck-focus-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-outer-shadow);
+    --ck-focus-disabled-outer-shadow: var(--ck-focus-outer-shadow-geometry) var(--ck-color-focus-disabled-shadow);
+    --ck-color-widget-blurred-border: @border-color-base;
+    --ck-color-panel-background: var(--ck-color-base-background);
+    --ck-color-panel-border: var(--ck-color-base-border);
+    --ck-color-toolbar-background: @body-background;
+    --ck-color-toolbar-border: var(--ck-color-base-border);
+    --ck-color-tooltip-background: var(--ck-color-base-text);
+    --ck-color-tooltip-text: @text-color;
+    --ck-color-block-toolbar-button: var(--ck-color-text);
+    --ck-color-resizer: var(--ck-color-focus-border);
+    --ck-clipboard-drop-target-color: var(--ck-color-focus-border);
+    --ck-color-widget-type-around-button-active: var(--ck-color-focus-border);
+    // set dn-app
+    --dn-brand: var(--theme-primary);
+    --dn-brand-hovering: var(--theme-primary-5);
+    --dn-brand-dragging: var(--theme-primary-1);
+    --dn-brand-dropping: var(--theme-primary-2);
+    --dn-brand-moving: var(--theme-primary-3);
+  }
+}
+
+.ck-content pre {
+  color: var(--ck-color-text);
+  border-color: var(--ck-color-base-border);
+}
+
+@import 'antdv-layout-pro/style/index';
+@import '../../components/index';

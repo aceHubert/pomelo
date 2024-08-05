@@ -101,6 +101,16 @@ module.exports = {
             position: 'after',
           },
           {
+            pattern: '@admin/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
+            pattern: '@initialize/**',
+            group: 'internal',
+            position: 'after',
+          },
+          {
             pattern: '*.+(less|scss|sass)',
             patternOptions: {
               matchBase: true,

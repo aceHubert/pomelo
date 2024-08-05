@@ -5,7 +5,7 @@ import { createResource } from '@vue-async/resource-manager';
 import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
-import { useTemplateApi, PageMetaPresetKeys } from '@/fetch/apis';
+import { usePageApi, PageMetaPresetKeys } from '@/fetch/apis';
 import { HomeDefault } from './components/home-default';
 
 const MobilePage = () => import(/* webpackChunkName: "mobile" */ './mobile');
@@ -45,19 +45,19 @@ export default defineComponent({
     const route = useRoute();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const deviceType = useDeviceType();
-    const templateApi = useTemplateApi();
+    const pageApi = usePageApi();
 
     const pageRes = createResource(async ({ id, name }: { id?: string; name?: string }) => {
       const page = id
-        ? await templateApi // from /p/:id
-            .getPage({
+        ? await pageApi // from /p/:id
+            .get({
               variables: {
                 id,
               },
             })
             .then(({ page }) => page)
-        : await templateApi // from name alias: /page-name
-            .getPageByName({
+        : await pageApi // from name alias: /page-name
+            .getByName({
               variables: {
                 name,
               },
