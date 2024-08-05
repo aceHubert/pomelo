@@ -6,6 +6,7 @@ import {
   version,
   OptionAutoload,
   OptionPresetKeys,
+  UserStatus,
   TermPresetTaxonomy,
   UserMetaPresetKeys,
   InfrastructureService,
@@ -45,6 +46,7 @@ export class SiteInitService {
               displayName: 'Admin',
               email: initArgs.email,
               url: '',
+              status: UserStatus.Enabled,
               metas: [
                 { metaKey: UserMetaPresetKeys.NickName, metaValue: 'Admin' },
                 { metaKey: UserMetaPresetKeys.FirstName, metaValue: '' },

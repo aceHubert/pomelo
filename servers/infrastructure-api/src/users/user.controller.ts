@@ -159,6 +159,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
           loginPwd: md5(input.loginPwd).toString(),
           niceName: input.loginName,
           displayName: input.loginName,
+          status: UserStatus.Enabled,
           capabilities,
         },
         Number(requestUser.sub),
