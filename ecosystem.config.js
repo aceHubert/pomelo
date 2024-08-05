@@ -119,35 +119,18 @@ module.exports = {
       },
     },
     {
-      name: 'client-admin',
-      cwd: 'client-admin',
-      script: 'serve',
-      env_production: {
-        PM2_SERVE_PATH: '.',
-        PM2_SERVE_PORT: 3011,
-        PM2_SERVE_SPA: 'true',
-        PM2_SERVE_HOMEPAGE: '/index.html',
-      },
-      env_fly: {
-        PM2_SERVE_PATH: '.',
-        PM2_SERVE_PORT: 3011,
-        PM2_SERVE_SPA: 'true',
-        PM2_SERVE_HOMEPAGE: '/index.html',
-      },
-    },
-    {
       name: 'client-web',
       cwd: 'client-web',
       script: 'serve',
       env_production: {
         PM2_SERVE_PATH: '.',
-        PM2_SERVE_PORT: 3012,
+        PM2_SERVE_PORT: 3011,
         PM2_SERVE_SPA: 'true',
         PM2_SERVE_HOMEPAGE: '/index.html',
       },
       env_fly: {
         PM2_SERVE_PATH: '.',
-        PM2_SERVE_PORT: 3012,
+        PM2_SERVE_PORT: 3011,
         PM2_SERVE_SPA: 'true',
         PM2_SERVE_HOMEPAGE: '/index.html',
       },
