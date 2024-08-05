@@ -26,7 +26,6 @@ RUN if [ "$BUILD_IGNORE" = "true" ]; then \
 FROM --platform=${BUILD_PLATFORM} node:${NODE_VERSION} AS runtime
 COPY --from=builder /app/packages /app/packages/
 COPY --from=builder /app/servers /app/servers/
-COPY --from=builder /app/clients/vue-admin/dist /app/clients/client-admin/
 COPY --from=builder /app/clients/vue-web/dist /app/clients/client-web/
 COPY --from=builder /app/ecosystem.config.js /app/
 COPY --from=builder /app/nginx.conf /app/
