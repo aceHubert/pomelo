@@ -1,5 +1,6 @@
 import { ref, reactive, computed, watch } from '@vue/composition-api';
 import { User } from 'oidc-client-ts';
+import { Theme } from 'antdv-layout-pro/types';
 import { warn } from '@ace-util/core';
 import { UserMetaPresetKeys } from '@ace-pomelo/shared-client';
 import { useUserApi } from '@/fetch/apis';
@@ -52,9 +53,13 @@ export const useAppMixin = () => {
       : appStore.siteTitle,
   );
 
+  const supportLanguages = computed(() => appStore.supportLanguages);
+  const layout = computed(() => appStore.layout);
+
   const theme = computed(() => appStore.theme);
-  const isDark = computed(() => theme.value === 'dark');
+  const isDark = computed(() => theme.value === Theme.Dark);
   const isLight = computed(() => !isDark.value);
+  const isRealLight = computed(() => theme.value === Theme.RealLight);
   const primaryColor = computed(() => appStore.primaryColor);
 
   /**
@@ -82,6 +87,15 @@ export const useAppMixin = () => {
               if (userLocale) {
                 i18n.locale = userLocale;
               }
+
+              // 设置用户布局、主题颜色
+              const color = metas.find((meta) => meta.key === UserMetaPresetKeys.AdminColor)?.value;
+              if (color) {
+                const { layout, theme, primaryColor } = JSON.parse(color);
+                appStore.setLayout(layout);
+                appStore.setTheme(theme);
+                appStore.setPrimaryColor(primaryColor);
+              }
             })
             .catch((err) => {
               warn(process.env.NODE_ENV === 'production', err.message);
@@ -95,6 +109,32 @@ export const useAppMixin = () => {
   }, []);
 
   /**
+   * 持久化保存用户布局、主题颜色
+   */
+  watch([() => appStore.layout, () => appStore.theme, () => appStore.primaryColor], () => {
+    userManager
+      .getUser()
+      .then((user) => {
+        if (!user) return;
+
+        userApi.updateMetaByKey({
+          variables: {
+            userId: user.profile.sub,
+            key: UserMetaPresetKeys.AdminColor,
+            value: JSON.stringify({
+              layout: appStore.layout,
+              theme: appStore.theme,
+              primaryColor: appStore.primaryColor,
+            }),
+          },
+        });
+      })
+      .catch((err) => {
+        warn(process.env.NODE_ENV === 'production', err.message);
+      });
+  });
+
+  /**
    * 持久化保存用户语言
    */
   watch(
@@ -104,20 +144,19 @@ export const useAppMixin = () => {
       userManager
         .getUser()
         .then((user) => {
-          if (!user) return;
-
-          userApi
-            .updateMetaByKey({
-              variables: {
-                userId: user.profile.sub,
-                key: UserMetaPresetKeys.Locale,
-                value: locale,
-              },
-            })
-            .then(({ result }) => {
-              // update user store locale
-              result && userManager.storeUser(new User({ ...user, profile: { ...user.profile, locale } }));
-            });
+          if (user?.profile.sub)
+            userApi
+              .updateMetaByKey({
+                variables: {
+                  userId: user.profile.sub,
+                  key: UserMetaPresetKeys.Locale,
+                  value: locale,
+                },
+              })
+              .then(({ result }) => {
+                // update user store locale
+                result && userManager.storeUser(new User({ ...user, profile: { ...user.profile, locale } }));
+              });
         })
         .catch((err) => {
           warn(process.env.NODE_ENV === 'production', err.message);
@@ -130,7 +169,7 @@ export const useAppMixin = () => {
    */
   useEffect(
     () => {
-      AntLocales[appStore.locale as keyof typeof AntLocales]?.()
+      AntLocales[i18n.locale as keyof typeof AntLocales]?.()
         .then((locales) => {
           antLocales.value = locales;
         })
@@ -138,7 +177,7 @@ export const useAppMixin = () => {
           warn(process.env.NODE_ENV === 'production', err.message);
         });
     },
-    () => appStore.locale,
+    () => i18n.locale,
   );
 
   return reactive({
@@ -148,6 +187,14 @@ export const useAppMixin = () => {
     theme,
     isDark,
     isLight,
+    isRealLight,
     primaryColor,
+    layout,
+    supportLanguages,
+    setTheme: appStore.setTheme,
+    setPrimaryColor: appStore.setPrimaryColor,
+    setColor: appStore.setColor,
+    setLayout: appStore.setLayout,
+    setSupportLanguages: appStore.setSupportLanguages,
   });
 };

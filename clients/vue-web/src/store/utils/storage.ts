@@ -2,7 +2,7 @@ import store from 'store';
 import engine from 'store/src/store-engine';
 import sessStorage from 'store/storages/sessionStorage';
 
-export const STORAGE_PREFIX = 'po-web';
+export const STORAGE_PREFIX = 'po';
 
 function defineStorage(store: StoreJsAPI, prefix?: string) {
   const getKey = (key: string) => (prefix ? `${prefix}/${key}` : key);

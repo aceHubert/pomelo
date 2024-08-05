@@ -7,6 +7,7 @@
   var env = window._ENV || {};
 
   // env.infrastructureApiBase = baseUrl + '/infrastructure/api';
+  env.identityGraphqlBase = baseUrl + '/identity/graphql';
   env.infrastructureGraphqlBase = baseUrl + '/infrastructure/graphql';
   env.infrastructureGraphqlSubscriptionBase = baseWsUrl + '/infrastructure/graphql';
 

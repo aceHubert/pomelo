@@ -1,0 +1,41 @@
+.design-layout {
+  &-wrapper {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  &-header {
+    &-wrapper {
+      padding: 0 16px;
+      height: 100%;
+      background-color: #fff;
+      border-bottom: 1px solid var(--color-border-base, @border-color-base);
+
+      .theme-dark & {
+        background-color: initial;
+      }
+    }
+
+    .logo {
+      display: block;
+      cursor: pointer;
+
+      &-img {
+        height: 32px;
+        font-size: 32px;
+        vertical-align: middle;
+        display: inline-block;
+      }
+    }
+  }
+
+  &-sider {
+    background-color: #fff;
+    box-shadow: -2px 0 8px rgba(29, 35, 41, 0.05);
+
+    .theme-dark & {
+      box-shadow: none;
+      border-left: 1px solid var(--color-border-base, @border-color-base);
+    }
+  }
+}

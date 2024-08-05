@@ -1,11 +1,12 @@
-import { defineComponent, ref, computed, h } from '@vue/composition-api';
+import { defineComponent, ref, computed, watch, h } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { useI18n, expose } from '@/hooks';
+import { useI18n } from '@/hooks';
 import { sanitizeComponent } from '@/components';
 import { useAppStore } from '@/store';
 
 const layouts = {
-  _default: () => import(/* webpackChunkName: "layouts" */ './layouts/default'),
+  _default: () => import('./layouts/default'),
+  _blank: () => import('./layouts/blank'),
 };
 
 export default defineComponent({
@@ -23,10 +24,11 @@ export default defineComponent({
     const route = useRoute();
     const i18n = useI18n();
 
+    const currentLayout = ref<ValueOf<typeof layouts>>();
     // 防止初始化闪烁
-    const routerReadyRef = ref(false);
+    const routerReady = ref(false);
     router.isReady().then(() => {
-      routerReadyRef.value = true;
+      routerReady.value = true;
     });
 
     const siteTitle = computed(() => {
@@ -36,33 +38,38 @@ export default defineComponent({
       return title;
     });
 
-    expose({
-      siteTitle,
-    });
-
-    const getLayout = () => {
-      let layoutName = route.meta?.layout;
-      if (!layoutName && route.matched.length) {
-        const component = sanitizeComponent(route.matched.slice(-1)[0].components.default);
-        layoutName = component.options.layout;
-        // antd Form.create({})(WrappedComponent)
-        if (!layoutName && component.options.WrappedComponent) {
-          layoutName = sanitizeComponent(component.options.WrappedComponent).options.layout;
+    watch(
+      () => route.fullPath,
+      () => {
+        let layoutName = route.meta?.layout;
+        if (!layoutName && route.matched.length) {
+          const component = sanitizeComponent(route.matched.slice(-1)[0].components.default);
+          layoutName = component.options.layout;
+          // antd Form.create({})(WrappedComponent)
+          if (!layoutName && component.options.WrappedComponent) {
+            layoutName = sanitizeComponent(component.options.WrappedComponent).options.layout;
+          }
         }
-      }
-      if (typeof layoutName === 'function') {
-        layoutName = layoutName();
-      }
-      if (!layoutName || !layouts[`_${layoutName}` as keyof typeof layouts]) {
-        layoutName = 'default';
-      }
-      return layouts[`_${layoutName}` as keyof typeof layouts];
-    };
+        if (typeof layoutName === 'function') {
+          layoutName = layoutName();
+        }
+        if (!layoutName || !layouts[`_${layoutName}` as keyof typeof layouts]) {
+          layoutName = 'default';
+        }
+        currentLayout.value = layouts[`_${layoutName}` as keyof typeof layouts];
+      },
+      { immediate: true },
+    );
 
-    return () => {
-      if (!routerReadyRef.value) return h('div');
-
-      return h(getLayout() || 'router-view');
+    return {
+      siteTitle,
+      currentLayout,
+      routerReady,
     };
+  },
+  render() {
+    if (!this.routerReady) return h('div');
+
+    return h(this.currentLayout || 'router-view');
   },
 });

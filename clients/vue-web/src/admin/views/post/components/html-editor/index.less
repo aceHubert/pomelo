@@ -1,0 +1,30 @@
+.html-editor {
+  height: 100%;
+
+  &__toolbar {
+    .ck {
+      &.ck-toolbar {
+        border-width: 0 0 1px 0;
+      }
+    }
+  }
+
+  &__wrapper {
+    margin: 0 auto;
+    background-color: var(--component-background, @component-background);
+  }
+
+  &__content {
+    padding: 10px 20px 20px;
+  }
+}
+
+.is-mobile .ck-block-toolbar-button{
+  transform: translateX(var(--ck-spacing-standard));
+  background-color: var(--ck-color-button-on-background);
+}
+
+div[class*='ck-powered-by-'] {
+  display: none !important;
+}
+

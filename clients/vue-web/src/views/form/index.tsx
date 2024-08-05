@@ -6,7 +6,7 @@ import { createResource } from '@vue-async/resource-manager';
 import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
-import { useTemplateApi, FormMetaPresetKeys } from '@/fetch/apis';
+import { useFormApi, FormMetaPresetKeys } from '@/fetch/apis';
 
 const MobileForm = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopForm = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -41,11 +41,11 @@ export default defineComponent({
     const fetch = getActiveFetch();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
     const deviceType = useDeviceType();
-    const templateApi = useTemplateApi();
+    const formApi = useFormApi();
 
     // from /f/:id
     const formRes = createResource(async (id: string) => {
-      const { form } = await templateApi.getForm({
+      const { form } = await formApi.get({
         variables: {
           id,
           keys: Object.values(FormMetaPresetKeys),

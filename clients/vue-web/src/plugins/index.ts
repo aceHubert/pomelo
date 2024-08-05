@@ -1,6 +1,4 @@
 import './banner';
 import './hljs';
-import options from './options';
-import pubSubMessage from './pubsub-messages';
-
-export default [options, pubSubMessage];
+export { default as options } from './options';
+export { default as pubSubMessage } from './pubsub-messages';

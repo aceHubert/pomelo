@@ -1,24 +1,27 @@
 /* eslint-disable import/order */
+import { once } from 'lodash';
 import Vue, { type ComponentOptions } from 'vue';
 import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
-import { absoluteGo, setQueryValues, getEnv } from '@ace-util/core';
 import { Modal } from './components';
 import { afetch } from './fetch';
 import { i18n } from './i18n';
+import { auth } from './auth';
 import { router } from './router';
 import { pinia } from './store';
-import { siteInitRequiredRef } from '@/shared';
+import * as plugins from './plugins';
 import App from './App';
 import './assets/styles/index.less';
 import '@ace-pomelo/theme/lib/index.less';
 
-// Plugins
-import plugins from './plugins';
+// Locales
+import zhCN from './locales/zh-CN_basic.json';
+import enUS from './locales/en-US.json';
 
 Vue.use(VueCompositionApi);
 Vue.use(ResourceManagerVuePlugin, { mode: 'visible' });
+Vue.use(auth);
 Vue.config.productionTip = false;
 
 async function createApp() {
@@ -29,6 +32,11 @@ async function createApp() {
     router,
     render: (h) => h(App),
   };
+
+  // set locales
+  i18n.setLocaleMessage('zh-CN', zhCN);
+  i18n.setLocaleMessage('en-US', enUS);
+
   function inject(key: string, value: any) {
     if (!key) {
       throw new Error('inject(key, value) has no key provided');
@@ -65,7 +73,7 @@ async function createApp() {
     router,
     pinia,
   };
-  for (const plugin of plugins) {
+  for (const plugin of Object.values(plugins)) {
     if (typeof plugin === 'function') {
       await plugin(context, inject);
     }
@@ -74,19 +82,12 @@ async function createApp() {
   return context;
 }
 
-let initialized = false;
+const trySignin = once((userManager: Vue['$userManager']) => userManager.signinSilent().catch(() => null));
 // preset anonymous routes
-function auth(this: Vue, to: Route, from: Route, next: Next) {
+function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
   const userManager = this.$userManager;
 
-  if (siteInitRequiredRef.value) {
-    absoluteGo(
-      setQueryValues(
-        { redirect: window.location.href },
-        getEnv('siteInitURL', `${window.location.origin}/admin/site-init`, window._ENV),
-      ),
-    );
-  } else if (to.name === 'signout') {
+  if (to.name === 'signout') {
     userManager.signout();
   } else if (to.meta?.anonymous === true) {
     next();
@@ -94,16 +95,7 @@ function auth(this: Vue, to: Route, from: Route, next: Next) {
     userManager.getUser().then((user) => {
       if (user) return next();
 
-      // try sign-in silent
-      initialized
-        ? next()
-        : userManager
-            .signinSilent()
-            .catch(() => {})
-            .finally(() => {
-              initialized = true;
-              next();
-            });
+      trySignin(userManager).finally(() => next());
     });
   }
 }
@@ -116,12 +108,12 @@ function clearModals(this: Vue) {
 createApp().then(({ app }) => {
   const _app = new Vue(app);
 
-  router.beforeEach(auth.bind(_app));
+  router.beforeEach(authMiddleware.bind(_app));
 
   router.afterEach(clearModals.bind(_app));
 
   router.isReady().then(() => {
-    auth.call(_app, router.currentRoute, router.currentRoute, (path) => {
+    authMiddleware.call(_app, router.currentRoute, router.currentRoute, (path) => {
       // If not redirected
       if (!path || typeof path === 'function') {
         typeof path === 'function' && path.call(null, _app);

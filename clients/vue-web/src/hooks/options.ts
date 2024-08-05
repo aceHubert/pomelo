@@ -14,7 +14,7 @@ export function useOptions(key?: string): Ref<string | undefined> | Readonly<Rec
   }
 
   // provide from plugins/options
-  const options = instance.proxy.$config;
+  const options = instance.proxy.$config || {};
 
   if (key) {
     return toRef(options, key);

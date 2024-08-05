@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import { hasIn } from 'lodash-es';
 import axios from 'axios';
+import { absoluteGo } from '@ace-util/core';
 import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
 import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@ace-fetch/axios';
-import { siteInitRequiredRef, loadingRef, errorRef, SharedError } from '@/shared';
-import { userManager } from '@/auth';
+import { loadingRef, errorRef, SharedError } from '@/shared';
+import { auth } from '@/auth';
 import { i18n } from '@/i18n';
 
 // Types
@@ -20,7 +21,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) => {
   const locale = i18n.locale;
-  const token = await userManager
+  const token = await auth.userManager
     .getUser()
     .then((user) => user?.access_token)
     .catch(() => '');
@@ -53,7 +54,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
 
   if (error.isAxiosError && error.response.status === 401) {
     // 重试登录，refresh token 重新获取 access token，如果再不成功则退出重新登录
-    return userManager
+    return auth.userManager
       .signinSilent()
       .then((user) => {
         if (user) {
@@ -67,7 +68,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
         }
       })
       .catch(() => {
-        userManager.signin();
+        auth.userManager.signin();
         return new Promise(() => {});
       });
   }
@@ -75,7 +76,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
   const { data = {} } = error.response as { data: any };
 
   if (data.siteInitRequired) {
-    siteInitRequiredRef.value = true;
+    absoluteGo(process.env.BASE_URL + 'initialize');
   }
 
   const message = data.message ?? error.message;

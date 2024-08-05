@@ -1,11 +1,6 @@
 import { ref } from '@vue/composition-api';
 
 /**
- * 需要初始化站点信息
- */
-export const siteInitRequiredRef = ref(false);
-
-/**
  * 全局的request loading 状态
  */
 export const loadingRef = ref(false);

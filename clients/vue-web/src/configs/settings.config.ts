@@ -1,4 +1,11 @@
-import type { ColorConfig, LocaleConfig } from '../types';
+import {
+  LayoutType,
+  Theme,
+  ContentWidth,
+  type LayoutConfig,
+  type ColorConfig,
+  type LocaleConfig,
+} from 'antdv-layout-pro/types';
 
 export const defaultSettings: {
   /**
@@ -10,6 +17,10 @@ export const defaultSettings: {
    * URL, svg, icon components
    */
   logo: any;
+  /**
+   * 布局配置
+   */
+  layout: LayoutConfig;
   /**
    * 颜色配置
    */
@@ -25,10 +36,21 @@ export const defaultSettings: {
 } = {
   // pwa: false,
   // iconfontUrl: '',
-  title: (i18nRender: (key: string, fallback: string, args?: any) => string) => i18nRender('site_title', 'Pomelo'),
+  title: (i18nRender: (key: string, fallback: string, args?: any) => string) =>
+    i18nRender('site_title', 'Pomelo Admin'),
   logo: `${process.env.BASE_URL}static/images/logo.png`,
+  layout: {
+    type: LayoutType.MixedMenu,
+    contentWidth: ContentWidth.Fluid,
+    fixedHeader: true,
+    fixSiderbar: true,
+    sideCollapsed: 'disabled',
+    colorWeak: false,
+    autoHideHeader: false,
+    multiTab: false,
+  },
   color: {
-    theme: 'light',
+    theme: Theme.Dark,
     primaryColor: '#FA541C',
   },
   language: {

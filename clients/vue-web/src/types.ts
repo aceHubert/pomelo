@@ -6,6 +6,9 @@ class Helper<Props> {
   Return = defineComponent({} as { props: Record<keyof Props, any> });
 }
 export type DefineComponent<Props> = Helper<Props>['Return'];
+export type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+export type OmitVue<T> = Partial<Omit<T, keyof Vue>>;
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export type Plugin = (context: { app: ComponentOptions<Vue> }, inject: (key: string, value: any) => void) => void;
 

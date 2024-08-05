@@ -1,0 +1,76 @@
+.fixed-link {
+  position: relative;
+
+  i {
+    display: none;
+  }
+
+  &:hover i{
+    display: initial;
+  }
+}
+
+
+.feature-image{
+  &-selector {
+    padding: 8px;
+    margin-bottom: 10px;
+    text-align: center;
+    background: var(--color-background-light, @background-color-light);
+    border: 1px dashed var(--color-border-base, @border-color-base);
+    border-radius: 8px;
+    cursor: default;
+
+    &:hover {
+      border-color: @var-primary;
+    }
+  }
+
+  &-add {
+    padding: 22px 0;
+  }
+
+  &-cover{
+    position: relative;
+
+    &__actions{
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background: rgba(0,0,0,.5);
+      color: #fff;
+      justify-content: center;
+      display: none;
+    }
+
+    &:hover &__actions{
+      display: flex;
+    }
+  }
+}
+
+.schema-designer {
+  height: 100%;
+
+  :global {
+    .dn-main-panel.root {
+      position: relative;
+    }
+
+    .dn-workspace-panel-item, .dn-reactions-setter{
+      .@{ant-prefix}-formily-array-base-remove{
+        color: inherit;
+
+        &:hover{
+          color: @var-primary;
+        }
+      }
+
+      .@{ant-prefix}-formily-form-item-label{
+        color: inherit;
+      }
+    }
+  }
+}

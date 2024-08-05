@@ -5,16 +5,15 @@
   var env = window._ENV || {};
 
   // env.infrastructureApiBase = '/infrastructure/api';
+  env.identityGraphqlBase = '/identity/graphql';
   env.infrastructureGraphqlBase = '/infrastructure/graphql';
   env.infrastructureGraphqlSubscriptionBase = 'ws://localhost:5003/graphql';
-
-  env.siteInitURL = 'https://localhost:5011/site-init';
 
   env.oidc = {
     authority: 'http://localhost:5001/',
     client_id: clientId,
     redirect_uri: baseUrl + '/signin.html',
-    post_logout_redirect_uri: baseUrl,
+    post_logout_redirect_uri: location.pathname.startsWith('/admin') ? baseUrl + '/admin' : baseUrl,
     // Add expiration nofitication time
     accessTokenExpiringNotificationTime: 10,
     // Setup to renew token access automatically

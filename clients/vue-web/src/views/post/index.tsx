@@ -5,7 +5,7 @@ import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client'
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
 import { useDeviceMixin } from '@/mixins';
-import { useTemplateApi, PostMetaPresetKeys } from '@/fetch/apis';
+import { usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
 
 const MobilePost = () => import(/* webpackChunkName: "mobile" */ './mobile');
 const DesktopPost = () => import(/* webpackChunkName: "desktop" */ './desktop');
@@ -46,11 +46,11 @@ export default defineComponent({
     const i18n = useI18n();
     const deviceMixin = useDeviceMixin();
     const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
-    const templateApi = useTemplateApi();
+    const postApi = usePostApi();
 
     // post /p/:id
     const postRes = createResource(async (id: string) => {
-      const { post } = await templateApi.getPost({
+      const { post } = await postApi.get({
         variables: {
           id,
         },
