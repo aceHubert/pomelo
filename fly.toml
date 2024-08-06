@@ -91,18 +91,6 @@ kill_timeout = "5s"
     handlers = ["http"]
     force_https = true
 
-[[services]]
-  internal_port = 3012
-  protocol = "tcp"
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ["app"]
-  [[services.ports]]
-    port = 3012
-    handlers = ["http"]
-    force_https = true
-
 [[vm]]
   cpu_kind = "shared"
   cpus = 1

@@ -50,7 +50,6 @@ services:
       - 3002:3002
       - 3003:3003
       - 3011:3011
-      - 3012:3012
     volumes:
       - deploy:/app
     external_links:

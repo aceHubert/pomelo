@@ -1,5 +1,5 @@
 # DOCKER_BUILDKIT=1 docker build -t hubert007/pomelo:0.0.1 -t hubert007/pomelo:latest --target deploy --cache-from hubert007/pomelo:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 .
-# docker run -it -d -p 3001:3001 -p 3002:3002 -p 3003:3003 -p 3011:3011 -p 3012:3012 -e ENV_FILE=.env.local --name pomelo-server --rm hubert007/pomelo:0.0.1
+# docker run -it -d -p 3001:3001 -p 3002:3002 -p 3003:3003 -p 3011:3011 -e ENV_FILE=.env.local --name pomelo-server --rm hubert007/pomelo:0.0.1
 
 # 添加ARG参数，可在docker build时通过 --build-arg BUILD_OPTION="xxx" --build-arg  BUILD_PLATFORM="xxx"传入代码编译命令
 # 容器 nodejs 版本
@@ -80,7 +80,7 @@ RUN npm install -g pm2
 #   npm config set registry https://registry.npm.taobao.org && \
 #   npm install -g pm2
 
-EXPOSE 3001-3004 3011-3012
+EXPOSE 3001-3004 3011
 CMD if [ "$SERVE_APPS" = "" ]; then \
       pm2-runtime start ecosystem.config.js --env $SERVE_ENV; \
     else \
