@@ -29,7 +29,7 @@ module.exports = {
       env_production: {
         PORT: 3001,
         ORIGIN,
-        GLOBAL_PREFIX_URI: '/oauth',
+        GLOBAL_PREFIX_URI: '/oauth2',
         CORS_ORIGIN: CORS_ORIGIN.join('|'),
         INFRASTRUCTURE_DATABASE_CONNECTION,
         IDENTITY_DATABASE_CONNECTION,
@@ -39,7 +39,7 @@ module.exports = {
       env_fly: {
         PORT: 3001,
         ORIGIN: 'https://pomelo-server.fly.dev',
-        GLOBAL_PREFIX_URI: '/oauth',
+        GLOBAL_PREFIX_URI: '/oauth2',
         CORS_ORIGIN: [].join('|'),
         // from fly secrets
         // INFRASTRUCTURE_DATABASE_CONNECTION,
@@ -61,7 +61,7 @@ module.exports = {
         GLOBAL_PREFIX_URI: '/identity',
         CORS_ORIGIN: CORS_ORIGIN.join('|'),
         IDENTITY_DATABASE_CONNECTION,
-        OIDC_ISSUER: ORIGIN + '/oauth',
+        OIDC_ISSUER: ORIGIN + '/oauth2',
         OIDC_CLIENT_SECRET: IDENTITY_API_CLIENT_SECRET,
       },
       env_fly: {
@@ -73,7 +73,7 @@ module.exports = {
         CORS_ORIGIN: [].join('|'),
         // from fly secrets
         // IDENTITY_DATABASE_CONNECTION,
-        OIDC_ISSUER: 'https://pomelo-server.fly.dev/oauth',
+        OIDC_ISSUER: 'https://pomelo-server.fly.dev/oauth2',
         OIDC_CLIENT_SECRET: process.env.IDENTITY_API_CLIENT_SECRET,
       },
     },
@@ -90,7 +90,7 @@ module.exports = {
         GLOBAL_PREFIX_URI: '/infrastructure',
         CORS_ORIGIN: CORS_ORIGIN.join('|'),
         INFRASTRUCTURE_DATABASE_CONNECTION,
-        OIDC_ISSUER: ORIGIN + '/oauth',
+        OIDC_ISSUER: ORIGIN + '/oauth2',
         OIDC_CLIENT_SECRET: INFRASTRUCTURE_API_CLIENT_SECRET,
       },
       env_fly: {
@@ -101,7 +101,7 @@ module.exports = {
         CORS_ORIGIN: [].join('|'),
         // from fly secrets
         // INFRASTRUCTURE_DATABASE_CONNECTION,
-        OIDC_ISSUER: 'https://pomelo-server.fly.dev/oauth',
+        OIDC_ISSUER: 'https://pomelo-server.fly.dev/oauth2',
         OIDC_CLIENT_SECRET: process.env.INFRASTRUCTURE_API_CLIENT_SECRET,
       },
     },
