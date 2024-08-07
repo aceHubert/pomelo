@@ -126,6 +126,14 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function getPath(path, packageName = '', version = '') {
+  return version
+    ? `${packageName}@${version}${path.startsWith('/') ? '' : '/'}${path}`
+    : path.startsWith('/')
+    ? path.substring(1)
+    : path;
+}
+
 function getCdnConfig(config = cdnConfig) {
   const { publicPath = '/', links = [], scripts = [] } = config;
 
@@ -135,45 +143,90 @@ function getCdnConfig(config = cdnConfig) {
       variableName && (prev[packageName] = variableName);
       return prev;
     }, {}),
-    links: links.map(({ packageName, path, ...rest }) => {
-      assert(packageName, `Links config "packageName" is required!`);
+    links: links.reduce(
+      (
+        prev,
+        { packageName, aliasName, path, publicPath, hash, append = false, version: addVersion = true, ...rest },
+      ) => {
+        assert(packageName, `Links config "packageName" is required!`);
 
-      // 获取版本
-      const version = getPackageVersion(packageName);
-      assert(version, `package "${packageName}" can not get version!`);
+        // 获取版本
+        let version;
+        if (addVersion) {
+          version = getPackageVersion(packageName);
+          assert(version, `package "${packageName}" can not get version!`);
+        }
 
-      const config = {
-        attributes: rest,
-      };
+        const config = {
+          attributes: rest,
+          publicPath,
+          hash,
+          append,
+        };
 
-      // 格式化 path
-      config.path = `${packageName}@${version}${path.startsWith('/') ? '' : '/'}${path}`;
+        // 格式化 path
+        prev.push(
+          ...(Array.isArray(path) ? path : [path]).map((p) => ({
+            ...config,
+            path: getPath(p, aliasName || packageName, version),
+          })),
+        );
 
-      return config;
-    }),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    scripts: scripts.map(({ packageName, variableName, path, ...rest }) => {
-      assert(packageName, `Scripts config "packageName" is required!`);
+        return prev;
+      },
+      [],
+    ),
+    scripts: scripts.reduce(
+      (
+        prev,
+        {
+          packageName,
+          aliasName,
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          variableName,
+          path,
+          publicPath,
+          hash,
+          append = false,
+          version: addVersion = true,
+          ...rest
+        },
+      ) => {
+        assert(packageName, `Scripts config "packageName" is required!`);
+        assert(path, `Scripts config "path" is required!`);
 
-      // 获取版本
-      const version = getPackageVersion(packageName);
-      assert(version, `Package "${packageName}" can not get version!`);
+        // 获取版本
+        let version;
+        if (addVersion) {
+          version = getPackageVersion(packageName);
+          assert(version, `Package "${packageName}" can not get version!`);
+        }
 
-      const config = {
-        attributes: rest,
-      };
+        const config = {
+          attributes: rest,
+          publicPath,
+          hash,
+          append,
+        };
 
-      // 格式化 path
-      config.path = `${packageName}@${version}${path.startsWith('/') ? '' : '/'}${path}`;
+        // 格式化 path
+        prev.push(
+          ...(Array.isArray(path) ? path : [path]).map((p) => ({
+            ...config,
+            path: getPath(p, aliasName || packageName, version),
+          })),
+        );
 
-      // 设置 external
-      // html-webpack-tags-plugin variableName 限制只能是字符串
-      // if (variableName) {
-      //   config.external = { packageName, variableName };
-      // }
+        // 设置 external
+        // html-webpack-tags-plugin variableName 限制只能是字符串
+        // if (variableName) {
+        //   config.external = { packageName, variableName };
+        // }
 
-      return config;
-    }),
+        return prev;
+      },
+      [],
+    ),
     append: {
       links: [],
       scripts: [],
