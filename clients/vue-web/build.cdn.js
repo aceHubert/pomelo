@@ -100,10 +100,16 @@ const cdnConfig = {
     //   variableName: ['VueAsync', 'ModuleLoader'],
     //   path: '/dist/module-loader.umd.production.js',
     // },
+    // 依赖 window.Vue, 临时通过打包解决
+    // {
+    //   packageName: '@vue-async/resource-manager',
+    //   variableName: ['VueAsync', 'ResourceManager'],
+    //   path: '/dist/resource-manager.umd.production.js',
+    // },
     {
-      packageName: '@vue-async/resource-manager',
-      variableName: ['VueAsync', 'ResourceManager'],
-      path: '/dist/resource-manager.umd.production.js',
+      packageName: '@iconfu/svg-inject',
+      variableName: 'SVGInject',
+      path: '/dist/svg-inject.min.js',
     },
   ],
 };
