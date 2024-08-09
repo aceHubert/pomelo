@@ -1,6 +1,7 @@
 import * as Oidc from 'oidc-client-ts';
 import { trailingSlash } from '@ace-util/core';
 import { Modal } from '@/components';
+import { STORAGE_PREFIX } from '@/store/utils';
 import { i18n } from '../i18n';
 
 // Types
@@ -10,8 +11,8 @@ export type SigninSilentArgs = Oidc.SigninSilentArgs;
 export type SigninArgs = Oidc.SigninRedirectArgs & { noInteractive?: boolean };
 export type SignoutArgs = Oidc.SignoutRedirectArgs;
 
-export const RedirectKey = 'po-web/oidc.redirect';
-export const LoginNameKey = 'po-web/oidc.login_name';
+export const RedirectKey = `${STORAGE_PREFIX}/oidc.redirect`;
+export const LoginNameKey = `${STORAGE_PREFIX}/oidc.login_name`;
 export const IgnoreRoutes = ['/signin', '/signout'].map(
   (path) => `${trailingSlash(process.env.BASE_URL ?? '/')}${path.substring(1)}`,
 );
