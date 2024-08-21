@@ -6,10 +6,10 @@
 
   var env = window._ENV || {};
 
-  // env.infrastructureApiBase = baseUrl + '/infrastructure/api';
+  // env.basicApiBase = baseUrl + '/basic/api';
+  env.basicGraphqlBase = baseUrl + '/basic/graphql';
+  env.basicGraphqlSubscriptionBase = baseWsUrl + '/basic/graphql';
   env.identityGraphqlBase = baseUrl + '/identity/graphql';
-  env.infrastructureGraphqlBase = baseUrl + '/infrastructure/graphql';
-  env.infrastructureGraphqlSubscriptionBase = baseWsUrl + '/infrastructure/graphql';
 
   env.oidc = {
     authority: baseUrl + '/oauth2',

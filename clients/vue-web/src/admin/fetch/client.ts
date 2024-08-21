@@ -1,5 +1,5 @@
 import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '@/fetch/graphql/identity-request';
+import { request } from '@/fetch/graphql-request/identity';
 
 // Types
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';

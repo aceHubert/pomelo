@@ -2,8 +2,8 @@ import { from } from '@apollo/client/core';
 import { getEnv } from '@ace-util/core';
 import { Request } from '@ace-pomelo/shared-client';
 import { loadingRef, errorRef, SharedError } from '@/shared';
-import { createClient } from './client';
-import { createHttpLink, authLink, errorLink } from './links';
+import { createClient } from './utils/client';
+import { createHttpLink, authLink, errorLink } from './utils/links';
 
 // Request instance
 export const request = new Request(

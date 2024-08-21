@@ -4,10 +4,10 @@
 
   var env = window._ENV || {};
 
-  // env.infrastructureApiBase = 'http://localhost:5003/api';
-  env.identityGraphqlBase = 'http://localhost:5002/graphql';
-  env.infrastructureGraphqlBase = 'http://localhost:5003/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'ws://localhost:5003/graphql';
+  // env.basicApiBase = 'http://localhost:9080/pomelo/basic/api';
+  env.basicGraphqlBase = 'http://localhost:9080/pomelo/basic/graphql';
+  env.basicGraphqlSubscriptionBase = 'ws://localhost:9080/pomelo/basic/graphql';
+  env.identityGraphqlBase = 'http://localhost:9080/pomelo/identity/graphql';
 
   env.oidc = {
     authority: 'http://localhost:5002/',

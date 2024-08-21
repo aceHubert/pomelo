@@ -19,8 +19,8 @@ const devHost = getEnv('DEV_HOST', 'localhost');
 const devPort = Number(getEnv('DEV_PORT', 3000));
 const isMock = getEnv('MOCK') === 'true';
 const isProxy = isMock || getEnv('PROXY') === 'true';
-const proxyIdentityOrigin = getEnv('PROXY_IDENTITY_ORIGIN', 'http://localhost:5002');
-const proxyInfrastructureOrigin = getEnv('PROXY_INFRASTRUCTURE_ORIGIN', 'http://localhost:5003');
+const proxyBasicOrigin = getEnv('PROXY_BASIC_ORIGIN', 'http://localhost:9080/pomelo/basic');
+const proxyIdentityOrigin = getEnv('PROXY_IDENTITY_ORIGIN', 'http://localhost:9080/pomelo/identity');
 const isHttps = getEnv('HTTPS') === 'true';
 const proxyTarget = (to) => (isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to);
 
@@ -103,12 +103,12 @@ module.exports = defineConfig({
     proxy:
       isProxy && !isProd
         ? {
-            '/infrastructure/api': {
-              target: proxyTarget(proxyInfrastructureOrigin + '/api'),
+            '/basic/api': {
+              target: proxyTarget(proxyBasicOrigin + '/api'),
               changeOrigin: true,
             },
-            '/infrastructure/graphql': {
-              target: proxyTarget(proxyInfrastructureOrigin + '/graphql'),
+            '/basic/graphql': {
+              target: proxyTarget(proxyBasicOrigin + '/graphql'),
               changeOrigin: true,
             },
             '/identity/api': {

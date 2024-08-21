@@ -3,8 +3,8 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { getEnv } from '@ace-util/core';
 import { Request } from '@ace-pomelo/shared-client';
 import { loadingRef, errorRef, SharedError } from '@/shared';
-import { createClient } from './client';
-import { createHttpUploadLink, createWebsocketLink, authLink, errorLink } from './links';
+import { createClient } from './utils/client';
+import { createHttpUploadLink, createWebsocketLink, authLink, errorLink } from './utils/links';
 
 const splitLink = split(
   ({ query }) => {
@@ -12,16 +12,12 @@ const splitLink = split(
     return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
   },
   createWebsocketLink(
-    getEnv(
-      'infrastructureGraphqlSubscriptionBase',
-      `${window.location.origin.replace(/^http/, 'ws')}/graphql`,
-      window._ENV,
-    ),
+    getEnv('basicGraphqlSubscriptionBase', `${window.location.origin.replace(/^http/, 'ws')}/graphql`, window._ENV),
   ),
   from([
     errorLink,
     authLink,
-    createHttpUploadLink(getEnv('infrastructureGraphqlBase', `${window.location.origin}/graphql`, window._ENV)),
+    createHttpUploadLink(getEnv('basicGraphqlBase', `${window.location.origin}/graphql`, window._ENV)),
   ]),
 );
 
