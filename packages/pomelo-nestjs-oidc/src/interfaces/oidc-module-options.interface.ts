@@ -1,5 +1,6 @@
 import { ModuleMetadata, Type } from '@nestjs/common/interfaces';
 import { AuthorizationParameters, ClientMetadata, HttpOptions } from 'openid-client';
+import { KeyLike } from 'jose';
 import { ChannelType } from './multitenant.interface';
 
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
@@ -47,6 +48,17 @@ export type OidcModuleOptions = {
    * Will use PKCE validation, changing to true will not append to sign in request code_challenge and code_challenge_method. (default: true)
    */
   usePKCE?: boolean;
+
+  /**
+   * Public key to verify the jwt token.
+   */
+  publicKey?: KeyLike | Uint8Array;
+
+  /**
+   * apisix openid-connect
+   * https://apisix.apache.org/docs/apisix/plugins/openid-connect/
+   */
+  setUserinfoHeader?: string;
 
   /**
    * openid-client http options

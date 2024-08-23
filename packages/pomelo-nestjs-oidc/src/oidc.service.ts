@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { HttpStatus, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { jwtVerify, createRemoteJWKSet } from 'jose';
-import { Client, Issuer, custom, TokenSet } from 'openid-client';
+import { Client, Issuer, TokenSet, custom } from 'openid-client';
 import { User as OidcUser, UserProfile } from './helpers/user';
 import { Params, ChannelType, OidcModuleOptions } from './interfaces';
 import { renderPopupPage, renderMsgPage } from './templates';
@@ -12,20 +12,28 @@ import { OIDC_MODULE_OPTIONS, SESSION_STATE_COOKIE } from './oidc.constants';
 
 @Injectable()
 export class OidcService {
+  readonly isMultitenant: boolean = false;
+  readonly channelType: ChannelType | undefined;
+  readonly setUserinfoHeader: string = 'x-userinfo';
+
   logger = new Logger(OidcService.name, { timestamp: true });
-  isMultitenant = false;
   strategy: any;
   idpInfos: {
     [tokenName: string]: {
       trustIssuer: Issuer<Client>;
-      keyStore: ReturnType<typeof createRemoteJWKSet>;
+      keyStore: ReturnType<typeof createRemoteJWKSet> | undefined;
       client: Client;
       strategy: OidcStrategy;
     };
   } = {};
 
-  constructor(@Inject(OIDC_MODULE_OPTIONS) public options: OidcModuleOptions) {
-    this.isMultitenant = !!this.options.issuerOrigin;
+  constructor(@Inject(OIDC_MODULE_OPTIONS) private options: OidcModuleOptions) {
+    this.isMultitenant = !!options.issuerOrigin;
+    this.channelType = options.channelType;
+    options.setUserinfoHeader && (this.setUserinfoHeader = options.setUserinfoHeader);
+    if (options.httpOptions) {
+      custom.setHttpOptionsDefaults(options.httpOptions);
+    }
   }
 
   // async onModuleInit() {
@@ -36,9 +44,7 @@ export class OidcService {
 
   async createStrategy(tenantId?: string, channelType?: ChannelType) {
     let strategy;
-    if (this.options.httpOptions) {
-      custom.setHttpOptionsDefaults(this.options.httpOptions);
-    }
+
     let issuer, redirectUri, clientMetadata;
     try {
       if (this.options.issuer) {
@@ -68,8 +74,9 @@ export class OidcService {
       const trustIssuer = await Issuer.discover(issuer);
       const client = new trustIssuer.Client(clientMetadata);
 
-      this.assertIssuerConfiguration(trustIssuer, 'jwks_uri');
-      const keyStore = await createRemoteJWKSet(new URL(trustIssuer.metadata.jwks_uri!));
+      const keyStore = trustIssuer.metadata.jwks_uri
+        ? await createRemoteJWKSet(new URL(trustIssuer.metadata.jwks_uri))
+        : void 0;
       const idpKey = this.getIdpInfosKey(tenantId, channelType);
 
       this.idpInfos[idpKey] = {
@@ -115,6 +122,7 @@ export class OidcService {
     }
   }
 
+  // #region for backend openid-connect login
   async login(req: Request, res: Response, next: NextFunction, params: Params) {
     try {
       const { tenantId, channelType } = this.getMultitenantParams(params, req.session);
@@ -309,6 +317,8 @@ export class OidcService {
     }
   }
 
+  // #endregion
+
   /**
    * verify access token
    * @param accessToken access token
@@ -317,27 +327,29 @@ export class OidcService {
    */
   async verifyToken(accessToken: string, tenantId?: string, channelType?: ChannelType) {
     const idpKey = this.getIdpInfosKey(tenantId, channelType);
-    if (accessToken.split('.').length !== 3) {
-      // opaque token
-      let client;
-      if (!(client = this.idpInfos[idpKey]?.client)) {
-        await this.createStrategy(tenantId, channelType);
-        client = this.idpInfos[idpKey]!.client;
-      }
-      const { active, ...payload } = await client.introspect(accessToken, 'access_token');
-      this.logger.debug(`Token introspection: ${active}`);
-      if (!active) throw new UnauthorizedException('Token is not active');
-
-      return payload;
-    } else {
-      // jwt token
-      let keyStore;
-      if (!(keyStore = this.idpInfos[idpKey]?.keyStore)) {
-        await this.createStrategy(tenantId, channelType);
-        keyStore = this.idpInfos[idpKey]!.keyStore;
-      }
-      return (await jwtVerify(accessToken, keyStore)).payload;
+    let idpInfo;
+    if (!(idpInfo = this.idpInfos[idpKey])) {
+      await this.createStrategy(tenantId, channelType);
+      idpInfo = this.idpInfos[idpKey]!;
     }
+
+    // jwt token
+    if (accessToken.split('.').length === 3) {
+      if (this.options.publicKey) {
+        // usePublicKey
+        return (await jwtVerify(accessToken, this.options.publicKey)).payload;
+      } else if (idpInfo.keyStore) {
+        // useJwks
+        return (await jwtVerify(accessToken, idpInfo.keyStore)).payload;
+      }
+    }
+
+    // opaque token, verify from inrospection_endpoint
+    const { active, ...payload } = await idpInfo.client.introspect(accessToken, 'access_token');
+    this.logger.debug(`Token introspection: ${active}`);
+    if (!active) throw new UnauthorizedException('Token is not active');
+
+    return payload;
   }
 
   getPrefixFromRequest(req: Request) {
@@ -378,11 +390,11 @@ export class OidcService {
     return `${tenantId ?? 'common'}.${channelType ?? 'none'}`;
   }
 
-  private assertIssuerConfiguration(issuer: Issuer, endpoint: string) {
-    if (!issuer[endpoint]) {
-      throw new TypeError(`${endpoint} must be configured on the issuer`);
-    }
-  }
+  // private assertIssuerConfiguration(issuer: Issuer, endpoint: string) {
+  //   if (!issuer[endpoint]) {
+  //     throw new TypeError(`${endpoint} must be configured on the issuer`);
+  //   }
+  // }
 }
 
 declare module 'openid-client' {

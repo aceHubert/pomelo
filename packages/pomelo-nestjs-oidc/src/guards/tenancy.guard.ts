@@ -24,11 +24,11 @@ export class TenancyGuard implements CanActivate {
       !ctx.user?.profile?.channel_type ||
       !ctx.params.tenantId ||
       ctx.params.tenantId === 'favicon.ico' ||
-      (!this.oidcService.options.channelType && !ctx.params.channelType) ||
+      (!this.oidcService.channelType && !ctx.params.channelType) ||
       (ctx.user?.profile?.channel_type &&
         ctx.user?.profile?.tenant_id &&
         ctx.user?.profile?.tenant_id === ctx.params.tenantId &&
-        (!this.oidcService.options.channelType ? ctx.user?.profile?.channel_type === ctx.params.channelType : true))
+        (!this.oidcService.channelType ? ctx.user?.profile?.channel_type === ctx.params.channelType : true))
     ) {
       return true;
     } else {
