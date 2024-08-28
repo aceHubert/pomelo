@@ -169,7 +169,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         const { mobile, email, ...rest } = user.toJSON() as any as UserModel;
         return {
           ...rest,
-          mobile: mobile ? mobile.replace(/(+?\d+)\d{4}(\d{4})$/, '$1****$2') : mobile,
+          mobile: mobile ? mobile.replace(/(\+?\d+)\d{4}(\d{4})$/, '$1****$2') : mobile,
           email: email ? email.replace(/^(.{1}).*(@.+)/, '$1***$2') : email,
         };
       }),
@@ -246,7 +246,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         const { UserMetas, mobile, email, ...rest } = row.toJSON() as any as UserModel & { UserMetas: UserMetaModel[] };
         return {
           ...rest,
-          mobile: mobile ? mobile.replace(/(+?\d+)\d{4}(\d{4})$/, '$1****$2') : mobile,
+          mobile: mobile ? mobile.replace(/(\+?\d+)\d{4}(\d{4})$/, '$1****$2') : mobile,
           email: email ? email.replace(/^(.{1}).*(@.+)/, '$1***$2') : email,
           capabilities: UserMetas.length ? UserMetas[0].metaValue : null,
         } as UserWithRoleModel;

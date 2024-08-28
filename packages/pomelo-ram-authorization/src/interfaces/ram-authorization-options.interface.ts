@@ -27,6 +27,11 @@ export interface RamAuthorizationOptions {
    * @default user.
    */
   userProperty?: string;
+
+  /**
+   * is global module
+   */
+  isGlobal?: boolean;
 }
 
 export interface RamAuthorizationOptionsFactory {
@@ -34,6 +39,10 @@ export interface RamAuthorizationOptionsFactory {
 }
 
 export interface RamAuthorizationAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  /**
+   * is global module
+   */
+  isGlobal?: boolean;
   useExisting?: Type<RamAuthorizationOptionsFactory>;
   useClass?: Type<RamAuthorizationOptionsFactory>;
   useFactory?: (...args: any[]) => Promise<RamAuthorizationOptions> | RamAuthorizationOptions;

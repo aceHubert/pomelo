@@ -1,8 +1,8 @@
 import passport from 'passport';
 import { v4 as uuid } from 'uuid';
-import { HttpStatus, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { jwtVerify, createRemoteJWKSet } from 'jose';
+import { createRemoteJWKSet } from 'jose';
 import { Client, Issuer, TokenSet, custom } from 'openid-client';
 import { User as OidcUser, UserProfile } from './helpers/user';
 import { Params, ChannelType, OidcModuleOptions } from './interfaces';
@@ -12,13 +12,10 @@ import { OIDC_MODULE_OPTIONS, SESSION_STATE_COOKIE } from './oidc.constants';
 
 @Injectable()
 export class OidcService {
-  readonly isMultitenant: boolean = false;
-  readonly channelType: ChannelType | undefined;
-  readonly setUserinfoHeader: string = 'x-userinfo';
-
-  logger = new Logger(OidcService.name, { timestamp: true });
-  strategy: any;
-  idpInfos: {
+  private logger = new Logger(OidcService.name, { timestamp: true });
+  private readonly isMultitenant: boolean = false;
+  private strategy: any;
+  private idpInfos: {
     [tokenName: string]: {
       trustIssuer: Issuer<Client>;
       keyStore: ReturnType<typeof createRemoteJWKSet> | undefined;
@@ -29,8 +26,6 @@ export class OidcService {
 
   constructor(@Inject(OIDC_MODULE_OPTIONS) private options: OidcModuleOptions) {
     this.isMultitenant = !!options.issuerOrigin;
-    this.channelType = options.channelType;
-    options.setUserinfoHeader && (this.setUserinfoHeader = options.setUserinfoHeader);
     if (options.httpOptions) {
       custom.setHttpOptionsDefaults(options.httpOptions);
     }
@@ -318,39 +313,6 @@ export class OidcService {
   }
 
   // #endregion
-
-  /**
-   * verify access token
-   * @param accessToken access token
-   * @param tenantId tenant id
-   * @param channelType channel type
-   */
-  async verifyToken(accessToken: string, tenantId?: string, channelType?: ChannelType) {
-    const idpKey = this.getIdpInfosKey(tenantId, channelType);
-    let idpInfo;
-    if (!(idpInfo = this.idpInfos[idpKey])) {
-      await this.createStrategy(tenantId, channelType);
-      idpInfo = this.idpInfos[idpKey]!;
-    }
-
-    // jwt token
-    if (accessToken.split('.').length === 3) {
-      if (this.options.publicKey) {
-        // usePublicKey
-        return (await jwtVerify(accessToken, this.options.publicKey)).payload;
-      } else if (idpInfo.keyStore) {
-        // useJwks
-        return (await jwtVerify(accessToken, idpInfo.keyStore)).payload;
-      }
-    }
-
-    // opaque token, verify from inrospection_endpoint
-    const { active, ...payload } = await idpInfo.client.introspect(accessToken, 'access_token');
-    this.logger.debug(`Token introspection: ${active}`);
-    if (!active) throw new UnauthorizedException('Token is not active');
-
-    return payload;
-  }
 
   getPrefixFromRequest(req: Request) {
     const { tenantId, channelType } = this.getMultitenantParamsFromRequest(req);

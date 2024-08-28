@@ -1,5 +1,5 @@
 import { APP_GUARD } from '@nestjs/core';
-import { DynamicModule, MiddlewareConsumer, Module, NestModule, Provider, RequestMethod } from '@nestjs/common';
+import { DynamicModule, MiddlewareConsumer, Module, NestModule, Provider, Inject, RequestMethod } from '@nestjs/common';
 import {
   AuthMultitenantMultiChannelController,
   AuthMultitenantController,
@@ -9,7 +9,7 @@ import {
 } from './controllers';
 import { GuestTokenGuard, TokenGuard, TenancyGuard } from './guards';
 import { OidcModuleAsyncOptions, OidcModuleOptions, OidcOptionsFactory } from './interfaces';
-import { UserMiddleware, LoginMiddleware } from './middlewares';
+import { LoginMiddleware } from './middlewares';
 import { OidcService } from './oidc.service';
 import { SessionSerializer } from './session.serializer';
 import { mergeDefaults } from './utils/merge-defaults';
@@ -17,19 +17,17 @@ import { OIDC_MODULE_OPTIONS } from './oidc.constants';
 
 @Module({})
 export class OidcModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(UserMiddleware)
-      .exclude({ path: '/user', method: RequestMethod.GET })
-      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  constructor(@Inject(OIDC_MODULE_OPTIONS) private options: OidcModuleOptions) {}
 
-    consumer
-      .apply(LoginMiddleware)
-      .forRoutes(
-        { path: '/login', method: RequestMethod.ALL },
-        { path: '/:tenantId/login', method: RequestMethod.ALL },
-        { path: '/:tenantId/:channelType/login', method: RequestMethod.ALL },
-      );
+  configure(consumer: MiddlewareConsumer) {
+    this.options.disableMiddleware !== true &&
+      consumer
+        .apply(LoginMiddleware)
+        .forRoutes(
+          { path: '/login', method: RequestMethod.ALL },
+          { path: '/:tenantId/login', method: RequestMethod.ALL },
+          { path: '/:tenantId/:channelType/login', method: RequestMethod.ALL },
+        );
   }
 
   static forRoot({ isGlobal, ...options }: OidcModuleOptions): DynamicModule {
@@ -37,7 +35,7 @@ export class OidcModule implements NestModule {
       module: OidcModule,
       global: isGlobal,
       controllers:
-        options.disableController === true
+        options.disableMiddleware === true
           ? []
           : [
               AuthController,
@@ -69,7 +67,7 @@ export class OidcModule implements NestModule {
       module: OidcModule,
       global: options.isGlobal,
       controllers:
-        options.disableController === true
+        options.disableMiddleware === true
           ? []
           : [
               AuthController,
@@ -113,7 +111,7 @@ export class OidcModule implements NestModule {
         provide: OIDC_MODULE_OPTIONS,
         useFactory: async (...args: any[]) =>
           mergeDefaults({
-            disableController: options.disableController,
+            disableMiddleware: options.disableMiddleware,
             ...(await options.useFactory!(...args)),
           }),
         inject: options.inject || [],
@@ -123,7 +121,7 @@ export class OidcModule implements NestModule {
       provide: OIDC_MODULE_OPTIONS,
       useFactory: async (optionsFactory: OidcOptionsFactory) =>
         mergeDefaults({
-          disableController: options.disableController,
+          disableMiddleware: options.disableMiddleware,
           ...(await optionsFactory.createModuleConfig()),
         }),
       inject: [options.useExisting! || options.useClass!],

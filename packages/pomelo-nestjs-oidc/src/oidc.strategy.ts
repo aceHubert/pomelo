@@ -6,7 +6,7 @@ import { UserInfoService } from './helpers/userinfo.service';
 import { ChannelType } from './interfaces';
 
 export class OidcStrategy extends PassportStrategy(Strategy, 'oidc') {
-  readonly logger = new Logger(OidcStrategy.name);
+  private logger = new Logger(OidcStrategy.name, { timestamp: true });
 
   claimsService: ClaimsService;
   userinfoService: UserInfoService;

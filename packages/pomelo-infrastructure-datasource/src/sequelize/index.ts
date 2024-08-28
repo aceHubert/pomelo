@@ -19,7 +19,7 @@ export interface DatabaseOptions extends SequelizeOptions {
 }
 
 export class DatabaseManager {
-  private readonly logger = new Logger(DatabaseManager.name, { timestamp: true });
+  private logger = new Logger(DatabaseManager.name, { timestamp: true });
   private associated = false;
   private readonly options: DatabaseOptions;
   public readonly sequelize: Sequelize;

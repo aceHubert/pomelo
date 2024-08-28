@@ -1,6 +1,5 @@
 import { ModuleMetadata, Type } from '@nestjs/common/interfaces';
 import { AuthorizationParameters, ClientMetadata, HttpOptions } from 'openid-client';
-import { KeyLike } from 'jose';
 import { ChannelType } from './multitenant.interface';
 
 type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
@@ -45,27 +44,6 @@ export type OidcModuleOptions = {
   mergeClaimsStrategy?: { array: 'replace' | 'merge' };
 
   /**
-   * Will use PKCE validation, changing to true will not append to sign in request code_challenge and code_challenge_method. (default: true)
-   */
-  usePKCE?: boolean;
-
-  /**
-   * Public key to verify the jwt token.
-   */
-  publicKey?: KeyLike | Uint8Array;
-
-  /**
-   * apisix openid-connect
-   * https://apisix.apache.org/docs/apisix/plugins/openid-connect/
-   */
-  setUserinfoHeader?: string;
-
-  /**
-   * openid-client http options
-   */
-  httpOptions?: HttpOptions;
-
-  /**
    * check user role permission
    * @param user user info
    * @param roles roles on method or class
@@ -73,10 +51,20 @@ export type OidcModuleOptions = {
   checkRolePremissionFactory?: (user: Express.User, roles: string[]) => boolean;
 
   /**
-   * Disable to register Login Controllers
+   * Will use PKCE validation, changing to true will not append to sign in request code_challenge and code_challenge_method. (default: true)
+   */
+  usePKCE?: boolean;
+
+  /**
+   * openid-client http options
+   */
+  httpOptions?: HttpOptions;
+
+  /**
+   * Disable to register Login Middleware (and all Controllers)
    * @default false
    */
-  disableController?: boolean;
+  disableMiddleware?: boolean;
 
   /**
    * is global module
@@ -98,8 +86,8 @@ interface OidcChannelOptions {
 
 export interface OidcOptionsFactory {
   createModuleConfig():
-    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>>
-    | Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>;
+    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>>
+    | Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>;
 }
 
 export interface OidcModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
@@ -111,13 +99,13 @@ export interface OidcModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> 
    * Disable to register Login Controller
    * @default false
    */
-  disableController?: boolean;
+  disableMiddleware?: boolean;
   useExisting?: Type<OidcOptionsFactory>;
   useClass?: Type<OidcOptionsFactory>;
   useFactory?: (
     ...args: any[]
   ) =>
-    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>>
-    | Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>;
+    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>>
+    | Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>;
   inject?: any[];
 }

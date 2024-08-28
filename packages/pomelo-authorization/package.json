@@ -1,6 +1,6 @@
 {
-  "name": "@ace-pomelo/ram-authorization",
-  "description": "Ram Authorization.",
+  "name": "@ace-pomelo/authorization",
+  "description": "Authorization for JWT.",
   "version": "0.1.0-alpha.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,7 @@
   "keywords": [
     "nestjs",
     "authorization",
-    "ram"
+    "jwt"
   ],
   "scripts": {
     "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
@@ -26,7 +26,8 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/graphql": "^11.0.0",
-    "graphql-parse-resolve-info": "^4.12.0"
+    "graphql-parse-resolve-info": "^4.12.0",
+    "openid-client": "^5.6.5"
   },
   "peerDependencies": {
     "@nestjs/common": "^9.0.0",

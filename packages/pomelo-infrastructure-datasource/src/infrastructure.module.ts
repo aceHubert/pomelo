@@ -10,7 +10,7 @@ import { INFRASTRUCTURE_OPTIONS } from './constants';
 
 @Module({})
 export class InfrastructureModule {
-  private static readonly logger = new Logger(InfrastructureModule.name, { timestamp: true });
+  private static logger = new Logger(InfrastructureModule.name, { timestamp: true });
 
   static register(options: InfrastructureOptions): DynamicModule {
     // check connection config

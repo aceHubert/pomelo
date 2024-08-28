@@ -5,9 +5,7 @@ import { renderMsgPage } from '../templates';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  readonly logger = new Logger(HttpExceptionFilter.name);
-
-  constructor() {}
+  private logger = new Logger(HttpExceptionFilter.name);
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();

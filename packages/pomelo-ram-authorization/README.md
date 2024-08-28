@@ -1,2 +1,3 @@
 # @ace-pomelo/ram-authorization
-> Ram Authorization for Pomelo
+
+> Ram Authorization，An extension to @ace-pomelo/authorization

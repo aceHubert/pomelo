@@ -1,50 +1,61 @@
-import { Reflector } from '@nestjs/core';
 import {
   Inject,
-  Injectable,
   CanActivate,
   ExecutionContext,
+  Injectable,
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
 import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
 import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
-import { RamAuthorizationOptions } from './interfaces/ram-authorization-options.interface';
+import { AuthorizationOptions, RequestUser } from './interfaces/authorization-options.interface';
+import { hasDecorator } from './utils/has-decorator';
 import { getContextObject } from './utils/get-context-object';
-import { RAM_AUTHORIZATION_OPTIONS, RAM_AUTHORIZATION_ACTION_KEY } from './constants';
+import { AUTHORIZATION_OPTIONS, AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
 
-/**
- * 是否有用户授权策略
- */
 @Injectable()
-export class RamAuthorizedGuard implements CanActivate {
+export class TokenGuard implements CanActivate {
   constructor(
-    @Inject(RAM_AUTHORIZATION_OPTIONS) private readonly options: RamAuthorizationOptions,
+    @Inject(AUTHORIZATION_OPTIONS) private readonly options: AuthorizationOptions,
     private readonly reflector: Reflector,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const cxt = getContextObject(context);
-    if (!cxt) {
+  async canActivate(context: ExecutionContext) {
+    const ctx = getContextObject(context);
+    if (!ctx) {
       throw Error(`context type: ${context.getType()} not supported`);
     }
 
-    const type = context.getType<GqlContextType>();
+    const anonymous = hasDecorator(ALLOWANONYMOUS_KEY, context, this.reflector);
 
-    const action = this.reflector.getAllAndOverride<string>(RAM_AUTHORIZATION_ACTION_KEY, [
+    // @Anonymous() decorator, return true
+    if (anonymous) {
+      return true;
+    }
+
+    const authorized = hasDecorator(AUTHORIZATION_KEY, context, this.reflector);
+
+    // no @Authorized() decorator, return true
+    if (!authorized) return true;
+
+    const user = ctx[this.options.userProperty!] as RequestUser | undefined;
+
+    const roles = this.reflector.getAllAndOverride<string[] | undefined>(AUTHORIZATION_ROLE_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    const user = cxt[this.options.userProperty!] as Record<string, any> | undefined;
     if (!user) {
       // 没有的提供 token, return 401
       throw new UnauthorizedException("Access denied, You don't have permission for this action!");
-    } else if (action && !this.hasRamPermission(user, action)) {
+    } else if (roles?.length && !this.hasRolePermission(user, roles)) {
       // false return 403
       throw new ForbiddenException("Access denied, You don't have capability for this action!");
     }
+
+    const type = context.getType<GqlContextType>();
 
     // graphql 判断返回实体字段是否有权限
     if (type === 'graphql') {
@@ -54,10 +65,10 @@ export class RamAuthorizedGuard implements CanActivate {
        * 这里未使用 FieldMiddleware 原因在于中间件对每个 field 是隔离的，当其中 field 验证失败时，ResoloveField 会继续执行
        * https://docs.nestjs.com/graphql/extensions
        */
-      // @FieldRamAuthorized
-      const fieldAction = this.resolveGraphqlOutputFieldsAction(info);
-      for (const field in fieldAction) {
-        if (!user || !this.hasRamPermission(user, fieldAction[field])) {
+      // @FieldAuthorized
+      const fieldRoles = this.resolveGraphqlOutputFieldsRoles(info);
+      for (const field in fieldRoles) {
+        if (!user || !this.hasRolePermission(user, fieldRoles[field])) {
           // false return 403
           throw new UnauthorizedException(`Access denied, You don't capability for field "${field}"!)`);
         }
@@ -71,7 +82,7 @@ export class RamAuthorizedGuard implements CanActivate {
    * 获取 Graphql Output fields 的角色权限
    * @param info GraphQLResolveInfo
    */
-  resolveGraphqlOutputFieldsAction(info: GraphQLResolveInfo): { [field: string]: string } {
+  protected resolveGraphqlOutputFieldsRoles(info: GraphQLResolveInfo): { [field: string]: string[] } {
     const parsedResolveInfoFragment = parse(info, { keepRoot: false, deep: true });
 
     if (!parsedResolveInfoFragment) {
@@ -88,7 +99,7 @@ export class RamAuthorizedGuard implements CanActivate {
       fieldsByTypeName: FieldsByTypeName,
       type: GraphQLOutputType,
       parentTypeName?: string,
-      fieldAction: { [field: string]: string } = {},
+      fieldRoles: { [field: string]: string[] } = {},
     ) {
       const returnType = getUnWrappingType(type);
 
@@ -97,15 +108,15 @@ export class RamAuthorizedGuard implements CanActivate {
         for (const key in fieldsByTypeName[returnType.name]) {
           const fields = returnType.getFields();
           const field = fieldsByTypeName[returnType.name][key];
-          if (fields[field.name]?.extensions?.action) {
-            fieldAction[`${parentTypeName ? parentTypeName + '.' : ''}${field.name}`] = fields[field.name].extensions
-              ?.action as string;
+          if (fields[field.name]?.extensions?.roles) {
+            fieldRoles[`${parentTypeName ? parentTypeName + '.' : ''}${field.name}`] = fields[field.name].extensions
+              ?.roles as string[];
           }
           Object.keys(field.fieldsByTypeName).length &&
-            resolveFields(field.fieldsByTypeName, fields[field.name].type, field.name, fieldAction);
+            resolveFields(field.fieldsByTypeName, fields[field.name].type, field.name, fieldRoles);
         }
       }
-      return fieldAction;
+      return fieldRoles;
     }
 
     function getUnWrappingType(type: GraphQLOutputType): any {
@@ -117,21 +128,25 @@ export class RamAuthorizedGuard implements CanActivate {
   }
 
   /**
-   * 判断用户策略是否在提供的策略内
+   * 判断用户角色是否在提供的角色内
    * @param user 用户
-   * @param rams 策略
-   * @returns
+   * @param roles 角色权限，如果用户色值有值但提供的角色长度为0，会直接返回true
    */
-  private hasRamPermission(user: Record<string, any>, action: string): boolean {
-    console.log('ram check', user.ramsClaim, action);
-    return true;
-    // const hasRam = (userRamsClaim: string[]): boolean => {
-    //   // TODO: RAM 策略判断
-    //   // rams.some((ram) => userRams.includes(ram))
-    //   console.log('ram check', userRamsClaim, action);
-    //   return true;
-    // };
-    // const userRamsClaim = user.ramsClaim as string[] | undefined;
-    // return Boolean(userRamsClaim?.length && hasRam(userRamsClaim));
+  protected hasRolePermission(user: RequestUser, roles: string[]): boolean {
+    if (!roles.length) {
+      return true; // 空 array 表示没有限制(如：@Authorized())
+    } else {
+      return (this.options.checkRolePremissionFactory ?? this.defaultCheckRolePremissionFactory)(user, roles);
+    }
+  }
+
+  /**
+   * 默认通过 user.role 判断角色权限
+   * @param user 用户
+   * @param roles 角色权限
+   */
+  private defaultCheckRolePremissionFactory(user: RequestUser, roles: string[]): boolean {
+    const userRole = 'role' in user ? (user['role'] as string) : undefined;
+    return Boolean(userRole && roles.some((role) => userRole === role));
   }
 }

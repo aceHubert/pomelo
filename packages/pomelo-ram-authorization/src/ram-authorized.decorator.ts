@@ -1,6 +1,6 @@
 import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';
 import { Extensions } from '@nestjs/graphql';
-import { RamAuthorizedGuard } from './ram-authorized.guard';
+import { TokenGuard } from './token.guard';
 import { RAM_AUTHORIZATION_ACTION_KEY } from './constants';
 
 /**
@@ -10,7 +10,7 @@ import { RAM_AUTHORIZATION_ACTION_KEY } from './constants';
 export function RamAuthorized(action: string): MethodDecorator {
   return applyDecorators(
     SetMetadata(RAM_AUTHORIZATION_ACTION_KEY, action), // 授权策略
-    UseGuards(RamAuthorizedGuard), // 使用  ram Guards
+    UseGuards(TokenGuard), // 使用  ram Guards
   );
 }
 
@@ -24,6 +24,6 @@ export function FieldRamAuthorized(action: string): PropertyDecorator {
     Extensions({
       action, // 授权策略
     }),
-    UseGuards(RamAuthorizedGuard), // 使用  ram Guards
+    UseGuards(TokenGuard), // 使用  ram Guards
   );
 }

@@ -8,6 +8,11 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "nestjs",
+    "openid",
+    "oidc"
+  ],
   "scripts": {
     "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
     "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json",
