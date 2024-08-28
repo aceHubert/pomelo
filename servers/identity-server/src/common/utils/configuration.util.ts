@@ -42,25 +42,49 @@ export interface ConfigObject {
     cors?: boolean | CorsOptions;
   };
   /**
+   * swagger options
+   */
+  swagger?: {
+    /**
+     * debug mode in runtime (show swagger doc)
+     */
+    debug?: boolean;
+    /**
+     * path
+     */
+    path?: string;
+  };
+  /**
+   * graphql options
+   */
+  graphql?: {
+    /**
+     * debug mode in runtime (show graphql background, enable introspection and debug)
+     */
+    debug?: boolean;
+    /**
+     * path
+     */
+    path?: string;
+    /**
+     * subscription path
+     */
+    subscription_path?: string;
+  };
+  /**
    * database configs
    */
   database?: {
-    infrastructure?: {
-      /**
-       * database connection,
-       * checkout on https://sequelize.org/docs/v6/getting-started/
-       */
-      connection: string | Record<string, any>;
-      /**
-       * table prefix
-       * @example t_
-       */
-      tablePrefix?: string;
-    };
-    identity?: {
-      connection: string | Record<string, any>;
-      tablePrefix?: string;
-    };
+    /**
+     * database connection,
+     * checkout on https://sequelize.org/docs/v6/getting-started/
+     */
+    connection: string | Record<string, any>;
+    /**
+     * table prefix
+     * @example t_
+     */
+    tablePrefix?: string;
   };
 
   [key: string]: any;
@@ -120,41 +144,31 @@ export const configuration =
               : true
             : false,
       },
+      swagger: {
+        debug: process.env.SWAGGER_DEBUG !== void 0 ? process.env.SWAGGER_DEBUG === 'true' : debugMode,
+        path: process.env.SWAGGER_PATH,
+      },
+      graphql: {
+        debug: process.env.GRAPHQL_DEBUG !== void 0 ? process.env.GRAPHQL_DEBUG === 'true' : debugMode,
+        path: process.env.GRAPHQL_PATH,
+        subscription_path: process.env.GRAPHQL_SUBSCRIPTION_PATH,
+      },
       database: {
-        infrastructure: {
-          connection: process.env.INFRASTRUCTURE_DATABASE_CONNECTION
-            ? process.env.INFRASTRUCTURE_DATABASE_CONNECTION
-            : {
-                database: process.env.INFRASTRUCTURE_DATABASE_NAME,
-                username: process.env.INFRASTRUCTURE_DATABASE_USERNAME,
-                password: process.env.INFRASTRUCTURE_DATABASE_PASSWORD,
-                dialect: process.env.INFRASTRUCTURE_DATABASE_DIALECT || 'mysql',
-                host: process.env.INFRASTRUCTURE_DATABASE_HOST || 'localhost',
-                port: process.env.INFRASTRUCTURE_DATABASE_PORT || 3306,
-                define: {
-                  charset: process.env.INFRASTRUCTURE_DATABASE_CHARSET || 'utf8',
-                  collate: process.env.INFRASTRUCTURE_DATABASE_COLLATE || '',
-                },
+        connection: process.env.IDENTITY_DATABASE_CONNECTION
+          ? process.env.IDENTITY_DATABASE_CONNECTION
+          : {
+              database: process.env.IDENTITY_DATABASE_NAME,
+              username: process.env.IDENTITY_DATABASE_USERNAME,
+              password: process.env.IDENTITY_DATABASE_PASSWORD,
+              dialect: process.env.IDENTITY_DATABASE_DIALECT || 'mysql',
+              host: process.env.IDENTITY_DATABASE_HOST || 'localhost',
+              port: process.env.IDENTITY_DATABASE_PORT || 3306,
+              define: {
+                charset: process.env.IDENTITY_DATABASE_CHARSET || 'utf8',
+                collate: process.env.IDENTITY_DATABASE_COLLATE || '',
               },
-          tablePrefix: process.env.TABLE_PREFIX,
-        },
-        identity: {
-          connection: process.env.IDENTITY_DATABASE_CONNECTION
-            ? process.env.IDENTITY_DATABASE_CONNECTION
-            : {
-                database: process.env.IDENTITY_DATABASE_NAME,
-                username: process.env.IDENTITY_DATABASE_USERNAME,
-                password: process.env.IDENTITY_DATABASE_PASSWORD,
-                dialect: process.env.IDENTITY_DATABASE_DIALECT || 'mysql',
-                host: process.env.IDENTITY_DATABASE_HOST || 'localhost',
-                port: process.env.IDENTITY_DATABASE_PORT || 3306,
-                define: {
-                  charset: process.env.IDENTITY_DATABASE_CHARSET || 'utf8',
-                  collate: process.env.IDENTITY_DATABASE_COLLATE || '',
-                },
-              },
-          tablePrefix: process.env.TABLE_PREFIX,
-        },
+            },
+        tablePrefix: process.env.TABLE_PREFIX,
       },
     };
 

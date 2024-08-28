@@ -4,10 +4,13 @@ import { default as expressEjsLayout } from 'express-ejs-layouts';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
-import { normalizeRoutePath } from '@ace-pomelo/shared-server';
+import { normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared-server';
+import { ApiModule } from './api/api.module';
 import { AppModule } from './app.module';
+import { version } from './version';
 import { syncDatabase } from './db.sync';
 
 declare const module: any;
@@ -22,6 +25,10 @@ async function bootstrap() {
   const port = configService.get<number>('webServer.port', 3000);
   const globalPrefix = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
   const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
+  const isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
+  const swaggerPath = normalizeRoutePath(configService.get<string>('swagger.path', '/doc'));
+  const isGraphqlDebug = configService.get<boolean>('graphql.debug', false);
+  const graphqlPath = normalizeRoutePath(configService.get<string>('graphql.path', '/graphql'));
 
   // Starts listening for shutdown hooks
   app.enableShutdownHooks();
@@ -45,6 +52,43 @@ async function bootstrap() {
     logger.debug(`trust proxy, addr: ${addr}, i: ${i}`);
     return true;
   });
+
+  // swagger
+  if (isSwaggerDebug) {
+    const api = new DocumentBuilder()
+      .setTitle('Pomelo identity APIs')
+      .setDescription(
+        `The RESTful API documentation.<br/>graphql support: <a href="${stripForegoingSlash(
+          graphqlPath,
+        )}" target="_blank">Documentation</a>`,
+      )
+      .setVersion(version)
+      .addBearerAuth()
+      .addOAuth2({
+        type: 'oauth2',
+        flows: {
+          authorizationCode: {
+            authorizationUrl: configService.get<string>('OIDC_ISSUER') + '/connect/authorize',
+            tokenUrl: configService.get<string>('OIDC_ISSUER') + '/connect/token',
+            scopes: {
+              openid: 'openid',
+              profile: 'profile',
+            },
+          },
+        },
+        // openIdConnectUrl: configService.get<string>('OIDC_ISSUER') + '/.well-known/openid-configuration',
+      })
+      .addTag('clients', 'Clients.')
+      .addTag('identityResources', 'Identity Resources.')
+      .addTag('apiResources', 'Api Resources.')
+      .build();
+    const document = SwaggerModule.createDocument(app, api, {
+      include: [ApiModule],
+    });
+    SwaggerModule.setup(swaggerPath, app, document, {
+      useGlobalPrefix: true,
+    });
+  }
 
   // set application/x-www-form-urlencoded body parser
   app.use(urlencoded({ extended: false }));
@@ -72,6 +116,8 @@ async function bootstrap() {
   logger.log(
     `OpenID-Connect discovery endpoint: ${await app.getUrl()}${globalPrefix}/.well-known/openid-configuration`,
   );
+  isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${globalPrefix}${swaggerPath}`);
+  isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${globalPrefix}${graphqlPath}`);
 
   // hot reload
   if (module.hot) {

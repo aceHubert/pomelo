@@ -15,15 +15,7 @@ export default defineConfig({
   },
   // 数据库
   database: {
-    // infrastructure database settings
-    infrastructure: {
-      connection: 'mysql://user:password@host:port/database',
-      tablePrefix: 'po_',
-    },
-    // identity database settings
-    identity: {
-      connection: 'mysql://user:password@host:port/database',
-      tablePrefix: 'po_',
-    },
+    connection: 'mysql://user:password@host:port/database',
+    tablePrefix: 'po_',
   },
 });

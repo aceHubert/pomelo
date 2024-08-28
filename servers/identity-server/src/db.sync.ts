@@ -4,8 +4,9 @@ import dotenv from 'dotenv';
 import { UniqueConstraintError } from 'sequelize';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatabaseManager, version, name } from '@ace-pomelo/identity-datasource';
 import { FileEnv } from '@ace-pomelo/shared-server';
+import { DatabaseManager, name } from '@/datasource';
+import { version } from './version';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
@@ -149,28 +150,8 @@ async function syncDatabase() {
           },
           {
             applicationType: 'native',
-            clientId: 'f6b2c633-4f9e-4b7a-8f2a-9a4b4e9b0b9b',
-            clientName: 'Pomelo Identity Api Server',
-            accessTokenFormat: 'jwt',
-            requireAuthTime: true,
-            requirePkce: true,
-            tokenEndpointAuthMethod: 'client_secret_basic',
-            scopes: ['openid', 'profile', 'offline_access'],
-            grantTypes: ['client_credentials'],
-            redirectUris: [],
-            postLogoutRedirectUris: [],
-            secrets: [
-              {
-                type: 'SharedSecret',
-                // X6agw8RoEC
-                value: '95cd8ad27f6bd19b508801620faddd11c1d19841386cd105864a60543b5b2431',
-              },
-            ],
-          },
-          {
-            applicationType: 'native',
             clientId: '75a9c633-cfde-4954-b35c-9344ed9b781a',
-            clientName: 'Pomelo Infratructure Api Server',
+            clientName: 'Pomelo BFF Server',
             accessTokenFormat: 'jwt',
             requireAuthTime: true,
             requirePkce: true,

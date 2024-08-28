@@ -1,8 +1,9 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
+import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR, HttpAdapterHost } from '@nestjs/core';
 import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import {
   I18nModule,
   I18nService,
@@ -14,13 +15,20 @@ import {
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
+import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
+// import { print, parse, getIntrospectionQuery } from 'graphql';
 import { OidcModule } from 'nest-oidc-provider';
 import { normalizeRoutePath } from '@ace-pomelo/shared-server';
-import { IdentityModule } from '@ace-pomelo/identity-datasource';
-import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
+import { AuthorizationModule } from '@ace-pomelo/authorization';
+import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
 import { configuration } from './common/utils/configuration.util';
+import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
+import { IdentityDatasourceModule } from './datasource/datasource.module';
+import { ApiModule } from './api/api.module';
 import { AccountProviderModule } from './account-provider/account-provider.module';
 import { AccountConfigService } from './account-config/account-config.service';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
@@ -29,6 +37,8 @@ import { AccountModule } from './account/account.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { envFilePaths } from './db.sync';
+import { getJWKS, getKey } from './keys';
+import { INFRASTRUCTURE_SERVICE } from './constants';
 
 // extends
 // eslint-disable-next-line import/order
@@ -86,12 +96,57 @@ const logger = new Logger('AppModule', { timestamp: true });
       ],
       inject: [ConfigService],
     }),
-    InfrastructureModule.registerAsync({
+    ClientsModule.registerAsync({
+      isGlobal: true,
+      clients: [
+        {
+          name: INFRASTRUCTURE_SERVICE,
+          useFactory: () => ({
+            transport: Transport.TCP,
+            options: {
+              host: 'localhost',
+              port: 5002,
+            },
+          }),
+          inject: [ConfigService],
+        },
+      ],
+    }),
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      useFactory: (config: ConfigService) => {
+        const isDebug = config.get<boolean>('graphql.debug', false);
+        const graphqlPath = config.get<string>('graphql.path', '/graphql');
+        return {
+          debug: isDebug,
+          playground: isDebug,
+          introspection: isDebug,
+          path: graphqlPath,
+          useGlobalPrefix: true,
+          cache: new InMemoryLRUCache(),
+          autoSchemaFile: path.join(__dirname, 'schema.gql'),
+          context: async ({ req }: any) => req,
+        };
+      },
+      inject: [ConfigService],
+    }),
+    AuthorizationModule.forRootAsync({
+      isGlobal: true,
+      useFactory: async (config: ConfigService) => ({
+        publicKey: await getKey(config.get('OIDC_PRIVATE_KEY')),
+      }),
+      inject: [ConfigService],
+    }),
+    RamAuthorizationModule.forRoot({
+      isGlobal: true,
+      serviceName: 'identity',
+    }),
+    IdentityDatasourceModule.registerAsync({
       isGlobal: true,
       useFactory: (config: ConfigService) => ({
         isGlobal: true,
-        connection: config.getOrThrow('database.infrastructure.connection'),
-        tablePrefix: config.get('database.infrastructure.tablePrefix', ''),
+        connection: config.getOrThrow('database.connection'),
+        tablePrefix: config.get('database.tablePrefix', ''),
         translate: (key, fallback, args) => {
           const i18n = I18nContext.current();
           return (
@@ -104,27 +159,9 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService],
     }),
-    IdentityModule.registerAsync({
-      isGlobal: true,
-      useFactory: (config: ConfigService) => ({
-        isGlobal: true,
-        connection: config.getOrThrow('database.identity.connection'),
-        tablePrefix: config.get('database.identity.tablePrefix', ''),
-        translate: (key, fallback, args) => {
-          const i18n = I18nContext.current();
-          return (
-            i18n?.translate(key, {
-              defaultValue: fallback,
-              args,
-            }) ?? fallback
-          );
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    ApiModule,
     AccountProviderModule.forRootAsync({
       isGlobal: true,
-      imports: [InfrastructureModule],
       useClass: AccountConfigService,
     }),
     AccountModule.forRootAsync({
@@ -136,12 +173,13 @@ const logger = new Logger('AppModule', { timestamp: true });
     // All routes proxy to oidc provider, must be the last one
     OidcConfigModule.forRootAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService, storageOptions: StorageOptions) => ({
+      useFactory: async (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('debug', false),
         issuer: `${config.getOrThrow('ORIGIN')}${normalizeRoutePath(
           config.get<string>('webServer.globalPrefixUri', ''),
         )}`,
-        path: normalizeRoutePath(config.get('OIDC_PATH', '')),
+        path: normalizeRoutePath(config.get('OIDC_PATH', '/oauth2')),
+        jwks: await getJWKS(config.get('OIDC_PRIVATE_KEY')),
         storage: storageOptions.use,
       }),
       inject: [ConfigService, STORAGE_OPTIONS],
@@ -164,6 +202,10 @@ const logger = new Logger('AppModule', { timestamp: true });
         });
       },
       inject: [ConfigService],
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: DbCheckInterceptor,
     },
     {
       provide: APP_FILTER,

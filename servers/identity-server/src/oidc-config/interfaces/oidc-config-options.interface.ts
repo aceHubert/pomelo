@@ -1,4 +1,5 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
+import { JWKS } from 'oidc-provider';
 
 export interface Storage {
   get<T>(key: string): T | null | undefined | Promise<T | null | undefined>;
@@ -22,6 +23,8 @@ export interface OidcConfigOptions {
    * @default /oidc
    */
   path?: string;
+
+  jwks?: JWKS;
 
   /**
    * storage

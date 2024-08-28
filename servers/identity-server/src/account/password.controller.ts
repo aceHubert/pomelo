@@ -20,7 +20,7 @@ import { ACCOUNT_OPTIONS } from './constants';
 
 @Controller('/password')
 export class PasswordController extends BaseController {
-  logger = new Logger(PasswordController.name, { timestamp: true });
+  private logger = new Logger(PasswordController.name, { timestamp: true });
 
   constructor(
     @Inject(ACCOUNT_OPTIONS) private readonly options: AccountOptions,
@@ -94,7 +94,7 @@ export class PasswordController extends BaseController {
 
     let loginName: string | undefined;
     if (session.accountId) {
-      const user = await this.accountProviderService.getAccount(session.accountId);
+      const user = await this.accountProviderService.getAccount(Number(session.accountId));
       loginName = user?.login_name as string;
     }
 
@@ -250,7 +250,11 @@ export class PasswordController extends BaseController {
 
     try {
       session.accountId
-        ? await this.accountProviderService.updatePassword(session.accountId, input.oldPassword, input.newPassword)
+        ? await this.accountProviderService.updatePassword(
+            Number(session.accountId),
+            input.oldPassword,
+            input.newPassword,
+          )
         : await this.accountProviderService.updatePasswordByUsername(
             input.username,
             input.oldPassword,
@@ -386,7 +390,7 @@ export class PasswordController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @I18n() i18n: I18nContext,
   ) {
-    const verifiedAccount = await this.accountProviderService.getAccountByUsername(input.username);
+    const verifiedAccount = await this.accountProviderService.getAccount(input.username);
     if (!verifiedAccount) {
       return this.faild(i18n.tv('password.forgot.error.user_not_found', 'User is not found!'));
     }
@@ -416,7 +420,7 @@ export class PasswordController extends BaseController {
       )}/password/reset/${code}`;
 
       // TODO: Send email
-      console.log(`找回密码地址：${resetUrl}，${expiresIn / 60}分钟有效！`);
+      this.logger.log(`找回密码地址：${resetUrl}，${expiresIn / 60}分钟有效！`);
 
       const encodedEmail = verifiedAccount.email
         .split('@')
@@ -459,7 +463,7 @@ export class PasswordController extends BaseController {
       });
 
       // TODO: Send SMS
-      console.log(`找回密码验证码：${code}，${expiresIn}秒有效！`);
+      this.logger.log(`找回密码验证码：${code}，${expiresIn}秒有效！`);
 
       const appConfig = this.moduleRef['container'].applicationConfig;
       // const edcodedPhone = input.username.replace(/(\+?\d{1,})\d{4}(\d{4})$/, '$1****$2');
@@ -848,7 +852,7 @@ export class PasswordController extends BaseController {
 
     try {
       const { accountId, clientId } = stored;
-      await this.accountProviderService.resetPassword(accountId, input.password);
+      await this.accountProviderService.resetPassword(Number(accountId), input.password);
       await this.storage.del(this.passwordResetCodeKeyFor(code));
 
       let returnUrl = stored.returnUrl;

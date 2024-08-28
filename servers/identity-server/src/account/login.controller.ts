@@ -5,12 +5,12 @@ import { ModuleRef } from '@nestjs/core';
 import { Controller, Get, Post, Query, Body, Req, Res, HttpStatus } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { normalizeRoutePath } from '@ace-pomelo/shared-server';
-import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
 import { KoaContextWithOIDC } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
 import { getLoginTemplate, getConsentTemplate } from '@/common/templates';
+import { IdentityResourceDataSource } from '@/datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { LoginDto } from './dto/login.dto';
 
