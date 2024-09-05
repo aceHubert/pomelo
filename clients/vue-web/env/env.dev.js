@@ -6,11 +6,10 @@
 
   // env.basicApiBase = 'http://localhost:9080/pomelo/basic/api';
   env.basicGraphqlBase = 'http://localhost:9080/pomelo/basic/graphql';
-  env.basicGraphqlSubscriptionBase = 'ws://localhost:9080/pomelo/basic/graphql';
   env.identityGraphqlBase = 'http://localhost:9080/pomelo/identity/graphql';
 
   env.oidc = {
-    authority: 'http://localhost:5002/',
+    authority: 'http://localhost:5002/oauth2',
     client_id: clientId,
     redirect_uri: baseUrl + '/signin.html',
     post_logout_redirect_uri: baseUrl,

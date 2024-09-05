@@ -3,7 +3,7 @@ import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
 import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { Fields } from '@ace-pomelo/shared-server';
+import { Fields } from '@ace-pomelo/shared/server';
 import { IdentityResourceAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { IdentityResourceDataSource } from '@/datasource';

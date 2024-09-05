@@ -1,6 +1,13 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "servers/identity-server/src",
+  "sourceRoot": "servers/infrastructure-api/src",
+  "monorepo": true,
+  "root": "servers/infrastructure-api",
+  "compilerOptions": {
+    "webpack": false,
+    "webpackConfigPath": "servers/infrastructure-api/webpack-hmr.config.js",
+    "tsConfigPath": "servers/infrastructure-api/tsconfig.json"
+  },
   "projects": {
     "identity-server": {
       "type": "application",
@@ -8,10 +15,10 @@
       "entryFile": "src/main",
       "sourceRoot": "servers/identity-server",
       "compilerOptions": {
-        "webpack": true,
         "webpackConfigPath": "servers/identity-server/webpack-hmr.config.js",
         "tsConfigPath": "servers/identity-server/tsconfig.json",
         "assets": ["package.json", "README.md", ".env", ".env.*"],
+        "watchAssets": true,
         "deleteOutDir": true,
         "plugins": [
           {
@@ -32,10 +39,10 @@
       "entryFile": "src/main",
       "sourceRoot": "servers/identity-api",
       "compilerOptions": {
-        "webpack": true,
         "webpackConfigPath": "servers/identity-api/webpack-hmr.config.js",
         "tsConfigPath": "servers/identity-api/tsconfig.json",
         "assets": ["package.json", "README.md", ".env", ".env.*"],
+        "watchAssets": true,
         "deleteOutDir": true,
         "plugins": [
           {
@@ -63,10 +70,10 @@
       "entryFile": "src/main",
       "sourceRoot": "servers/infrastructure-api",
       "compilerOptions": {
-        "webpack": true,
         "webpackConfigPath": "servers/infrastructure-api/webpack-hmr.config.js",
         "tsConfigPath": "servers/infrastructure-api/tsconfig.json",
         "assets": ["package.json", "README.md", ".env", ".env.*"],
+        "watchAssets": true,
         "deleteOutDir": true,
         "plugins": [
           {
@@ -88,13 +95,13 @@
         ]
       }
     },
-    "pomelo-nestjs-oidc": {
+    "nestjs-oidc-identity": {
       "type": "library",
-      "root": "packages/pomelo-nestjs-oidc",
+      "root": "packages/nestjs-oidc-identity",
       "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-nestjs-oidc",
+      "sourceRoot": "packages/nestjs-oidc-identity",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-nestjs-oidc/tsconfig.json",
+        "tsConfigPath": "packages/nestjs-oidc-identity/tsconfig.json",
         "assets": ["package.json", "README.md"],
         "deleteOutDir": true
       }

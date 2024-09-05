@@ -1,8 +1,7 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '@/fetch/graphql-request/basic';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 import type { PagedArgs, Paged } from '@/fetch/apis/types';
 
 export interface Version {
@@ -30,8 +29,8 @@ export interface SubModuleItem extends PagedSubModuleItem {
   readme: string;
 }
 
-export const useSubmoduleApi = defineRegistApi('submodule', {
-  apis: {
+export const useSubmoduleApi = defineRegistGraphql('submodule', {
+  definition: {
     // 获取模块列表（分页）
     getPaged: gql`
       query getSubModules($name: String, $offset: Int, $limit: Int) {
@@ -71,5 +70,4 @@ export const useSubmoduleApi = defineRegistApi('submodule', {
       }
     ` as TypedMutationDocumentNode<{ subModule: SubModuleItem | null }, { name: string }>,
   },
-  request,
 });

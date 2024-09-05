@@ -1,8 +1,7 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '../graphql-request/basic';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TypedQueryDocumentNode, TypedSubscriptionDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedSubscriptionDocumentNode } from '@ace-fetch/graphql';
 
 export enum OptionAutoload {
   Yes = 'Yes',
@@ -35,8 +34,8 @@ export type Message =
   // content message
   | { content: string; to?: string };
 
-export const useBasicApi = defineRegistApi('basic', {
-  apis: {
+export const useBasicApi = defineRegistGraphql('basic', {
+  definition: {
     // 获取程序初始化自动加载配置
     getAutoloadOptions: gql`
       query getAutoloadOptions {
@@ -70,19 +69,19 @@ export const useBasicApi = defineRegistApi('basic', {
           }
           ... on StringPayloadEventMessageSubscriotion {
             eventName
-            payload
+            stringPayload: payload
           }
           ... on NumberPayloadEventMessageSubscriotion {
             eventName
-            payload
+            numberPayload: payload
           }
           ... on BooleanPayloadEventMessageSubscriotion {
             eventName
-            payload
+            booleanPayload: payload
           }
           ... on ObjectPayloadEventMessageSubscriotion {
             eventName
-            payload
+            objectPayload: payload
           }
           ... on ContentMessageSubscriotion {
             content
@@ -94,5 +93,4 @@ export const useBasicApi = defineRegistApi('basic', {
       message: Message;
     }>,
   },
-  request,
 });

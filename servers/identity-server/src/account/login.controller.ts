@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
 import { Controller, Get, Post, Query, Body, Req, Res, HttpStatus } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { normalizeRoutePath } from '@ace-pomelo/shared-server';
+import { normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { KoaContextWithOIDC } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
 import { BaseController } from '@/common/controllers/base.controller';

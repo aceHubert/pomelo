@@ -1,5 +1,5 @@
 import { reactive } from '@vue/composition-api';
-import { OptionPresetKeys } from '@ace-pomelo/shared-client';
+import { OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { useOptions } from '@/hooks';
 
 export const useUserMixin = () => {

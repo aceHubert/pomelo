@@ -1,13 +1,8 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '../../graphql-request/basic';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type {
-  TemplateStatus,
-  TemplateCommentStatus,
-  TypedQueryDocumentNode,
-  TypedMutationDocumentNode,
-} from '@ace-pomelo/shared-client';
+import type { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared/client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 
 import type { TermTaxonomyModel } from '../term-taxonomy';
 import type { PagedArgs, Paged } from '../types';
@@ -121,8 +116,8 @@ export const PageMetaPresetKeys = {
   ...TemplateMetaPresetKeys,
 };
 
-export const useTemplateApi = defineRegistApi('template', {
-  apis: {
+export const useTemplateApi = defineRegistGraphql('template', {
+  definition: {
     // 分页获取模版
     getPaged: gql`
       query getTemplates(
@@ -375,7 +370,6 @@ export const useTemplateApi = defineRegistApi('template', {
       }
     ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
-  request,
 });
 
 export * from './post';

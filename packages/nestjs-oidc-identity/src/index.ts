@@ -1,3 +1,4 @@
+export * from './version';
 export * from './controllers';
 export * from './decorators';
 export * from './filters';

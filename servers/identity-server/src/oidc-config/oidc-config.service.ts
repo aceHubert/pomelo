@@ -15,7 +15,7 @@ import {
 import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared-server';
+import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { ClientDataSource, IdentityResourceDataSource } from '../datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { getI18nFromContext } from './i18n.helper';

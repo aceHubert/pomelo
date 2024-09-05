@@ -1,12 +1,34 @@
 {
   "name": "nestjs-oidc-identity",
-  "version": "0.0.1-alpha.7",
   "description": "nestjs openid connect client identity module.",
+  "version": "0.0.1-alpha.7",
   "author": "Hubert<yi.xiang@live.com>",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js",
+      "require": "./lib/index.js"
+    },
+    "./*": {
+      "import": [
+        "./esm/*",
+        "./*"
+      ],
+      "require": [
+        "./lib/*",
+        "./*"
+      ],
+      "default": {
+        "import": "./esm/*/index.js",
+        "require": "./lib/*/index.js"
+      }
+    }
+  },
   "files": [
-    "dist"
+    "esm",
+    "lib"
   ],
   "keywords": [
     "nestjs",
@@ -17,7 +39,10 @@
   ],
   "scripts": {
     "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
-    "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json",
+    "build": "run -T rimraf dist && yarn build:version && yarn build:cjs && yarn build:esm",
+    "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "build:cjs": "run -T tsc --project tsconfig.build.json",
+    "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
     "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
     "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
     "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
@@ -25,7 +50,7 @@
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
   "dependencies": {
-    "@nestjs/passport": "^9.0.0",
+    "@nestjs/passport": "^10.0.0",
     "@types/uuid": "^9.0.7",
     "cookie": "^0.5.0",
     "express-session": "^1.17.3",
@@ -36,16 +61,16 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/core": "^9.0.0",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
     "@types/cookie": "^0.5.4",
     "@types/express-session": "^1.17.10",
     "@types/mongodb": "^4.0.6",
     "@types/passport": "^1.0.9"
   },
   "peerDependencies": {
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/core": "^9.0.0",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^11.0.0",
     "@types/mongodb": "^4.0.6",
     "connect-mongo": "4.6.0",

@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '@/fetch/graphql-request/identity';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
+import { identityLink } from '@/fetch/graphql/identity';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 import type { PagedArgs, Paged } from '@/fetch/apis/types';
 
 export interface ClientModel {
@@ -189,8 +189,8 @@ export interface NewClientPropertyInput {
   value: string;
 }
 
-export const useClientApi = defineRegistApi('client', {
-  apis: {
+export const useClientApi = defineRegistGraphql('client', {
+  definition: {
     // 获取分页客户端
     getPaged: gql`
       query getClients($clientName: String, $offset: Int, $limit: Int) {
@@ -579,5 +579,7 @@ export const useClientApi = defineRegistApi('client', {
       }
     ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
-  request,
+  clientOptions: {
+    link: identityLink,
+  },
 });

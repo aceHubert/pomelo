@@ -5,7 +5,7 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { trailingSlash } from '@ace-util/core';
 import { Select, Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
-import { OptionPresetKeys, UserCapability, TemplateStatus } from '@ace-pomelo/shared-client';
+import { OptionPresetKeys, UserCapability, TemplateStatus } from '@ace-pomelo/shared/client';
 import { message } from '@/components';
 import { usePageApi, PresetTemplateType } from '@/fetch/apis';
 import { useI18n, useOptions, useUserManager, useDeviceType } from '@/hooks';

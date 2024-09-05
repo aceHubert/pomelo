@@ -2,8 +2,8 @@ import Vue from 'vue';
 import { hasIn } from 'lodash-es';
 import axios from 'axios';
 import { absoluteGo } from '@ace-util/core';
+import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@ace-fetch/core';
 import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
-import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@ace-fetch/axios';
 import { loadingRef, errorRef, SharedError } from '@/shared';
 import { auth } from '@/auth';
 import { i18n } from '@/i18n';
@@ -83,16 +83,16 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
   return Promise.reject(new Error(message?.length > 100 ? message.substring(0, 100) + '...' : message));
 });
 
-export const afetch = createFetch(axiosInstance);
+export const apiFetch = createFetch(axiosInstance);
 
-afetch.use(
+apiFetch.use(
   createRetryPlugin({
     maxCount: 3,
     delay: true,
   }),
 );
 
-afetch.use(
+apiFetch.use(
   createLoadingPlugin({
     handler: () => {
       loadingRef.value = true;
@@ -103,7 +103,7 @@ afetch.use(
   }),
 );
 
-afetch.use(
+apiFetch.use(
   createCatchErrorPlugin({
     serializerData: (data: any) => {
       if (hasIn(data, 'success')) {

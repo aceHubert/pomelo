@@ -1,8 +1,8 @@
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Controller, Query, Get, HttpStatus } from '@nestjs/common';
-import { Authorized } from '@ace-pomelo/nestjs-oidc';
+import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { ApiAuthCreate, ParseQueryPipe, createResponseSuccessType } from '@ace-pomelo/shared-server';
+import { ApiAuthCreate, ParseQueryPipe, createResponseSuccessType } from '@ace-pomelo/shared/server';
 import { ObsUploadSignedUrlResp, ObsPostUploadSignatureResp } from './resp/hw-cloud.resp';
 import { Action } from './action';
 

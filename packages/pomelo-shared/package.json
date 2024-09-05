@@ -1,16 +1,11 @@
 {
-  "name": "@ace-pomelo/shared-client",
-  "description": "Client shared context",
+  "name": "@ace-pomelo/shared",
+  "description": "Pomelo Shared Library",
   "version": "0.1.0",
-  "private": true,
+  "author": "Hubert<yi.xiang@live.com>",
   "main": "lib/index.js",
   "module": "esm/index.js",
   "license": "MIT",
-  "files": [
-    "lib",
-    "esm",
-    "dist"
-  ],
   "exports": {
     ".": {
       "import": "./esm/index.js",
@@ -29,11 +24,48 @@
         "import": "./esm/*/index.js",
         "require": "./lib/*/index.js"
       }
+    },
+    "./client": {
+      "import": "./esm/client/index.js",
+      "require": "./lib/client/index.js"
+    },
+    "./client/*": {
+      "import": "./esm/client/*",
+      "require": "./lib/client/*",
+      "default": {
+        "import": "./esm/client/*/index.js",
+        "require": "./lib/client/*/index.js"
+      }
+    },
+    "./server": {
+      "import": "./esm/server/index.js",
+      "require": "./lib/server/index.js"
+    },
+    "./server/*": {
+      "import": "./esm/server/*",
+      "require": "./lib/server/*",
+      "default": {
+        "import": "./esm/server/*/index.js",
+        "require": "./lib/server/*/index.js"
+      }
     }
   },
+  "files": [
+    "lib",
+    "esm"
+  ],
+  "keywords": [
+    "nestjs",
+    "pomelo",
+    "library",
+    "shared"
+  ],
   "scripts": {
-    "build": "run -T rimraf -rf lib esm dist && yarn build:version && run -T ts-node --transpileOnly --cwdMode ../../scripts/build",
+    "serve": "run -T concurrently --raw \"tsc --project tsconfig.build.json -watch\"",
+    "build": "run -T rimraf -rf lib esm dist && yarn build:version && yarn build:cjs && yarn build:esm",
     "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "build:cjs": "run -T tsc --project tsconfig.build.json",
+    "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
     "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
     "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
     "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
@@ -41,7 +73,7 @@
     "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
   },
   "dependencies": {
-    "@ace-util/core": "^0.1.1"
+    "@ace-util/core": "^0.3.0"
   },
   "peerDependencies": {
     "@apollo/client": "^3.0.0",

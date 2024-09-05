@@ -274,8 +274,8 @@ export const renderCheckSessionTemplate = ({
         var val = hex2b64(s);
 
         val = val.replace(/=/g, ''); // Remove any trailing '='s
-        val = val.replace(/\+/g, '-'); // '+' => '-'
-        val = val.replace(/\//g, '_'); // '/' => '_'
+        val = val.replace(/\\+/g, '-'); // '+' => '-'
+        val = val.replace(/\\//g, '_'); // '/' => '_'
 
         return val;
       }

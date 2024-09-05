@@ -5,13 +5,10 @@
     "lib": ["ES2018", "ESNext.AsyncIterable"],
     "baseUrl": ".",
     "outDir": "./dist",
-    "declaration": true,
-    "declarationMap": false,
-    "sourceMap": false,
     "skipLibCheck": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "include": ["./src/**/*.ts"]
 }

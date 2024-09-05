@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { UniqueConstraintError } from 'sequelize';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileEnv } from '@ace-pomelo/shared-server';
+import { FileEnv } from '@ace-pomelo/shared/server';
 import { DatabaseManager, name } from '@/datasource';
 import { version } from './version';
 

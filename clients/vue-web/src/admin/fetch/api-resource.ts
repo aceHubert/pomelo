@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '@/fetch/graphql-request/identity';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
+import { identityLink } from '@/fetch/graphql/identity';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 import type { PagedArgs, Paged } from '@/fetch/apis/types';
 
 export interface ApiResourceModel {
@@ -124,8 +124,8 @@ export interface NewApiPropertyInput {
   value: string;
 }
 
-export const useApiResourceApi = defineRegistApi('api', {
-  apis: {
+export const useApiResourceApi = defineRegistGraphql('api-resource', {
+  definition: {
     getPaged: gql`
       query getApiResources($keyword: String, $keywordField: String, $offset: Int, $limit: Int) {
         apiResources(keyword: $keyword, keywordField: $keywordField, offset: $offset, limit: $limit) {
@@ -361,5 +361,7 @@ export const useApiResourceApi = defineRegistApi('api', {
       }
     ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
-  request,
+  clientOptions: {
+    link: identityLink,
+  },
 });

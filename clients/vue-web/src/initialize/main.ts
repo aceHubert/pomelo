@@ -4,7 +4,7 @@ import 'custom-event-polyfill';
 
 import Vue, { type ComponentOptions } from 'vue';
 import VueCompositionApi from '@vue/composition-api';
-import { afetch } from '@/fetch';
+import { apiFetch } from '@/fetch';
 import { i18n } from '@/i18n';
 import { pinia } from '@/store';
 
@@ -22,7 +22,7 @@ Vue.config.productionTip = false;
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {
-    afetch,
+    afetch: apiFetch,
     i18n,
     pinia,
     router,

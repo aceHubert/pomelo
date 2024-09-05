@@ -19,7 +19,7 @@ import {
   type LayoutType,
   type ContentWidth,
 } from 'antdv-layout-pro/types';
-import { OptionPresetKeys } from '@ace-pomelo/shared-client';
+import { OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
 import { useUserManager, usePubSubMessage, useI18n, useOptions } from '@/hooks';
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';

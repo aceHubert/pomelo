@@ -1,6 +1,6 @@
 import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
-import { ValidationError } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared/server';
 import { Includeable, Op, WhereOptions } from 'sequelize';
 import {
   ClientModel,

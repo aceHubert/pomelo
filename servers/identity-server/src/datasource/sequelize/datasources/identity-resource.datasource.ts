@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ValidationError } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared/server';
 import { WhereOptions, Order, Attributes, Op, Includeable } from 'sequelize';
 import { default as IdentityResources } from '../entities/identity-resources.entity';
 import {

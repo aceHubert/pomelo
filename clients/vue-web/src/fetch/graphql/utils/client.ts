@@ -1,12 +1,12 @@
-import { ApolloClient, type ApolloLink, InMemoryCache } from '@apollo/client/core';
+import { ApolloClient, InMemoryCache, type ApolloLink, type ApolloClientOptions } from '@apollo/client/core';
 
 /**
  * apollo client
  */
-export const createClient = (link: ApolloLink, cache = new InMemoryCache()) =>
+export const createClient = (link: ApolloLink, options?: Optional<Omit<ApolloClientOptions<any>, 'link'>, 'cache'>) =>
   new ApolloClient({
     link,
-    cache,
+    cache: new InMemoryCache(),
     defaultOptions: {
       query: {
         fetchPolicy: 'no-cache',
@@ -19,4 +19,5 @@ export const createClient = (link: ApolloLink, cache = new InMemoryCache()) =>
       },
     },
     connectToDevTools: process.env.NODE_ENV === 'development',
+    ...options,
   });

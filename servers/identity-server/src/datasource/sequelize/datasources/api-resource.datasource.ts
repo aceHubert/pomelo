@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Order, Attributes, Op, Includeable } from 'sequelize';
-import { ValidationError } from '@ace-pomelo/shared-server';
+import { ValidationError } from '@ace-pomelo/shared/server';
 import { default as ApiResources } from '../entities/api-resources.entity';
 import { default as ApiScopes } from '../entities/api-scopes.entity';
 import {

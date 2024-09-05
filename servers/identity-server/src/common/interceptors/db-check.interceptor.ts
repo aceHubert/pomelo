@@ -11,7 +11,7 @@ import {
   SetMetadata,
 } from '@nestjs/common';
 import { I18nContext, I18nTranslation } from 'nestjs-i18n';
-import { FileEnv } from '@ace-pomelo/shared-server';
+import { FileEnv } from '@ace-pomelo/shared/server';
 import { name } from '@/datasource';
 
 const IgnoreDbCheckInterceptorName = Symbol('IgnoreDbCheckInterceptor');

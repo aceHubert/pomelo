@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '@/fetch/graphql-request/basic';
+import { defineRegistApi, gql } from '@ace-pomelo/shared/client';
+import { request } from '@/fetch/graphql/basic';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared/client';
 
 export interface SiteInitArgs {
   // 站点标题

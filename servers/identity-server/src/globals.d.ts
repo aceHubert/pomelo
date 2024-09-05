@@ -1,5 +1,5 @@
 // import { JwtPayload } from 'jsonwebtoken';
-import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared-server';
+import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared/server';
 
 declare global {
   export type ConnectionParams = {

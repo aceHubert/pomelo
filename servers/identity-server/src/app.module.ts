@@ -20,7 +20,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 // import { print, parse, getIntrospectionQuery } from 'graphql';
 import { OidcModule } from 'nest-oidc-provider';
-import { normalizeRoutePath } from '@ace-pomelo/shared-server';
+import { normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
 import { configuration } from './common/utils/configuration.util';

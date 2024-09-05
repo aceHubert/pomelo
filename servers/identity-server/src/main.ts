@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
-import { normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared-server';
+import { normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared/server';
 import { ApiModule } from './api/api.module';
 import { AppModule } from './app.module';
 import { version } from './version';

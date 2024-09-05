@@ -19,8 +19,7 @@ const devHost = getEnv('DEV_HOST', 'localhost');
 const devPort = Number(getEnv('DEV_PORT', 3000));
 const isMock = getEnv('MOCK') === 'true';
 const isProxy = isMock || getEnv('PROXY') === 'true';
-const proxyBasicOrigin = getEnv('PROXY_BASIC_ORIGIN', 'http://localhost:9080/pomelo/basic');
-const proxyIdentityOrigin = getEnv('PROXY_IDENTITY_ORIGIN', 'http://localhost:9080/pomelo/identity');
+const proxyBasicPrefix = getEnv('PROXY_BASIC_PREFIX', 'http://localhost:9080/pomelo');
 const isHttps = getEnv('HTTPS') === 'true';
 const proxyTarget = (to) => (isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to);
 
@@ -103,20 +102,12 @@ module.exports = defineConfig({
     proxy:
       isProxy && !isProd
         ? {
-            '/basic/api': {
-              target: proxyTarget(proxyBasicOrigin + '/api'),
+            '/basic': {
+              target: proxyTarget(proxyBasicPrefix),
               changeOrigin: true,
             },
-            '/basic/graphql': {
-              target: proxyTarget(proxyBasicOrigin + '/graphql'),
-              changeOrigin: true,
-            },
-            '/identity/api': {
-              target: proxyTarget(proxyIdentityOrigin + '/api'),
-              changeOrigin: true,
-            },
-            '/identity/graphql': {
-              target: proxyTarget(proxyIdentityOrigin + '/graphql'),
+            '/identity': {
+              target: proxyTarget(proxyBasicPrefix),
               changeOrigin: true,
             },
           }
@@ -351,7 +342,7 @@ module.exports = defineConfig({
                 'antdv-layout-pro': path.resolve(__dirname, '../../packages/antdv-layout-pro/src'),
                 '@ace-pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
                 '@ace-pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
-                '@ace-pomelo/shared-client': path.resolve(__dirname, '../../packages/pomelo-shared-client/src'),
+                '@ace-pomelo/shared/client': path.resolve(__dirname, '../../packages/pomelo-shared/src/client'),
                 '@formily/antdv$': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
                 '@formily/antdv/esm': path.resolve(
                   __dirname,

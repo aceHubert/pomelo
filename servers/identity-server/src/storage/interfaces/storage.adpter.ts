@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { jsonSafelyParse } from '@ace-pomelo/shared-server';
+import { jsonSafelyParse } from '@ace-pomelo/shared/server';
 
 export abstract class StorageAdpter {
   protected readonly logger: Logger;

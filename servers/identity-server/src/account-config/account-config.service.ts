@@ -3,7 +3,7 @@ import { lastValueFrom } from 'rxjs';
 import { CountryCode } from 'libphonenumber-js';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { md5 } from '@ace-pomelo/shared-server';
+import { md5, UserMetaPresetKeys, OptionPresetKeys } from '@ace-pomelo/shared/server';
 import { INFRASTRUCTURE_SERVICE } from '@/constants';
 
 import {
@@ -70,17 +70,7 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
               { cmd: 'user.metas.get' },
               {
                 userId: id,
-                metaKeys: [
-                  'nick_name',
-                  'first_name',
-                  'last_name',
-                  'avatar',
-                  'description',
-                  'locale',
-                  'verifing_email',
-                  'verifing_phone',
-                  'capabilities',
-                ],
+                metaKeys: Object.values(UserMetaPresetKeys),
                 fields: ['metaKey', 'metaValue'],
               },
             ),
@@ -88,15 +78,15 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
 
           return metas.reduce((acc, meta) => {
             switch (meta.metaKey) {
-              case 'verifing_email':
+              case UserMetaPresetKeys.VerifingEmail:
                 acc['email'] = meta.metaValue;
                 acc['email_verified'] = false;
                 break;
-              case 'verifing_phone':
+              case UserMetaPresetKeys.VerifingMobile:
                 acc['phone_number'] = meta.metaValue;
                 acc['phone_number_verified'] = false;
                 break;
-              case 'capabilities':
+              case UserMetaPresetKeys.Capabilities:
                 acc['role'] = meta.metaValue;
                 break;
               default:
@@ -109,7 +99,7 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
           return lastValueFrom(
             this.basicService.send<CountryCode | undefined>(
               { cmd: 'option.getValue' },
-              { optionName: 'default_phone_number_region' },
+              { optionName: OptionPresetKeys.DefaultPhoneNumberRegion },
             ),
           );
         },

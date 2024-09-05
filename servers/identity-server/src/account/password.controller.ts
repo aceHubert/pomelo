@@ -9,7 +9,7 @@ import { Inject, Controller, Get, Post, Query, Body, Req, Res, Logger, Param } f
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { Provider } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
-import { random, normalizeRoutePath } from '@ace-pomelo/shared-server';
+import { random, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
 import { getPasswordModifyTemplate, getPasswordForgotTemplate, getPasswordResetTemplate } from '@/common/templates';

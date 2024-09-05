@@ -1,14 +1,12 @@
 (function (window) {
   var globalPrefix = process.env.BASE_URL.replace(/\/$/, '');
   var baseUrl = window.location.protocol + '//' + window.location.host;
-  var baseWsUrl = baseUrl.replace(/^http/, 'ws');
   var clientId = '3d136433-977f-40c7-8702-a0444a6b2a9f';
 
   var env = window._ENV || {};
 
   // env.basicApiBase = baseUrl + '/basic/api';
   env.basicGraphqlBase = baseUrl + '/basic/graphql';
-  env.basicGraphqlSubscriptionBase = baseWsUrl + '/basic/graphql';
   env.identityGraphqlBase = baseUrl + '/identity/graphql';
 
   env.oidc = {
