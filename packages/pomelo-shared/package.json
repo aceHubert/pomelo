@@ -66,25 +66,61 @@
     "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "build:cjs": "run -T tsc --project tsconfig.build.json",
     "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
-    "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
-    "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
-    "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
-    "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
-    "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
+    "release:major": "yarn version $(run -T semver $npm_package_version -i major) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:minor": "yarn version $(run -T semver $npm_package_version -i minor) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:patch": "yarn version $(run -T semver $npm_package_version -i patch) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:alpha": "yarn version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag alpha",
+    "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
   "dependencies": {
     "@ace-util/core": "^0.3.0"
   },
+  "devDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/graphql": "^11.0.0",
+    "@nestjs/microservices": "^10.0.0",
+    "@nestjs/swagger": "^7.4.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
+    "graphql": "^16.9.0",
+    "graphql-parse-resolve-info": "^4.12.0"
+  },
   "peerDependencies": {
-    "@apollo/client": "^3.0.0",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/graphql": "^11.0.0",
+    "@nestjs/microservices": "^10.0.0",
+    "@nestjs/swagger": "^7.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.13.2",
     "graphql": "^16.0.0",
+    "graphql-parse-resolve-info": "^4.12.0",
     "lodash-es": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "@apollo/client": {
       "optional": true
     },
+    "@nestjs/graphql": {
+      "optional": true
+    },
+    "@nestjs/microservices": {
+      "optional": true
+    },
+    "@nestjs/swagger": {
+      "optional": true
+    },
+    "class-transformer": {
+      "optional": true
+    },
+    "class-validator": {
+      "optional": true
+    },
     "graphql": {
+      "optional": true
+    },
+    "graphql-parse-resolve-info": {
       "optional": true
     }
   },
