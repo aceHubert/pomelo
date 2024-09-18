@@ -1,5 +1,5 @@
-import { ApiProperty, ApiHideProperty, ApiResponseProperty, OmitType, PickType } from '@nestjs/swagger';
-import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/infrastructure-datasource';
+import { ApiProperty, ApiResponseProperty, OmitType, PickType } from '@nestjs/swagger';
+import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared/server';
 import { PagedResponse, Count } from '@/common/controllers/resp/paged.resp';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 
@@ -43,7 +43,6 @@ export class TemplateModelResp {
   /**
    * Status
    */
-  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
     enum: TemplateStatus,
     readOnly: true,
@@ -61,7 +60,6 @@ export class TemplateModelResp {
   /**
    * Comment status
    */
-  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
     enum: TemplateCommentStatus,
     readOnly: true,
@@ -113,7 +111,6 @@ export class TemplateStatusCount extends Count {
   /**
    * Template status
    */
-  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
     enum: TemplateStatus,
     readOnly: true,

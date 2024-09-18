@@ -1,11 +1,22 @@
-import { ModuleRef } from '@nestjs/core';
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { Authorized } from '@ace-pomelo/nestjs-oidc';
+import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { Fields, User, RequestUser, md5 } from '@ace-pomelo/shared-server';
-import { OptionDataSource, UserDataSource, UserStatus, OptionPresetKeys } from '@ace-pomelo/infrastructure-datasource';
+import {
+  Fields,
+  User,
+  RequestUser,
+  md5,
+  UserStatus,
+  UserRole,
+  OptionPresetKeys,
+  INFRASTRUCTURE_SERVICE,
+  OptionPattern,
+  UserPattern,
+} from '@ace-pomelo/shared/server';
 import { UserAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { NewUserInput } from './dto/new-user.input';
@@ -16,8 +27,8 @@ import { User as UserModel, UserMeta, PagedUser } from './models/user.model';
 
 @Authorized()
 @Resolver(() => UserModel)
-export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUserMetaInput, UserDataSource, {
-  resolverName: 'User',
+export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUserMetaInput, {
+  modelName: 'user',
   authDecorator: (method) => {
     const ramAction =
       method === 'getMeta'
@@ -33,12 +44,8 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     return RamAuthorized(ramAction);
   },
 }) {
-  constructor(
-    protected readonly moduleRef: ModuleRef,
-    private readonly optionDataSource: OptionDataSource,
-    private readonly userDataSource: UserDataSource,
-  ) {
-    super(moduleRef);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 
   @RamAuthorized(UserAction.Detail)
@@ -48,7 +55,13 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Fields() fields: ResolveTree,
     @User() requestUser: RequestUser,
   ): Promise<UserModel | undefined> {
-    return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.UserModel), Number(requestUser.sub));
+    return this.basicService
+      .send<UserModel | undefined>(UserPattern.Get, {
+        id,
+        fields: this.getFieldNames(fields.fieldsByTypeName.UserModel),
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(UserAction.PagedList)
@@ -58,11 +71,13 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Fields() fields: ResolveTree,
     @User() requestUser: RequestUser,
   ): Promise<PagedUser> {
-    return this.userDataSource.getPaged(
-      args,
-      this.getFieldNames(fields.fieldsByTypeName.PagedUser.rows.fieldsByTypeName.PagedUser),
-      Number(requestUser.sub),
-    );
+    return this.basicService
+      .send<PagedUser>(UserPattern.GetPaged, {
+        query: args,
+        fields: this.getFieldNames(fields.fieldsByTypeName.PagedUser),
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(UserAction.Create)
@@ -73,20 +88,24 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   ): Promise<UserModel> {
     let capabilities = input.capabilities;
     if (!capabilities) {
-      capabilities = await this.optionDataSource.getValue(OptionPresetKeys.DefaultRole);
+      capabilities = await this.basicService
+        .send<UserRole>(OptionPattern.GetValue, {
+          optionName: OptionPresetKeys.DefaultRole,
+        })
+        .lastValue();
     }
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
-      await this.userDataSource.create(
-        {
+      await this.basicService
+        .send<UserModel>(UserPattern.Create, {
           ...input,
           loginPwd: md5(input.loginPwd).toString(),
           niceName: input.loginName,
           displayName: input.loginName,
           status: UserStatus.Enabled,
           capabilities,
-        },
-        Number(requestUser.sub),
-      );
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
 
     return {
       id,
@@ -109,7 +128,13 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.userDataSource.update(id, model, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(UserPattern.Update, {
+        ...model,
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(UserAction.UpdateStatus)
@@ -119,7 +144,13 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Args('status', { type: () => UserStatus, description: 'status' }) status: UserStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.userDataSource.updateStatus(id, status, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(UserPattern.UpdateStatus, {
+        id,
+        status,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(UserAction.Delete)
@@ -128,6 +159,11 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     @Args('id', { type: () => ID, description: 'User id' }) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.userDataSource.delete(id, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(UserPattern.Delete, {
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 }

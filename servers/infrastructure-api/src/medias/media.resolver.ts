@@ -1,19 +1,29 @@
 import * as path from 'path';
 import { Inject } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { VoidResolver } from 'graphql-scalars';
 import { FileUpload } from 'graphql-upload/Upload.js';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
-import { MediaDataSource } from '@ace-pomelo/infrastructure-datasource';
-import { isAbsoluteUrl, Fields, User, RequestUser } from '@ace-pomelo/shared-server';
-import { createMetaResolver } from '@/common/resolvers/meta.resolver';
+import {
+  isAbsoluteUrl,
+  Fields,
+  User,
+  RequestUser,
+  UserCapability,
+  ForbiddenError,
+  INFRASTRUCTURE_SERVICE,
+  UserPattern,
+  MediaPattern,
+} from '@ace-pomelo/shared/server';
 import { MediaAction } from '@/common/actions';
-import { FixedMediaOptions } from './interfaces/media-options.interface';
+import { createMetaResolver } from '@/common/resolvers/meta.resolver';
+import { MediaOptions } from './interfaces/media-options.interface';
+import { MediaModel, PagedMediaModel } from './interfaces/media.interface';
 import { MediaService } from './media.service';
 import { PagedMediaArgs } from './dto/media.args';
 import {
@@ -29,7 +39,7 @@ import { MEDIA_OPTIONS } from './constants';
 
 @Authorized()
 @Resolver(() => Media)
-export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMediaMetaInput, MediaDataSource, {
+export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMediaMetaInput, {
   authDecorator: (method) => {
     const ramAction =
       method === 'getMeta'
@@ -48,12 +58,11 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   },
 }) {
   constructor(
-    protected readonly moduleRef: ModuleRef,
-    @Inject(MEDIA_OPTIONS) private readonly fileOptions: FixedMediaOptions,
-    private readonly fileService: MediaService,
-    private readonly mediaDataSource: MediaDataSource,
+    @Inject(MEDIA_OPTIONS) private readonly mediaOptions: Required<MediaOptions>,
+    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
+    private readonly mediaService: MediaService,
   ) {
-    super(moduleRef);
+    super(basicService);
   }
 
   @Mutation(() => Media)
@@ -62,8 +71,23 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @Args('file', { type: () => GraphQLUpload }) file: FileUpload,
     @Args('options', { type: () => FileUploadOptionsInput, nullable: true })
     options: FileUploadOptionsInput | undefined,
+    @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
   ): Promise<Media> {
+    // 检测是否有上传文件的权限，没有则抛出异常不处理文件流
+    const hasCapability = await this.basicService
+      .send<boolean>(UserPattern.HasCapability, {
+        id: Number(requestUser.sub),
+        capability: UserCapability.UploadFiles,
+      })
+      .lastValue();
+
+    if (!hasCapability) {
+      throw new ForbiddenError(
+        i18n.tv('infrastructure-api.media_resolver.upload_files_forbidden', 'No permission to upload files'),
+      );
+    }
+
     const { createReadStream, filename, mimetype } = await file;
 
     const stream = createReadStream();
@@ -78,43 +102,41 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     const fileName = Buffer.from(filename, 'latin1').toString('utf8');
     const fileBuffer = Buffer.concat(buffers);
 
-    const md5 = await this.fileService.getFileMd5(fileBuffer);
-    let media = await this.mediaDataSource.getByName(md5, [
-      'id',
-      'fileName',
-      'originalFileName',
-      'extension',
-      'mimeType',
-      'path',
-      'createdAt',
-    ]);
+    const md5 = await this.mediaService.getFileMd5(fileBuffer);
+    let media = await this.basicService
+      .send<MediaModel | undefined>(MediaPattern.GetByName, {
+        fileName: md5,
+        fields: ['id', 'fileName', 'originalFileName', 'extension', 'mimeType', 'path', 'createdAt'],
+      })
+      .lastValue();
 
     if (!media || options?.crop) {
       const {
-        fileName: md5FileName,
+        md5: md5FileName,
         originalFileName,
         extension,
         path,
         metaData,
-      } = await this.fileService.saveFile(fileBuffer, {
+      } = await this.mediaService.saveFile(fileBuffer, {
         originalName: options?.fileName || fileName,
         mimeType: mimetype,
+        md5,
         crop: options?.crop,
       });
-      media = await this.mediaDataSource.create(
-        {
+      media = await this.basicService
+        .send<MediaModel>(MediaPattern.Create, {
           fileName: md5FileName,
           originalFileName,
           extension,
           mimeType: mimetype,
           path,
-        },
-        metaData,
-        Number(requestUser.sub),
-      );
+          metaData,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
     }
 
-    const { original, ...rest } = await this.fileService.toFileModel(media, media.metaData);
+    const { original, ...rest } = await this.mediaService.toFileModel(media, media.metaData);
     return {
       ...original,
       ...rest,
@@ -130,8 +152,23 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   @RamAuthorized(MediaAction.Upload)
   async uploadFiles(
     @Args('files', { type: () => [GraphQLUpload] }) files: FileUpload[],
+    @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
   ): Promise<Media[]> {
+    // 检测是否有上传文件的权限，没有则抛出异常不处理文件流
+    const hasCapability = await this.basicService
+      .send<boolean>(UserPattern.HasCapability, {
+        id: Number(requestUser.sub),
+        capability: UserCapability.UploadFiles,
+      })
+      .lastValue();
+
+    if (!hasCapability) {
+      throw new ForbiddenError(
+        i18n.tv('infrastructure-api.media_resolver.upload_files_forbidden', 'No permission to upload files'),
+      );
+    }
+
     return Promise.all(
       files.map(async (file) => {
         const { createReadStream, filename, mimetype } = await file;
@@ -147,36 +184,40 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
         // https://github.com/mscdex/busboy defParamCharset: 'latin1'
         const fileName = Buffer.from(filename, 'latin1').toString('utf8');
         const fileBuffer = Buffer.concat(buffers);
-        const md5 = await this.fileService.getFileMd5(fileBuffer);
-        let media = await this.mediaDataSource.getByName(md5, [
-          'id',
-          'fileName',
-          'originalFileName',
-          'extension',
-          'mimeType',
-          'path',
-          'createdAt',
-        ]);
+        const md5 = await this.mediaService.getFileMd5(fileBuffer);
+        let media = await this.basicService
+          .send<MediaModel | undefined>(MediaPattern.GetByName, {
+            fileName: md5,
+            fields: ['id', 'fileName', 'originalFileName', 'extension', 'mimeType', 'path', 'createdAt'],
+          })
+          .lastValue();
 
         if (!media) {
-          const { originalFileName, extension, path, metaData } = await this.fileService.saveFile(fileBuffer, {
+          const {
+            md5: md5FileName,
+            originalFileName,
+            extension,
+            path,
+            metaData,
+          } = await this.mediaService.saveFile(fileBuffer, {
             originalName: fileName,
             mimeType: mimetype,
+            md5,
           });
-          media = await this.mediaDataSource.create(
-            {
-              fileName: md5,
-              originalFileName: originalFileName,
+          media = await this.basicService
+            .send<MediaModel>(MediaPattern.Create, {
+              fileName: md5FileName,
+              originalFileName,
               extension,
               mimeType: mimetype,
               path,
-            },
-            metaData,
-            Number(requestUser.sub),
-          );
+              metaData,
+              requestUserId: Number(requestUser.sub),
+            })
+            .lastValue();
         }
 
-        const { original, ...rest } = await this.fileService.toFileModel(media, media.metaData);
+        const { original, ...rest } = await this.mediaService.toFileModel(media, media.metaData);
         return {
           ...original,
           ...rest,
@@ -197,25 +238,40 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
   ): Promise<Media | undefined> {
-    const media = await this.mediaDataSource.get(id, [
-      'fileName',
-      'originalFileName',
-      'extension',
-      'mimeType',
-      'path',
-      'createdAt',
-    ]);
+    // 检测是否有编辑文件的权限，没有则抛出异常不处理文件流
+    const hasCapability = await this.basicService
+      .send<boolean>(UserPattern.HasCapability, {
+        id: Number(requestUser.sub),
+        capability: UserCapability.EditFiles,
+      })
+      .lastValue();
+
+    if (!hasCapability) {
+      throw new ForbiddenError(
+        i18n.tv('infrastructure-api.media_resolver.edit_files_forbidden', 'No permission to edit files'),
+      );
+    }
+
+    const media = await this.basicService
+      .send<MediaModel | undefined>(MediaPattern.Get, {
+        id,
+        fields: ['fileName', 'originalFileName', 'extension', 'mimeType', 'path', 'createdAt'],
+      })
+      .lastValue();
+
     if (media) {
       if (isAbsoluteUrl(media.path))
-        throw new Error(i18n.tv('medias.crop_absolute_image_forbidden', 'Cannot crop absolute url image'));
+        throw new Error(
+          i18n.tv('infrastructure-api.media_resolver.crop_absolute_image_forbidden', 'Cannot crop absolute url image'),
+        );
 
       const {
-        fileName,
+        md5: md5FileName,
         originalFileName,
         extension,
         path: filePath,
         metaData,
-      } = await this.fileService.saveFile(path.join(this.fileOptions.dest, media.path), {
+      } = await this.mediaService.saveFile(path.join(this.mediaOptions.dest, media.path), {
         originalName: `${media.originalFileName}${media.extension}`,
         mimeType: media.mimeType,
         crop: {
@@ -226,19 +282,19 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
         },
       });
       if (options.replace) {
-        await this.mediaDataSource.update(
-          id,
-          {
-            fileName,
+        await this.basicService
+          .send<void>(MediaPattern.Update, {
+            id,
+            fileName: md5FileName,
             path: filePath,
-          },
-          metaData,
-          Number(requestUser.sub),
-        );
-        const { original, ...rest } = await this.fileService.toFileModel(
+            metaData,
+            requestUserId: Number(requestUser.sub),
+          })
+          .lastValue();
+        const { original, ...rest } = await this.mediaService.toFileModel(
           {
             ...media,
-            fileName,
+            fileName: md5FileName,
             path: filePath,
           },
           metaData,
@@ -253,18 +309,18 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
           createdAt: media.createdAt,
         };
       } else {
-        const newMedia = await this.mediaDataSource.create(
-          {
-            fileName,
+        const newMedia = await this.basicService
+          .send<MediaModel>(MediaPattern.Create, {
+            fileName: md5FileName,
             originalFileName,
             extension,
             mimeType: media.mimeType,
             path: filePath,
-          },
-          metaData,
-          Number(requestUser.sub),
-        );
-        const { original, ...rest } = await this.fileService.toFileModel(newMedia, newMedia.metaData);
+            metaData,
+            requestUserId: Number(requestUser.sub),
+          })
+          .lastValue();
+        const { original, ...rest } = await this.mediaService.toFileModel(newMedia, newMedia.metaData);
         return {
           ...original,
           ...rest,
@@ -285,12 +341,17 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @Args('id', { type: () => ID, description: 'Media id' }) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<Media | undefined> {
-    const media = await this.mediaDataSource.get(id, [
-      // toFileModel requires these fields
-      ...new Set(this.getFieldNames(fields.fieldsByTypeName.Media).concat(['fileName', 'path', 'extension'])),
-    ]);
+    const media = await this.basicService
+      .send<MediaModel | undefined>(MediaPattern.Get, {
+        id,
+        fields: [
+          ...new Set(this.getFieldNames(fields.fieldsByTypeName.Media).concat(['fileName', 'path', 'extension'])),
+        ],
+      })
+      .lastValue();
+
     if (media) {
-      const { original, ...rest } = await this.fileService.toFileModel(media, media.metaData);
+      const { original, ...rest } = await this.mediaService.toFileModel(media, media.metaData);
       return {
         ...original,
         ...rest,
@@ -307,20 +368,24 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   @Query(() => PagedMedia, { description: 'Get paged medias.' })
   @RamAuthorized(MediaAction.PagedList)
   async medias(@Args() args: PagedMediaArgs, @Fields() fields: ResolveTree): Promise<PagedMedia> {
-    const { rows, ...rest } = await this.mediaDataSource.getPaged(args, [
-      // toFileModel requires these fields
-      ...new Set(
-        this.getFieldNames(fields.fieldsByTypeName.PagedMedia.rows.fieldsByTypeName.Media).concat([
-          'fileName',
-          'path',
-          'extension',
-        ]),
-      ),
-    ]);
+    const { rows, ...rest } = await this.basicService
+      .send<PagedMediaModel>(MediaPattern.GetPaged, {
+        query: args,
+        fields: [
+          ...new Set(
+            this.getFieldNames(fields.fieldsByTypeName.PagedMedia.rows.fieldsByTypeName.Media).concat([
+              'fileName',
+              'path',
+              'extension',
+            ]),
+          ),
+        ],
+      })
+      .lastValue();
 
     const formattedRows = await Promise.all(
       rows.map(async (media) => {
-        const { original, ...rest } = await this.fileService.toFileModel(media, media.metaData);
+        const { original, ...rest } = await this.mediaService.toFileModel(media, media.metaData);
         return {
           ...original,
           ...rest,
@@ -347,8 +412,14 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @User()
     requestUser: RequestUser,
   ): Promise<Media> {
-    const media = await this.mediaDataSource.create(model, metaData, Number(requestUser.sub));
-    const { original, ...rest } = await this.fileService.toFileModel(media, media.metaData);
+    const media = await this.basicService
+      .send<MediaModel>(MediaPattern.Create, {
+        ...model,
+        metaData,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
+    const { original, ...rest } = await this.mediaService.toFileModel(media, media.metaData);
     return {
       ...original,
       ...rest,
@@ -368,6 +439,13 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @User()
     requestUser: RequestUser,
   ): Promise<void> {
-    await this.mediaDataSource.update(id, model, metaData ?? 'NONE', Number(requestUser.sub));
+    await this.basicService
+      .send<void>(MediaPattern.Update, {
+        ...model,
+        id,
+        metaData,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 }

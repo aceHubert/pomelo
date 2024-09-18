@@ -1,7 +1,7 @@
 import { Response } from 'express';
-import { ModuleRef } from '@nestjs/core';
 import { ApiTags, ApiQuery, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import {
+  Inject,
   Controller,
   Scope,
   Query,
@@ -18,8 +18,8 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
-import { OptionDataSource, OptionPresetKeys, UserDataSource, UserStatus } from '@ace-pomelo/infrastructure-datasource';
-import { Authorized } from '@ace-pomelo/nestjs-oidc';
+import { ClientProxy } from '@nestjs/microservices';
+import { Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
   ParseQueryPipe,
@@ -29,9 +29,16 @@ import {
   RequestUser,
   md5,
   createResponseSuccessType,
-} from '@ace-pomelo/shared-server';
-import { createMetaController } from '@/common/controllers/meta.controller';
+  OptionPresetKeys,
+  UserStatus,
+  UserRole,
+  INFRASTRUCTURE_SERVICE,
+  UserPattern,
+  OptionPattern,
+} from '@ace-pomelo/shared/server';
 import { UserAction } from '@/common/actions';
+import { createMetaController } from '@/common/controllers/meta.controller';
+import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { NewUserDto } from './dto/new-user.dto';
 import { NewUserMetaDto } from './dto/new-user-meta.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -41,7 +48,7 @@ import { UserModelResp, UserWithMetasModelResp, PagedUserResp, UserMetaModelResp
 @ApiTags('user')
 @Authorized()
 @Controller({ path: 'api/users', scope: Scope.REQUEST })
-export class UserController extends createMetaController('user', UserMetaModelResp, NewUserMetaDto, UserDataSource, {
+export class UserController extends createMetaController('user', UserMetaModelResp, NewUserMetaDto, {
   authDecorator: (method) => {
     const ramAction =
       method === 'getMeta'
@@ -57,12 +64,8 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     return [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
   },
 }) {
-  constructor(
-    protected readonly moduleRef: ModuleRef,
-    private readonly optionDataSource: OptionDataSource,
-    private readonly userDataSource: UserDataSource,
-  ) {
-    super(moduleRef);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 
   /**
@@ -91,15 +94,34 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.userDataSource.get(
-      id,
-      ['id', 'loginName', 'niceName', 'displayName', 'mobile', 'email', 'url', 'status', 'updatedAt', 'createdAt'],
-      Number(requestUser.sub),
-    );
+    const result = await this.basicService
+      .send<UserModelResp | undefined>(UserPattern.Get, {
+        id,
+        fields: [
+          'id',
+          'loginName',
+          'niceName',
+          'displayName',
+          'mobile',
+          'email',
+          'url',
+          'status',
+          'updatedAt',
+          'createdAt',
+        ],
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     let metas;
     if (result) {
-      metas = await this.userDataSource.getMetas(id, metaKeys ?? 'ALL', ['id', 'userId', 'metaKey', 'metaValue']);
+      metas = await this.basicService
+        .send<MetaModelResp[]>(UserPattern.GetMetas, {
+          userId: id,
+          metaKeys,
+          fields: ['id', 'userId', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
     }
 
     if (result === undefined) {
@@ -125,11 +147,24 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     type: () => createResponseSuccessType({ data: PagedUserResp }, 'PagedUserSuccessResp'),
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedUserQueryDto, @User() requestUser: RequestUser) {
-    const result = await this.userDataSource.getPaged(
-      query,
-      ['id', 'loginName', 'niceName', 'displayName', 'mobile', 'email', 'url', 'status', 'updatedAt', 'createdAt'],
-      Number(requestUser.sub),
-    );
+    const result = await this.basicService
+      .send<PagedUserResp>(UserPattern.GetPaged, {
+        query,
+        fields: [
+          'id',
+          'loginName',
+          'niceName',
+          'displayName',
+          'mobile',
+          'email',
+          'url',
+          'status',
+          'updatedAt',
+          'createdAt',
+        ],
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     return this.success({
       data: result,
@@ -149,21 +184,26 @@ export class UserController extends createMetaController('user', UserMetaModelRe
   async create(@Body() input: NewUserDto, @User() requestUser: RequestUser) {
     let capabilities = input.capabilities;
     if (!capabilities) {
-      capabilities = await this.optionDataSource.getValue(OptionPresetKeys.DefaultRole);
+      capabilities = await this.basicService
+        .send<UserRole>(OptionPattern.GetValue, {
+          optionName: OptionPresetKeys.DefaultRole,
+        })
+        .lastValue();
     }
 
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
-      await this.userDataSource.create(
-        {
+      await this.basicService
+        .send(UserPattern.Create, {
           ...input,
           loginPwd: md5(input.loginPwd).toString(),
           niceName: input.loginName,
           displayName: input.loginName,
           status: UserStatus.Enabled,
           capabilities,
-        },
-        Number(requestUser.sub),
-      );
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
+
     return this.success({
       data: {
         id,
@@ -196,7 +236,13 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.userDataSource.update(id, model, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(UserPattern.Update, {
+          ...model,
+          id,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -220,7 +266,13 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.userDataSource.updateStatus(id, status, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(UserPattern.UpdateStatus, {
+          id,
+          status,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -240,7 +292,12 @@ export class UserController extends createMetaController('user', UserMetaModelRe
   })
   async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
     try {
-      await this.userDataSource.delete(id, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(UserPattern.Delete, {
+          id,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR, HttpAdapterHost } from '@nestjs/core';
 import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ClientsModule } from '@nestjs/microservices';
 import {
   I18nModule,
   I18nService,
@@ -20,10 +20,11 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 // import { print, parse, getIntrospectionQuery } from 'graphql';
 import { OidcModule } from 'nest-oidc-provider';
-import { normalizeRoutePath } from '@ace-pomelo/shared/server';
+import { normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
 import { AuthorizationModule } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
 import { configuration } from './common/utils/configuration.util';
+import { ErrorHandlerClientTCP } from './common/utils/error-handler-client-tcp.util';
 import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
@@ -38,11 +39,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { envFilePaths } from './db.sync';
 import { getJWKS, getKey } from './keys';
-import { INFRASTRUCTURE_SERVICE } from './constants';
 
 // extends
-// eslint-disable-next-line import/order
-import '@/common/extends/i18n.extend';
+import './common/extends/i18n.extend';
+import './common/extends/observable.extend';
 
 const logger = new Logger('AppModule', { timestamp: true });
 
@@ -66,7 +66,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const loaderPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/server');
+        const loaderPath = path.join(config.getOrThrow<string>('contentPath'), '/languages');
         if (!fs.existsSync(loaderPath)) {
           fs.mkdirSync(loaderPath, { recursive: true });
         }
@@ -101,11 +101,11 @@ const logger = new Logger('AppModule', { timestamp: true });
       clients: [
         {
           name: INFRASTRUCTURE_SERVICE,
-          useFactory: () => ({
-            transport: Transport.TCP,
+          useFactory: (config: ConfigService) => ({
+            customClass: ErrorHandlerClientTCP,
             options: {
-              host: 'localhost',
-              port: 5002,
+              host: config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
+              port: config.getOrThrow('INFRASTRUCTURE_SERVICE_PORT'),
             },
           }),
           inject: [ConfigService],

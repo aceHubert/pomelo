@@ -1,20 +1,21 @@
 import DataLoader from 'dataloader';
-import { ModuleRef } from '@nestjs/core';
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { Anonymous, Authorized } from '@ace-pomelo/nestjs-oidc';
+import { Anonymous, Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { Fields } from '@ace-pomelo/shared-server';
 import {
-  OptionDataSource,
-  TermTaxonomyDataSource,
-  TermTaxonomyModel,
+  Fields,
   OptionPresetKeys,
   TermPresetTaxonomy,
-} from '@ace-pomelo/infrastructure-datasource';
-import { createMetaResolver } from '@/common/resolvers/meta.resolver';
+  INFRASTRUCTURE_SERVICE,
+  OptionPattern,
+  TermTaxonomyPattern,
+} from '@ace-pomelo/shared/server';
 import { TermTaxonomyAction } from '@/common/actions';
+import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { NewTermTaxonomyInput } from './dto/new-term-taxonomy.input';
 import { NewTermTaxonomyMetaInput } from './dto/new-term-taxonomy-meta.input';
 import { NewTermRelationshipInput } from './dto/new-term-relationship.input';
@@ -25,45 +26,37 @@ import { TermTaxonomy, TermTaxonomyMeta, TermRelationship } from './models/term-
 
 @Authorized()
 @Resolver(() => TermTaxonomy)
-export class TermTaxonomyResolver extends createMetaResolver(
-  TermTaxonomy,
-  TermTaxonomyMeta,
-  NewTermTaxonomyMetaInput,
-  TermTaxonomyDataSource,
-  {
-    authDecorator: (method) => {
-      const ramAction =
-        method === 'getMeta'
-          ? TermTaxonomyAction.MetaDetail
-          : method === 'getMetas' || method === 'fieldMetas'
-          ? TermTaxonomyAction.MetaList
-          : method === 'createMeta' || method === 'createMetas'
-          ? TermTaxonomyAction.MetaCreate
-          : method === 'updateMeta' || method === 'updateMetaByKey'
-          ? TermTaxonomyAction.MetaUpdate
-          : TermTaxonomyAction.MetaDelete;
+export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermTaxonomyMeta, NewTermTaxonomyMetaInput, {
+  authDecorator: (method) => {
+    const ramAction =
+      method === 'getMeta'
+        ? TermTaxonomyAction.MetaDetail
+        : method === 'getMetas' || method === 'fieldMetas'
+        ? TermTaxonomyAction.MetaList
+        : method === 'createMeta' || method === 'createMetas'
+        ? TermTaxonomyAction.MetaCreate
+        : method === 'updateMeta' || method === 'updateMetaByKey'
+        ? TermTaxonomyAction.MetaUpdate
+        : TermTaxonomyAction.MetaDelete;
 
-      return method === 'getMeta' || method === 'getMetas'
-        ? [RamAuthorized(ramAction), Anonymous()]
-        : [RamAuthorized(ramAction)];
-    },
+    return method === 'getMeta' || method === 'getMetas'
+      ? [RamAuthorized(ramAction), Anonymous()]
+      : [RamAuthorized(ramAction)];
   },
-) {
-  private cascadeLoader!: DataLoader<{ parentId: number; fields: string[] }, TermTaxonomyModel[]>;
+}) {
+  private cascadeLoader!: DataLoader<{ parentId: number; fields: string[] }, TermTaxonomy[]>;
 
-  constructor(
-    protected readonly moduleRef: ModuleRef,
-    private readonly termTaxonomyDataSource: TermTaxonomyDataSource,
-    private readonly optionDataSource: OptionDataSource,
-  ) {
-    super(moduleRef);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
     this.cascadeLoader = new DataLoader(async (keys) => {
       if (keys.length) {
         // 所有调用的 fields 都是相同的
-        const results = await this.termTaxonomyDataSource.getList(
-          keys.map((key) => key.parentId),
-          keys[0].fields,
-        );
+        const results = await basicService
+          .send<Record<number, TermTaxonomy[]>>(TermTaxonomyPattern.GetList, {
+            parentIds: keys.map((key) => key.parentId),
+            fields: keys[0].fields,
+          })
+          .lastValue();
         return keys.map(({ parentId }) => results[parentId] || []);
       } else {
         return Promise.resolve([]);
@@ -77,14 +70,23 @@ export class TermTaxonomyResolver extends createMetaResolver(
     @Args('id', { type: () => ID, description: 'Term taxonomy id' }) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy | undefined> {
-    return this.termTaxonomyDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy));
+    return this.basicService
+      .send<TermTaxonomy>(TermTaxonomyPattern.Get, {
+        id,
+        fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.List)
   @Query((returns) => [TermTaxonomy!], { description: 'Get term taxonomy list.' })
   termTaxonomies(@Args() args: TermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
-    return this.termTaxonomyDataSource
-      .getList(args, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
+    return this.basicService
+      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetList, {
+        query: args,
+        fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+      })
+      .lastValue()
       .then((terms) =>
         terms.map((term) =>
           // 级联查询将参数传给 children
@@ -107,14 +109,19 @@ export class TermTaxonomyResolver extends createMetaResolver(
   ): Promise<TermTaxonomy[]> {
     let excludes: number[] | undefined;
     if (args.includeDefault !== true) {
-      const defaultCategoryId = await this.optionDataSource.getValue(OptionPresetKeys.DefaultCategory);
+      const defaultCategoryId = await this.basicService
+        .send<string>(OptionPattern.GetValue, {
+          optionName: OptionPresetKeys.DefaultCategory,
+        })
+        .lastValue();
       excludes = [Number(defaultCategoryId)];
     }
-    return this.termTaxonomyDataSource
-      .getList(
-        { ...args, excludes, taxonomy: TermPresetTaxonomy.Category },
-        this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
-      )
+    return this.basicService
+      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetList, {
+        query: { ...args, excludes, taxonomy: TermPresetTaxonomy.Category },
+        fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+      })
+      .lastValue()
       .then((terms) =>
         terms.map((term) =>
           // 级联查询将参数传给 children
@@ -132,8 +139,12 @@ export class TermTaxonomyResolver extends createMetaResolver(
   @RamAuthorized(TermTaxonomyAction.TagList)
   @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
   tagTermTaxonomies(@Args() args: TagTermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
-    return this.termTaxonomyDataSource
-      .getList({ ...args, taxonomy: TermPresetTaxonomy.Tag }, this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy))
+    return this.basicService
+      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetList, {
+        query: { ...args, taxonomy: TermPresetTaxonomy.Tag },
+        fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+      })
+      .lastValue()
       .then((terms) =>
         terms.map((term) =>
           // 级联查询将参数传给 children
@@ -162,10 +173,12 @@ export class TermTaxonomyResolver extends createMetaResolver(
     @Args() args: TermTaxonomyByObjectIdArgs,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy[]> {
-    return this.termTaxonomyDataSource.getListByObjectId(
-      args,
-      this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
-    );
+    return this.basicService
+      .send<TermTaxonomy[]>('termTaxonomy.getListByObjectId', {
+        query: args,
+        fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.Create)
@@ -173,7 +186,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
   createTermTaxonomy(
     @Args('model', { type: () => NewTermTaxonomyInput }) model: NewTermTaxonomyInput,
   ): Promise<TermTaxonomy> {
-    return this.termTaxonomyDataSource.create(model);
+    return this.basicService.send<TermTaxonomy>(TermTaxonomyPattern.Create, model).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.CreateRelationship)
@@ -181,7 +194,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
   createTermRelationship(
     @Args('model', { type: () => NewTermRelationshipInput }) model: NewTermRelationshipInput,
   ): Promise<TermRelationship> {
-    return this.termTaxonomyDataSource.createRelationship(model);
+    return this.basicService.send<TermRelationship>(TermTaxonomyPattern.CreateRelationship, model).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.Update)
@@ -190,7 +203,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
     @Args('id', { type: () => ID, description: 'Term id' }) id: number,
     @Args('model', { type: () => UpdateTermTaxonomyInput }) model: UpdateTermTaxonomyInput,
   ): Promise<void> {
-    await this.termTaxonomyDataSource.update(id, model);
+    await this.basicService.send<void>(TermTaxonomyPattern.Update, { id, ...model }).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.Delete)
@@ -199,7 +212,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
     description: 'Delete term taxonomy permanently (include term relationship).',
   })
   async deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<void> {
-    await this.termTaxonomyDataSource.delete(id);
+    await this.basicService.send(TermTaxonomyPattern.Delete, { id }).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.BulkDelete)
@@ -210,7 +223,7 @@ export class TermTaxonomyResolver extends createMetaResolver(
   async bulkDeleteTermTaxonomy(
     @Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[],
   ): Promise<void> {
-    await this.termTaxonomyDataSource.bulkDelete(ids);
+    await this.basicService.send<void>(TermTaxonomyPattern.BulkDelete, { ids }).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.DeleteRelationship)
@@ -219,6 +232,11 @@ export class TermTaxonomyResolver extends createMetaResolver(
     @Args('objectId', { type: () => ID, description: 'Object id' }) objectId: number,
     @Args('termTaxonomyId', { type: () => ID, description: 'Term taxonomy id' }) termTaxonomyId: number,
   ): Promise<void> {
-    await this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
+    await this.basicService
+      .send<void>(TermTaxonomyPattern.DeleteRelationship, {
+        objectId,
+        termTaxonomyId,
+      })
+      .lastValue();
   }
 }

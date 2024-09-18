@@ -1,22 +1,23 @@
 import DataLoader from 'dataloader';
 import { upperFirst } from 'lodash';
-import { ModuleRef } from '@nestjs/core';
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
-  TemplateDataSource,
-  TermTaxonomyDataSource,
-  UserDataSource,
-  PagedTemplateArgs,
-  TemplateOptionArgs,
-  TermTaxonomyModel,
+  Fields,
+  User,
+  RequestUser,
   TemplateStatus,
   TermPresetTaxonomy,
-} from '@ace-pomelo/infrastructure-datasource';
+  INFRASTRUCTURE_SERVICE,
+  TemplatePattern,
+  TermTaxonomyPattern,
+  UserPattern,
+} from '@ace-pomelo/shared/server';
 import { TemplateAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
@@ -45,21 +46,21 @@ import {
  * Taxonomy base field resolver
  */
 export abstract class TaxonomyFieldResolver extends BaseResolver {
-  constructor(protected readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
     super();
   }
 
-  protected createDataLoader(
-    taxonomy: string,
-  ): DataLoader<{ objectId: number; fields: string[] }, TermTaxonomyModel[]> {
+  protected createDataLoader(taxonomy: string): DataLoader<{ objectId: number; fields: string[] }, TermTaxonomy[]> {
     const termLoaderFn = async (keys: Readonly<Array<{ objectId: number; fields: string[] }>>) => {
       if (keys.length) {
         // 所有调用的 taxonomy 和 fields 都是相同的
-        const results = await this.termTaxonomyDataSource.getListByObjectId(
-          keys.map((key) => key.objectId),
-          taxonomy,
-          keys[0].fields,
-        );
+        const results = await this.basicService
+          .send<Record<number, TermTaxonomy[]>>(TermTaxonomyPattern.GetListByObjectIds, {
+            objectIds: keys.map((key) => key.objectId),
+            taxonomy,
+            fields: keys[0].fields,
+          })
+          .lastValue();
         return keys.map(({ objectId }) => results[objectId] || []);
       } else {
         return Promise.resolve([]);
@@ -91,8 +92,8 @@ export const createTaxonomyFieldResolver = (
   abstract class TaxonomyResolver extends TaxonomyFieldResolver {
     private taxonomyDataLoader;
 
-    constructor(termTaxonomyDataSource: TermTaxonomyDataSource) {
-      super(termTaxonomyDataSource);
+    constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+      super(basicService);
 
       this.taxonomyDataLoader = this.createDataLoader(options.taxonomy);
     }
@@ -110,13 +111,15 @@ export const createTaxonomyFieldResolver = (
           fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
         });
       } else {
-        return this.termTaxonomyDataSource.getListByObjectId(
-          {
-            objectId,
-            taxonomy: options.taxonomy,
-          },
-          this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
-        );
+        return this.basicService
+          .send<TermTaxonomy[]>(TermTaxonomyPattern.GetListByObjectId, {
+            query: {
+              objectId,
+              taxonomy: options.taxonomy,
+            },
+            fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
+          })
+          .lastValue();
       }
     }
   }
@@ -132,8 +135,8 @@ export class PagedTemplateItemCategoryResolver extends createTaxonomyFieldResolv
   description: 'Categories',
   useDataLoader: true,
 }) {
-  constructor(protected readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
-    super(termTaxonomyDataSource);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 }
 
@@ -143,8 +146,8 @@ export class TemplateCategoryResolver extends createTaxonomyFieldResolver(Templa
   taxonomy: TermPresetTaxonomy.Category,
   description: 'Categories',
 }) {
-  constructor(protected readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
-    super(termTaxonomyDataSource);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 }
 // #endregion
@@ -165,12 +168,18 @@ export const createAuthorFieldResolver = (
   abstract class AuthorResolver extends BaseResolver {
     private authorDataLoader;
 
-    constructor(protected readonly userDataSource: UserDataSource) {
+    constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
       super();
 
       this.authorDataLoader = new DataLoader(async (keys: Readonly<Array<{ id: number; fields: string[] }>>) => {
         if (keys.length) {
-          const results = await userDataSource.getList([...new Set(keys.map((key) => key.id))], keys[0].fields);
+          const results = await basicService
+            .send<SimpleUser[]>(UserPattern.GetList, {
+              ids: [...new Set(keys.map((key) => key.id))],
+              fields: keys[0].fields,
+            })
+            .lastValue();
+
           return keys.map(({ id }) => results.find((item) => item.id === id));
         } else {
           return Promise.resolve([]);
@@ -192,7 +201,12 @@ export const createAuthorFieldResolver = (
           fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser),
         });
       } else {
-        return this.userDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.SimpleUser));
+        return this.basicService
+          .send<SimpleUser | undefined>(UserPattern.Get, {
+            id,
+            fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser),
+          })
+          .lastValue();
       }
     }
   }
@@ -203,16 +217,16 @@ export const createAuthorFieldResolver = (
 @Authorized()
 @Resolver(() => PagedTemplateItem)
 export class PagedTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedTemplateItem, true) {
-  constructor(protected readonly userDataSource: UserDataSource) {
-    super(userDataSource);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 }
 
 @Authorized()
 @Resolver(() => Template)
 export class TemplateAuthorResolver extends createAuthorFieldResolver(Template) {
-  constructor(protected readonly userDataSource: UserDataSource) {
-    super(userDataSource);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 }
 
@@ -220,36 +234,29 @@ export class TemplateAuthorResolver extends createAuthorFieldResolver(Template) 
 
 @Authorized()
 @Resolver(() => Template)
-export class TemplateResolver extends createMetaResolver(
-  Template,
-  TemplateMeta,
-  NewTemplateMetaInput,
-  TemplateDataSource,
-  {
-    authDecorator: (method) => {
-      const ramAction =
-        method === 'getMeta'
-          ? TemplateAction.MetaDetail
-          : method === 'getMetas' || method === 'fieldMetas'
-          ? TemplateAction.MetaList
-          : method === 'createMeta' || method === 'createMetas'
-          ? TemplateAction.MetaCreate
-          : method === 'updateMeta' || method === 'updateMetaByKey'
-          ? TemplateAction.MetaUpdate
-          : TemplateAction.MetaDelete;
+export class TemplateResolver extends createMetaResolver(Template, TemplateMeta, NewTemplateMetaInput, {
+  authDecorator: (method) => {
+    const ramAction =
+      method === 'getMeta'
+        ? TemplateAction.MetaDetail
+        : method === 'getMetas' || method === 'fieldMetas'
+        ? TemplateAction.MetaList
+        : method === 'createMeta' || method === 'createMetas'
+        ? TemplateAction.MetaCreate
+        : method === 'updateMeta' || method === 'updateMetaByKey'
+        ? TemplateAction.MetaUpdate
+        : TemplateAction.MetaDelete;
 
-      return method === 'getMeta' || method === 'getMetas'
-        ? [RamAuthorized(ramAction), Anonymous()]
-        : [RamAuthorized(ramAction)];
-    },
+    return method === 'getMeta' || method === 'getMetas'
+      ? [RamAuthorized(ramAction), Anonymous()]
+      : [RamAuthorized(ramAction)];
   },
-) {
+}) {
   constructor(
-    protected readonly moduleRef: ModuleRef,
-    private readonly templateDataSource: TemplateDataSource,
+    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
     private readonly messageService: MessageService,
   ) {
-    super(moduleRef);
+    super(basicService);
   }
 
   @Anonymous()
@@ -259,26 +266,28 @@ export class TemplateResolver extends createMetaResolver(
     @Fields() fields: ResolveTree,
   ): Promise<TemplateOption[]> {
     const { type, categoryId, categoryName, ...restArgs } = args;
-    return this.templateDataSource.getOptions(
-      {
-        ...restArgs,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
-      },
-      type,
-      this.getFieldNames(fields.fieldsByTypeName.TemplateOption),
-    );
+    return this.basicService
+      .send<TemplateOption[]>(TemplatePattern.GetOptions, {
+        query: {
+          ...restArgs,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type,
+        fields: this.getFieldNames(fields.fieldsByTypeName.TemplateOption),
+      })
+      .lastValue();
   }
 
   @Anonymous()
@@ -288,12 +297,13 @@ export class TemplateResolver extends createMetaResolver(
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<Template | undefined> {
-    return this.templateDataSource.get(
-      id,
-      'NONE',
-      this.getFieldNames(fields.fieldsByTypeName.Template),
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    return this.basicService
+      .send<Template | undefined>(TemplatePattern.Get, {
+        id,
+        fields: this.getFieldNames(fields.fieldsByTypeName.Template),
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
   }
 
   @Anonymous()
@@ -303,12 +313,13 @@ export class TemplateResolver extends createMetaResolver(
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<Template | undefined> {
-    return this.templateDataSource.getByName(
-      name,
-      'NONE',
-      this.getFieldNames(fields.fieldsByTypeName.Template),
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    return this.basicService
+      .send<Template | undefined>(TemplatePattern.GetByName, {
+        name,
+        fields: this.getFieldNames(fields.fieldsByTypeName.Template),
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -316,8 +327,18 @@ export class TemplateResolver extends createMetaResolver(
   templateCountByStatus(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
     @User() requestUser: RequestUser,
-  ) {
-    return this.templateDataSource.getCountByStatus(type, Number(requestUser.sub));
+  ): Promise<Array<{ status: TemplateStatus; count: number }>> {
+    return this.basicService
+      .send<
+        Array<{
+          status: TemplateStatus;
+          count: number;
+        }>
+      >(TemplatePattern.CountByStatus, {
+        type,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -327,8 +348,14 @@ export class TemplateResolver extends createMetaResolver(
     @Args('includeTrash', { type: () => Boolean, defaultValue: true, description: 'Include "Trash" status datas' })
     includeTrash: boolean,
     @User() requestUser: RequestUser,
-  ) {
-    return this.templateDataSource.getCountBySelf(type, includeTrash, Number(requestUser.sub));
+  ): Promise<number> {
+    return this.basicService
+      .send<number>(TemplatePattern.CountBySelf, {
+        type,
+        includeTrashStatus: includeTrash,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -336,8 +363,13 @@ export class TemplateResolver extends createMetaResolver(
   templateCountByDay(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
     @Args('month', { description: 'Month (format：yyyyMM)' }) month: string,
-  ) {
-    return this.templateDataSource.getCountByDay(month, type);
+  ): Promise<Array<{ day: string; count: number }>> {
+    return this.basicService
+      .send<Array<{ day: string; count: number }>>(TemplatePattern.CountByDay, {
+        month,
+        type,
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -351,14 +383,22 @@ export class TemplateResolver extends createMetaResolver(
       description: 'Latest number of months from current (default: 12)',
     })
     months: number | undefined,
-  ) {
-    return this.templateDataSource.getCountByMonth({ year, months }, type);
+  ): Promise<Array<{ month: string; count: number }>> {
+    return this.basicService
+      .send<Array<{ month: string; count: number }>>(TemplatePattern.CountByMonth, { months, year, type })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Counts)
   @Query((returns) => [TemplateYearCount], { description: 'Get template count by year.' })
-  templateCountByYear(@Args('type', { type: () => String, description: 'Template type' }) type: string) {
-    return this.templateDataSource.getCountByYear(type);
+  templateCountByYear(
+    @Args('type', { type: () => String, description: 'Template type' }) type: string,
+  ): Promise<Array<{ year: string; count: number }>> {
+    return this.basicService
+      .send<Array<{ year: string; count: number }>>(TemplatePattern.CountByYear, {
+        type,
+      })
+      .lastValue();
   }
 
   @Query((returns) => PagedTemplate, { description: 'Get paged templates.' })
@@ -368,27 +408,29 @@ export class TemplateResolver extends createMetaResolver(
     @User() requestUser?: RequestUser,
   ): Promise<PagedTemplate> {
     const { type, categoryId, categoryName, ...restArgs } = args;
-    return this.templateDataSource.getPaged(
-      {
-        ...restArgs,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
-      },
-      type,
-      this.getFieldNames(fields.fieldsByTypeName.PagedTemplate.rows.fieldsByTypeName.PagedTemplateItem),
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    return this.basicService
+      .send<PagedTemplate>(TemplatePattern.GetPaged, {
+        query: {
+          ...restArgs,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type,
+        fields: this.getFieldNames(fields.fieldsByTypeName.PagedTemplate.rows.fieldsByTypeName.PagedTemplateItem),
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Create)
@@ -397,13 +439,26 @@ export class TemplateResolver extends createMetaResolver(
     @Args('model', { type: () => NewTemplateInput }) model: NewTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<Template> {
-    const { type, ...restInput } = model;
-    const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(
-        { ...restInput, excerpt: restInput.excerpt || '' },
-        type,
-        Number(requestUser.sub),
-      );
+    const {
+      id,
+      name,
+      title,
+      author,
+      content,
+      excerpt,
+      type,
+      status,
+      commentStatus,
+      commentCount,
+      updatedAt,
+      createdAt,
+    } = await this.basicService
+      .send<Template>(TemplatePattern.Create, {
+        ...model,
+        excerpt: model.excerpt || '',
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
@@ -444,7 +499,13 @@ export class TemplateResolver extends createMetaResolver(
     @Args('model', { type: () => UpdateTemplateInput }) model: UpdateTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.update(id, model, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.Update, {
+        ...model,
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (model.status === TemplateStatus.Pending) {
@@ -470,7 +531,13 @@ export class TemplateResolver extends createMetaResolver(
     @Args('status', { type: () => TemplateStatus, description: 'status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.updateStatus(id, status, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.UpdateStatus, {
+        id,
+        status,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.BulkUpdateStatus)
@@ -483,7 +550,13 @@ export class TemplateResolver extends createMetaResolver(
     @Args('status', { type: () => TemplateStatus, description: 'Status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.bulkUpdateStatus(ids, status, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.BulkUpdateStatus, {
+        ids,
+        status,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Restore)
@@ -495,7 +568,12 @@ export class TemplateResolver extends createMetaResolver(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.restore(id, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.Restore, {
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.BulkRestore)
@@ -507,7 +585,12 @@ export class TemplateResolver extends createMetaResolver(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.bulkRestore(ids, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.BulkRestore, {
+        ids,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.Delete)
@@ -519,7 +602,12 @@ export class TemplateResolver extends createMetaResolver(
     @Args('id', { type: () => ID, description: 'Template id' }) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.delete(id, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.Delete, {
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(TemplateAction.BulkDelete)
@@ -531,6 +619,11 @@ export class TemplateResolver extends createMetaResolver(
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.bulkDelete(ids, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.BulkDelete, {
+        ids,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 }

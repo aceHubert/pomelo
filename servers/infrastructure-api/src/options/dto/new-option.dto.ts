@@ -1,5 +1,5 @@
-import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
-import { OptionAutoload } from '@ace-pomelo/infrastructure-datasource';
+import { ApiProperty } from '@nestjs/swagger';
+import { OptionAutoload } from '@ace-pomelo/shared/server';
 import { NewOptionValidator } from './new-option.validator';
 
 export class NewOptionDto extends NewOptionValidator {
@@ -17,7 +17,6 @@ export class NewOptionDto extends NewOptionValidator {
    * Is option load automatically in application start
    * @default no
    */
-  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
     enum: OptionAutoload,
     default: OptionAutoload.No,

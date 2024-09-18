@@ -104,8 +104,8 @@ export const usePostApi = defineRegistGraphql('template_post', {
       PagedPostTemplateArgs
     >,
     // 分页获取文章
-    getPublishedPaged: gql`
-      query getPostTemplates(
+    getPublished: gql`
+      query getPublishedPostTemplates(
         $offset: Int
         $limit: Int
         $keyword: String
@@ -113,7 +113,7 @@ export const usePostApi = defineRegistGraphql('template_post', {
         $tagId: ID
         $metaKeys: [String!]
       ) {
-        posts: postPublishedTemplates(
+        posts: publishedPostTemplates(
           offset: $offset
           limit: $limit
           keyword: $keyword

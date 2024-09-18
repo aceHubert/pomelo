@@ -7,13 +7,13 @@ import { I18nContext, I18nValidationException } from 'nestjs-i18n';
 import { BaseError as SequelizeBaseError } from 'sequelize';
 import { GraphQLError } from 'graphql';
 import { isHttpError } from 'http-errors';
-import { renderMsgPage } from '@ace-pomelo/nestjs-oidc';
 import { InvalidPackageNameError, InvalidPackageVersionError } from 'query-registry';
-import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.utils';
+import { renderMsgPage } from '@ace-pomelo/shared/server';
+import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.util';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionFilter.name, { timestamp: true });
+  private logger = new Logger(AllExceptionFilter.name, { timestamp: true });
 
   async catch(exception: Error, host: ArgumentsHost) {
     // log

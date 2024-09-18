@@ -1,8 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsNotEmpty, IsInt } from 'class-validator';
-import { TermTaxonomyArgs } from '@ace-pomelo/infrastructure-datasource';
 
-export abstract class TermTaxonomyArgsValidator implements TermTaxonomyArgs {
+export abstract class TermTaxonomyArgsValidator {
   @IsOptional()
   abstract keyword?: string;
 

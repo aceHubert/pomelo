@@ -52,11 +52,6 @@ export class FilesUploadDto {
 
 export class ImageCropDto extends ImageCropOptions {
   /**
-   * Media id
-   */
-  id!: number;
-
-  /**
    * Create new media if set "true", default is "false"
    */
   replace?: boolean;

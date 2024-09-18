@@ -1,11 +1,10 @@
 import DataLoader from 'dataloader';
 import { camelCase, lowerCase, upperFirst } from 'lodash';
-import { ModuleRef } from '@nestjs/core';
 import { Type, applyDecorators } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
 import { VoidResolver } from 'graphql-scalars';
-import { Fields } from '@ace-pomelo/shared-server';
-import { MetaDataSource } from '@ace-pomelo/infrastructure-datasource';
+import { Fields, createMetaPattern } from '@ace-pomelo/shared/server';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { NewMetaInput } from './dto/new-meta.input';
 import { Meta } from './models/meta.model';
@@ -24,14 +23,15 @@ export type Method =
 
 export type Options = {
   /**
-   * Query/Mutation prefix (upper camel case).
+   * model name(camelCase),
+   * pattern prefix(e.g. termTaxonomy -> termTaxonomy.meta.get),
+   * Query/Mutation name prefix(e.g. termTaxonomy -> termTaxonomyMeta)
    * @default camelCase(resolverType.name)
-   * @example resolverType is Post, then will expose postMetas, createPostMeta, updatePostMeta, deletePostMeta, etc... methods
    */
-  resolverName?: string;
+  modelName?: string;
   /**
    * description model name for resolver (lower case).
-   * @default lowerCase(resolverName)
+   * @default lowerCase(modelName)
    * @example Get media(descriptionName) metas.
    */
   descriptionName?: string;
@@ -42,26 +42,24 @@ export type Options = {
 };
 
 /**
- * 创建 metas ResolverField （分离解决继承问题）
- * DataSources 必须有 getMetas/createMeta/updateMeta/updateMetaByKey/deleteMeta 方法
+ * use DataLoader to batch load metas field resolver
+ * @param resolverType Resolver type
+ * @param options options
  */
-export function createMetaFieldResolver<
-  MetaReturnType,
-  NewMetaInputType,
-  MetaDataSourceType extends MetaDataSource<MetaReturnType, NewMetaInputType>,
->(
+export function createMetaFieldResolver<MetaReturnType>(
   resolverType: Function,
-  metaDataSourceTypeOrToken: Type<MetaDataSourceType> | string | symbol,
   {
-    resolverName,
+    modelName,
     descriptionName,
     authDecorator,
   }: Omit<Options, 'authDecorator'> & {
     authDecorator?: () => MethodDecorator | MethodDecorator[];
   },
 ) {
-  const _resolverName = resolverName || resolverType.name;
-  const _descriptionName = descriptionName || lowerCase(_resolverName);
+  const _modelName = modelName || camelCase(resolverType.name);
+  const _descriptionName = descriptionName || lowerCase(_modelName);
+
+  const pattern = createMetaPattern(_modelName);
 
   const AuthDecorate = (): MethodDecorator => {
     if (authDecorator) {
@@ -74,20 +72,20 @@ export function createMetaFieldResolver<
 
   @Resolver(() => resolverType, { isAbstract: true })
   abstract class MetaFieldResolver extends BaseResolver {
-    protected metaDataSource!: MetaDataSource<MetaReturnType, NewMetaInputType>;
     private metaLoader!: DataLoader<{ modelId: number; metaKeys?: string[]; fields: string[] }, MetaReturnType[]>;
 
-    constructor(protected readonly moduleRef: ModuleRef) {
+    constructor(basicService: ClientProxy) {
       super();
-      this.metaDataSource = this.moduleRef.get(metaDataSourceTypeOrToken, { strict: false });
       this.metaLoader = new DataLoader(async (keys) => {
         if (keys.length) {
           // 所有调用的 metaKeys 和 fields 都是相同的
-          const results = await this.metaDataSource.getMetas(
-            keys.map((key) => key.modelId),
-            keys[0].metaKeys ?? 'ALL',
-            keys[0].fields,
-          );
+          const results = await basicService
+            .send<Record<number, MetaReturnType[]>>(pattern.GetMetas, {
+              [`${_modelName}Ids`]: keys.map((key) => key.modelId),
+              metaKeys: keys[0].metaKeys,
+              fields: keys[0].fields,
+            })
+            .lastValue();
           return keys.map(({ modelId }) => results[modelId] || []);
         } else {
           return Promise.resolve([]);
@@ -122,23 +120,23 @@ export function createMetaFieldResolver<
 }
 
 /**
- * 创建 meta resolver
+ * create meta resolver
+ * @param resolverType Resolver type
+ * @param metaReturnType meta return type (Query/Mutation return type)
+ * @param newMetaInputType new meta input type (Mutation input type)
+ * @param options options
  */
-export function createMetaResolver<
-  MetaReturnType,
-  NewMetaInputType,
-  MetaDataSourceType extends MetaDataSource<MetaReturnType, NewMetaInputType>,
->(
+export function createMetaResolver<MetaReturnType, NewMetaInputType>(
   resolverType: Function,
   metaReturnType: Type<MetaReturnType>,
   newMetaInputType: Type<NewMetaInputType>,
-  metaDataSourceTypeOrToken: Type<MetaDataSourceType> | string | symbol,
-  { resolverName, descriptionName, authDecorator }: Options = {},
+  { modelName, descriptionName, authDecorator }: Options = {},
 ) {
-  const _resolverName = resolverName || resolverType.name;
-  const _camelCaseResolverName = camelCase(_resolverName);
-  const _upperCamelCaseResolverName = upperFirst(_camelCaseResolverName);
-  const _descriptionName = descriptionName || lowerCase(_resolverName);
+  const _modelName = modelName || camelCase(resolverType.name);
+  const _upperFirstModelName = upperFirst(_modelName);
+  const _descriptionName = descriptionName || lowerCase(_modelName);
+
+  const pattern = createMetaPattern(_modelName);
 
   const AuthDecorate = (method: Method): MethodDecorator => {
     if (authDecorator) {
@@ -149,14 +147,14 @@ export function createMetaResolver<
     }
   };
 
-  @Resolver(() => resolverType, { isAbstract: true })
-  abstract class MetaResolver extends createMetaFieldResolver(resolverType, metaDataSourceTypeOrToken, {
-    resolverName: _resolverName,
+  @Resolver({ isAbstract: true })
+  abstract class MetaResolver extends createMetaFieldResolver<MetaReturnType>(resolverType, {
+    modelName: _modelName,
     descriptionName: _descriptionName,
     authDecorator: () => AuthDecorate('fieldMetas'),
   }) {
-    constructor(protected readonly moduleRef: ModuleRef) {
-      super(moduleRef);
+    constructor(protected readonly basicService: ClientProxy) {
+      super(basicService);
     }
 
     /**
@@ -165,7 +163,7 @@ export function createMetaResolver<
     @AuthDecorate('getMeta')
     @Query((returns) => metaReturnType, {
       nullable: true,
-      name: `${_camelCaseResolverName}Meta`,
+      name: `${_modelName}Meta`,
       description: `Get ${_descriptionName} meta.`,
     })
     getMeta(
@@ -176,7 +174,12 @@ export function createMetaResolver<
       id: number,
       @Fields() fields: ResolveTree,
     ) {
-      return this.metaDataSource.getMeta(id, this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]));
+      return this.basicService
+        .send<MetaReturnType | undefined>(pattern.GetMeta, {
+          id,
+          fields: this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]),
+        })
+        .lastValue();
     }
 
     /**
@@ -184,11 +187,11 @@ export function createMetaResolver<
      */
     @AuthDecorate('getMetas')
     @Query((returns) => [metaReturnType!], {
-      name: `${_camelCaseResolverName}Metas`,
+      name: `${_modelName}Metas`,
       description: `Get ${_descriptionName} metas.`,
     })
     getMetas(
-      @Args(`${_camelCaseResolverName}Id`, {
+      @Args(`${_modelName}Id`, {
         type: () => ID,
         description: `${_descriptionName} Id`,
       })
@@ -201,11 +204,13 @@ export function createMetaResolver<
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
     ) {
-      return this.metaDataSource.getMetas(
-        modelId,
-        metaKeys ?? 'ALL',
-        this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]),
-      );
+      return this.basicService
+        .send<MetaReturnType[]>(pattern.GetMetas, {
+          [`${_modelName}Id`]: modelId,
+          metaKeys,
+          fields: this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]),
+        })
+        .lastValue();
     }
 
     /**
@@ -214,11 +219,11 @@ export function createMetaResolver<
     @AuthDecorate('createMeta')
     @Mutation((returns) => metaReturnType, {
       nullable: true,
-      name: `create${_upperCamelCaseResolverName}Meta`,
+      name: `create${_upperFirstModelName}Meta`,
       description: `Create a new ${_descriptionName} meta.`,
     })
     createMeta(@Args('model', { type: () => newMetaInputType }) model: NewMetaInputType) {
-      return this.metaDataSource.createMeta(model);
+      return this.basicService.send<MetaReturnType>(pattern.CreateMeta, model).lastValue();
     }
 
     /**
@@ -226,18 +231,23 @@ export function createMetaResolver<
      */
     @AuthDecorate('createMetas')
     @Mutation((returns) => [metaReturnType!], {
-      name: `create${_upperCamelCaseResolverName}Metas`,
+      name: `create${_upperFirstModelName}Metas`,
       description: `Create the bulk of ${_descriptionName} metas.`,
     })
     createMetas(
-      @Args(`${_camelCaseResolverName}id`, {
+      @Args(`${_modelName}id`, {
         type: () => ID,
         description: `${_descriptionName} id`,
       })
       modelId: number,
       @Args('metas', { type: () => [NewMetaInput!] }) models: NewMetaInput[],
     ) {
-      return this.metaDataSource.bulkCreateMeta(modelId, models);
+      return this.basicService
+        .send<MetaReturnType[]>(pattern.CreateMetas, {
+          [`${_modelName}Id`]: modelId,
+          models,
+        })
+        .lastValue();
     }
 
     /**
@@ -246,7 +256,7 @@ export function createMetaResolver<
     @AuthDecorate('updateMeta')
     @Mutation((returns) => VoidResolver, {
       nullable: true,
-      name: `update${_upperCamelCaseResolverName}Meta`,
+      name: `update${_upperFirstModelName}Meta`,
       description: `Update ${_descriptionName} meta value.`,
     })
     async updateMeta(
@@ -254,7 +264,12 @@ export function createMetaResolver<
       id: number,
       @Args('metaValue') metaValue: string,
     ) {
-      await this.metaDataSource.updateMeta(id, metaValue);
+      await this.basicService
+        .send<void>(pattern.UpdateMeta, {
+          id,
+          metaValue,
+        })
+        .lastValue();
     }
 
     /**
@@ -263,11 +278,11 @@ export function createMetaResolver<
     @AuthDecorate('updateMetaByKey')
     @Mutation((returns) => VoidResolver, {
       nullable: true,
-      name: `update${_upperCamelCaseResolverName}MetaByKey`,
+      name: `update${_upperFirstModelName}MetaByKey`,
       description: `Update ${_descriptionName} meta value by meta key.`,
     })
     async updateMetaByKey(
-      @Args(`${_camelCaseResolverName}Id`, {
+      @Args(`${_modelName}Id`, {
         type: () => ID,
         description: `${_descriptionName} Id`,
       })
@@ -280,7 +295,14 @@ export function createMetaResolver<
       })
       createIfNotExists?: boolean,
     ) {
-      await this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
+      await this.basicService
+        .send<void>(pattern.UpdateMetaByKey, {
+          [`${_modelName}Id`]: modelId,
+          metaKey,
+          metaValue,
+          createIfNotExists,
+        })
+        .lastValue();
     }
 
     /**
@@ -289,14 +311,14 @@ export function createMetaResolver<
     @AuthDecorate('deleteMeta')
     @Mutation((returns) => VoidResolver, {
       nullable: true,
-      name: `delete${_upperCamelCaseResolverName}Meta`,
+      name: `delete${_upperFirstModelName}Meta`,
       description: `Delete ${_descriptionName} meta`,
     })
     async deleteMeta(
       @Args('id', { type: () => ID, description: `${_descriptionName} meta Id` })
       id: number,
     ) {
-      await this.metaDataSource.deleteMeta(id);
+      await this.basicService.send<void>(pattern.DeleteMeta, { id }).lastValue();
     }
 
     /**
@@ -305,18 +327,23 @@ export function createMetaResolver<
     @AuthDecorate('deleteMetaByKey')
     @Mutation((returns) => VoidResolver, {
       nullable: true,
-      name: `delete${_upperCamelCaseResolverName}MetaByKey`,
+      name: `delete${_upperFirstModelName}MetaByKey`,
       description: `Delete ${_descriptionName} meta by meta key.`,
     })
     async deleteMetaByKey(
-      @Args(`${_camelCaseResolverName}Id`, {
+      @Args(`${_modelName}Id`, {
         type: () => ID,
         description: `${_descriptionName} Id`,
       })
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
     ): Promise<void> {
-      await this.metaDataSource.deleteMetaByKey(modelId, metaKey);
+      await this.basicService
+        .send<void>(pattern.DeleteMetaByKey, {
+          [`${_modelName}Id`]: modelId,
+          metaKey,
+        })
+        .lastValue();
     }
   }
 

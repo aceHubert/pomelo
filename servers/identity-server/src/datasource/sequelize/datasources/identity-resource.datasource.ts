@@ -190,7 +190,10 @@ export class IdentityResourceDataSource extends BaseDataSource {
 
     if (exists)
       throw new ValidationError(
-        this.translate('datasource.identity_resource.resource_has_existed', 'Identity resource has already existed!'),
+        this.translate(
+          'identity-server.datasource.identity_resource.resource_has_existed',
+          'Identity resource has already existed!',
+        ),
       );
 
     return this.models.IdentityResources.create(input).then((resource) => {
@@ -213,7 +216,10 @@ export class IdentityResourceDataSource extends BaseDataSource {
 
     if (nonEditable)
       throw new ValidationError(
-        this.translate('datasource.identity_resource.resource_non_editable', 'Identity resource is not editable!'),
+        this.translate(
+          'identity-server.datasource.identity_resource.resource_non_editable',
+          'Identity resource is not editable!',
+        ),
       );
 
     await this.models.IdentityResources.update(input, {
@@ -236,13 +242,19 @@ export class IdentityResourceDataSource extends BaseDataSource {
     if (resource) {
       if (resource.nonEditable)
         throw new ValidationError(
-          this.translate('datasource.identity_resource.resource_non_editable', 'Identity resource is not editable!'),
+          this.translate(
+            'identity-server.datasource.identity_resource.resource_non_editable',
+            'Identity resource is not editable!',
+          ),
         );
 
       await resource.destroy();
     } else {
       throw new ValidationError(
-        this.translate('datasource.identity_resource.resource_does_not_exist', 'Identity resource does not exist!'),
+        this.translate(
+          'identity-server.datasource.identity_resource.resource_does_not_exist',
+          'Identity resource does not exist!',
+        ),
       );
     }
   }
@@ -304,7 +316,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
       if (exists)
         throw new ValidationError(
           this.translate(
-            'datasource.identity_resource.claim_has_existed',
+            'identity-server.datasource.identity_resource.claim_has_existed',
             'Identity resource claim has already existed!',
           ),
         );
@@ -426,7 +438,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
       if (exists)
         throw new ValidationError(
           this.translate(
-            'datasource.identity_resource.property_has_existed',
+            'identity-server.datasource.identity_resource.property_has_existed',
             'Identity resource property has already existed.',
           ),
         );

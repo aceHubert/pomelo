@@ -1,21 +1,22 @@
-import { ModuleRef } from '@nestjs/core';
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { Anonymous, Authorized } from '@ace-pomelo/nestjs-oidc';
+import { Anonymous, Authorized } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { Fields, User, RequestUser } from '@ace-pomelo/shared-server';
 import {
-  OptionDataSource,
+  Fields,
+  User,
+  RequestUser,
   OptionPresetKeys,
-  TemplateDataSource,
-  UserDataSource,
-  PagedTemplateArgs,
-  TemplateOptionArgs,
   TemplateStatus,
   TemplatePresetType,
   TermPresetTaxonomy,
-} from '@ace-pomelo/infrastructure-datasource';
+  INFRASTRUCTURE_SERVICE,
+  OptionPattern,
+  TemplatePattern,
+} from '@ace-pomelo/shared/server';
 import { TemplateAction, PageTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
@@ -30,16 +31,16 @@ import { PageTemplate, PagedPageTemplate, PageTemplateOption, PagedPageTemplateI
 @Authorized()
 @Resolver(() => PagedPageTemplateItem)
 export class PagedPageTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedPageTemplateItem, true) {
-  constructor(protected readonly userDataSource: UserDataSource) {
-    super(userDataSource);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 }
 
 @Authorized()
 @Resolver(() => PageTemplate)
 export class PageTemplateAuthorResolver extends createAuthorFieldResolver(PageTemplate) {
-  constructor(protected readonly userDataSource: UserDataSource) {
-    super(userDataSource);
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
   }
 }
 
@@ -47,32 +48,32 @@ export class PageTemplateAuthorResolver extends createAuthorFieldResolver(PageTe
 
 @Authorized()
 @Resolver(() => PagedPageTemplateItem)
-export class PagedPageTemplateItemMetaFieldResolver extends createMetaFieldResolver(
-  PagedPageTemplateItem,
-  TemplateDataSource,
-  {
-    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
-  },
-) {}
+export class PagedPageTemplateItemMetaFieldResolver extends createMetaFieldResolver(PagedPageTemplateItem, {
+  modelName: 'template',
+  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+}) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    super(basicService);
+  }
+}
 
 @Authorized()
 @Resolver(() => PageTemplate)
-export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, TemplateDataSource, {
+export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, {
+  modelName: 'template',
   authDecorator: () => RamAuthorized(TemplateAction.MetaList),
 }) {
   constructor(
-    protected readonly moduleRef: ModuleRef,
-    private readonly optionDataSource: OptionDataSource,
-    private readonly templateDataSource: TemplateDataSource,
+    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
     private readonly messageService: MessageService,
   ) {
-    super(moduleRef);
+    super(basicService);
   }
 
   @Anonymous()
   @Query((returns) => [String!], { description: ' Get page alias paths' })
   pageAliasPaths(): Promise<string[]> {
-    return this.templateDataSource.getNames(TemplatePresetType.Page);
+    return this.basicService.send<string[]>(TemplatePattern.GetNames, { type: TemplatePresetType.Page }).lastValue();
   }
 
   @Anonymous()
@@ -82,26 +83,28 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Fields() fields: ResolveTree,
   ): Promise<PageTemplateOption[]> {
     const { categoryId, categoryName, ...restArgs } = args;
-    return this.templateDataSource.getOptions(
-      {
-        ...restArgs,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
-      },
-      TemplatePresetType.Page,
-      this.getFieldNames(fields.fieldsByTypeName.PageTemplateOption),
-    );
+    return this.basicService
+      .send<PageTemplateOption[]>(TemplatePattern.GetOptions, {
+        query: {
+          ...restArgs,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Page,
+        fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplateOption),
+      })
+      .lastValue();
   }
 
   @Anonymous()
@@ -111,12 +114,14 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
-    return this.templateDataSource.get(
-      id,
-      TemplatePresetType.Page,
-      this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    return this.basicService
+      .send<PageTemplate | undefined>(TemplatePattern.Get, {
+        id,
+        type: TemplatePresetType.Page,
+        fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
   }
 
   @Anonymous()
@@ -132,24 +137,33 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
     if (name) {
-      return this.templateDataSource.getByName(
-        name,
-        TemplatePresetType.Page,
-        this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-        requestUser ? Number(requestUser.sub) : undefined,
-      );
+      return this.basicService
+        .send<PageTemplate>(TemplatePattern.GetByName, {
+          name,
+          type: TemplatePresetType.Page,
+          fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
+          requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+        })
+        .lastValue();
     } else {
-      return this.optionDataSource.getValue(OptionPresetKeys.PageOnFront).then((id) => {
-        if (id) {
-          return this.templateDataSource.get(
-            Number(id),
-            TemplatePresetType.Page,
-            this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-            requestUser ? Number(requestUser.sub) : undefined,
-          );
-        }
-        return undefined;
-      });
+      return this.basicService
+        .send<string | undefined>(OptionPattern.GetValue, {
+          optionName: OptionPresetKeys.PageOnFront,
+        })
+        .lastValue()
+        .then((id) => {
+          if (id) {
+            return this.basicService
+              .send<PageTemplate>(TemplatePattern.Get, {
+                id: Number(id),
+                type: TemplatePresetType.Page,
+                fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
+                requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+              })
+              .lastValue();
+          }
+          return undefined;
+        });
     }
   }
 
@@ -160,27 +174,31 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @User() requestUser?: RequestUser,
   ): Promise<PagedPageTemplate> {
     const { categoryId, categoryName, ...restArgs } = args;
-    return this.templateDataSource.getPaged(
-      {
-        ...restArgs,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
-      },
-      TemplatePresetType.Page,
-      this.getFieldNames(fields.fieldsByTypeName.PagedPageTemplate.rows.fieldsByTypeName.PagedPageTemplateItem),
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    return this.basicService
+      .send<PagedPageTemplate>(TemplatePattern.GetPaged, {
+        query: {
+          ...restArgs,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Page,
+        fields: this.getFieldNames(
+          fields.fieldsByTypeName.PagedPageTemplate.rows.fieldsByTypeName.PagedPageTemplateItem,
+        ),
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
   }
 
   @RamAuthorized(PageTemplateAction.Create)
@@ -190,7 +208,12 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @User() requestUser: RequestUser,
   ): Promise<PageTemplate> {
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(model, TemplatePresetType.Page, Number(requestUser.sub));
+      await this.basicService
+        .send<PageTemplate>(TemplatePattern.CreatePage, {
+          ...model,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
 
     // 新建（当状态为需要审核）审核消息推送
     if (status === TemplateStatus.Pending) {
@@ -229,7 +252,13 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Args('model', { type: () => UpdatePageTemplateInput }) model: UpdatePageTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.templateDataSource.update(id, model, Number(requestUser.sub));
+    await this.basicService
+      .send<void>(TemplatePattern.Update, {
+        ...model,
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     // 修改（当状态为需要审核并且有任何修改）审核消息推送
     if (model.status === TemplateStatus.Pending) {

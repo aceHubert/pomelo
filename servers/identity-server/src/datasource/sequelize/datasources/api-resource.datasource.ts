@@ -176,7 +176,10 @@ export class ApiResourceDataSource extends BaseDataSource {
 
     if (exists)
       throw new ValidationError(
-        this.translate('datasource.api_resource.resource_has_existed', 'Api resource has already existed!'),
+        this.translate(
+          'identity-server.datasource.api_resource.resource_has_existed',
+          'Api resource has already existed!',
+        ),
       );
 
     return this.models.ApiResources.create(input).then((api) => api.toJSON<ApiResourceModel>());
@@ -197,7 +200,10 @@ export class ApiResourceDataSource extends BaseDataSource {
 
     if (nonEditable)
       throw new ValidationError(
-        this.translate('datasource.api_resource.resource_non_editable', 'Api resource is not editable!'),
+        this.translate(
+          'identity-server.datasource.api_resource.resource_non_editable',
+          'Api resource is not editable!',
+        ),
       );
 
     await this.models.ApiResources.update(input, {
@@ -233,13 +239,19 @@ export class ApiResourceDataSource extends BaseDataSource {
     if (resource) {
       if (resource.nonEditable)
         throw new ValidationError(
-          this.translate('datasource.api_resource.resource_non_editable', 'Api resource is not editable!'),
+          this.translate(
+            'identity-server.datasource.api_resource.resource_non_editable',
+            'Api resource is not editable!',
+          ),
         );
 
       await resource.destroy();
     } else {
       throw new ValidationError(
-        this.translate('datasource.api_resource.resource_does_not_exist', 'Api resource does not exist!'),
+        this.translate(
+          'identity-server.datasource.api_resource.resource_does_not_exist',
+          'Api resource does not exist!',
+        ),
       );
     }
   }
@@ -298,7 +310,10 @@ export class ApiResourceDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.api_resource.claim_has_existed', 'Api resource claim has already existed!'),
+          this.translate(
+            'identity-server.datasource.api_resource.claim_has_existed',
+            'Api resource claim has already existed!',
+          ),
         );
 
       return this.models.ApiClaims.create({
@@ -503,7 +518,10 @@ export class ApiResourceDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.api_resource.scope_has_existed', 'Api resource scope has already existed!'),
+          this.translate(
+            'identity-server.datasource.api_resource.scope_has_existed',
+            'Api resource scope has already existed!',
+          ),
         );
 
       return this.models.ApiScopes.create({
@@ -536,7 +554,10 @@ export class ApiResourceDataSource extends BaseDataSource {
 
     if (nonEditable)
       throw new ValidationError(
-        this.translate('datasource.api_resource.resource_non_editable', 'Api resource is not editable!'),
+        this.translate(
+          'identity-server.datasource.api_resource.resource_non_editable',
+          'Api resource is not editable!',
+        ),
       );
 
     await this.models.ApiScopes.update(input, {
@@ -568,7 +589,10 @@ export class ApiResourceDataSource extends BaseDataSource {
 
     if (nonEditable)
       throw new ValidationError(
-        this.translate('datasource.api_resource.resource_non_editable', 'Api resource is not editable!'),
+        this.translate(
+          'identity-server.datasource.api_resource.resource_non_editable',
+          'Api resource is not editable!',
+        ),
       );
 
     await this.models.ApiScopes.destroy({
@@ -634,7 +658,7 @@ export class ApiResourceDataSource extends BaseDataSource {
       if (exists)
         throw new ValidationError(
           this.translate(
-            'datasource.api_resource.scope_claim_has_existed',
+            'identity-server.datasource.api_resource.scope_claim_has_existed',
             'Api resource scope claim has already existed!',
           ),
         );
@@ -814,7 +838,10 @@ export class ApiResourceDataSource extends BaseDataSource {
 
       if (exists)
         throw new ValidationError(
-          this.translate('datasource.api_resource.property_has_existed', 'Api resource property has already existed.'),
+          this.translate(
+            'identity-server.datasource.api_resource.property_has_existed',
+            'Api resource property has already existed.',
+          ),
         );
 
       return this.models.ApiProperties.create({

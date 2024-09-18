@@ -337,12 +337,15 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             //   the End-User
             ctx.body = renderLogoutSourceTempate({
               globalPrefix: this.globalPrefix,
-              pageTitle: i18n.tv('oidc.config.logout.confirm_page_title', `Logout Request`),
+              pageTitle: i18n.tv('identity-server.oidc.config.logout.confirm_page_title', `Logout Request`),
               content: {
-                title: i18n.tv('oidc.config.logout.confirm_title', `Do you want to sign-out from ${ctx.host}?`),
+                title: i18n.tv(
+                  'identity-server.oidc.config.logout.confirm_title',
+                  `Do you want to sign-out from ${ctx.host}?`,
+                ),
                 form,
-                confirmBtnText: i18n.tv('oidc.config.logout.confirm_btn_text', 'Yes, sign me out'),
-                cancelBtnText: i18n.tv('oidc.config.logout.cancel_btn_text', 'No, stay signed in'),
+                confirmBtnText: i18n.tv('identity-server.oidc.config.logout.confirm_btn_text', 'Yes, sign me out'),
+                cancelBtnText: i18n.tv('identity-server.oidc.config.logout.cancel_btn_text', 'No, stay signed in'),
               },
               primaryColor,
             });
@@ -354,18 +357,18 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             const display = clientName || clientId;
             ctx.body = renderPostLogoutSuccessSourceTemplate({
               globalPrefix: this.globalPrefix,
-              pageTitle: i18n.tv('oidc.config.logout.success_page_title', `Sign-out Success`),
+              pageTitle: i18n.tv('identity-server.oidc.config.logout.success_page_title', `Sign-out Success`),
               content: {
-                title: i18n.tv('oidc.config.logout.success_title', 'Sign-out Success'),
+                title: i18n.tv('identity-server.oidc.config.logout.success_title', 'Sign-out Success'),
                 description: display
                   ? i18n.tv(
-                      'oidc.config.logout.success_description_with_client',
+                      'identity-server.oidc.config.logout.success_description_with_client',
                       `Your sign-out with ${display} was successful.`,
                       {
                         args: { client: display },
                       },
                     )
-                  : i18n.tv('oidc.config.logout.success_description', `Your sign-out was successful.`),
+                  : i18n.tv('identity-server.oidc.config.logout.success_description', `Your sign-out was successful.`),
               },
               primaryColor,
             });
@@ -490,11 +493,11 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
         const i18n = getI18nFromContext(ctx);
         const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
-        let pageTitle = i18n.tv('error.page_title', 'An error occurred'),
-          title = i18n.tv('error.title', 'An error occurred!');
+        let pageTitle = i18n.tv('identity-server.error.page_title', 'An error occurred'),
+          title = i18n.tv('identity-server.error.title', 'An error occurred!');
         if (ctx.status === 404) {
-          pageTitle = i18n.tv('404.page_title', 'Page not found');
-          title = i18n.tv('404.title', 'Page not found!');
+          pageTitle = i18n.tv('identity-server.404.page_title', 'Page not found');
+          title = i18n.tv('identity-server.404.title', 'Page not found!');
         }
 
         ctx.type = 'html';
@@ -617,7 +620,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   private findAccount: FindAccount = async (ctx, id) => {
-    const account = await this.accountProviderService.getAccount(Number(id));
+    const account = await this.accountProviderService.getAccount({
+      id: Number(id),
+    });
 
     if (!account) return;
 

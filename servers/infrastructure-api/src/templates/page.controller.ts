@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import {
+  Inject,
   Controller,
   Scope,
   Query,
@@ -14,6 +15,7 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import {
   createResponseSuccessType,
   ParseQueryPipe,
@@ -21,20 +23,18 @@ import {
   ApiAuthCreate,
   User,
   RequestUser,
-} from '@ace-pomelo/shared-server';
-import {
-  OptionDataSource,
   OptionPresetKeys,
-  TemplateDataSource,
-  PagedTemplateArgs,
-  TemplateOptionArgs,
   TemplatePresetType,
   TermPresetTaxonomy,
-} from '@ace-pomelo/infrastructure-datasource';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+  INFRASTRUCTURE_SERVICE,
+  TemplatePattern,
+  OptionPattern,
+} from '@ace-pomelo/shared/server';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { PageTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
+import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { PageTemplateOptionQueryDto, PagedPageTemplateQueryDto } from './dto/template-query.dto';
 import { NewPageTemplateDto } from './dto/new-template.dto';
 import {
@@ -52,10 +52,7 @@ import { UpdatePageTemplateDto } from './dto/update-template.dto';
 @Authorized()
 @Controller({ path: 'api/template/pages', scope: Scope.REQUEST })
 export class PageTemplateController extends BaseController {
-  constructor(
-    private readonly optionDataSource: OptionDataSource,
-    private readonly templateDataSource: TemplateDataSource,
-  ) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
     super();
   }
 
@@ -70,26 +67,28 @@ export class PageTemplateController extends BaseController {
   })
   async getOptions(@Query(ParseQueryPipe) query: PageTemplateOptionQueryDto) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.templateDataSource.getOptions(
-      {
-        ...restQuery,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
-      },
-      TemplatePresetType.Page,
-      ['id', 'name', 'title'],
-    );
+    const result = await this.basicService
+      .send<PageTemplateOptionResp[]>(TemplatePattern.GetOptions, {
+        query: {
+          ...restQuery,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Page,
+        fields: ['id', 'name', 'title'],
+      })
+      .lastValue();
     return this.success({
       data: result,
     });
@@ -105,7 +104,9 @@ export class PageTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: [String] }, 'PageAliaPathsSuccessResp'),
   })
   async getPathAlias() {
-    const result = await this.templateDataSource.getNames(TemplatePresetType.Page);
+    const result = await this.basicService
+      .send<string[]>(TemplatePattern.GetNames, { type: TemplatePresetType.Page })
+      .lastValue();
     return this.success({
       data: result,
     });
@@ -142,49 +143,64 @@ export class PageTemplateController extends BaseController {
     @User() requestUser?: RequestUser,
   ) {
     const result = name
-      ? await this.templateDataSource.getByName(
-          name,
-          TemplatePresetType.Page,
-          [
-            'id',
-            'name',
-            'title',
-            'author',
-            'content',
-            'status',
-            'commentStatus',
-            'commentCount',
-            'updatedAt',
-            'createdAt',
-          ],
-          requestUser ? Number(requestUser.sub) : undefined,
-        )
-      : await this.optionDataSource.getValue(OptionPresetKeys.PageOnFront).then((id) => {
-          if (id) {
-            return this.templateDataSource.get(
-              Number(id),
-              TemplatePresetType.Page,
-              [
-                'id',
-                'name',
-                'title',
-                'author',
-                'content',
-                'status',
-                'commentStatus',
-                'commentCount',
-                'updatedAt',
-                'createdAt',
-              ],
-              requestUser ? Number(requestUser.sub) : undefined,
-            );
-          }
-          return undefined;
-        });
+      ? await this.basicService
+          .send<PageTemplateModelResp | undefined>(TemplatePattern.GetByName, {
+            name,
+            type: TemplatePresetType.Page,
+            fields: [
+              'id',
+              'name',
+              'title',
+              'author',
+              'content',
+              'status',
+              'commentStatus',
+              'commentCount',
+              'updatedAt',
+              'createdAt',
+            ],
+            requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+          })
+          .lastValue()
+      : await this.basicService
+          .send<string | undefined>(OptionPattern.GetValue, {
+            optionName: OptionPresetKeys.PageOnFront,
+          })
+          .lastValue()
+          .then((id) => {
+            if (id) {
+              return this.basicService
+                .send<PageTemplateModelResp | undefined>(TemplatePattern.Get, {
+                  id: Number(id),
+                  type: TemplatePresetType.Page,
+                  fields: [
+                    'id',
+                    'name',
+                    'title',
+                    'author',
+                    'content',
+                    'status',
+                    'commentStatus',
+                    'commentCount',
+                    'updatedAt',
+                    'createdAt',
+                  ],
+                  requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+                })
+                .lastValue();
+            }
+            return undefined;
+          });
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(result.id, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
+      metas = await this.basicService
+        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
+          templateId: result.id,
+          metaKeys,
+          fields: ['id', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
     }
 
     if (result === undefined) {
@@ -222,16 +238,35 @@ export class PageTemplateController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.templateDataSource.get(
-      id,
-      TemplatePresetType.Page,
-      ['id', 'name', 'title', 'author', 'content', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = await this.basicService
+      .send<PageTemplateModelResp | undefined>(TemplatePattern.Get, {
+        id,
+        type: TemplatePresetType.Page,
+        fields: [
+          'id',
+          'name',
+          'title',
+          'author',
+          'content',
+          'status',
+          'commentStatus',
+          'commentCount',
+          'updatedAt',
+          'createdAt',
+        ],
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(id, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
+      metas = await this.basicService
+        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
+          templateId: result.id,
+          metaKeys,
+          fields: ['id', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
     }
 
     if (result === undefined) {
@@ -257,27 +292,29 @@ export class PageTemplateController extends BaseController {
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedPageTemplateQueryDto, @User() requestUser: RequestUser) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.templateDataSource.getPaged(
-      {
-        ...restQuery,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
-      },
-      TemplatePresetType.Page,
-      ['id', 'name', 'title', 'author', 'status', 'createdAt'],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = await this.basicService
+      .send<PagedPageTemplateResp>(TemplatePattern.GetPaged, {
+        query: {
+          ...restQuery,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Page,
+        fields: ['id', 'name', 'title', 'author', 'status', 'createdAt'],
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
 
     return this.success({
       data: result,
@@ -296,7 +333,12 @@ export class PageTemplateController extends BaseController {
   })
   async create(@Body() input: NewPageTemplateDto, @User() requestUser: RequestUser) {
     const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(input, TemplatePresetType.Page, Number(requestUser.sub));
+      await this.basicService
+        .send<PageTemplateModelResp>(TemplatePattern.CreatePage, {
+          ...input,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
 
     return this.success({
       data: {
@@ -330,7 +372,13 @@ export class PageTemplateController extends BaseController {
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.templateDataSource.update(id, input, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(TemplatePattern.Update, {
+          ...input,
+          id,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);

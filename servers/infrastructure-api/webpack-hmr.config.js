@@ -22,7 +22,7 @@ module.exports = function (options) {
       new RunScriptWebpackPlugin({
         name: options.output.filename,
         autoRestart: true,
-        nodeArgs: ['--inspect=0.0.0.0:9229'],
+        nodeArgs: ['--inspect=0.0.0.0:9228'],
       }),
     ],
   };

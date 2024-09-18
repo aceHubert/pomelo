@@ -29,10 +29,12 @@ export interface AccountProviderOptions {
   adapter: () => {
     /**
      * get account
-     * @param idOrUserName account id or username
+     * @param options account id or username
+     * @param options.id account id
+     * @param options.username account username
      * @returns account claims (snakecase keys)
      */
-    getAccount(idOrUserName: number | string): CanBePromise<AccountClaims | undefined>;
+    getAccount(options: XOR<{ id: number }, { username: string }>): CanBePromise<AccountClaims | undefined>;
     /**
      * get extra claims(claims to be issued in userinfo and id_token)
      * @param id account id
@@ -56,14 +58,9 @@ export interface AccountProviderOptions {
      * @param oldPwd old password
      * @param newPwd new password
      */
-    updatePassword(id: number, oldPwd: string, newPwd: string): CanBePromise<void>;
-    /**
-     * update password by username
-     * @param username username (account identifier, such as login name, email, phone number, etc.)
-     * @param oldPwd old password
-     * @param newPwd
-     */
-    updatePasswordByUsername(username: string, oldPwd: string, newPwd: string): CanBePromise<void>;
+    updatePassword(
+      options: XOR<{ id: number }, { username: string }> & { oldPwd: string; newPwd: string },
+    ): CanBePromise<void>;
     /**
      * reset password
      * @param id account id

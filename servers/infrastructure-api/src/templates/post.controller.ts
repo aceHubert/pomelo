@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import {
+  Inject,
   Controller,
   Scope,
   Query,
@@ -14,6 +15,7 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import {
   createResponseSuccessType,
   ParseQueryPipe,
@@ -21,18 +23,16 @@ import {
   ApiAuthCreate,
   User,
   RequestUser,
-} from '@ace-pomelo/shared-server';
-import {
-  TemplateDataSource,
-  PagedTemplateArgs,
-  TemplateOptionArgs,
   TemplatePresetType,
   TermPresetTaxonomy,
-} from '@ace-pomelo/infrastructure-datasource';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+  INFRASTRUCTURE_SERVICE,
+  TemplatePattern,
+} from '@ace-pomelo/shared/server';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { PostTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
+import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { PostTemplateOptionQueryDto, PagedPostTemplateQueryDto } from './dto/template-query.dto';
 import { NewPostTemplateDto } from './dto/new-template.dto';
 import { UpdatePostTemplateDto } from './dto/update-template.dto';
@@ -50,7 +50,7 @@ import {
 @Authorized()
 @Controller({ path: 'api/template/posts', scope: Scope.REQUEST })
 export class PostTemplateController extends BaseController {
-  constructor(private readonly templateDataSource: TemplateDataSource) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
     super();
   }
 
@@ -65,34 +65,39 @@ export class PostTemplateController extends BaseController {
   })
   async getOptions(@Query(ParseQueryPipe) query: PostTemplateOptionQueryDto) {
     const { categoryId, categoryName, tagId, tagName, ...restQuery } = query;
-    const result = await this.templateDataSource.getOptions(
-      {
-        ...restQuery,
-        taxonomies: [
-          categoryId !== void 0
-            ? { type: TermPresetTaxonomy.Category, id: categoryId }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-          tagId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Tag,
-                id: tagId,
-              }
-            : tagName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Tag,
-                name: tagName,
-              }
-            : false,
-        ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
-      },
-      TemplatePresetType.Post,
-      ['id', 'name', 'title'],
-    );
+    const result = await this.basicService
+      .send<PostTemplateOptionResp[]>(TemplatePattern.GetOptions, {
+        query: {
+          ...restQuery,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+            tagId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Tag,
+                  id: tagId,
+                }
+              : tagName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Tag,
+                  name: tagName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Post,
+        fields: ['id', 'name', 'title'],
+      })
+      .lastValue();
     return this.success({
       data: result,
     });
@@ -121,28 +126,36 @@ export class PostTemplateController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.templateDataSource.getByName(
-      name,
-      TemplatePresetType.Post,
-      [
-        'id',
-        'name',
-        'title',
-        'author',
-        'content',
-        'excerpt',
-        'status',
-        'commentStatus',
-        'commentCount',
-        'updatedAt',
-        'createdAt',
-      ],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = await this.basicService
+      .send<PostTemplateModelResp | undefined>(TemplatePattern.GetByName, {
+        name,
+        type: TemplatePresetType.Post,
+        fields: [
+          'id',
+          'name',
+          'title',
+          'author',
+          'content',
+          'excerpt',
+          'status',
+          'commentStatus',
+          'commentCount',
+          'updatedAt',
+          'createdAt',
+        ],
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(result.id, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
+      metas = await this.basicService
+        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
+          templateId: result.id,
+          metaKeys,
+          fields: ['id', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
     }
 
     if (result === undefined) {
@@ -180,33 +193,36 @@ export class PostTemplateController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.templateDataSource.get(
-      id,
-      TemplatePresetType.Post,
-      [
-        'id',
-        'name',
-        'title',
-        'author',
-        'content',
-        'excerpt',
-        'status',
-        'commentStatus',
-        'commentCount',
-        'updatedAt',
-        'createdAt',
-      ],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = await this.basicService
+      .send<PostTemplateModelResp | undefined>(TemplatePattern.Get, {
+        id,
+        type: TemplatePresetType.Post,
+        fields: [
+          'id',
+          'name',
+          'title',
+          'author',
+          'content',
+          'excerpt',
+          'status',
+          'commentStatus',
+          'commentCount',
+          'updatedAt',
+          'createdAt',
+        ],
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(id, metaKeys ?? 'ALL', [
-        'id',
-        'templateId',
-        'metaKey',
-        'metaValue',
-      ]);
+      metas = await this.basicService
+        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
+          templateId: result.id,
+          metaKeys,
+          fields: ['id', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
     }
 
     if (result === undefined) {
@@ -230,7 +246,7 @@ export class PostTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: PagedPostTemplateResp }, 'PagedPostTemplateSuccessResp'),
   })
   async getPublishedPaged(@Query(ParseQueryPipe) query: Omit<PagedPostTemplateQueryDto, 'status'>) {
-    this.getPaged(query);
+    return this.getPaged(query);
   }
 
   /**
@@ -244,35 +260,51 @@ export class PostTemplateController extends BaseController {
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedPostTemplateQueryDto, @User() requestUser?: RequestUser) {
     const { categoryId, categoryName, tagId, tagName, ...restQuery } = query;
-    const result = await this.templateDataSource.getPaged(
-      {
-        ...restQuery,
-        taxonomies: [
-          categoryId !== void 0
-            ? { type: TermPresetTaxonomy.Category, id: categoryId }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-          tagId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Tag,
-                id: tagId,
-              }
-            : tagName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Tag,
-                name: tagName,
-              }
-            : false,
-        ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
-      },
-      TemplatePresetType.Post,
-      ['id', 'name', 'title', 'author', 'excerpt', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = await this.basicService
+      .send<PagedPostTemplateResp>(TemplatePattern.GetPaged, {
+        query: {
+          ...restQuery,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+            tagId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Tag,
+                  id: tagId,
+                }
+              : tagName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Tag,
+                  name: tagName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Post,
+        fields: [
+          'id',
+          'name',
+          'title',
+          'author',
+          'excerpt',
+          'status',
+          'commentStatus',
+          'commentCount',
+          'updatedAt',
+          'createdAt',
+        ],
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
 
     return this.success({
       data: result,
@@ -291,11 +323,13 @@ export class PostTemplateController extends BaseController {
   })
   async create(@Body() input: NewPostTemplateDto, @User() requestUser: RequestUser) {
     const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.templateDataSource.create(
-        { ...input, excerpt: input.excerpt || '' },
-        TemplatePresetType.Post,
-        Number(requestUser.sub),
-      );
+      await this.basicService
+        .send<PostTemplateModelResp>(TemplatePattern.CreatePost, {
+          ...input,
+          excerpt: input.excerpt || '',
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
 
     return this.success({
       data: {
@@ -330,7 +364,13 @@ export class PostTemplateController extends BaseController {
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.templateDataSource.update(id, model, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(TemplatePattern.Update, {
+          ...model,
+          id,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);

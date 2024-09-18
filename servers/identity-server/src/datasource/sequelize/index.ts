@@ -1,4 +1,4 @@
-import merge from 'lodash.merge';
+import { merge } from 'lodash';
 import { Logger } from '@nestjs/common';
 import { Sequelize, Options, SyncOptions, ModelStatic, CreationAttributes } from 'sequelize';
 import * as DataSources from './datasources';

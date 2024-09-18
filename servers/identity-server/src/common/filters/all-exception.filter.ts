@@ -4,7 +4,7 @@ import { BaseError as SequelizeBaseError } from 'sequelize';
 import { isHttpError } from 'http-errors';
 import { Request, Response } from 'express';
 import { isJsonRequest } from '../utils/is-json-request.util';
-import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.utils';
+import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.util';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {

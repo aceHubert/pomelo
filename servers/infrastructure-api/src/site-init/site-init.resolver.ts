@@ -1,23 +1,26 @@
 import { HttpAdapterHost } from '@nestjs/core';
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Context, Query, Mutation, Args } from '@nestjs/graphql';
+import { INFRASTRUCTURE_SERVICE, SiteInitPattern } from '@ace-pomelo/shared/server';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
-import { IgnoreDbCheckInterceptor } from '@/common/interceptors/db-check.interceptor';
-import { SiteInitService } from './site-init.service';
 import { SiteInitArgsInput } from './dto/init-args.input';
 
-@IgnoreDbCheckInterceptor()
 @Resolver()
 export class SiteInitResolver extends BaseResolver {
-  constructor(private readonly httpAdapterHost: HttpAdapterHost, private readonly dbInitService: SiteInitService) {
+  constructor(
+    private readonly httpAdapterHost: HttpAdapterHost,
+    @Inject(INFRASTRUCTURE_SERVICE) private readonly basicService: ClientProxy,
+  ) {
     super();
   }
 
-  @Query(() => Boolean, { description: 'It is required to initial database before running site.' })
-  checkSiteInitialRequired() {
-    return this.dbInitService.initialRequired();
+  @Query(() => Boolean, { description: 'It is required to initial site before running.' })
+  checkSiteInitialRequired(): Promise<boolean> {
+    return this.basicService.send<boolean>(SiteInitPattern.IsRequired, {}).lastValue();
   }
 
-  @Mutation(() => Boolean, { description: 'Sync database and initialize datas if database has not been initialized' })
+  @Mutation(() => Boolean, { description: 'Start to initialize site datas.' })
   async startSiteInitial(
     @Args('model', { type: () => SiteInitArgsInput }) initArgs: SiteInitArgsInput,
     @Context('req') request: any,
@@ -33,10 +36,12 @@ export class SiteInitResolver extends BaseResolver {
     }
 
     try {
-      await this.dbInitService.initialize({
-        ...initArgs,
-        siteUrl,
-      });
+      await this.basicService
+        .send<void>(SiteInitPattern.Start, {
+          ...initArgs,
+          siteUrl,
+        })
+        .lastValue();
 
       return true;
     } catch (err) {

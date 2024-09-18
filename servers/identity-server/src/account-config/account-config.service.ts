@@ -1,10 +1,15 @@
 import { snakeCase } from 'lodash';
-import { lastValueFrom } from 'rxjs';
 import { CountryCode } from 'libphonenumber-js';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { md5, UserMetaPresetKeys, OptionPresetKeys } from '@ace-pomelo/shared/server';
-import { INFRASTRUCTURE_SERVICE } from '@/constants';
+import {
+  md5,
+  INFRASTRUCTURE_SERVICE,
+  UserPattern,
+  UserMetaPresetKeys,
+  OptionPresetKeys,
+  OptionPattern,
+} from '@ace-pomelo/shared/server';
 
 import {
   AccountProviderOptionsFactory,
@@ -18,9 +23,9 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
   createAccountProviderOptions() {
     return {
       adapter: () => ({
-        getAccount: async (idOrUserName: number | string) => {
-          const user = await lastValueFrom(
-            this.basicService.send<
+        getAccount: async (options: XOR<{ id: number }, { username: string }>) => {
+          const user = await this.basicService
+            .send<
               | {
                   id: number;
                   loginName: string;
@@ -32,14 +37,13 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
                   updatedAt: string;
                 }
               | undefined
-            >(
-              { cmd: 'user.getRequest' },
-              {
-                fields: ['id', 'loginName', 'niceName', 'displayName', 'email', 'mobile', 'url', 'updatedAt'],
-                requestUserIdOrUsername: idOrUserName,
-              },
-            ),
-          );
+            >(UserPattern.Get, {
+              fields: ['id', 'loginName', 'niceName', 'displayName', 'email', 'mobile', 'url', 'updatedAt'],
+              requestUserId: options.id,
+              requestUsername: options.username,
+            })
+            .lastValue();
+
           if (user) {
             const claims: AccountClaims = {
               id: user.id,
@@ -65,16 +69,13 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
           return;
         },
         getClaims: async (id: number) => {
-          const metas = await lastValueFrom(
-            this.basicService.send<Array<{ id: string; metaKey: string; metaValue: string }>>(
-              { cmd: 'user.metas.get' },
-              {
-                userId: id,
-                metaKeys: Object.values(UserMetaPresetKeys),
-                fields: ['metaKey', 'metaValue'],
-              },
-            ),
-          );
+          const metas = await this.basicService
+            .send<Array<{ id: string; metaKey: string; metaValue: string }>>(UserPattern.GetMetas, {
+              userId: id,
+              metaKeys: Object.values(UserMetaPresetKeys),
+              fields: ['metaKey', 'metaValue'],
+            })
+            .lastValue();
 
           return metas.reduce((acc, meta) => {
             switch (meta.metaKey) {
@@ -96,62 +97,43 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
           }, {} as Omit<AccountClaims, 'id'>);
         },
         getPhoneRegionCode: async () => {
-          return lastValueFrom(
-            this.basicService.send<CountryCode | undefined>(
-              { cmd: 'option.getValue' },
-              { optionName: OptionPresetKeys.DefaultPhoneNumberRegion },
-            ),
-          );
+          return this.basicService
+            .send<CountryCode | undefined>(OptionPattern.GetValue, {
+              optionName: OptionPresetKeys.DefaultPhoneNumberRegion,
+            })
+            .lastValue();
         },
         verifyAccount: async (loginName: string, password: string) => {
-          const user = await lastValueFrom(
-            this.basicService.send<{ id: number }>(
-              { cmd: 'user.verify' },
-              {
-                username: loginName,
-                password,
-              },
-            ),
-          );
+          const user = await this.basicService
+            .send<{ id: number } | false>(UserPattern.Verify, {
+              username: loginName,
+              password,
+            })
+            .lastValue();
           if (user) {
             return String(user.id);
           }
           return false;
         },
-        updatePassword: async (id: number, oldPwd: string, newPwd: string) => {
-          return lastValueFrom(
-            this.basicService.send<void>(
-              { cmd: 'user.update.password' },
-              {
-                id,
-                oldPwd: md5(oldPwd),
-                newPwd: md5(newPwd),
-              },
-            ),
-          );
-        },
-        updatePasswordByUsername: async (username: string, oldPwd: string, newPwd: string) => {
-          return lastValueFrom(
-            this.basicService.send<void>(
-              { cmd: 'user.update.passwordByUsername' },
-              {
-                username,
-                oldPwd: md5(oldPwd),
-                newPwd: md5(newPwd),
-              },
-            ),
-          );
+        updatePassword: async (
+          options: XOR<{ id: number }, { username: string }> & { oldPwd: string; newPwd: string },
+        ) => {
+          return this.basicService
+            .send<void>(UserPattern.UpdatePassword, {
+              id: options.id,
+              username: options.username,
+              oldPwd: md5(options.oldPwd),
+              newPwd: md5(options.newPwd),
+            })
+            .lastValue();
         },
         resetPassword: async (id: number, newPwd: string) => {
-          return lastValueFrom(
-            this.basicService.send<void>(
-              { cmd: 'user.reset.password' },
-              {
-                id,
-                password: md5(newPwd),
-              },
-            ),
-          );
+          return this.basicService
+            .send<void>(UserPattern.ResetPassword, {
+              id,
+              password: md5(newPwd),
+            })
+            .lastValue();
         },
       }),
     };

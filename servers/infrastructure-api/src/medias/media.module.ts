@@ -1,14 +1,15 @@
 import { Module, Provider, DynamicModule } from '@nestjs/common';
-import {
-  MediaOptions,
-  FixedMediaOptions,
-  FileAsyncOptions,
-  MediaOptionsFactory,
-} from './interfaces/media-options.interface';
+import { MediaOptions, FileAsyncOptions, MediaOptionsFactory } from './interfaces/media-options.interface';
 import { MediaController } from './media.controller';
 import { MediaResolver } from './media.resolver';
 import { MediaService } from './media.service';
 import { MEDIA_OPTIONS } from './constants';
+
+const DefaultOptions: MediaOptions = {
+  dest: process.cwd(),
+  groupBy: 'month',
+  staticPrefix: 'uploads',
+};
 
 @Module({})
 export class MediaModule {
@@ -20,7 +21,7 @@ export class MediaModule {
       providers: [
         {
           provide: MEDIA_OPTIONS,
-          useValue: this.fixOptions(options),
+          useValue: { ...DefaultOptions, options },
         },
         MediaResolver,
         MediaService,
@@ -59,7 +60,7 @@ export class MediaModule {
         provide: MEDIA_OPTIONS,
         useFactory: async (...args: any[]) => {
           const config = await options.useFactory!(...args);
-          return this.fixOptions(config);
+          return { ...DefaultOptions, ...config };
         },
         inject: options.inject || [],
       };
@@ -68,18 +69,9 @@ export class MediaModule {
       provide: MEDIA_OPTIONS,
       useFactory: async (optionsFactory: MediaOptionsFactory) => {
         const config = await optionsFactory.createFileOptions();
-        return this.fixOptions(config);
+        return { ...DefaultOptions, ...config };
       },
       inject: [options.useExisting! || options.useClass!],
-    };
-  }
-
-  private static fixOptions(options: MediaOptions): FixedMediaOptions {
-    const { dest = process.cwd(), groupBy = 'month', staticPrefix = 'uploads' } = options;
-    return {
-      dest,
-      groupBy,
-      staticPrefix,
     };
   }
 }

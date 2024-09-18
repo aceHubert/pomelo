@@ -1,10 +1,11 @@
 import { ObjectType, Field, ID, PickType } from '@nestjs/graphql';
-import { UserModel, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { DateTimeISOResolver } from 'graphql-scalars';
+import { UserStatus } from '@ace-pomelo/shared/server';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
 @ObjectType({ description: 'User model' })
-export class User implements UserModel {
+export class User {
   /**
    * User id
    */
@@ -50,11 +51,13 @@ export class User implements UserModel {
   /**
    * Latest update time
    */
+  @Field((type) => DateTimeISOResolver)
   updatedAt!: Date;
 
   /**
    * Creation time
    */
+  @Field((type) => DateTimeISOResolver)
   createdAt!: Date;
 }
 

@@ -19,7 +19,7 @@ export const HomeDefault = defineComponent({
 
     const $postRes = createResource((args: { offset?: number; limit?: number } = {}) => {
       return postApi
-        .getPublishedPaged({
+        .getPublished({
           variables: {
             ...args,
             metaKeys: ['feature-image'],

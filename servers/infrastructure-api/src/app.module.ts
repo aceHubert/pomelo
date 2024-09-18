@@ -1,11 +1,12 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import multer from 'multer';
-import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER, ModuleRef } from '@nestjs/core';
+import { APP_PIPE, APP_FILTER, ModuleRef } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ClientsModule } from '@nestjs/microservices';
 import { MulterModule } from '@nestjs/platform-express';
 import { GraphQLModule } from '@nestjs/graphql';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
@@ -15,7 +16,6 @@ import { PubSub } from 'graphql-subscriptions';
 import {
   I18nModule,
   I18nMiddleware,
-  I18nContext,
   I18nValidationPipe,
   QueryResolver,
   HeaderResolver,
@@ -23,12 +23,11 @@ import {
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
-import { normalizeRoutePath } from '@ace-pomelo/shared-server';
-import { OidcModule, OidcService } from '@ace-pomelo/nestjs-oidc';
+import { normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import { AuthorizationModule, AuthorizationService } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
-import { InfrastructureModule } from '@ace-pomelo/infrastructure-datasource';
-import { configuration } from './common/utils/configuration.utils';
-import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
+import { configuration } from './common/utils/configuration.util';
+import { ErrorHandlerClientTCP } from './common/utils/error-handler-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
 import { MessageModule } from './messages/message.module';
@@ -39,11 +38,10 @@ import { TemplateModule } from './templates/template.module';
 import { UserModule } from './users/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { envFilePaths } from './db.sync';
 
 // extends
-// eslint-disable-next-line import/order
-import '@/common/extends/i18n.extend';
+import './common/extends/i18n.extend';
+import './common/extends/observable.extend';
 
 // format introspection query same way as apollo tooling do
 // const IntrospectionQuery = print(parse(getIntrospectionQuery()));
@@ -54,7 +52,11 @@ const logger = new Logger('AppModule', { timestamp: true });
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: envFilePaths,
+      envFilePath: process.env.ENV_FILE
+        ? [process.env.ENV_FILE]
+        : process.env.NODE_ENV === 'production'
+        ? ['.env.production', '.env']
+        : ['.env.development.local', '.env.development'],
       load: [configuration()],
     }),
     ServeStaticModule.forRootAsync({
@@ -69,7 +71,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const loaderPath = path.join(config.getOrThrow<string>('contentPath'), '/languages/server');
+        const loaderPath = path.join(config.getOrThrow<string>('contentPath'), '/languages');
         if (!fs.existsSync(loaderPath)) {
           fs.mkdirSync(loaderPath, { recursive: true });
         }
@@ -99,41 +101,31 @@ const logger = new Logger('AppModule', { timestamp: true });
       ],
       inject: [ConfigService],
     }),
-    InfrastructureModule.registerAsync({
+    ClientsModule.registerAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService) => ({
-        isGlobal: true,
-        connection: config.getOrThrow('database.connection'),
-        tablePrefix: config.get('database.tablePrefix', ''),
-        translate: (key, fallback, args) => {
-          const i18n = I18nContext.current();
-          return (
-            i18n?.translate(key, {
-              defaultValue: fallback,
-              args,
-            }) ?? fallback
-          );
+      clients: [
+        {
+          name: INFRASTRUCTURE_SERVICE,
+          useFactory: (config: ConfigService) => ({
+            customClass: ErrorHandlerClientTCP,
+            options: {
+              host: config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
+              port: config.getOrThrow('INFRASTRUCTURE_SERVICE_PORT'),
+            },
+          }),
+          inject: [ConfigService],
         },
-      }),
-      inject: [ConfigService],
+      ],
     }),
-    OidcModule.forRootAsync({
+    AuthorizationModule.forRootAsync({
       isGlobal: true,
-      disableController: true,
       useFactory: (config: ConfigService) => ({
-        origin: `${config.getOrThrow('ORIGIN')}${normalizeRoutePath(
-          config.get<string>('webServer.globalPrefixUri', ''),
-        )}`,
         issuer: config.getOrThrow('OIDC_ISSUER'),
         clientMetadata: {
           client_id: config.getOrThrow('OIDC_CLIENT_ID'),
           client_secret: config.get('OIDC_CLIENT_SECRET'),
         },
-        authParams: {
-          scope: config.get('OIDC_SCOPE'),
-          resource: config.get('OIDC_RESOURCE'),
-          nonce: 'true',
-        },
+        useJWKS: true,
         httpOptions: {
           timeout: 20000,
         },
@@ -141,11 +133,12 @@ const logger = new Logger('AppModule', { timestamp: true });
       inject: [ConfigService],
     }),
     RamAuthorizationModule.forRoot({
+      isGlobal: true,
       serviceName: 'basic',
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      useFactory: (config: ConfigService, oidcService: OidcService) => {
+      useFactory: (config: ConfigService, authService: AuthorizationService) => {
         const isDebug = config.get<boolean>('graphql.debug', false);
         const graphqlPath = config.get<string>('graphql.path', '/graphql');
         // https://github.com/nestjs/graphql/issues/2477
@@ -170,10 +163,12 @@ const logger = new Logger('AppModule', { timestamp: true });
                   { user?: any; connectionParams?: ConnectionParams }
                 >;
                 logger.debug('graphql-ws', 'connect', connectionParams);
-                let user: any;
-                if (connectionParams?.token) {
+                let user: any, userStr: string;
+                if ((userStr = connectionParams?.['x-userinfo'])) {
+                  user = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
+                } else if (connectionParams?.token) {
                   try {
-                    user = await oidcService.verifyToken(
+                    user = await authService.verifyToken(
                       connectionParams.token,
                       connectionParams.tenantId,
                       connectionParams.channelType,
@@ -191,10 +186,12 @@ const logger = new Logger('AppModule', { timestamp: true });
               path: graphqlSubscriptionPath,
               onConnect: async (connectionParams: ConnectionParams) => {
                 logger.debug('subscriptions-transport-ws', 'connect', connectionParams);
-                let user: any;
-                if (connectionParams?.token) {
+                let user: any, userStr: string;
+                if ((userStr = connectionParams?.['x-userinfo'])) {
+                  user = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
+                } else if (connectionParams?.token) {
                   try {
-                    user = await oidcService.verifyToken(
+                    user = await authService.verifyToken(
                       connectionParams.token,
                       connectionParams.tenantId,
                       connectionParams.channelType,
@@ -217,9 +214,9 @@ const logger = new Logger('AppModule', { timestamp: true });
           },
         };
       },
-      inject: [ConfigService, OidcService],
+      inject: [ConfigService, AuthorizationService],
     }),
-    SiteInitModule, // init database datas
+    SiteInitModule,
     MessageModule.forRoot({
       isGlobal: true,
       // TODO: PubSub 是使用内存管理，生产环境需要更换
@@ -294,10 +291,6 @@ const logger = new Logger('AppModule', { timestamp: true });
         });
       },
       inject: [ConfigService],
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: DbCheckInterceptor,
     },
     {
       provide: APP_FILTER,

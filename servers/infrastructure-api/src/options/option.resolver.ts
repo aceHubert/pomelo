@@ -1,10 +1,11 @@
+import { Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { JSONObjectResolver, VoidResolver } from 'graphql-scalars';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
-import { OptionDataSource } from '@ace-pomelo/infrastructure-datasource';
-import { User, Fields, RequestUser } from '@ace-pomelo/shared-server';
+import { User, Fields, RequestUser, INFRASTRUCTURE_SERVICE, OptionPattern } from '@ace-pomelo/shared/server';
 import { OptionAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { NewOptionInput } from './dto/new-option.input';
@@ -15,32 +16,52 @@ import { Option } from './models/option.model';
 @Authorized()
 @Resolver(() => Option)
 export class OptionResolver extends BaseResolver {
-  constructor(private readonly optionDataSource: OptionDataSource) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) private readonly basicService: ClientProxy) {
     super();
   }
 
   @Anonymous()
   @Query((returns) => Option, { nullable: true, description: 'Get option.' })
   option(@Args('id', { type: () => ID }) id: number, @Fields() fields: ResolveTree): Promise<Option | undefined> {
-    return this.optionDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.Option));
+    return this.basicService
+      .send<Option | undefined>(OptionPattern.Get, {
+        id,
+        fields: this.getFieldNames(fields.fieldsByTypeName.Option),
+      })
+      .lastValue();
   }
 
   @Anonymous()
   @Query((returns) => String, { nullable: true, description: 'Get option value by name.' })
   optionValue(@Args('name') name: string): Promise<string | undefined> {
-    return this.optionDataSource.getValue(name);
+    return this.basicService
+      .send<string | undefined>(OptionPattern.GetValue, {
+        optionName: name,
+      })
+      .lastValue();
   }
 
   @Anonymous()
   @Query((returns) => JSONObjectResolver, { description: 'Get autoload options(key/value), cache by memory.' })
-  autoloadOptions(): Promise<Dictionary<string>> {
-    return this.optionDataSource.getAutoloads();
+  autoloadOptions(): Promise<Record<string, string>> {
+    return this.basicService.send<Record<string, string>>(OptionPattern.GetAutoloads, {}).lastValue();
   }
 
   @RamAuthorized(OptionAction.List)
   @Query((returns) => [Option], { description: 'Get options.' })
   options(@Args() args: OptionArgs, @Fields() fields: ResolveTree): Promise<Option[]> {
-    return this.optionDataSource.getList(args, this.getFieldNames(fields.fieldsByTypeName.Option));
+    return this.basicService
+      .send<Option[]>(OptionPattern.GetList, {
+        query: args,
+        fields: this.getFieldNames(fields.fieldsByTypeName.Option),
+      })
+      .lastValue();
+  }
+
+  @RamAuthorized(OptionAction.Update)
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Clear option cache from momery.' })
+  clearOptionCache(): Promise<void> {
+    return this.basicService.send<void>(OptionPattern.Reset, {}).lastValue();
   }
 
   @RamAuthorized(OptionAction.Create)
@@ -49,31 +70,41 @@ export class OptionResolver extends BaseResolver {
     @Args('model', { type: () => NewOptionInput }) model: NewOptionInput,
     @User() requestUser: RequestUser,
   ): Promise<Option> {
-    return this.optionDataSource.create(model, Number(requestUser.sub));
-  }
-
-  @RamAuthorized(OptionAction.Update)
-  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Clear option cache from momery.' })
-  clearOptionCache(): void {
-    this.optionDataSource.reset();
+    return this.basicService
+      .send<Option>(OptionPattern.Create, {
+        ...model,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(OptionAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update option.' })
-  async updateOption(
+  updateOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,
     @Args('model') model: UpdateOptionInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.optionDataSource.update(id, model, Number(requestUser.sub));
+    return this.basicService
+      .send<void>(OptionPattern.Update, {
+        ...model,
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 
   @RamAuthorized(OptionAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete option permanently.' })
-  async deleteOption(
+  deleteOption(
     @Args('id', { type: () => ID, description: 'Option id' }) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.optionDataSource.delete(id, Number(requestUser.sub));
+    return this.basicService
+      .send<void>(OptionPattern.Delete, {
+        id,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
   }
 }

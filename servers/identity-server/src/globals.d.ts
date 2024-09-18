@@ -20,6 +20,8 @@ declare global {
    * Type helper for making certain fields of an object optional.
    */
   // export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+  export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+  export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 }
 
 declare module '@types/oidc-provider' {

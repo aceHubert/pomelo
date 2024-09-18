@@ -113,17 +113,17 @@ export const ensureContentPath = (contentPath?: string, basePath = process.cwd()
       fs.mkdirSync(contentPath, { recursive: true });
     }
   }
-  logger.log(`Content path: ${contentPath}`);
+  logger.debug(`Content path: ${contentPath}`);
   return contentPath;
 };
 
 /**
- * @nextjs/config load
+ * @nexsjs/config load
  */
 export const configuration =
   (basePath = process.cwd()): ConfigFactory<ConfigObject> =>
   () => {
-    logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'})`);
+    logger.debug(`"@nestjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'})`);
 
     const debugMode =
       process.env.DEBUG !== void 0 ? process.env.DEBUG === 'true' : process.env.NODE_ENV !== 'production';

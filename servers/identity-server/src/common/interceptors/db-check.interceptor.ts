@@ -44,7 +44,7 @@ export class DbCheckInterceptor implements NestInterceptor {
           {
             // 提示要初始化数据库， 并设置 response.siteInitRequired = true
             message:
-              i18n?.tv('site-init.required', 'Site datas initialization is required!') ??
+              i18n?.tv('common.site_init.required', 'Site datas initialization is required!') ??
               'Site datas initialization is required!',
             siteInitRequired: true,
           },

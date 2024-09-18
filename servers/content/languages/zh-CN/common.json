@@ -1,0 +1,47 @@
+{
+  "validation": {
+    "IS_DEFINED": "{property}未定义",
+    "IS_NOT_EMPTY": "{property}不能为空",
+    "IS_STRING": "{property}必须是一个字符串",
+    "IS_OBJECT": "{property}必须是一个对象",
+    "IS_ARRAY": "{property}必须是一个数组",
+    "IS_BOOLEAN": "{property}必须是一个布尔值",
+    "IS_NUMBER": "{property}必须是一个数字",
+    "IS_INT": "{property}必须是一个整数",
+    "IS_POSITIVE": "{property}必须是一个正数",
+    "IS_NEGATIVE": "{property}必须是一个负数",
+    "IS_EMAIL": "{property}必须是一个邮箱地址",
+    "IS_PHONE_NUMBER": "{property}必须是一个电话号码",
+    "IS_URL": "{property}必须是一个URL",
+    "IS_LOCALE": "{property}必须是一个有效的区域设置",
+    "IS_UUID": "{property}必须是一个UUID",
+    "IS_ENUM": "{property}值: \"{value}\"不在枚举值范围内",
+    "MIN": "{property}值: \"{value}\"必须大于等于{constraints.0}",
+    "MIN_LENGTH": "{property}值长度必须大于等于{constraints.0}",
+    "MAX": "{property}值: \"{value}\"必须小于待于{constraints.0}",
+    "MAX_LENGTH": "{property}值长度必须小于等于{constraints.0}"
+  },
+  "site-init": {
+    "required": "请初始化站点数据！",
+    "completed": "站点数据已经初始化！",
+    "success": "初始化站点数据成功！",
+    "faild": "在初始化站点数据时发生错误！"
+  },
+  "error": {
+    "unauthorized": "拒绝访问，您没有访问权限！",
+    "forbidden_field": "拒绝访问，您没有访问字段\"{field}\"的值！",
+    "forbidden_capability": "拒绝访问，您没有\"{requiredCapability}\"权限！",
+    "forbidden_role": "拒绝访问，需要\"{requiredRole}\"角色权限！",
+    "forbidden": "拒绝访问，您没有访问权限！",
+    "invalid_token": "无效的token！",
+    "file": {
+      "limit_part_count": "超出参数数量限制！",
+      "limit_file_size": "文件超出上传大小限制！",
+      "limit_file_count": "文件超出上传数量限制！",
+      "limit_field_key": "上传字段key超长！",
+      "limit_field_value": "上传字段值超长！",
+      "limit_field_count": "超出上传个数限制！",
+      "limit_unexpected_field": "未知上传字段！"
+    }
+  }
+}

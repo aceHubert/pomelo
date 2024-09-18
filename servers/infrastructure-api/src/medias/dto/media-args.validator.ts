@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsInt, IsArray, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsInt, IsArray, Min, Max, ArrayNotEmpty } from 'class-validator';
 
 export abstract class PagedMediaArgsValidator {
   @IsOptional()
@@ -7,10 +7,14 @@ export abstract class PagedMediaArgsValidator {
 
   @IsOptional()
   @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
   abstract extensions?: string[];
 
   @IsOptional()
   @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
   abstract mimeTypes?: string[];
 
   @Type()

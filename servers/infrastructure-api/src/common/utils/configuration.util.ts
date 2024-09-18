@@ -73,21 +73,6 @@ export interface ConfigObject {
     subscription_path?: string;
   };
   /**
-   * database configs
-   */
-  database?: {
-    /**
-     * database connection,
-     * checkout on https://sequelize.org/docs/v6/getting-started/
-     */
-    connection: string | Record<string, any>;
-    /**
-     * table prefix
-     * @example t_
-     */
-    tablePrefix?: string;
-  };
-  /**
    * upload configs
    */
   upload?: {
@@ -130,17 +115,17 @@ export const ensureContentPath = (contentPath?: string, basePath = process.cwd()
       fs.mkdirSync(contentPath, { recursive: true });
     }
   }
-  logger.log(`Content path: ${contentPath}`);
+  logger.debug(`Content path: ${contentPath}`);
   return contentPath;
 };
 
 /**
- * @nextjs/config load
+ * @nestjs/config load
  */
 export const configuration =
   (basePath = process.cwd()): ConfigFactory<ConfigObject> =>
   () => {
-    logger.log(`"@nextjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'})`);
+    logger.debug(`"@nestjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'})`);
 
     const debugMode =
       process.env.DEBUG !== void 0 ? process.env.DEBUG === 'true' : process.env.NODE_ENV !== 'production';
@@ -169,23 +154,6 @@ export const configuration =
         debug: process.env.GRAPHQL_DEBUG !== void 0 ? process.env.GRAPHQL_DEBUG === 'true' : debugMode,
         path: process.env.GRAPHQL_PATH,
         subscription_path: process.env.GRAPHQL_SUBSCRIPTION_PATH,
-      },
-      database: {
-        connection: process.env.INFRASTRUCTURE_DATABASE_CONNECTION
-          ? process.env.INFRASTRUCTURE_DATABASE_CONNECTION
-          : {
-              database: process.env.INFRASTRUCTURE_DATABASE_NAME,
-              username: process.env.INFRASTRUCTURE_DATABASE_USERNAME,
-              password: process.env.INFRASTRUCTURE_DATABASE_PASSWORD,
-              dialect: process.env.INFRASTRUCTURE_DATABASE_DIALECT || 'mysql',
-              host: process.env.INFRASTRUCTURE_DATABASE_HOST || 'localhost',
-              port: process.env.INFRASTRUCTURE_DATABASE_PORT || 3306,
-              define: {
-                charset: process.env.INFRASTRUCTURE_DATABASE_CHARSET || 'utf8',
-                collate: process.env.INFRASTRUCTURE_DATABASE_COLLATE || '',
-              },
-            },
-        tablePrefix: process.env.TABLE_PREFIX,
       },
       upload: {
         dest: process.env.UPLOAD_DEST,

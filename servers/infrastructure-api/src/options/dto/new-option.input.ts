@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { OptionAutoload } from '@ace-pomelo/infrastructure-datasource';
+import { OptionAutoload } from '@ace-pomelo/shared/server';
 import { NewOptionValidator } from './new-option.validator';
 
 @InputType({ description: 'New option inpupt' })

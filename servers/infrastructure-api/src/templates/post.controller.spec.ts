@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
-import { TemplateDataSource } from '@ace-pomelo/infrastructure-datasource';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
 import { PostTemplateController } from './post.controller';
 // import { TemplateService } from './template.service';
 
@@ -10,7 +11,24 @@ describe('TemplateController', () => {
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({}), TemplateDataSource],
+      imports: [
+        ConfigModule.forRoot({}),
+        ClientsModule.registerAsync({
+          isGlobal: true,
+          clients: [
+            {
+              name: INFRASTRUCTURE_SERVICE,
+              useFactory: () => ({
+                transport: Transport.TCP,
+                options: {
+                  host: 'localhost',
+                  port: 5002,
+                },
+              }),
+            },
+          ],
+        }),
+      ],
       controllers: [PostTemplateController],
       // providers: [TemplateService],
     }).compile();

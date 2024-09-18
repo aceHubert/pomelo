@@ -1,8 +1,8 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { OptionAutoload, OptionModel } from '@ace-pomelo/infrastructure-datasource';
+import { OptionAutoload } from '@ace-pomelo/shared/server';
 
 @ObjectType({ description: 'Option model' })
-export class Option implements OptionModel {
+export class Option {
   /**
    * Option id
    */

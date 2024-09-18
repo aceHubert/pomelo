@@ -1,9 +1,8 @@
 import { Field, InputType, ID } from '@nestjs/graphql';
-import { NewMediaMetaInput as INewMediaMetaInput } from '@ace-pomelo/infrastructure-datasource';
 import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 
 @InputType({ description: 'New media meta input' })
-export class NewMediaMetaInput extends NewMetaInput implements INewMediaMetaInput {
+export class NewMediaMetaInput extends NewMetaInput {
   /**
    * Media Id
    */

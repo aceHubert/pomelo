@@ -1,6 +1,5 @@
-import { camelCase, lowerCase, upperFirst } from 'lodash';
+import { lowerCase, upperFirst } from 'lodash';
 import { Response } from 'express';
-import { ModuleRef } from '@nestjs/core';
 import {
   Query,
   Param,
@@ -24,8 +23,8 @@ import {
   ApiCreatedResponse,
   ApiNoContentResponse,
 } from '@nestjs/swagger';
-import { MetaDataSource } from '@ace-pomelo/infrastructure-datasource';
-import { createResponseSuccessType } from '@ace-pomelo/shared-server';
+import { ClientProxy } from '@nestjs/microservices';
+import { createResponseSuccessType, createMetaPattern } from '@ace-pomelo/shared/server';
 import { NewMetaDto } from './dto/new-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';
 import { BaseController } from './base.controller';
@@ -53,23 +52,22 @@ export type Options = {
 };
 
 /**
- * 创建 Meta Controller
- * DataSources 必须有 getMetas/createMeta/updateMeta/updateMetaByKey/deleteMeta 方法
+ * Create Meta Controller
+ * @param modelName model name, action/param prefix and pattern prefix(camelCase, e.g. 'template' -> '/:templateId/metas')
+ * @param metaModelRespType meta model response data type (swagger ApiOkResponse)
+ * @param newMetaDtoType new meta dto type (swagger ApiBody)
+ * @param options options
  */
-export function createMetaController<
-  MetaModelRespType,
-  NewMetaDtoType,
-  MetaDataSourceType extends MetaDataSource<MetaModelRespType, NewMetaDtoType>,
->(
+export function createMetaController<MetaModelRespType, NewMetaDtoType>(
   modelName: string,
   metaModelRespType: Type<MetaModelRespType>,
   newMetaDtoType: Type<NewMetaDtoType>,
-  metaDataSourceTypeOrToken: Type<MetaDataSourceType> | string | symbol,
   { descriptionName, authDecorator }: Options = {},
 ) {
-  const _camelCaseModelName = camelCase(modelName);
   const _upperFirstModelName = upperFirst(modelName);
   const _descriptionName = descriptionName || lowerCase(modelName);
+
+  const pattern = createMetaPattern(modelName);
 
   const AuthDecorate = (method: Method): MethodDecorator => {
     if (authDecorator) {
@@ -81,11 +79,8 @@ export function createMetaController<
   };
 
   abstract class MetaController extends BaseController {
-    private metaDataSource!: MetaDataSource<MetaModelRespType, NewMetaDtoType>;
-
-    constructor(protected readonly moduleRef: ModuleRef) {
+    constructor(protected readonly basicService: ClientProxy) {
       super();
-      this.metaDataSource = this.moduleRef.get(metaDataSourceTypeOrToken, { strict: false });
     }
 
     /**
@@ -100,7 +95,12 @@ export function createMetaController<
     })
     @ApiNoContentResponse({ description: `${_descriptionName} meta not found` })
     async getMeta(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res: Response) {
-      const result = await this.metaDataSource.getMeta(id, ['id', 'metaKey', 'metaValue']);
+      const result = await this.basicService
+        .send<MetaModelRespType | undefined>(pattern.GetMeta, {
+          id,
+          fields: ['id', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
 
       if (result === undefined) {
         res.status(HttpStatus.NO_CONTENT);
@@ -114,7 +114,7 @@ export function createMetaController<
     /**
      * 获取元数据集合
      */
-    @Get(`/:${_camelCaseModelName}Id/metas`)
+    @Get(`/:${modelName}Id/metas`)
     @AuthDecorate('getMetas')
     @ApiOperation({ summary: `Get ${_descriptionName} metas.` })
     @ApiQuery({
@@ -129,10 +129,16 @@ export function createMetaController<
         createResponseSuccessType({ data: [metaModelRespType] }, `${_upperFirstModelName}MetaModelsSuccessResp`),
     })
     async getMetas(
-      @Param(`${_camelCaseModelName}Id`, ParseIntPipe) modelId: number,
+      @Param(`${modelName}Id`, ParseIntPipe) modelId: number,
       @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     ) {
-      const result = await this.metaDataSource.getMetas(modelId, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
+      const result = await this.basicService
+        .send<MetaModelRespType[]>(pattern.CreateMetas, {
+          [`${modelName}Id`]: modelId,
+          metaKeys,
+          fields: ['id', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
 
       return this.success({
         data: result,
@@ -151,7 +157,8 @@ export function createMetaController<
       type: () => createResponseSuccessType({ data: metaModelRespType }, `${_upperFirstModelName}MetaModelSuccessResp`),
     })
     async createMeta(@Body() input: NewMetaDtoType) {
-      const result = await this.metaDataSource.createMeta(input);
+      const result = await this.basicService.send<MetaModelRespType>(pattern.CreateMeta, input).lastValue();
+
       return this.success({
         data: result,
       });
@@ -160,7 +167,7 @@ export function createMetaController<
     /**
      * 批量新建元数据
      */
-    @Post(`/:${_camelCaseModelName}Id/metas/bulk`)
+    @Post(`/:${modelName}Id/metas/bulk`)
     @AuthDecorate('createMetas')
     @ApiOperation({ summary: `Create bulk of ${_descriptionName} metas.` })
     @ApiBody({ type: () => [NewMetaDto] })
@@ -169,8 +176,13 @@ export function createMetaController<
       type: () =>
         createResponseSuccessType({ data: [metaModelRespType] }, `${_upperFirstModelName}MetaModelsSuccessResp`),
     })
-    async createMetas(@Param(`${_camelCaseModelName}Id`, ParseIntPipe) modelId: number, @Body() models: NewMetaDto[]) {
-      const result = await this.metaDataSource.bulkCreateMeta(modelId, models);
+    async createMetas(@Param(`${modelName}Id`, ParseIntPipe) modelId: number, @Body() models: NewMetaDto[]) {
+      const result = await this.basicService
+        .send<MetaModelRespType[]>(pattern.CreateMetas, {
+          [`${modelName}Id`]: modelId,
+          models,
+        })
+        .lastValue();
       return this.success({
         data: result,
       });
@@ -189,7 +201,12 @@ export function createMetaController<
     })
     async updateMeta(@Param('id', ParseIntPipe) id: number, @Body('metaValue') metaValue: string) {
       try {
-        await this.metaDataSource.updateMeta(id, metaValue);
+        await this.basicService
+          .send<void>(pattern.UpdateMeta, {
+            id,
+            metaValue,
+          })
+          .lastValue();
         return this.success();
       } catch (e: any) {
         this.logger.error(e);
@@ -200,7 +217,7 @@ export function createMetaController<
     /**
      * 根据 metaKey 修改元数据
      */
-    @Patch(`/:${_camelCaseModelName}Id/metas/:metaKey`)
+    @Patch(`/:${modelName}Id/metas/:metaKey`)
     @AuthDecorate('deleteMetaByKey')
     @ApiOperation({ summary: `Update ${_descriptionName} meta value by meta key.` })
     @ApiBody({ type: () => UpdateMetaDto })
@@ -209,13 +226,20 @@ export function createMetaController<
       type: () => createResponseSuccessType({}, `Update${_upperFirstModelName}MetaModelSuccessResp`),
     })
     async updateMetaByKey(
-      @Param(`${_camelCaseModelName}Id`, ParseIntPipe) modelId: number,
+      @Param(`${modelName}Id`, ParseIntPipe) modelId: number,
       @Param('metaKey') metaKey: string,
       @Body('metaValue') metaValue: string,
       @Body('createIfNotExists') createIfNotExists?: boolean,
     ) {
       try {
-        await this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
+        await this.basicService
+          .send<void>(pattern.UpdateMetaByKey, {
+            [`${modelName}Id`]: modelId,
+            metaKey,
+            metaValue,
+            createIfNotExists,
+          })
+          .lastValue();
         return this.success();
       } catch (e: any) {
         this.logger.error(e);
@@ -235,7 +259,7 @@ export function createMetaController<
     })
     async deleteMeta(@Param('id', ParseIntPipe) id: number) {
       try {
-        await this.metaDataSource.deleteMeta(id);
+        await this.basicService.send<void>(pattern.DeleteMeta, { id }).lastValue();
         return this.success();
       } catch (e: any) {
         this.logger.error(e);
@@ -246,19 +270,21 @@ export function createMetaController<
     /**
      * 根据 metaKey 添加元数据
      */
-    @Delete(`/:${_camelCaseModelName}Id/metas/:metaKey`)
+    @Delete(`/:${modelName}Id/metas/:metaKey`)
     @AuthDecorate('deleteMetaByKey')
     @ApiOperation({ summary: `Delete ${_descriptionName} meta by meta key.` })
     @ApiOkResponse({
       description: 'no data content',
       type: () => createResponseSuccessType({}, `Delete${_upperFirstModelName}MetaModelSuccessResp`),
     })
-    async deleteMetaByKey(
-      @Param(`${_camelCaseModelName}Id`, ParseIntPipe) modelId: number,
-      @Param('metaKey') metaKey: string,
-    ) {
+    async deleteMetaByKey(@Param(`${modelName}Id`, ParseIntPipe) modelId: number, @Param('metaKey') metaKey: string) {
       try {
-        await this.metaDataSource.deleteMetaByKey(modelId, metaKey);
+        await this.basicService
+          .send(pattern.DeleteMetaByKey, {
+            [`${modelName}Id`]: modelId,
+            metaKey,
+          })
+          .lastValue();
         return this.success();
       } catch (e: any) {
         this.logger.error(e);

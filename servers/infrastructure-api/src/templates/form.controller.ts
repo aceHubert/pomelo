@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiOkResponse, ApiNoContentResponse, ApiCreatedResponse } from '@nestjs/swagger';
 import {
+  Inject,
   Controller,
   Scope,
   Query,
@@ -14,6 +15,7 @@ import {
   Res,
   HttpStatus,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import {
   createResponseSuccessType,
   ApiAuthCreate,
@@ -21,18 +23,16 @@ import {
   ValidatePayloadExistsPipe,
   User,
   RequestUser,
-} from '@ace-pomelo/shared-server';
-import {
-  TemplateDataSource,
-  PagedTemplateArgs,
-  TemplateOptionArgs,
   TemplatePresetType,
   TermPresetTaxonomy,
-} from '@ace-pomelo/infrastructure-datasource';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+  INFRASTRUCTURE_SERVICE,
+  TemplatePattern,
+} from '@ace-pomelo/shared/server';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import { FormTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
+import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { PagedFormTemplateQueryDto, FormTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewFormTemplateDto } from './dto/new-template.dto';
 import {
@@ -50,7 +50,7 @@ import { UpdateFormTemplateDto } from './dto/update-template.dto';
 @Authorized()
 @Controller({ path: 'api/template/forms', scope: Scope.REQUEST })
 export class FormTemplateController extends BaseController {
-  constructor(private readonly templateDataSource: TemplateDataSource) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
     super();
   }
 
@@ -65,25 +65,27 @@ export class FormTemplateController extends BaseController {
   })
   async getOptions(@Query(ParseQueryPipe) query: FormTemplateOptionQueryDto) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.templateDataSource.getOptions(
-      {
-        ...restQuery,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as TemplateOptionArgs['taxonomies'],
-      },
-      TemplatePresetType.Form,
-    );
+    const result = await this.basicService
+      .send<FormTemplateOptionResp[]>(TemplatePattern.GetOptions, {
+        query: {
+          ...restQuery,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Form,
+      })
+      .lastValue();
     return this.success({
       data: result,
     });
@@ -112,16 +114,24 @@ export class FormTemplateController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.templateDataSource.get(
-      id,
-      TemplatePresetType.Form,
-      ['id', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = await this.basicService
+      .send<FormTemplateModelResp | undefined>(TemplatePattern.Get, {
+        id,
+        type: TemplatePresetType.Form,
+        fields: ['id', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
 
     let metas;
     if (result) {
-      metas = await this.templateDataSource.getMetas(id, metaKeys ?? 'ALL', ['id', 'metaKey', 'metaValue']);
+      metas = await this.basicService
+        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
+          templateId: result.id,
+          metaKeys,
+          fields: ['id', 'metaKey', 'metaValue'],
+        })
+        .lastValue();
     }
 
     if (result === undefined) {
@@ -147,27 +157,29 @@ export class FormTemplateController extends BaseController {
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedFormTemplateQueryDto, @User() requestUser: RequestUser) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.templateDataSource.getPaged(
-      {
-        ...restQuery,
-        taxonomies: [
-          categoryId !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                id: categoryId,
-              }
-            : categoryName !== void 0
-            ? {
-                type: TermPresetTaxonomy.Category,
-                name: categoryName,
-              }
-            : false,
-        ].filter(Boolean) as PagedTemplateArgs['taxonomies'],
-      },
-      TemplatePresetType.Form,
-      ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
-      requestUser ? Number(requestUser.sub) : undefined,
-    );
+    const result = await this.basicService
+      .send<PagedFormTemplateResp>(TemplatePattern.GetPaged, {
+        query: {
+          ...restQuery,
+          taxonomies: [
+            categoryId !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  id: categoryId,
+                }
+              : categoryName !== void 0
+              ? {
+                  type: TermPresetTaxonomy.Category,
+                  name: categoryName,
+                }
+              : false,
+          ].filter(Boolean),
+        },
+        type: TemplatePresetType.Form,
+        fields: ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
+        requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+      })
+      .lastValue();
 
     return this.success({
       data: result,
@@ -185,11 +197,12 @@ export class FormTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: FormTemplateModelResp }, 'FormTemplateModelSuccessResp'),
   })
   async create(@Body() input: NewFormTemplateDto, @User() requestUser: RequestUser) {
-    const { id, title, author, content, status, updatedAt, createdAt } = await this.templateDataSource.create(
-      input,
-      TemplatePresetType.Form,
-      Number(requestUser.sub),
-    );
+    const { id, title, author, content, status, updatedAt, createdAt } = await this.basicService
+      .send<FormTemplateModelResp>(TemplatePattern.CreateForm, {
+        ...input,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
     return this.success({
       data: {
         id,
@@ -219,7 +232,13 @@ export class FormTemplateController extends BaseController {
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.templateDataSource.update(id, input, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(TemplatePattern.Update, {
+          ...input,
+          id,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);

@@ -1,8 +1,21 @@
 import { Response } from 'express';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
-import { Controller, Query, Param, Body, Get, Post, Put, Delete, ParseIntPipe, Res, HttpStatus } from '@nestjs/common';
-import { OptionDataSource } from '@ace-pomelo/infrastructure-datasource';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-oidc';
+import {
+  Inject,
+  Controller,
+  Query,
+  Param,
+  Body,
+  Get,
+  Post,
+  Put,
+  Delete,
+  ParseIntPipe,
+  Res,
+  HttpStatus,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { Authorized, Anonymous } from '@ace-pomelo/authorization';
 import { RamAuthorized } from '@ace-pomelo/ram-authorization';
 import {
   describeType,
@@ -12,7 +25,9 @@ import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   RequestUser,
-} from '@ace-pomelo/shared-server';
+  INFRASTRUCTURE_SERVICE,
+  OptionPattern,
+} from '@ace-pomelo/shared/server';
 import { OptionAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { OptionQueryDto } from './dto/option-query.dto';
@@ -24,7 +39,7 @@ import { OptionResp } from './resp/option.resp';
 @Authorized()
 @Controller('api/options')
 export class OptionController extends BaseController {
-  constructor(private readonly optionDataSource: OptionDataSource) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) private readonly basicService: ClientProxy) {
     super();
   }
 
@@ -38,7 +53,7 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: {} }, 'AutoloadOptionsModelsSuccessResp'),
   })
   async getAutoloadOptions() {
-    const result = await this.optionDataSource.getAutoloads();
+    const result = await this.basicService.send<Record<string, string>>(OptionPattern.GetAutoloads, {}).lastValue();
     return this.success({
       data: result,
     });
@@ -55,7 +70,12 @@ export class OptionController extends BaseController {
   })
   @ApiNoContentResponse({ description: 'Option not found' })
   async get(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res: Response) {
-    const result = await this.optionDataSource.get(id, ['id', 'optionName', 'optionValue', 'autoload']);
+    const result = await this.basicService
+      .send<OptionResp | undefined>(OptionPattern.Get, {
+        id,
+        fields: ['id', 'optionName', 'optionValue', 'autoload'],
+      })
+      .lastValue();
     if (result === undefined) {
       res.status(HttpStatus.NO_CONTENT);
     }
@@ -79,7 +99,11 @@ export class OptionController extends BaseController {
   })
   @ApiNoContentResponse({ description: 'Option not found' })
   async getValue(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
-    const value = await this.optionDataSource.getValue(name);
+    const value = await this.basicService
+      .send<string | undefined>(OptionPattern.GetValue, {
+        optionName: name,
+      })
+      .lastValue();
     if (value === undefined) {
       res.status(HttpStatus.NO_CONTENT);
     }
@@ -99,24 +123,12 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: [OptionResp] }, 'OptionModelsSuccessResp'),
   })
   async getList(@Query(ParseQueryPipe) query: OptionQueryDto) {
-    const result = await this.optionDataSource.getList(query, ['id', 'optionName', 'optionValue', 'autoload']);
-    return this.success({
-      data: result,
-    });
-  }
-
-  /**
-   * Create a new option.
-   */
-  @Post()
-  @RamAuthorized(OptionAction.Create)
-  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiCreatedResponse({
-    description: 'Option model',
-    type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
-  })
-  async create(@Body() input: NewOptionDto, @User() requestUser: RequestUser) {
-    const result = await this.optionDataSource.create(input, Number(requestUser.sub));
+    const result = await this.basicService
+      .send<OptionResp[]>(OptionPattern.GetList, {
+        query,
+        fields: ['id', 'optionName', 'optionValue', 'autoload'],
+      })
+      .lastValue();
     return this.success({
       data: result,
     });
@@ -132,9 +144,36 @@ export class OptionController extends BaseController {
     description: 'no data content',
     type: () => createResponseSuccessType({}, 'ClearOptionCacheModelSuccessResp'),
   })
-  clearCache() {
-    this.optionDataSource.reset();
-    return this.success();
+  async clearCache() {
+    try {
+      await this.basicService.send<void>(OptionPattern.Reset, {}).lastValue();
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
+  }
+
+  /**
+   * Create a new option.
+   */
+  @Post()
+  @RamAuthorized(OptionAction.Create)
+  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
+  @ApiCreatedResponse({
+    description: 'Option model',
+    type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
+  })
+  async create(@Body() input: NewOptionDto, @User() requestUser: RequestUser) {
+    const result = await this.basicService
+      .send<OptionResp>(OptionPattern.Create, {
+        ...input,
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
+    return this.success({
+      data: result,
+    });
   }
 
   /**
@@ -149,11 +188,17 @@ export class OptionController extends BaseController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(ValidatePayloadExistsPipe) model: UpdateOptionDto,
+    @Body(ValidatePayloadExistsPipe) input: UpdateOptionDto,
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.optionDataSource.update(id, model, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(OptionPattern.Update, {
+          ...input,
+          id,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -173,7 +218,12 @@ export class OptionController extends BaseController {
   })
   async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
     try {
-      await this.optionDataSource.delete(id, Number(requestUser.sub));
+      await this.basicService
+        .send<void>(OptionPattern.Delete, {
+          id,
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);

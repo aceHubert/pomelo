@@ -46,7 +46,7 @@ export class SecurityController extends BaseController {
     }
 
     if (accountId) {
-      const account = await this.accountProviderService.getAccount(Number(accountId));
+      const account = await this.accountProviderService.getAccount({ id: Number(accountId) });
 
       if (!account) {
         throw new HttpException('Account not found.', HttpStatus.UNAUTHORIZED);

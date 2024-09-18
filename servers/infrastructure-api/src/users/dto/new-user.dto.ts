@@ -1,4 +1,4 @@
-import { UserRole } from '../enums/user-role.enum';
+import { UserRole } from '@ace-pomelo/shared/server';
 import { NewUserValidator } from './new-user.validator';
 
 export class NewUserDto extends NewUserValidator {

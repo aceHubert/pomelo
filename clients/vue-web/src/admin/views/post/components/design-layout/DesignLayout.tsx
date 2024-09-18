@@ -14,7 +14,7 @@ import {
   Col,
   Space,
 } from 'ant-design-vue';
-import { TemplateStatus } from '@ace-pomelo/shared/client';
+import { TemplateStatus } from '@/fetch/apis';
 import { useI18n } from '@/hooks';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
 import IconMore from '@admin/assets/icons/more.svg?inline';

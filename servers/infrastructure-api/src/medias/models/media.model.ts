@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType, OmitType, IntersectionType } from '@nestjs/graphql';
+import { DateTimeISOResolver } from 'graphql-scalars';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
@@ -105,6 +106,7 @@ export class Media extends IntersectionType(OmitType(File, ['original'] as const
   /**
    * Creation time
    */
+  @Field((type) => DateTimeISOResolver)
   createdAt!: Date;
 }
 

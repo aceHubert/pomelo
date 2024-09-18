@@ -1,6 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { UserStatus } from '@ace-pomelo/infrastructure-datasource';
-import { UserRole } from './user-role.enum';
+import { UserStatus, UserRole } from '@ace-pomelo/shared/server';
 
 registerEnumType(UserRole, {
   name: 'UserRole',

@@ -1,4 +1,5 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
+import { ImageScaleType } from './media.interface';
 
 export interface MediaOptions {
   /**
@@ -17,12 +18,14 @@ export interface MediaOptions {
    */
   staticPrefix?: string;
   /**
+   * Scale image quality
+   */
+  quality?: number | Record<ImageScaleType, number>;
+  /**
    * is global module
    */
   isGlobal?: boolean;
 }
-
-export interface FixedMediaOptions extends Required<Omit<MediaOptions, 'isGlobal'>> {}
 
 export interface MediaOptionsFactory {
   createFileOptions(): Promise<Omit<MediaOptions, 'isGlobal'>> | Omit<MediaOptions, 'isGlobal'>;

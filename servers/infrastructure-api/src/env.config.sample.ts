@@ -1,4 +1,4 @@
-import { defineConfig } from './common/utils/configuration.utils';
+import { defineConfig } from './common/utils/configuration.util';
 
 /**
  * 通过文件配置环境（设置环境变量 CONFIG_FILE：env config file path）
@@ -12,28 +12,6 @@ export default defineConfig({
     port: process.env.PORT || 3000,
     globalPrefixUri: '/',
     cors: false,
-  },
-  // 数据库
-  database: {
-    connection: {
-      // database name
-      database: 'po_template',
-      // database name
-      username: 'username',
-      // database password
-      password: 'password',
-      // database host
-      host: 'host',
-      // database port, default: 3306
-      port: 3306,
-      // database charset, default: utf8
-      charset: 'utf8',
-      // database dialect, default: mysql
-      dialect: 'mysql',
-      // database collate
-      collate: '',
-    },
-    tablePrefix: 'po_',
   },
   // Swagger
   swagger: {

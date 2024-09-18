@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsLocale, IsUrl, IsEmail, MinLength } from 'class-validator';
-import { SiteInitArgs } from '../interfaces/init-args.interface';
 
-export abstract class SiteInitArgsValidator implements Omit<SiteInitArgs, 'siteUrl'> {
+export abstract class SiteInitArgsValidator {
   @IsNotEmpty()
   abstract title: string;
 

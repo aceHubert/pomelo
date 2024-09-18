@@ -9,10 +9,9 @@ import {
   MinLength,
   IsUrl,
 } from 'class-validator';
-import { NewUserInput } from '@ace-pomelo/infrastructure-datasource';
-import { UserRole } from '../enums/user-role.enum';
+import { UserRole } from '@ace-pomelo/shared/server';
 
-export abstract class NewUserValidator implements Omit<NewUserInput, 'niceName' | 'displayName'> {
+export abstract class NewUserValidator {
   @IsDefined()
   @IsNotEmpty()
   @IsString()

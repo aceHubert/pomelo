@@ -1,5 +1,5 @@
 // import { JwtPayload } from 'jsonwebtoken';
-import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared-server';
+import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared/server';
 
 declare global {
   export type ConnectionParams = {
@@ -17,10 +17,6 @@ declare global {
   export type PagedResponseOf<T> = PagedResponseSuccess<T> | ResponseError;
 
   export type Dictionary<T> = Record<string, T>;
-  /**
-   * Type helper for making certain fields of an object optional.
-   */
-  // export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 }
 
 // 注意: 修改"全局声明"必须在模块内部, 所以至少要有 export{}字样

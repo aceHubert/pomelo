@@ -1,9 +1,9 @@
-import { ApiProperty, ApiHideProperty, ApiResponseProperty } from '@nestjs/swagger';
-import { UserModel, UserStatus } from '@ace-pomelo/infrastructure-datasource';
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import { UserStatus } from '@ace-pomelo/shared/server';
 import { PagedResponse } from '@/common/controllers/resp/paged.resp';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 
-export class UserModelResp implements UserModel {
+export class UserModelResp {
   /**
    * User id
    */
@@ -49,7 +49,6 @@ export class UserModelResp implements UserModel {
   /**
    * Status
    */
-  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
     enum: UserStatus,
     readOnly: true,

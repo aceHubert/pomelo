@@ -1,6 +1,7 @@
 import { Field, ObjectType, ID, Int, OmitType, PickType } from '@nestjs/graphql';
-import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/infrastructure-datasource';
-// import { FieldAuthorized, UserRole } from '@ace-pomelo/nestjs-oidc';
+import { DateTimeISOResolver } from 'graphql-scalars';
+import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared/server';
+// import { FieldAuthorized, UserRole } from '@ace-pomelo/authorization';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
 
@@ -66,11 +67,13 @@ export class Template {
   /**
    * Latest update time
    */
+  @Field((type) => DateTimeISOResolver)
   updatedAt!: Date;
 
   /**
    * Creation time
    */
+  @Field((type) => DateTimeISOResolver)
   createdAt!: Date;
 }
 

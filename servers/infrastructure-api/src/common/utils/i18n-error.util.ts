@@ -19,7 +19,7 @@ export function formatI18nErrors<K = Record<string, unknown>>(
       const [translationKey, argsString] = error.constraints![key].split('|');
       const args = !!argsString ? JSON.parse(argsString) : {};
       result[key] = i18n.translate(
-        `validation.${snakeCase(key).toUpperCase()}${argsString ? `|${argsString}` : ''}` as Path<K>,
+        `common.validation.${snakeCase(key).toUpperCase()}${argsString ? `|${argsString}` : ''}` as Path<K>,
         {
           ...options,
           defaultValue: translationKey,

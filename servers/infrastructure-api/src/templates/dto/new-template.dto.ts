@@ -1,5 +1,5 @@
-import { PickType, ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { TemplateCommentStatus, TemplateStatus } from '@ace-pomelo/infrastructure-datasource';
+import { PickType, ApiProperty } from '@nestjs/swagger';
+import { TemplateCommentStatus, TemplateStatus } from '@ace-pomelo/shared/server';
 import { NewTemplateValidator } from './new-template.validator';
 
 export class NewTemplateDto extends NewTemplateValidator {
@@ -26,7 +26,6 @@ export class NewTemplateDto extends NewTemplateValidator {
   /**
    * Status
    */
-  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
     enum: TemplateStatus,
     required: false,
@@ -42,7 +41,6 @@ export class NewTemplateDto extends NewTemplateValidator {
   /**
    * Comment status
    */
-  @ApiHideProperty() // FIX: Hide from nest-cli plugin, enum compile to relative path from packages
   @ApiProperty({
     enum: TemplateCommentStatus,
     required: false,
