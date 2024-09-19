@@ -1,5 +1,5 @@
-# @ace-pomelo/infrastructure-api
-> Pomelo Core RESTful API Server
+# @ace-pomelo/infrastructure-bff
+> Pomelo BFF Server
 > GraphQL Support
 
 <br/>

@@ -51,7 +51,7 @@ bootstrap<NestExpressApplication>(AppModule, {
             path: swaggerPath,
             configFactory: () =>
               new DocumentBuilder()
-                .setTitle('Pomelo infrastructure APIs')
+                .setTitle('Pomelo infrastructure BFF APIs')
                 .setDescription(
                   `The RESTful API documentation.<br/>graphql support: <a href="${stripForegoingSlash(
                     graphqlPath,

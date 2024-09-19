@@ -1,12 +1,12 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "servers/infrastructure-api/src",
+  "sourceRoot": "servers/infrastructure-service/src",
   "monorepo": true,
-  "root": "servers/infrastructure-api",
+  "root": "servers/infrastructure-service",
   "compilerOptions": {
     "webpack": false,
-    "webpackConfigPath": "servers/infrastructure-api/webpack-hmr.config.js",
-    "tsConfigPath": "servers/infrastructure-api/tsconfig.json"
+    "webpackConfigPath": "servers/infrastructure-service/webpack-hmr.config.js",
+    "tsConfigPath": "servers/infrastructure-service/tsconfig.json"
   },
   "projects": {
     "identity-server": {
@@ -33,14 +33,14 @@
         ]
       }
     },
-    "identity-api": {
+    "infrastructure-service": {
       "type": "application",
-      "root": "servers/identity-api",
+      "root": "servers/infrastructure-service",
       "entryFile": "src/main",
-      "sourceRoot": "servers/identity-api",
+      "sourceRoot": "servers/infrastructure-service",
       "compilerOptions": {
-        "webpackConfigPath": "servers/identity-api/webpack-hmr.config.js",
-        "tsConfigPath": "servers/identity-api/tsconfig.json",
+        "webpackConfigPath": "servers/infrastructure-service/webpack-hmr.config.js",
+        "tsConfigPath": "servers/infrastructure-service/tsconfig.json",
         "assets": ["package.json", "README.md", ".env", ".env.*"],
         "watchAssets": true,
         "deleteOutDir": true,
@@ -64,14 +64,14 @@
         ]
       }
     },
-    "infrastructure-api": {
+    "infrastructure-bff": {
       "type": "application",
-      "root": "servers/infrastructure-api",
+      "root": "servers/infrastructure-bff",
       "entryFile": "src/main",
-      "sourceRoot": "servers/infrastructure-api",
+      "sourceRoot": "servers/infrastructure-bff",
       "compilerOptions": {
-        "webpackConfigPath": "servers/infrastructure-api/webpack-hmr.config.js",
-        "tsConfigPath": "servers/infrastructure-api/tsconfig.json",
+        "webpackConfigPath": "servers/infrastructure-bff/webpack-hmr.config.js",
+        "tsConfigPath": "servers/infrastructure-bff/tsconfig.json",
         "assets": ["package.json", "README.md", ".env", ".env.*"],
         "watchAssets": true,
         "deleteOutDir": true,

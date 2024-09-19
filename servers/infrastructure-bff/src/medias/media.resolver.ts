@@ -84,7 +84,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
 
     if (!hasCapability) {
       throw new ForbiddenError(
-        i18n.tv('infrastructure-api.media_resolver.upload_files_forbidden', 'No permission to upload files'),
+        i18n.tv('infrastructure-bff.media_resolver.upload_files_forbidden', 'No permission to upload files'),
       );
     }
 
@@ -165,7 +165,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
 
     if (!hasCapability) {
       throw new ForbiddenError(
-        i18n.tv('infrastructure-api.media_resolver.upload_files_forbidden', 'No permission to upload files'),
+        i18n.tv('infrastructure-bff.media_resolver.upload_files_forbidden', 'No permission to upload files'),
       );
     }
 
@@ -248,7 +248,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
 
     if (!hasCapability) {
       throw new ForbiddenError(
-        i18n.tv('infrastructure-api.media_resolver.edit_files_forbidden', 'No permission to edit files'),
+        i18n.tv('infrastructure-bff.media_resolver.edit_files_forbidden', 'No permission to edit files'),
       );
     }
 
@@ -262,7 +262,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     if (media) {
       if (isAbsoluteUrl(media.path))
         throw new Error(
-          i18n.tv('infrastructure-api.media_resolver.crop_absolute_image_forbidden', 'Cannot crop absolute url image'),
+          i18n.tv('infrastructure-bff.media_resolver.crop_absolute_image_forbidden', 'Cannot crop absolute url image'),
         );
 
       const {

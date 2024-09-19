@@ -137,9 +137,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/infrastructure-api@workspace:servers/infrastructure-api":
+"@ace-pomelo/infrastructure-bff@workspace:servers/infrastructure-bff":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/infrastructure-api@workspace:servers/infrastructure-api"
+  resolution: "@ace-pomelo/infrastructure-bff@workspace:servers/infrastructure-bff"
   dependencies:
     "@ace-pomelo/authorization": "workspace:^"
     "@ace-pomelo/ram-authorization": "workspace:^"

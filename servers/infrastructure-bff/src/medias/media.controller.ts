@@ -113,7 +113,7 @@ export class MediaController extends createMetaController('media', MediaMetaMode
 
     if (!hasCapability) {
       throw new ForbiddenError(
-        i18n.tv('infrastructure-api.media_resolver.upload_files_forbidden', 'No permission to upload files'),
+        i18n.tv('infrastructure-bff.media_resolver.upload_files_forbidden', 'No permission to upload files'),
       );
     }
 
@@ -205,7 +205,7 @@ export class MediaController extends createMetaController('media', MediaMetaMode
 
     if (!hasCapability) {
       throw new ForbiddenError(
-        i18n.tv('infrastructure-api.media_resolver.upload_files_forbidden', 'No permission to upload files'),
+        i18n.tv('infrastructure-bff.media_resolver.upload_files_forbidden', 'No permission to upload files'),
       );
     }
 
@@ -298,7 +298,7 @@ export class MediaController extends createMetaController('media', MediaMetaMode
 
     if (!hasCapability) {
       throw new ForbiddenError(
-        i18n.tv('infrastructure-api.media_resolver.edit_files_forbidden', 'No permission to edit files'),
+        i18n.tv('infrastructure-bff.media_resolver.edit_files_forbidden', 'No permission to edit files'),
       );
     }
 
@@ -313,7 +313,7 @@ export class MediaController extends createMetaController('media', MediaMetaMode
       if (isAbsoluteUrl(media.path))
         throw new ForbiddenError(
           i18n.tv(
-            'infrastructure-api.media_controller.crop_absolute_image_forbidden',
+            'infrastructure-bff.media_controller.crop_absolute_image_forbidden',
             'Cannot crop absolute url image',
           ),
         );
@@ -321,7 +321,7 @@ export class MediaController extends createMetaController('media', MediaMetaMode
       if (!this.mediaService.isCropable(media.mimeType)) {
         throw new ForbiddenError(
           i18n.tv(
-            'infrastructure-api.media_controller.crop_none_image_forbidden',
+            'infrastructure-bff.media_controller.crop_none_image_forbidden',
             `Cannot crop image with mimeType: ${media.mimeType}`,
             {
               args: {
@@ -401,7 +401,7 @@ export class MediaController extends createMetaController('media', MediaMetaMode
         });
       }
     }
-    return this.faild(i18n.tv('infrastructure-api.media_controller.crop_media_not_found', 'Media is not found!'));
+    return this.faild(i18n.tv('infrastructure-bff.media_controller.crop_media_not_found', 'Media is not found!'));
   }
 
   /**

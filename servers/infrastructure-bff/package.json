@@ -1,7 +1,7 @@
 {
-  "name": "@ace-pomelo/infrastructure-api",
+  "name": "@ace-pomelo/infrastructure-bff",
   "version": "0.0.1",
-  "description": "core server for pomelo",
+  "description": "BFF server for pomelo",
   "author": "Hubert<yi.xiang@live.cn>",
   "private": true,
   "license": "MIT",
