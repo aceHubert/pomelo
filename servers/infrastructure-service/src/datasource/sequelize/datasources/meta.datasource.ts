@@ -261,7 +261,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
     if (Object.values(groupBy(models, (meta) => meta.metaKey)).some((arr) => arr.length > 1)) {
       throw new UserInputError(
         this.translate(
-          'infrastructure-server.datasource.bulk_create_meta_key_unique_error',
+          'infrastructure-service.datasource.bulk_create_meta_key_unique_error',
           `The "metaKey" must be unique!`,
         ),
       );

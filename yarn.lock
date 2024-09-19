@@ -195,9 +195,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/infrastructure-service@workspace:servers/infrastructure-server":
+"@ace-pomelo/infrastructure-service@workspace:servers/infrastructure-service":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/infrastructure-service@workspace:servers/infrastructure-server"
+  resolution: "@ace-pomelo/infrastructure-service@workspace:servers/infrastructure-service"
   dependencies:
     "@ace-pomelo/shared": "workspace:^"
     "@apollo/server": ^4.9.1

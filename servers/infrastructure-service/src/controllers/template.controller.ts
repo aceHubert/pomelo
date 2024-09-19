@@ -8,7 +8,7 @@ import {
   TemplateOptionModel,
   TemplateMetaModel,
   NewTemplateMetaInput,
-} from '../datasource';
+} from '../datasource/index';
 import { createMetaController } from './meta.controller';
 import {
   NewFormTemplatePayload,

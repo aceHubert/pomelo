@@ -39,7 +39,7 @@ export class OptionController {
   isExists(@Payload('optionName') optionName: string, @I18n() i18n: I18nContext): Promise<boolean> {
     if (!optionName)
       throw new UserInputError(
-        i18n.tv('infrastructure-server.option_controller.is_exists_input_error', 'Option name is required'),
+        i18n.tv('infrastructure-service.option_controller.is_exists_input_error', 'Option name is required'),
       );
 
     return this.optionDataSource.isExists(optionName);

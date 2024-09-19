@@ -78,7 +78,7 @@ export class LinkDataSource extends BaseDataSource {
       });
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.link.link_does_not_exist', 'Link does not exist!'),
+        this.translate('infrastructure-service.datasource.link.link_does_not_exist', 'Link does not exist!'),
       );
     }
   }
@@ -103,7 +103,7 @@ export class LinkDataSource extends BaseDataSource {
       await link.destroy();
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.link.link_does_not_exist', 'Link does not exist!'),
+        this.translate('infrastructure-service.datasource.link.link_does_not_exist', 'Link does not exist!'),
       );
     }
   }

@@ -246,14 +246,14 @@ export abstract class BaseDataSource implements OnModuleInit {
 
     if (!result) {
       const requiredCapability = this.translate(
-        `infrastructure-server.datasource.user_capability.${capability}`,
+        `infrastructure-service.datasource.user_capability.${capability}`,
         words(capability, /[^_]+/g)
           .map((word) => capitalize(word))
           .join(' '),
       );
       const error = new ForbiddenError(
         this.translate(
-          'infrastructure-server.datasource.error.forbidden_capability',
+          'infrastructure-service.datasource.error.forbidden_capability',
           `Access denied, You don't have capability "${requiredCapability}" for this action!`,
           { requiredCapability },
         ),

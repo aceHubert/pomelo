@@ -1,7 +1,7 @@
 import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { LinkPattern } from '@ace-pomelo/shared/server';
-import { LinkDataSource, LinkModel, PagedLinkModel } from '../datasource';
+import { LinkDataSource, LinkModel, PagedLinkModel } from '../datasource/index';
 import { NewLinkPayload, UpdateLinkPayload, PagedLinkQueryPayload } from './payload/link.payload';
 
 @Controller()

@@ -16,7 +16,7 @@ import {
 import { IgnoreDbCheckInterceptor } from '@/common/interceptors/db-check.interceptor';
 import { getDefaultUserRoles } from '@/common/utils/user.util';
 import { version } from '../version';
-import { name, InfrastructureDatasourceService } from '../datasource';
+import { name, InfrastructureDatasourceService } from '../datasource/index';
 import { SiteInitPayload } from './payload/site-init.payload';
 
 @IgnoreDbCheckInterceptor()

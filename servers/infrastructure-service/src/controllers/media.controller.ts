@@ -8,7 +8,7 @@ import {
   MediaMetaDataModel,
   MediaMetaModel,
   NewMediaMetaInput,
-} from '../datasource';
+} from '../datasource/index';
 import { createMetaController } from './meta.controller';
 import { PagedMediaQueryPayload, NewMediaPayload, UpdateMediaPayload } from './payload/media.payload';
 

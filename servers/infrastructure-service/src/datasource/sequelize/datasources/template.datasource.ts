@@ -144,14 +144,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (status === TemplateInnerStatus.AutoDraft) {
         throw new UserInputError(
           this.translate(
-            'infrastructure-server.datasource.template.operate_status_autodraft_is_not_allowed',
+            'infrastructure-service.datasource.template.operate_status_autodraft_is_not_allowed',
             `Status "AutoDraft" is not allowed!`,
           ),
         );
       }
       throw new UserInputError(
         this.translate(
-          'infrastructure-server.datasource.template.operate_status_is_not_allowed',
+          'infrastructure-service.datasource.template.operate_status_is_not_allowed',
           `Status "${status}" is not allowed!`,
           {
             args: {
@@ -1143,7 +1143,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       // Trash 状态不允许直接创建
       throw new ForbiddenError(
         this.translate(
-          'infrastructure-server.datasource.template.trash_status_forbidden_in_creation',
+          'infrastructure-service.datasource.template.trash_status_forbidden_in_creation',
           'Do not create "trash" content!',
         ),
       );
@@ -1154,7 +1154,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     const name = await this.fixName(model.name || model.title || '', type); // name 需要取唯一
     const title =
       model.title ?? status === TemplateInnerStatus.AutoDraft
-        ? this.translate('infrastructure-server.datasource.template.status.auto_draft', 'Auto Draft')
+        ? this.translate('infrastructure-service.datasource.template.status.auto_draft', 'Auto Draft')
         : '';
     const excerpt = (restModel as any).excerpt || ''; // post
 
@@ -1224,7 +1224,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (template.status === TemplateStatus.Trash) {
         throw new ForbiddenError(
           this.translate(
-            'infrastructure-server.datasource.template.update_forbidden_in_trash_status',
+            'infrastructure-service.datasource.template.update_forbidden_in_trash_status',
             `Do not update content that status is in "trash"!`,
           ),
         );
@@ -1299,7 +1299,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.template.template_does_not_exist', 'Template does not exist!'),
+        this.translate(
+          'infrastructure-service.datasource.template.template_does_not_exist',
+          'Template does not exist!',
+        ),
       );
     }
   }
@@ -1317,7 +1320,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     // name 不可修改为空
     if (!!name) {
       throw new ForbiddenError(
-        this.translate('infrastructure-server.datasource.template.name_is_invalid', `Name is invalid!`),
+        this.translate('infrastructure-service.datasource.template.name_is_invalid', `Name is invalid!`),
       );
     }
 
@@ -1333,7 +1336,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (template.status === TemplateStatus.Trash) {
         throw new ForbiddenError(
           this.translate(
-            'infrastructure-server.datasource.template.update_forbidden_in_trash_status',
+            'infrastructure-service.datasource.template.update_forbidden_in_trash_status',
             `Do not update content that status is in "trash"!`,
           ),
         );
@@ -1346,7 +1349,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       template.save();
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.template.template_does_not_exist', 'Template does not exist!'),
+        this.translate(
+          'infrastructure-service.datasource.template.template_does_not_exist',
+          'Template does not exist!',
+        ),
       );
     }
   }
@@ -1381,7 +1387,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (template.status === TemplateStatus.Trash) {
         throw new ForbiddenError(
           this.translate(
-            'infrastructure-server.datasource.template.update_forbidden_in_trash_status',
+            'infrastructure-service.datasource.template.update_forbidden_in_trash_status',
             `Do not update content that status is in "trash"!`,
           ),
         );
@@ -1412,7 +1418,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.template.template_does_not_exist', 'Template does not exist!'),
+        this.translate(
+          'infrastructure-service.datasource.template.template_does_not_exist',
+          'Template does not exist!',
+        ),
       );
     }
   }
@@ -1450,7 +1459,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       const ids = trushedIds.join(',');
       throw new ForbiddenError(
         this.translate(
-          'infrastructure-server.datasource.template.bulk_update_forbidden_in_trash_status',
+          'infrastructure-service.datasource.template.bulk_update_forbidden_in_trash_status',
           `Do not update content that status is in "trash", Id(s}: "${ids}"!`,
           { ids },
         ),
@@ -1539,14 +1548,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (template.status !== TemplateStatus.Trash) {
         throw new ForbiddenError(
           this.translate(
-            'infrastructure-server.datasource.template.restore_forbidden_not_in_trash_status',
+            'infrastructure-service.datasource.template.restore_forbidden_not_in_trash_status',
             `Do not restore content that status is not in "trash"!`,
           ),
         );
       } else if (template.author !== requestUserId) {
         throw new ForbiddenError(
           this.translate(
-            'infrastructure-server.datasource.template.restore_forbidden_not_author',
+            'infrastructure-service.datasource.template.restore_forbidden_not_author',
             `Do not restore content that is not yours!`,
           ),
         );
@@ -1568,7 +1577,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.template.template_does_not_exist', 'Template does not exist!'),
+        this.translate(
+          'infrastructure-service.datasource.template.template_does_not_exist',
+          'Template does not exist!',
+        ),
       );
     }
   }
@@ -1603,14 +1615,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         if (template.status !== TemplateStatus.Trash) {
           throw new ForbiddenError(
             this.translate(
-              'infrastructure-server.datasource.template.restore_forbidden_not_in_trash_status',
+              'infrastructure-service.datasource.template.restore_forbidden_not_in_trash_status',
               `Do not restore content that status is not in "trash"!`,
             ),
           );
         } else if (template.author !== requestUserId) {
           throw new ForbiddenError(
             this.translate(
-              'infrastructure-server.datasource.template.restore_forbidden_not_author',
+              'infrastructure-service.datasource.template.restore_forbidden_not_author',
               `Do not restore content that is not yours!`,
             ),
           );
@@ -1679,7 +1691,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (template.status !== TemplateStatus.Trash) {
         throw new ForbiddenError(
           this.translate(
-            'infrastructure-server.datasource.template.delete_forbidden_not_in_trash_status',
+            'infrastructure-service.datasource.template.delete_forbidden_not_in_trash_status',
             `Do not delete content that status is not in "trash"!`,
           ),
         );
@@ -1709,7 +1721,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.template.template_does_not_exist', 'Template does not exist!'),
+        this.translate(
+          'infrastructure-service.datasource.template.template_does_not_exist',
+          'Template does not exist!',
+        ),
       );
     }
   }
@@ -1743,7 +1758,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       const ids = notWithTrushedIds.join(',');
       throw new ForbiddenError(
         this.translate(
-          'infrastructure-server.datasource.template.bulk_delete_forbidden_not_in_trash_status',
+          'infrastructure-service.datasource.template.bulk_delete_forbidden_not_in_trash_status',
           `Do not delete content that status is not in "trash", Id(s}: "${ids}"!`,
           { ids },
         ),

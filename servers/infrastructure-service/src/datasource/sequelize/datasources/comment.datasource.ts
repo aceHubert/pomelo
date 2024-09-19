@@ -119,7 +119,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       });
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.comment.comment_does_not_exist', 'Comment does not exist!'),
+        this.translate('infrastructure-service.datasource.comment.comment_does_not_exist', 'Comment does not exist!'),
       );
     }
   }
@@ -158,7 +158,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       }
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.comment.comment_does_not_exist', 'Comment does not exist!'),
+        this.translate('infrastructure-service.datasource.comment.comment_does_not_exist', 'Comment does not exist!'),
       );
     }
   }

@@ -5,7 +5,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler, SetMetadata
 import { RpcException } from '@nestjs/microservices';
 import { I18nContext, I18nTranslation } from 'nestjs-i18n';
 import { FileEnv } from '@ace-pomelo/shared/server';
-import { name } from '../../datasource';
+import { name } from '../../datasource/index';
 
 let NeedInitDatasCache: boolean;
 const IgnoreDbCheckInterceptorName = Symbol('IgnoreDbCheckInterceptor');

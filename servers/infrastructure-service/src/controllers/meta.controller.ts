@@ -40,7 +40,7 @@ export function createMetaController<MetaModelType, NewMetaPayloadType>(modelNam
     ) {
       if (!modelId && !modelIds)
         throw new UserInputError(
-          i18n.tv('infrastructure-server.meta_controller.get_metas_input_error', 'modelId or modelIds is required'),
+          i18n.tv('infrastructure-service.meta_controller.get_metas_input_error', 'modelId or modelIds is required'),
         );
       return this.metaDataSource.getMetas(modelId ?? modelIds, metaKeys, fields);
     }

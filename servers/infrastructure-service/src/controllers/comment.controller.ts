@@ -1,7 +1,7 @@
 import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CommentPattern } from '@ace-pomelo/shared/server';
-import { CommentDataSource, CommentModel, PagedCommentModel } from '../datasource';
+import { CommentDataSource, CommentModel, PagedCommentModel } from '../datasource/index';
 import { NewCommentPayload, PagedCommentQueryPayload, UpdateCommentPayload } from './payload/comment.payload';
 
 @Controller()

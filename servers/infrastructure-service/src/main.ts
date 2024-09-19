@@ -36,8 +36,7 @@ syncDatabase()
                 path: swaggerPath,
                 configFactory: () =>
                   new DocumentBuilder()
-                    .setTitle('Pomelo infrastructure servers')
-                    .setDescription(`The RESTful API documentation.`)
+                    .setTitle('Pomelo infrastructure microservice')
                     .setVersion(version)
                     .addBearerAuth()
                     .build(),

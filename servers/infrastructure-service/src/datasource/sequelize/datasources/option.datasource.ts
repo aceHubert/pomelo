@@ -101,7 +101,7 @@ export class OptionDataSource extends BaseDataSource {
     if (await this.isExists(model.optionName)) {
       throw new ValidationError(
         this.translate(
-          'infrastructure-server.datasource.option.name_exists',
+          'infrastructure-service.datasource.option.name_exists',
           `Option name "${model.optionName}" has existed!`,
           {
             name: model.optionName,

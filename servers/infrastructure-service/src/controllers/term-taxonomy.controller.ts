@@ -36,7 +36,7 @@ export class TermTaxonomyController extends createMetaController('termTaxonomy')
     if (!parentIds && !query)
       throw new UserInputError(
         i18n.tv(
-          'infrastructure-server.term_taxonomy_controller.get_list_input_error',
+          'infrastructure-service.term_taxonomy_controller.get_list_input_error',
           'parentIds or query is required',
         ),
       );

@@ -2,7 +2,7 @@ import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { UserCapability, UserInputError, UserPattern } from '@ace-pomelo/shared/server';
-import { UserDataSource, UserModel, PagedUserModel, UserMetaModel, NewUserMetaInput } from '../datasource';
+import { UserDataSource, UserModel, PagedUserModel, UserMetaModel, NewUserMetaInput } from '../datasource/index';
 import { Nullable } from '../types';
 import { createMetaController } from './meta.controller';
 import {
@@ -54,7 +54,7 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
       return this.userDataSource.getEmail(payload.id || payload.username!);
     }
     throw new UserInputError(
-      i18n.tv('infrastructure-server.user_controller.get_email_input_error', 'id or username is required'),
+      i18n.tv('infrastructure-service.user_controller.get_email_input_error', 'id or username is required'),
     );
   }
 
@@ -67,7 +67,7 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
       return this.userDataSource.getMobile(payload.id || payload.username!);
     }
     throw new UserInputError(
-      i18n.tv('infrastructure-server.user_controller.get_mobile_input_error', 'id or username is required'),
+      i18n.tv('infrastructure-service.user_controller.get_mobile_input_error', 'id or username is required'),
     );
   }
 
@@ -120,7 +120,7 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
   isLoginNameExists(@Payload('loginName') loginName: string, @I18n() i18n: I18nContext): Promise<boolean> {
     if (!loginName)
       throw new UserInputError(
-        i18n.tv('infrastructure-server.user_controller.is_login_name_exists_input_error', 'loginName is required'),
+        i18n.tv('infrastructure-service.user_controller.is_login_name_exists_input_error', 'loginName is required'),
       );
 
     return this.userDataSource.isLoginNameExists(loginName);
@@ -130,7 +130,7 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
   isMobileExists(@Payload('mobile') mobile: string, @I18n() i18n: I18nContext): Promise<boolean> {
     if (!mobile)
       throw new UserInputError(
-        i18n.tv('infrastructure-server.user_controller.is_mobile_exists_input_error', 'mobile is required'),
+        i18n.tv('infrastructure-service.user_controller.is_mobile_exists_input_error', 'mobile is required'),
       );
 
     return this.userDataSource.isMobileExists(mobile);
@@ -140,7 +140,7 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
   isEmailExists(@Payload('email') email: string, @I18n() i18n: I18nContext): Promise<boolean> {
     if (!email)
       throw new UserInputError(
-        i18n.tv('infrastructure-server.user_controller.is_email_exists_input_error', 'email is required'),
+        i18n.tv('infrastructure-service.user_controller.is_email_exists_input_error', 'email is required'),
       );
 
     return this.userDataSource.isEmailExists(email);
@@ -181,7 +181,7 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
       return this.userDataSource.updateLoginPwd(payload.username, payload.oldPwd, payload.newPwd);
     }
     throw new UserInputError(
-      i18n.tv('infrastructure-server.user_controller.update_login_pwd_input_error', 'id or username is required'),
+      i18n.tv('infrastructure-service.user_controller.update_login_pwd_input_error', 'id or username is required'),
     );
   }
 

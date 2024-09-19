@@ -390,7 +390,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (model.loginName && (await this.isLoginNameExists(model.loginName))) {
       throw new ValidationError(
         this.translate(
-          'infrastructure-server.datasource.user.username_unique_required',
+          'infrastructure-service.datasource.user.username_unique_required',
           'Username is reqiured to be unique!',
         ),
       );
@@ -399,7 +399,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (model.email && (await this.isEmailExists(model.email))) {
       throw new ValidationError(
         this.translate(
-          'infrastructure-server.datasource.user.email_unique_required',
+          'infrastructure-service.datasource.user.email_unique_required',
           `Email is reqiured to be unique!`,
         ),
       );
@@ -408,7 +408,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (model.mobile && (await this.isMobileExists(model.mobile))) {
       throw new ValidationError(
         this.translate(
-          'infrastructure-server.datasource.user.mobile_unique_required',
+          'infrastructure-service.datasource.user.mobile_unique_required',
           'Mobile is reqiured to be unique!',
         ),
       );
@@ -633,7 +633,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       }
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.user.user_does_not_exist', 'User does not exist!'),
+        this.translate('infrastructure-service.datasource.user.user_does_not_exist', 'User does not exist!'),
       );
     }
   }
@@ -658,18 +658,18 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (user) {
       if (user.status === UserStatus.Disabled) {
         throw new ValidationError(
-          this.translate('infrastructure-server.datasource.user.user_disabled', 'User is disabled!'),
+          this.translate('infrastructure-service.datasource.user.user_disabled', 'User is disabled!'),
         );
       }
       if (email === user.email) {
         throw new ValidationError(
-          this.translate('infrastructure-server.datasource.user.email_same_with_old', 'Email is same with old!'),
+          this.translate('infrastructure-service.datasource.user.email_same_with_old', 'Email is same with old!'),
         );
       }
       if (await this.isEmailExists(email)) {
         throw new ValidationError(
           this.translate(
-            'infrastructure-server.datasource.user.email_unique_required',
+            'infrastructure-service.datasource.user.email_unique_required',
             'Email is reqiured to be unique!',
           ),
         );
@@ -679,7 +679,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await user.save();
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.user.user_does_not_exist', 'User does not exist!'),
+        this.translate('infrastructure-service.datasource.user.user_does_not_exist', 'User does not exist!'),
       );
     }
   }
@@ -704,18 +704,18 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (user) {
       if (user.status === UserStatus.Disabled) {
         throw new ValidationError(
-          this.translate('infrastructure-server.datasource.user.user_disabled', 'User is disabled!'),
+          this.translate('infrastructure-service.datasource.user.user_disabled', 'User is disabled!'),
         );
       }
       if (mobile === user.mobile) {
         throw new ValidationError(
-          this.translate('infrastructure-server.datasource.user.mobile_same_with_old', 'Mobile is same with old!'),
+          this.translate('infrastructure-service.datasource.user.mobile_same_with_old', 'Mobile is same with old!'),
         );
       }
       if (await this.isMobileExists(mobile)) {
         throw new ValidationError(
           this.translate(
-            'infrastructure-server.datasource.user.mobile_unique_required',
+            'infrastructure-service.datasource.user.mobile_unique_required',
             'Mobile is reqiured to be unique!',
           ),
         );
@@ -725,7 +725,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await user.save();
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.user.user_does_not_exist', 'User does not exist!'),
+        this.translate('infrastructure-service.datasource.user.user_does_not_exist', 'User does not exist!'),
       );
     }
   }
@@ -794,12 +794,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (user) {
       if (user.status === UserStatus.Disabled) {
         throw new ValidationError(
-          this.translate('infrastructure-server.datasource.user.user_disabled', 'User is disabled!'),
+          this.translate('infrastructure-service.datasource.user.user_disabled', 'User is disabled!'),
         );
       } else if (oldPwd === newPwd) {
         throw new ValidationError(
           this.translate(
-            'infrastructure-server.datasource.user.new_password_same_with_old',
+            'infrastructure-service.datasource.user.new_password_same_with_old',
             'New password is same with old!',
           ),
         );
@@ -809,7 +809,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await user.save();
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.user.old_password_incorrect', 'Old password is incorrect!'),
+        this.translate('infrastructure-service.datasource.user.old_password_incorrect', 'Old password is incorrect!'),
       );
     }
   }
@@ -824,14 +824,14 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (user) {
       if (user.status === UserStatus.Disabled) {
         throw new ValidationError(
-          this.translate('infrastructure-server.datasource.user.user_disabled', 'User is disabled!'),
+          this.translate('infrastructure-service.datasource.user.user_disabled', 'User is disabled!'),
         );
       }
       user.loginPwd = password;
       user.save();
     } else {
       throw new ValidationError(
-        this.translate('infrastructure-server.datasource.user.user_does_not_exist', 'User does not exist!'),
+        this.translate('infrastructure-service.datasource.user.user_does_not_exist', 'User does not exist!'),
       );
     }
   }
@@ -881,7 +881,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     if (id === requestUserId) {
       throw new ForbiddenError(
-        this.translate('infrastructure-server.datasource.user.delete_self_forbidden', `Could not delete yourself!`),
+        this.translate('infrastructure-service.datasource.user.delete_self_forbidden', `Could not delete yourself!`),
       );
     }
 
@@ -918,7 +918,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
 
     if (ids.includes(requestUserId)) {
       throw new ForbiddenError(
-        this.translate('infrastructure-server.datasource.user.delete_self_forbidden', `Could not delete yourself!`),
+        this.translate('infrastructure-service.datasource.user.delete_self_forbidden', `Could not delete yourself!`),
       );
     }
 

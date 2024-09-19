@@ -244,7 +244,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
     if (isExists) {
       throw new ValidationError(
         this.translate(
-          'infrastructure-server.datasource.term_taxonomy.relationship_duplicate_definition',
+          'infrastructure-service.datasource.term_taxonomy.relationship_duplicate_definition',
           'Term taxonomy relationship has been defined!',
         ),
       );
