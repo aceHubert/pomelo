@@ -4,3 +4,4 @@ export * from './user.middleware';
 export * from './authorized.decorator';
 export * from './authroized.service';
 export * from './authorized.module';
+export * from './keys.helper';

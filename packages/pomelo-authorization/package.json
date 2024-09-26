@@ -47,18 +47,35 @@
     "release:alpha": "yarn version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag alpha",
     "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
+  "dependencies": {
+    "jose": "^4.15.9"
+  },
   "devDependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
-    "@nestjs/graphql": "^11.0.0",
-    "graphql-parse-resolve-info": "^4.12.0",
     "openid-client": "^5.6.5"
   },
   "peerDependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^11.0.0",
-    "graphql-parse-resolve-info": "^4.12.0"
+    "graphql": "^16.0.0",
+    "graphql-parse-resolve-info": "^4.12.0",
+    "openid-client": "^5.6.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/graphql": {
+      "optional": true
+    },
+    "graphql": {
+      "optional": true
+    },
+    "graphql-parse-resolve-info": {
+      "optional": true
+    },
+    "openid-client": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

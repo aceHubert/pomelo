@@ -1,3 +1,4 @@
+import { Reflector } from '@nestjs/core';
 import {
   Inject,
   CanActivate,
@@ -6,10 +7,7 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
-import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
-import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
+import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { AuthorizationOptions, RequestUser } from './interfaces/authorization-options.interface';
 import { hasDecorator } from './utils/has-decorator';
 import { getContextObject } from './utils/get-context-object';
@@ -55,11 +53,14 @@ export class TokenGuard implements CanActivate {
       throw new ForbiddenException("Access denied, You don't have capability for this action!");
     }
 
-    const type = context.getType<GqlContextType>();
+    const type = context.getType<string>();
 
     // graphql 判断返回实体字段是否有权限
     if (type === 'graphql') {
-      const info = GqlExecutionContext.create(context).getInfo<GraphQLResolveInfo>();
+      const { GqlExecutionContext } = loadPackage('@nestjs/graphql', 'TokenAuthorizationGuard', () =>
+        require('@nestjs/graphql'),
+      );
+      const info = GqlExecutionContext.create(context).getInfo();
 
       /**
        * 这里未使用 FieldMiddleware 原因在于中间件对每个 field 是隔离的，当其中 field 验证失败时，ResoloveField 会继续执行
@@ -82,7 +83,15 @@ export class TokenGuard implements CanActivate {
    * 获取 Graphql Output fields 的角色权限
    * @param info GraphQLResolveInfo
    */
-  protected resolveGraphqlOutputFieldsRoles(info: GraphQLResolveInfo): { [field: string]: string[] } {
+  protected resolveGraphqlOutputFieldsRoles(info: any): { [field: string]: string[] } {
+    const { isObjectType, isInterfaceType, isWrappingType } = loadPackage(
+      'graphql',
+      'ResolveGraphqlOutputFieldsRoles',
+      () => require('graphql'),
+    );
+    const { parse } = loadPackage('graphql-parse-resolve-info', 'ResolveGraphqlOutputFieldsRoles', () =>
+      require('graphql-parse-resolve-info'),
+    );
     const parsedResolveInfoFragment = parse(info, { keepRoot: false, deep: true });
 
     if (!parsedResolveInfoFragment) {
@@ -90,14 +99,14 @@ export class TokenGuard implements CanActivate {
     }
 
     const rootFields = parsedResolveInfoFragment.fieldsByTypeName
-      ? (parsedResolveInfoFragment.fieldsByTypeName as FieldsByTypeName)
-      : (parsedResolveInfoFragment as FieldsByTypeName);
+      ? parsedResolveInfoFragment.fieldsByTypeName
+      : parsedResolveInfoFragment;
 
     return resolveFields(rootFields, info.returnType);
 
     function resolveFields(
-      fieldsByTypeName: FieldsByTypeName,
-      type: GraphQLOutputType,
+      fieldsByTypeName: any,
+      type: any,
       parentTypeName?: string,
       fieldRoles: { [field: string]: string[] } = {},
     ) {
@@ -119,7 +128,7 @@ export class TokenGuard implements CanActivate {
       return fieldRoles;
     }
 
-    function getUnWrappingType(type: GraphQLOutputType): any {
+    function getUnWrappingType(type: any): any {
       if (isWrappingType(type)) {
         return getUnWrappingType(type.ofType);
       }

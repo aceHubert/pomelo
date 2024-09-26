@@ -1,4 +1,3 @@
-import { custom } from 'openid-client';
 import { NestModule, Module, DynamicModule, Provider, Inject, RequestMethod, MiddlewareConsumer } from '@nestjs/common';
 import { AuthorizationService } from './authroized.service';
 import { UserMiddleware } from './user.middleware';
@@ -19,10 +18,6 @@ export class AuthorizationModule implements NestModule {
   constructor(@Inject(AUTHORIZATION_OPTIONS) private readonly options: AuthorizationOptions) {}
 
   configure(consumer: MiddlewareConsumer) {
-    if (this.options.httpOptions) {
-      custom.setHttpOptionsDefaults(this.options.httpOptions);
-    }
-
     this.options.disableMiddleware !== true &&
       consumer.apply(UserMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
   }

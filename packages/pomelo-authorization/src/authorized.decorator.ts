@@ -1,5 +1,5 @@
 import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';
-import { Extensions } from '@nestjs/graphql';
+import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { TokenGuard } from './token.guard';
 import { getArrayFromOverloadedRest } from './utils/array-overload';
 import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from './constants';
@@ -35,6 +35,7 @@ export function Anonymous(): ClassDecorator & MethodDecorator {
  * @param others 更多角色
  */
 export function FieldAuthorized(role: string, ...others: string[]): PropertyDecorator {
+  const { Extensions } = loadPackage('@nestjs/graphql', 'FieldAuthorized', () => require('@nestjs/graphql'));
   const roles = [role].concat(others);
   return applyDecorators(
     Extensions({

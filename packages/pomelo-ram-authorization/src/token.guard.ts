@@ -7,9 +7,7 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
-import { GqlExecutionContext, GqlContextType } from '@nestjs/graphql';
-import { isObjectType, isInterfaceType, isWrappingType, GraphQLResolveInfo, GraphQLOutputType } from 'graphql';
-import { parse, FieldsByTypeName } from 'graphql-parse-resolve-info';
+import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { RamAuthorizationOptions } from './interfaces/ram-authorization-options.interface';
 import { getContextObject } from './utils/get-context-object';
 import { RAM_AUTHORIZATION_OPTIONS, RAM_AUTHORIZATION_ACTION_KEY } from './constants';
@@ -44,11 +42,14 @@ export class TokenGuard implements CanActivate {
       throw new ForbiddenException("Access denied, You don't have capability for this action!");
     }
 
-    const type = context.getType<GqlContextType>();
+    const type = context.getType<string>();
 
     // graphql 判断返回实体字段是否有权限
     if (type === 'graphql') {
-      const info = GqlExecutionContext.create(context).getInfo<GraphQLResolveInfo>();
+      const { GqlExecutionContext } = loadPackage('@nestjs/graphql', 'TokenRamAuthoricationGuard', () =>
+        require('@nestjs/graphql'),
+      );
+      const info = GqlExecutionContext.create(context).getInfo();
 
       /**
        * 这里未使用 FieldMiddleware 原因在于中间件对每个 field 是隔离的，当其中 field 验证失败时，ResoloveField 会继续执行
@@ -71,7 +72,15 @@ export class TokenGuard implements CanActivate {
    * 获取 Graphql Output fields 的角色权限
    * @param info GraphQLResolveInfo
    */
-  resolveGraphqlOutputFieldsAction(info: GraphQLResolveInfo): { [field: string]: string } {
+  resolveGraphqlOutputFieldsAction(info: any): { [field: string]: string } {
+    const { isObjectType, isInterfaceType, isWrappingType } = loadPackage(
+      'graphql',
+      'ResolveGraphqlOutputFieldsAction',
+      () => require('graphql'),
+    );
+    const { parse } = loadPackage('graphql-parse-resolve-info', 'ResolveGraphqlOutputFieldsAction', () =>
+      require('graphql-parse-resolve-info'),
+    );
     const parsedResolveInfoFragment = parse(info, { keepRoot: false, deep: true });
 
     if (!parsedResolveInfoFragment) {
@@ -79,14 +88,14 @@ export class TokenGuard implements CanActivate {
     }
 
     const rootFields = parsedResolveInfoFragment.fieldsByTypeName
-      ? (parsedResolveInfoFragment.fieldsByTypeName as FieldsByTypeName)
-      : (parsedResolveInfoFragment as FieldsByTypeName);
+      ? parsedResolveInfoFragment.fieldsByTypeName
+      : parsedResolveInfoFragment;
 
     return resolveFields(rootFields, info.returnType);
 
     function resolveFields(
-      fieldsByTypeName: FieldsByTypeName,
-      type: GraphQLOutputType,
+      fieldsByTypeName: any,
+      type: any,
       parentTypeName?: string,
       fieldAction: { [field: string]: string } = {},
     ) {
@@ -108,7 +117,7 @@ export class TokenGuard implements CanActivate {
       return fieldAction;
     }
 
-    function getUnWrappingType(type: GraphQLOutputType): any {
+    function getUnWrappingType(type: any): any {
       if (isWrappingType(type)) {
         return getUnWrappingType(type.ofType);
       }
@@ -123,6 +132,7 @@ export class TokenGuard implements CanActivate {
    * @returns
    */
   private hasRamPermission(user: Record<string, any>, action: string): boolean {
+    // TODO: RAM 策略判断
     console.log('ram check', user.ramsClaim, action);
     return true;
     // const hasRam = (userRamsClaim: string[]): boolean => {

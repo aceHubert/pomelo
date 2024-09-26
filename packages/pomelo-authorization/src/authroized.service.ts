@@ -1,6 +1,6 @@
-import { Issuer, Client } from 'openid-client';
 import { jwtVerify, createRemoteJWKSet, KeyLike } from 'jose';
 import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
+import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { AuthorizationOptions } from './interfaces/authorization-options.interface';
 import { Params, ChannelType } from './interfaces/multitenant.interface';
 import { AUTHORIZATION_OPTIONS } from './constants';
@@ -11,8 +11,8 @@ export class AuthorizationService {
   private readonly isMultitenant: boolean = false;
   private idpInfos: {
     [tokenName: string]: {
-      trustIssuer: Issuer<Client>;
-      client: Client;
+      trustIssuer: any;
+      client: any;
       getKey: ReturnType<typeof createRemoteJWKSet> | undefined;
     };
   } = {};
@@ -51,6 +51,9 @@ export class AuthorizationService {
             break;
         }
       }
+      const { Issuer, custom } = loadPackage('openid-client', 'AuthorizationService', () => require('openid-client'));
+      this.options.httpOptions && custom.setHttpOptionsDefaults(this.options.httpOptions);
+
       const trustIssuer = await Issuer.discover(issuer);
       const client = new trustIssuer.Client(clientMetadata);
 

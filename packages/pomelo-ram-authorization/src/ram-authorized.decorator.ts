@@ -1,5 +1,5 @@
 import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';
-import { Extensions } from '@nestjs/graphql';
+import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { TokenGuard } from './token.guard';
 import { RAM_AUTHORIZATION_ACTION_KEY } from './constants';
 
@@ -20,6 +20,7 @@ export function RamAuthorized(action: string): MethodDecorator {
  * @param action Action
  */
 export function FieldRamAuthorized(action: string): PropertyDecorator {
+  const { Extensions } = loadPackage('@nestjs/graphql', 'FieldRamAuthorized', () => require('@nestjs/graphql'));
   return applyDecorators(
     Extensions({
       action, // 授权策略
