@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger, INestApplication, NestHybridApplicationOptions } from '@nestjs/common';
 import { NestApplicationOptions } from '@nestjs/common/interfaces/nest-application-options.interface';
+import { GlobalPrefixOptions } from '@nestjs/common/interfaces/global-prefix-options.interface';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import {
   SwaggerModule,
@@ -33,7 +34,7 @@ export interface BootstrapOptions {
   /**
    * Global prefix for all routes.
    */
-  prefix?: string;
+  prefix?: string | ({ path: string } & GlobalPrefixOptions);
   /**
    * Enable cors for the application.
    * @default false
@@ -71,12 +72,12 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
     nestApplicationOptions: NestApplicationOptions = {},
     host: string | undefined,
     port: number | undefined,
-    prefix: string | undefined,
+    prefix: BootstrapOptions['prefix'],
     cors: BootstrapOptions['cors'],
     swagger: BootstrapOptions['swagger'],
     microserviceOptions: BootstrapOptions['microserviceService'],
     hybridOptions: BootstrapOptions['hybridOptions'];
-  if (Object.hasOwn(options, 'optionsFactory')) {
+  if (Object.prototype.hasOwnProperty.call(options, 'optionsFactory')) {
     ({ optionsFactory, ...nestApplicationOptions } = options as {
       optionsFactory: (app: NestApplication) => Promise<BootstrapOptions> | BootstrapOptions;
     } & NestApplicationOptions);
@@ -112,7 +113,17 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
   app.enableShutdownHooks();
 
   // add grobal prefix
-  prefix && app.setGlobalPrefix(prefix);
+  let globalPrefix: string | undefined;
+  if (prefix) {
+    if (typeof prefix === 'string') {
+      globalPrefix = prefix;
+      app.setGlobalPrefix(prefix);
+    } else {
+      const { path, ...options } = prefix;
+      globalPrefix = path;
+      app.setGlobalPrefix(path, options);
+    }
+  }
 
   // enable cors
   if (cors) {
@@ -132,7 +143,7 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
       configFactory: (() => Omit<OpenAPIObject, 'paths'>) | undefined,
       documentOptions: SwaggerDocumentOptions | undefined,
       customOptions: SwaggerCustomOptions | undefined;
-    if (Object.hasOwn(swagger, 'configFactory')) {
+    if (Object.prototype.hasOwnProperty.call(swagger, 'configFactory')) {
       ({ configFactory, path, documentOptions, ...customOptions } = swagger as {
         configFactory: () => Omit<OpenAPIObject, 'paths'>;
       } & Pick<SwaggerSimpleOptions, 'path' | 'documentOptions'> &
@@ -161,7 +172,9 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
   }
 
   await app.listen(port || 3000, host || '');
-  logger.log(`Service is running on: ${await app.getUrl()}${prefix ? ' with global prefix: ' + prefix : ''}`);
+  logger.log(
+    `Service is running on: ${await app.getUrl()}${globalPrefix ? ' with global prefix: ' + globalPrefix : ''}`,
+  );
 
   return app;
 }

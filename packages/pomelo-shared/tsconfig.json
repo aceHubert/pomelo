@@ -1,8 +1,8 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "esnext",
-    "lib": ["ESNext", "DOM"],
+    "target": "es2018",
+    "lib": ["ES2018", "ESNext.AsyncIterable", "DOM"],
     "baseUrl": ".",
     "outDir": "./dist",
     "skipLibCheck": true,

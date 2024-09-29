@@ -7,3 +7,5 @@ export * from './crypto.util';
 export * from './path.util';
 export * from './swagger-type.util';
 export * from './uuid.util';
+export * from './bootstrap.util';
+export * from './configuration.util';
