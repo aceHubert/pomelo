@@ -3,21 +3,12 @@ import * as fs from 'fs';
 import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import {
-  I18nModule,
-  // I18nMiddleware,
-  I18nContext,
-  I18nValidationPipe,
-  QueryResolver,
-  HeaderResolver,
-  AcceptLanguageResolver,
-  CookieResolver,
-  GraphQLWebsocketResolver,
-} from 'nestjs-i18n';
+import { I18nModule, I18nService, I18nValidationPipe } from 'nestjs-i18n';
+import { configuration } from '@ace-pomelo/shared/server';
 import { InfrastructureDatasourceModule } from '@/datasource/datasource.module';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
-import { configuration } from './common/utils/configuration.util';
+import { I18nTcpResolver } from './common/utils/i18n-server-tcp.util';
 import { SiteInitController } from './controllers/site-init.controller';
 import { CommentController } from './controllers/comment.controller';
 import { LinkController } from './controllers/link.controller';
@@ -28,7 +19,6 @@ import { TermTaxonomyController } from './controllers/term-taxonomy.controller';
 import { UserController } from './controllers/user.constroller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { envFilePaths } from './db.sync';
 
 // extends
 // eslint-disable-next-line import/order
@@ -38,7 +28,13 @@ import '@/common/extends/i18n.extend';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: envFilePaths,
+      expandVariables: true,
+      envFilePath: process.env.ENV_FILE
+        ? [process.env.ENV_FILE]
+        : (process.env.NODE_ENV === 'production'
+            ? ['.env.production', '.env']
+            : ['.env.development.local', '.env.development']
+          ).flatMap((file) => [path.join(__dirname, file), path.join(__dirname, '../', file)]),
       load: [configuration()],
     }),
     I18nModule.forRootAsync({
@@ -62,35 +58,37 @@ import '@/common/extends/i18n.extend';
             watch: isDebug,
           },
           logging: isDebug,
-          disableMiddleware: true,
         };
       },
-      resolvers: [
-        new GraphQLWebsocketResolver(),
-        new QueryResolver(['lang', 'locale']),
-        new HeaderResolver(['x-custom-lang', 'x-custom-locale']),
-        new CookieResolver(['lang', 'locale']),
-        new AcceptLanguageResolver(),
-      ],
+      resolvers: [new I18nTcpResolver(['lang', 'locale'])],
       inject: [ConfigService],
     }),
     InfrastructureDatasourceModule.registerAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService) => ({
+      useFactory: (config: ConfigService, i18n: I18nService) => ({
         isGlobal: true,
-        connection: config.getOrThrow('database.connection'),
-        tablePrefix: config.get('database.tablePrefix', ''),
-        translate: (key, fallback, args) => {
-          const i18n = I18nContext.current();
-          return (
-            i18n?.translate(key, {
-              defaultValue: fallback,
-              args,
-            }) ?? fallback
-          );
-        },
+        connection: config.get('INFRASTRUCTURE_DATABASE_CONNECTION')
+          ? config.get<string>('INFRASTRUCTURE_DATABASE_CONNECTION')!
+          : {
+              database: config.getOrThrow('INFRASTRUCTURE_DATABASE_NAME'),
+              username: config.getOrThrow('INFRASTRUCTURE_DATABASE_USERNAME'),
+              password: config.getOrThrow('INFRASTRUCTURE_DATABASE_PASSWORD'),
+              dialect: config.get('INFRASTRUCTURE_DATABASE_DIALECT', 'mysql'),
+              host: config.get('INFRASTRUCTURE_DATABASE_HOST', 'localhost'),
+              port: config.get('INFRASTRUCTURE_DATABASE_PORT', 3306),
+              define: {
+                charset: config.get('INFRASTRUCTURE_DATABASE_CHARSET', 'utf8'),
+                collate: config.get('INFRASTRUCTURE_DATABASE_COLLATE', ''),
+              },
+            },
+        tablePrefix: config.get('TABLE_PREFIX'),
+        translate: (key, fallback, args) =>
+          i18n.translate(key, {
+            defaultValue: fallback,
+            args,
+          }),
       }),
-      inject: [ConfigService],
+      inject: [ConfigService, I18nService],
     }),
   ],
   controllers: [

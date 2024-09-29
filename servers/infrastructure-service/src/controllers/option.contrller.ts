@@ -1,7 +1,6 @@
 import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { I18n, I18nContext } from 'nestjs-i18n';
-import { UserInputError, OptionPattern } from '@ace-pomelo/shared/server';
+import { OptionPattern } from '@ace-pomelo/shared/server';
 import { OptionDataSource, OptionModel } from '../datasource/index';
 import { ListOptionQueryPayload, NewOptionPayload, UpdateOptionPayload } from './payload/option.payload';
 
@@ -36,11 +35,8 @@ export class OptionController {
   }
 
   @MessagePattern(OptionPattern.NameExists)
-  isExists(@Payload('optionName') optionName: string, @I18n() i18n: I18nContext): Promise<boolean> {
-    if (!optionName)
-      throw new UserInputError(
-        i18n.tv('infrastructure-service.option_controller.is_exists_input_error', 'Option name is required'),
-      );
+  async isExists(@Payload('optionName') optionName: string): Promise<boolean> {
+    if (!optionName) return true;
 
     return this.optionDataSource.isExists(optionName);
   }

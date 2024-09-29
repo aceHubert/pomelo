@@ -36,9 +36,9 @@ describe('TemplateController', () => {
     postTemplateController = app.get<PostTemplateController>(PostTemplateController);
   });
 
-  // describe('getHello', () => {
-  //   it('should return "Hello World!"', () => {
-  //     expect(templateController.getHello()).toBe('Hello World!');
-  //   });
-  // });
+  describe('getHello', () => {
+    it('should return "Hello World!"', () => {
+      expect(postTemplateController.getOptions({})).toHaveLength(0);
+    });
+  });
 });

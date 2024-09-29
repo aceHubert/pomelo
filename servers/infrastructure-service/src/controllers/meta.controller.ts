@@ -1,7 +1,6 @@
 import { ParseIntPipe, ParseArrayPipe, DefaultValuePipe } from '@nestjs/common';
 import { Payload, MessagePattern } from '@nestjs/microservices';
-import { I18n, I18nContext } from 'nestjs-i18n';
-import { UserInputError, createMetaPattern } from '@ace-pomelo/shared/server';
+import { createMetaPattern } from '@ace-pomelo/shared/server';
 import { MetaDataSource } from '../datasource/index';
 import { NewMetaPayload } from './payload/meta.payload';
 
@@ -22,7 +21,7 @@ export function createMetaController<MetaModelType, NewMetaPayloadType>(modelNam
       @Payload('id', ParseIntPipe) id: number,
       @Payload('fields', new ParseArrayPipe({ items: String, optional: true }))
       fields: string[] = ['id', 'metaKey', 'metaValue'],
-    ) {
+    ): Promise<MetaModelType | undefined> {
       return this.metaDataSource.getMeta(id, fields);
     }
 
@@ -30,18 +29,15 @@ export function createMetaController<MetaModelType, NewMetaPayloadType>(modelNam
      * 获取元数据集合
      */
     @MessagePattern(pattern.GetMetas)
-    getMetas(
+    async getMetas(
       @Payload(`${modelName}Id`, new ParseIntPipe({ optional: true })) modelId: number,
       @Payload(`${modelName}Ids`, new ParseArrayPipe({ items: Number, optional: true })) modelIds: number[],
       @Payload('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
       @Payload('fields', new ParseArrayPipe({ items: String, optional: true }))
       fields: string[] = ['id', 'metaKey', 'metaValue'],
-      @I18n() i18n: I18nContext,
-    ) {
-      if (!modelId && !modelIds)
-        throw new UserInputError(
-          i18n.tv('infrastructure-service.meta_controller.get_metas_input_error', 'modelId or modelIds is required'),
-        );
+    ): Promise<MetaModelType[] | Record<number, MetaModelType[]>> {
+      if (!modelId && !modelIds) return [];
+
       return this.metaDataSource.getMetas(modelId ?? modelIds, metaKeys, fields);
     }
 

@@ -12,7 +12,7 @@ export class AllExceptionFilter extends BaseRpcExceptionFilter {
     const loggerArgs: [string, string?] = super.isError(exception) ? [exception.message, exception.stack] : [exception];
     this.logger.error(...loggerArgs);
 
-    const i18n = I18nContext.current();
+    const i18n = I18nContext.current(host);
 
     if (!(exception instanceof RpcException)) {
       const description = this.getDescriptionFromError(exception, i18n);

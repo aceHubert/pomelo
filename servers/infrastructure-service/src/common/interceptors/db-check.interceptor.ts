@@ -2,8 +2,9 @@ import path from 'path';
 import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, SetMetadata } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { RpcException } from '@nestjs/microservices';
-import { I18nContext, I18nTranslation } from 'nestjs-i18n';
+import { I18nContext } from 'nestjs-i18n';
 import { FileEnv } from '@ace-pomelo/shared/server';
 import { name } from '../../datasource/index';
 
@@ -21,8 +22,9 @@ export function IgnoreDbCheckInterceptor(): ClassDecorator & MethodDecorator {
 export class DbCheckInterceptor implements NestInterceptor {
   private fileEnv: FileEnv;
 
-  constructor(private readonly reflector: Reflector) {
-    this.fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
+  constructor(private readonly reflector: Reflector, readonly config: ConfigService) {
+    const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
+    this.fileEnv = FileEnv.getInstance(lockfile);
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -32,7 +34,7 @@ export class DbCheckInterceptor implements NestInterceptor {
     ]);
 
     if (!ignored || !NeedInitDatasCache) {
-      const i18n = I18nContext.current<I18nTranslation>(context);
+      const i18n = I18nContext.current(context);
       const needInitDatas = (NeedInitDatasCache = this.fileEnv.getEnv(name) === 'PENDING');
       if (needInitDatas) {
         throw new RpcException({

@@ -1,7 +1,6 @@
 import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { I18n, I18nContext } from 'nestjs-i18n';
-import { UserCapability, UserInputError, UserPattern } from '@ace-pomelo/shared/server';
+import { UserCapability, UserPattern, ValidatePayloadExistsPipe } from '@ace-pomelo/shared/server';
 import { UserDataSource, UserModel, PagedUserModel, UserMetaModel, NewUserMetaInput } from '../datasource/index';
 import { Nullable } from '../types';
 import { createMetaController } from './meta.controller';
@@ -47,28 +46,16 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
 
   @MessagePattern(UserPattern.GetEmail)
   getEmail(
-    @Payload() payload: IdOrUserNamePayload,
-    @I18n() i18n: I18nContext,
+    @Payload(new ValidatePayloadExistsPipe({ oneOf: ['id', 'username'] })) payload: IdOrUserNamePayload,
   ): Promise<Pick<UserModel, 'id' | 'email'> | undefined> {
-    if (payload.id || payload.username) {
-      return this.userDataSource.getEmail(payload.id || payload.username!);
-    }
-    throw new UserInputError(
-      i18n.tv('infrastructure-service.user_controller.get_email_input_error', 'id or username is required'),
-    );
+    return this.userDataSource.getEmail(payload.id || payload.username!);
   }
 
   @MessagePattern(UserPattern.GetMobile)
   getMobile(
-    @Payload() payload: IdOrUserNamePayload,
-    @I18n() i18n: I18nContext,
+    @Payload(new ValidatePayloadExistsPipe({ oneOf: ['id', 'username'] })) payload: IdOrUserNamePayload,
   ): Promise<Pick<UserModel, 'id' | 'mobile'> | undefined> {
-    if (payload.id || payload.username) {
-      return this.userDataSource.getMobile(payload.id || payload.username!);
-    }
-    throw new UserInputError(
-      i18n.tv('infrastructure-service.user_controller.get_mobile_input_error', 'id or username is required'),
-    );
+    return this.userDataSource.getMobile(payload.id || payload.username!);
   }
 
   @MessagePattern(UserPattern.GetCapabilities)
@@ -117,31 +104,22 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
   }
 
   @MessagePattern(UserPattern.LoginNameExists)
-  isLoginNameExists(@Payload('loginName') loginName: string, @I18n() i18n: I18nContext): Promise<boolean> {
-    if (!loginName)
-      throw new UserInputError(
-        i18n.tv('infrastructure-service.user_controller.is_login_name_exists_input_error', 'loginName is required'),
-      );
+  async isLoginNameExists(@Payload('loginName') loginName: string): Promise<boolean> {
+    if (!loginName) return true;
 
     return this.userDataSource.isLoginNameExists(loginName);
   }
 
   @MessagePattern(UserPattern.MobileExists)
-  isMobileExists(@Payload('mobile') mobile: string, @I18n() i18n: I18nContext): Promise<boolean> {
-    if (!mobile)
-      throw new UserInputError(
-        i18n.tv('infrastructure-service.user_controller.is_mobile_exists_input_error', 'mobile is required'),
-      );
+  async isMobileExists(@Payload('mobile') mobile: string): Promise<boolean> {
+    if (!mobile) return true;
 
     return this.userDataSource.isMobileExists(mobile);
   }
 
   @MessagePattern(UserPattern.EmailExists)
-  isEmailExists(@Payload('email') email: string, @I18n() i18n: I18nContext): Promise<boolean> {
-    if (!email)
-      throw new UserInputError(
-        i18n.tv('infrastructure-service.user_controller.is_email_exists_input_error', 'email is required'),
-      );
+  async isEmailExists(@Payload('email') email: string): Promise<boolean> {
+    if (!email) return true;
 
     return this.userDataSource.isEmailExists(email);
   }
@@ -174,15 +152,10 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
   }
 
   @MessagePattern(UserPattern.UpdatePassword)
-  updateLoginPwd(@Payload() payload: UpdateLoginPwdPayload, @I18n() i18n: I18nContext): Promise<void> {
-    if (payload.id) {
-      return this.userDataSource.updateLoginPwd(payload.id, payload.oldPwd, payload.newPwd);
-    } else if (payload.username) {
-      return this.userDataSource.updateLoginPwd(payload.username, payload.oldPwd, payload.newPwd);
-    }
-    throw new UserInputError(
-      i18n.tv('infrastructure-service.user_controller.update_login_pwd_input_error', 'id or username is required'),
-    );
+  updateLoginPwd(
+    @Payload(new ValidatePayloadExistsPipe({ oneOf: ['id', 'username'] })) payload: UpdateLoginPwdPayload,
+  ): Promise<void> {
+    return this.userDataSource.updateLoginPwd(payload.id || payload.username!, payload.oldPwd, payload.newPwd);
   }
 
   @MessagePattern(UserPattern.ResetPassword)

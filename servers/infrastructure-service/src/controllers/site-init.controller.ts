@@ -1,6 +1,7 @@
 import path from 'path';
 import { UniqueConstraintError } from 'sequelize';
 import { Controller, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   md5,
@@ -23,15 +24,35 @@ import { SiteInitPayload } from './payload/site-init.payload';
 @Controller()
 export class SiteInitController {
   private logger = new Logger(SiteInitController.name, { timestamp: true });
+  private readonly adminLoginName = 'admin';
   private readonly fileEnv: FileEnv;
 
-  constructor(private readonly infrastructureDatasourceService: InfrastructureDatasourceService) {
-    this.fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
+  constructor(
+    private readonly infrastructureDatasourceService: InfrastructureDatasourceService,
+    readonly config: ConfigService,
+  ) {
+    const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
+    this.fileEnv = FileEnv.getInstance(lockfile);
+  }
+
+  private checkAdminExists() {
+    return this.infrastructureDatasourceService.models.Users.count({ where: { loginName: this.adminLoginName } }).then(
+      (count) => count > 0,
+    );
   }
 
   @MessagePattern(SiteInitPattern.IsRequired)
-  isRequired() {
-    return this.fileEnv.getEnv(name) === 'PENDING';
+  async isRequired() {
+    if (this.fileEnv.getEnv(name) === 'PENDING') {
+      if (!(await this.checkAdminExists())) {
+        this.fileEnv.setEnv(name, version);
+        this.logger.debug('Datas already initialized!');
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -39,14 +60,14 @@ export class SiteInitController {
    */
   @MessagePattern(SiteInitPattern.Start)
   async start(@Payload() payload: SiteInitPayload) {
-    if (this.isRequired()) {
+    if (await this.isRequired()) {
       this.logger.debug('Start to initialize datas!');
       try {
         const timezoneOffset = -new Date().getTimezoneOffset();
         await this.infrastructureDatasourceService.initDatas({
           users: [
             {
-              loginName: 'admin',
+              loginName: this.adminLoginName,
               loginPwd: md5(payload.password),
               niceName: 'Admin',
               displayName: 'Admin',

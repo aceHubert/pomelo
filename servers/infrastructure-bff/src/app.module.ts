@@ -23,11 +23,10 @@ import {
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
-import { normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule, AuthorizationService } from '@ace-pomelo/authorization';
+import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import { AuthorizationModule, AuthorizationService, getPublicKey } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
-import { configuration } from './common/utils/configuration.util';
-import { ErrorHandlerClientTCP } from './common/utils/error-handler-client-tcp.util';
+import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
 import { MessageModule } from './messages/message.module';
@@ -52,11 +51,13 @@ const logger = new Logger('AppModule', { timestamp: true });
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      expandVariables: true,
       envFilePath: process.env.ENV_FILE
         ? [process.env.ENV_FILE]
-        : process.env.NODE_ENV === 'production'
-        ? ['.env.production', '.env']
-        : ['.env.development.local', '.env.development'],
+        : (process.env.NODE_ENV === 'production'
+            ? ['.env.production', '.env']
+            : ['.env.development.local', '.env.development']
+          ).flatMap((file) => [path.join(__dirname, file), path.join(__dirname, '../', file)]),
       load: [configuration()],
     }),
     ServeStaticModule.forRootAsync({
@@ -111,6 +112,7 @@ const logger = new Logger('AppModule', { timestamp: true });
             options: {
               host: config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
               port: config.getOrThrow('INFRASTRUCTURE_SERVICE_PORT'),
+              serializer: new I18nSerializer(),
             },
           }),
           inject: [ConfigService],
@@ -119,17 +121,24 @@ const logger = new Logger('AppModule', { timestamp: true });
     }),
     AuthorizationModule.forRootAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService) => ({
-        issuer: config.getOrThrow('OIDC_ISSUER'),
-        clientMetadata: {
-          client_id: config.getOrThrow('OIDC_CLIENT_ID'),
-          client_secret: config.get('OIDC_CLIENT_SECRET'),
-        },
-        useJWKS: true,
-        httpOptions: {
-          timeout: 20000,
-        },
-      }),
+      useFactory: async (config: ConfigService) => {
+        const {
+          issuer,
+          useJWKS = true,
+          httpOptions = {},
+          ...clientMetadata
+        } = config.get<Record<string, any>>('OIDC_CONFIG', {});
+        return {
+          issuer,
+          clientMetadata: clientMetadata as any,
+          useJWKS,
+          publicKey: await getPublicKey(config.get('PUBLIC_KEY')),
+          httpOptions: {
+            timeout: 20000,
+            ...httpOptions,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     RamAuthorizationModule.forRoot({
@@ -143,7 +152,7 @@ const logger = new Logger('AppModule', { timestamp: true });
         const graphqlPath = config.get<string>('graphql.path', '/graphql');
         // https://github.com/nestjs/graphql/issues/2477
         const graphqlSubscriptionPath = `${normalizeRoutePath(
-          config.get<string>('webServer.globalPrefixUri', ''),
+          config.get<string>('server.globalPrefixUri', ''),
         )}${config.get<string>('graphql.subscription_path', graphqlPath)}`;
         return {
           debug: isDebug,

@@ -1,5 +1,5 @@
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.js';
-import { Logger } from '@nestjs/common';
+import { Logger, RequestMethod } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
@@ -17,10 +17,10 @@ bootstrap<NestExpressApplication>(AppModule, {
   optionsFactory: (app) => {
     const configService = app.get(ConfigService);
 
-    const host = configService.get<string>('webServer.host', '');
-    const port = configService.get<number>('webServer.port', 3000);
-    const cors = configService.get<boolean | CorsOptions>('webServer.cors', false);
-    globalPrefix = normalizeRoutePath(configService.get<string>('webServer.globalPrefixUri', ''));
+    const host = configService.get<string>('server.host', '');
+    const port = configService.get<number>('server.port', 3000);
+    const cors = configService.get<boolean | CorsOptions>('server.cors', false);
+    globalPrefix = normalizeRoutePath(configService.get<string>('server.globalPrefixUri', ''));
     isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
     swaggerPath = normalizeRoutePath(configService.get<string>('swagger.path', '/doc'));
     isGraphqlDebug = configService.get<boolean>('graphql.debug', false);
@@ -36,8 +36,8 @@ bootstrap<NestExpressApplication>(AppModule, {
     app.use(
       globalPrefix + graphqlPath,
       graphqlUploadExpress({
-        maxFileSize: configService.get<number>('upload.maxFileSize'),
-        maxFiles: configService.get<number>('upload.maxFiles'),
+        maxFileSize: configService.get<number>('upload.maxFileSize', 1024 * 1024 * 10),
+        maxFiles: configService.get<number>('upload.maxFiles', 10),
       }),
     );
 
@@ -45,7 +45,15 @@ bootstrap<NestExpressApplication>(AppModule, {
       host,
       port,
       cors,
-      prefix: globalPrefix,
+      prefix: globalPrefix
+        ? {
+            path: globalPrefix,
+            exclude: [
+              { path: '', method: RequestMethod.GET },
+              { path: 'health', method: RequestMethod.GET },
+            ],
+          }
+        : void 0,
       swagger: isSwaggerDebug
         ? {
             path: swaggerPath,
@@ -59,20 +67,6 @@ bootstrap<NestExpressApplication>(AppModule, {
                 )
                 .setVersion(version)
                 .addBearerAuth()
-                .addOAuth2({
-                  type: 'oauth2',
-                  flows: {
-                    authorizationCode: {
-                      authorizationUrl: configService.get<string>('OIDC_ISSUER') + '/connect/authorize',
-                      tokenUrl: configService.get<string>('OIDC_ISSUER') + '/connect/token',
-                      scopes: {
-                        openid: 'openid',
-                        profile: 'profile',
-                      },
-                    },
-                  },
-                  // openIdConnectUrl: configService.get<string>('OIDC_ISSUER') + '/.well-known/openid-configuration',
-                })
                 .addTag('options', 'Option configs.')
                 .addTag('templates', 'Template common actions.')
                 .addTag('templates/form', 'From template.')
@@ -84,12 +78,6 @@ bootstrap<NestExpressApplication>(AppModule, {
                 // .addTag('submodules', 'Micro front-end sub modules.')
                 .build(),
             useGlobalPrefix: true,
-            swaggerOptions: {
-              initOAuth: {
-                clientId: configService.get<string>('OIDC_CLIENT_ID'),
-                scopes: ['openid', 'profile'],
-              },
-            },
           }
         : void 0,
     };

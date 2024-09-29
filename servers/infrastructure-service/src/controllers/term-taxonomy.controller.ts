@@ -1,7 +1,6 @@
 import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { I18n, I18nContext } from 'nestjs-i18n';
-import { UserInputError, TermTaxonomyPattern } from '@ace-pomelo/shared/server';
+import { TermTaxonomyPattern } from '@ace-pomelo/shared/server';
 import { TermTaxonomyDataSource, TermTaxonomyModel, TermRelationshipModel } from '../datasource/index';
 import { createMetaController } from './meta.controller';
 import {
@@ -27,19 +26,12 @@ export class TermTaxonomyController extends createMetaController('termTaxonomy')
   }
 
   @MessagePattern(TermTaxonomyPattern.GetList)
-  getList(
+  async getList(
     @Payload('parentIds', new ParseArrayPipe({ items: Number, optional: true })) parentIds: number[],
     @Payload('query') query: ListTermTaxonomyQueryPayload,
     @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-    @I18n() i18n: I18nContext,
-  ): Promise<Record<number, TermTaxonomyModel[]>> {
-    if (!parentIds && !query)
-      throw new UserInputError(
-        i18n.tv(
-          'infrastructure-service.term_taxonomy_controller.get_list_input_error',
-          'parentIds or query is required',
-        ),
-      );
+  ): Promise<TermTaxonomyModel[] | Record<number, TermTaxonomyModel[]>> {
+    if (!parentIds && !query) return [];
     return this.termTaxonomyDataSource.getList(parentIds || query, fields);
   }
 

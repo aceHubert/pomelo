@@ -755,19 +755,11 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 通过用户Id修改密码
-   * @param id 用户 Id
+   * 通过户Id/用户名修改密码
+   * @param idOrUsername 用户 Id/登录名/邮箱/手机号码
    * @param oldPwd 旧密码
    * @param newPwd 新密码
    */
-  async updateLoginPwd(id: number, oldPwd: string, newPwd: string): Promise<void>;
-  /**
-   * 通过用户名修改密码
-   * @param username 登录名/邮箱/手机号码
-   * @param oldPwd 旧密码
-   * @param newPwd 新密码
-   */
-  async updateLoginPwd(username: string, oldPwd: string, newPwd: string): Promise<void>;
   async updateLoginPwd(idOrUsername: number | string, oldPwd: string, newPwd: string): Promise<void> {
     const id = typeof idOrUsername === 'number' ? idOrUsername : undefined,
       username = id ? undefined : (idOrUsername as string),

@@ -66,7 +66,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       _query = {
         parentId: parentIdsOrQuery,
       };
-      fields.push('parentId');
+      !fields.includes('parentId') && fields.push('parentId');
     }
     if (!fields.includes('id')) {
       // 主键(meta/children 查询)

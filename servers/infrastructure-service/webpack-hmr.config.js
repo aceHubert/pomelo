@@ -9,7 +9,7 @@ module.exports = function (options) {
     devtool: 'inline-source-map',
     externals: [
       nodeExternals({
-        allowlist: ['webpack/hot/poll?100', 'utils/configuration.utils'],
+        allowlist: ['webpack/hot/poll?100'],
         modulesFromFile: true,
       }),
     ],
