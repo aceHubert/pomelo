@@ -342,6 +342,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
                 title: i18n.tv(
                   'identity-server.oidc.config.logout.confirm_title',
                   `Do you want to sign-out from ${ctx.host}?`,
+                  {
+                    args: { host: ctx.host },
+                  },
                 ),
                 form,
                 confirmBtnText: i18n.tv('identity-server.oidc.config.logout.confirm_btn_text', 'Yes, sign me out'),

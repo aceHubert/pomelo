@@ -1,13 +1,13 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { APP_PIPE, APP_FILTER, APP_INTERCEPTOR, HttpAdapterHost } from '@nestjs/core';
+import { createLocalJWKSet } from 'jose';
+import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule } from '@nestjs/microservices';
 import {
   I18nModule,
   I18nService,
-  I18nContext,
   I18nValidationPipe,
   QueryResolver,
   HeaderResolver,
@@ -20,12 +20,10 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 // import { print, parse, getIntrospectionQuery } from 'graphql';
 import { OidcModule } from 'nest-oidc-provider';
-import { normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule } from '@ace-pomelo/authorization';
+import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import { AuthorizationModule, getJWKS } from '@ace-pomelo/authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
-import { configuration } from './common/utils/configuration.util';
-import { ErrorHandlerClientTCP } from './common/utils/error-handler-client-tcp.util';
-import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
+import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { IdentityDatasourceModule } from './datasource/datasource.module';
@@ -37,8 +35,6 @@ import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { envFilePaths } from './db.sync';
-import { getJWKS, getKey } from './keys';
 
 // extends
 import './common/extends/i18n.extend';
@@ -50,7 +46,13 @@ const logger = new Logger('AppModule', { timestamp: true });
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: envFilePaths,
+      expandVariables: true,
+      envFilePath: process.env.ENV_FILE
+        ? [process.env.ENV_FILE]
+        : (process.env.NODE_ENV === 'production'
+            ? ['.env.production', '.env']
+            : ['.env.development.local', '.env.development']
+          ).flatMap((file) => [path.join(__dirname, file), path.join(__dirname, '../', file)]),
       load: [configuration()],
     }),
     StorageModule.forRootAsync({
@@ -106,6 +108,7 @@ const logger = new Logger('AppModule', { timestamp: true });
             options: {
               host: config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
               port: config.getOrThrow('INFRASTRUCTURE_SERVICE_PORT'),
+              serializer: new I18nSerializer(),
             },
           }),
           inject: [ConfigService],
@@ -133,7 +136,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => ({
-        publicKey: await getKey(config.get('OIDC_PRIVATE_KEY')),
+        publicKey: createLocalJWKSet(await getJWKS(config.get('PRIVATE_KEY'))),
       }),
       inject: [ConfigService],
     }),
@@ -143,21 +146,30 @@ const logger = new Logger('AppModule', { timestamp: true });
     }),
     IdentityDatasourceModule.registerAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService) => ({
+      useFactory: (config: ConfigService, i18n: I18nService) => ({
         isGlobal: true,
-        connection: config.getOrThrow('database.connection'),
-        tablePrefix: config.get('database.tablePrefix', ''),
-        translate: (key, fallback, args) => {
-          const i18n = I18nContext.current();
-          return (
-            i18n?.translate(key, {
-              defaultValue: fallback,
-              args,
-            }) ?? fallback
-          );
-        },
+        connection: config.get('IDENTITY_DATABASE_CONNECTION')
+          ? config.get<string>('IDENTITY_DATABASE_CONNECTION')!
+          : {
+              database: config.getOrThrow('IDENTITY_DATABASE_NAME'),
+              username: config.getOrThrow('IDENTITY_DATABASE_USERNAME'),
+              password: config.getOrThrow('IDENTITY_DATABASE_PASSWORD'),
+              dialect: config.get('IDENTITY_DATABASE_DIALECT', 'mysql'),
+              host: config.get('IDENTITY_DATABASE_HOST', 'localhost'),
+              port: config.get('IDENTITY_DATABASE_PORT', 3306),
+              define: {
+                charset: config.get('IDENTITY_DATABASE_CHARSET', 'utf8'),
+                collate: config.get('IDENTITY_DATABASE_COLLATE', ''),
+              },
+            },
+        tablePrefix: config.get('TABLE_PREFIX'),
+        translate: (key, fallback, args) =>
+          i18n?.translate(key, {
+            defaultValue: fallback,
+            args,
+          }),
       }),
-      inject: [ConfigService],
+      inject: [ConfigService, I18nService],
     }),
     ApiModule,
     AccountProviderModule.forRootAsync({
@@ -175,11 +187,11 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       useFactory: async (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('debug', false),
-        issuer: `${config.getOrThrow('ORIGIN')}${normalizeRoutePath(
-          config.get<string>('webServer.globalPrefixUri', ''),
+        issuer: `${config.getOrThrow('server.origin')}${normalizeRoutePath(
+          config.get<string>('server.globalPrefixUri', ''),
         )}`,
-        path: normalizeRoutePath(config.get('OIDC_PATH', '/oauth2')),
-        jwks: await getJWKS(config.get('OIDC_PRIVATE_KEY')),
+        path: normalizeRoutePath(config.get('OIDC_PATH', '/oidc')),
+        jwks: await getJWKS(config.get('PRIVATE_KEY')),
         storage: storageOptions.use,
       }),
       inject: [ConfigService, STORAGE_OPTIONS],
@@ -202,10 +214,6 @@ const logger = new Logger('AppModule', { timestamp: true });
         });
       },
       inject: [ConfigService],
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: DbCheckInterceptor,
     },
     {
       provide: APP_FILTER,

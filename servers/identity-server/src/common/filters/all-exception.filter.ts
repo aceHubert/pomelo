@@ -14,7 +14,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     // log
     this.logger.error(exception, exception.stack);
 
-    const i18n = I18nContext.current();
+    const i18n = I18nContext.current(host);
     switch (host.getType()) {
       case 'http':
         const http = host.switchToHttp();

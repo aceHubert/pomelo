@@ -29,7 +29,7 @@
     "config": {
       "logout": {
         "confirm_page_title": "退出确认",
-        "confirm_title": "您确认退出{ctx.host}?",
+        "confirm_title": "您确认退出{host}?",
         "confirm_btn_text": "是，退出",
         "cancel_btn_text": "否，保持当前登录",
         "success_page_title": "退出成功",

@@ -6,7 +6,7 @@ export class MemeryStorage extends StorageAdpter {
   constructor(options?: LRUCache.Options<string, any, any>) {
     super();
 
-    this.storage = new LRUCache<string, any>({ max: Number.MAX_VALUE, ...options });
+    this.storage = new LRUCache<string, any>({ max: 1000, ...options });
 
     this.logger.debug('Use memory cache');
   }

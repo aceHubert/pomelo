@@ -107,7 +107,7 @@ export class AccountConfigService implements AccountProviderOptionsFactory {
           const user = await this.basicService
             .send<{ id: number } | false>(UserPattern.Verify, {
               username: loginName,
-              password,
+              password: md5(password),
             })
             .lastValue();
           if (user) {

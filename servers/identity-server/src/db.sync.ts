@@ -1,6 +1,4 @@
 import path from 'path';
-import fs from 'fs';
-import dotenv from 'dotenv';
 import { UniqueConstraintError } from 'sequelize';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -10,40 +8,27 @@ import { version } from './version';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
-// env file
-const envFilePaths = process.env.ENV_FILE
-  ? [process.env.ENV_FILE]
-  : process.env.NODE_ENV === 'production'
-  ? ['.env.production', '.env']
-  : ['.env.development.local', '.env.development'];
-let config: Record<string, any> = {};
-for (const envFilePath of envFilePaths) {
-  if (fs.existsSync(envFilePath)) {
-    config = Object.assign(dotenv.parse(fs.readFileSync(envFilePath)), config);
-  }
-}
-const configService = new ConfigService(config);
-
 // sync database
-async function syncDatabase() {
-  const connection = configService.get('IDENTITY_DATABASE_CONNECTION')
-    ? configService.get('IDENTITY_DATABASE_CONNECTION')
+export async function syncDatabase(config: ConfigService) {
+  const connection = config.get('IDENTITY_DATABASE_CONNECTION')
+    ? config.get('IDENTITY_DATABASE_CONNECTION')
     : {
-        database: configService.get('IDENTITY_DATABASE_NAME'),
-        username: configService.get('IDENTITY_DATABASE_USERNAME'),
-        password: configService.get('IDENTITY_DATABASE_PASSWORD'),
-        dialect: configService.get('IDENTITY_DATABASE_DIALECT', 'mysql'),
-        host: configService.get('IDENTITY_DATABASE_HOST', 'localhost'),
-        port: configService.get('IDENTITY_DATABASE_PORT', 3306),
+        database: config.getOrThrow('IDENTITY_DATABASE_NAME'),
+        username: config.getOrThrow('IDENTITY_DATABASE_USERNAME'),
+        password: config.getOrThrow('IDENTITY_DATABASE_PASSWORD'),
+        dialect: config.get('IDENTITY_DATABASE_DIALECT', 'mysql'),
+        host: config.get('IDENTITY_DATABASE_HOST', 'localhost'),
+        port: config.get('IDENTITY_DATABASE_PORT', 3306),
         define: {
-          charset: configService.get('IDENTITY_DATABASE_CHARSET', 'utf8'),
-          collate: configService.get('IDENTITY_DATABASE_COLLATE', ''),
+          charset: config.get('IDENTITY_DATABASE_CHARSET', 'utf8'),
+          collate: config.get('IDENTITY_DATABASE_COLLATE', ''),
         },
       };
-  const tablePrefix = configService.get('TABLE_PREFIX');
+  const tablePrefix = config.get('TABLE_PREFIX');
 
   // db lock file
-  const fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
+  const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
+  const fileEnv = FileEnv.getInstance(lockfile);
 
   // 初始化数据库
   const dbManager =
@@ -69,11 +54,8 @@ async function syncDatabase() {
   if (needInitDates) {
     logger.debug('Start to initialize datas!');
     try {
-      const origin = configService.get(
-        'ORIGIN',
-        'http://localhost:' + configService.get<number>('webServer.port', 3000),
-      );
-      const webURL = configService.get('WEB_URL', origin);
+      const origin = config.get('server.origin', 'http://localhost:' + config.get<number>('server.port', 3000));
+      const webURL = config.get('WEB_URL', origin);
 
       await dbManager.initDatas({
         apiResources: [],
@@ -195,17 +177,16 @@ async function syncDatabase() {
       });
       fileEnv.setEnv(name, version);
       logger.debug('Initialize datas successful!');
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof UniqueConstraintError) {
         fileEnv.setEnv(name, version);
         logger.debug('Datas already initialized!');
       } else {
-        throw err;
+        logger.error(err.message);
+        process.exit(1);
       }
     }
   } else {
     logger.debug('Datas already initialized!');
   }
 }
-
-export { envFilePaths, syncDatabase };
