@@ -66,6 +66,7 @@ class LockFile {
 
 export class FileEnv {
   private static instance: FileEnv;
+  private static instances: Record<string, FileEnv> = {};
   private readonly lockFile: LockFile;
 
   private constructor(fileName?: string) {
@@ -73,10 +74,11 @@ export class FileEnv {
   }
 
   static getInstance(fileName?: string) {
-    if (!FileEnv.instance) {
-      FileEnv.instance = new FileEnv(fileName);
+    if (fileName) {
+      return FileEnv.instances[fileName] || (FileEnv.instances[fileName] = new FileEnv(fileName));
+    } else {
+      return FileEnv.instance || (FileEnv.instance = new FileEnv(fileName));
     }
-    return FileEnv.instance;
   }
 
   hasEnv(key: string) {
