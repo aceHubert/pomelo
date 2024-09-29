@@ -4,9 +4,9 @@
 
   var env = window._ENV || {};
 
-  // env.basicApiBase = '/basic/api';
-  env.basicGraphqlBase = '/basic/graphql';
-  env.identityGraphqlBase = '/identity/graphql';
+  // env.basicApiBase = '/pomelo/basic/api';
+  env.basicGraphqlBase = '/pomelo/basic/graphql';
+  env.identityGraphqlBase = '/pomelo/identity/graphql';
 
   env.oidc = {
     authority: 'http://localhost:5001/oauth2',

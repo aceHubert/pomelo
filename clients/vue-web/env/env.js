@@ -5,9 +5,9 @@
 
   var env = window._ENV || {};
 
-  // env.basicApiBase = baseUrl + '/basic/api';
-  env.basicGraphqlBase = baseUrl + '/basic/graphql';
-  env.identityGraphqlBase = baseUrl + '/identity/graphql';
+  // env.basicApiBase = baseUrl + '/action/basic/api';
+  env.basicGraphqlBase = baseUrl + '/action/basic/graphql';
+  env.identityGraphqlBase = baseUrl + '/action/identity/graphql';
 
   env.oidc = {
     authority: baseUrl + '/oauth2',

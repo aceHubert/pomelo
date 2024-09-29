@@ -19,7 +19,7 @@ const devHost = getEnv('DEV_HOST', 'localhost');
 const devPort = Number(getEnv('DEV_PORT', 3000));
 const isMock = getEnv('MOCK') === 'true';
 const isProxy = isMock || getEnv('PROXY') === 'true';
-const proxyBasicPrefix = getEnv('PROXY_BASIC_PREFIX', 'http://localhost:9080/pomelo');
+const proxyBasicPrefix = getEnv('PROXY_BASIC_PREFIX', 'http://localhost:9080');
 const isHttps = getEnv('HTTPS') === 'true';
 const proxyTarget = (to) => (isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to);
 
@@ -102,11 +102,11 @@ module.exports = defineConfig({
     proxy:
       isProxy && !isProd
         ? {
-            '/basic': {
+            '/pomelo/basic': {
               target: proxyTarget(proxyBasicPrefix),
               changeOrigin: true,
             },
-            '/identity': {
+            '/pomelo/identity': {
               target: proxyTarget(proxyBasicPrefix),
               changeOrigin: true,
             },
