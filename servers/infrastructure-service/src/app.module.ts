@@ -46,7 +46,7 @@ import '@/common/extends/i18n.extend';
           appenders: {
             dateFile: {
               type: 'dateFile',
-              filename: `./logs/infrastructure-service.log`,
+              filename: config.get('LOG_FILENAME', './logs/infrastructure-service.log'),
               keepFileExt: true,
               layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
             },
@@ -54,8 +54,8 @@ import '@/common/extends/i18n.extend';
           categories: {
             default: {
               enableCallStack: true,
-              appenders: ['stdout', 'dateFile'],
-              level: isDebug ? 'debug' : 'info',
+              appenders: config.get('LOG_APPENDERS', ['stdout', 'dateFile']),
+              level: config.get('LOG_LEVEL', isDebug ? 'debug' : 'info'),
             },
           },
           pm2: !isDebug,

@@ -1,8 +1,8 @@
 module.exports = {
   client: {
     service: {
-      name: 'my-graphql-app',
-      url: 'http://localhost:5002/graphql',
+      name: 'basic-bff',
+      url: 'http://localhost:5003/graphql',
     },
     includes: ['./src/**/*.ts'],
   },

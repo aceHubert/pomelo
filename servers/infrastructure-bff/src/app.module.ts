@@ -69,7 +69,7 @@ const logger = new Logger('AppModule', { timestamp: true });
           appenders: {
             dateFile: {
               type: 'dateFile',
-              filename: `./logs/infrastructure-bff.log`,
+              filename: config.get('LOG_FILENAME', './logs/infrastructure-bff.log'),
               keepFileExt: true,
               layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
             },
@@ -77,8 +77,8 @@ const logger = new Logger('AppModule', { timestamp: true });
           categories: {
             default: {
               enableCallStack: true,
-              appenders: ['stdout', 'dateFile'],
-              level: isDebug ? 'debug' : 'info',
+              appenders: config.get('LOG_APPENDERS', ['stdout', 'dateFile']),
+              level: config.get('LOG_LEVEL', isDebug ? 'debug' : 'info'),
             },
           },
           pm2: !isDebug,
