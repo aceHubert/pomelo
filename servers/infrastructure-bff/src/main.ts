@@ -36,6 +36,15 @@ bootstrap<NestExpressApplication>(AppModule, {
       return true;
     });
 
+    // ignore favicon.ico
+    app.use(function (req: any, res: any, next: Function) {
+      if (req.originalUrl && req.originalUrl.split('/').pop() === 'favicon.ico') {
+        return res.sendStatus(204);
+      }
+
+      next();
+    });
+
     // graphql upload file
     app.use(
       globalPrefix + graphqlPath,

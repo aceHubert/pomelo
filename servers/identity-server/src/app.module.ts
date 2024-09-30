@@ -5,6 +5,13 @@ import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule } from '@nestjs/microservices';
+import { HttpModule } from '@nestjs/axios';
+import { TerminusModule } from '@nestjs/terminus';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { GraphQLModule } from '@nestjs/graphql';
+import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
+// import { print, parse, getIntrospectionQuery } from 'graphql';
+import { OidcModule } from 'nest-oidc-provider';
 import {
   I18nModule,
   I18nService,
@@ -15,11 +22,6 @@ import {
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { GraphQLModule } from '@nestjs/graphql';
-import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
-// import { print, parse, getIntrospectionQuery } from 'graphql';
-import { OidcModule } from 'nest-oidc-provider';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
 import { AuthorizationModule, getJWKS } from '@ace-pomelo/nestjs-authorization';
@@ -45,6 +47,8 @@ const logger = new Logger('AppModule', { timestamp: true });
 
 @Module({
   imports: [
+    HttpModule,
+    TerminusModule,
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,

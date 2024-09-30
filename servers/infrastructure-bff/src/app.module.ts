@@ -5,9 +5,11 @@ import { APP_PIPE, APP_FILTER, ModuleRef } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ClientsModule } from '@nestjs/microservices';
 import { MulterModule } from '@nestjs/platform-express';
+import { HttpModule } from '@nestjs/axios';
+import { TerminusModule } from '@nestjs/terminus';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 // import { print, parse, getIntrospectionQuery } from 'graphql';
@@ -50,6 +52,8 @@ const logger = new Logger('AppModule', { timestamp: true });
 
 @Module({
   imports: [
+    HttpModule,
+    TerminusModule,
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,

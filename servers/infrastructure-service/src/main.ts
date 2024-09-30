@@ -32,6 +32,15 @@ bootstrap(AppModule, {
     isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
     swaggerPath = normalizeRoutePath(configService.get<string>('swagger.path', '/doc'));
 
+    // ignore favicon.ico
+    app.use(function (req: any, res: any, next: Function) {
+      if (req.originalUrl && req.originalUrl.split('/').pop() === 'favicon.ico') {
+        return res.sendStatus(204);
+      }
+
+      next();
+    });
+
     return {
       host,
       port,
