@@ -1,7 +1,7 @@
 import { Field, ObjectType, ID, Int, OmitType, PickType } from '@nestjs/graphql';
 import { DateTimeISOResolver } from 'graphql-scalars';
 import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared/server';
-// import { FieldAuthorized, UserRole } from '@ace-pomelo/authorization';
+// import { FieldAuthorized, UserRole } from '@ace-pomelo/nestjs-authorization';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse, Count } from '@/common/resolvers/models/paged.model';
 

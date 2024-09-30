@@ -1,8 +1,8 @@
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Authorized } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import { Fields, random, sha256 } from '@ace-pomelo/shared/server';
 import { ClientAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';

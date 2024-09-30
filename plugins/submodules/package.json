@@ -48,16 +48,11 @@
     "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
   "devDependencies": {
-    "@ace-pomelo/authorization": "workspace:^",
-    "@ace-pomelo/ram-authorization": "workspace:^",
-    "@ace-pomelo/shared": "workspace:^",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^11.0.0"
   },
   "peerDependencies": {
-    "@ace-pomelo/authorization": "workspace:^",
-    "@ace-pomelo/ram-authorization": "workspace:^",
     "@ace-pomelo/shared": "workspace:^",
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",

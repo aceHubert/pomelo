@@ -1,3 +1,3 @@
-# @ace-pomelo/ram-authorization
+# @ace-pomelo/nestjs-ram-authorization
 
-> Ram Authorization，An extension to @ace-pomelo/authorization
+> Ram Authorization for NestJS，An extension to @ace-pomelo/nestjs-authorization

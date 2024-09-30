@@ -1,6 +1,6 @@
 {
-  "name": "@ace-pomelo/authorization",
-  "description": "Authorization for JWT.",
+  "name": "@ace-pomelo/nestjs-authorization",
+  "description": "JWT Authorization for NestJS.",
   "version": "0.1.0-alpha.0",
   "author": "Hubert<yi.xiang@live.com>",
   "main": "lib/index.js",
@@ -33,7 +33,9 @@
   "keywords": [
     "nestjs",
     "authorization",
-    "jwt"
+    "jwt",
+    "oidc",
+    "openid-connect"
   ],
   "scripts": {
     "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",

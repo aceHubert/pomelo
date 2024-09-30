@@ -19,8 +19,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Authorized } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Authorized } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,

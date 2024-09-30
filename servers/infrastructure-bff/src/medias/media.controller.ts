@@ -19,8 +19,8 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   isAbsoluteUrl,
   createResponseSuccessType,

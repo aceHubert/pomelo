@@ -5,8 +5,8 @@ import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   Fields,
   User,

@@ -48,8 +48,6 @@
     "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
   "dependencies": {
-    "@ace-pomelo/authorization": "workspace:^",
-    "@ace-pomelo/ram-authorization": "workspace:^",
     "@ace-pomelo/shared": "workspace:^",
     "esdk-obs-nodejs": "^3.21.6"
   },

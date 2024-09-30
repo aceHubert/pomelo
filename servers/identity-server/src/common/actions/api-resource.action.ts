@@ -1,4 +1,4 @@
-import { IRAMActionDefine } from '@ace-pomelo/ram-authorization';
+import { IRAMActionDefine } from '@ace-pomelo/nestjs-ram-authorization';
 
 export class ApiResourceAction implements IRAMActionDefine {
   static readonly Detail = 'api-resource.detail';

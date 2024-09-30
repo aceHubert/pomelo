@@ -1,3 +1,3 @@
-# @ace-pomelo/authorization
+# @ace-pomelo/nestjs-authorization
 
-> Authorization for JWT
+> JWT Authorization for NestJS

@@ -1,4 +1,4 @@
-import { IRAMActionDefine } from '@ace-pomelo/ram-authorization';
+import { IRAMActionDefine } from '@ace-pomelo/nestjs-ram-authorization';
 
 export class Action implements IRAMActionDefine {
   static UploadSignedUrl = 'resource.obs.upload.signedurl';

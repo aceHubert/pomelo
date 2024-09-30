@@ -28,8 +28,8 @@ import {
   INFRASTRUCTURE_SERVICE,
   TemplatePattern,
 } from '@ace-pomelo/shared/server';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import { FormTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';

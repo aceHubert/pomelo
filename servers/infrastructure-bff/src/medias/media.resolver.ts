@@ -6,8 +6,8 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { VoidResolver } from 'graphql-scalars';
 import { FileUpload } from 'graphql-upload/Upload.js';
 import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
-import { Authorized, Anonymous } from '@ace-pomelo/authorization';
-import { RamAuthorized } from '@ace-pomelo/ram-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import {
   isAbsoluteUrl,
