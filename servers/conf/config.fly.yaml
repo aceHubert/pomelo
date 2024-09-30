@@ -1,0 +1,21 @@
+# swagger configuration
+swagger:
+  # show swagger documentation
+  debug: true
+  # swagger path
+  # path: "/doc"
+# graphql configuration
+graphql:
+  # show graphql playground
+  debug: true
+  # graphql path
+  # path: "/graphql"
+# server configuration
+server:
+  origin: "https://pomelo-server.fly.dev"
+# redis connection, from fly secrets
+# REDIS_URL: "redis://host:port/db"
+# infrastructure database connection, from fly secrets
+# INFRASTRUCTURE_DATABASE_CONNECTION: "mysql://user:password@host:port/database"
+# identity database connection, from fly secrets
+# IDENTITY_DATABASE_CONNECTION: "mysql://user:password@host:port/database"

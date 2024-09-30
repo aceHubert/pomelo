@@ -1,0 +1,58 @@
+# swagger configuration
+swagger:
+  # show swagger documentation
+  debug: false
+  # swagger path, default: /doc
+  path: "/doc"
+# graphql configuration
+graphql:
+  # show graphql playground
+  debug: false
+  # graphql path, default: /graphql
+  path: "/graphql"
+  # graphql subscription path, default: graphql.path
+  # subscription_path: "/graphql"
+# server configuration
+server:
+  origin: "https://example.com"
+  cors:
+    origin:
+      - "https://example.com"
+      - "https://example.com:3000"
+    credentials: true
+# upload configuration
+upload:
+  # upload path
+  dest: "uploads"
+  # upload file size limit, a byte number,
+  # or string(https://github.com/visionmedia/bytes.js), default: 10MB
+  maxFileSize: 1000000
+  # upload file count limit, default: 10
+  maxFiles: 10
+# redis connection string
+# redis[s] :// [[username :] password@] host [:port][/database]
+#           [?[timeout=timeout[d|h|m|s|ms|us|ns]] [&clientName=clientName]
+#           [&libraryName=libraryName] [&libraryVersion=libraryVersion] ]
+REDIS_URL: "redis://host:port/db"
+# infrastructure database connection
+INFRASTRUCTURE_DATABASE_CONNECTION: "mysql://user:password@host:port/database"
+# identity database connection
+IDENTITY_DATABASE_CONNECTION: "mysql://user:password@host:port/database"
+# table prefix
+TABLE_PREFIX: "po_"
+# jwt public key
+PUBLIC_KEY: "private_key"
+# openid-client authentication configuration
+OIDC_CONFIG:
+  # openid-connect issuer
+  issuer: "${server.origin}/oauth2"
+  # use jwks to verify jwt
+  useJWKS: true
+  # client metadata
+  # https://github.com/panva/node-openid-client/blob/main/docs/README.md#new-clientmetadata-jwks-options
+  client_id: "client_id"
+  client_secret: "client_secret"
+  # http options
+  # https://github.com/panva/node-openid-client/blob/main/docs/README.md#customizing-http-requests
+  httpOptions:
+    timeout: 1000

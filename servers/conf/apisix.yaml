@@ -1,0 +1,82 @@
+routes:
+  - uri: /action/basic*
+    name: pomelo-basic
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - HEAD
+      - OPTIONS
+      - CONNECT
+    plugins:
+      cors:
+      openid-connect:
+        _meta:
+          disable: true
+        bearer_only: false
+        client_id: f6b2c633-4f9e-4b7a-8f2a-9a4b4e9b0b9b
+        client_secret: ZjZiMmM2MzMtNGY5ZS00YjdhLThmMmEtOWE0YjRlOWIwYjliLlg2YWd3OFJvRUM
+        discovery: http://pomelo-server:3003/oauth2/.well-known/openid-configuration
+        unauth_action: pass
+        use_jwks: true
+      proxy-rewrite:
+        regex_uri:
+          - ^/action/basic(/?)(.*)
+          - /$2
+    upstream:
+      nodes:
+        - host: pomelo
+          port: 3002
+          weight: 1
+      timeout:
+        connect: 60
+        send: 60
+        read: 60
+      type: roundrobin
+      scheme: http
+      pass_host: pass
+      keepalive_pool:
+        idle_timeout: 60
+        requests: 1000
+        size: 320
+    enable_websocket: true
+    status: 1
+  - uri: /action/identity*
+    name: pomelo-identity
+    methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - HEAD
+      - OPTIONS
+      - CONNECT
+      - TRACE
+      - PURGE
+    plugins:
+      cors:
+      proxy-rewrite:
+        regex_uri:
+          - ^/action/identity(/?)(.*)
+          - /$2
+    upstream:
+      nodes:
+        - host: pomelo
+          port: 3003
+          weight: 1
+      timeout:
+        connect: 6
+        send: 6
+        read: 6
+      type: roundrobin
+      scheme: http
+      pass_host: pass
+      keepalive_pool:
+        idle_timeout: 60
+        requests: 1000
+        size: 320
+    status: 1
+#END

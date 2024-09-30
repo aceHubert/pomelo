@@ -54,9 +54,6 @@
     "i18n-ally.sourceLanguage": "zh-CN",
     "i18n-ally.localesPaths": ["src/i18n", "src/i18n/langs"],
     "i18n-ally.ignoreFiles": ["zh-CN_basic.json"],
-    "i18n-ally.translate.engines": ["baidu", "google", "deepl"],
-    "i18n-ally.translate.baidu.appId": "20221114001451503",
-    "i18n-ally.translate.baidu.secretKey": "UE42YEj5DeSqTJnp8QCz",
-    "i18n-ally.translate.baidu.enableLog": true
+    "i18n-ally.translate.engines": ["baidu", "google", "deepl"]
   }
 }

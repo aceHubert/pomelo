@@ -16,13 +16,8 @@
 # // Build & Run
 # > rm -rf release && mkdir release && docker compose --env-file .env.docker.local up --build --force-recreate -d
 
-version: '3.1'
+# version: '3.1'
 
-networks:
-  mysql_default:
-    external: true
-  redis_default:
-    external: true
 services:
   server:
     build:
@@ -30,11 +25,11 @@ services:
       dockerfile: Dockerfile
       args:
         BUILD_PLATFORM: ${BUILD_PLATFORM:-linux/amd64}
-        BUILD_IGNORE: ${BUILD_IGNORE:-false}
-        BUILD_OPTION: ${BUILD_OPTION:-build}
-        RUNTIME_ENV: ${RUNTIME_ENV:-production}
-        SERVE_ENV: ${SERVE_ENV:-production}
-        SERVE_APPS: ${SERVE_APPS}
+        BUILD_IGNORE: ${BUILD_IGNORE:-false} # ignore exectuing build in Dockerfile
+        BUILD_OPTION: ${BUILD_OPTION:-build} # scripts in package.json
+        RUNTIME_ENV: ${RUNTIME_ENV:-production} # runtime env, production | development
+        SERVE_ENV: ${SERVE_ENV:-production} # env in ecosystem.config.js, production | fly
+        SERVE_APPS: ${SERVE_APPS} # apps in ecosystem.config.js, run all apps if empty
         BUILDKIT_INLINE_CACHE: true
         BUILDKIT_CONTEXT_KEEP_GIT_DIR: true
       cache_from:
@@ -45,25 +40,61 @@ services:
     image: pomelo
     container_name: pomelo-server
     restart: always
-    ports:
-      - 3001:3001
-      - 3002:3002
-      - 3003:3003
-      - 3011:3011
     volumes:
-      - deploy:/app
+      - conf:/app/conf
+      - ${PWD}/logs:/app/logs
+    ports:
+      # - 3000:3000 # infrastructure microservice
+      # - 3001:3001 # infrastructure server
+      # - 3002:3002 # bff
+      - 3003:3003 # identity server
+      - 3004:3004 # static content
+      - 3011:3011 # web
     external_links:
-      - mysql-default-5.7:mysql
-      - redis-default-6.2:redis
+      - ${MYSQL_CONTAINER_NAME:-mysql-default-5.7}:mysql
+      - ${REDIS_CONTAINER_NAME:-redis-default-6.2}:redis
     networks:
       - default
-      - mysql_default
-      - redis_default
+      - mysql
+      - redis
+  apisix:
+    image: apache/apisix:${APISIX_IMAGE_TAG:-3.9.0-debian}
+    container_name: pomelo-apisix
+    restart: always
+    environment:
+      - APISIX_STAND_ALONE=true
+    volumes:
+      - type: volume
+        source: conf
+        target: /usr/local/apisix/conf/apisix.yaml
+        volume:
+          nocopy: true
+          subpath: apisix.yaml
+      - ${PWD}/logs/apisix:/usr/local/apisix/logs
+    depends_on:
+      - server
+    ##network_mode: host
+    ports:
+      - '3180:9180/tcp' # admin_control: true
+      - '3080:9080/tcp'  # http
+      - '3091:9091/tcp'  # prometheus
+      - '3443:9443/tcp'  # tls http/2
+      - '3092:9092/tcp' # enable_control: true
+    networks:
+      - default
+networks:
+  mysql:
+    name: ${MYSQL_NETWORK_NAME:-mysql_default}
+    external: true
+  redis:
+    name: ${REDIS_NETWORK_NAME:-redis_default}
+    external: true
 volumes:
-  deploy:
-    name: pomelo
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/${DEPLOY_DIR:-release}
-      o: bind
+  conf:
+    name: pomelo-conf
+    external: true
+    # driver: local
+    # driver_opts:
+    #   type: none
+    #   device: ${PWD}/${DEPLOY_DIR:-release}
+    #   o: bind
