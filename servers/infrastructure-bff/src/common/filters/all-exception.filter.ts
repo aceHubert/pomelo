@@ -2,6 +2,7 @@ import statuses from 'statuses';
 import { snakeCase } from 'lodash';
 import { Request, Response } from 'express';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
+import { isObject } from '@nestjs/common/utils/shared.utils';
 import { GqlContextType } from '@nestjs/graphql';
 import { I18nContext, I18nValidationException } from 'nestjs-i18n';
 import { BaseError as SequelizeBaseError } from 'sequelize';
@@ -17,7 +18,8 @@ export class AllExceptionFilter implements ExceptionFilter {
 
   async catch(exception: Error, host: ArgumentsHost) {
     // log
-    this.logger.error(exception, exception.stack);
+    const loggerArgs: [string, string?] = this.isError(exception) ? [exception.message, exception.stack] : [exception];
+    this.logger.error(...loggerArgs);
 
     const i18n = I18nContext.current(host);
     switch (host.getType<GqlContextType>()) {
@@ -82,6 +84,10 @@ export class AllExceptionFilter implements ExceptionFilter {
         // todo:其它情况
         return exception;
     }
+  }
+
+  isError(exception: any): exception is Error {
+    return !!(isObject(exception) && (exception as any).message);
   }
 
   private isJson(req: Request) {

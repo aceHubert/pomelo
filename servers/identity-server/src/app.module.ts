@@ -20,9 +20,10 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache';
 // import { print, parse, getIntrospectionQuery } from 'graphql';
 import { OidcModule } from 'nest-oidc-provider';
+import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule, getJWKS } from '@ace-pomelo/authorization';
-import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
+import { AuthorizationModule, getJWKS } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
@@ -54,6 +55,31 @@ const logger = new Logger('AppModule', { timestamp: true });
             : ['.env.development.local', '.env.development']
           ).flatMap((file) => [path.join(__dirname, file), path.join(__dirname, '../', file)]),
       load: [configuration()],
+    }),
+    Log4jsModule.forRootAsync({
+      useFactory: (config: ConfigService) => {
+        const isDebug = config.get('debug', false);
+        return {
+          isGlobal: true,
+          appenders: {
+            dateFile: {
+              type: 'dateFile',
+              filename: `./logs/identity-server.log`,
+              keepFileExt: true,
+              layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
+            },
+          },
+          categories: {
+            default: {
+              enableCallStack: true,
+              appenders: ['stdout', 'dateFile'],
+              level: isDebug ? 'debug' : 'info',
+            },
+          },
+          pm2: !isDebug,
+        };
+      },
+      inject: [ConfigService],
     }),
     StorageModule.forRootAsync({
       isGlobal: true,

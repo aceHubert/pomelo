@@ -380,7 +380,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         resourceIndicators: {
           enabled: true,
           defaultResource: (ctx) => {
-            this.logger.debug('default resource', ctx.origin, ctx.protocol);
+            this.logger.debug(`default resource, origin: ${ctx.origin}, protocol: ${ctx.protocol}`);
 
             return ctx.origin;
           },
@@ -401,7 +401,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             };
           },
           useGrantedResource: (ctx, resourceIndicator) => {
-            this.logger.debug('use granted resource', resourceIndicator);
+            this.logger.debug(`use granted resource, ${resourceIndicator}`);
 
             return true;
           },
@@ -492,7 +492,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         return;
       },
       renderError: async (ctx, out, err) => {
-        this.logger.error('oidc renderError', err);
+        this.logger.error('oidc renderError, Error: ${err}');
 
         const i18n = getI18nFromContext(ctx);
         const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
@@ -632,7 +632,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     return {
       accountId: String(account.id),
       claims: async (use, scope) => {
-        this.logger.debug('claims', use, scope);
+        this.logger.debug(`claims, use: ${JSON.stringify(use, void 0, 2)}, scope: ${JSON.stringify(scope, void 0, 2)}`);
 
         const { id: accountId, ...rest } = account;
 

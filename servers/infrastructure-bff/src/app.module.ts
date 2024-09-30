@@ -23,9 +23,10 @@ import {
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
+import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule, AuthorizationService, getPublicKey } from '@ace-pomelo/authorization';
-import { RamAuthorizationModule } from '@ace-pomelo/ram-authorization';
+import { AuthorizationModule, AuthorizationService, getPublicKey } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
@@ -59,6 +60,31 @@ const logger = new Logger('AppModule', { timestamp: true });
             : ['.env.development.local', '.env.development']
           ).flatMap((file) => [path.join(__dirname, file), path.join(__dirname, '../', file)]),
       load: [configuration()],
+    }),
+    Log4jsModule.forRootAsync({
+      useFactory: (config: ConfigService) => {
+        const isDebug = config.get('debug', false);
+        return {
+          isGlobal: true,
+          appenders: {
+            dateFile: {
+              type: 'dateFile',
+              filename: `./logs/infrastructure-bff.log`,
+              keepFileExt: true,
+              layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
+            },
+          },
+          categories: {
+            default: {
+              enableCallStack: true,
+              appenders: ['stdout', 'dateFile'],
+              level: isDebug ? 'debug' : 'info',
+            },
+          },
+          pm2: !isDebug,
+        };
+      },
+      inject: [ConfigService],
     }),
     ServeStaticModule.forRootAsync({
       useFactory: (config: ConfigService) => [
@@ -171,7 +197,7 @@ const logger = new Logger('AppModule', { timestamp: true });
                   ConnectionParams,
                   { user?: any; connectionParams?: ConnectionParams }
                 >;
-                logger.debug('graphql-ws', 'connect', connectionParams);
+                logger.debug(`graphql-ws connect: ${JSON.stringify(connectionParams, void 0, 2)}`);
                 let user: any, userStr: string;
                 if ((userStr = connectionParams?.['x-userinfo'])) {
                   user = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
@@ -188,13 +214,13 @@ const logger = new Logger('AppModule', { timestamp: true });
                 extra.connectionParams = connectionParams;
               },
               onDisconnect: (context, code, reason) => {
-                logger.debug('graphql-ws', 'disconnect', code, reason);
+                logger.debug(`graphql-ws disconnect, code: ${code}, reason: ${reason}`);
               },
             },
             'subscriptions-transport-ws': {
               path: graphqlSubscriptionPath,
               onConnect: async (connectionParams: ConnectionParams) => {
-                logger.debug('subscriptions-transport-ws', 'connect', connectionParams);
+                logger.debug(`subscriptions-transport-ws connect: ${JSON.stringify(connectionParams, void 0, 2)}`);
                 let user: any, userStr: string;
                 if ((userStr = connectionParams?.['x-userinfo'])) {
                   user = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
@@ -214,7 +240,7 @@ const logger = new Logger('AppModule', { timestamp: true });
                 };
               },
               onDisconnect: (...args: any[]) => {
-                logger.debug('subscriptions-transport-ws', 'disconnect', args);
+                logger.debug(`subscriptions-transport-ws disconnect, args: ${JSON.stringify(args, void 0, 2)}`);
               },
             },
           },

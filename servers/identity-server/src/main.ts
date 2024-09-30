@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { Log4jsService } from '@ace-pomelo/nestjs-log4js';
 import { bootstrap, normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared/server';
 import { ApiModule } from './api/api.module';
 import { AppModule } from './app.module';
@@ -25,6 +26,9 @@ let globalPrefix: string,
 bootstrap<NestExpressApplication>(AppModule, {
   optionsFactory: async (app) => {
     const configService = app.get(ConfigService);
+
+    // log4js
+    app.useLogger(app.get(Log4jsService));
 
     // sync database
     await syncDatabase(configService);

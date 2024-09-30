@@ -2,6 +2,7 @@ import { Logger, RequestMethod } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { Log4jsService } from '@ace-pomelo/nestjs-log4js';
 import { bootstrap, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { I18nServerTcp } from './common/utils/i18n-server-tcp.util';
 import { AppModule } from './app.module';
@@ -15,6 +16,9 @@ let globalPrefix: string, isSwaggerDebug: boolean, swaggerPath: string;
 bootstrap(AppModule, {
   optionsFactory: async (app) => {
     const configService = app.get(ConfigService);
+
+    // log4js
+    app.useLogger(app.get(Log4jsService));
 
     // sync database
     await syncDatabase(configService);

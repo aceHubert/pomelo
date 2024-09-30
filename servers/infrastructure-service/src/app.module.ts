@@ -4,6 +4,7 @@ import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { I18nModule, I18nService, I18nValidationPipe } from 'nestjs-i18n';
+import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration } from '@ace-pomelo/shared/server';
 import { InfrastructureDatasourceModule } from '@/datasource/datasource.module';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
@@ -36,6 +37,31 @@ import '@/common/extends/i18n.extend';
             : ['.env.development.local', '.env.development']
           ).flatMap((file) => [path.join(__dirname, file), path.join(__dirname, '../', file)]),
       load: [configuration()],
+    }),
+    Log4jsModule.forRootAsync({
+      useFactory: (config: ConfigService) => {
+        const isDebug = config.get('debug', false);
+        return {
+          isGlobal: true,
+          appenders: {
+            dateFile: {
+              type: 'dateFile',
+              filename: `./logs/infrastructure-service.log`,
+              keepFileExt: true,
+              layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
+            },
+          },
+          categories: {
+            default: {
+              enableCallStack: true,
+              appenders: ['stdout', 'dateFile'],
+              level: isDebug ? 'debug' : 'info',
+            },
+          },
+          pm2: !isDebug,
+        };
+      },
+      inject: [ConfigService],
     }),
     I18nModule.forRootAsync({
       useFactory: (config: ConfigService) => {

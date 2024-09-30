@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { Log4jsService } from '@ace-pomelo/nestjs-log4js';
 import { bootstrap, normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared/server';
 import { AppModule } from './app.module';
 import { version } from './version';
@@ -16,6 +17,9 @@ let globalPrefix: string, isSwaggerDebug: boolean, swaggerPath: string, isGraphq
 bootstrap<NestExpressApplication>(AppModule, {
   optionsFactory: (app) => {
     const configService = app.get(ConfigService);
+
+    // log4js
+    app.useLogger(app.get(Log4jsService));
 
     const host = configService.get<string>('server.host', '');
     const port = configService.get<number>('server.port', 3000);
