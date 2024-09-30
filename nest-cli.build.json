@@ -6,7 +6,6 @@
   "compilerOptions": {
     "deleteOutDir": false,
     "webpack": false,
-    "webpackConfigPath": "servers/infrastructure-service/webpack-hmr.config.js",
     "tsConfigPath": "servers/infrastructure-service/tsconfig.json"
   },
   "projects": {
@@ -16,40 +15,39 @@
       "entryFile": "src/main",
       "sourceRoot": "servers/identity-server",
       "compilerOptions": {
-        "webpackConfigPath": "servers/identity-server/webpack-hmr.config.js",
+        "webpackConfigPath": "servers/identity-server/webpack.config.js",
         "tsConfigPath": "servers/identity-server/tsconfig.json",
         "assets": [
           {
             "include": "public",
             "exclude": "public/**/*.less",
-            "outDir": "dist/servers/identity-server/",
-            "watchAssets": true
+            "outDir": "dist/servers/identity-server/"
           },
           {
             "include": "views",
-            "outDir": "dist/servers/identity-server/",
-            "watchAssets": true
-          },
-          {
-            "include": ".env?(.*)",
-            "outDir": "dist/servers/identity-server/",
-            "watchAssets": true
+            "outDir": "dist/servers/identity-server/"
           },
           {
             "include": "**/*.gql",
-            "outDir": "dist/servers/identity-server/",
-            "watchAssets": true
+            "outDir": "dist/servers/identity-server/"
+          },
+          {
+            "include": "iisnode.js",
+            "outDir": "dist/servers/identity-server/"
+          },
+          {
+            "include": "web.config",
+            "outDir": "dist/servers/identity-server/"
           },
           {
             "include": "../content",
-            "exclude": "uploads/**/*",
-            "outDir": "dist/servers/content",
-            "watchAssets": true
+            "exclude": "../content/uploads/**/*",
+            "outDir": "dist/servers/content"
           },
           {
             "include": "../conf",
-            "outDir": "dist/servers/conf",
-            "watchAssets": true
+            "exclude": "../conf/{*.backup.*,*.local.*,db.lock}",
+            "outDir": "dist/servers/conf"
           }
         ],
         "watchAssets": true,
@@ -79,27 +77,18 @@
       "entryFile": "src/main",
       "sourceRoot": "servers/infrastructure-service",
       "compilerOptions": {
-        "webpackConfigPath": "servers/infrastructure-service/webpack-hmr.config.js",
+        "webpackConfigPath": "servers/infrastructure-service/webpack.config.js",
         "tsConfigPath": "servers/infrastructure-service/tsconfig.json",
         "assets": [
           {
-            "include": ".env?(.*)",
-            "outDir": "dist/servers/infrastructure-service/",
-            "watchAssets": true
+            "include": "iisnode.js",
+            "outDir": "dist/servers/identity-server/"
           },
           {
-            "include": "../content",
-            "exclude": "uploads/**/*",
-            "outDir": "dist/servers/content",
-            "watchAssets": true
-          },
-          {
-            "include": "../conf",
-            "outDir": "dist/servers/conf",
-            "watchAssets": true
+            "include": "web.config",
+            "outDir": "dist/servers/identity-server/"
           }
         ],
-        "watchAssets": true,
         "plugins": [
           {
             "name": "@nestjs/swagger",
@@ -126,24 +115,16 @@
       "entryFile": "src/main",
       "sourceRoot": "servers/infrastructure-bff",
       "compilerOptions": {
-        "webpackConfigPath": "servers/infrastructure-bff/webpack-hmr.config.js",
+        "webpackConfigPath": "servers/infrastructure-bff/webpack.config.js",
         "tsConfigPath": "servers/infrastructure-bff/tsconfig.json",
         "assets": [
           {
-            "include": ".env?(.*)",
-            "outDir": "dist/servers/infrastructure-bff/",
-            "watchAssets": true
+            "include": "iisnode.js",
+            "outDir": "dist/servers/identity-server/"
           },
           {
-            "include": "../content",
-            "exclude": "uploads/**/*",
-            "outDir": "dist/servers/content",
-            "watchAssets": true
-          },
-          {
-            "include": "../conf",
-            "outDir": "dist/servers/conf",
-            "watchAssets": true
+            "include": "web.config",
+            "outDir": "dist/servers/identity-server/"
           }
         ],
         "watchAssets": true,
@@ -192,15 +173,6 @@
       "sourceRoot": "packages/pomelo-ram-authorization",
       "compilerOptions": {
         "tsConfigPath": "packages/pomelo-ram-authorization/tsconfig.json"
-      }
-    },
-    "pomelo-log4js": {
-      "type": "library",
-      "root": "packages/pomelo-log4js",
-      "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-log4js",
-      "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-log4js/tsconfig.json"
       }
     },
     "pomelo-shared": {
