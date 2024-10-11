@@ -1,5 +1,6 @@
 import { IsOptional, IsDefined, IsNotEmpty, IsString, IsBoolean } from 'class-validator';
-import { NewApiResourceInput, Optional } from '@/datasource';
+import { NewApiResourceInput } from '@/datasource';
+import { Optional } from '@/datasource/shared/types';
 
 export abstract class NewApiResourceValidator implements Optional<NewApiResourceInput, 'nonEditable' | 'enabled'> {
   @IsDefined()

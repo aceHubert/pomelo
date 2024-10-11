@@ -1,5 +1,6 @@
 import { IsDefined, IsOptional, IsNotEmpty, IsString, IsBoolean } from 'class-validator';
-import { NewApiScopeInput, Optional } from '@/datasource';
+import { NewApiScopeInput } from '@/datasource';
+import { Optional } from '@/datasource/shared/types';
 
 export abstract class NewApiScopeValidator
   implements Optional<NewApiScopeInput, 'emphasize' | 'required' | 'showInDiscoveryDocument'>

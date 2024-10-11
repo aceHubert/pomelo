@@ -1,5 +1,6 @@
 import { IsOptional, IsDefined, IsNotEmpty, IsString, IsBoolean } from 'class-validator';
-import { NewIdentityResourceInput, Optional } from '@/datasource';
+import { NewIdentityResourceInput } from '@/datasource';
+import { Optional } from '@/datasource/shared/types';
 
 export abstract class NewIdentityResourceValidator
   implements

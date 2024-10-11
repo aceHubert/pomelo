@@ -8,7 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { Log4jsService } from '@ace-pomelo/nestjs-log4js';
 import { bootstrap, normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared/server';
-import { ApiModule } from './api/api.module';
+import { ApisModule } from './apis/apis.module';
 import { AppModule } from './app.module';
 import { version } from './version';
 import { syncDatabase } from './db.sync';
@@ -31,7 +31,7 @@ bootstrap<NestExpressApplication>(AppModule, {
     app.useLogger(app.get(Log4jsService));
 
     // sync database
-    await syncDatabase(configService);
+    await syncDatabase(app);
 
     const host = configService.get<string>('server.host', '');
     const port = configService.get<number>('server.port', 3000);
@@ -114,7 +114,7 @@ bootstrap<NestExpressApplication>(AppModule, {
                 .addTag('apiResources', 'Api Resources.')
                 .build(),
             documentOptions: {
-              include: [ApiModule],
+              include: [ApisModule],
             },
             // custom options
             useGlobalPrefix: true,

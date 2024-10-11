@@ -30,7 +30,7 @@ import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-clien
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { IdentityDatasourceModule } from './datasource/datasource.module';
-import { ApiModule } from './api/api.module';
+import { ApisModule } from './apis/apis.module';
 import { AccountProviderModule } from './account-provider/account-provider.module';
 import { AccountConfigService } from './account-config/account-config.service';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
@@ -201,7 +201,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService, I18nService],
     }),
-    ApiModule,
+    ApisModule,
     AccountProviderModule.forRootAsync({
       isGlobal: true,
       useClass: AccountConfigService,
