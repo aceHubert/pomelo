@@ -1,19 +1,16 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { ApiScopeClaimsAttributes, ApiScopeClaimsCreationAttributes } from '../../entities/api-scope-claims.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ApiScopeClaims extends Model<
-  ApiScopeClaimsAttributes,
-  Omit<ApiScopeClaimsCreationAttributes, 'id'>
-> {
+export class ApiScopeClaims extends Model<ApiScopeClaimsAttributes, Omit<ApiScopeClaimsCreationAttributes, 'id'>> {
   public id!: number;
   public apiScopeId!: number;
   public type!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ApiScopeClaims.init(
+ApiScopeClaims.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

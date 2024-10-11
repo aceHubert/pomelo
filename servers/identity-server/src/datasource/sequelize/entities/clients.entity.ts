@@ -1,9 +1,16 @@
-import { Model, DataTypes, Optional } from 'sequelize';
+import { DataTypes, Optional } from 'sequelize';
 import { ClientsAttributes, ClientsCreationAttributes } from '../../entities/clients.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { ClientCorsOrigins } from './client-cors-origins.entity';
+import { ClientClaims } from './client-claims.entity';
+import { ClientScopes } from './client-scopes.entity';
+import { ClientGrantTypes } from './client-grant-types.entity';
+import { ClientRedirectUris } from './client-redirect-uris.entity';
+import { ClientPostLogoutRedirectUris } from './client-post-logout-redirect-uris.entity';
+import { ClientSecrets } from './client-secrets.entity';
+import { ClientProperties } from './client-properties.entity';
 
-export default class Clients extends Model<
+export class Clients extends Model<
   Omit<ClientsAttributes, 'updatedAt' | 'createdAt'>,
   Optional<Omit<ClientsCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'enabled'>
 > {
@@ -45,9 +52,9 @@ export default class Clients extends Model<
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  Clients.init(
+Clients.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -204,94 +211,94 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+Clients.associate = function associate() {
   // Clients.id <--> ClientCorsOrigins.clientId
-  models.Clients.hasMany(models.ClientCorsOrigins, {
+  Clients.hasMany(ClientCorsOrigins, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientCorsOrigins',
     constraints: false,
   });
-  models.ClientCorsOrigins.belongsTo(models.Clients, { foreignKey: 'clientId', targetKey: 'id', constraints: false });
+  ClientCorsOrigins.belongsTo(Clients, { foreignKey: 'clientId', targetKey: 'id', constraints: false });
 
   // Clients.id <--> ClientClaims.clientId
-  models.Clients.hasMany(models.ClientClaims, {
+  Clients.hasMany(ClientClaims, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientClaims',
     constraints: false,
   });
-  models.ClientClaims.belongsTo(models.Clients, { foreignKey: 'clientId', targetKey: 'id', constraints: false });
+  ClientClaims.belongsTo(Clients, { foreignKey: 'clientId', targetKey: 'id', constraints: false });
 
   // Clients.id <--> ClientScopes.clientId
-  models.Clients.hasMany(models.ClientScopes, {
+  Clients.hasMany(ClientScopes, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientScopes',
     constraints: false,
   });
-  models.ClientScopes.belongsTo(models.Clients, {
+  ClientScopes.belongsTo(Clients, {
     foreignKey: 'clientId',
     targetKey: 'id',
     constraints: false,
   });
 
   // Clients.id <--> ClientGrantTypes.clientId
-  models.Clients.hasMany(models.ClientGrantTypes, {
+  Clients.hasMany(ClientGrantTypes, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientGrantTypes',
     constraints: false,
   });
-  models.ClientGrantTypes.belongsTo(models.Clients, { foreignKey: 'clientId', targetKey: 'id', constraints: false });
+  ClientGrantTypes.belongsTo(Clients, { foreignKey: 'clientId', targetKey: 'id', constraints: false });
 
   // Clients.id <--> ClientRedirectUris.clientId
-  models.Clients.hasMany(models.ClientRedirectUris, {
+  Clients.hasMany(ClientRedirectUris, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientRedirectUris',
     constraints: false,
   });
-  models.ClientRedirectUris.belongsTo(models.Clients, {
+  ClientRedirectUris.belongsTo(Clients, {
     foreignKey: 'clientId',
     targetKey: 'id',
     constraints: false,
   });
 
   // Clients.id <--> ClientPostLogoutRedirectUris.clientId
-  models.Clients.hasMany(models.ClientPostLogoutRedirectUris, {
+  Clients.hasMany(ClientPostLogoutRedirectUris, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientPostLogoutRedirectUris',
     constraints: false,
   });
-  models.ClientPostLogoutRedirectUris.belongsTo(models.Clients, {
+  ClientPostLogoutRedirectUris.belongsTo(Clients, {
     foreignKey: 'clientId',
     targetKey: 'id',
     constraints: false,
   });
 
   // Clients.id <--> ClientSecrets.clientId
-  models.Clients.hasMany(models.ClientSecrets, {
+  Clients.hasMany(ClientSecrets, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientSecrets',
     constraints: false,
   });
-  models.ClientSecrets.belongsTo(models.Clients, {
+  ClientSecrets.belongsTo(Clients, {
     foreignKey: 'clientId',
     targetKey: 'id',
     constraints: false,
   });
 
   // Clients.id <--> ClientProperties.clientId
-  models.Clients.hasMany(models.ClientProperties, {
+  Clients.hasMany(ClientProperties, {
     foreignKey: 'clientId',
     sourceKey: 'id',
     as: 'ClientProperties',
     constraints: false,
   });
-  models.ClientProperties.belongsTo(models.Clients, {
+  ClientProperties.belongsTo(Clients, {
     foreignKey: 'clientId',
     targetKey: 'id',
     constraints: false,

@@ -1,19 +1,16 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { IdentityClaimsAttributes, IdentityClaimsCreationAttributes } from '../../entities/identity-claims.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class IdentityClaims extends Model<
-  IdentityClaimsAttributes,
-  Omit<IdentityClaimsCreationAttributes, 'id'>
-> {
+export class IdentityClaims extends Model<IdentityClaimsAttributes, Omit<IdentityClaimsCreationAttributes, 'id'>> {
   public id!: number;
   public identityResourceId!: number;
   public type!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  IdentityClaims.init(
+IdentityClaims.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

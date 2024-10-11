@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Order, Attributes, Op, Includeable } from 'sequelize';
 import { ValidationError } from '@ace-pomelo/shared/server';
-import { default as ApiResources } from '../entities/api-resources.entity';
-import { default as ApiScopes } from '../entities/api-scopes.entity';
+import { IdentityDatasourceService } from '../../datasource.service';
+import { ApiResources, ApiScopes, ApiClaims, ApiSecrets, ApiProperties, ApiScopeClaims } from '../entities';
 import {
   ApiResourceModel,
   PagedApiResourceArgs,
@@ -27,13 +27,12 @@ import {
   ApiPropertiesModel,
   NewApiPropertyInput,
 } from '../interfaces/api-resource.interface';
-import { IdentityDatasourceService } from '../../datasource.service';
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class ApiResourceDataSource extends BaseDataSource {
-  constructor(protected readonly datasourceService: IdentityDatasourceService) {
-    super();
+  constructor(datasourceService: IdentityDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -58,29 +57,29 @@ export class ApiResourceDataSource extends BaseDataSource {
       fields.unshift('id');
     }
 
-    return this.models.ApiResources.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.ApiResources),
+    return ApiResources.findByPk(id, {
+      attributes: this.filterFields(fields, ApiResources),
       include: [
         fields.includes('claims') && {
-          model: this.models.ApiClaims,
+          model: ApiClaims,
           attributes: ['id', 'type'],
           as: 'ApiClaims',
           required: false,
         },
         fields.includes('scopes') && {
-          model: this.models.ApiScopes,
+          model: ApiScopes,
           attributes: ['id', 'name', 'emphasize', 'required', 'showInDiscoveryDocument'],
           as: 'ApiScopes',
           required: false,
         },
         fields.includes('secrets') && {
-          model: this.models.ApiSecrets,
+          model: ApiSecrets,
           attributes: ['id', 'type', 'value', 'expiresAt'],
           as: 'ApiSecrets',
           required: false,
         },
         fields.includes('properties') && {
-          model: this.models.ApiProperties,
+          model: ApiProperties,
           attributes: ['id', 'key', 'value'],
           as: 'ApiProperties',
           required: false,
@@ -140,15 +139,15 @@ export class ApiResourceDataSource extends BaseDataSource {
       where.enabled = query.enabled;
     }
 
-    return this.models.ApiResources.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.ApiResources),
+    return ApiResources.findAndCountAll({
+      attributes: this.filterFields(fields, ApiResources),
       where,
       offset,
       limit,
       order: [
         // 根据 keyword 匹配程度排序
         !!query.keyword && [
-          this.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
+          this.datasourceService.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
         WHEN ${keywordField} LIKE '${query.keyword}%' THEN 1
         WHEN ${keywordField} LIKE '%${query.keyword}%' THEN 2
         WHEN ${keywordField} LIKE '%${query.keyword}' THEN 3
@@ -168,7 +167,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input new resource input
    */
   async create(input: NewApiResourceInput): Promise<ApiResourceModel> {
-    const exists = await this.models.ApiResources.count({
+    const exists = await ApiResources.count({
       where: {
         name: input.name,
       },
@@ -182,7 +181,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         ),
       );
 
-    return this.models.ApiResources.create(input).then((api) => api.toJSON<ApiResourceModel>());
+    return ApiResources.create(input).then((api) => api.toJSON<ApiResourceModel>());
   }
 
   /**
@@ -191,7 +190,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input update resource input
    */
   async update(id: number, input: UpdateApiResourceInput): Promise<void> {
-    const nonEditable = await this.models.ApiResources.count({
+    const nonEditable = await ApiResources.count({
       where: {
         id,
         nonEditable: true,
@@ -206,7 +205,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         ),
       );
 
-    await this.models.ApiResources.update(input, {
+    await ApiResources.update(input, {
       where: {
         id,
       },
@@ -218,7 +217,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api resource id
    */
   async updateLastAccessed(id: number): Promise<void> {
-    await this.models.ApiResources.update(
+    await ApiResources.update(
       {
         lastAccessed: new Date(),
       },
@@ -235,7 +234,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api resource id
    */
   async delete(id: number): Promise<void> {
-    const resource = await this.models.ApiResources.findByPk(id);
+    const resource = await ApiResources.findByPk(id);
     if (resource) {
       if (resource.nonEditable)
         throw new ValidationError(
@@ -267,16 +266,16 @@ export class ApiResourceDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ApiClaimsModel | undefined> {
-    return this.models.ApiResources.findByPk(id, {
+    return ApiResources.findByPk(id, {
       attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
-          model: this.models.ApiClaims,
-          attributes: this.filterFields(fields, this.models.ApiClaims),
+          model: ApiClaims,
+          attributes: this.filterFields(fields, ApiClaims),
           as: 'ApiClaims',
         },
       ],
-      order: [[{ model: this.models.ApiClaims, as: 'ApiClaims' }, orderField, order]],
+      order: [[{ model: ApiClaims, as: 'ApiClaims' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -294,14 +293,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input new api claim input
    */
   createClaim(apiResourceId: number, input: NewApiClaimInput): Promise<ApiClaimModel | undefined> {
-    return this.models.ApiResources.count({
+    return ApiResources.count({
       where: {
         id: apiResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return;
 
-      const exists = await this.models.ApiClaims.count({
+      const exists = await ApiClaims.count({
         where: {
           apiResourceId,
           type: input.type,
@@ -316,7 +315,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ApiClaims.create({
+      return ApiClaims.create({
         ...input,
         apiResourceId,
       }).then((claim) => claim.toJSON<ApiClaimModel>());
@@ -329,14 +328,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param inputs new api resource claims input
    */
   createClaims(apiResourceId: number, inputs: NewApiClaimInput[]): Promise<ApiClaimModel[]> {
-    return this.models.ApiResources.count({
+    return ApiResources.count({
       where: {
         id: apiResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return [];
 
-      const claims = await this.models.ApiClaims.findAll({
+      const claims = await ApiClaims.findAll({
         attributes: ['type'],
         where: {
           apiResourceId,
@@ -348,7 +347,7 @@ export class ApiResourceDataSource extends BaseDataSource {
 
       const existsType = claims.map((claim) => claim.type);
 
-      return this.models.ApiClaims.bulkCreate(
+      return ApiClaims.bulkCreate(
         inputs
           .filter((input) => !existsType.includes(input.type))
           .map((input) => ({
@@ -364,7 +363,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api claim id
    */
   async deleteClaim(id: number): Promise<void> {
-    await this.models.ApiClaims.destroy({
+    await ApiClaims.destroy({
       where: {
         id,
       },
@@ -385,11 +384,11 @@ export class ApiResourceDataSource extends BaseDataSource {
       })
     | undefined
   > {
-    return this.models.ApiScopes.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.ApiScopes),
+    return ApiScopes.findByPk(id, {
+      attributes: this.filterFields(fields, ApiScopes),
       include: [
         fields.includes('claims') && {
-          model: this.models.ApiScopeClaims,
+          model: ApiScopeClaims,
           attributes: ['id', 'type'],
           as: 'ApiScopeClaims',
           required: false,
@@ -431,15 +430,15 @@ export class ApiResourceDataSource extends BaseDataSource {
       where.apiResourceId = query.apiResourceId;
     }
 
-    return this.models.ApiScopes.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.ApiScopes),
+    return ApiScopes.findAndCountAll({
+      attributes: this.filterFields(fields, ApiScopes),
       where,
       offset,
       limit,
       order: [
         // 根据 keyword 匹配程度排序
         !!query.keyword && [
-          this.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
+          this.datasourceService.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
         WHEN ${keywordField} LIKE '${query.keyword}%' THEN 1
         WHEN ${keywordField} LIKE '%${query.keyword}%' THEN 2
         WHEN ${keywordField} LIKE '%${query.keyword}' THEN 3
@@ -469,11 +468,11 @@ export class ApiResourceDataSource extends BaseDataSource {
       }
     >
   > {
-    return this.models.ApiScopes.findAll({
-      attributes: this.filterFields(fields, this.models.ApiScopes),
+    return ApiScopes.findAll({
+      attributes: this.filterFields(fields, ApiScopes),
       include: [
         fields.includes('claims') && {
-          model: this.models.ApiScopeClaims,
+          model: ApiScopeClaims,
           attributes: ['id', 'type'],
           as: 'ApiScopeClaims',
           required: false,
@@ -502,14 +501,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @returns
    */
   createScope(apiResourceId: number, input: NewApiScopeInput): Promise<ApiScopeModel | undefined> {
-    return this.models.ApiResources.count({
+    return ApiResources.count({
       where: {
         id: apiResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return;
 
-      const exists = await this.models.ApiScopes.count({
+      const exists = await ApiScopes.count({
         where: {
           apiResourceId,
           name: input.name,
@@ -524,7 +523,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ApiScopes.create({
+      return ApiScopes.create({
         ...input,
         apiResourceId,
       }).then((scope) => scope.toJSON<ApiScopeModel>());
@@ -537,10 +536,10 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input api scope input
    */
   async updateScope(id: number, input: UpdateApiScopeInput): Promise<void> {
-    const nonEditable = await this.models.ApiResources.count({
+    const nonEditable = await ApiResources.count({
       include: [
         {
-          model: this.models.ApiScopes,
+          model: ApiScopes,
           as: 'ApiScopes',
           where: {
             id,
@@ -560,7 +559,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         ),
       );
 
-    await this.models.ApiScopes.update(input, {
+    await ApiScopes.update(input, {
       where: {
         id,
       },
@@ -572,10 +571,10 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api scope id
    */
   async deleteScope(id: number): Promise<void> {
-    const nonEditable = await this.models.ApiResources.count({
+    const nonEditable = await ApiResources.count({
       include: [
         {
-          model: this.models.ApiScopes,
+          model: ApiScopes,
           as: 'ApiScopes',
           where: {
             id,
@@ -595,7 +594,7 @@ export class ApiResourceDataSource extends BaseDataSource {
         ),
       );
 
-    await this.models.ApiScopes.destroy({
+    await ApiScopes.destroy({
       where: {
         id,
       },
@@ -612,16 +611,16 @@ export class ApiResourceDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ApiScopeClaimsModel | undefined> {
-    return this.models.ApiScopes.findByPk(apiScopeId, {
+    return ApiScopes.findByPk(apiScopeId, {
       attributes: ['id', 'apiResourceId', 'name', 'displayName'],
       include: [
         {
-          model: this.models.ApiScopeClaims,
-          attributes: this.filterFields(fields, this.models.ApiScopeClaims),
+          model: ApiScopeClaims,
+          attributes: this.filterFields(fields, ApiScopeClaims),
           as: 'ApiScopeClaims',
         },
       ],
-      order: [[{ model: this.models.ApiScopeClaims, as: 'ApiScopeClaims' }, orderField, order]],
+      order: [[{ model: ApiScopeClaims, as: 'ApiScopeClaims' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -641,14 +640,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input new api scope claim input
    */
   createScopeClaim(apiScopeId: number, input: NewApiScopeClaimInput): Promise<ApiScopeClaimModel | undefined> {
-    return this.models.ApiScopes.count({
+    return ApiScopes.count({
       where: {
         id: apiScopeId,
       },
     }).then(async (count) => {
       if (count === 0) return;
 
-      const exists = await this.models.ApiScopeClaims.count({
+      const exists = await ApiScopeClaims.count({
         where: {
           apiScopeId,
           type: input.type,
@@ -663,7 +662,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ApiScopeClaims.create({
+      return ApiScopeClaims.create({
         ...input,
         apiScopeId,
       }).then((claim) => claim.toJSON<ApiScopeClaimModel>());
@@ -676,14 +675,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param inputs new api scope claims input
    */
   createScopeClaims(apiScopeId: number, inputs: NewApiScopeClaimInput[]): Promise<ApiScopeClaimModel[]> {
-    return this.models.ApiScopes.count({
+    return ApiScopes.count({
       where: {
         id: apiScopeId,
       },
     }).then(async (count) => {
       if (count === 0) return [];
 
-      const claims = await this.models.ApiScopeClaims.findAll({
+      const claims = await ApiScopeClaims.findAll({
         attributes: ['type'],
         where: {
           apiScopeId,
@@ -695,7 +694,7 @@ export class ApiResourceDataSource extends BaseDataSource {
 
       const existsType = claims.map((claim) => claim.type);
 
-      return this.models.ApiScopeClaims.bulkCreate(
+      return ApiScopeClaims.bulkCreate(
         inputs
           .filter((input) => !existsType.includes(input.type))
           .map((input) => ({
@@ -711,7 +710,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api scope claim id
    */
   async deleteScopeClaim(id: number): Promise<void> {
-    await this.models.ApiScopeClaims.destroy({
+    await ApiScopeClaims.destroy({
       where: {
         id,
       },
@@ -729,16 +728,16 @@ export class ApiResourceDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ApiSecretsModel | undefined> {
-    return this.models.ApiResources.findByPk(apiResourceId, {
+    return ApiResources.findByPk(apiResourceId, {
       attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
-          model: this.models.ApiSecrets,
-          attributes: this.filterFields(fields, this.models.ApiSecrets),
+          model: ApiSecrets,
+          attributes: this.filterFields(fields, ApiSecrets),
           as: 'ApiSecrets',
         },
       ],
-      order: [[{ model: this.models.ApiSecrets, as: 'ApiSecrets' }, orderField, order]],
+      order: [[{ model: ApiSecrets, as: 'ApiSecrets' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -756,14 +755,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input new api secret input
    */
   createSecret(apiResourceId: number, input: NewApiSecretInput): Promise<ApiSecretModel | undefined> {
-    return this.models.ApiResources.count({
+    return ApiResources.count({
       where: {
         id: apiResourceId,
       },
     }).then((count) => {
       if (count === 0) return;
 
-      return this.models.ApiSecrets.create({
+      return ApiSecrets.create({
         ...input,
         apiResourceId,
       }).then((secret) => secret.toJSON<ApiSecretModel>());
@@ -775,7 +774,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api secret id
    */
   async deleteSecret(id: number): Promise<void> {
-    await this.models.ApiSecrets.destroy({
+    await ApiSecrets.destroy({
       where: {
         id,
       },
@@ -793,16 +792,16 @@ export class ApiResourceDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ApiPropertiesModel | undefined> {
-    return this.models.ApiResources.findByPk(apiResourceId, {
+    return ApiResources.findByPk(apiResourceId, {
       attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
-          model: this.models.ApiProperties,
-          attributes: this.filterFields(fields, this.models.ApiProperties),
+          model: ApiProperties,
+          attributes: this.filterFields(fields, ApiProperties),
           as: 'ApiProperties',
         },
       ],
-      order: [[{ model: this.models.ApiProperties, as: 'ApiProperties' }, orderField, order]],
+      order: [[{ model: ApiProperties, as: 'ApiProperties' }, orderField, order]],
     }).then((api) => {
       if (!api) return;
 
@@ -822,14 +821,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param input api property input
    */
   createProperty(apiResourceId: number, input: NewApiPropertyInput): Promise<ApiPropertyModel | undefined> {
-    return this.models.ApiResources.count({
+    return ApiResources.count({
       where: {
         id: apiResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return;
 
-      const exists = await this.models.ApiProperties.count({
+      const exists = await ApiProperties.count({
         where: {
           apiResourceId,
           key: input.key,
@@ -844,7 +843,7 @@ export class ApiResourceDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ApiProperties.create({
+      return ApiProperties.create({
         ...input,
         apiResourceId,
       }).then((property) => property.toJSON<ApiPropertyModel>());
@@ -857,14 +856,14 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param inputs new api resource properties input
    */
   createProperties(apiResourceId: number, inputs: NewApiPropertyInput[]): Promise<ApiPropertyModel[]> {
-    return this.models.ApiResources.count({
+    return ApiResources.count({
       where: {
         id: apiResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return [];
 
-      const properties = await this.models.ApiProperties.findAll({
+      const properties = await ApiProperties.findAll({
         attributes: ['key'],
         where: {
           apiResourceId,
@@ -876,7 +875,7 @@ export class ApiResourceDataSource extends BaseDataSource {
 
       const existsKey = properties.map((property) => property.key);
 
-      return this.models.ApiProperties.bulkCreate(
+      return ApiProperties.bulkCreate(
         inputs
           .filter((input) => !existsKey.includes(input.key))
           .map((input) => ({
@@ -892,7 +891,7 @@ export class ApiResourceDataSource extends BaseDataSource {
    * @param id api property id
    */
   async deleteProperty(id: number): Promise<void> {
-    await this.models.ApiProperties.destroy({
+    await ApiProperties.destroy({
       where: {
         id,
       },

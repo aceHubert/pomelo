@@ -1,20 +1,17 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { TemplateMetaAttributes, TemplateMetaMetaCreationAttributes } from '../../entities/template-meta.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class TemplateMeta extends Model<
-  TemplateMetaAttributes,
-  Omit<TemplateMetaMetaCreationAttributes, 'id'>
-> {
+export class TemplateMeta extends Model<TemplateMetaAttributes, Omit<TemplateMetaMetaCreationAttributes, 'id'>> {
   public id!: number;
   public templateId!: number;
   public metaKey!: string;
   public metaValue?: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
+TemplateMeta.initialize = function initialize(sequelize, { prefix }) {
   const isMysql = sequelize.getDialect() === 'mysql';
-  TemplateMeta.init(
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

@@ -1,26 +1,27 @@
 import { Op } from 'sequelize';
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { Links } from '../entities';
 import { LinkModel, PagedLinkModel, PagedLinkArgs, NewLinkInput, UpdateLinkInput } from '../interfaces/link.interface';
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class LinkDataSource extends BaseDataSource {
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
   }
 
   get(id: number, fields: string[]): Promise<LinkModel | undefined> {
-    return this.models.Links.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.Links),
+    return Links.findByPk(id, {
+      attributes: this.filterFields(fields, Links),
     }).then((link) => link?.toJSON<LinkModel>());
   }
 
   getPaged({ offset, limit, ...query }: PagedLinkArgs, fields: string[]): Promise<PagedLinkModel> {
     const { keyword, ...restQuery } = query;
-    return this.models.Links.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.Links),
+    return Links.findAndCountAll({
+      attributes: this.filterFields(fields, Links),
       where: {
         ...(keyword
           ? {
@@ -46,7 +47,7 @@ export class LinkDataSource extends BaseDataSource {
    * @param requestUserId 请求用户 Id
    */
   async create(model: NewLinkInput, requestUserId: number): Promise<LinkModel> {
-    const link = await this.models.Links.create({
+    const link = await Links.create({
       ...model,
       userId: requestUserId,
     });
@@ -64,7 +65,7 @@ export class LinkDataSource extends BaseDataSource {
    * @param requestUserId 请求用户 Id
    */
   async update(id: number, model: UpdateLinkInput, requestUserId: number): Promise<void> {
-    const link = await this.models.Links.findByPk(id, {
+    const link = await Links.findByPk(id, {
       attributes: ['userId'],
     });
     if (link) {
@@ -73,7 +74,7 @@ export class LinkDataSource extends BaseDataSource {
         await this.hasCapability(UserCapability.ManageLinks, requestUserId);
       }
 
-      await this.models.Links.update(model, {
+      await Links.update(model, {
         where: { id },
       });
     } else {
@@ -93,7 +94,7 @@ export class LinkDataSource extends BaseDataSource {
    * @param requestUserId 请求用户 Id
    */
   async delete(id: number, requestUserId: number): Promise<void> {
-    const link = await this.models.Links.findByPk(id);
+    const link = await Links.findByPk(id);
     if (link) {
       // 非本人创建的是否可删除
       if (link.userId !== requestUserId) {

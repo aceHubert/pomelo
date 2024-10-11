@@ -1,7 +1,18 @@
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@ace-pomelo/shared/server';
 import { Includeable, Op, WhereOptions } from 'sequelize';
+import { IdentityDatasourceService } from '../../datasource.service';
+import {
+  Clients,
+  ClientCorsOrigins,
+  ClientClaims,
+  ClientGrantTypes,
+  ClientScopes,
+  ClientRedirectUris,
+  ClientPostLogoutRedirectUris,
+  ClientSecrets,
+  ClientProperties,
+} from '../entities';
 import {
   ClientModel,
   PagedClientArgs,
@@ -37,8 +48,8 @@ import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class ClientDataSource extends BaseDataSource {
-  constructor(protected readonly moduleRef: ModuleRef) {
-    super();
+  constructor(datasourceService: IdentityDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -67,56 +78,56 @@ export class ClientDataSource extends BaseDataSource {
       fields.unshift('id');
     }
 
-    return this.models.Clients.findOne({
-      attributes: this.filterFields(fields, this.models.Clients),
+    return Clients.findOne({
+      attributes: this.filterFields(fields, Clients),
       where: {
         clientId,
       },
       include: [
         fields.includes('corsOrigins') && {
-          model: this.models.ClientCorsOrigins,
+          model: ClientCorsOrigins,
           attributes: ['id', 'origin'],
           as: 'ClientCorsOrigins',
           required: false,
         },
         fields.includes('claims') && {
-          model: this.models.ClientClaims,
+          model: ClientClaims,
           attributes: ['id', 'type', 'value'],
           as: 'ClientClaims',
           required: false,
         },
         fields.includes('grantTypes') && {
-          model: this.models.ClientGrantTypes,
+          model: ClientGrantTypes,
           attributes: ['id', 'grantType'],
           as: 'ClientGrantTypes',
           required: false,
         },
         fields.includes('scopes') && {
-          model: this.models.ClientScopes,
+          model: ClientScopes,
           attributes: ['id', 'scope'],
           as: 'ClientScopes',
           required: false,
         },
         fields.includes('redirectUris') && {
-          model: this.models.ClientRedirectUris,
+          model: ClientRedirectUris,
           attributes: ['id', 'redirectUri'],
           as: 'ClientRedirectUris',
           required: false,
         },
         fields.includes('postLogoutRedirectUris') && {
-          model: this.models.ClientPostLogoutRedirectUris,
+          model: ClientPostLogoutRedirectUris,
           attributes: ['id', 'postLogoutRedirectUri'],
           as: 'ClientPostLogoutRedirectUris',
           required: false,
         },
         fields.includes('secrets') && {
-          model: this.models.ClientSecrets,
+          model: ClientSecrets,
           attributes: ['id', 'type', 'value', 'expiresAt'],
           as: 'ClientSecrets',
           required: false,
         },
         fields.includes('properties') && {
-          model: this.models.ClientProperties,
+          model: ClientProperties,
           attributes: ['id', 'key', 'value'],
           as: 'ClientProperties',
           required: false,
@@ -186,8 +197,8 @@ export class ClientDataSource extends BaseDataSource {
       };
     }
 
-    return this.models.Clients.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.Clients),
+    return Clients.findAndCountAll({
+      attributes: this.filterFields(fields, Clients),
       where,
       offset,
       limit,
@@ -203,7 +214,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client input
    */
   create(input: NewClientInput): Promise<ClientModel> {
-    return this.models.Clients.create(input).then((client) => client.toJSON<ClientModel>());
+    return Clients.create(input).then((client) => client.toJSON<ClientModel>());
   }
 
   /**
@@ -212,7 +223,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input update client input
    */
   async update(clientId: string, input: UpdateClientInput): Promise<void> {
-    await this.models.Clients.update(input, {
+    await Clients.update(input, {
       where: {
         clientId,
       },
@@ -230,19 +241,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientClaimsModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientClaims,
-          attributes: this.filterFields(fields, this.models.ClientClaims),
+          model: ClientClaims,
+          attributes: this.filterFields(fields, ClientClaims),
           as: 'ClientClaims',
         },
       ],
-      order: [[{ model: this.models.ClientClaims, as: 'ClientClaims' }, orderField, order]],
+      order: [[{ model: ClientClaims, as: 'ClientClaims' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -260,7 +271,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client claim input
    */
   createClaim(clientId: string, input: NewClientClaimInput): Promise<ClientClaimModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -268,7 +279,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return;
 
-      const exists = await this.models.ClientClaims.count({
+      const exists = await ClientClaims.count({
         where: {
           clientId: client.id,
           type: input.type,
@@ -280,7 +291,7 @@ export class ClientDataSource extends BaseDataSource {
           this.translate('identity-server.datasource.client.claim_has_existed', 'Client claim has already existed!'),
         );
 
-      return this.models.ClientClaims.create({
+      return ClientClaims.create({
         ...input,
         clientId: client.id,
       }).then((claim) => claim.toJSON<ClientClaimModel>());
@@ -293,7 +304,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param inputs new client claims input
    */
   createClaims(clientId: string, inputs: NewClientClaimInput[]): Promise<ClientClaimModel[]> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -301,7 +312,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return [];
 
-      const claims = await this.models.ClientClaims.findAll({
+      const claims = await ClientClaims.findAll({
         attributes: ['type'],
         where: {
           clientId: client.id,
@@ -313,7 +324,7 @@ export class ClientDataSource extends BaseDataSource {
 
       const existsType = claims.map((claim) => claim.type);
 
-      return this.models.ClientClaims.bulkCreate(
+      return ClientClaims.bulkCreate(
         inputs
           .filter((input) => !existsType.includes(input.type))
           .map((input) => ({
@@ -329,7 +340,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client claim id
    */
   async deleteClaim(id: number): Promise<void> {
-    await this.models.ClientClaims.destroy({
+    await ClientClaims.destroy({
       where: {
         id,
       },
@@ -347,19 +358,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientCorsOriginsModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientCorsOrigins,
-          attributes: this.filterFields(fields, this.models.ClientCorsOrigins),
+          model: ClientCorsOrigins,
+          attributes: this.filterFields(fields, ClientCorsOrigins),
           as: 'ClientCorsOrigins',
         },
       ],
-      order: [[{ model: this.models.ClientCorsOrigins, as: 'ClientCorsOrigins' }, orderField, order]],
+      order: [[{ model: ClientCorsOrigins, as: 'ClientCorsOrigins' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -379,7 +390,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client cors origin input
    */
   createCorsOrigin(clientId: string, input: NewClientCorsOriginInput): Promise<ClientCorsOriginModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -387,7 +398,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return;
 
-      const exists = await this.models.ClientCorsOrigins.count({
+      const exists = await ClientCorsOrigins.count({
         where: {
           clientId: client.id,
           origin: input.origin,
@@ -402,7 +413,7 @@ export class ClientDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ClientCorsOrigins.create({
+      return ClientCorsOrigins.create({
         ...input,
         clientId: client.id,
       }).then((corsOrigin) => corsOrigin.toJSON<ClientCorsOriginModel>());
@@ -415,7 +426,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param inputs new client cors origins input
    */
   createCorsOrigins(clientId: string, inputs: NewClientCorsOriginInput[]): Promise<ClientCorsOriginModel[]> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -423,7 +434,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return [];
 
-      const corsOrigins = await this.models.ClientCorsOrigins.findAll({
+      const corsOrigins = await ClientCorsOrigins.findAll({
         attributes: ['origin'],
         where: {
           clientId: client.id,
@@ -435,7 +446,7 @@ export class ClientDataSource extends BaseDataSource {
 
       const existsOrigin = corsOrigins.map((corsOrigin) => corsOrigin.origin);
 
-      return this.models.ClientCorsOrigins.bulkCreate(
+      return ClientCorsOrigins.bulkCreate(
         inputs
           .filter((input) => !existsOrigin.includes(input.origin))
           .map((input) => ({
@@ -451,7 +462,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client cors origin id
    */
   async deleteCorsOrigin(id: number): Promise<void> {
-    await this.models.ClientCorsOrigins.destroy({
+    await ClientCorsOrigins.destroy({
       where: {
         id,
       },
@@ -469,19 +480,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientScopesModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientScopes,
-          attributes: this.filterFields(fields, this.models.ClientScopes),
+          model: ClientScopes,
+          attributes: this.filterFields(fields, ClientScopes),
           as: 'ClientScopes',
         },
       ],
-      order: [[{ model: this.models.ClientScopes, as: 'ClientScopes' }, orderField, order]],
+      order: [[{ model: ClientScopes, as: 'ClientScopes' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -499,7 +510,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client scope input
    */
   createScope(clientId: string, input: NewClientScopeInput): Promise<ClientScopeModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -507,7 +518,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return;
 
-      const exists = await this.models.ClientScopes.count({
+      const exists = await ClientScopes.count({
         where: {
           clientId: client.id,
           scope: input.scope,
@@ -519,7 +530,7 @@ export class ClientDataSource extends BaseDataSource {
           this.translate('identity-server.datasource.client.scope_has_existed', 'Client scope has already existed!'),
         );
 
-      return this.models.ClientScopes.create({
+      return ClientScopes.create({
         ...input,
         clientId: client.id,
       }).then((scope) => scope.toJSON<ClientScopeModel>());
@@ -532,7 +543,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param inputs new client scopes input
    */
   createScopes(clientId: string, inputs: NewClientScopeInput[]): Promise<ClientScopeModel[]> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -540,7 +551,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return [];
 
-      const scopes = await this.models.ClientScopes.findAll({
+      const scopes = await ClientScopes.findAll({
         attributes: ['scope'],
         where: {
           clientId: client.id,
@@ -552,7 +563,7 @@ export class ClientDataSource extends BaseDataSource {
 
       const existsScope = scopes.map((scope) => scope.scope);
 
-      return this.models.ClientScopes.bulkCreate(
+      return ClientScopes.bulkCreate(
         inputs
           .filter((input) => !existsScope.includes(input.scope))
           .map((input) => ({
@@ -568,7 +579,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client scope id
    */
   async deleteScope(id: number): Promise<void> {
-    await this.models.ClientScopes.destroy({
+    await ClientScopes.destroy({
       where: {
         id,
       },
@@ -586,19 +597,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientGrantTypesModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientGrantTypes,
-          attributes: this.filterFields(fields, this.models.ClientGrantTypes),
+          model: ClientGrantTypes,
+          attributes: this.filterFields(fields, ClientGrantTypes),
           as: 'ClientGrantTypes',
         },
       ],
-      order: [[{ model: this.models.ClientGrantTypes, as: 'ClientGrantTypes' }, orderField, order]],
+      order: [[{ model: ClientGrantTypes, as: 'ClientGrantTypes' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -618,7 +629,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client grant type input
    */
   createGrantType(clientId: string, input: NewClientGrantTypeInput): Promise<ClientGrantTypeModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -626,7 +637,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return;
 
-      const exists = await this.models.ClientGrantTypes.count({
+      const exists = await ClientGrantTypes.count({
         where: {
           clientId: client.id,
           grantType: input.grantType,
@@ -641,7 +652,7 @@ export class ClientDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ClientGrantTypes.create({
+      return ClientGrantTypes.create({
         ...input,
         clientId: client.id,
       }).then((grantType) => grantType.toJSON<ClientGrantTypeModel>());
@@ -654,7 +665,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param inputs new client grant types input
    */
   createGrantTypes(clientId: string, inputs: NewClientGrantTypeInput[]): Promise<ClientGrantTypeModel[]> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -662,7 +673,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return [];
 
-      const grantTypes = await this.models.ClientGrantTypes.findAll({
+      const grantTypes = await ClientGrantTypes.findAll({
         attributes: ['grantType'],
         where: {
           clientId: client.id,
@@ -674,7 +685,7 @@ export class ClientDataSource extends BaseDataSource {
 
       const existsGrantType = grantTypes.map((grantType) => grantType.grantType);
 
-      return this.models.ClientGrantTypes.bulkCreate(
+      return ClientGrantTypes.bulkCreate(
         inputs
           .filter((input) => !existsGrantType.includes(input.grantType))
           .map((input) => ({
@@ -690,7 +701,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client grant type id
    */
   async deleteGrantType(id: number): Promise<void> {
-    await this.models.ClientGrantTypes.destroy({
+    await ClientGrantTypes.destroy({
       where: {
         id,
       },
@@ -708,19 +719,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientRedirectUrisModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientRedirectUris,
-          attributes: this.filterFields(fields, this.models.ClientRedirectUris),
+          model: ClientRedirectUris,
+          attributes: this.filterFields(fields, ClientRedirectUris),
           as: 'ClientRedirectUris',
         },
       ],
-      order: [[{ model: this.models.ClientRedirectUris, as: 'ClientRedirectUris' }, orderField, order]],
+      order: [[{ model: ClientRedirectUris, as: 'ClientRedirectUris' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -740,7 +751,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client redirect uri input
    */
   createRedirectUri(clientId: string, input: NewClientRedirectUriInput): Promise<ClientRedirectUriModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -748,7 +759,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return;
 
-      const exists = await this.models.ClientRedirectUris.count({
+      const exists = await ClientRedirectUris.count({
         where: {
           clientId: client.id,
           redirectUri: input.redirectUri,
@@ -763,7 +774,7 @@ export class ClientDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ClientRedirectUris.create({
+      return ClientRedirectUris.create({
         ...input,
         clientId: client.id,
       }).then((redirectUri) => redirectUri.toJSON<ClientRedirectUriModel>());
@@ -776,7 +787,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param inputs new client redirect uris input
    */
   createRedirectUris(clientId: string, inputs: NewClientRedirectUriInput[]): Promise<ClientRedirectUriModel[]> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -784,7 +795,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return [];
 
-      const redirectUris = await this.models.ClientRedirectUris.findAll({
+      const redirectUris = await ClientRedirectUris.findAll({
         attributes: ['redirectUri'],
         where: {
           clientId: client.id,
@@ -796,7 +807,7 @@ export class ClientDataSource extends BaseDataSource {
 
       const existsRedirectUri = redirectUris.map((redirectUri) => redirectUri.redirectUri);
 
-      return this.models.ClientRedirectUris.bulkCreate(
+      return ClientRedirectUris.bulkCreate(
         inputs
           .filter((input) => !existsRedirectUri.includes(input.redirectUri))
           .map((input) => ({
@@ -812,7 +823,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client redirect uri id
    */
   async deleteRedirectUri(id: number): Promise<void> {
-    await this.models.ClientRedirectUris.destroy({
+    await ClientRedirectUris.destroy({
       where: {
         id,
       },
@@ -830,21 +841,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientPostLogoutRedirectUrisModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientPostLogoutRedirectUris,
-          attributes: this.filterFields(fields, this.models.ClientPostLogoutRedirectUris),
+          model: ClientPostLogoutRedirectUris,
+          attributes: this.filterFields(fields, ClientPostLogoutRedirectUris),
           as: 'ClientPostLogoutRedirectUris',
         },
       ],
-      order: [
-        [{ model: this.models.ClientPostLogoutRedirectUris, as: 'ClientPostLogoutRedirectUris' }, orderField, order],
-      ],
+      order: [[{ model: ClientPostLogoutRedirectUris, as: 'ClientPostLogoutRedirectUris' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -867,7 +876,7 @@ export class ClientDataSource extends BaseDataSource {
     clientId: string,
     input: NewClientPostLogoutRedirectUriInput,
   ): Promise<ClientPostLogoutRedirectUriModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -875,7 +884,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return;
 
-      const exists = await this.models.ClientPostLogoutRedirectUris.count({
+      const exists = await ClientPostLogoutRedirectUris.count({
         where: {
           clientId: client.id,
           postLogoutRedirectUri: input.postLogoutRedirectUri,
@@ -890,7 +899,7 @@ export class ClientDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ClientPostLogoutRedirectUris.create({
+      return ClientPostLogoutRedirectUris.create({
         ...input,
         clientId: client.id,
       }).then((postLogoutRedirectUri) => postLogoutRedirectUri.toJSON<ClientPostLogoutRedirectUriModel>());
@@ -906,7 +915,7 @@ export class ClientDataSource extends BaseDataSource {
     clientId: string,
     inputs: NewClientPostLogoutRedirectUriInput[],
   ): Promise<ClientPostLogoutRedirectUriModel[]> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -914,7 +923,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return [];
 
-      const postLogoutRedirectUris = await this.models.ClientPostLogoutRedirectUris.findAll({
+      const postLogoutRedirectUris = await ClientPostLogoutRedirectUris.findAll({
         attributes: ['postLogoutRedirectUri'],
         where: {
           clientId: client.id,
@@ -928,7 +937,7 @@ export class ClientDataSource extends BaseDataSource {
         (postLogoutRedirectUri) => postLogoutRedirectUri.postLogoutRedirectUri,
       );
 
-      return this.models.ClientPostLogoutRedirectUris.bulkCreate(
+      return ClientPostLogoutRedirectUris.bulkCreate(
         inputs
           .filter((input) => !existsPostLogoutRedirectUri.includes(input.postLogoutRedirectUri))
           .map((input) => ({
@@ -948,7 +957,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client post logout redirect uri id
    */
   async deletePostLogoutRedirectUri(id: number): Promise<void> {
-    await this.models.ClientPostLogoutRedirectUris.destroy({
+    await ClientPostLogoutRedirectUris.destroy({
       where: {
         id,
       },
@@ -966,19 +975,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientSecretsModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientSecrets,
-          attributes: this.filterFields(fields, this.models.ClientSecrets),
+          model: ClientSecrets,
+          attributes: this.filterFields(fields, ClientSecrets),
           as: 'ClientSecrets',
         },
       ],
-      order: [[{ model: this.models.ClientSecrets, as: 'ClientSecrets' }, orderField, order]],
+      order: [[{ model: ClientSecrets, as: 'ClientSecrets' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -996,7 +1005,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client secret input
    */
   createSecret(clientId: string, input: NewClientSecretInput): Promise<ClientSecretModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -1004,7 +1013,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then((client) => {
       if (!client) return;
 
-      return this.models.ClientSecrets.create({
+      return ClientSecrets.create({
         ...input,
         clientId: client.id,
       }).then((secret) => secret.toJSON<ClientSecretModel>());
@@ -1016,7 +1025,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client secret id
    */
   async deleteSecret(id: number): Promise<void> {
-    await this.models.ClientSecrets.destroy({
+    await ClientSecrets.destroy({
       where: {
         id,
       },
@@ -1034,19 +1043,19 @@ export class ClientDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<ClientPropertiesModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['clientId', 'clientName'],
       where: {
         clientId,
       },
       include: [
         {
-          model: this.models.ClientProperties,
-          attributes: this.filterFields(fields, this.models.ClientProperties),
+          model: ClientProperties,
+          attributes: this.filterFields(fields, ClientProperties),
           as: 'ClientProperties',
         },
       ],
-      order: [[{ model: this.models.ClientProperties, as: 'ClientProperties' }, orderField, order]],
+      order: [[{ model: ClientProperties, as: 'ClientProperties' }, orderField, order]],
     }).then((client) => {
       if (!client) return;
 
@@ -1066,7 +1075,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param input new client property input
    */
   createProperty(clientId: string, input: NewClientPropertyInput): Promise<ClientPropertyModel | undefined> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -1074,7 +1083,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return;
 
-      const exists = await this.models.ClientProperties.count({
+      const exists = await ClientProperties.count({
         where: {
           clientId: client.id,
           key: input.key,
@@ -1089,7 +1098,7 @@ export class ClientDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.ClientProperties.create({
+      return ClientProperties.create({
         ...input,
         clientId: client.id,
       }).then((property) => property.toJSON<ClientPropertyModel>());
@@ -1102,7 +1111,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param inputs new client properties input
    */
   createProperties(clientId: string, inputs: NewClientPropertyInput[]): Promise<ClientPropertyModel[]> {
-    return this.models.Clients.findOne({
+    return Clients.findOne({
       attributes: ['id'],
       where: {
         clientId,
@@ -1110,7 +1119,7 @@ export class ClientDataSource extends BaseDataSource {
     }).then(async (client) => {
       if (!client) return [];
 
-      const properties = await this.models.ClientProperties.findAll({
+      const properties = await ClientProperties.findAll({
         attributes: ['key'],
         where: {
           clientId: client.id,
@@ -1122,7 +1131,7 @@ export class ClientDataSource extends BaseDataSource {
 
       const existsKey = properties.map((property) => property.key);
 
-      return this.models.ClientProperties.bulkCreate(
+      return ClientProperties.bulkCreate(
         inputs
           .filter((input) => !existsKey.includes(input.key))
           .map((input) => ({
@@ -1138,7 +1147,7 @@ export class ClientDataSource extends BaseDataSource {
    * @param id client property id
    */
   async deleteProperty(id: number): Promise<void> {
-    await this.models.ClientProperties.destroy({
+    await ClientProperties.destroy({
       where: {
         id,
       },

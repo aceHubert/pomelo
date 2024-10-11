@@ -1,40 +1,26 @@
 import path from 'path';
-import { Logger } from '@nestjs/common';
+import { Logger, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileEnv } from '@ace-pomelo/shared/server';
-import { DatabaseManager, name } from '@/datasource';
+import { InfrastructureDatasourceService, name } from '@/datasource';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
 // sync database
-export async function syncDatabase(config: ConfigService) {
-  const connection = config.get('INFRASTRUCTURE_DATABASE_CONNECTION')
-    ? config.get('INFRASTRUCTURE_DATABASE_CONNECTION')
-    : {
-        database: config.getOrThrow('INFRASTRUCTURE_DATABASE_NAME'),
-        username: config.getOrThrow('INFRASTRUCTURE_DATABASE_USERNAME'),
-        password: config.getOrThrow('INFRASTRUCTURE_DATABASE_PASSWORD'),
-        dialect: config.get('INFRASTRUCTURE_DATABASE_DIALECT', 'mysql'),
-        host: config.get('INFRASTRUCTURE_DATABASE_HOST', 'localhost'),
-        port: config.get('INFRASTRUCTURE_DATABASE_PORT', 3306),
-        define: {
-          charset: config.get('INFRASTRUCTURE_DATABASE_CHARSET', 'utf8'),
-          collate: config.get('INFRASTRUCTURE_DATABASE_COLLATE', ''),
-        },
-      };
-  const tablePrefix = config.get('TABLE_PREFIX');
+export async function syncDatabase(app: INestApplication<any>) {
+  const configService = app.get(ConfigService);
+  const datasourceService = app.get(InfrastructureDatasourceService);
 
   // db lock
-  const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
+  const lockfile = path.join(
+    configService.get<string>('configPath')!,
+    configService.get<string>('DBLOCK_FILE', 'db.lock'),
+  );
   const fileEnv = FileEnv.getInstance(lockfile);
 
   // 初始化数据库
-  const dbManager =
-    typeof connection === 'string'
-      ? new DatabaseManager(connection, { tablePrefix })
-      : new DatabaseManager({ ...connection, tablePrefix });
-  await dbManager
-    .sync({
+  await datasourceService
+    .syncDB({
       alter: false,
       // match: /_dev$/,
       // TODO: version compare
@@ -45,6 +31,5 @@ export async function syncDatabase(config: ConfigService) {
         fileEnv.setEnv(name, 'PENDING');
         logger.debug('Initialize database successful!');
       }
-      3;
     });
 }

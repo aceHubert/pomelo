@@ -1,11 +1,11 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import {
   ClientPropertiesAttributes,
   ClientPropertiesCreationAttributes,
 } from '../../entities/client-properties.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ClientProperties extends Model<
+export class ClientProperties extends Model<
   ClientPropertiesAttributes,
   Omit<ClientPropertiesCreationAttributes, 'id'>
 > {
@@ -15,9 +15,9 @@ export default class ClientProperties extends Model<
   public value!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ClientProperties.init(
+ClientProperties.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

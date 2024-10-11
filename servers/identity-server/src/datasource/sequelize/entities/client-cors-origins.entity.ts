@@ -1,11 +1,11 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import {
   ClientCorsOriginsAttributes,
   ClientCorsOriginsCreationAttributes,
 } from '../../entities/client-cors-origins.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ClientCorsOrigins extends Model<
+export class ClientCorsOrigins extends Model<
   ClientCorsOriginsAttributes,
   Omit<ClientCorsOriginsCreationAttributes, 'id'>
 > {
@@ -14,9 +14,9 @@ export default class ClientCorsOrigins extends Model<
   public origin!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ClientCorsOrigins.init(
+ClientCorsOrigins.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

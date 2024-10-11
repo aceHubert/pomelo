@@ -1,6 +1,5 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import TermTaxonomy from '../entities/term-taxonomy.entity';
-import TermRelationship from '../entities/term-relationships.entity';
+import { TermTaxonomy, TermRelationships } from '../entities';
 import { MetaModel, NewMetaInput } from './meta.interface';
 
 /**
@@ -19,7 +18,7 @@ export interface NewTermTaxonomyMetaInput extends NewMetaInput {
 /**
  * 协议关系
  */
-export interface TermRelationshipModel extends Attributes<TermRelationship> {}
+export interface TermRelationshipModel extends Attributes<TermRelationships> {}
 
 /**
  * 协议（类别）搜索条件
@@ -67,4 +66,4 @@ export interface UpdateTermTaxonomyInput
 /**
  * 新建协议关系实体
  */
-export interface NewTermRelationshipInput extends CreationAttributes<TermRelationship> {}
+export interface NewTermRelationshipInput extends CreationAttributes<TermRelationships> {}

@@ -1,10 +1,10 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import { LinkVisible, LinkTarget } from '@ace-pomelo/shared/server';
 import { LinkAttributes, LinkCreationAttributes } from '../../entities/links.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { TermRelationships } from './term-relationships.entity';
 
-export default class Links extends Model<
+export class Links extends Model<
   Omit<LinkAttributes, 'updatedAt' | 'createdAt'>,
   Optional<Omit<LinkCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'visible' | 'userId'>
 > {
@@ -20,9 +20,9 @@ export default class Links extends Model<
   public rss?: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  Links.init(
+Links.initialize = function init(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -89,9 +89,9 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+Links.associate = function associate() {
   // Links.id <--> TermRelationships.objectId
-  models.Links.hasMany(models.TermRelationships, {
+  Links.hasMany(TermRelationships, {
     foreignKey: 'objectId',
     sourceKey: 'id',
     as: 'LinkTermRelationships',

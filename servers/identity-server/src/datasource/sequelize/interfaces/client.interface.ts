@@ -1,13 +1,13 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import Clients from '../entities/clients.entity';
-import ClientCorsOrigins from '../entities/client-cors-origins.entity';
-import ClientClaims from '../entities/client-claims.entity';
-import ClientGrantTypes from '../entities/client-grant-types.entity';
-import ClientScopes from '../entities/client-scopes.entity';
-import ClientRedirectUris from '../entities/client-redirect-uris.entity';
-import ClientPostLogoutRedirectUris from '../entities/client-post-logout-redirect-uris.entity';
-import ClientSecrets from '../entities/client-secrets.entity';
-import ClientProperties from '../entities/client-properties.entity';
+import { Clients } from '../entities/clients.entity';
+import { ClientCorsOrigins } from '../entities/client-cors-origins.entity';
+import { ClientClaims } from '../entities/client-claims.entity';
+import { ClientGrantTypes } from '../entities/client-grant-types.entity';
+import { ClientScopes } from '../entities/client-scopes.entity';
+import { ClientRedirectUris } from '../entities/client-redirect-uris.entity';
+import { ClientPostLogoutRedirectUris } from '../entities/client-post-logout-redirect-uris.entity';
+import { ClientSecrets } from '../entities/client-secrets.entity';
+import { ClientProperties } from '../entities/client-properties.entity';
 import { PagedArgs, Paged } from './paged.interface';
 
 export interface ClientModel extends Attributes<Clients> {

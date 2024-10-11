@@ -4,9 +4,11 @@ import {
   IdentityDatasourceAsyncOptions,
   IdentityDatasourceOptionsFactory,
 } from './interfaces/identity-datasource-options.interface';
-import { dataSources } from './sequelize';
+import * as DataSources from './sequelize/datasources';
 import { IdentityDatasourceService } from './datasource.service';
-import { IDENTITY_OPTIONS } from './constants';
+import { IDENTITY_DATASOURCE_OPTIONS } from './constants';
+
+const dataSources = Object.values(DataSources);
 
 @Module({})
 export class IdentityDatasourceModule {
@@ -22,13 +24,13 @@ export class IdentityDatasourceModule {
       global: isGlobal,
       providers: [
         {
-          provide: IDENTITY_OPTIONS,
+          provide: IDENTITY_DATASOURCE_OPTIONS,
           useValue: restOptions,
         },
-        ...dataSources,
         IdentityDatasourceService,
+        ...dataSources,
       ],
-      exports: [IDENTITY_OPTIONS, ...dataSources, IdentityDatasourceService],
+      exports: [IDENTITY_DATASOURCE_OPTIONS, IdentityDatasourceService, ...dataSources],
     };
   }
 
@@ -37,8 +39,8 @@ export class IdentityDatasourceModule {
       module: IdentityDatasourceModule,
       global: options.isGlobal,
       imports: options.imports,
-      providers: [...this.createAsyncProviders(options), ...dataSources, IdentityDatasourceService],
-      exports: [IDENTITY_OPTIONS, ...dataSources, IdentityDatasourceService],
+      providers: [...this.createAsyncProviders(options), IdentityDatasourceService, ...dataSources],
+      exports: [IDENTITY_DATASOURCE_OPTIONS, IdentityDatasourceService, ...dataSources],
     };
   }
 
@@ -58,7 +60,7 @@ export class IdentityDatasourceModule {
   private static createAsyncOptionsProvider(options: IdentityDatasourceAsyncOptions): Provider {
     if (options.useFactory) {
       return {
-        provide: IDENTITY_OPTIONS,
+        provide: IDENTITY_DATASOURCE_OPTIONS,
         useFactory: async (...args: any[]) => {
           const moduleOptions = await options.useFactory!(...args);
           // check connection config
@@ -69,7 +71,7 @@ export class IdentityDatasourceModule {
       };
     }
     return {
-      provide: IDENTITY_OPTIONS,
+      provide: IDENTITY_DATASOURCE_OPTIONS,
       useFactory: async (optionsFactory: IdentityDatasourceOptionsFactory) => {
         const moduleOptions = await optionsFactory.createSequlizeOptions();
         // check connection config

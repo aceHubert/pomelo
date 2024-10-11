@@ -1,8 +1,8 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { ApiSecretsAttributes, ApiSecretsCreationAttributes } from '../../entities/api-secrets.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ApiSecrets extends Model<
+export class ApiSecrets extends Model<
   Omit<ApiSecretsAttributes, 'createdAt'>,
   Omit<ApiSecretsCreationAttributes, 'id' | 'createdAt'>
 > {
@@ -17,9 +17,9 @@ export default class ApiSecrets extends Model<
   public readonly createdAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ApiSecrets.init(
+ApiSecrets.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

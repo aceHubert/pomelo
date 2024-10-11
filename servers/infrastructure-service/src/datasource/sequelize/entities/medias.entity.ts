@@ -1,10 +1,10 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import { MediaMetaPresetKeys } from '@ace-pomelo/shared/server';
 import { MediaAttributes, MediaCreationAttributes } from '../../entities/medias.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { MediaMeta } from './media-meta.entity';
 
-export default class Medias extends Model<
+export class Medias extends Model<
   Omit<MediaAttributes, 'createdAt'>,
   Optional<Omit<MediaCreationAttributes, 'id' | 'createdAt'>, 'userId'>
 > {
@@ -20,8 +20,8 @@ export default class Medias extends Model<
   public readonly createdAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
+Medias.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
   Medias.init(
     {
       id: {
@@ -76,17 +76,17 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+Medias.associate = function associate() {
   // Medias.id <--> MediaMeta.mediaId
-  models.Medias.hasMany(models.MediaMeta, {
+  Medias.hasMany(MediaMeta, {
     foreignKey: 'mediaId',
     sourceKey: 'id',
     as: 'MediaMetas',
     constraints: false,
   });
-  models.MediaMeta.belongsTo(models.Medias, { foreignKey: 'mediaId', targetKey: 'id', constraints: false });
+  MediaMeta.belongsTo(Medias, { foreignKey: 'mediaId', targetKey: 'id', constraints: false });
 
-  models.Medias.hasOne(models.MediaMeta.scope(MediaMetaPresetKeys.Matedata), {
+  Medias.hasOne(MediaMeta.scope(MediaMetaPresetKeys.Matedata), {
     foreignKey: 'mediaId',
     sourceKey: 'id',
     as: 'MediaMetadata',

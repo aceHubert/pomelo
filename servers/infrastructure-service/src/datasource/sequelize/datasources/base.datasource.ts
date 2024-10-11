@@ -1,7 +1,6 @@
 import { words, capitalize } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
-import { ModuleRef } from '@nestjs/core';
-import { Logger, OnModuleInit } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
   ForbiddenError,
   jsonSafelyParse,
@@ -11,8 +10,7 @@ import {
   UserCapability,
 } from '@ace-pomelo/shared/server';
 import { InfrastructureDatasourceService } from '../../datasource.service';
-import { InfrastructureDatasourceOptions } from '../../interfaces/infrastructure-datasource-options.interface';
-import { INFRASTRUCTURE_OPTIONS } from '../../constants';
+import { Options, UserMeta } from '../entities';
 
 // https://github.com/microsoft/TypeScript/issues/47663
 import type {} from 'sequelize/types/utils';
@@ -20,93 +18,32 @@ import type {} from 'sequelize/types/utils';
 const __AUTOLOAD_OPTIONS__ = new Map<string, string>(); // Autoload options 缓存
 const __OPTIONS__ = new Map<string, string>(); // Not autoload options 缓存
 
-export abstract class BaseDataSource implements OnModuleInit {
+export abstract class BaseDataSource {
   protected readonly logger!: Logger;
-  private infrastructureService?: InfrastructureDatasourceService;
-  private infrastuctureOptions?: InfrastructureDatasourceOptions;
 
-  constructor(private readonly moduleRef: ModuleRef) {
+  constructor(protected readonly datasourceService: InfrastructureDatasourceService) {
     this.logger = new Logger(this.constructor.name, { timestamp: true });
   }
 
-  async onModuleInit() {
-    !this.infrastructureService &&
-      (this.infrastructureService = this.moduleRef?.get(InfrastructureDatasourceService, { strict: false }));
-    !this.infrastuctureOptions &&
-      (this.infrastuctureOptions = this.moduleRef?.get<InfrastructureDatasourceOptions>(INFRASTRUCTURE_OPTIONS, {
-        strict: false,
-      }));
-  }
-
-  private ensureInfrastuctureService() {
-    if (!this.infrastructureService) {
-      this.logger.warn('Please inject IdentityService or ModuleRef in SubClass constructor');
-      throw new Error('InfrastructureService not initialized');
-    }
-  }
-
-  private ensureInfrastuctureOptions() {
-    if (!this.infrastuctureOptions) {
-      this.logger.warn('Please inject IdentityOptions or ModuleRef in SubClass constructor');
-      throw new Error('IdentityOptions not initialized');
-    }
-  }
-
   /**
-   * Get dialect from infrastuctureOptions.connection
-   * Inject IdentityOptions in SubClass constructor when use this property before onModuleInit
-   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   * Get dialect
    */
-  protected get getDatabaseDialect() {
-    this.ensureInfrastuctureOptions();
-
-    return typeof this.infrastuctureOptions!.connection === 'string'
-      ? (this.infrastuctureOptions!.connection.split(':')[0] as Dialect)
-      : this.infrastuctureOptions!.connection.dialect ?? 'mysql';
+  protected get databaseDialect(): Dialect {
+    return this.datasourceService.sequelize.getDialect() as Dialect;
   }
 
   /**
-   * Shortcut for this.infrastuctureOptions.tablePrefix
-   * Inject IdentityOptions in SubClass constructor when use this property before onModuleInit
-   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   * Get table prefix
    */
   protected get tablePrefix() {
-    this.ensureInfrastuctureOptions();
-
-    return this.infrastuctureOptions!.tablePrefix || '';
+    return this.datasourceService.tablePrefix;
   }
 
   /**
-   * Shortcut for this.infrastuctureOptions.translate
-   * Inject IdentityOptions in SubClass constructor when use this property before onModuleInit
-   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
+   * Translate function
    */
   protected get translate() {
-    this.ensureInfrastuctureOptions();
-
-    return this.infrastuctureOptions!.translate || ((key: string, fallback: string) => fallback);
-  }
-
-  /**
-   * Shortcut for this.infrastructureService.sequelize
-   * Inject IdentityService in SubClass constructor when use this property before onModuleInit
-   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
-   */
-  protected get sequelize() {
-    this.ensureInfrastuctureService();
-
-    return this.infrastructureService!.sequelize;
-  }
-
-  /**
-   * Shortcut for this.infrastructureService.models
-   * Inject IdentityService in SubClass constructor when use this property before onModuleInit
-   * or inject ModuleRef in SubClass constructor when use this property after onModuleInit
-   */
-  protected get models() {
-    this.ensureInfrastuctureService();
-
-    return this.infrastructureService!.models;
+    return this.datasourceService.translate;
   }
 
   /**
@@ -120,7 +57,7 @@ export abstract class BaseDataSource implements OnModuleInit {
     } else {
       return (async () => {
         // 赋默认值，initialize 会多次执行
-        const options = await this.models.Options.findAll({
+        const options = await Options.findAll({
           attributes: ['optionName', 'optionValue'],
           where: {
             autoload: OptionAutoload.Yes,
@@ -197,7 +134,7 @@ export abstract class BaseDataSource implements OnModuleInit {
     model: ModelDefined<TAttributes, any>,
     modelName?: string,
   ) {
-    return this.sequelize.col(`${modelName || model.name}.${String(this.field(fieldName, model))}`);
+    return this.datasourceService.sequelize.col(`${modelName || model.name}.${String(this.field(fieldName, model))}`);
   }
 
   protected async getUserCapabilities(userId: number): Promise<UserCapability[]> {
@@ -210,7 +147,7 @@ export abstract class BaseDataSource implements OnModuleInit {
         }
       >
     >((await this.getOption(OptionPresetKeys.UserRoles))!);
-    const userCapabilities = await this.models.UserMeta.findOne({
+    const userCapabilities = await UserMeta.findOne({
       attributes: ['metaValue'],
       where: {
         userId,
@@ -282,7 +219,7 @@ export abstract class BaseDataSource implements OnModuleInit {
     }
     // 如果缓存中没有，从数据库查询
     if (value === void 0) {
-      const options = await this.models.Options.findAll({
+      const options = await Options.findAll({
         attributes: ['optionName', 'optionValue'],
         where: {
           optionName: [optionName, `${this.tablePrefix}${optionName}`],

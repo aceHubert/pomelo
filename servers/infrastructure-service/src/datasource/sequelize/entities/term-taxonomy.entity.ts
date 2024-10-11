@@ -1,9 +1,9 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import { TermTaxonomyAttributes, TermTaxonomyCreationAttributes } from '../../entities/term-taxonomy.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { TermRelationships } from './term-relationships.entity';
 
-export default class TermTaxonomy extends Model<
+export class TermTaxonomy extends Model<
   TermTaxonomyAttributes,
   Optional<Omit<TermTaxonomyCreationAttributes, 'id'>, 'parentId' | 'group' | 'count'>
 > {
@@ -17,9 +17,9 @@ export default class TermTaxonomy extends Model<
   public count!: number;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  TermTaxonomy.init(
+TermTaxonomy.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -81,15 +81,15 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+TermTaxonomy.associate = function associate() {
   // TermTaxonomy.id <--> TermRelationships.termTaxonomyId
-  models.TermTaxonomy.hasMany(models.TermRelationships, {
+  TermTaxonomy.hasMany(TermRelationships, {
     foreignKey: 'termTaxonomyId',
     sourceKey: 'id',
     as: 'TermRelationships',
     constraints: false,
   });
-  models.TermRelationships.belongsTo(models.TermTaxonomy, {
+  TermRelationships.belongsTo(TermTaxonomy, {
     foreignKey: 'termTaxonomyId',
     targetKey: 'id',
     constraints: false,

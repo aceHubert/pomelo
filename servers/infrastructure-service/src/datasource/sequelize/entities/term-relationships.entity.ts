@@ -1,11 +1,11 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import {
   TermRelationshipAttributes,
   TermRelationshipCreationAttributes,
 } from '../../entities/term-relationships.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class TermRelationships extends Model<
+export class TermRelationships extends Model<
   TermRelationshipAttributes,
   Optional<TermRelationshipCreationAttributes, 'order'>
 > {
@@ -14,9 +14,9 @@ export default class TermRelationships extends Model<
   public order!: number;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  TermRelationships.init(
+TermRelationships.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       objectId: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

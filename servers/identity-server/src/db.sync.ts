@@ -1,42 +1,28 @@
 import path from 'path';
 import { UniqueConstraintError } from 'sequelize';
-import { Logger } from '@nestjs/common';
+import { Logger, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileEnv } from '@ace-pomelo/shared/server';
-import { DatabaseManager, name } from '@/datasource';
+import { IdentityDatasourceService, name } from '@/datasource';
 import { version } from './version';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
 // sync database
-export async function syncDatabase(config: ConfigService) {
-  const connection = config.get('IDENTITY_DATABASE_CONNECTION')
-    ? config.get('IDENTITY_DATABASE_CONNECTION')
-    : {
-        database: config.getOrThrow('IDENTITY_DATABASE_NAME'),
-        username: config.getOrThrow('IDENTITY_DATABASE_USERNAME'),
-        password: config.getOrThrow('IDENTITY_DATABASE_PASSWORD'),
-        dialect: config.get('IDENTITY_DATABASE_DIALECT', 'mysql'),
-        host: config.get('IDENTITY_DATABASE_HOST', 'localhost'),
-        port: config.get('IDENTITY_DATABASE_PORT', 3306),
-        define: {
-          charset: config.get('IDENTITY_DATABASE_CHARSET', 'utf8'),
-          collate: config.get('IDENTITY_DATABASE_COLLATE', ''),
-        },
-      };
-  const tablePrefix = config.get('TABLE_PREFIX');
+export async function syncDatabase(app: INestApplication<any>) {
+  const configService = app.get(ConfigService);
+  const datasourceService = app.get(IdentityDatasourceService);
 
   // db lock file
-  const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
+  const lockfile = path.join(
+    configService.get<string>('configPath')!,
+    configService.get<string>('DBLOCK_FILE', 'db.lock'),
+  );
   const fileEnv = FileEnv.getInstance(lockfile);
 
   // 初始化数据库
-  const dbManager =
-    typeof connection === 'string'
-      ? new DatabaseManager(connection, { tablePrefix })
-      : new DatabaseManager({ ...connection, tablePrefix });
-  await dbManager
-    .sync({
+  await datasourceService
+    .syncDB({
       alter: false,
       // match: /_dev$/,
       // TODO: version compare
@@ -54,10 +40,13 @@ export async function syncDatabase(config: ConfigService) {
   if (needInitDates) {
     logger.debug('Start to initialize datas!');
     try {
-      const origin = config.get('server.origin', 'http://localhost:' + config.get<number>('server.port', 3000));
-      const webURL = config.get('WEB_URL', origin);
+      const origin = configService.get(
+        'server.origin',
+        'http://localhost:' + configService.get<number>('server.port', 3000),
+      );
+      const webURL = configService.get('WEB_URL', origin);
 
-      await dbManager.initDatas({
+      await datasourceService.initDatas({
         apiResources: [],
         identityResources: [
           {

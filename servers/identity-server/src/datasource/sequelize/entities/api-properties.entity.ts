@@ -1,17 +1,17 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { ApiPropertiesAttributes, ApiPropertiesCreationAttributes } from '../../entities/api-properties.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ApiProperties extends Model<ApiPropertiesAttributes, Omit<ApiPropertiesCreationAttributes, 'id'>> {
+export class ApiProperties extends Model<ApiPropertiesAttributes, Omit<ApiPropertiesCreationAttributes, 'id'>> {
   public id!: number;
   public apiResourceId!: number;
   public key!: string;
   public value!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ApiProperties.init(
+ApiProperties.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

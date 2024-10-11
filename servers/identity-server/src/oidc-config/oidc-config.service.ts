@@ -3,16 +3,16 @@ import wildcard from 'wildcard';
 import psl from 'psl';
 import { get, omitBy, isNil } from 'lodash';
 import {
-  Provider,
   FindAccount,
   KoaContextWithOIDC,
   CookiesSetOptions,
   ClientMetadata,
   ClientAuthMethod,
   SigningAlgorithmWithNone,
+  Provider,
   errors,
 } from 'oidc-provider';
-import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
+import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared/server';
@@ -45,13 +45,13 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     return normalizeRoutePath(new url.URL(this.options.issuer).pathname);
   }
 
-  async createModuleOptions() {
+  async createModuleOptions(): Promise<OidcModuleOptions> {
     return {
       issuer: this.options.issuer,
-      path: normalizeRoutePath(this.options.path!),
+      path: this.options.path,
       oidc: await this.getConfiguration(),
       proxy: true,
-      factory: (issuer: string, config?: OidcConfiguration) => {
+      factory: (issuer, config) => {
         const provider = new Provider(issuer, config);
         // allow http,localhost in development mode
         if (this.options.debug) {
@@ -87,7 +87,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           const wildcardUris = this.redirectUris?.filter(hasWildcardHost) || [];
           return wildcardUris.some(wildcardMatches.bind(undefined, redirectUri));
         };
-
         // Skip redirecting invalid request error to client
         // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_redirect.md
         Object.defineProperty(errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
@@ -105,13 +104,23 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         // checksession endpoint
         // @ts-expect-error no types
         const sessionName = provider.cookieName('session');
+        const checkSessionRoute = '/connect/checksession';
+        const discoveryRoute = '/.well-known/openid-configuration';
         provider.use(async (ctx, next) => {
-          if (ctx.method === 'GET' && ctx.path === '/connect/checksession') {
+          // set issuer dynamically
+          // @ts-expect-error readonly types
+          provider.issuer = ctx.origin;
+
+          if (ctx.method === 'GET' && ctx.path === checkSessionRoute) {
             ctx.type = 'html';
             ctx.status = 200;
             ctx.body = renderCheckSessionTemplate({ globalPrefix: this.globalPrefix, sessionName });
           }
           await next();
+
+          if (ctx.oidc.route === 'discovery') {
+            ctx.body.check_session_iframe = ctx.oidc.urlFor('discovery').replace(discoveryRoute, checkSessionRoute);
+          }
         });
 
         // checksession session_state
@@ -140,29 +149,43 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
-    const scopes: OidcConfiguration['scopes'] = [],
-      claims: OidcConfiguration['claims'] = {};
+    const claims: OidcConfiguration['claims'] = {};
 
     // identity resources
-    await this.identityResourceDataSource.getList(['name', 'enabled', 'claims']).then((resources) => {
-      resources.forEach((resource) => {
-        scopes.push(resource.name);
-        claims[resource.name] = resource.claims?.map((claim) => claim.type) ?? [];
-      }, {} as NonNullable<OidcConfiguration['claims']>);
-    });
+    try {
+      await this.identityResourceDataSource.getList(['name', 'enabled', 'claims']).then((resources) => {
+        resources.forEach((resource) => {
+          claims[resource.name] = resource.claims?.map((claim) => claim.type) ?? [];
+        });
+      });
+    } catch (e: any) {
+      this.logger.error(`Required to reload server after database initalized: ${e.message}`);
+      // TODO: DB sync after module initalized cause table not found
+      // Set as default claims as DB sync
+      Object.entries({
+        openid: ['sub'],
+        profile: [
+          'role',
+          'login_name',
+          'display_name',
+          'nice_name',
+          'nick_name',
+          'avatar',
+          'gender',
+          'locale',
+          'timezone',
+          'url',
+          'updated_at',
+        ],
+        phone: ['phone_number', 'phone_number_verified'],
+        email: ['email', 'email_verified'],
+      }).forEach(([name, claim]) => {
+        claims[name] = claim;
+      });
+    }
 
     // api resources
     // TODO: api resources
-
-    // required scopes
-    if (!scopes.includes('openid')) {
-      scopes.unshift('openid');
-    }
-
-    // no configured need scopes
-    if (!scopes.includes('offline_access')) {
-      scopes.push('offline_access');
-    }
 
     return {
       // static clients metadata
@@ -197,7 +220,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             },
           ]
         : [],
-      scopes,
       claims,
       responseTypes: [
         'code',
@@ -242,9 +264,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
           return `${this.globalPrefix}/login?${params.toString()}`;
         },
-      },
-      discovery: {
-        check_session_iframe: url.resolve(this.options.issuer, `${this.options.path}/connect/checksession`),
       },
       ttl: {
         DeviceCode: (ctx, token, client) => {

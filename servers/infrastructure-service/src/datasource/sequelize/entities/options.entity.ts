@@ -1,21 +1,18 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import { OptionAutoload } from '@ace-pomelo/shared/server';
 import { OptionAttributes, OptionCreationAttributes } from '../../entities/options.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class Options extends Model<
-  OptionAttributes,
-  Optional<Omit<OptionCreationAttributes, 'id'>, 'autoload'>
-> {
+export class Options extends Model<OptionAttributes, Optional<Omit<OptionCreationAttributes, 'id'>, 'autoload'>> {
   public id!: number;
   public optionName!: string;
   public optionValue!: string;
   public autoload!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  Options.init(
+Options.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

@@ -1,11 +1,11 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import {
   TermTaxonomyMetaAttributes,
   TermTaxonomyMetaCreationAttributes,
 } from '../../entities/term-taxonomy-meta.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class TermTaxonomyMeta extends Model<
+export class TermTaxonomyMeta extends Model<
   TermTaxonomyMetaAttributes,
   Omit<TermTaxonomyMetaCreationAttributes, 'id'>
 > {
@@ -15,9 +15,9 @@ export default class TermTaxonomyMeta extends Model<
   public metaValue!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
+TermTaxonomyMeta.initialize = function initialize(sequelize, { prefix }) {
   const isMysql = sequelize.getDialect() === 'mysql';
-  TermTaxonomyMeta.init(
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

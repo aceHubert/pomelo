@@ -1,13 +1,14 @@
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { Options } from '../entities';
 import { OptionModel, OptionArgs, NewOptionInput, UpdateOptionInput } from '../interfaces/option.interface';
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class OptionDataSource extends BaseDataSource {
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -17,8 +18,8 @@ export class OptionDataSource extends BaseDataSource {
    * @param fields 返回的字段
    */
   get(id: number, fields: string[]): Promise<OptionModel | undefined> {
-    return this.models.Options.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.Options),
+    return Options.findByPk(id, {
+      attributes: this.filterFields(fields, Options),
     }).then((option) => {
       if (option) {
         const { optionName, ...rest } = option.toJSON();
@@ -41,8 +42,8 @@ export class OptionDataSource extends BaseDataSource {
    * @param fields 返回的字段
    */
   getList(query: OptionArgs, fields: string[]): Promise<OptionModel[]> {
-    return this.models.Options.findAll({
-      attributes: this.filterFields(fields, this.models.Options),
+    return Options.findAll({
+      attributes: this.filterFields(fields, Options),
       where: {
         ...query,
       },
@@ -82,7 +83,7 @@ export class OptionDataSource extends BaseDataSource {
    */
   async isExists(optionName: string) {
     return (
-      (await this.models.Options.count({
+      (await Options.count({
         where: {
           optionName: [optionName, `${this.tablePrefix}${optionName}`],
         },
@@ -110,7 +111,7 @@ export class OptionDataSource extends BaseDataSource {
       );
     }
 
-    const option = await this.models.Options.create(model);
+    const option = await Options.create(model);
     super.resetOptions();
     return option.toJSON<OptionModel>();
   }
@@ -124,7 +125,7 @@ export class OptionDataSource extends BaseDataSource {
   async update(id: number, model: UpdateOptionInput, requestUserId: number): Promise<void> {
     await this.hasCapability(UserCapability.ManageOptions, requestUserId);
 
-    await this.models.Options.update(model, {
+    await Options.update(model, {
       where: { id },
     });
     super.resetOptions();
@@ -145,7 +146,7 @@ export class OptionDataSource extends BaseDataSource {
   async delete(id: number, requestUserId: number): Promise<void> {
     await this.hasCapability(UserCapability.ManageOptions, requestUserId);
 
-    await this.models.Options.destroy({
+    await Options.destroy({
       where: { id },
     });
     super.resetOptions();

@@ -2,7 +2,6 @@ import { isUndefined } from 'lodash';
 import { CountryCode } from 'libphonenumber-js';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { WhereOptions, Attributes, Op } from 'sequelize';
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import {
   ForbiddenError,
@@ -12,7 +11,8 @@ import {
   UserMetaPresetKeys,
   OptionPresetKeys,
 } from '@ace-pomelo/shared/server';
-import { default as User } from '../entities/users.entity';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { Users, UserMeta } from '../entities';
 import {
   UserModel,
   UserWithRoleModel,
@@ -27,8 +27,8 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInput> {
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
   }
 
   private async getFieldsValue<F extends keyof UserModel>(
@@ -40,11 +40,11 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       region = username ? await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion) : undefined;
 
     if (id) {
-      return this.models.Users.findByPk(id, {
+      return Users.findByPk(id, {
         attributes: ['id', ...fields],
       }).then((user) => user?.toJSON() as any as UserModel);
     } else {
-      return this.models.Users.findOne({
+      return Users.findOne({
         attributes: ['id', ...fields],
         where: {
           [Op.or]: [
@@ -117,7 +117,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       fields.unshift('id');
     }
 
-    return this.getFieldsValue(idOrUserName, this.filterFields(fields, this.models.Users) as (keyof UserModel)[]);
+    return this.getFieldsValue(idOrUserName, this.filterFields(fields, Users) as (keyof UserModel)[]);
   }
 
   /**
@@ -137,7 +137,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   async getId(username: string): Promise<number | undefined> {
-    return this.models.Users.findOne({
+    return Users.findOne({
       attributes: ['id'],
       where: {
         loginName: username,
@@ -162,8 +162,8 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     // 排除登录密码
     fields = fields.filter((field) => field !== 'loginPwd');
 
-    return this.models.Users.findAll({
-      attributes: this.filterFields(fields, this.models.Users),
+    return Users.findAll({
+      attributes: this.filterFields(fields, Users),
       where: {
         id: ids,
       },
@@ -197,7 +197,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     // 是否有查看用户列表权限
     await this.hasCapability(UserCapability.ListUsers, requestUserId);
 
-    const where: WhereOptions<Attributes<User>> = {};
+    const where: WhereOptions<Attributes<Users>> = {};
     if (query.keyword) {
       // @ts-expect-error type error
       where[Op.or] = [
@@ -220,18 +220,17 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     if (!isUndefined(query.capabilities)) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      where[`$UserMetas.${this.field('metaValue', this.models.UserMeta)}$` as keyof UserAttributes] =
-        query.capabilities;
+      where[`$UserMetas.${this.field('metaValue', UserMeta)}$` as keyof UserAttributes] = query.capabilities;
     }
 
     // 排除登录密码
     fields = fields.filter((field) => field !== 'loginPwd');
 
-    return this.models.Users.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.Users),
+    return Users.findAndCountAll({
+      attributes: this.filterFields(fields, Users),
       include: [
         {
-          model: this.models.UserMeta,
+          model: UserMeta,
           as: 'UserMetas',
           where: {
             metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
@@ -288,7 +287,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     // 是否有查看用户列表权限
     await this.hasCapability(UserCapability.ListUsers, requestUserId);
 
-    return this.models.Users.count({
+    return Users.count({
       attributes: ['status'],
       group: 'status',
     });
@@ -306,13 +305,16 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     // 是否有查看用户列表权限
     await this.hasCapability(UserCapability.ListUsers, requestUserId);
 
-    return this.models.Users.count({
+    return Users.count({
       attributes: [
-        [this.sequelize.fn('ifnull', this.col('metaValue', this.models.UserMeta, 'UserMetas'), 'none'), 'userRole'],
+        [
+          this.datasourceService.sequelize.fn('ifnull', this.col('metaValue', UserMeta, 'UserMetas'), 'none'),
+          'userRole',
+        ],
       ],
       include: [
         {
-          model: this.models.UserMeta,
+          model: UserMeta,
           as: 'UserMetas',
           where: {
             metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
@@ -334,7 +336,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param loginName 登录名
    */
   isLoginNameExists(loginName: string): Promise<boolean> {
-    return this.models.Users.count({
+    return Users.count({
       where: {
         loginName,
       },
@@ -350,7 +352,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param mobile 手机号码
    */
   isMobileExists(mobile: string): Promise<boolean> {
-    return this.models.Users.count({
+    return Users.count({
       where: {
         mobile,
       },
@@ -366,7 +368,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param email 电子邮箱
    */
   isEmailExists(email: string): Promise<boolean> {
-    return this.models.Users.count({
+    return Users.count({
       where: {
         email,
       },
@@ -414,9 +416,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       );
     }
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      const user = await this.models.Users.create(
+      const user = await Users.create(
         {
           loginName: model.loginName,
           loginPwd: model.loginPwd,
@@ -482,7 +484,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         );
       }
 
-      await this.models.UserMeta.bulkCreate(metaCreationModels, { transaction: t });
+      await UserMeta.bulkCreate(metaCreationModels, { transaction: t });
 
       await t.commit();
 
@@ -512,19 +514,19 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
-    const user = await this.models.Users.findByPk(id);
+    const user = await Users.findByPk(id);
     if (user) {
       const { nickName, firstName, lastName, avator, description, adminColor, capabilities, locale, ...updateUser } =
         model;
-      const t = await this.sequelize.transaction();
+      const t = await this.datasourceService.sequelize.transaction();
       try {
-        await this.models.Users.update(updateUser, {
+        await Users.update(updateUser, {
           where: { id },
           transaction: t,
         });
 
         if (!isUndefined(firstName)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: firstName },
             {
               where: {
@@ -536,7 +538,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           );
         }
         if (!isUndefined(lastName)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: lastName },
             {
               where: {
@@ -549,7 +551,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         }
 
         if (!isUndefined(nickName)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: nickName },
             {
               where: {
@@ -562,7 +564,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         }
 
         if (!isUndefined(avator)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: avator },
             {
               where: {
@@ -575,7 +577,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         }
 
         if (!isUndefined(locale)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: locale },
             {
               where: {
@@ -588,7 +590,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         }
 
         if (!isUndefined(description)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: description },
             {
               where: {
@@ -601,7 +603,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         }
 
         if (!isUndefined(adminColor)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: adminColor },
             {
               where: {
@@ -614,7 +616,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         }
 
         if (!isUndefined(capabilities)) {
-          await this.models.UserMeta.update(
+          await UserMeta.update(
             { metaValue: capabilities },
             {
               where: {
@@ -654,7 +656,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
-    const user = await this.models.Users.findByPk(id);
+    const user = await Users.findByPk(id);
     if (user) {
       if (user.status === UserStatus.Disabled) {
         throw new ValidationError(
@@ -700,7 +702,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
-    const user = await this.models.Users.findByPk(id);
+    const user = await Users.findByPk(id);
     if (user) {
       if (user.status === UserStatus.Disabled) {
         throw new ValidationError(
@@ -744,7 +746,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     // 是否有修改权限
     await this.hasCapability(UserCapability.EditUsers, requestUserId);
 
-    await this.models.Users.update(
+    await Users.update(
       { status },
       {
         where: {
@@ -765,13 +767,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       username = id ? undefined : (idOrUsername as string),
       region = username ? await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion) : undefined;
     const user = id
-      ? await this.models.Users.findOne({
+      ? await Users.findOne({
           where: {
             id,
             loginPwd: oldPwd,
           },
         })
-      : await this.models.Users.findOne({
+      : await Users.findOne({
           where: {
             [Op.or]: [
               { loginName: username },
@@ -812,7 +814,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param password 新密码
    */
   async resetLoginPwd(id: number, password: string): Promise<void> {
-    const user = await this.models.Users.findByPk(id);
+    const user = await Users.findByPk(id);
     if (user) {
       if (user.status === UserStatus.Disabled) {
         throw new ValidationError(
@@ -839,7 +841,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async verifyUser(username: string, password: string): Promise<false | UserModel> {
     const region = await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
-    const user = await this.models.Users.findOne({
+    const user = await Users.findOne({
       where: {
         [Op.or]: [
           { loginName: username },
@@ -877,13 +879,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       );
     }
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      await this.models.UserMeta.destroy({
+      await UserMeta.destroy({
         where: { userId: id },
         transaction: t,
       });
-      await this.models.Users.destroy({
+      await Users.destroy({
         where: { id },
         transaction: t,
       });
@@ -914,13 +916,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       );
     }
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      await this.models.UserMeta.destroy({
+      await UserMeta.destroy({
         where: { userId: ids },
         transaction: t,
       });
-      await this.models.Users.destroy({
+      await Users.destroy({
         where: { id: ids },
         transaction: t,
       });

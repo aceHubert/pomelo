@@ -1,11 +1,11 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import {
   ClientIdPRestrictionsAttributes,
   ClientIdPRestrictionsCreationAttributes,
 } from '../../entities/client-id-prestrictions.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ClientIdPRestrictions extends Model<
+export class ClientIdPRestrictions extends Model<
   ClientIdPRestrictionsAttributes,
   Omit<ClientIdPRestrictionsCreationAttributes, 'id'>
 > {
@@ -14,9 +14,9 @@ export default class ClientIdPRestrictions extends Model<
   public grantType!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ClientIdPRestrictions.init(
+ClientIdPRestrictions.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

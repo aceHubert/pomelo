@@ -1,3 +1,4 @@
+export type NonAbstract<T> = { [P in keyof T]: T[P] };
 /**
  * Type helper for making certain fields of an object optional.
  */

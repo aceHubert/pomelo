@@ -1,16 +1,16 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { ApiClaimsAttributes, ApiClaimsCreationAttributes } from '../../entities/api-claims.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ApiClaims extends Model<ApiClaimsAttributes, Omit<ApiClaimsCreationAttributes, 'id'>> {
+export class ApiClaims extends Model<ApiClaimsAttributes, Omit<ApiClaimsCreationAttributes, 'id'>> {
   public id!: number;
   public apiResourceId!: number;
   public type!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ApiClaims.init(
+ApiClaims.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

@@ -1,8 +1,8 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { ClientSecretsAttributes, ClientSecretsCreationAttributes } from '../../entities/client-secrets.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ClientSecrets extends Model<
+export class ClientSecrets extends Model<
   Omit<ClientSecretsAttributes, 'createdAt'>,
   Omit<ClientSecretsCreationAttributes, 'id' | 'createdAt'>
 > {
@@ -17,9 +17,9 @@ export default class ClientSecrets extends Model<
   public readonly createdAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ClientSecrets.init(
+ClientSecrets.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

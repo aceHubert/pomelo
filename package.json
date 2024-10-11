@@ -87,7 +87,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "sanitize-html": "^2.11.0",
-    "sequelize": "^6.19.0",
+    "sequelize": "^6.30.0",
     "statuses": "^2.0.1",
     "tedious": "^15.1.0",
     "wildcard": "^2.0.1"

@@ -1,18 +1,18 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { MediaMetaPresetKeys } from '@ace-pomelo/shared/server';
 import { MediaMetaAttributes, MediaMetaCreationAttributes } from '../../entities/media-meta.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class MediaMeta extends Model<MediaMetaAttributes, Omit<MediaMetaCreationAttributes, 'id'>> {
+export class MediaMeta extends Model<MediaMetaAttributes, Omit<MediaMetaCreationAttributes, 'id'>> {
   public id!: number;
   public mediaId!: number;
   public metaKey!: string;
   public metaValue?: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
+MediaMeta.initialize = function initialize(sequelize, { prefix }) {
   const isMysql = sequelize.getDialect() === 'mysql';
-  MediaMeta.init(
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -44,7 +44,7 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
     },
   );
 
-  MediaMeta.addScope(MediaMetaPresetKeys.Matedata, {
+  this.addScope(MediaMetaPresetKeys.Matedata, {
     where: {
       metaKey: MediaMetaPresetKeys.Matedata,
     },

@@ -1,12 +1,13 @@
-import { Model, DataTypes, Optional } from 'sequelize';
+import { DataTypes, Optional } from 'sequelize';
 import {
   IdentityResourcesAttributes,
   IdentityResourcesCreationAttributes,
 } from '../../entities/identity-resources.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { IdentityClaims } from './identity-claims.entity';
+import { IdentityProperties } from './identity-properties.entity';
 
-export default class IdentityResources extends Model<
+export class IdentityResources extends Model<
   Omit<IdentityResourcesAttributes, 'updatedAt' | 'createdAt'>,
   Optional<
     Omit<IdentityResourcesCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>,
@@ -28,9 +29,9 @@ export default class IdentityResources extends Model<
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  IdentityResources.init(
+IdentityResources.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -91,28 +92,28 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+IdentityResources.associate = function associate() {
   // IdentityResources.id <--> IdentityClaims.identityResourceId
-  models.IdentityResources.hasMany(models.IdentityClaims, {
+  IdentityResources.hasMany(IdentityClaims, {
     foreignKey: 'identityResourceId',
     sourceKey: 'id',
     as: 'IdentityClaims',
     constraints: false,
   });
-  models.IdentityClaims.belongsTo(models.IdentityResources, {
+  IdentityClaims.belongsTo(IdentityResources, {
     foreignKey: 'identityResourceId',
     targetKey: 'id',
     constraints: false,
   });
 
   // IdentityResources.id <--> IdentityProperties.identityResourceId
-  models.IdentityResources.hasMany(models.IdentityProperties, {
+  IdentityResources.hasMany(IdentityProperties, {
     foreignKey: 'identityResourceId',
     sourceKey: 'id',
     as: 'IdentityProperties',
     constraints: false,
   });
-  models.IdentityProperties.belongsTo(models.IdentityResources, {
+  IdentityProperties.belongsTo(IdentityResources, {
     foreignKey: 'identityResourceId',
     targetKey: 'id',
     constraints: false,

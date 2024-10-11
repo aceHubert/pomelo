@@ -1,11 +1,11 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import {
   ClientGrantTypesAttributes,
   ClientGrantTypesCreationAttributes,
 } from '../../entities/client-grant-types.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ClientGrantTypes extends Model<
+export class ClientGrantTypes extends Model<
   ClientGrantTypesAttributes,
   Omit<ClientGrantTypesCreationAttributes, 'id'>
 > {
@@ -14,9 +14,9 @@ export default class ClientGrantTypes extends Model<
   public grantType!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ClientGrantTypes.init(
+ClientGrantTypes.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

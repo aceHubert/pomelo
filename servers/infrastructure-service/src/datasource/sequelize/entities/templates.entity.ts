@@ -1,10 +1,11 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import { TemplateStatus, TemplatePresetType, TemplateCommentStatus } from '@ace-pomelo/shared/server';
 import { TemplateAttributes, TemplateCreationAttributes } from '../../entities/template.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { TemplateMeta } from './template-meta.entity';
+import { TermRelationships } from './term-relationships.entity';
 
-export default class Templates extends Model<
+export class Templates extends Model<
   Omit<TemplateAttributes, 'updatedAt' | 'createdAt'>,
   Optional<
     Omit<TemplateCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>,
@@ -29,9 +30,9 @@ export default class Templates extends Model<
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  Templates.init(
+Templates.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -114,18 +115,18 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+Templates.associate = function associate() {
   // Template.id <--> TemplateMeta.templateId
-  models.Templates.hasMany(models.TemplateMeta, {
+  Templates.hasMany(TemplateMeta, {
     foreignKey: 'templateId',
     sourceKey: 'id',
     as: 'TemplateMetas',
     constraints: false,
   });
-  models.TemplateMeta.belongsTo(models.Templates, { foreignKey: 'templateId', targetKey: 'id', constraints: false });
+  TemplateMeta.belongsTo(Templates, { foreignKey: 'templateId', targetKey: 'id', constraints: false });
 
   // Template.id --> TermRelationships.objectId
-  models.Templates.hasMany(models.TermRelationships, {
+  Templates.hasMany(TermRelationships, {
     foreignKey: 'objectId',
     sourceKey: 'id',
     as: 'TemplateTermRelationships',

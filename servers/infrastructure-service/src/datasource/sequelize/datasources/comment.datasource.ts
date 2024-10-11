@@ -1,6 +1,7 @@
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { Comments, CommentMeta } from '../entities';
 import {
   CommentModel,
   CommentMetaModel,
@@ -14,8 +15,8 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewCommentMetaInput> {
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -29,8 +30,8 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       fields.unshift('id');
     }
 
-    return this.models.Comments.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.Comments),
+    return Comments.findByPk(id, {
+      attributes: this.filterFields(fields, Comments),
     }).then((comment) => comment?.toJSON<CommentModel>());
   }
 
@@ -40,8 +41,8 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @param fields 返回的字段
    */
   getPaged({ offset, limit, ...query }: PagedCommentArgs, fields: string[]): Promise<PagedCommentModel> {
-    return this.models.Comments.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.Comments),
+    return Comments.findAndCountAll({
+      attributes: this.filterFields(fields, Comments),
       where: {
         ...query,
       },
@@ -63,9 +64,9 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
   async create(model: NewCommentInput, requestUserId: number): Promise<CommentModel> {
     const { metas, ...rest } = model;
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      const comment = await this.models.Comments.create(
+      const comment = await Comments.create(
         {
           ...rest,
           userId: requestUserId,
@@ -74,7 +75,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
       );
 
       if (metas && metas.length) {
-        this.models.CommentMeta.bulkCreate(
+        CommentMeta.bulkCreate(
           metas.map((meta) => {
             return {
               ...meta,
@@ -105,7 +106,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @param requestUserId 请求用户 Id
    */
   async update(id: number, model: UpdateCommentInput, requestUserId: number): Promise<void> {
-    const comment = await this.models.Comments.findByPk(id, {
+    const comment = await Comments.findByPk(id, {
       attributes: ['userId'],
     });
     if (comment) {
@@ -114,7 +115,7 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
         await this.hasCapability(UserCapability.ModerateComments, requestUserId);
       }
 
-      await this.models.Comments.update(model, {
+      await Comments.update(model, {
         where: { id },
       });
     } else {
@@ -134,17 +135,17 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
    * @param requestUserId 请求用户 Id
    */
   async delete(id: number, requestUserId: number): Promise<void> {
-    const comment = await this.models.Comments.findByPk(id);
+    const comment = await Comments.findByPk(id);
     if (comment) {
       // 非本人创建的是否可以删除
       if (comment.userId !== requestUserId) {
         await this.hasCapability(UserCapability.ModerateComments, requestUserId);
       }
-      const t = await this.sequelize.transaction();
+      const t = await this.datasourceService.sequelize.transaction();
       try {
         await comment.destroy({ transaction: t });
 
-        await this.models.CommentMeta.destroy({
+        await CommentMeta.destroy({
           where: {
             commentId: id,
           },

@@ -1,5 +1,5 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import Medias from '../entities/medias.entity';
+import { Medias } from '../entities';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 

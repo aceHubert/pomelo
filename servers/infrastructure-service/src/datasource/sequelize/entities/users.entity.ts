@@ -1,10 +1,10 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import { UserStatus } from '@ace-pomelo/shared/server';
 import { UserAttributes, UserCreationAttributes } from '../../entities/users.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { UserMeta } from './user-meta.entity';
 
-export default class Users
+export class Users
   extends Model<
     Omit<UserAttributes, 'updatedAt' | 'createdAt'>,
     Optional<Omit<UserCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'status'>
@@ -29,7 +29,7 @@ export default class Users
 }
 
 // 初始化
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
+Users.initialize = function initialize(sequelize, { prefix }) {
   const isMysql = sequelize.getDialect() === 'mysql';
   Users.init(
     {
@@ -91,13 +91,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+Users.associate = function associate() {
   // Users.id <--> UserMeta.userId
-  models.Users.hasMany(models.UserMeta, {
+  Users.hasMany(UserMeta, {
     foreignKey: 'userId',
     sourceKey: 'id',
     as: 'UserMetas',
     constraints: false,
   });
-  models.UserMeta.belongsTo(models.Users, { foreignKey: 'userId', targetKey: 'id', constraints: false });
+  UserMeta.belongsTo(Users, { foreignKey: 'userId', targetKey: 'id', constraints: false });
 };

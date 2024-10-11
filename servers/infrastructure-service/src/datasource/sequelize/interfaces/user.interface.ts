@@ -1,6 +1,6 @@
 import { Attributes, CreationAttributes } from 'sequelize';
 import { UserStatus } from '@ace-pomelo/shared/server';
-import Users from '../entities/users.entity';
+import { Users } from '../entities';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 

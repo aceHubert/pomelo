@@ -1,4 +1,4 @@
-import { Optional } from './types';
+import { Optional } from '../shared/types';
 
 export interface ApiScopesAttributes {
   id: number;

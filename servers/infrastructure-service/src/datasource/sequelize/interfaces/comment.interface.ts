@@ -1,5 +1,5 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import Comments from '../entities/comments.entity';
+import { Comments } from '../entities';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 

@@ -1,9 +1,12 @@
-import { Model, DataTypes, Optional } from 'sequelize';
+import { DataTypes, Optional } from 'sequelize';
 import { ApiResourcesAttributes, ApiResourcesCreationAttributes } from '../../entities/api-resources.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { ApiClaims } from './api-claims.entity';
+import { ApiScopes } from './api-scopes.entity';
+import { ApiSecrets } from './api-secrets.entity';
+import { ApiProperties } from './api-properties.entity';
 
-export default class ApiResources extends Model<
+export class ApiResources extends Model<
   Omit<ApiResourcesAttributes, 'updatedAt' | 'createdAt'>,
   Optional<Omit<ApiResourcesCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>, 'nonEditable' | 'enabled'>
 > {
@@ -20,9 +23,9 @@ export default class ApiResources extends Model<
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ApiResources.init(
+ApiResources.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -69,54 +72,54 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+ApiResources.associate = function associate() {
   // ApiResourcesrs.id <--> ApiClaims.apiResourceId
-  models.ApiResources.hasMany(models.ApiClaims, {
+  ApiResources.hasMany(ApiClaims, {
     foreignKey: 'apiResourceId',
     sourceKey: 'id',
     as: 'ApiClaims',
     constraints: false,
   });
-  models.ApiClaims.belongsTo(models.ApiResources, {
+  ApiClaims.belongsTo(ApiResources, {
     foreignKey: 'apiResourceId',
     targetKey: 'id',
     constraints: false,
   });
 
   // ApiResourcesrs.id <--> ApiProperties.apiResourceId
-  models.ApiResources.hasMany(models.ApiProperties, {
+  ApiResources.hasMany(ApiProperties, {
     foreignKey: 'apiResourceId',
     sourceKey: 'id',
     as: 'ApiProperties',
     constraints: false,
   });
-  models.ApiProperties.belongsTo(models.ApiResources, {
+  ApiProperties.belongsTo(ApiResources, {
     foreignKey: 'apiResourceId',
     targetKey: 'id',
     constraints: false,
   });
 
   // ApiResourcesrs.id <--> ApiScopes.apiResourceId
-  models.ApiResources.hasMany(models.ApiScopes, {
+  ApiResources.hasMany(ApiScopes, {
     foreignKey: 'apiResourceId',
     sourceKey: 'id',
     as: 'ApiScopes',
     constraints: false,
   });
-  models.ApiScopes.belongsTo(models.ApiResources, {
+  ApiScopes.belongsTo(ApiResources, {
     foreignKey: 'apiResourceId',
     targetKey: 'id',
     constraints: false,
   });
 
   // ApiResourcesrs.id <--> ApiSecrets.apiResourceId
-  models.ApiResources.hasMany(models.ApiSecrets, {
+  ApiResources.hasMany(ApiSecrets, {
     foreignKey: 'apiResourceId',
     sourceKey: 'id',
     as: 'ApiSecrets',
     constraints: false,
   });
-  models.ApiSecrets.belongsTo(models.ApiResources, {
+  ApiSecrets.belongsTo(ApiResources, {
     foreignKey: 'apiResourceId',
     targetKey: 'id',
     constraints: false,

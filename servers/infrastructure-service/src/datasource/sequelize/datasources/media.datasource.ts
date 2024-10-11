@@ -1,7 +1,8 @@
 import { Op, WhereOptions } from 'sequelize';
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, MediaMetaPresetKeys, UserCapability } from '@ace-pomelo/shared/server';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { Medias, MediaMeta } from '../entities';
 import {
   MediaModel,
   MediaMetaDataModel,
@@ -16,8 +17,8 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMetaInput> {
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -31,10 +32,10 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       fields.unshift('id');
     }
 
-    return this.models.Medias.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.Medias),
+    return Medias.findByPk(id, {
+      attributes: this.filterFields(fields, Medias),
       include: {
-        model: this.models.MediaMeta.scope(MediaMetaPresetKeys.Matedata),
+        model: MediaMeta.scope(MediaMetaPresetKeys.Matedata),
         attributes: ['metaValue'],
         as: 'MediaMetadata',
         required: false,
@@ -64,10 +65,10 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       fields.unshift('id');
     }
 
-    return this.models.Medias.findOne({
-      attributes: this.filterFields(fields, this.models.Medias),
+    return Medias.findOne({
+      attributes: this.filterFields(fields, Medias),
       include: {
-        model: this.models.MediaMeta.scope(MediaMetaPresetKeys.Matedata),
+        model: MediaMeta.scope(MediaMetaPresetKeys.Matedata),
         attributes: ['metaValue'],
         as: 'MediaMetadata',
         required: false,
@@ -113,10 +114,10 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       where.mimeType = query.mimeTypes;
     }
 
-    return this.models.Medias.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.Medias),
+    return Medias.findAndCountAll({
+      attributes: this.filterFields(fields, Medias),
       include: {
-        model: this.models.MediaMeta.scope(MediaMetaPresetKeys.Matedata),
+        model: MediaMeta.scope(MediaMetaPresetKeys.Matedata),
         as: 'MediaMetadata',
         attributes: ['metaValue'],
         required: false,
@@ -144,7 +145,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
    */
   async isExists(fileName: string): Promise<boolean> {
     return (
-      (await this.models.Medias.count({
+      (await Medias.count({
         where: {
           fileName,
         },
@@ -176,9 +177,9 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
     }
 
     const { metas, ...rest } = model;
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      const media = await this.models.Medias.create(
+      const media = await Medias.create(
         {
           ...rest,
           userId: requestUserId,
@@ -186,7 +187,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
         { transaction: t },
       );
 
-      const mediaMetas = await this.models.MediaMeta.bulkCreate(
+      const mediaMetas = await MediaMeta.bulkCreate(
         [
           {
             mediaId: media.id,
@@ -232,9 +233,9 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
     // 是否有编辑文件的权限
     await this.hasCapability(UserCapability.EditFiles, requestUserId);
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      await this.models.Medias.update(
+      await Medias.update(
         {
           ...model,
           userId: requestUserId,
@@ -248,7 +249,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
       );
 
       if (!!metaData) {
-        await this.models.MediaMeta.update(
+        await MediaMeta.update(
           {
             metaValue: JSON.stringify(metaData),
           },
@@ -278,9 +279,9 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
     // 是否有编辑文件的权限
     await this.hasCapability(UserCapability.EditFiles, requestUserId);
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      await this.models.Medias.update(
+      await Medias.update(
         {
           userId: requestUserId,
         },
@@ -291,7 +292,7 @@ export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMeta
           transaction: t,
         },
       );
-      await this.models.MediaMeta.update(
+      await MediaMeta.update(
         {
           metaValue: JSON.stringify(metaData),
         },

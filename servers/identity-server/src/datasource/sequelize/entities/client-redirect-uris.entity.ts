@@ -1,11 +1,11 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import {
   ClientRedirectUrisAttributes,
   ClientRedirectUrisCreationAttributes,
 } from '../../entities/client-redirect-uris.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ClientRedirectUris extends Model<
+export class ClientRedirectUris extends Model<
   ClientRedirectUrisAttributes,
   Omit<ClientRedirectUrisCreationAttributes, 'id'>
 > {
@@ -14,9 +14,9 @@ export default class ClientRedirectUris extends Model<
   public redirectUri!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ClientRedirectUris.init(
+ClientRedirectUris.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

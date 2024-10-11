@@ -21,7 +21,7 @@ bootstrap(AppModule, {
     app.useLogger(app.get(Log4jsService));
 
     // sync database
-    await syncDatabase(configService);
+    await syncDatabase(app);
 
     const host = configService.get<string>('server.host', '');
     const port = configService.get<number>('server.port', 3000);

@@ -1,4 +1,3 @@
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { WhereOptions, Attributes, Includeable, Transaction, Op, Order } from 'sequelize';
 import {
@@ -11,7 +10,8 @@ import {
   TemplateStatus,
   TemplatePresetType,
 } from '@ace-pomelo/shared/server';
-import { default as Templates } from '../entities/templates.entity';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { Templates, TemplateMeta, TermTaxonomy, TermRelationships } from '../entities';
 import {
   TemplateInnerStatus,
   TemplateInnerType,
@@ -58,8 +58,8 @@ enum TemplateMetaPresetKeys {
 
 @Injectable()
 export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTemplateMetaInput> {
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -70,7 +70,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     name = escape(name).trim();
     if (!name) return '';
 
-    const count = await this.models.Templates.count({
+    const count = await Templates.count({
       where: {
         name: {
           [Op.or]: {
@@ -169,7 +169,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param prevStatus 之前的状态
    */
   private async storeTrashStatus(templateId: number, prevStatus: string, t?: Transaction) {
-    return await this.models.TemplateMeta.bulkCreate(
+    return await TemplateMeta.bulkCreate(
       [
         {
           templateId,
@@ -195,7 +195,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    */
   private async bulkStoreTrashStatus(templatesOrtemplateIds: Attributes<Templates>[] | number[], t?: Transaction) {
     const templates = templatesOrtemplateIds.some((templateOrId) => typeof templateOrId === 'number')
-      ? await this.models.Templates.findAll({
+      ? await Templates.findAll({
           attributes: ['id', 'status'],
           where: {
             id: templatesOrtemplateIds as number[],
@@ -205,7 +205,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     if (!templates.length) return [];
 
-    return await this.models.TemplateMeta.bulkCreate(
+    return await TemplateMeta.bulkCreate(
       Array.prototype.concat.apply(
         [],
         templates.map((template) => [
@@ -309,8 +309,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
       }
     }
-    return this.models.Templates.findOne({
-      attributes: this.filterFields(fields, this.models.Templates),
+    return Templates.findOne({
+      attributes: this.filterFields(fields, Templates),
       where,
     }).then((template) => template?.toJSON<TemplateModel>());
   }
@@ -396,8 +396,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
       }
     }
-    return this.models.Templates.findOne({
-      attributes: this.filterFields(fields, this.models.Templates),
+    return Templates.findOne({
+      attributes: this.filterFields(fields, Templates),
       where,
     }).then((template) => template?.toJSON<TemplateModel>());
   }
@@ -441,22 +441,22 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     if (date) {
       andWhere.push(
-        this.sequelize.where(
+        this.datasourceService.sequelize.where(
           // TODO: 只支持 mssql 和 mysql
-          this.sequelize.getDialect() === 'mssql'
-            ? this.sequelize.fn(
+          this.datasourceService.sequelize.getDialect() === 'mssql'
+            ? this.datasourceService.sequelize.fn(
                 'LEFT',
-                this.sequelize.fn(
+                this.datasourceService.sequelize.fn(
                   'CONVERT',
-                  this.sequelize.literal('varchar(12)'),
-                  this.col('createdAt', this.models.Templates),
+                  this.datasourceService.sequelize.literal('varchar(12)'),
+                  this.col('createdAt', Templates),
                   112,
                 ),
                 date.length,
               )
-            : this.sequelize.fn(
+            : this.datasourceService.sequelize.fn(
                 'DATE_FORMAT',
-                this.col('createdAt', this.models.Templates),
+                this.col('createdAt', Templates),
                 date.length === 4 ? '%Y' : date.length === 6 ? '%Y%m' : '%Y%m%d',
               ),
           date,
@@ -471,11 +471,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     }>) {
       if (taxonomyId) {
         include.push({
-          model: this.models.TermRelationships,
+          model: TermRelationships,
           as: 'TermRelationships',
           include: [
             {
-              model: this.models.TermTaxonomy,
+              model: TermTaxonomy,
               as: 'TermTaxonomy',
               duplicating: false,
             },
@@ -489,24 +489,24 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           (await this.getOption(OptionPresetKeys.DefaultCategory)) === String(taxonomyId)
         ) {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', this.models.TermTaxonomy)}$`]: {
+            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: {
               [Op.or]: [taxonomyId, { [Op.is]: null }],
             },
           });
         } else {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', this.models.TermTaxonomy)}$`]: taxonomyId,
-            [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', this.models.TermTaxonomy)}$`]: taxonomyType,
+            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: taxonomyId,
+            [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
           });
         }
       } else if (taxonomyName) {
         include.push({
-          model: this.models.TermRelationships,
+          model: TermRelationships,
           as: 'TermRelationships',
           attributes: [],
           include: [
             {
-              model: this.models.TermTaxonomy,
+              model: TermTaxonomy,
               as: 'TermTaxonomy',
               attributes: [],
             },
@@ -515,14 +515,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
 
         andWhere.push({
-          [`$TermRelationships.TermTaxonomy.${this.field('name', this.models.TermTaxonomy)}$`]: taxonomyName,
-          [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', this.models.TermTaxonomy)}$`]: taxonomyType,
+          [`$TermRelationships.TermTaxonomy.${this.field('name', TermTaxonomy)}$`]: taxonomyName,
+          [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
         });
       }
     }
 
-    return this.models.Templates.findAll({
-      attributes: this.filterFields(fields, this.models.Templates),
+    return Templates.findAll({
+      attributes: this.filterFields(fields, Templates),
       include,
       where,
     });
@@ -537,7 +537,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param type 类型
    */
   async getNames(type: string): Promise<string[]> {
-    const templates = await this.models.Templates.findAll({
+    const templates = await Templates.findAll({
       attributes: ['name'],
       where: {
         type,
@@ -566,7 +566,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       notIn.push(TemplateStatus.Trash);
     }
 
-    return this.models.Templates.count({
+    return Templates.count({
       where: {
         type,
         status: {
@@ -588,23 +588,23 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param type 类型
    */
   getCountByDay(month: string, type: string) {
-    const mssqlDayCol = this.sequelize.fn(
+    const mssqlDayCol = this.datasourceService.sequelize.fn(
       'LEFT',
-      this.sequelize.fn(
+      this.datasourceService.sequelize.fn(
         'CONVERT',
-        this.sequelize.literal('varchar(12)'),
-        this.col('createdAt', this.models.Templates),
+        this.datasourceService.sequelize.literal('varchar(12)'),
+        this.col('createdAt', Templates),
         112,
       ),
       8,
     );
-    return this.models.Templates.count({
+    return Templates.count({
       attributes: [
         [
           // TODO: 只支持 mssql 和 mysql
-          this.sequelize.getDialect() === 'mssql'
+          this.datasourceService.sequelize.getDialect() === 'mssql'
             ? mssqlDayCol
-            : this.sequelize.fn('DATE_FORMAT', this.col('createdAt', this.models.Templates), '%Y%m%d'),
+            : this.datasourceService.sequelize.fn('DATE_FORMAT', this.col('createdAt', Templates), '%Y%m%d'),
           'day',
         ],
       ],
@@ -614,25 +614,25 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           // 不包含所有的操作时的状态
           [Op.notIn]: [...TemplateOperateStatus],
         },
-        [Op.and]: this.sequelize.where(
+        [Op.and]: this.datasourceService.sequelize.where(
           // TODO: 只支持 mssql 和 mysql
-          this.sequelize.getDialect() === 'mssql'
-            ? this.sequelize.fn(
+          this.datasourceService.sequelize.getDialect() === 'mssql'
+            ? this.datasourceService.sequelize.fn(
                 'LEFT',
-                this.sequelize.fn(
+                this.datasourceService.sequelize.fn(
                   'CONVERT',
-                  this.sequelize.literal('varchar(12)'),
-                  this.col('createdAt', this.models.Templates),
+                  this.datasourceService.sequelize.literal('varchar(12)'),
+                  this.col('createdAt', Templates),
                   112,
                 ),
                 6,
               )
-            : this.sequelize.fn('DATE_FORMAT', this.col('createdAt', this.models.Templates), '%Y%m'),
+            : this.datasourceService.sequelize.fn('DATE_FORMAT', this.col('createdAt', Templates), '%Y%m'),
           month,
         ),
       },
       // TODO: 只支持 mssql 和 mysql
-      group: this.sequelize.getDialect() === 'mssql' ? mssqlDayCol : 'day',
+      group: this.datasourceService.sequelize.getDialect() === 'mssql' ? mssqlDayCol : 'day',
     });
   }
 
@@ -650,24 +650,24 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       months = months || 12; // 默认向前推12个月
     }
 
-    const mssqlMonthCol = this.sequelize.fn(
+    const mssqlMonthCol = this.datasourceService.sequelize.fn(
       'LEFT',
-      this.sequelize.fn(
+      this.datasourceService.sequelize.fn(
         'CONVERT',
-        this.sequelize.literal('varchar(12)'),
-        this.col('createdAt', this.models.Templates),
+        this.datasourceService.sequelize.literal('varchar(12)'),
+        this.col('createdAt', Templates),
         112,
       ),
       6,
     );
 
-    return this.models.Templates.count({
+    return Templates.count({
       attributes: [
         [
           // TODO: 只支持 mssql 和 mysql
-          this.sequelize.getDialect() === 'mssql'
+          this.datasourceService.sequelize.getDialect() === 'mssql'
             ? mssqlMonthCol
-            : this.sequelize.fn('DATE_FORMAT', this.col('createdAt', this.models.Templates), '%Y%m'),
+            : this.datasourceService.sequelize.fn('DATE_FORMAT', this.col('createdAt', Templates), '%Y%m'),
           'month',
         ],
       ],
@@ -678,42 +678,42 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           [Op.notIn]: TemplateOperateStatus,
         },
         [Op.and]: year
-          ? this.sequelize.where(
+          ? this.datasourceService.sequelize.where(
               // TODO: 只支持 mssql 和 mysql
-              this.sequelize.getDialect() === 'mssql'
-                ? this.sequelize.fn(
+              this.datasourceService.sequelize.getDialect() === 'mssql'
+                ? this.datasourceService.sequelize.fn(
                     'LEFT',
-                    this.sequelize.fn(
+                    this.datasourceService.sequelize.fn(
                       'CONVERT',
-                      this.sequelize.literal('varchar(12)'),
-                      this.col('createdAt', this.models.Templates),
+                      this.datasourceService.sequelize.literal('varchar(12)'),
+                      this.col('createdAt', Templates),
                       112,
                     ),
                     4,
                   )
-                : this.sequelize.fn('DATE_FORMAT', this.col('createdAt', this.models.Templates), '%Y'),
+                : this.datasourceService.sequelize.fn('DATE_FORMAT', this.col('createdAt', Templates), '%Y'),
               year,
             )
-          : this.sequelize.where(
+          : this.datasourceService.sequelize.where(
               // TODO: 只支持 mssql 和 mysql
-              this.sequelize.getDialect() === 'mssql'
-                ? this.sequelize.fn(
+              this.datasourceService.sequelize.getDialect() === 'mssql'
+                ? this.datasourceService.sequelize.fn(
                     'DATEDIFF',
-                    this.sequelize.literal('mm'),
-                    this.col('createdAt', this.models.Templates),
-                    this.sequelize.literal('getdate()'),
+                    this.datasourceService.sequelize.literal('mm'),
+                    this.col('createdAt', Templates),
+                    this.datasourceService.sequelize.literal('getdate()'),
                   )
-                : this.sequelize.fn(
+                : this.datasourceService.sequelize.fn(
                     'TIMESTAMPDIFF',
-                    this.sequelize.literal('MONTH'),
-                    this.col('createdAt', this.models.Templates),
-                    this.sequelize.literal('CURRENT_TIMESTAMP'),
+                    this.datasourceService.sequelize.literal('MONTH'),
+                    this.col('createdAt', Templates),
+                    this.datasourceService.sequelize.literal('CURRENT_TIMESTAMP'),
                   ),
               { [Op.lte]: months },
             ),
       },
       // TODO: 只支持 mssql 和 mysql
-      group: this.sequelize.getDialect() === 'mssql' ? mssqlMonthCol : 'month',
+      group: this.datasourceService.sequelize.getDialect() === 'mssql' ? mssqlMonthCol : 'month',
     });
   }
 
@@ -726,23 +726,23 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param type 类型
    */
   getCountByYear(type: string) {
-    const mssqlYearCol = this.sequelize.fn(
+    const mssqlYearCol = this.datasourceService.sequelize.fn(
       'LEFT',
-      this.sequelize.fn(
+      this.datasourceService.sequelize.fn(
         'CONVERT',
-        this.sequelize.literal('varchar(12)'),
-        this.col('createdAt', this.models.Templates),
+        this.datasourceService.sequelize.literal('varchar(12)'),
+        this.col('createdAt', Templates),
         112,
       ),
       4,
     );
-    return this.models.Templates.count({
+    return Templates.count({
       attributes: [
         [
           // TODO: 只支持 mssql 和 mysql
-          this.sequelize.getDialect() === 'mssql'
+          this.datasourceService.sequelize.getDialect() === 'mssql'
             ? mssqlYearCol
-            : this.sequelize.fn('DATE_FORMAT', this.col('createdAt', this.models.Templates), '%Y'),
+            : this.datasourceService.sequelize.fn('DATE_FORMAT', this.col('createdAt', Templates), '%Y'),
           'year',
         ],
       ],
@@ -754,7 +754,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         },
       },
       // TODO: 只支持 mssql 和 mysql
-      group: this.sequelize.getDialect() === 'mssql' ? mssqlYearCol : 'year',
+      group: this.datasourceService.sequelize.getDialect() === 'mssql' ? mssqlYearCol : 'year',
     });
   }
 
@@ -815,7 +815,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       },
     });
 
-    return this.models.Templates.count({
+    return Templates.count({
       attributes: ['status'],
       where,
       group: 'status',
@@ -874,22 +874,22 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
     if (date) {
       andWhere.push(
-        this.sequelize.where(
+        this.datasourceService.sequelize.where(
           // TODO: 只支持 mssql 和 mysql
-          this.sequelize.getDialect() === 'mssql'
-            ? this.sequelize.fn(
+          this.datasourceService.sequelize.getDialect() === 'mssql'
+            ? this.datasourceService.sequelize.fn(
                 'LEFT',
-                this.sequelize.fn(
+                this.datasourceService.sequelize.fn(
                   'CONVERT',
-                  this.sequelize.literal('varchar(12)'),
-                  this.col('createdAt', this.models.Templates),
+                  this.datasourceService.sequelize.literal('varchar(12)'),
+                  this.col('createdAt', Templates),
                   112,
                 ),
                 date.length,
               )
-            : this.sequelize.fn(
+            : this.datasourceService.sequelize.fn(
                 'DATE_FORMAT',
-                this.col('createdAt', this.models.Templates),
+                this.col('createdAt', Templates),
                 date.length === 4 ? '%Y' : date.length === 6 ? '%Y%m' : '%Y%m%d',
               ),
           date,
@@ -954,12 +954,12 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     }>) {
       if (taxonomyId) {
         include.push({
-          model: this.models.TermRelationships,
+          model: TermRelationships,
           as: 'TermRelationships',
           attributes: [],
           include: [
             {
-              model: this.models.TermTaxonomy,
+              model: TermTaxonomy,
               as: 'TermTaxonomy',
               attributes: [],
               duplicating: false,
@@ -973,24 +973,24 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           (await this.getOption(OptionPresetKeys.DefaultCategory)) === String(taxonomyId)
         ) {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', this.models.TermTaxonomy)}$`]: {
+            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: {
               [Op.or]: [taxonomyId, { [Op.is]: null }],
             },
           });
         } else {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', this.models.TermTaxonomy)}$`]: taxonomyId,
-            [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', this.models.TermTaxonomy)}$`]: taxonomyType,
+            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: taxonomyId,
+            [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
           });
         }
       } else if (taxonomyName) {
         include.push({
-          model: this.models.TermRelationships,
+          model: TermRelationships,
           as: 'TermRelationships',
           attributes: [],
           include: [
             {
-              model: this.models.TermTaxonomy,
+              model: TermTaxonomy,
               as: 'TermTaxonomy',
               attributes: [],
             },
@@ -999,14 +999,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
 
         andWhere.push({
-          [`$TermRelationships.TermTaxonomy.${this.field('name', this.models.TermTaxonomy)}$`]: taxonomyName,
-          [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', this.models.TermTaxonomy)}$`]: taxonomyType,
+          [`$TermRelationships.TermTaxonomy.${this.field('name', TermTaxonomy)}$`]: taxonomyName,
+          [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
         });
       }
     }
 
-    return this.models.Templates.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.Templates),
+    return Templates.findAndCountAll({
+      attributes: this.filterFields(fields, Templates),
       include,
       where,
       offset,
@@ -1014,7 +1014,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       order: [
         // 根据 keyword 匹配程度排序
         !!keyword && [
-          this.sequelize.literal(`CASE WHEN ${keywordField} = '${keyword}' THEN 0
+          this.datasourceService.sequelize.literal(`CASE WHEN ${keywordField} = '${keyword}' THEN 0
         WHEN ${keywordField} LIKE '${keyword}%' THEN 1
         WHEN ${keywordField} LIKE '%${keyword}%' THEN 2
         WHEN ${keywordField} LIKE '%${keyword}' THEN 3
@@ -1037,7 +1037,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param id Template id
    */
   getRevisionCount(id: number) {
-    return this.models.Templates.count({
+    return Templates.count({
       where: {
         type: TemplateInnerType.Revision,
         parentId: id,
@@ -1054,7 +1054,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUserId 请求的用户ID
    */
   async getRevisions(id: number, fields: string[], requestUserId: number) {
-    const template = await this.models.Templates.findByPk(id, {
+    const template = await Templates.findByPk(id, {
       attributes: ['id', 'type', 'status', 'author'],
     });
     if (!template) return [];
@@ -1062,8 +1062,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
     // 需要有编辑权限才可以查看
     await this.hasEditCapability(template, requestUserId);
 
-    return this.models.Templates.findAll({
-      attributes: this.filterFields(fields, this.models.Templates),
+    return Templates.findAll({
+      attributes: this.filterFields(fields, Templates),
       where: {
         type: TemplateInnerType.Revision,
         parentId: id,
@@ -1158,9 +1158,9 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         : '';
     const excerpt = (restModel as any).excerpt || ''; // post
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      const template = await this.models.Templates.create(
+      const template = await Templates.create(
         {
           name,
           title,
@@ -1175,7 +1175,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       );
 
       metas?.length &&
-        (await this.models.TemplateMeta.bulkCreate(
+        (await TemplateMeta.bulkCreate(
           metas.map((meta) => {
             return {
               ...meta,
@@ -1217,7 +1217,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }
     }
 
-    const template = await this.models.Templates.findByPk(id);
+    const template = await Templates.findByPk(id);
     if (template) {
       // 如果状态为 Trash, 不被允许修改，先使用 restore 统一处理状态逻辑
       // 需要恢复到移入Trash前的状态，并删除记录等逻辑
@@ -1238,7 +1238,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         await this.hasDeleteCapability(template, requestUserId);
       }
 
-      const t = await this.sequelize.transaction();
+      const t = await this.datasourceService.sequelize.transaction();
       try {
         // 移到 Trash 之前记录状态
         if (model.status === TemplateStatus.Trash) {
@@ -1252,7 +1252,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           template.name !== modelName && (name = await this.fixName(modelName, template.type));
         }
 
-        await this.models.Templates.update(
+        await Templates.update(
           {
             ...restModel,
             name,
@@ -1277,7 +1277,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
             ? (model as UpdateTemplateInput).excerpt!
             : false;
         if (changedTitle || changedContent || changedExcerpt) {
-          await this.models.Templates.create(
+          await Templates.create(
             {
               title: changedTitle || template.title,
               content: changedContent || template.content,
@@ -1324,7 +1324,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       );
     }
 
-    const template = await this.models.Templates.findByPk(id);
+    const template = await Templates.findByPk(id);
     if (template) {
       // 状态相同，忽略
       if (template.name === name) {
@@ -1375,7 +1375,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       await this.hasCapability(UserCapability.PublishTemplates, requestUserId);
     }
 
-    const template = await this.models.Templates.findByPk(id);
+    const template = await Templates.findByPk(id);
     if (template) {
       // 状态相同，忽略
       if (template.status === status) {
@@ -1401,7 +1401,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         await this.hasDeleteCapability(template, requestUserId);
       }
 
-      const t = await this.sequelize.transaction();
+      const t = await this.datasourceService.sequelize.transaction();
       try {
         // 移到 Trash 之前记录状态
         if (status === TemplateStatus.Trash) {
@@ -1445,7 +1445,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       await this.hasCapability(UserCapability.PublishTemplates, requestUserId);
     }
 
-    const templates = await this.models.Templates.findAll({
+    const templates = await Templates.findAll({
       where: {
         id: ids,
       },
@@ -1479,14 +1479,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }),
     );
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
       // 移到 Trash 之前记录状态
       if (status === TemplateStatus.Trash) {
         await this.bulkStoreTrashStatus(templates, t);
       }
 
-      await this.models.Templates.update(
+      await Templates.update(
         {
           status,
         },
@@ -1514,7 +1514,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @returns
    */
   async updateCommentCount(id: number, count: number): Promise<void> {
-    await this.models.Templates.update(
+    await Templates.update(
       {
         commentCount: count,
       },
@@ -1535,7 +1535,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUserId 请求的用户ID
    */
   async restore(id: number, requestUserId: number): Promise<void> {
-    const metaStatus = await this.models.TemplateMeta.findOne({
+    const metaStatus = await TemplateMeta.findOne({
       attributes: ['id', 'metaValue'],
       where: {
         templateId: id,
@@ -1543,7 +1543,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       },
     });
 
-    const template = await this.models.Templates.findByPk(id);
+    const template = await Templates.findByPk(id);
     if (template) {
       if (template.status !== TemplateStatus.Trash) {
         throw new ForbiddenError(
@@ -1562,7 +1562,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }
 
       template.status = (metaStatus?.metaValue as TemplateStatus) ?? TemplateStatus.Draft; // 默认恢复为为 draft
-      const t = await this.sequelize.transaction();
+      const t = await this.datasourceService.sequelize.transaction();
       try {
         await template.save({
           transaction: t,
@@ -1600,7 +1600,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUserId 请求的用户ID
    */
   async bulkRestore(ids: number[], requestUserId: number): Promise<void> {
-    const templates = await this.models.Templates.findAll({
+    const templates = await Templates.findAll({
       where: {
         id: ids,
       },
@@ -1630,7 +1630,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }),
     );
 
-    const metas = await this.models.TemplateMeta.findAll({
+    const metas = await TemplateMeta.findAll({
       attributes: ['id', 'templateId', 'metaValue'],
       where: {
         templateId: templates.map((template) => template.id),
@@ -1638,11 +1638,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       },
     });
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
       await Promise.all(
         templates.map((template) =>
-          this.models.Templates.update(
+          Templates.update(
             {
               status:
                 (metas.find((meta) => meta.templateId === template.id)?.metaValue as TemplateStatus) ??
@@ -1656,7 +1656,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         ),
       );
 
-      await this.models.TemplateMeta.destroy({
+      await TemplateMeta.destroy({
         where: {
           id: metas.map((meta) => meta.id),
         },
@@ -1685,7 +1685,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUserId 请求的用户ID
    */
   async delete(id: number, requestUserId: number): Promise<void> {
-    const template = await this.models.Templates.findByPk(id);
+    const template = await Templates.findByPk(id);
     if (template) {
       // 非 trash 状态下不可以删除
       if (template.status !== TemplateStatus.Trash) {
@@ -1700,10 +1700,10 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       // 是否有删除模版的权限
       await this.hasDeleteCapability(template, requestUserId);
 
-      const t = await this.sequelize.transaction();
+      const t = await this.datasourceService.sequelize.transaction();
       try {
         // 删除相关信息
-        await this.models.TermRelationships.destroy({
+        await TermRelationships.destroy({
           where: {
             objectId: template.id,
           },
@@ -1744,7 +1744,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
    * @param requestUserId 请求的用户ID
    */
   async bulkDelete(ids: number[], requestUserId: number): Promise<void> {
-    const templates = await this.models.Templates.findAll({
+    const templates = await Templates.findAll({
       where: {
         id: ids,
       },
@@ -1773,11 +1773,11 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       }),
     );
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
 
     try {
       // 删除相关信息
-      await this.models.TermRelationships.destroy({
+      await TermRelationships.destroy({
         where: {
           objectId: ids,
         },
@@ -1786,7 +1786,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
 
       // TODO: TermTaxonomy count calc
 
-      await this.models.Templates.destroy({
+      await Templates.destroy({
         where: {
           id: ids,
         },

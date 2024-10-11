@@ -1,9 +1,9 @@
 import { isUndefined } from 'lodash';
 import { WhereOptions, Model, Attributes, Transaction, Op } from 'sequelize';
-import { ModuleRef } from '@nestjs/core';
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@ace-pomelo/shared/server';
-import { default as TermTaxonomy } from '../entities/term-taxonomy.entity';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { TermTaxonomy, TermRelationships } from '../entities';
 import {
   TermTaxonomyMetaModel,
   NewTermTaxonomyMetaInput,
@@ -19,8 +19,8 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel, NewTermTaxonomyMetaInput> {
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -34,8 +34,8 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       fields.unshift('id');
     }
 
-    return this.models.TermTaxonomy.findOne({
-      attributes: this.filterFields(fields, this.models.TermTaxonomy),
+    return TermTaxonomy.findOne({
+      attributes: this.filterFields(fields, TermTaxonomy),
       where: {
         id,
       },
@@ -94,8 +94,8 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       };
     }
 
-    return this.models.TermTaxonomy.findAll({
-      attributes: this.filterFields(fields, this.models.TermTaxonomy),
+    return TermTaxonomy.findAll({
+      attributes: this.filterFields(fields, TermTaxonomy),
       where,
     }).then((terms) => {
       const format = (term: Model<TermTaxonomyModel>) => {
@@ -146,11 +146,11 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
       fields.unshift('id');
     }
 
-    return this.models.TermTaxonomy.findAll({
-      attributes: this.filterFields(fields, this.models.TermTaxonomy),
+    return TermTaxonomy.findAll({
+      attributes: this.filterFields(fields, TermTaxonomy),
       include: [
         {
-          model: this.models.TermRelationships,
+          model: TermRelationships,
           attributes: ['objectId'],
           as: 'TermRelationships',
           where: {
@@ -162,7 +162,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
         ...(!isUndefined(query.parentId) ? { parentId: query.parentId } : {}),
         taxonomy: query.taxonomy,
       },
-      order: [[this.models.TermRelationships, 'order', query.desc ? 'DESC' : 'ASC']],
+      order: [[TermRelationships, 'order', query.desc ? 'DESC' : 'ASC']],
     }).then((terms) => {
       const format = (term: Model<TermTaxonomyModel>) => {
         return term.toJSON<TermTaxonomyModel>();
@@ -191,11 +191,11 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * @param model 新建协议实体
    */
   async create(model: NewTermTaxonomyInput): Promise<TermTaxonomyModel> {
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     const { name, slug, group, taxonomy, description, parentId } = model;
     try {
       // 添加类别
-      const termTaxonomy = await this.models.TermTaxonomy.create(
+      const termTaxonomy = await TermTaxonomy.create(
         {
           name,
           slug: slug || name,
@@ -234,7 +234,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    */
   async createRelationship(model: NewTermRelationshipInput, transaction?: Transaction): Promise<TermRelationshipModel> {
     const isExists =
-      (await this.models.TermRelationships.count({
+      (await TermRelationships.count({
         where: {
           objectId: model.objectId,
           termTaxonomyId: model.termTaxonomyId,
@@ -251,13 +251,13 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
     }
 
     // 数量 +1
-    await this.models.TermTaxonomy.increment('count', {
+    await TermTaxonomy.increment('count', {
       where: {
         id: model.termTaxonomyId,
       },
       transaction,
     });
-    const termRelationship = await this.models.TermRelationships.create(model, { transaction });
+    const termRelationship = await TermRelationships.create(model, { transaction });
     return termRelationship.toJSON<TermRelationshipModel>();
   }
 
@@ -267,7 +267,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * @param model 修改协议实体
    */
   async update(id: number, model: UpdateTermTaxonomyInput): Promise<void> {
-    await this.models.TermTaxonomy.update(model, {
+    await TermTaxonomy.update(model, {
       where: {
         id,
       },
@@ -280,9 +280,9 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * @param termTaxonomyId
    */
   async deleteRelationship(objectId: number, termTaxonomyId: number): Promise<void> {
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      const count = await this.models.TermRelationships.destroy({
+      const count = await TermRelationships.destroy({
         where: {
           objectId,
           termTaxonomyId,
@@ -292,7 +292,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
 
       if (count > 0) {
         // 数量 -1
-        await this.models.TermTaxonomy.increment('count', {
+        await TermTaxonomy.increment('count', {
           where: {
             id: termTaxonomyId,
           },
@@ -313,16 +313,16 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * @param id term Id
    */
   async delete(id: number): Promise<void> {
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      await this.models.TermRelationships.destroy({
+      await TermRelationships.destroy({
         where: {
           termTaxonomyId: id,
         },
         transaction: t,
       });
 
-      const termTaxonomy = await this.models.TermTaxonomy.findOne({
+      const termTaxonomy = await TermTaxonomy.findOne({
         where: {
           id,
         },
@@ -334,7 +334,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
         });
 
         // 子项层级提升
-        await this.models.TermTaxonomy.update(
+        await TermTaxonomy.update(
           { parentId: termTaxonomy.parentId },
           {
             where: {
@@ -369,23 +369,23 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
    * @param id term Id
    */
   async bulkDelete(ids: number[]): Promise<void> {
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
-      await this.models.TermRelationships.destroy({
+      await TermRelationships.destroy({
         where: {
           termTaxonomyId: ids,
         },
         transaction: t,
       });
 
-      const termTaxonomies = await this.models.TermTaxonomy.findAll({
+      const termTaxonomies = await TermTaxonomy.findAll({
         where: {
           id: ids,
         },
       });
 
       if (termTaxonomies.length) {
-        await this.models.TermTaxonomy.destroy({
+        await TermTaxonomy.destroy({
           where: {
             id: termTaxonomies.map(({ id }) => id),
           },
@@ -395,7 +395,7 @@ export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel
         // 子项层级提升
         await Promise.all(
           termTaxonomies.map((termTaxonomy) =>
-            this.models.TermTaxonomy.update(
+            TermTaxonomy.update(
               { parentId: this.getParentId(termTaxonomies, termTaxonomy) },
               {
                 where: {

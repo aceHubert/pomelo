@@ -1,15 +1,15 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { CommentMetaAttributes, CommentMetaCreationAttributes } from '../../entities/comment-meta.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class CommentMeta extends Model<CommentMetaAttributes, Omit<CommentMetaCreationAttributes, 'id'>> {
+export class CommentMeta extends Model<CommentMetaAttributes, Omit<CommentMetaCreationAttributes, 'id'>> {
   public id!: number;
   public commentId!: number;
   public metaKey!: string;
   public metaValue?: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
+CommentMeta.initialize = function initialize(sequelize, { prefix }) {
   const isMysql = sequelize.getDialect() === 'mysql';
   CommentMeta.init(
     {

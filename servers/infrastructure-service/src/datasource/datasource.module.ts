@@ -4,9 +4,11 @@ import {
   InfrastructureDatasourceAsyncOptions,
   InfrastructureDatasourceOptionsFactory,
 } from './interfaces/infrastructure-datasource-options.interface';
-import { dataSources } from './sequelize/index';
+import * as DataSources from './sequelize/datasources';
 import { InfrastructureDatasourceService } from './datasource.service';
-import { INFRASTRUCTURE_OPTIONS } from './constants';
+import { INFRASTRUCTURE_DATASOURCE_OPTIONS } from './constants';
+
+const dataSources = Object.values(DataSources);
 
 @Module({})
 export class InfrastructureDatasourceModule {
@@ -22,13 +24,13 @@ export class InfrastructureDatasourceModule {
       global: isGlobal,
       providers: [
         {
-          provide: INFRASTRUCTURE_OPTIONS,
+          provide: INFRASTRUCTURE_DATASOURCE_OPTIONS,
           useValue: restOptions,
         },
         ...dataSources,
         InfrastructureDatasourceService,
       ],
-      exports: [INFRASTRUCTURE_OPTIONS, ...dataSources, InfrastructureDatasourceService],
+      exports: [INFRASTRUCTURE_DATASOURCE_OPTIONS, ...dataSources, InfrastructureDatasourceService],
     };
   }
 
@@ -38,7 +40,7 @@ export class InfrastructureDatasourceModule {
       global: options.isGlobal,
       imports: options.imports,
       providers: [...this.createAsyncProviders(options), ...dataSources, InfrastructureDatasourceService],
-      exports: [INFRASTRUCTURE_OPTIONS, ...dataSources, InfrastructureDatasourceService],
+      exports: [INFRASTRUCTURE_DATASOURCE_OPTIONS, ...dataSources, InfrastructureDatasourceService],
     };
   }
 
@@ -58,7 +60,7 @@ export class InfrastructureDatasourceModule {
   private static createAsyncOptionsProvider(options: InfrastructureDatasourceAsyncOptions): Provider {
     if (options.useFactory) {
       return {
-        provide: INFRASTRUCTURE_OPTIONS,
+        provide: INFRASTRUCTURE_DATASOURCE_OPTIONS,
         useFactory: async (...args: any[]) => {
           const moduleOptions = await options.useFactory!(...args);
           // check connection config
@@ -69,7 +71,7 @@ export class InfrastructureDatasourceModule {
       };
     }
     return {
-      provide: INFRASTRUCTURE_OPTIONS,
+      provide: INFRASTRUCTURE_DATASOURCE_OPTIONS,
       useFactory: async (optionsFactory: InfrastructureDatasourceOptionsFactory) => {
         const moduleOptions = await optionsFactory.createSequlizeOptions();
         // check connection config

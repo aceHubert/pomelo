@@ -1,16 +1,16 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { ClientScopesAttributes, ClientScopesCreationAttributes } from '../../entities/client-scopes.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class ClientScopes extends Model<ClientScopesAttributes, Omit<ClientScopesCreationAttributes, 'id'>> {
+export class ClientScopes extends Model<ClientScopesAttributes, Omit<ClientScopesCreationAttributes, 'id'>> {
   public id!: number;
   public clientId!: number;
   public scope!: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ClientScopes.init(
+ClientScopes.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),

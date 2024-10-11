@@ -1,10 +1,10 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import ApiResources from '../entities/api-resources.entity';
-import ApiClaims from '../entities/api-claims.entity';
-import ApiScopes from '../entities/api-scopes.entity';
-import ApiScopeClaims from '../entities/api-scope-claims.entity';
-import ApiSecrets from '../entities/api-secrets.entity';
-import ApiProperties from '../entities/api-properties.entity';
+import { ApiResources } from '../entities/api-resources.entity';
+import { ApiClaims } from '../entities/api-claims.entity';
+import { ApiScopes } from '../entities/api-scopes.entity';
+import { ApiScopeClaims } from '../entities/api-scope-claims.entity';
+import { ApiSecrets } from '../entities/api-secrets.entity';
+import { ApiProperties } from '../entities/api-properties.entity';
 import { PagedArgs, Paged } from './paged.interface';
 
 export interface ApiResourceModel extends Attributes<ApiResources> {

@@ -11477,9 +11477,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dottie@npm:^2.0.4":
+"dottie@npm:^2.0.6":
   version: 2.0.6
-  resolution: "dottie@npm:2.0.6"
+  resolution: "dottie@npm:2.0.6::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fdottie%2F-%2Fdottie-2.0.6.tgz"
   checksum: 4c778df9dc631a1108a32ef390916836814999a7411d10883f4151bd49c9c6934dc329b3f50fc7692849aa75ba87dba880fd54be501a3b39a6b9c23d6f772a09
   languageName: node
   linkType: hard
@@ -11561,13 +11561,13 @@ __metadata:
   linkType: hard
 
 "ejs@npm:^3.1.8":
-  version: 3.1.9
-  resolution: "ejs@npm:3.1.9::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fejs%2F-%2Fejs-3.1.9.tgz"
+  version: 3.1.10
+  resolution: "ejs@npm:3.1.10::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fejs%2F-%2Fejs-3.1.10.tgz"
   dependencies:
     jake: ^10.8.5
   bin:
     ejs: bin/cli.js
-  checksum: af6f10eb815885ff8a8cfacc42c6b6cf87daf97a4884f87a30e0c3271fedd85d76a3a297d9c33a70e735b97ee632887f85e32854b9cdd3a2d97edf931519a35f
+  checksum: ce90637e9c7538663ae023b8a7a380b2ef7cc4096de70be85abf5a3b9641912dde65353211d05e24d56b1f242d71185c6d00e02cb8860701d571786d92c71f05
   languageName: node
   linkType: hard
 
@@ -16259,17 +16259,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^4.10.3, jose@npm:^4.15.5":
-  version: 4.15.5
-  resolution: "jose@npm:4.15.5::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fjose%2F-%2Fjose-4.15.5.tgz"
-  checksum: 7dde76447c7707bd4b448f914b216f3858e701aa83f00447434252461af5b9e159dcbffb88badea3f9616739526763581267c9560622f0a058df8d68c86d7f79
-  languageName: node
-  linkType: hard
-
-"jose@npm:^4.15.9":
+"jose@npm:^4.10.3, jose@npm:^4.15.9":
   version: 4.15.9
   resolution: "jose@npm:4.15.9::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fjose%2F-%2Fjose-4.15.9.tgz"
   checksum: 41abe1c99baa3cf8a78ebbf93da8f8e50e417b7a26754c4afa21865d87527b8ac2baf66de2c5f6accc3f7d7158658dae7364043677236ea1d07895b040097f15
+  languageName: node
+  linkType: hard
+
+"jose@npm:^4.15.5":
+  version: 4.15.5
+  resolution: "jose@npm:4.15.5::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fjose%2F-%2Fjose-4.15.5.tgz"
+  checksum: 7dde76447c7707bd4b448f914b216f3858e701aa83f00447434252461af5b9e159dcbffb88badea3f9616739526763581267c9560622f0a058df8d68c86d7f79
   languageName: node
   linkType: hard
 
@@ -16727,8 +16727,8 @@ __metadata:
   linkType: hard
 
 "koa@npm:^2.13.4":
-  version: 2.15.0
-  resolution: "koa@npm:2.15.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fkoa%2F-%2Fkoa-2.15.0.tgz"
+  version: 2.15.3
+  resolution: "koa@npm:2.15.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fkoa%2F-%2Fkoa-2.15.3.tgz"
   dependencies:
     accepts: ^1.3.5
     cache-content-type: ^1.0.0
@@ -16753,7 +16753,7 @@ __metadata:
     statuses: ^1.5.0
     type-is: ^1.6.16
     vary: ^1.1.2
-  checksum: a97741f89f328f25ae94d82d0ee608377d89e086c73f2d868023e6050dea682ef93e0a5c80097f3aaad28121853aea50a7fb3c0c12ecc45798da2fd1255f580b
+  checksum: 7c3537443b1a588cf5c3e5554b914ff2bad510323d22b41861d5e0c97d47e9c5997965f303ede8be8bd83d309a4eea1f82cd45d35d6838bc21bb1bb6a90d5d25
   languageName: node
   linkType: hard
 
@@ -18404,7 +18404,7 @@ __metadata:
 
 "nest-oidc-provider@npm:^1.1.1":
   version: 1.1.1
-  resolution: "nest-oidc-provider@npm:1.1.1"
+  resolution: "nest-oidc-provider@npm:1.1.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fnest-oidc-provider%2F-%2Fnest-oidc-provider-1.1.1.tgz"
   peerDependencies:
     "@nestjs/common": ">=8.0.0"
     "@nestjs/core": ">=8.0.0"
@@ -19563,10 +19563,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pg-connection-string@npm:^2.6.0":
-  version: 2.6.2
-  resolution: "pg-connection-string@npm:2.6.2"
-  checksum: 22265882c3b6f2320785378d0760b051294a684989163d5a1cde4009e64e84448d7bf67d9a7b9e7f69440c3ee9e2212f9aa10dd17ad6773f6143c6020cebbcb5
+"pg-connection-string@npm:^2.6.1":
+  version: 2.7.0
+  resolution: "pg-connection-string@npm:2.7.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fpg-connection-string%2F-%2Fpg-connection-string-2.7.0.tgz"
+  checksum: 68015a8874b7ca5dad456445e4114af3d2602bac2fdb8069315ecad0ff9660ec93259b9af7186606529ac4f6f72a06831e6f20897a689b16cc7fda7ca0e247fd
   languageName: node
   linkType: hard
 
@@ -19874,7 +19874,7 @@ __metadata:
     rxjs: ^7.2.0
     sanitize-html: ^2.11.0
     semver: ^7.5.1
-    sequelize: ^6.19.0
+    sequelize: ^6.30.0
     source-map-support: ^0.5.20
     statuses: ^2.0.1
     stylelint: ^15.10.3
@@ -21987,21 +21987,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize@npm:^6.19.0":
-  version: 6.32.1
-  resolution: "sequelize@npm:6.32.1"
+"sequelize@npm:^6.30.0":
+  version: 6.37.4
+  resolution: "sequelize@npm:6.37.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fsequelize%2F-%2Fsequelize-6.37.4.tgz"
   dependencies:
     "@types/debug": ^4.1.8
     "@types/validator": ^13.7.17
     debug: ^4.3.4
-    dottie: ^2.0.4
+    dottie: ^2.0.6
     inflection: ^1.13.4
     lodash: ^4.17.21
     moment: ^2.29.4
     moment-timezone: ^0.5.43
-    pg-connection-string: ^2.6.0
+    pg-connection-string: ^2.6.1
     retry-as-promised: ^7.0.4
-    semver: ^7.5.1
+    semver: ^7.5.4
     sequelize-pool: ^7.1.0
     toposort-class: ^1.0.1
     uuid: ^8.3.2
@@ -22026,7 +22026,7 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: 5284fd7a8eb8dfa8340c50c119b31006dda0931714d3e5a72bbfef3a07838018f935cc1b789a46486298043f10d553dbf9cf9cf60c46c6646ecfc9e9623a8b4c
+  checksum: 29adebae6e7dcb626a22281c87cd82e5ab270d357ac771a271287c9a481887f68dbce9b5edb8dfab99c40c8147080525ed1e3ba6d6ca07d42c5045ccf34889c5
   languageName: node
   linkType: hard
 

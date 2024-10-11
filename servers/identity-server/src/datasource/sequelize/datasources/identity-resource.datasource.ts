@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@ace-pomelo/shared/server';
 import { WhereOptions, Order, Attributes, Op, Includeable } from 'sequelize';
-import { default as IdentityResources } from '../entities/identity-resources.entity';
+import { IdentityDatasourceService } from '../../datasource.service';
+import { IdentityResources, IdentityClaims, IdentityProperties } from '../entities';
 import {
   IdentityResourceModel,
   PagedIdentityResourceArgs,
@@ -15,13 +16,13 @@ import {
   NewIdentityPropertyInput,
   UpdateIdentityResourceInput,
 } from '../interfaces/identity-resource.interface';
-import { IdentityDatasourceService } from '../../datasource.service';
+
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class IdentityResourceDataSource extends BaseDataSource {
-  constructor(protected readonly datasourceService: IdentityDatasourceService) {
-    super();
+  constructor(datasourceService: IdentityDatasourceService) {
+    super(datasourceService);
   }
 
   /**
@@ -40,17 +41,17 @@ export class IdentityResourceDataSource extends BaseDataSource {
       fields.unshift('id');
     }
 
-    return this.models.IdentityResources.findByPk(id, {
-      attributes: this.filterFields(fields, this.models.IdentityResources),
+    return IdentityResources.findByPk(id, {
+      attributes: this.filterFields(fields, IdentityResources),
       include: [
         fields.includes('claims') && {
-          model: this.models.IdentityClaims,
+          model: IdentityClaims,
           attributes: ['id', 'type'],
           as: 'IdentityClaims',
           required: false,
         },
         fields.includes('properties') && {
-          model: this.models.IdentityProperties,
+          model: IdentityProperties,
           attributes: ['id', 'key', 'value'],
           as: 'IdentityProperties',
           required: false,
@@ -107,15 +108,15 @@ export class IdentityResourceDataSource extends BaseDataSource {
       where.enabled = query.enabled;
     }
 
-    return this.models.IdentityResources.findAndCountAll({
-      attributes: this.filterFields(fields, this.models.IdentityResources),
+    return IdentityResources.findAndCountAll({
+      attributes: this.filterFields(fields, IdentityResources),
       where,
       offset,
       limit,
       order: [
         // 根据 keyword 匹配程度排序
         !!query.keyword && [
-          this.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
+          this.datasourceService.sequelize.literal(`CASE WHEN ${keywordField} = '${query.keyword}' THEN 0
         WHEN ${keywordField} LIKE '${query.keyword}%' THEN 1
         WHEN ${keywordField} LIKE '%${query.keyword}%' THEN 2
         WHEN ${keywordField} LIKE '%${query.keyword}' THEN 3
@@ -137,17 +138,17 @@ export class IdentityResourceDataSource extends BaseDataSource {
   getList(
     fields: string[],
   ): Promise<Array<IdentityResourceModel & { claims?: IdentityClaimModel[]; properties?: IdentityPropertyModel[] }>> {
-    return this.models.IdentityResources.findAll({
-      attributes: this.filterFields(fields!, this.models.IdentityResources),
+    return IdentityResources.findAll({
+      attributes: this.filterFields(fields!, IdentityResources),
       include: [
         fields.includes('claims') && {
-          model: this.models.IdentityClaims,
+          model: IdentityClaims,
           attributes: ['id', 'type'],
           as: 'IdentityClaims',
           required: false,
         },
         fields.includes('properties') && {
-          model: this.models.IdentityProperties,
+          model: IdentityProperties,
           attributes: ['id', 'key', 'value'],
           as: 'IdentityProperties',
           required: false,
@@ -182,7 +183,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param input resource input
    */
   async create(input: NewIdentityResourceInput): Promise<IdentityResourceModel> {
-    const exists = await this.models.IdentityResources.count({
+    const exists = await IdentityResources.count({
       where: {
         name: input.name,
       },
@@ -196,7 +197,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
         ),
       );
 
-    return this.models.IdentityResources.create(input).then((resource) => {
+    return IdentityResources.create(input).then((resource) => {
       return resource.toJSON<IdentityResourceModel>();
     });
   }
@@ -207,7 +208,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param input resource input
    */
   async update(id: number, input: UpdateIdentityResourceInput): Promise<void> {
-    const nonEditable = await this.models.IdentityResources.count({
+    const nonEditable = await IdentityResources.count({
       where: {
         id,
         nonEditable: true,
@@ -222,7 +223,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
         ),
       );
 
-    await this.models.IdentityResources.update(input, {
+    await IdentityResources.update(input, {
       where: {
         id,
       },
@@ -235,7 +236,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @returns
    */
   async delete(id: number): Promise<void> {
-    const resource = await this.models.IdentityResources.findByPk(id, {
+    const resource = await IdentityResources.findByPk(id, {
       attributes: ['id', 'nonEditable'],
     });
 
@@ -270,16 +271,16 @@ export class IdentityResourceDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'ASC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<IdentityClaimsModel | undefined> {
-    return this.models.IdentityResources.findByPk(identityResourceId, {
+    return IdentityResources.findByPk(identityResourceId, {
       attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
-          model: this.models.IdentityClaims,
-          attributes: this.filterFields(fields, this.models.IdentityClaims),
+          model: IdentityClaims,
+          attributes: this.filterFields(fields, IdentityClaims),
           as: 'IdentityClaims',
         },
       ],
-      order: [[{ model: this.models.IdentityClaims, as: 'IdentityClaims' }, orderField, order]],
+      order: [[{ model: IdentityClaims, as: 'IdentityClaims' }, orderField, order]],
     }).then((resource) => {
       if (!resource) return;
 
@@ -299,14 +300,14 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param input claim input
    */
   createClaim(identityResourceId: number, input: NewIdentityClaimInput): Promise<IdentityClaimModel | undefined> {
-    return this.models.IdentityResources.count({
+    return IdentityResources.count({
       where: {
         id: identityResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return;
 
-      const exists = await this.models.IdentityClaims.count({
+      const exists = await IdentityClaims.count({
         where: {
           identityResourceId,
           type: input.type,
@@ -321,7 +322,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.IdentityClaims.create({
+      return IdentityClaims.create({
         ...input,
         identityResourceId,
       }).then((claim) => {
@@ -336,14 +337,14 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param inputs new identity resource claims input
    */
   createClaims(identityResourceId: number, inputs: NewIdentityClaimInput[]): Promise<IdentityClaimModel[]> {
-    return this.models.IdentityResources.count({
+    return IdentityResources.count({
       where: {
         id: identityResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return [];
 
-      const claims = await this.models.IdentityClaims.findAll({
+      const claims = await IdentityClaims.findAll({
         attributes: ['type'],
         where: {
           identityResourceId,
@@ -355,7 +356,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
 
       const existsType = claims.map((claim) => claim.type);
 
-      return this.models.IdentityClaims.bulkCreate(
+      return IdentityClaims.bulkCreate(
         inputs
           .filter((input) => !existsType.includes(input.type))
           .map((input) => ({
@@ -371,7 +372,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param id identity claim id
    */
   async deleteClaim(id: number): Promise<void> {
-    await this.models.IdentityClaims.destroy({
+    await IdentityClaims.destroy({
       where: {
         id,
       },
@@ -389,16 +390,16 @@ export class IdentityResourceDataSource extends BaseDataSource {
     fields: string[],
     { field: orderField = 'id', order = 'DESC' }: { field?: string; order?: 'ASC' | 'DESC' } = {},
   ): Promise<IdentityPropertiesModel | undefined> {
-    return this.models.IdentityResources.findByPk(identityResourceId, {
+    return IdentityResources.findByPk(identityResourceId, {
       attributes: ['id', 'name', 'displayName', 'nonEditable'],
       include: [
         {
-          model: this.models.IdentityProperties,
-          attributes: this.filterFields(fields, this.models.IdentityProperties),
+          model: IdentityProperties,
+          attributes: this.filterFields(fields, IdentityProperties),
           as: 'IdentityProperties',
         },
       ],
-      order: [[{ model: this.models.IdentityProperties, as: 'IdentityProperties' }, orderField, order]],
+      order: [[{ model: IdentityProperties, as: 'IdentityProperties' }, orderField, order]],
     }).then((resource) => {
       if (!resource) return;
 
@@ -421,14 +422,14 @@ export class IdentityResourceDataSource extends BaseDataSource {
     identityResourceId: number,
     input: NewIdentityPropertyInput,
   ): Promise<IdentityPropertyModel | undefined> {
-    return this.models.IdentityResources.count({
+    return IdentityResources.count({
       where: {
         id: identityResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return;
 
-      const exists = await this.models.IdentityProperties.count({
+      const exists = await IdentityProperties.count({
         where: {
           identityResourceId,
           key: input.key,
@@ -443,7 +444,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
           ),
         );
 
-      return this.models.IdentityProperties.create({
+      return IdentityProperties.create({
         ...input,
         identityResourceId,
       }).then((property) => {
@@ -458,14 +459,14 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param inputs new identity resource properties input
    */
   createProperties(identityResourceId: number, inputs: NewIdentityPropertyInput[]): Promise<IdentityPropertyModel[]> {
-    return this.models.IdentityResources.count({
+    return IdentityResources.count({
       where: {
         id: identityResourceId,
       },
     }).then(async (count) => {
       if (count === 0) return [];
 
-      const properties = await this.models.IdentityProperties.findAll({
+      const properties = await IdentityProperties.findAll({
         attributes: ['key'],
         where: {
           identityResourceId,
@@ -477,7 +478,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
 
       const existsKey = properties.map((property) => property.key);
 
-      return this.models.IdentityProperties.bulkCreate(
+      return IdentityProperties.bulkCreate(
         inputs
           .filter((input) => !existsKey.includes(input.key))
           .map((input) => ({
@@ -493,7 +494,7 @@ export class IdentityResourceDataSource extends BaseDataSource {
    * @param id property id
    */
   async deleteProperty(id: number): Promise<void> {
-    await this.models.IdentityProperties.destroy({
+    await IdentityProperties.destroy({
       where: {
         id,
       },

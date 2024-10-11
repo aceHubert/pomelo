@@ -217,9 +217,10 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       useFactory: async (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('debug', false),
-        issuer: `${config.getOrThrow('server.origin')}${normalizeRoutePath(
-          config.get<string>('server.globalPrefixUri', ''),
-        )}`,
+        issuer: 'http://fakeissuer.com',
+        //  `${config.getOrThrow('server.origin')}${normalizeRoutePath(
+        //   config.get<string>('server.globalPrefixUri', ''),
+        // )}`,
         path: normalizeRoutePath(config.get('OIDC_PATH', '/oidc')),
         jwks: await getJWKS(config.get('PRIVATE_KEY')),
         storage: storageOptions.use,

@@ -1,7 +1,8 @@
 import { lowerFirst, flattenDeep, groupBy } from 'lodash';
-import { ModelStatic, Model, Op } from 'sequelize';
-import { ModuleRef } from '@nestjs/core';
+import { Op } from 'sequelize';
 import { UserInputError, ValidationError, RuntimeError } from '@ace-pomelo/shared/server';
+import { InfrastructureDatasourceService } from '../../datasource.service';
+import { Model } from '..';
 import { MetaModel, NewMetaInput } from '../interfaces/meta.interface';
 import { MetaDataSource as IMetaDataSource } from '../interfaces/meta-data-source.interface';
 import { BaseDataSource } from './base.datasource';
@@ -20,19 +21,19 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   protected metaModelIdFieldName: string; // 如 templateId
   protected metaModelName: string; // 如 TemplateMeta
 
-  constructor(moduleRef: ModuleRef) {
-    super(moduleRef);
+  constructor(datasourceService: InfrastructureDatasourceService) {
+    super(datasourceService);
     const rootModelName = this.constructor.name.replace(/DataSource$/, '');
     this.metaModelIdFieldName = `${lowerFirst(rootModelName)}Id`;
     this.metaModelName = `${rootModelName}Meta`;
   }
 
   private get metaModel() {
-    const model = this.sequelize.modelManager.getModel(this.metaModelName);
-    if (model === null) {
+    const model = this.datasourceService.sequelize.model(this.metaModelName);
+    if (!model) {
       throw new RuntimeError(`Could not found sequelize model from name "${this.metaModelName}"`);
     }
-    return model as ModelStatic<Model>;
+    return model;
   }
 
   /**
@@ -272,7 +273,7 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
       models.map((model) => model.metaKey),
     );
 
-    const t = await this.sequelize.transaction();
+    const t = await this.datasourceService.sequelize.transaction();
     try {
       if (falseOrMetaKeys) {
         // 支持重复key update

@@ -17,18 +17,19 @@ import {
 import { IgnoreDbCheckInterceptor } from '@/common/interceptors/db-check.interceptor';
 import { getDefaultUserRoles } from '@/common/utils/user.util';
 import { version } from '../version';
-import { name, InfrastructureDatasourceService } from '../datasource/index';
+import { name, InfrastructureDatasourceService, UserDataSource } from '../datasource';
 import { SiteInitPayload } from './payload/site-init.payload';
 
 @IgnoreDbCheckInterceptor()
 @Controller()
 export class SiteInitController {
   private logger = new Logger(SiteInitController.name, { timestamp: true });
-  private readonly adminLoginName = 'admin';
+  private readonly adminName = 'admin';
   private readonly fileEnv: FileEnv;
 
   constructor(
-    private readonly infrastructureDatasourceService: InfrastructureDatasourceService,
+    private readonly datasourceService: InfrastructureDatasourceService,
+    private readonly userDataSource: UserDataSource,
     readonly config: ConfigService,
   ) {
     const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
@@ -36,9 +37,7 @@ export class SiteInitController {
   }
 
   private checkAdminExists() {
-    return this.infrastructureDatasourceService.models.Users.count({ where: { loginName: this.adminLoginName } }).then(
-      (count) => count > 0,
-    );
+    return this.userDataSource.isLoginNameExists(this.adminName);
   }
 
   @MessagePattern(SiteInitPattern.IsRequired)
@@ -64,10 +63,10 @@ export class SiteInitController {
       this.logger.debug('Start to initialize datas!');
       try {
         const timezoneOffset = -new Date().getTimezoneOffset();
-        await this.infrastructureDatasourceService.initDatas({
+        await this.datasourceService.initDatas({
           users: [
             {
-              loginName: this.adminLoginName,
+              loginName: this.adminName,
               loginPwd: md5(payload.password),
               niceName: 'Admin',
               displayName: 'Admin',

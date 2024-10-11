@@ -1,5 +1,5 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import Links from '../entities/links.entity';
+import { Links } from '../entities';
 import { PagedArgs, Paged } from './paged.interface';
 
 export interface LinkModel extends Attributes<Links> {

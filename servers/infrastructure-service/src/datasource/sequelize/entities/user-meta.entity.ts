@@ -1,15 +1,15 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from 'sequelize';
 import { UserMetaAttributes, UserMetaCreationAttributes } from '../../entities/user-meta.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
+import { Model } from '../model/model';
 
-export default class UserMeta extends Model<UserMetaAttributes, Omit<UserMetaCreationAttributes, 'id'>> {
+export class UserMeta extends Model<UserMetaAttributes, Omit<UserMetaCreationAttributes, 'id'>> {
   public id!: number;
   public userId!: number;
   public metaKey!: string;
   public metaValue?: string;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
+UserMeta.initialize = function initialize(sequelize, { prefix }) {
   const isMysql = sequelize.getDialect() === 'mysql';
   UserMeta.init(
     {

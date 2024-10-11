@@ -1,7 +1,7 @@
 import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { UserCapability, UserPattern, ValidatePayloadExistsPipe } from '@ace-pomelo/shared/server';
-import { UserDataSource, UserModel, PagedUserModel, UserMetaModel, NewUserMetaInput } from '../datasource/index';
+import { UserDataSource, UserModel, PagedUserModel, UserMetaModel, NewUserMetaInput } from '../datasource';
 import { Nullable } from '../types';
 import { createMetaController } from './meta.controller';
 import {

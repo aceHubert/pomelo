@@ -1,7 +1,7 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import IdentityResources from '../entities/identity-resources.entity';
-import IdentityClaims from '../entities/identity-claims.entity';
-import IdentityProperties from '../entities/identity-properties.entity';
+import { IdentityResources } from '../entities/identity-resources.entity';
+import { IdentityClaims } from '../entities/identity-claims.entity';
+import { IdentityProperties } from '../entities/identity-properties.entity';
 import { PagedArgs, Paged } from './paged.interface';
 
 export interface IdentityResourceModel extends Attributes<IdentityResources> {

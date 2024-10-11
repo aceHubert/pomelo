@@ -1,10 +1,10 @@
-import { Model, Optional, DataTypes } from 'sequelize';
+import { Optional, DataTypes } from 'sequelize';
 import { CommentType } from '@ace-pomelo/shared/server';
 import { CommentAttributes, CommentCreationAttributes } from '../../entities/comments.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { CommentMeta } from './comment-meta.entity';
 
-export default class Comments extends Model<
+export class Comments extends Model<
   Omit<CommentAttributes, 'updatedAt' | 'createdAt'>,
   Optional<
     Omit<CommentCreationAttributes, 'id' | 'updatedAt' | 'createdAt'>,
@@ -30,9 +30,9 @@ export default class Comments extends Model<
   public readonly updatedAt!: Date;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  Comments.init(
+Comments.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -118,13 +118,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+Comments.associate = function associate() {
   // Users.id <--> UserMeta.userId
-  models.Comments.hasMany(models.CommentMeta, {
+  Comments.hasMany(CommentMeta, {
     foreignKey: 'commentId',
     sourceKey: 'id',
     as: 'CommentMetas',
     constraints: false,
   });
-  models.CommentMeta.belongsTo(models.Comments, { foreignKey: 'commentId', targetKey: 'id', constraints: false });
+  CommentMeta.belongsTo(Comments, { foreignKey: 'commentId', targetKey: 'id', constraints: false });
 };

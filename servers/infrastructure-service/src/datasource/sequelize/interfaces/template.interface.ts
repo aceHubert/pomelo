@@ -1,6 +1,6 @@
 import { Attributes, CreationAttributes } from 'sequelize';
 import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared/server';
-import Templates from '../entities/templates.entity';
+import { Templates } from '../entities';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 

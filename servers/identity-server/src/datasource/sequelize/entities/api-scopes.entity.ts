@@ -1,9 +1,9 @@
-import { Model, DataTypes, Optional } from 'sequelize';
+import { DataTypes, Optional } from 'sequelize';
 import { ApiScopesAttributes, ApiScopesCreationAttributes } from '../../entities/api-scopes.entity';
-import { TableInitFunc } from '../interfaces/table-init-func.interface';
-import { TableAssociateFunc } from '../interfaces/table-associate-func.interface';
+import { Model } from '../model/model';
+import { ApiScopeClaims } from './api-scope-claims.entity';
 
-export default class ApiScopes extends Model<
+export class ApiScopes extends Model<
   ApiScopesAttributes,
   Optional<Omit<ApiScopesCreationAttributes, 'id'>, 'emphasize' | 'required' | 'showInDiscoveryDocument'>
 > {
@@ -17,9 +17,9 @@ export default class ApiScopes extends Model<
   public showInDiscoveryDocument!: boolean;
 }
 
-export const init: TableInitFunc = function init(sequelize, { prefix }) {
-  const isMysql = sequelize.getDialect();
-  ApiScopes.init(
+ApiScopes.initialize = function initialize(sequelize, { prefix }) {
+  const isMysql = sequelize.getDialect() === 'mysql';
+  this.init(
     {
       id: {
         type: isMysql ? DataTypes.BIGINT({ unsigned: true }) : DataTypes.BIGINT(),
@@ -78,13 +78,13 @@ export const init: TableInitFunc = function init(sequelize, { prefix }) {
 };
 
 // 关联
-export const associate: TableAssociateFunc = function associate(models) {
+ApiScopes.associate = function associate() {
   // ApiScopes.id <--> ApiScopeClaims.apiScopeId
-  models.ApiScopes.hasMany(models.ApiScopeClaims, {
+  ApiScopes.hasMany(ApiScopeClaims, {
     foreignKey: 'apiScopeId',
     sourceKey: 'id',
     as: 'ApiScopeClaims',
     constraints: false,
   });
-  models.ApiScopeClaims.belongsTo(models.ApiScopes, { foreignKey: 'apiScopeId', targetKey: 'id', constraints: false });
+  ApiScopeClaims.belongsTo(ApiScopes, { foreignKey: 'apiScopeId', targetKey: 'id', constraints: false });
 };
