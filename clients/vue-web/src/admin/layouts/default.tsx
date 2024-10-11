@@ -209,7 +209,7 @@ export default defineComponent({
             photo:
               user.profile.picture ?? user.profile.avatar
                 ? `${homeUrl}${user.profile.picture ?? user.profile.avatar}`
-                : void 0, //`${process.env.BASE_URL}static/images/head_default.jpg`,
+                : void 0, //`${process.env.BASE_URL}static/img/head_default.jpg`,
           };
         }
       });
