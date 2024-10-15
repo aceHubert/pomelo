@@ -22,26 +22,26 @@ __metadata:
   linkType: hard
 
 "@ace-fetch/graphql-vue@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@ace-fetch/graphql-vue@npm:0.5.0"
+  version: 0.5.4
+  resolution: "@ace-fetch/graphql-vue@npm:0.5.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql-vue%2F-%2Fgraphql-vue-0.5.4.tgz"
   dependencies:
-    "@ace-fetch/graphql": ^0.5.0
+    "@ace-fetch/graphql": ^0.5.4
     "@ace-util/core": ^0.3.0
     graphql-tag: ^2.12.6
     vue-demi: ^*
-  checksum: aac9df1bac9ff8ff6a4d61c429eb05a6840b7b98c207cdc41ea389c69f2d75d6b387c293b170f9e8d3d9a83b1e3bc836e7241e95460d9fa7628f4a90f33bdae4
+  checksum: 7fd1da156545cc00cd8fa11fe7e0e3c2254f904b1bd8f3931c3dfdc0ab2ba307e02c8783dd97206667ee1946d18838d7dc2f6bbaf27ad4a396fd00056371bad1
   languageName: node
   linkType: hard
 
-"@ace-fetch/graphql@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@ace-fetch/graphql@npm:0.5.0"
+"@ace-fetch/graphql@npm:^0.5.4":
+  version: 0.5.4
+  resolution: "@ace-fetch/graphql@npm:0.5.4"
   dependencies:
     "@ace-util/core": ^0.3.0
     ts-invariant: ^0.10.3
   peerDependencies:
     graphql: ^16.0.0
-  checksum: 25e15eb19c4ac2884cf9d3564fcd8d63cefb0769e2f2179a05de83fe049e72115c9fba04b36a9e8c6620a4627def7f4ac761e54d67031bae1968851ac29d21dc
+  checksum: bf72ee772ce97467592d3aeb5f2a0976c65cea4396e107540d7a50bdd4366625a829f43e4b539ff0872367ad29815cbe618284c4f192246ed35bc5a667eef8a7
   languageName: node
   linkType: hard
 
@@ -6526,17 +6526,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:*":
-  version: 4.14.198
-  resolution: "@types/lodash@npm:4.14.198"
-  checksum: b290e4480707151bcec738bca40527915defe52a0d8e26c83685c674163a265e1a88cb2ee56b0fb587a89819d0cd5df86ada836aec3e9c2e4bf516e7d348d524
-  languageName: node
-  linkType: hard
-
-"@types/lodash@npm:^4.14.182":
-  version: 4.17.7
-  resolution: "@types/lodash@npm:4.17.7"
-  checksum: 09e58a119cd8a70acfb33f8623dc2fc54f74cdce3b3429b879fc2daac4807fe376190a04b9e024dd300f9a3ee1876d6623979cefe619f70654ca0fe0c47679a7
+"@types/lodash@npm:4.17.5":
+  version: 4.17.5
+  resolution: "@types/lodash@npm:4.17.5::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Flodash%2F-%2Flodash-4.17.5.tgz"
+  checksum: 3c9bb15772509f0ecb40428531863dbc3f064f2bf34bbccc2ce2b2923c69fb0868aec7e357b1d97fd0d7f7e435a014ea5c1adef8a64715529887179c97a5a823
   languageName: node
   linkType: hard
 
