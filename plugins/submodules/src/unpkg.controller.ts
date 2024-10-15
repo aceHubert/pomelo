@@ -1,7 +1,7 @@
 import { ApiTags, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { Controller, Get, Query, Param, Scope } from '@nestjs/common';
 // import { I18n, I18nContext } from 'nestjs-i18n';
-import { ParseQueryPipe, createResponseSuccessType } from '@ace-pomelo/shared-server';
+import { ParseQueryPipe, createResponseSuccessType } from '@ace-pomelo/shared/server';
 import { UnpkgSubModuleService } from './unpkg.service';
 import { SubModuleModelResp, SubModuleManifestModelResp, PagedSubModuleModelResp } from './resp/submodule-model.resp';
 import { PagedSubModuleQueryDto } from './dto/paged-sub-module-query.dto';

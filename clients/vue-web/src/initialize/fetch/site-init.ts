@@ -1,8 +1,7 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '@/fetch/graphql/infrastructure-request';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 
 export interface SiteInitArgs {
   // 站点标题
@@ -17,8 +16,8 @@ export interface SiteInitArgs {
   homeUrl: string;
 }
 
-export const useSiteInitApi = defineRegistApi('site-init', {
-  apis: {
+export const useSiteInitApi = defineRegistGraphql('site-init', {
+  definition: {
     check: gql`
       query checkSiteInitialRequired {
         result: checkSiteInitialRequired
@@ -30,5 +29,4 @@ export const useSiteInitApi = defineRegistApi('site-init', {
       }
     ` as TypedMutationDocumentNode<{ result: boolean }, { model: SiteInitArgs }>,
   },
-  request,
 });

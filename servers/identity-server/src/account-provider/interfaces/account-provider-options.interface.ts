@@ -3,7 +3,7 @@ import { CountryCode } from 'libphonenumber-js';
 import { CanBePromise } from 'oidc-provider';
 
 export interface AccountClaims {
-  sub: string;
+  id: number;
   name?: string;
   given_name?: string;
   family_name?: string;
@@ -29,22 +29,18 @@ export interface AccountProviderOptions {
   adapter: () => {
     /**
      * get account
-     * @param sub account id
+     * @param options account id or username
+     * @param options.id account id
+     * @param options.username account username
      * @returns account claims (snakecase keys)
      */
-    getAccount(sub: string): CanBePromise<AccountClaims | undefined>;
+    getAccount(options: XOR<{ id: number }, { username: string }>): CanBePromise<AccountClaims | undefined>;
     /**
      * get extra claims(claims to be issued in userinfo and id_token)
-     * @param sub account id
+     * @param id account id
      * @returns extra claims (snakecase keys)
      */
-    getClaims(sub: string): CanBePromise<Omit<AccountClaims, 'sub'> & { [key: string]: unknown }>;
-    /**
-     * get account by username
-     * @param username username (account identifier, such as login name, email, phone number, etc.)
-     * @returns account id
-     */
-    getAccountByUsername(username: string): CanBePromise<AccountClaims | undefined>;
+    getClaims(id: number): CanBePromise<Omit<AccountClaims, 'id'> & { [key: string]: unknown }>;
     /**
      * get phone region code
      */
@@ -58,24 +54,19 @@ export interface AccountProviderOptions {
     verifyAccount(username: string, password: string): CanBePromise<false | string>;
     /**
      * update password by account id
-     * @param sub account id
+     * @param id account id
      * @param oldPwd old password
      * @param newPwd new password
      */
-    updatePassword(sub: string, oldPwd: string, newPwd: string): CanBePromise<void>;
-    /**
-     * update password by username
-     * @param username username (account identifier, such as login name, email, phone number, etc.)
-     * @param oldPwd old password
-     * @param newPwd
-     */
-    updatePasswordByUsername(username: string, oldPwd: string, newPwd: string): CanBePromise<void>;
+    updatePassword(
+      options: XOR<{ id: number }, { username: string }> & { oldPwd: string; newPwd: string },
+    ): CanBePromise<void>;
     /**
      * reset password
-     * @param sub account id
+     * @param id account id
      * @param newPwd new password
      */
-    resetPassword(sub: string, newPwd: string): CanBePromise<void>;
+    resetPassword(id: number, newPwd: string): CanBePromise<void>;
   };
   /**
    * is global module

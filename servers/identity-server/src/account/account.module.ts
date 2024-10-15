@@ -1,6 +1,5 @@
 import { Module, DynamicModule, Provider } from '@nestjs/common';
 import { AccountOptions, AccountAsyncOptions, AccountOptionsFactory } from './interfaces/account-options.interface';
-import { DiscoveryController } from './discovery.controller';
 import { SecurityController } from './security.controller';
 import { LoginController } from './login.controller';
 import { PasswordController } from './password.controller';
@@ -11,7 +10,7 @@ export class AccountModule {
   static forRoot(options: AccountOptions): DynamicModule {
     return {
       module: AccountModule,
-      controllers: [DiscoveryController, SecurityController, LoginController, PasswordController],
+      controllers: [SecurityController, LoginController, PasswordController],
       providers: [
         {
           provide: ACCOUNT_OPTIONS,
@@ -24,7 +23,7 @@ export class AccountModule {
   static forRootAsync(options: AccountAsyncOptions): DynamicModule {
     return {
       module: AccountModule,
-      controllers: [DiscoveryController, SecurityController, LoginController, PasswordController],
+      controllers: [SecurityController, LoginController, PasswordController],
       imports: options.imports || [],
       providers: this.createAsyncProviders(options),
     };

@@ -38,7 +38,7 @@ export const defaultSettings: {
   // iconfontUrl: '',
   title: (i18nRender: (key: string, fallback: string, args?: any) => string) =>
     i18nRender('site_title', 'Pomelo Admin'),
-  logo: `${process.env.BASE_URL}static/images/logo.png`,
+  logo: `${process.env.BASE_URL}static/img/logo.png`,
   layout: {
     type: LayoutType.MixedMenu,
     contentWidth: ContentWidth.Fluid,

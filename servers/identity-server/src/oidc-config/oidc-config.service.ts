@@ -3,23 +3,28 @@ import wildcard from 'wildcard';
 import psl from 'psl';
 import { get, omitBy, isNil } from 'lodash';
 import {
-  Provider,
   FindAccount,
   KoaContextWithOIDC,
   CookiesSetOptions,
   ClientMetadata,
   ClientAuthMethod,
   SigningAlgorithmWithNone,
+  Provider,
   errors,
 } from 'oidc-provider';
-import { OidcConfiguration, OidcModuleOptionsFactory } from 'nest-oidc-provider';
+import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { ClientDataSource, IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
-import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared-server';
-import { renderPrimaryStyle } from '../common/utils/render-primary-style-tag.util';
+import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared/server';
+import { ClientDataSource, IdentityResourceDataSource } from '../datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { getI18nFromContext } from './i18n.helper';
+import {
+  renderCheckSessionTemplate,
+  renderLogoutSourceTempate,
+  renderPostLogoutSuccessSourceTemplate,
+  renderExceptionTemplate,
+} from './templates';
 import { OidcConfigAdapter } from './oidc-config.adapter';
 import { OidcConfigStorage } from './oidc-config.storage';
 import { OidcConfigOptions } from './interfaces/oidc-config-options.interface';
@@ -36,17 +41,17 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     private readonly clientDataSource: ClientDataSource,
   ) {}
 
-  private get globalPrefix() {
+  private get globalPrefix(): string {
     return normalizeRoutePath(new url.URL(this.options.issuer).pathname);
   }
 
-  async createModuleOptions() {
+  async createModuleOptions(): Promise<OidcModuleOptions> {
     return {
       issuer: this.options.issuer,
-      path: normalizeRoutePath(this.options.path!),
+      path: this.options.path,
       oidc: await this.getConfiguration(),
       proxy: true,
-      factory: (issuer: string, config?: OidcConfiguration) => {
+      factory: (issuer, config) => {
         const provider = new Provider(issuer, config);
         // allow http,localhost in development mode
         if (this.options.debug) {
@@ -82,7 +87,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           const wildcardUris = this.redirectUris?.filter(hasWildcardHost) || [];
           return wildcardUris.some(wildcardMatches.bind(undefined, redirectUri));
         };
-
         // Skip redirecting invalid request error to client
         // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_redirect.md
         Object.defineProperty(errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
@@ -96,6 +100,28 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
           return constantEquals(this.clientSecret, actual, 1000);
         };
+
+        // checksession endpoint
+        // @ts-expect-error no types
+        const sessionName = provider.cookieName('session');
+        const checkSessionRoute = '/connect/checksession';
+        const discoveryRoute = '/.well-known/openid-configuration';
+        provider.use(async (ctx, next) => {
+          // set issuer dynamically
+          // @ts-expect-error readonly types
+          provider.issuer = ctx.origin;
+
+          if (ctx.method === 'GET' && ctx.path === checkSessionRoute) {
+            ctx.type = 'html';
+            ctx.status = 200;
+            ctx.body = renderCheckSessionTemplate({ globalPrefix: this.globalPrefix, sessionName });
+          }
+          await next();
+
+          if (ctx.oidc.route === 'discovery') {
+            ctx.body.check_session_iframe = ctx.oidc.urlFor('discovery').replace(discoveryRoute, checkSessionRoute);
+          }
+        });
 
         // checksession session_state
         provider.on('authorization.success', async (ctx: KoaContextWithOIDC, response: Record<string, any>) => {
@@ -123,62 +149,77 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   async getConfiguration(): Promise<OidcConfiguration> {
-    const scopes: OidcConfiguration['scopes'] = [],
-      claims: OidcConfiguration['claims'] = {};
+    const claims: OidcConfiguration['claims'] = {};
 
     // identity resources
-    await this.identityResourceDataSource.getList(['name', 'enabled', 'claims']).then((resources) => {
-      resources.forEach((resource) => {
-        scopes.push(resource.name);
-        claims[resource.name] = resource.claims?.map((claim) => claim.type) ?? [];
-      }, {} as NonNullable<OidcConfiguration['claims']>);
-    });
+    try {
+      await this.identityResourceDataSource.getList(['name', 'enabled', 'claims']).then((resources) => {
+        resources.forEach((resource) => {
+          claims[resource.name] = resource.claims?.map((claim) => claim.type) ?? [];
+        });
+      });
+    } catch (e: any) {
+      this.logger.error(`Required to reload server after database initalized: ${e.message}`);
+      // TODO: DB sync after module initalized cause table not found
+      // Set as default claims as DB sync
+      Object.entries({
+        openid: ['sub'],
+        profile: [
+          'role',
+          'login_name',
+          'display_name',
+          'nice_name',
+          'nick_name',
+          'avatar',
+          'gender',
+          'locale',
+          'timezone',
+          'url',
+          'updated_at',
+        ],
+        phone: ['phone_number', 'phone_number_verified'],
+        email: ['email', 'email_verified'],
+      }).forEach(([name, claim]) => {
+        claims[name] = claim;
+      });
+    }
 
     // api resources
     // TODO: api resources
 
-    // required scopes
-    if (!scopes.includes('openid')) {
-      scopes.unshift('openid');
-    }
-
-    // no configured need scopes
-    if (!scopes.includes('offline_access')) {
-      scopes.push('offline_access');
-    }
-
     return {
       // static clients metadata
-      clients: [
-        {
-          client_id: '00000000-0000-0000-0000-000000000001',
-          // UtQs360CkP
-          client_secret: '10414436a1a7d7ff59e1087209ca32b508224462441c484dfe8f8994f55fcca1',
-          client_name: 'Pomelo Identity Server',
-          scope: 'openid profile offline_access',
-          grant_types: ['client_credentials'],
-          response_types: [],
-          redirect_uris: [],
-          token_endpoint_auth_method: 'client_secret_basic',
-          require_auth_time: true,
-          access_token_format: 'jwt',
-        },
-        {
-          client_id: '00000000-0000-0000-0000-000000000002',
-          // b9fqUuo2Gd
-          client_secret: 'b1dc4e94b22ffd8e4f4016c506ac0f2c0795eaa628548a5250a78dbb3ef4d7f1',
-          client_name: 'Pomelo Infratructure Server',
-          scope: 'openid profile offline_access',
-          grant_types: ['authorization_code', 'client_credentials'],
-          response_types: ['code'],
-          redirect_uris: ['http://localhost:5002/login/callback'],
-          post_logout_redirect_uris: ['http://localhost:5002'],
-          token_endpoint_auth_method: 'client_secret_basic',
-          require_auth_time: true,
-          access_token_format: 'jwt',
-        },
-      ],
-      scopes,
+      clients: this.options.debug
+        ? [
+            {
+              client_id: '00000000-0000-0000-0000-000000000001',
+              // UtQs360CkP
+              client_secret: '10414436a1a7d7ff59e1087209ca32b508224462441c484dfe8f8994f55fcca1',
+              client_name: 'Pomelo Identity Server',
+              scope: 'openid profile offline_access',
+              grant_types: ['client_credentials'],
+              response_types: [],
+              redirect_uris: [],
+              token_endpoint_auth_method: 'client_secret_basic',
+              require_auth_time: true,
+              access_token_format: 'jwt',
+            },
+            {
+              client_id: '00000000-0000-0000-0000-000000000002',
+              // b9fqUuo2Gd
+              client_secret: 'b1dc4e94b22ffd8e4f4016c506ac0f2c0795eaa628548a5250a78dbb3ef4d7f1',
+              client_name: 'Pomelo Infratructure Server',
+              scope: 'openid profile offline_access',
+              grant_types: ['authorization_code', 'client_credentials'],
+              response_types: ['code'],
+              redirect_uris: ['http://localhost:5002/login/callback'],
+              post_logout_redirect_uris: ['http://localhost:5002'],
+              token_endpoint_auth_method: 'client_secret_basic',
+              require_auth_time: true,
+              access_token_format: 'jwt',
+            },
+          ]
+        : [],
       claims,
       responseTypes: [
         'code',
@@ -223,9 +264,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
           return `${this.globalPrefix}/login?${params.toString()}`;
         },
-      },
-      discovery: {
-        check_session_iframe: url.resolve(this.options.issuer, `${this.globalPrefix}/connect/checksession`),
       },
       ttl: {
         DeviceCode: (ctx, token, client) => {
@@ -290,41 +328,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           secureProxy: true,
         } as CookiesSetOptions,
       },
-      jwks: {
-        keys: this.options.debug
-          ? [
-              {
-                p: 'xtPNYqTMy_AhvR7emZXo-ddOXQ3PekXLzefL7QC0X27Gsia2KZ3Zu1R6FE7fAT3cGGw4pfzS625H1jOH9zJJKiqzOigu63ison0vHsxFlAX2iu776DVqs6d7aOhYYklbY5xCUWP-wHAODRr1y6M5CCoUyzbS0SnQ0JGbbLQyGQ8',
-                kty: 'RSA',
-                q: 'qPsoMPzpx_bs49HFAHc4TNalOP_HM6eEwLAHMjrLc2gJIUeiAGlT8BdcPZtowSX82-hbZV8Ob81zpzJubTgivWs31w9rVX-j2hmKEH03ZgQSfY5ediMckssQjmRECpT2vN8VvNz23spePIN9P30flWaJuFg_vwgSx7Y3WsdmxUs',
-                d: 'eb1_2nVLoKqZLJLarDVMmy2xVgW7WfwDLTQqmjxk5M93xeKoNob2RU9exRs9H38i6hZ9is5X60omRC-jk-_vqif9ZHbB-RNO9QpBS0YtfxS7le540FssJX4dVH-irgHtls81ukMx2vEy0TFQl-cTNQm7MSjS0a-nOqaSK8xU5SAnb3Z0ais4B1bMAs8pWxWM-dnUbEVN4fdCnHsFTRBpEYscdyTCzTs6ppgeTtkuonhSmO3TtrDRotPhqBDwCVbH8XxBsomwvl9KY1U4BIq9Y-EWq27oQDjEdmo9smh_0fh0OMJIZ51XKMwrxctrF7o7sg6NS7oeDpCMufmCLegBoQ',
-                e: 'AQAB',
-                use: 'sig',
-                kid: '93J_YBZFn9dR-xu18kOV7A2EEeU4-w824Nnw1D6fFVo',
-                qi: 'QTOHT0K-o_Jk8pnTcFRV_waouTrMYF3VjzCz_zIEid1SV8aYNVx_GTHlIhT5vwLLd-dzT3mrum38AwU9dcMOM_pI3FSYKTL3kHue7NgrSHnW4V84TVbW6Kgux6ogDpzjNaNjhYwUCk366-dZYVrRU6p21L2pcqSguhlDRODeYy4',
-                dp: 'XXKaq2wtXQSFtu9VS_YrQ5GwIQgmpZ88RJBXRhL4s4nLFVwgbbrk5Ki1n-nZ4imC0m-6yDjloQV5-fDKTKJzxL_A8OqF8uIKsWwIw37ajNGoqG_eMas5dSqYVBwvvjIgI9cDTGGlECkaUYqET6ttWKr-juw7dVcj74Mf-51Nln0',
-                alg: 'RS256',
-                dq: 'GPTW7706jbTTMaZWcQYqg3aj-jIUanWQLqEQvwNd7tJrnsWkkGj945Sfo92i7_u7R4MelG8gg7SVIxlYo7rJrq36FkIJuRvbyCdDc8H6f4-UZ4SyQMJYwvlIna8DOYjck_JilH0R3L-IgWluAwVot7joGBi4eW8ozuQDct3GONc',
-                n: 'gz4PqkAZ9yHmBccYwdgmVvXHFPNOH23Hgl9N6kQ_4PUaq5YkbCMXD58g7sKHEbz4QbuCagjWgKHHh-QjdJx3GSFZkCvShQZmpphvIOC9fLDpCRrG9c8jAVtov74z3t6p09q5zI-zDBtpwjuAbR25-oeQZtWrjZqRPc80mRMr-EdK4lJFPagIk718oWIPqvTojQhdYXsHtESMp6X8mdFgPRMPX2RM3thEtlWdxxLS6bAlJocYAtw8sW4Xm5sQEaWeYZ4Rg-vtywDZlJluMPDXEIfhswrg_Jitod-zGW4uHe0WR32oOAXA8VUpqB1X4eBLSBjVqu44gZcrTvU5_O_iZQ',
-              },
-            ]
-          : [
-              {
-                p: '04eRUaRpAvXZikctZQ7t8_OwEYVteHphMpl9v0JBWQ8GfrKYsCSW6TyH9cPIbFi3Mx1flGO2nO7VfFCkmcxGO4MErjRGcEJmhpAGMZX9pWiLZMJ2XwD-gbZ1B1mqtUG8XifHxB5LOGqn7Dxu5e2hZzIZWYJkHPFFWEBOGBe2xvM',
-                kty: 'RSA',
-                q: 'u48bIaB2u7EzwtSqDYjT0rQp-VL0ivbD5y_gK7wukCfJRLHQYvWWtSFE4jYbzcb_DsXOgkH2SobZg7zI6S4nW7jMls5rqRmo5FbJlWcpCXkeOv4rbKxDx9hbgZ-SASIobqB6QcvHCoTSufdcr0yaF0DPZ47oGbDP423RjCGPDBU',
-                d: 'EK0Vm10PbIqoiObD69Mw4MVNscO_nNlNWj9ZQF0UvBWZBwnf_s_Wdd6WVIlozRAaRcVcSsZm-Yh4RNyNH7fl0Pvau9gSCgtGh9HdP_ynRkOZ9gk2CV5lPBse_0D7gw2HZ8PMQftBbTg6GL5kpYj0ULGrL_kO1b6cDIfXmhgJWisLpQLRQY5AFBX0Ry19iGA4uu1MujinQ-2DZP87eoTie0oKt0drCUwdFjXshgrRSGi-vSpjlHTTCg99taHLODI3iwSmK7Y2uATQcpbH1GMaXRQ2jK-OZOeqH0qh_tTvVlBFeYI_IBlZdfJZh64un3Qev9gsknFyqSYzgSSN9umO4Q',
-                e: 'AQAB',
-                use: 'sig',
-                kid: 'POAtnw37qoO9ibJfAAfpH9cslsNC5dyJo7raChSYqrQ',
-                qi: 'VASQdA9bxQ0AbnHA9oBrVrMUNBYw5eCBspQivx8qnOb4yCyN4TlGHHNsZrTs7DkzeWZdnhLxHQgqFtzaMzFjHnvYjC-s8sUyhLPyfzfziG8BTr9-xEc4EFfb2Q2ieByt-PolgCh-KQEaGCS07Dr9hVySkB_Wo0uegfwJLAV4B0Y',
-                dp: 'n9yPxazENBmLG4bpVruut7RONx-oeOm8NVps_zNaYa0KUow0-sHcT06Qzfr1qHRvl7C2QFYPd5DERNxJWXZZCbbdva4CIer8wutr0uOxOuXEmxSgEvKUZYF39mMcsTmJ23qi7aObY3qvh8iwYxJw7aWeJNh3QqxQpP6MRob9emM',
-                alg: 'RS256',
-                dq: 'YGfAVFp8bSE6L8zL08Uey9DbOlJPbBZGv9A184T4khRBOdQD_rmpS1TcaUHSrMS6WUeHTCDHjasepr4kruaQSG8GigV0BSkxTJznZKnvx_S_eycl_ufUtyYYctooW_jIu4Q1ExjBKED5Z6kjtN803PrtIJet6XaehJHwAY1GT7k',
-                n: 'mvpGS-UXuhX3IFsTHbw2vd1ij86t-s5GHl-sWa1qxPxD1bR1D9JOVBznSHLoRpp55Y8ak-snWUg7unnBbPE-ncFnz-SfzfOIdjZ90QWi4gvqR0Q__BhYFhWacPhniK13aDrPRmhh4wTEWurZqajxZNh_138DS9m6_tWatzz3g0mlvi_MuujOkJ5gUTJffkOhmNLqKAGmYqcJUvkpWe5HBi-sNQFV7Gg5PdGW7BKrNkrrH3tdnIrDHhIF5sjgtYHD22guzpSQp9didTtRfHV8Nfno-C1zjYiIP9lwfJxWYY5k4O7Xra60wJICMSvLKJ3hCwwN-iNOGxJaS4e4-A617w',
-              },
-            ],
-      },
+      jwks: this.options.jwks,
       features: {
         devInteractions: { enabled: false },
         claimsParameter: { enabled: true },
@@ -350,92 +354,52 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             // @param ctx - koa request context
             // @param form - form source (id="op.logoutForm") to be embedded in the page and submitted by
             //   the End-User
-            ctx.body = `<!DOCTYPE html>
-            <head>
-              <meta charset="UTF-8" />
-              <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-              <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
-              <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
-              <title>${i18n.tv('oidc.config.logout.confirm_page_title', `Logout Request`)}</title>
-              ${
-                process.env.NODE_ENV === 'production'
-                  ? `<link rel="stylesheet" href="${this.globalPrefix}/style/index.min.css" />
-                    <link rel="stylesheet" href="${this.globalPrefix}/style/container.min.css" />`
-                  : `<link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
-                    <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />`
-              }
-              ${primaryColor ? renderPrimaryStyle(primaryColor) : ''}
-            </head>
-            <body>
-              <main class="container">
-                <div class="wrapper">
-                  <h1 class="title">${i18n.tv(
-                    'oidc.config.logout.confirm_title',
-                    `Do you want to sign-out from ${ctx.host}?`,
-                    {
-                      args: { ctx },
-                    },
-                  )}</h1>
-                  ${form}
-                  <div id="actions"">
-                    <button autofocus type="submit" class="action-button" form="op.logoutForm" value="yes" name="logout">${i18n.tv(
-                      'oidc.config.logout.confirm_btn_text',
-                      'Yes, sign me out',
-                    )}</button>
-                    <button type="submit" class="action-button secondary" form="op.logoutForm">${i18n.tv(
-                      'oidc.config.logout.cancel_btn_text',
-                      'No, stay signed in',
-                    )}</button>
-                  </div>
-                </div>
-              </main>
-            </body>
-            </html>`;
+            ctx.body = renderLogoutSourceTempate({
+              globalPrefix: this.globalPrefix,
+              pageTitle: i18n.tv('identity-server.oidc.config.logout.confirm_page_title', `Logout Request`),
+              content: {
+                title: i18n.tv(
+                  'identity-server.oidc.config.logout.confirm_title',
+                  `Do you want to sign-out from ${ctx.host}?`,
+                  {
+                    args: { host: ctx.host },
+                  },
+                ),
+                form,
+                confirmBtnText: i18n.tv('identity-server.oidc.config.logout.confirm_btn_text', 'Yes, sign me out'),
+                cancelBtnText: i18n.tv('identity-server.oidc.config.logout.cancel_btn_text', 'No, stay signed in'),
+              },
+              primaryColor,
+            });
           },
           postLogoutSuccessSource: (ctx) => {
             const i18n = getI18nFromContext(ctx);
+            const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
             const { clientId, clientName } = ctx.oidc.client || {}; // client is defined if the user chose to stay logged in with the OP
             const display = clientName || clientId;
-            ctx.body = `<!DOCTYPE html>
-              <head>
-              <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-                <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
-                <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
-                <title>${i18n.tv('oidc.config.logout.success_page_title', `Sign-out Success`)}</title>
-                ${
-                  process.env.NODE_ENV === 'production'
-                    ? `<link rel="stylesheet" href="${this.globalPrefix}/style/index.min.css" />
-                      <link rel="stylesheet" href="${this.globalPrefix}/style/container.min.css" />`
-                    : `<link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
-                      <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />`
-                }
-              </head>
-              <body>
-                <main class="container">
-                  <div class="wrapper">
-                    <h1 class="title">${i18n.tv('oidc.config.logout.success_title', 'Sign-out Success')}</h1>
-                    <p class="description">${
-                      display
-                        ? i18n.tv(
-                            'oidc.config.logout.success_description_with_client',
-                            `Your sign-out with ${display} was successful.`,
-                            {
-                              args: { client: display },
-                            },
-                          )
-                        : i18n.tv('oidc.config.logout.success_description', `Your sign-out was successful.`)
-                    }</p>
-                  </div>
-                </main>
-              </body>
-              </html>`;
+            ctx.body = renderPostLogoutSuccessSourceTemplate({
+              globalPrefix: this.globalPrefix,
+              pageTitle: i18n.tv('identity-server.oidc.config.logout.success_page_title', `Sign-out Success`),
+              content: {
+                title: i18n.tv('identity-server.oidc.config.logout.success_title', 'Sign-out Success'),
+                description: display
+                  ? i18n.tv(
+                      'identity-server.oidc.config.logout.success_description_with_client',
+                      `Your sign-out with ${display} was successful.`,
+                      {
+                        args: { client: display },
+                      },
+                    )
+                  : i18n.tv('identity-server.oidc.config.logout.success_description', `Your sign-out was successful.`),
+              },
+              primaryColor,
+            });
           },
         },
         resourceIndicators: {
           enabled: true,
           defaultResource: (ctx) => {
-            this.logger.debug('default resource', ctx.origin, ctx.protocol);
+            this.logger.debug(`default resource, origin: ${ctx.origin}, protocol: ${ctx.protocol}`);
 
             return ctx.origin;
           },
@@ -456,7 +420,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             };
           },
           useGrantedResource: (ctx, resourceIndicator) => {
-            this.logger.debug('use granted resource', resourceIndicator);
+            this.logger.debug(`use granted resource, ${resourceIndicator}`);
 
             return true;
           },
@@ -547,51 +511,32 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         return;
       },
       renderError: async (ctx, out, err) => {
-        this.logger.error('oidc renderError', err);
+        this.logger.error('oidc renderError, Error: ${err}');
 
         const i18n = getI18nFromContext(ctx);
-        let pageTitle = i18n.tv('error.page_title', 'An error occurred'),
-          title = i18n.tv('error.title', 'An error occurred!');
+        const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
+        let pageTitle = i18n.tv('identity-server.error.page_title', 'An error occurred'),
+          title = i18n.tv('identity-server.error.title', 'An error occurred!');
         if (ctx.status === 404) {
-          pageTitle = i18n.tv('404.page_title', 'Page not found');
-          title = i18n.tv('404.title', 'Page not found!');
+          pageTitle = i18n.tv('identity-server.404.page_title', 'Page not found');
+          title = i18n.tv('identity-server.404.title', 'Page not found!');
         }
 
         ctx.type = 'html';
-        ctx.body = `<!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0" />
-            <link rel="icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
-            <link rel="shortcut icon" type="image/x-icon" href="${this.globalPrefix}/favicon.ico" />
-            <title>${pageTitle}</title>
-            ${
-              process.env.NODE_ENV === 'production'
-                ? `<link rel="stylesheet" href="${this.globalPrefix}/style/index.min.css" />
-                  <link rel="stylesheet" href="${this.globalPrefix}/style/container.min.css" />`
-                : `<link rel="stylesheet" href="${this.globalPrefix}/style/index.css" />
-                  <link rel="stylesheet" href="${this.globalPrefix}/style/container.css" />`
-            }
-          </head>
-          <body>
-            <main class="container">
-              <div class="wrapper">
-                <h1 class="title">${title}</h1>
-                <p class="description">
-                  ${
-                    ctx.status === 404
-                      ? (err as any).error_description ?? err.message
-                      : Object.entries(out)
-                          .map(([key, value]) => `<pre><strong>${key}</strong>: ${sanitizeHtml(value)}</pre>`)
-                          .join('')
-                  }
-                </p>
-              </div>
-            </main>
-          </body>
-        </html>
-        `;
+        ctx.body = renderExceptionTemplate({
+          globalPrefix: this.globalPrefix,
+          pageTitle,
+          content: {
+            title,
+            description:
+              ctx.status === 404
+                ? (err as any).error_description ?? err.message
+                : Object.entries(out)
+                    .map(([key, value]) => `<pre><strong>${key}</strong>: ${sanitizeHtml(value)}</pre>`)
+                    .join(''),
+          },
+          primaryColor,
+        });
       },
       extraClientMetadata: {
         properties: [
@@ -697,31 +642,36 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   }
 
   private findAccount: FindAccount = async (ctx, id) => {
-    const account = await this.accountProviderService.getAccount(id);
+    const account = await this.accountProviderService.getAccount({
+      id: Number(id),
+    });
 
     if (!account) return;
 
     return {
-      accountId: account.sub,
+      accountId: String(account.id),
       claims: async (use, scope) => {
-        this.logger.debug('claims', use, scope);
+        this.logger.debug(`claims, use: ${JSON.stringify(use, void 0, 2)}, scope: ${JSON.stringify(scope, void 0, 2)}`);
+
+        const { id: accountId, ...rest } = account;
 
         if (use === 'extra_token_claims') {
           return {
-            sub: account.sub,
+            sub: String(accountId),
             // TODO: add rams
             ram: [],
           };
         } else if (use === 'userinfo' || use === 'id_token') {
-          const claims = await this.accountProviderService.getClaims(id);
+          const claims = await this.accountProviderService.getClaims(Number(id));
 
           return {
+            sub: String(accountId),
             ...claims,
-            ...account,
+            ...rest,
           };
         } else {
           return {
-            sub: account.sub,
+            sub: String(accountId),
           };
         }
       },

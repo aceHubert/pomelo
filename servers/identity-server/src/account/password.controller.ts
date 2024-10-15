@@ -9,7 +9,7 @@ import { Inject, Controller, Get, Post, Query, Body, Req, Res, Logger, Param } f
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { Provider } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
-import { random, normalizeRoutePath } from '@ace-pomelo/shared-server';
+import { random, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
 import { getPasswordModifyTemplate, getPasswordForgotTemplate, getPasswordResetTemplate } from '@/common/templates';
@@ -20,7 +20,7 @@ import { ACCOUNT_OPTIONS } from './constants';
 
 @Controller('/password')
 export class PasswordController extends BaseController {
-  logger = new Logger(PasswordController.name, { timestamp: true });
+  private logger = new Logger(PasswordController.name, { timestamp: true });
 
   constructor(
     @Inject(ACCOUNT_OPTIONS) private readonly options: AccountOptions,
@@ -73,18 +73,18 @@ export class PasswordController extends BaseController {
       `<div class="wrapper-placeholder">
         <%- locales %>
         <div class="wrapper">
-          <h1 class="title">${i18n.tv('password.modify.wrapper.title', 'Modify password')}</h1>
+          <h1 class="title">${i18n.tv('identity-server.password.modify.wrapper.title', 'Modify password')}</h1>
           <%- form %>
           <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
               <div class="d-sm-inline-block gap-2 mt-2">
                 <button type="submit" class="btn btn-primary w-100" form="password-modify-form">
-                  ${i18n.tv('password.modify.wrapper.submit_btn_text', 'Submit')}
+                  ${i18n.tv('identity-server.password.modify.wrapper.submit_btn_text', 'Submit')}
                 </button>
               </div>
               <div class="d-sm-inline-block gap-2 mt-2">
                 <button id="cancle-btn" type="button" class="btn btn-light w-100">
-                  ${i18n.tv('password.modify.wrapper.cancel_btn_text', 'Cancel')}
+                  ${i18n.tv('identity-server.password.modify.wrapper.cancel_btn_text', 'Cancel')}
                 </button>
               </div>
             </div>
@@ -94,7 +94,7 @@ export class PasswordController extends BaseController {
 
     let loginName: string | undefined;
     if (session.accountId) {
-      const user = await this.accountProviderService.getAccount(session.accountId);
+      const user = await this.accountProviderService.getAccount({ id: Number(session.accountId) });
       loginName = user?.login_name as string;
     }
 
@@ -104,7 +104,7 @@ export class PasswordController extends BaseController {
         ${
           formLableDisplay
             ? `<label for="username" class="col-sm-3 col-form-label">
-                ${i18n.tv('password.modify.form.username_label', 'Username')}
+                ${i18n.tv('identity-server.password.modify.form.username_label', 'Username')}
               </label>`
             : ''
         }
@@ -114,13 +114,16 @@ export class PasswordController extends BaseController {
               class="form-control"
               id="username"
               name="username"
-              placeholder="${i18n.tv('password.modify.form.username_placeholder', 'Login Name/Email/Phone')}"
+              placeholder="${i18n.tv(
+                'identity-server.password.modify.form.username_placeholder',
+                'Login Name/Email/Phone',
+              )}"
               ${!loginName ? `autofocus="on"` : `value="${loginName}" readonly`}
               required
               maxlength="50"
             />
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('password.modify.form.username_invalid', 'Please input username!')}
+              ${i18n.tv('identity-server.password.modify.form.username_invalid', 'Please input username!')}
             </div>
           </div>
         </div>
@@ -128,7 +131,7 @@ export class PasswordController extends BaseController {
         ${
           formLableDisplay
             ? `<label for="password" class="col-sm-3 col-form-label">
-                ${i18n.tv('password.modify.form.old_password_label', 'Old Password')}
+                ${i18n.tv('identity-server.password.modify.form.old_password_label', 'Old Password')}
               </label>`
             : ''
         }
@@ -139,7 +142,10 @@ export class PasswordController extends BaseController {
                 class="form-control password"
                 id="oldPassword"
                 name="oldPassword"
-                placeholder="${i18n.tv('password.modify.form.old_password_placeholder', 'Old Password')}"
+                placeholder="${i18n.tv(
+                  'identity-server.password.modify.form.old_password_placeholder',
+                  'Old Password',
+                )}"
                 autocomplete="off"
                 ${loginName ? `autofocus="on"` : ''}
                 required
@@ -149,7 +155,7 @@ export class PasswordController extends BaseController {
               />
               <span class="toggle-password eye" data-target="#oldPassword" ></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-                ${i18n.tv('password.modify.form.old_password_invalid', 'Please input old password!')}
+                ${i18n.tv('identity-server.password.modify.form.old_password_invalid', 'Please input old password!')}
               </div>
             </div>
           </div>
@@ -158,7 +164,7 @@ export class PasswordController extends BaseController {
         ${
           formLableDisplay
             ? `<label for="password" class="col-sm-3 col-form-label">
-                ${i18n.tv('password.modify.form.new_password_label', 'New Password')}
+                ${i18n.tv('identity-server.password.modify.form.new_password_label', 'New Password')}
               </label>`
             : ''
         }
@@ -169,7 +175,10 @@ export class PasswordController extends BaseController {
                 class="form-control password"
                 id="newPassword"
                 name="newPassword"
-                placeholder="${i18n.tv('password.modify.form.new_password_placeholder', 'New Password')}"
+                placeholder="${i18n.tv(
+                  'identity-server.password.modify.form.new_password_placeholder',
+                  'New Password',
+                )}"
                 autocomplete="off"
                 ${loginName ? `autofocus="on"` : ''}
                 required
@@ -180,7 +189,7 @@ export class PasswordController extends BaseController {
               <span class="toggle-password eye" data-target="#newPassword" ></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
                 ${i18n.tv(
-                  'password.modify.form.new_password_invalid',
+                  'identity-server.password.modify.form.new_password_invalid',
                   'Please input password(6-16 characters includes numbers and letters)!',
                 )}
               </div>
@@ -191,7 +200,7 @@ export class PasswordController extends BaseController {
         ${
           formLableDisplay
             ? `<label for="password" class="col-sm-3 col-form-label">
-              ${i18n.tv('password.modify.form.confirm_password_label', 'Confirm Password')}
+              ${i18n.tv('identity-server.password.modify.form.confirm_password_label', 'Confirm Password')}
             </label>`
             : ''
         }
@@ -202,7 +211,10 @@ export class PasswordController extends BaseController {
                 class="form-control password"
                 id="confirmPassword"
                 name="confirmPassword"
-                placeholder="${i18n.tv('password.modify.form.confirm_password_placeholder', 'Confirm Password')}"
+                placeholder="${i18n.tv(
+                  'identity-server.password.modify.form.confirm_password_placeholder',
+                  'Confirm Password',
+                )}"
                 autocomplete="off"
                 required
                 minlength="6"
@@ -211,7 +223,10 @@ export class PasswordController extends BaseController {
               />
               <span class="toggle-password eye" data-target="#confirmPassword" ></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-                ${i18n.tv('password.modify.form.confirm_password_invalid', 'Please input confirm password!')}
+                ${i18n.tv(
+                  'identity-server.password.modify.form.confirm_password_invalid',
+                  'Please input confirm password!',
+                )}
               </div>
             </div>
           </div>
@@ -220,7 +235,7 @@ export class PasswordController extends BaseController {
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
-      title: i18n.tv('password.modify.page_title', 'Modify Password'),
+      title: i18n.tv('identity-server.password.modify.page_title', 'Modify Password'),
       content: ejs.render(wrapper, {
         form,
         locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
@@ -244,18 +259,19 @@ export class PasswordController extends BaseController {
     const session = await this.oidcService.getSession(req, res);
     if (session.accountId && session.accountId !== input.accountId) {
       return this.faild(
-        i18n.tv('password.modify.error.account_id_not_match', 'Account id not match current sign-in user!'),
+        i18n.tv(
+          'identity-server.password.modify.error.account_id_not_match',
+          'Account id not match current sign-in user!',
+        ),
       );
     }
 
     try {
-      session.accountId
-        ? await this.accountProviderService.updatePassword(session.accountId, input.oldPassword, input.newPassword)
-        : await this.accountProviderService.updatePasswordByUsername(
-            input.username,
-            input.oldPassword,
-            input.newPassword,
-          );
+      await this.accountProviderService.updatePassword({
+        ...(session.accountId ? { id: Number(session.accountId) } : { username: input.username }),
+        oldPwd: input.oldPassword,
+        newPwd: input.newPassword,
+      });
 
       // if client_id present
       if (!returnUrl && clientId) {
@@ -317,18 +333,18 @@ export class PasswordController extends BaseController {
       `<div class="wrapper-placeholder">
         <%- locales %>
         <div class="wrapper">
-          <h1 class="title">${i18n.tv('password.forgot.wrapper.title', 'Find password')}</h1>
+          <h1 class="title">${i18n.tv('identity-server.password.forgot.wrapper.title', 'Find password')}</h1>
           <%- form %>
           <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
               <div class="d-sm-inline-block gap-2 mt-2">
                 <button type="submit" class="btn btn-primary w-100" form="password-forgot-form">
-                  ${i18n.tv('password.forgot.wrapper.submit_btn_text', 'Next')}
+                  ${i18n.tv('identity-server.password.forgot.wrapper.submit_btn_text', 'Next')}
                 </button>
               </div>
               <div class="d-sm-inline-block gap-2 mt-2">
                 <button id="cancle-btn" type="button" class="btn btn-light w-100">
-                  ${i18n.tv('password.forgot.wrapper.cancel_btn_text', 'Cancel')}
+                  ${i18n.tv('identity-server.password.forgot.wrapper.cancel_btn_text', 'Cancel')}
                 </button>
               </div>
             </div>
@@ -341,7 +357,7 @@ export class PasswordController extends BaseController {
         ${
           formLableDisplay
             ? `<label for="username" class="col-sm-3 col-form-label">
-                ${i18n.tv('password.forgot.form.username_label', 'Username')}
+                ${i18n.tv('identity-server.password.forgot.form.username_label', 'Username')}
               </label>`
             : ''
         }
@@ -351,13 +367,16 @@ export class PasswordController extends BaseController {
               class="form-control"
               id="username"
               name="username"
-              placeholder="${i18n.tv('password.forgot.form.username_placeholder', 'Login Name/Email/Mobild')}"
+              placeholder="${i18n.tv(
+                'identity-server.password.forgot.form.username_placeholder',
+                'Login Name/Email/Mobild',
+              )}"
               autofocus="on"
               required
               maxlength="50"
             />
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('password.forgot.form.username_invalid', 'Please input username!')}
+              ${i18n.tv('identity-server.password.forgot.form.username_invalid', 'Please input username!')}
             </div>
           </div>
         </div>
@@ -365,7 +384,7 @@ export class PasswordController extends BaseController {
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
-      title: i18n.tv('password.forgot.page_title', 'Find Password'),
+      title: i18n.tv('identity-server.password.forgot.page_title', 'Find Password'),
       content: ejs.render(wrapper, {
         form,
         locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
@@ -386,9 +405,11 @@ export class PasswordController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @I18n() i18n: I18nContext,
   ) {
-    const verifiedAccount = await this.accountProviderService.getAccountByUsername(input.username);
+    const verifiedAccount = await this.accountProviderService.getAccount({
+      username: input.username,
+    });
     if (!verifiedAccount) {
-      return this.faild(i18n.tv('password.forgot.error.user_not_found', 'User is not found!'));
+      return this.faild(i18n.tv('identity-server.password.forgot.error.user_not_found', 'User is not found!'));
     }
 
     const phoneRegion = await this.accountProviderService.getPhoneRegionCode();
@@ -416,7 +437,7 @@ export class PasswordController extends BaseController {
       )}/password/reset/${code}`;
 
       // TODO: Send email
-      console.log(`找回密码地址：${resetUrl}，${expiresIn / 60}分钟有效！`);
+      this.logger.log(`找回密码地址：${resetUrl}，${expiresIn / 60}分钟有效！`);
 
       const encodedEmail = verifiedAccount.email
         .split('@')
@@ -424,7 +445,7 @@ export class PasswordController extends BaseController {
         .join('@');
       return this.success({
         message: i18n.tv(
-          'password.forgot.success.send_email_content',
+          'identity-server.password.forgot.success.send_email_content',
           `Please go to check inbox from your email address "${encodedEmail}" and reset your password follow to the instruction!`,
           {
             args: {
@@ -433,7 +454,7 @@ export class PasswordController extends BaseController {
           },
         ),
       });
-      // return this.faild(i18n.tv('password.forgot.error.user_email_not_found', 'Email is not found!'));
+      // return this.faild(i18n.tv('identity-server.password.forgot.error.user_email_not_found', 'Email is not found!'));
     } else if (verifiedAccount.phone_number) {
       let expiresIn = this.mobileCodeExpiresIn();
       const codeLength = 6;
@@ -459,14 +480,14 @@ export class PasswordController extends BaseController {
       });
 
       // TODO: Send SMS
-      console.log(`找回密码验证码：${code}，${expiresIn}秒有效！`);
+      this.logger.log(`找回密码验证码：${code}，${expiresIn}秒有效！`);
 
       const appConfig = this.moduleRef['container'].applicationConfig;
       // const edcodedPhone = input.username.replace(/(\+?\d{1,})\d{4}(\d{4})$/, '$1****$2');
       return this.success({
         next: `${normalizeRoutePath(appConfig?.getGlobalPrefix() ?? '')}/password/code-verify?${stringify(req.query)}`,
         // message: i18n.tv(
-        //   'password.forgot.success.send_sms_code_content',
+        //   'identity-server.password.forgot.success.send_sms_code_content',
         //   `Please go to check SMS on your phone number "${edcodedPhone}"!`,
         //   {
         //     args: {
@@ -477,7 +498,7 @@ export class PasswordController extends BaseController {
       });
     } else {
       // TODO: 其它验证方式
-      return this.faild(i18n.tv('password.forgot.error.user_email_not_found', 'Email is not found!'));
+      return this.faild(i18n.tv('identity-server.password.forgot.error.user_email_not_found', 'Email is not found!'));
     }
   }
 
@@ -545,13 +566,13 @@ export class PasswordController extends BaseController {
       `<div class="wrapper-placeholder">
       <%- locales %>
       <div class="wrapper">
-        <h1 class="title">${i18n.tv('password.code_verify.wrapper.title', 'Code Verify')}</h1>
+        <h1 class="title">${i18n.tv('identity-server.password.code_verify.wrapper.title', 'Code Verify')}</h1>
         <%- form %>
         <div class="row">
           <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
             <div class="d-sm-inline-block gap-2">
               <button type="submit" class="btn btn-primary w-100" form="password-code-verify-form">
-                ${i18n.tv('password.code_verify.wrapper.submit_btn_text', 'Next')}
+                ${i18n.tv('identity-server.password.code_verify.wrapper.submit_btn_text', 'Next')}
               </button>
             </div>
           </div>
@@ -565,7 +586,7 @@ export class PasswordController extends BaseController {
         ${
           formLableDisplay
             ? `<label for="code" class="col-sm-3 col-form-label">
-                ${i18n.tv('password.code_verify.form.code_label', 'Code')}
+                ${i18n.tv('identity-server.password.code_verify.form.code_label', 'Code')}
               </label>`
             : ''
         }
@@ -575,7 +596,7 @@ export class PasswordController extends BaseController {
               class="form-control"
               id="code"
               name="code"
-              placeholder="${i18n.tv('password.code_verify.form.code_placeholder', 'Input Code', {
+              placeholder="${i18n.tv('identity-server.password.code_verify.form.code_placeholder', 'Input Code', {
                 args: {
                   length: codeLength,
                 },
@@ -586,7 +607,7 @@ export class PasswordController extends BaseController {
               minlength="${codeLength}"
             />
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('password.code_verify.form.code_invalid', 'Please input correct code!')}
+              ${i18n.tv('identity-server.password.code_verify.form.code_invalid', 'Please input correct code!')}
             </div>
             <div class="text--secondary">
               <small id="expiresIn"></small>
@@ -596,7 +617,7 @@ export class PasswordController extends BaseController {
                 function countdown() {
                   count--;
                   document.getElementById('expiresIn').innerText = '${i18n.tv(
-                    'password.code_verify.form.code_expires_countdown',
+                    'identity-server.password.code_verify.form.code_expires_countdown',
                     'The code will expire in %s second(s)',
                   )}'.replace(/%s/g, count);
                   if (count <= 0) {
@@ -617,7 +638,7 @@ export class PasswordController extends BaseController {
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
-      title: i18n.tv('password.verify_code.page_title', 'Verify Code'),
+      title: i18n.tv('identity-server.password.verify_code.page_title', 'Verify Code'),
       content: ejs.render(wrapper, {
         form,
         locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
@@ -642,11 +663,11 @@ export class PasswordController extends BaseController {
       this.passwordResetCodeKeyFor(input.phone),
     );
     if (!stored) {
-      return this.faild(i18n.tv('password.verify.error.code_invalid', 'The code is invalid!'));
+      return this.faild(i18n.tv('identity-server.password.verify.error.code_invalid', 'The code is invalid!'));
     }
 
     if (stored.code !== input.code) {
-      return this.faild(i18n.tv('password.verify.error.code_dismatch', 'The code is incorrect!'));
+      return this.faild(i18n.tv('identity-server.password.verify.error.code_dismatch', 'The code is incorrect!'));
     }
 
     const code = random(10).toString();
@@ -688,7 +709,7 @@ export class PasswordController extends BaseController {
       const errorWrapper = `<div class="wrapper-placeholder">
         <%- locales %>
         <div class="wrapper">
-          <h1 class="title">${i18n.tv('password.reset.wrapper.title', 'Reset password')}</h1>
+          <h1 class="title">${i18n.tv('identity-server.password.reset.wrapper.title', 'Reset password')}</h1>
           <div class="mt-8">
             <%- error %>
           </div>
@@ -697,11 +718,14 @@ export class PasswordController extends BaseController {
 
       return res.render('password', {
         primaryStyleVars: '',
-        title: i18n.tv('password.reset.page_title', 'Reset Password'),
+        title: i18n.tv('identity-server.password.reset.page_title', 'Reset Password'),
         content: ejs.render(errorWrapper, {
           error: `<p>
-            <strong>${i18n.tv('password.reset.error.title', 'Error: ')}</strong>
-            <span class="error--text">${i18n.tv('password.reset.error.code_invalid', 'The link is invalid!')}</span>
+            <strong>${i18n.tv('identity-server.password.reset.error.title', 'Error: ')}</strong>
+            <span class="error--text">${i18n.tv(
+              'identity-server.password.reset.error.code_invalid',
+              'The link is invalid!',
+            )}</span>
           </p>`,
           locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
           tv: i18n.tv.bind(i18n),
@@ -743,13 +767,13 @@ export class PasswordController extends BaseController {
       `<div class="wrapper-placeholder">
         <%- locales %>
         <div class="wrapper">
-          <h1 class="title">${i18n.tv('password.reset.wrapper.title', 'Reset password')}</h1>
+          <h1 class="title">${i18n.tv('identity-server.password.reset.wrapper.title', 'Reset password')}</h1>
           <%- form %>
           <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
               <div class="d-sm-inline-block gap-2 mt-2">
                 <button type="submit" class="btn btn-primary w-100" form="password-reset-form">
-                  ${i18n.tv('password.reset.wrapper.submit_btn_text', 'Reset')}
+                  ${i18n.tv('identity-server.password.reset.wrapper.submit_btn_text', 'Reset')}
                 </button>
               </div>
             </div>
@@ -763,7 +787,7 @@ export class PasswordController extends BaseController {
       ${
         formLableDisplay
           ? `<label for="password" class="col-sm-3 col-form-label">
-              ${i18n.tv('password.reset.form.new_password_label', 'New Password')}
+              ${i18n.tv('identity-server.password.reset.form.new_password_label', 'New Password')}
             </label>`
           : ''
       }
@@ -774,7 +798,7 @@ export class PasswordController extends BaseController {
               class="form-control password"
               id="newPassword"
               name="newPassword"
-              placeholder="${i18n.tv('password.reset.form.new_password_placeholder', 'New Password')}"
+              placeholder="${i18n.tv('identity-server.password.reset.form.new_password_placeholder', 'New Password')}"
               autocomplete="off"
               autofocus="on"
               required
@@ -785,7 +809,7 @@ export class PasswordController extends BaseController {
             <span class="toggle-password eye" data-target="#newPassword" ></span>
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
               ${i18n.tv(
-                'password.reset.form.new_password_invalid',
+                'identity-server.password.reset.form.new_password_invalid',
                 'Please input password(6-16 characters includes numbers and letters)!',
               )}
             </div>
@@ -796,7 +820,7 @@ export class PasswordController extends BaseController {
       ${
         formLableDisplay
           ? `<label for="password" class="col-sm-3 col-form-label">
-            ${i18n.tv('password.reset.form.confirm_password_label', 'Confirm Password')}
+            ${i18n.tv('identity-server.password.reset.form.confirm_password_label', 'Confirm Password')}
           </label>`
           : ''
       }
@@ -807,7 +831,10 @@ export class PasswordController extends BaseController {
               class="form-control password"
               id="confirmPassword"
               name="confirmPassword"
-              placeholder="${i18n.tv('password.reset.form.confirm_password_placeholder', 'Confirm Password')}"
+              placeholder="${i18n.tv(
+                'identity-server.password.reset.form.confirm_password_placeholder',
+                'Confirm Password',
+              )}"
               autocomplete="off"
               required
               minlength="6"
@@ -816,7 +843,10 @@ export class PasswordController extends BaseController {
             />
             <span class="toggle-password eye" data-target="#confirmPassword" ></span>
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('password.reset.form.confirm_password_invalid', 'Please input confirm password!')}
+              ${i18n.tv(
+                'identity-server.password.reset.form.confirm_password_invalid',
+                'Please input confirm password!',
+              )}
             </div>
           </div>
         </div>
@@ -825,7 +855,7 @@ export class PasswordController extends BaseController {
 
     return res.render('password', {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
-      title: i18n.tv('password.reset.page_title', 'Reset Password'),
+      title: i18n.tv('identity-server.password.reset.page_title', 'Reset Password'),
       content: ejs.render(wrapper, {
         form,
         locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
@@ -843,12 +873,12 @@ export class PasswordController extends BaseController {
       this.passwordResetCodeKeyFor(code),
     );
     if (!stored) {
-      return this.faild(i18n.tv('password.reset.error.code_invalid', 'The link is invalid!'));
+      return this.faild(i18n.tv('identity-server.password.reset.error.code_invalid', 'The link is invalid!'));
     }
 
     try {
       const { accountId, clientId } = stored;
-      await this.accountProviderService.resetPassword(accountId, input.password);
+      await this.accountProviderService.resetPassword(Number(accountId), input.password);
       await this.storage.del(this.passwordResetCodeKeyFor(code));
 
       let returnUrl = stored.returnUrl;

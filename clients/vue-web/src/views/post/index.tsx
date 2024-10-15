@@ -1,7 +1,7 @@
 import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composition-api';
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { createResource } from '@vue-async/resource-manager';
-import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
+import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, expose } from '@/hooks';
 import { useDeviceMixin } from '@/mixins';

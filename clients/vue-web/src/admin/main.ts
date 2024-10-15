@@ -7,7 +7,8 @@ import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
 import { Modal } from '@/components';
-import { afetch } from '@/fetch';
+import { apiFetch } from '@/fetch';
+import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
 import { pinia } from '@/store';
 import { auth } from '@/auth';
@@ -30,7 +31,8 @@ Vue.config.productionTip = false;
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {
-    afetch,
+    apiFetch,
+    graphqlFetch,
     i18n,
     pinia,
     router,

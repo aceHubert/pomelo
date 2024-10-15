@@ -1,8 +1,7 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '../graphql/infrastructure-request';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 
 export enum PresetTaxonomy {
   Category = 'Category',
@@ -42,8 +41,8 @@ export type NewTermRelationshipInput = {
   order?: number;
 };
 
-export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
-  apis: {
+export const useTermTaxonomyApi = defineRegistGraphql('term-taxonomy', {
+  definition: {
     get: gql`
       query getTermTaxonomies($taxonomy: String!, $keyword: String, $parentId: ID, $group: Int) {
         termTaxonomies(taxonomy: $taxonomy, keyword: $keyword, group: $group, parentId: $parentId) {
@@ -149,5 +148,4 @@ export const useTermTaxonomyApi = defineRegistApi('term-taxonomy', {
       }
     ` as TypedMutationDocumentNode<{ result: null }, { objectId: string; termTaxonomyId: string }>,
   },
-  request,
 });

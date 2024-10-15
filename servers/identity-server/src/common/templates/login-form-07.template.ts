@@ -154,15 +154,15 @@ form .row:first-child {
           <div class="col-md-8">
             <div class="title">
               <%- locales %>
-              <h3><%= tv('login.wrapper.title', 'Sign In') %></h3>
-              <p class="mb-4"><%- tv('login.wrapper.subtitle', 'to <strong>' + new URL(params.redirect_uri).host + '</strong>', {
+              <h3><%= tv('identity-server.login.wrapper.title', 'Sign In') %></h3>
+              <p class="mb-4"><%- tv('identity-server.login.wrapper.subtitle', 'to <strong>' + new URL(params.redirect_uri).host + '</strong>', {
                 args: {
                   host: new URL(params.redirect_uri).host,
                 },
               }) %></p>
             </div>
             <%- form %>
-            <input type="submit" value="<%= tv('login.wrapper.submit_btn_text', 'Sign In') %>" class="btn btn-primary submit" form="login-form">
+            <input type="submit" value="<%= tv('identity-server.login.wrapper.submit_btn_text', 'Sign In') %>" class="btn btn-primary submit" form="login-form">
           </div>
         </div>
       </div>

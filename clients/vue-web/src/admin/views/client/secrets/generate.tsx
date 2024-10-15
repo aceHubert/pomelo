@@ -3,7 +3,7 @@ import { computed, defineComponent, ref } from '@vue/composition-api';
 import { createResource } from '@vue-async/resource-manager';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { Alert, Button, Form, Card, DatePicker, Input, Select, Icon, Result } from 'ant-design-vue';
-import { copyTextToClipboard } from '@ace-pomelo/shared-client';
+import { copyTextToClipboard } from '@ace-pomelo/shared/client';
 import { message } from '@/components';
 import { useI18n, useDeviceType } from '@/hooks';
 import { PageBreadcrumb } from '@/admin/components';

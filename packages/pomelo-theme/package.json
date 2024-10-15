@@ -13,11 +13,11 @@
   "scripts": {
     "serve": "run -T grunt dev",
     "build": "run -T rimraf -rf lib dist && run -T grunt --verbose",
-    "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
-    "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
-    "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
-    "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
-    "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
+    "release:major": "yarn version $(run -T semver $npm_package_version -i major) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:minor": "yarn version $(run -T semver $npm_package_version -i minor) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:patch": "yarn version $(run -T semver $npm_package_version -i patch) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:alpha": "yarn version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag alpha",
+    "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
   "publishConfig": {
     "access": "public"

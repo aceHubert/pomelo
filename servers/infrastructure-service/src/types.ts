@@ -1,0 +1,5 @@
+/**
+ * Type helper for making certain fields of an object optional.
+ */
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type Nullable<T> = T | undefined | null;

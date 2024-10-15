@@ -4,13 +4,13 @@ import { Request, Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
 import { Controller, Get, Post, Query, Body, Req, Res, HttpStatus } from '@nestjs/common';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { normalizeRoutePath } from '@ace-pomelo/shared-server';
-import { IdentityResourceDataSource } from '@ace-pomelo/identity-datasource';
+import { normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { KoaContextWithOIDC } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
 import { getLoginTemplate, getConsentTemplate } from '@/common/templates';
+import { IdentityResourceDataSource } from '@/datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { LoginDto } from './dto/login.dto';
 
@@ -80,12 +80,12 @@ export class LoginController extends BaseController {
         `<div class="wrapper-placeholder">
             <%- locales %>
             <div class="wrapper">
-              <h1 class="title">${i18n.tv('login.wrapper.title', 'Sign In')}</h1>
+              <h1 class="title">${i18n.tv('identity-server.login.wrapper.title', 'Sign In')}</h1>
               ${
                 params.redirect_uri
                   ? `<p class="text--secondary">
                       ${i18n.tv(
-                        'login.wrapper.subtitle',
+                        'identity-server.login.wrapper.subtitle',
                         `to <strong>${new URL(params.redirect_uri as string).host}</strong>`,
                         {
                           args: {
@@ -100,7 +100,7 @@ export class LoginController extends BaseController {
                 <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
                   <div class="d-sm-inline-block gap-2 mt-2">
                     <button type="submit" class="btn btn-primary w-100" form="login-form">
-                      ${i18n.tv('login.wrapper.submit_btn_text', 'Sign In')}
+                      ${i18n.tv('identity-server.login.wrapper.submit_btn_text', 'Sign In')}
                     </button>
                   </div>
                 </div>
@@ -113,7 +113,7 @@ export class LoginController extends BaseController {
         ${
           formLableDisplay
             ? `<label for="username" class="col-sm-3 col-form-label">
-                ${i18n.tv('login.form.username_label', 'Username')}
+                ${i18n.tv('identity-server.login.form.username_label', 'Username')}
               </label>`
             : ''
         }
@@ -123,13 +123,13 @@ export class LoginController extends BaseController {
               class="form-control"
               id="username"
               name="username"
-              placeholder="${i18n.tv('login.form.username_placeholder', 'Login Name/Email/Phone')}"
+              placeholder="${i18n.tv('identity-server.login.form.username_placeholder', 'Login Name/Email/Phone')}"
               ${!params.login_hint ? `autofocus="on"` : `value="${params.login_hint}"`}
               required
               maxlength="50"
             />
             <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('login.form.username_invalid', 'Please input username!')}
+              ${i18n.tv('identity-server.login.form.username_invalid', 'Please input username!')}
             </div>
           </div>
         </div>
@@ -137,7 +137,7 @@ export class LoginController extends BaseController {
          ${
            formLableDisplay
              ? `<label for="password" class="col-sm-3 col-form-label">
-                ${i18n.tv('login.form.password_label', 'Password')}
+                ${i18n.tv('identity-server.login.form.password_label', 'Password')}
               </label>`
              : ''
          }
@@ -148,7 +148,7 @@ export class LoginController extends BaseController {
                 class="form-control password"
                 id="password"
                 name="password"
-                placeholder="${i18n.tv('login.form.password_placeholder', 'Password')}"
+                placeholder="${i18n.tv('identity-server.login.form.password_placeholder', 'Password')}"
                 autocomplete="off"
                 ${params.login_hint ? `autofocus="on"` : ''}
                 required
@@ -159,7 +159,7 @@ export class LoginController extends BaseController {
               <span data-target="#password" class="toggle-password eye"></span>
               <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
                 ${i18n.tv(
-                  'login.form.password_invalid',
+                  'identity-server.login.form.password_invalid',
                   'Please input password(6-16 characters includes numbers and letters)!',
                 )}
               </div>
@@ -171,7 +171,7 @@ export class LoginController extends BaseController {
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="on" id="remember" name="remember" />
               <label class="form-check-label" for="remember">
-                ${i18n.tv('login.form.remember_me_label', 'Remember Me?')}
+                ${i18n.tv('identity-server.login.form.remember_me_label', 'Remember Me?')}
               </label>
             </div>
             <span class="ml-auto"><a href="${`${normalizeRoutePath(
@@ -179,7 +179,7 @@ export class LoginController extends BaseController {
             )}/password/forgot${
               returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''
             }`}" class="forgot-password">
-            ${i18n.tv('login.form.forgot_password_label', 'Forgot Password')}
+            ${i18n.tv('identity-server.login.form.forgot_password_label', 'Forgot Password')}
             </a></span>
           </div>
         </div>
@@ -190,9 +190,9 @@ export class LoginController extends BaseController {
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="on" id="userPolicy" name="userPolicy" />
                     <label class="form-check-label" for="userPolicy">
-                      ${i18n.tv('login.form.user_policy_label', 'I agree to the')}
+                      ${i18n.tv('identity-server.login.form.user_policy_label', 'I agree to the')}
                       <a href="${client.policyUri}" class="ml-1" target="_blank">${i18n.tv(
-                'login.form.user_policy_link_text',
+                'identity-server.login.form.user_policy_link_text',
                 'User Privacy Agreement',
               )}</a>
                     </label>
@@ -226,12 +226,12 @@ export class LoginController extends BaseController {
           <%- locales %>
           <div class="wrapper">
             <div class="mb-2 pb-2 border-bottom">
-              <h1 class="title">${i18n.tv('consent.wrapper.title', 'Confirm')}</h1>
+              <h1 class="title">${i18n.tv('identity-server.consent.wrapper.title', 'Confirm')}</h1>
               ${
                 params.redirect_uri
                   ? `<p class="text--secondary">
                       ${i18n.tv(
-                        'consent.wrapper.subtitle',
+                        'identity-server.consent.wrapper.subtitle',
                         `to <strong>${new URL(params.redirect_uri as string).host}</strong>`,
                         {
                           args: {
@@ -243,7 +243,7 @@ export class LoginController extends BaseController {
               }
             </div>
             <p>${i18n.tv(
-              'consent.wrapper.description',
+              'identity-server.consent.wrapper.description',
               `<strong>${client?.clientName}</strong> want to access your account.`,
               {
                 args: {
@@ -254,11 +254,11 @@ export class LoginController extends BaseController {
             <%- form %>
             <div class="text-end mt-4">
               <button type="submit" class="btn btn-light" form="consent-abort-form">${i18n.tv(
-                'consent.wrapper.abort_btn_text',
+                'identity-server.consent.wrapper.abort_btn_text',
                 'Abort',
               )}</button>
               <button type="submit" class="btn btn-primary" form="consent-confirm-form">${i18n.tv(
-                'consent.wrapper.continue_btn_text',
+                'identity-server.consent.wrapper.continue_btn_text',
                 'Continue',
               )}</button>
             </div>
@@ -274,7 +274,10 @@ export class LoginController extends BaseController {
       }" method="POST" autocomplete="off">
         ${
           missingScopes.size > 0
-            ? `<p>${i18n.tv('consent.form.requested_access_title', '<strong>Requested access:</strong>')}</p>
+            ? `<p>${i18n.tv(
+                'identity-server.consent.form.requested_access_title',
+                '<strong>Requested access:</strong>',
+              )}</p>
                 <ul>
                 ${[...missingScopes]
                   .map((scope: string) => `<li>${resourceMap.has(scope) ? resourceMap.get(scope) : scope}</li>`)
@@ -312,7 +315,7 @@ export class LoginController extends BaseController {
     if (!interaction) {
       return this.success({
         next: returnUrl ?? '/',
-        message: i18n.tv('login.check.session_missing', 'session not found!'),
+        message: i18n.tv('identity-server.login.check.session_missing', 'session not found!'),
       });
     }
 
@@ -325,13 +328,15 @@ export class LoginController extends BaseController {
     }
 
     if (client?.policyUri && !input.userPolicy) {
-      return this.faild(i18n.tv('login.check.user_policy_invalid', 'Please read and agree to the User Policy!'));
+      return this.faild(
+        i18n.tv('identity-server.login.check.user_policy_invalid', 'Please read and agree to the User Policy!'),
+      );
     }
 
     const verifiedAccountId = await this.userProviderService.verifyAccount(input.username, input.password);
     if (!verifiedAccountId) {
       return this.faild(
-        i18n.tv('login.confirm.incorrect_username_or_password', 'username or password incorrect!'),
+        i18n.tv('identity-server.login.confirm.incorrect_username_or_password', 'username or password incorrect!'),
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -414,8 +419,11 @@ export class LoginController extends BaseController {
     if (!interaction) return;
 
     const result = {
-      error: i18n.tv('consent.abort.access_denied', 'access_denied'),
-      error_description: i18n.tv('consent.abort.access_denied_description', 'End-user aborted interaction'),
+      error: i18n.tv('identity-server.consent.abort.access_denied', 'access_denied'),
+      error_description: i18n.tv(
+        'identity-server.consent.abort.access_denied_description',
+        'End-user aborted interaction',
+      ),
     };
 
     await this.oidcService.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });

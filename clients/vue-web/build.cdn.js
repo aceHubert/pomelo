@@ -85,11 +85,6 @@ const cdnConfig = {
       path: '/dist/index.umd.production.js',
     },
     {
-      packageName: '@ace-fetch/axios',
-      variableName: ['AceFetch', 'Axios'],
-      path: '/dist/index.umd.production.js',
-    },
-    {
       packageName: '@ace-fetch/vue',
       variableName: ['AceFetch', 'Vue'],
       path: '/dist/index.umd.production.js',

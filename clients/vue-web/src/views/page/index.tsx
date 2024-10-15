@@ -2,7 +2,7 @@ import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composi
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { createResource } from '@vue-async/resource-manager';
-import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
+import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
 import { usePageApi, PageMetaPresetKeys } from '@/fetch/apis';

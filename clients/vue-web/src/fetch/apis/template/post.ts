@@ -1,8 +1,8 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '../../graphql/infrastructure-request';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TemplatePageType, TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TemplatePageType } from '@ace-pomelo/shared/client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
 import type { TermTaxonomyModel } from '../term-taxonomy';
 import type { Paged } from '../types';
@@ -38,8 +38,8 @@ export interface NewPostTemplateInput
 
 export interface UpdatePostTemplateInput extends Partial<Omit<NewPostTemplateInput, 'metas'>> {}
 
-export const usePostApi = defineRegistApi('template_post', {
-  apis: {
+export const usePostApi = defineRegistGraphql('template_post', {
+  definition: {
     // 分页获取文章
     getPaged: gql`
       query getPostTemplates(
@@ -104,8 +104,8 @@ export const usePostApi = defineRegistApi('template_post', {
       PagedPostTemplateArgs
     >,
     // 分页获取文章
-    getPublishedPaged: gql`
-      query getPostTemplates(
+    getPublished: gql`
+      query getPublishedPostTemplates(
         $offset: Int
         $limit: Int
         $keyword: String
@@ -113,7 +113,7 @@ export const usePostApi = defineRegistApi('template_post', {
         $tagId: ID
         $metaKeys: [String!]
       ) {
-        posts: postPublishedTemplates(
+        posts: publishedPostTemplates(
           offset: $offset
           limit: $limit
           keyword: $keyword
@@ -247,5 +247,4 @@ export const usePostApi = defineRegistApi('template_post', {
       { id: string; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
     >,
   },
-  request,
 });

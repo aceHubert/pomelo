@@ -1,21 +1,29 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '../../graphql/infrastructure-request';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type {
-  TemplateStatus,
-  TemplateCommentStatus,
-  TypedQueryDocumentNode,
-  TypedMutationDocumentNode,
-} from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 
 import type { TermTaxonomyModel } from '../term-taxonomy';
 import type { PagedArgs, Paged } from '../types';
+
+export enum TemplateStatus {
+  Draft = 'Draft', // 草稿
+  Pending = 'Pending', // 等审核
+  Publish = 'Publish', // 已发布
+  Private = 'Private', // 私有，暂未使用
+  Future = 'Future', // 定时发布，暂未使用
+  Trash = 'Trash', // 垃圾箱
+}
 
 export enum PresetTemplateType {
   Post = 'Post',
   Page = 'Page',
   Form = 'Form',
+}
+
+export enum TemplateCommentStatus {
+  Open = 'Open',
+  Closed = 'Closed',
 }
 
 export interface PagedTemplateArgs extends PagedArgs {
@@ -121,8 +129,8 @@ export const PageMetaPresetKeys = {
   ...TemplateMetaPresetKeys,
 };
 
-export const useTemplateApi = defineRegistApi('template', {
-  apis: {
+export const useTemplateApi = defineRegistGraphql('template', {
+  definition: {
     // 分页获取模版
     getPaged: gql`
       query getTemplates(
@@ -375,7 +383,6 @@ export const useTemplateApi = defineRegistApi('template', {
       }
     ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
   },
-  request,
 });
 
 export * from './post';

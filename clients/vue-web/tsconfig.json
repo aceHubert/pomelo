@@ -5,6 +5,7 @@
     "module": "esnext",
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "jsx": "preserve",
+    "moduleResolution": "node",
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noImplicitAny": false,

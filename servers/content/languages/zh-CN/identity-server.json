@@ -1,0 +1,180 @@
+{
+  "datasource": {
+    "api_resource": {
+      "resource_has_existed": "资源已经存在！",
+      "resource_non_editable": "资源不可编辑！",
+      "resource_does_not_exist": "资源不存在！",
+      "claim_has_existed": "声明已经存在！",
+      "scope_claim_has_existed": "范围声明已经存在！",
+      "property_has_existed": "属性已经存在！"
+    },
+    "identity_resource": {
+      "resource_has_existed": "资源已经存在！",
+      "resource_non_editable": "资源不可编辑！",
+      "resource_does_not_exist": "资源不存在！",
+      "claim_has_existed": "声明已经存在！",
+      "property_has_existed": "属性已经存在！"
+    },
+    "client": {
+      "claim_has_existed": "声明已经存在！",
+      "cors_origin_has_existed": "跨域源已经存在！",
+      "scope_has_existed": "范围已经存在！",
+      "grant_type_has_existed": "授权类型已经存在！",
+      "redirect_uri_has_existed": "重定向地址已经存在！",
+      "post_logout_redirect_uri_has_existed": "登出重定向地址已经存在！",
+      "property_has_existed": "属性已经存在！"
+    }
+  },
+  "oidc": {
+    "config": {
+      "logout": {
+        "confirm_page_title": "退出确认",
+        "confirm_title": "您确认退出{host}?",
+        "confirm_btn_text": "是，退出",
+        "cancel_btn_text": "否，保持当前登录",
+        "success_page_title": "退出成功",
+        "success_title": "退出成功",
+        "success_description": "您已成功退出当前会话，可以关闭当前页面。",
+        "success_description_with_client": "您已成功退出{client}，可以关闭当前页面。"
+      },
+      "render_error": {
+        "page_title": "发生错误",
+        "title": "发生错误!"
+      }
+    }
+  },
+  "index": {
+    "page_title": "首页"
+  },
+  "consent": {
+    "page_title": "授权确认",
+    "form": {
+      "requested_access_title": "<strong>请求访问：</strong>"
+    },
+    "abort": {
+      "access_denied": "拒绝访问",
+      "access_denied_description": "用户拒绝授权访问！"
+    },
+    "wrapper": {
+      "title": "确认",
+      "subtitle": "到 <strong>{host}</strong>",
+      "description": "<strong>{clientName}</strong> 想要访问您的帐户。",
+      "abort_btn_text": "拒绝",
+      "continue_btn_text": "授权"
+    }
+  },
+  "login": {
+    "page_title": "登录",
+    "form": {
+      "username_label": "用户名",
+      "username_placeholder": "请输入用户名",
+      "username_invalid": "请输入用户名！",
+      "password_label": "密码",
+      "password_placeholder": "请输入密码",
+      "password_invalid": "请输入密码（6-16位至少包含数字和字母的字符）！",
+      "remember_me_label": "记住我？",
+      "forgot_password_label": "忘记密码",
+      "user_policy_label": "已阅读并同意",
+      "user_policy_link_text": "用户协议",
+      "user_policy_check_required": "请阅读并同意用户协议！"
+    },
+    "wrapper": {
+      "title": "登录",
+      "subtitle": "到 <strong>{host}</strong>",
+      "submit_btn_text": "登  录"
+    }
+  },
+  "password": {
+    "modify": {
+      "page_title": "修改密码",
+      "wrapper": {
+        "title": "修改密码",
+        "submit_btn_text": "修改",
+        "cancel_btn_text": "取消"
+      },
+      "form": {
+        "username_label": "用户名",
+        "username_placeholder": "登录名/邮箱/手机号",
+        "username_invalid": "用户名不能为空！",
+        "old_password_label": "旧密码",
+        "old_password_placeholder": "请输入旧密码",
+        "old_password_invalid": "旧密码不能为空！",
+        "new_password_label": "新密码",
+        "new_password_placeholder": "请输入新密码",
+        "new_password_invalid": "请输入新密码（6-16位至少包含数字和字母的字符）！",
+        "confirm_password_label": "确认密码",
+        "confirm_password_placeholder": "请再次输入新密码",
+        "confirm_password_invalid": "确认密码不能为空！",
+        "confirm_password_dismatch": "确认密码写新密码不一致！"
+      },
+      "error": {
+        "account_id_not_match:": "账号ID不匹配！"
+      }
+    },
+    "forgot": {
+      "page_title": "忘记密码",
+      "wrapper": {
+        "title": "忘记密码",
+        "submit_btn_text": "下一步",
+        "cancel_btn_text": "取消"
+      },
+      "form": {
+        "username_label": "用户名",
+        "username_placeholder": "登录名/邮箱/手机号",
+        "username_invalid": "用户名不能为空！"
+      },
+      "error": {
+        "user_email_not_found": "用户邮箱不存在！"
+      },
+      "success": {
+        "send_email_content": "已发送到您的邮箱\"{email}\", 请根据指示重置密码！",
+        "send_sms_code_content": "验证码已发送到您的手机\"{phone}\"！"
+      }
+    },
+    "code_verify": {
+      "page_title": "验证码验证",
+      "wrapper": {
+        "title": "验证码验证",
+        "submit_btn_text": "下一步"
+      },
+      "form": {
+        "code_label": "验证码",
+        "code_placeholder": "请输入验证码",
+        "code_invalid": "验证码不能为空！",
+        "code_expires_countdown": "验证码有效期剩余%s秒"
+      }
+    },
+    "reset": {
+      "page_title": "重置密码",
+      "wrapper": {
+        "title": "重置密码",
+        "submit_btn_text": "重置"
+      },
+      "form": {
+        "new_password_label": "新密码",
+        "new_password_placeholder": "请输入新密码",
+        "new_password_invalid": "新密码不能为空！",
+        "confirm_password_label": "确认密码",
+        "confirm_password_placeholder": "请再次输入新密码",
+        "confirm_password_invalid": "确认密码不能为空！"
+      },
+      "error": {
+        "title": "错误：",
+        "code_invalid": "链接已失效！"
+      },
+      "success": {
+        "reset_password_success": "重置密码成功！"
+      }
+    }
+  },
+  "error": {
+    "page_title": "发生错误",
+    "title": "发生错误!",
+    "subtitle": "错误 {code}"
+  },
+  "404": {
+    "page_title": "页面未找到",
+    "title": "页面未找到!",
+    "description": "<strong>路径：</strong>{path}"
+  }
+}

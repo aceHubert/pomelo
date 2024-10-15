@@ -14,7 +14,7 @@ const ExecutionContextMethodNotImplemented = new KoaContextI18nError(
   "Method not implemented. nestjs-i18n creates a fake Http context since it's using middleware to resolve your language. Nestjs middlewares don't have access to the ExecutionContext.",
 );
 
-export const logger = new Logger('KoaContextI18nHelper');
+const logger = new Logger('KoaContextI18nHelper', { timestamp: true });
 
 class KoaHttpContext implements ArgumentsHost, HttpArgumentsHost {
   constructor(private ctx: KoaContextWithOIDC) {}

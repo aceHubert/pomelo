@@ -2,29 +2,60 @@
   "name": "@ace-pomelo/plugin-submodules",
   "description": "pomelo submodules management",
   "version": "0.1.0-alpha.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "author": "Hubert<yi.xiang@live.com>",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js",
+      "require": "./lib/index.js"
+    },
+    "./*": {
+      "import": [
+        "./esm/*",
+        "./*"
+      ],
+      "require": [
+        "./lib/*",
+        "./*"
+      ],
+      "default": {
+        "import": "./esm/*/index.js",
+        "require": "./lib/*/index.js"
+      }
+    }
+  },
   "files": [
-    "dist"
+    "esm",
+    "lib"
+  ],
+  "keywords": [
+    "nestjs",
+    "pomelo",
+    "submodules"
   ],
   "scripts": {
     "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
-    "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json"
+    "build": "run -T rimraf dist && run -T tsc --project tsconfig.build.json",
+    "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
+    "build:cjs": "run -T tsc --project tsconfig.build.json",
+    "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
+    "release:major": "yarn version $(run -T semver $npm_package_version -i major) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:minor": "yarn version $(run -T semver $npm_package_version -i minor) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:patch": "yarn version $(run -T semver $npm_package_version -i patch) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:alpha": "yarn version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag alpha",
+    "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
   "devDependencies": {
-    "@ace-pomelo/nestjs-oidc": "workspace:^",
-    "@ace-pomelo/ram-authorization": "workspace:^",
-    "@ace-pomelo/shared-server": "workspace:^",
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/core": "^9.0.0",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^11.0.0"
   },
   "peerDependencies": {
-    "@ace-pomelo/nestjs-oidc": "workspace:^",
-    "@ace-pomelo/ram-authorization": "workspace:^",
-    "@ace-pomelo/shared-server": "workspace:^",
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/core": "^9.0.0",
+    "@ace-pomelo/shared": "workspace:^",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^11.0.0"
   },
   "packageManager": "yarn@3.1.0"

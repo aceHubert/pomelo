@@ -133,8 +133,7 @@ iisnode.js.debug/
 .env.*.local
 env.local.js
 env.*.local.js
-
-# local backup files
+*.local.*
 *.backup.*
 
 # database initialization lock file

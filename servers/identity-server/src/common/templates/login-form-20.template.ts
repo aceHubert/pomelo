@@ -191,19 +191,19 @@ body:after {
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-6 text-center mb-7">
-        <h2 class="heading-section"><%= tv('login.wrapper.title', 'Sign In') %></h2>
+        <h2 class="heading-section"><%= tv('identity-server.login.wrapper.title', 'Sign In') %></h2>
       </div>
     </div>
     <div class="row justify-content-center">
       <div class="col-md-6 col-lg-4">
         <div class="login-wrap p-0">
-          <h3 class="mb-5 text-center"><%- tv('login.wrapper.subtitle', 'to <strong>' + new URL(params.redirect_uri).host + '</strong>', {
+          <h3 class="mb-5 text-center"><%- tv('identity-server.login.wrapper.subtitle', 'to <strong>' + new URL(params.redirect_uri).host + '</strong>', {
             args: {
               host: new URL(params.redirect_uri).host,
             },
           }) %></h3>
           <%- form %>
-          <button type="submit" class="btn btn-primary btn-lg submit px-3" form="login-form"><%= tv('login.wrapper.submit_btn_text', 'Sign In') %></button>
+          <button type="submit" class="btn btn-primary btn-lg submit px-3" form="login-form"><%= tv('identity-server.login.wrapper.submit_btn_text', 'Sign In') %></button>
         </div>
       </div>
     </div>

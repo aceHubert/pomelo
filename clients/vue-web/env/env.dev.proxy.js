@@ -4,13 +4,12 @@
 
   var env = window._ENV || {};
 
-  // env.infrastructureApiBase = '/infrastructure/api';
-  env.identityGraphqlBase = '/identity/graphql';
-  env.infrastructureGraphqlBase = '/infrastructure/graphql';
-  env.infrastructureGraphqlSubscriptionBase = 'ws://localhost:5003/graphql';
+  // env.basicApiBase = '/pomelo/basic/api';
+  env.basicGraphqlBase = '/pomelo/basic/graphql';
+  env.identityGraphqlBase = '/pomelo/identity/graphql';
 
   env.oidc = {
-    authority: 'http://localhost:5001/',
+    authority: 'http://localhost:5001/oauth2',
     client_id: clientId,
     redirect_uri: baseUrl + '/signin.html',
     post_logout_redirect_uri: location.pathname.startsWith('/admin') ? baseUrl + '/admin' : baseUrl,

@@ -1,56 +1,28 @@
 import path from 'path';
-import fs from 'fs';
-import dotenv from 'dotenv';
 import { UniqueConstraintError } from 'sequelize';
-import { Logger } from '@nestjs/common';
+import { Logger, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DatabaseManager, version, name } from '@ace-pomelo/identity-datasource';
-import { FileEnv } from '@ace-pomelo/shared-server';
+import { FileEnv } from '@ace-pomelo/shared/server';
+import { IdentityDatasourceService, name } from '@/datasource';
+import { version } from './version';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
-// env file
-const envFilePaths = process.env.ENV_FILE
-  ? [process.env.ENV_FILE]
-  : process.env.NODE_ENV === 'production'
-  ? ['.env.production', '.env']
-  : ['.env.development.local', '.env.development'];
-let config: Record<string, any> = {};
-for (const envFilePath of envFilePaths) {
-  if (fs.existsSync(envFilePath)) {
-    config = Object.assign(dotenv.parse(fs.readFileSync(envFilePath)), config);
-  }
-}
-const configService = new ConfigService(config);
-
 // sync database
-async function syncDatabase() {
-  const connection = configService.get('IDENTITY_DATABASE_CONNECTION')
-    ? configService.get('IDENTITY_DATABASE_CONNECTION')
-    : {
-        database: configService.get('IDENTITY_DATABASE_NAME'),
-        username: configService.get('IDENTITY_DATABASE_USERNAME'),
-        password: configService.get('IDENTITY_DATABASE_PASSWORD'),
-        dialect: configService.get('IDENTITY_DATABASE_DIALECT', 'mysql'),
-        host: configService.get('IDENTITY_DATABASE_HOST', 'localhost'),
-        port: configService.get('IDENTITY_DATABASE_PORT', 3306),
-        define: {
-          charset: configService.get('IDENTITY_DATABASE_CHARSET', 'utf8'),
-          collate: configService.get('IDENTITY_DATABASE_COLLATE', ''),
-        },
-      };
-  const tablePrefix = configService.get('TABLE_PREFIX');
+export async function syncDatabase(app: INestApplication<any>) {
+  const configService = app.get(ConfigService);
+  const datasourceService = app.get(IdentityDatasourceService);
 
   // db lock file
-  const fileEnv = FileEnv.getInstance(path.join(process.cwd(), '..', 'db.lock'));
+  const lockfile = path.join(
+    configService.get<string>('configPath')!,
+    configService.get<string>('DBLOCK_FILE', 'db.lock'),
+  );
+  const fileEnv = FileEnv.getInstance(lockfile);
 
   // 初始化数据库
-  const dbManager =
-    typeof connection === 'string'
-      ? new DatabaseManager(connection, { tablePrefix })
-      : new DatabaseManager({ ...connection, tablePrefix });
-  await dbManager
-    .sync({
+  await datasourceService
+    .syncDB({
       alter: false,
       // match: /_dev$/,
       // TODO: version compare
@@ -69,12 +41,12 @@ async function syncDatabase() {
     logger.debug('Start to initialize datas!');
     try {
       const origin = configService.get(
-        'ORIGIN',
-        'http://localhost:' + configService.get<number>('webServer.port', 3000),
+        'server.origin',
+        'http://localhost:' + configService.get<number>('server.port', 3000),
       );
       const webURL = configService.get('WEB_URL', origin);
 
-      await dbManager.initDatas({
+      await datasourceService.initDatas({
         apiResources: [],
         identityResources: [
           {
@@ -149,28 +121,8 @@ async function syncDatabase() {
           },
           {
             applicationType: 'native',
-            clientId: 'f6b2c633-4f9e-4b7a-8f2a-9a4b4e9b0b9b',
-            clientName: 'Pomelo Identity Api Server',
-            accessTokenFormat: 'jwt',
-            requireAuthTime: true,
-            requirePkce: true,
-            tokenEndpointAuthMethod: 'client_secret_basic',
-            scopes: ['openid', 'profile', 'offline_access'],
-            grantTypes: ['client_credentials'],
-            redirectUris: [],
-            postLogoutRedirectUris: [],
-            secrets: [
-              {
-                type: 'SharedSecret',
-                // X6agw8RoEC
-                value: '95cd8ad27f6bd19b508801620faddd11c1d19841386cd105864a60543b5b2431',
-              },
-            ],
-          },
-          {
-            applicationType: 'native',
             clientId: '75a9c633-cfde-4954-b35c-9344ed9b781a',
-            clientName: 'Pomelo Infratructure Api Server',
+            clientName: 'Pomelo BFF Server',
             accessTokenFormat: 'jwt',
             requireAuthTime: true,
             requirePkce: true,
@@ -214,17 +166,16 @@ async function syncDatabase() {
       });
       fileEnv.setEnv(name, version);
       logger.debug('Initialize datas successful!');
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof UniqueConstraintError) {
         fileEnv.setEnv(name, version);
         logger.debug('Datas already initialized!');
       } else {
-        throw err;
+        logger.error(err.message);
+        process.exit(1);
       }
     }
   } else {
     logger.debug('Datas already initialized!');
   }
 }
-
-export { envFilePaths, syncDatabase };

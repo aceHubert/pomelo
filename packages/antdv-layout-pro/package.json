@@ -36,15 +36,15 @@
     "build": "run -T rimraf -rf lib esm dist && yarn build:version && run -T ts-node --transpileOnly --cwdMode ../../scripts/build && yarn build:styles",
     "build:styles": "run -T grunt --verbose",
     "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
-    "release:major": "npm version $(run -T semver $npm_package_version -i major) && yarn build && npm publish --tag latest",
-    "release:minor": "npm version $(run -T semver $npm_package_version -i minor) && yarn build && npm publish --tag latest",
-    "release:patch": "npm version $(run -T semver $npm_package_version -i patch) && yarn build && npm publish --tag latest",
-    "release:alpha": "npm version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && yarn build && npm publish --tag alpha",
-    "release:beta": "npm version $(run -T semver $npm_package_version -i prerelease --preid beta ) && yarn build && npm publish --tag beta"
+    "release:major": "yarn version $(run -T semver $npm_package_version -i major) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:minor": "yarn version $(run -T semver $npm_package_version -i minor) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:patch": "yarn version $(run -T semver $npm_package_version -i patch) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag latest",
+    "release:alpha": "yarn version $(run -T semver $npm_package_version -i prerelease --preid alpha ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag alpha",
+    "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
   "dependencies": {
     "@ace-pomelo/theme": "^0.1.0-alpha.2",
-    "@ace-util/core": "^0.1.1",
+    "@ace-util/core": "^0.3.0",
     "@iconfu/svg-inject": "^1.2.3",
     "jsoneditor": "^9.5.6",
     "lodash.clonedeep": "^4.5.0",

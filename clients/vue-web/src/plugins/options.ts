@@ -4,8 +4,8 @@ import { useBasicApi } from '@/fetch/apis';
 // Types
 import type { Plugin } from '@/types';
 
-const plugin: Plugin = async (ctx, inject) => {
-  const basicApi = useBasicApi();
+const plugin: Plugin = async ({ app }, inject) => {
+  const basicApi = useBasicApi(app.graphqlFetch);
 
   let options: Record<string, string> = {};
 

@@ -1,6 +1,14 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "servers/identity-server/src",
+  "sourceRoot": "servers/infrastructure-service/src",
+  "monorepo": true,
+  "root": "servers/infrastructure-service",
+  "compilerOptions": {
+    "deleteOutDir": false,
+    "webpack": false,
+    "webpackConfigPath": "servers/infrastructure-service/webpack-hmr.config.js",
+    "tsConfigPath": "servers/infrastructure-service/tsconfig.json"
+  },
   "projects": {
     "identity-server": {
       "type": "application",
@@ -8,35 +16,43 @@
       "entryFile": "src/main",
       "sourceRoot": "servers/identity-server",
       "compilerOptions": {
-        "webpack": true,
         "webpackConfigPath": "servers/identity-server/webpack-hmr.config.js",
         "tsConfigPath": "servers/identity-server/tsconfig.json",
-        "assets": ["package.json", "README.md", ".env", ".env.*"],
-        "deleteOutDir": true,
-        "plugins": [
+        "assets": [
           {
-            "name": "@nestjs/swagger",
-            "options": {
-              "dtoFileNameSuffix": [".dto.ts", ".resp.ts"],
-              "controllerKeyOfComment": "summary",
-              "classValidatorShim": true,
-              "introspectComments": true
-            }
+            "include": "public",
+            "exclude": "public/**/*.less",
+            "outDir": "dist/servers/identity-server/",
+            "watchAssets": true
+          },
+          {
+            "include": "views",
+            "outDir": "dist/servers/identity-server/",
+            "watchAssets": true
+          },
+          {
+            "include": ".env?(.*)",
+            "outDir": "dist/servers/identity-server/",
+            "watchAssets": true
+          },
+          {
+            "include": "**/*.gql",
+            "outDir": "dist/servers/identity-server/",
+            "watchAssets": true
+          },
+          {
+            "include": "../content",
+            "exclude": "uploads/**/*",
+            "outDir": "dist/servers/content",
+            "watchAssets": true
+          },
+          {
+            "include": "../conf",
+            "outDir": "dist/servers/conf",
+            "watchAssets": true
           }
-        ]
-      }
-    },
-    "identity-api": {
-      "type": "application",
-      "root": "servers/identity-api",
-      "entryFile": "src/main",
-      "sourceRoot": "servers/identity-api",
-      "compilerOptions": {
-        "webpack": true,
-        "webpackConfigPath": "servers/identity-api/webpack-hmr.config.js",
-        "tsConfigPath": "servers/identity-api/tsconfig.json",
-        "assets": ["package.json", "README.md", ".env", ".env.*"],
-        "deleteOutDir": true,
+        ],
+        "watchAssets": true,
         "plugins": [
           {
             "name": "@nestjs/swagger",
@@ -57,17 +73,33 @@
         ]
       }
     },
-    "infrastructure-api": {
+    "infrastructure-service": {
       "type": "application",
-      "root": "servers/infrastructure-api",
+      "root": "servers/infrastructure-service",
       "entryFile": "src/main",
-      "sourceRoot": "servers/infrastructure-api",
+      "sourceRoot": "servers/infrastructure-service",
       "compilerOptions": {
-        "webpack": true,
-        "webpackConfigPath": "servers/infrastructure-api/webpack-hmr.config.js",
-        "tsConfigPath": "servers/infrastructure-api/tsconfig.json",
-        "assets": ["package.json", "README.md", ".env", ".env.*"],
-        "deleteOutDir": true,
+        "webpackConfigPath": "servers/infrastructure-service/webpack-hmr.config.js",
+        "tsConfigPath": "servers/infrastructure-service/tsconfig.json",
+        "assets": [
+          {
+            "include": ".env?(.*)",
+            "outDir": "dist/servers/infrastructure-service/",
+            "watchAssets": true
+          },
+          {
+            "include": "../content",
+            "exclude": "uploads/**/*",
+            "outDir": "dist/servers/content",
+            "watchAssets": true
+          },
+          {
+            "include": "../conf",
+            "outDir": "dist/servers/conf",
+            "watchAssets": true
+          }
+        ],
+        "watchAssets": true,
         "plugins": [
           {
             "name": "@nestjs/swagger",
@@ -88,26 +120,60 @@
         ]
       }
     },
-    "pomelo-nestjs-oidc": {
-      "type": "library",
-      "root": "packages/pomelo-nestjs-oidc",
-      "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-nestjs-oidc",
+    "infrastructure-bff": {
+      "type": "application",
+      "root": "servers/infrastructure-bff",
+      "entryFile": "src/main",
+      "sourceRoot": "servers/infrastructure-bff",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-nestjs-oidc/tsconfig.json",
-        "assets": ["package.json", "README.md"],
-        "deleteOutDir": true
+        "webpackConfigPath": "servers/infrastructure-bff/webpack-hmr.config.js",
+        "tsConfigPath": "servers/infrastructure-bff/tsconfig.json",
+        "assets": [
+          {
+            "include": ".env?(.*)",
+            "outDir": "dist/servers/infrastructure-bff/",
+            "watchAssets": true
+          },
+          {
+            "include": "../content",
+            "exclude": "uploads/**/*",
+            "outDir": "dist/servers/content",
+            "watchAssets": true
+          },
+          {
+            "include": "../conf",
+            "outDir": "dist/servers/conf",
+            "watchAssets": true
+          }
+        ],
+        "watchAssets": true,
+        "plugins": [
+          {
+            "name": "@nestjs/swagger",
+            "options": {
+              "dtoFileNameSuffix": [".dto.ts", ".resp.ts"],
+              "controllerKeyOfComment": "summary",
+              "classValidatorShim": true,
+              "introspectComments": true
+            }
+          },
+          {
+            "name": "@nestjs/graphql",
+            "options": {
+              "typeFileNameSuffix": [".input.ts", ".args.ts", ".model.ts"],
+              "introspectComments": true
+            }
+          }
+        ]
       }
     },
-    "pomelo-datasource": {
+    "nestjs-oidc": {
       "type": "library",
-      "root": "packages/pomelo-datasource",
+      "root": "packages/nestjs-oidc",
       "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-datasource",
+      "sourceRoot": "packages/nestjs-oidc",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-datasource/tsconfig.json",
-        "assets": ["package.json", "README.md"],
-        "deleteOutDir": true
+        "tsConfigPath": "packages/nestjs-oidc/tsconfig.json"
       }
     },
     "pomelo-authorization": {
@@ -116,9 +182,7 @@
       "entryFile": "src/index",
       "sourceRoot": "packages/pomelo-authorization",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-authorization/tsconfig.json",
-        "assets": ["package.json", "README.md"],
-        "deleteOutDir": true
+        "tsConfigPath": "packages/pomelo-authorization/tsconfig.json"
       }
     },
     "pomelo-ram-authorization": {
@@ -127,20 +191,25 @@
       "entryFile": "src/index",
       "sourceRoot": "packages/pomelo-ram-authorization",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-ram-authorization/tsconfig.json",
-        "assets": ["package.json", "README.md"],
-        "deleteOutDir": true
+        "tsConfigPath": "packages/pomelo-ram-authorization/tsconfig.json"
       }
     },
-    "pomelo-shared-server": {
+    "pomelo-log4js": {
       "type": "library",
-      "root": "packages/pomelo-shared-server",
+      "root": "packages/pomelo-log4js",
       "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-shared-server",
+      "sourceRoot": "packages/pomelo-log4js",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-shared-server/tsconfig.json",
-        "assets": ["package.json", "README.md"],
-        "deleteOutDir": true
+        "tsConfigPath": "packages/pomelo-log4js/tsconfig.json"
+      }
+    },
+    "pomelo-shared": {
+      "type": "library",
+      "root": "packages/pomelo-shared",
+      "entryFile": "src/index",
+      "sourceRoot": "packages/pomelo-shared",
+      "compilerOptions": {
+        "tsConfigPath": "packages/pomelo-shared/tsconfig.json"
       }
     }
   }

@@ -1,8 +1,7 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '../../graphql/infrastructure-request';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
 import type { Paged } from '../types';
 
@@ -31,8 +30,8 @@ export interface NewPageTemplateInput
 
 export interface UpdatePageTemplateInput extends Partial<Omit<NewPageTemplateInput, 'meta'>> {}
 
-export const usePageApi = defineRegistApi('template_page', {
-  apis: {
+export const usePageApi = defineRegistGraphql('template_page', {
+  definition: {
     // 分页获取表单
     getPaged: gql`
       query getPageTemplates(
@@ -176,5 +175,4 @@ export const usePageApi = defineRegistApi('template_page', {
       { id: string; updatePage: UpdatePageTemplateInput; featureImage?: string }
     >,
   },
-  request,
 });

@@ -3,7 +3,7 @@ import { defineComponent, ref, computed, h, onErrorCaptured } from '@vue/composi
 import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
-import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared-client';
+import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
 import { useFormApi, FormMetaPresetKeys } from '@/fetch/apis';

@@ -7,7 +7,7 @@ import { AccountProviderService } from '../account-provider/account-provider.ser
 
 @Controller('/SECURITY')
 export class SecurityController extends BaseController {
-  logger = new Logger(SecurityController.name, { timestamp: true });
+  private logger = new Logger(SecurityController.name, { timestamp: true });
 
   constructor(
     private readonly accountProviderService: AccountProviderService,
@@ -46,7 +46,7 @@ export class SecurityController extends BaseController {
     }
 
     if (accountId) {
-      const account = await this.accountProviderService.getAccount(accountId);
+      const account = await this.accountProviderService.getAccount({ id: Number(accountId) });
 
       if (!account) {
         throw new HttpException('Account not found.', HttpStatus.UNAUTHORIZED);

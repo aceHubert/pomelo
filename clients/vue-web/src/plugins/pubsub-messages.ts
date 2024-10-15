@@ -15,7 +15,7 @@ type To =
     };
 
 const plugin: Plugin = ({ app }, inject) => {
-  const basicApi = useBasicApi();
+  const basicApi = useBasicApi(app.graphqlFetch);
 
   const messages = reactive({
     value: [] as (MessageConfig<To> & {

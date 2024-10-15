@@ -25,7 +25,7 @@ import {
   getFrameworkSchema,
   toFrameworkContent,
   type SchemaFramework,
-} from '@ace-pomelo/shared-client';
+} from '@ace-pomelo/shared/client';
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
 import { useI18n, useUserManager, useOptions, useDeviceType } from '@/hooks';

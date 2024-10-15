@@ -16,13 +16,13 @@ const DefaultRamAuthorizationOptions: Partial<RamAuthorizationOptions> = {
 
 @Module({})
 export class RamAuthorizationModule {
-  static forRoot(options: RamAuthorizationOptions): DynamicModule {
+  static forRoot({ isGlobal, ...options }: RamAuthorizationOptions): DynamicModule {
     options = { ...DefaultRamAuthorizationOptions, ...options };
     this.assertOptions(options);
 
     return {
       module: RamAuthorizationModule,
-      global: true,
+      global: isGlobal,
       providers: [
         {
           provide: RAM_AUTHORIZATION_OPTIONS,
@@ -36,9 +36,9 @@ export class RamAuthorizationModule {
   static forRootAsync(options: RamAuthorizationAsyncOptions): DynamicModule {
     return {
       module: RamAuthorizationModule,
-      global: true,
+      global: options.isGlobal,
       imports: options.imports || [],
-      providers: this.createAsyncProviders(options),
+      providers: [...this.createAsyncProviders(options)],
       exports: [RAM_AUTHORIZATION_OPTIONS],
     };
   }

@@ -16,7 +16,7 @@ import classes from './mobile.module.less';
 
 // Types
 import type { SchemaComponents } from '@formily/vue';
-import type { SchemaFramework } from '@ace-pomelo/shared-client';
+import type { SchemaFramework } from '@ace-pomelo/shared/client';
 
 const form = createForm();
 const { SchemaField } = createSchemaField({

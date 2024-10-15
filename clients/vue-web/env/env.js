@@ -1,15 +1,13 @@
 (function (window) {
   var globalPrefix = process.env.BASE_URL.replace(/\/$/, '');
   var baseUrl = window.location.protocol + '//' + window.location.host;
-  var baseWsUrl = baseUrl.replace(/^http/, 'ws');
   var clientId = '3d136433-977f-40c7-8702-a0444a6b2a9f';
 
   var env = window._ENV || {};
 
-  // env.infrastructureApiBase = baseUrl + '/infrastructure/api';
-  env.identityGraphqlBase = baseUrl + '/identity/graphql';
-  env.infrastructureGraphqlBase = baseUrl + '/infrastructure/graphql';
-  env.infrastructureGraphqlSubscriptionBase = baseWsUrl + '/infrastructure/graphql';
+  // env.basicApiBase = baseUrl + '/action/basic/api';
+  env.basicGraphqlBase = baseUrl + '/action/basic/graphql';
+  env.identityGraphqlBase = baseUrl + '/action/identity/graphql';
 
   env.oidc = {
     authority: baseUrl + '/oauth2',

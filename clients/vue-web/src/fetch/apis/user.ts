@@ -1,8 +1,7 @@
-import { defineRegistApi, gql } from '@ace-pomelo/shared-client';
-import { request } from '../graphql/infrastructure-request';
+import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-pomelo/shared-client';
+import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 
 export enum UserStatus {
   Disabled = 'Disabled',
@@ -20,8 +19,8 @@ export interface UserModel {
   updatedAt: Date;
 }
 
-export const useUserApi = defineRegistApi('user', {
-  apis: {
+export const useUserApi = defineRegistGraphql('user', {
+  definition: {
     get: gql`
       query getUser($id: ID!) {
         user(id: $id) {
@@ -54,5 +53,4 @@ export const useUserApi = defineRegistApi('user', {
       }
     ` as TypedMutationDocumentNode<{ result: null }, { userId: string; key: string; value: string }>,
   },
-  request,
 });

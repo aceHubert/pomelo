@@ -31,7 +31,7 @@ import {
   getFrameworkSchema,
   toFrameworkContent,
   type SchemaFramework,
-} from '@ace-pomelo/shared-client';
+} from '@ace-pomelo/shared/client';
 import { trailingSlash, equals, warn } from '@ace-util/core';
 import { Modal, message } from '@/components';
 import { useTemplateApi, useFormApi, FormMetaPresetKeys } from '@/fetch/apis';

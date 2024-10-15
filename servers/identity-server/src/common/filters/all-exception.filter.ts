@@ -1,10 +1,11 @@
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
+import { isObject } from '@nestjs/common/utils/shared.utils';
 import { I18nContext, I18nValidationException } from 'nestjs-i18n';
 import { BaseError as SequelizeBaseError } from 'sequelize';
 import { isHttpError } from 'http-errors';
 import { Request, Response } from 'express';
 import { isJsonRequest } from '../utils/is-json-request.util';
-import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.utils';
+import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.util';
 
 @Catch()
 export class AllExceptionFilter implements ExceptionFilter {
@@ -12,9 +13,10 @@ export class AllExceptionFilter implements ExceptionFilter {
 
   async catch(exception: Error, host: ArgumentsHost) {
     // log
-    this.logger.error(exception, exception.stack);
+    const loggerArgs: [string, string?] = this.isError(exception) ? [exception.message, exception.stack] : [exception];
+    this.logger.error(...loggerArgs);
 
-    const i18n = I18nContext.current();
+    const i18n = I18nContext.current(host);
     switch (host.getType()) {
       case 'http':
         const http = host.switchToHttp();
@@ -66,6 +68,10 @@ export class AllExceptionFilter implements ExceptionFilter {
         // todo:其它情况
         return exception;
     }
+  }
+
+  isError(exception: any): exception is Error {
+    return !!(isObject(exception) && (exception as any).message);
   }
 
   /**
