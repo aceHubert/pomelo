@@ -42,6 +42,9 @@ services:
     restart: always
     volumes:
       - conf:/app/conf
+      - ${PWD}/uploads:/app/content/uploads
+      - ${PWD}/plugins:/app/content/plugins
+      - ${PWD}/themes:/app/content/themes
       - ${PWD}/logs:/app/logs
     ports:
       # - 3000:3000 # infrastructure microservice
@@ -96,5 +99,5 @@ volumes:
     # driver: local
     # driver_opts:
     #   type: none
-    #   device: ${PWD}/${DEPLOY_DIR:-release}
+    #   device: ${PWD}/${CONF_DIR:-CONF}
     #   o: bind
