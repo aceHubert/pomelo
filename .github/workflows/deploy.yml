@@ -21,7 +21,9 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-  DOCKER_COMPOSE_DIR: /opt/pomelo
+  DOCKER_COMPOSE_DIR: /opt/pomelo # docker-compose.yml 文件目录
+  NGINX_CONF_DIR: /opt/nginx/conf/conf.d # nginx 配置文件目录
+  NGINX_CONTAINER: nginx-default # nginx 容器名称/ID
 
 permissions:
   contents: read
@@ -126,3 +128,5 @@ jobs:
             docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
+            docker cp pomelo-server:/app/conf/nginx.conf ${{ env.NGINX_CONF_DIR }}/pomelo.conf
+            docker exec ${{ env.NGINX_CONTAINER }} nginx -s reload
