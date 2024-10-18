@@ -10,7 +10,7 @@
   env.identityGraphqlBase = baseUrl + '/action/identity/graphql';
 
   env.oidc = {
-    authority: baseUrl + '/oauth2',
+    authority: baseUrl + '/identity/oauth2',
     client_id: clientId,
     redirect_uri: baseUrl + globalPrefix + '/signin.html',
     post_logout_redirect_uri: baseUrl + globalPrefix,

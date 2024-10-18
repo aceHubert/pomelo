@@ -29,10 +29,8 @@ RUN if [ "$BUILD_IGNORE" = "true" ]; then \
 FROM --platform=${BUILD_PLATFORM} node:${NODE_VERSION} AS runtime
 COPY --from=builder /app/clients/vue-web/dist /app/clients/web/
 COPY --from=builder /app/dist/servers /app/servers/
-COPY --from=builder /app/package*.json /app/
 COPY --from=builder /app/.yarn /app/.yarn/
-COPY --from=builder /app/.yarnrc.yml /app/
-COPY --from=builder /app/yarn.lock /app/
+COPY --from=builder /app/package*.json /app/ecosystem.config.js /app/nginx.conf /app/.yarnrc.yml /app/yarn.lock /app/
 
 WORKDIR /app
 # 安装 Nodejs 运行时文件
@@ -41,7 +39,7 @@ RUN yarn workspaces focus --production --all
 
 # copy runtime files
 FROM --platform=${BUILD_PLATFORM} node:${NODE_VERSION} AS deploy
-COPY --from=runtime /app/servers /app/clients /app/
+COPY --from=runtime /app/servers /app/clients /app/ecosystem.config.js /app/nginx.conf /app/
 COPY --from=runtime /app/node_modules /app/node_modules/
 
 # NODE_ENV 环境
@@ -64,7 +62,7 @@ RUN npm install -g pm2
 
 EXPOSE 3001-3004 3011
 CMD if [ "$SERVE_APPS" = "" ]; then \
-      pm2-runtime start conf/ecosystem.config.js --env $SERVE_ENV; \
+      pm2-runtime start ecosystem.config.js --env $SERVE_ENV; \
     else \
-      pm2-runtime start conf/ecosystem.config.js --only "$SERVE_APPS" --env $SERVE_ENV; \
+      pm2-runtime start ecosystem.config.js --only "$SERVE_APPS" --env $SERVE_ENV; \
     fi

@@ -152,21 +152,8 @@ const logger = new Logger('AppModule', { timestamp: true });
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => {
-        const {
-          issuer,
-          useJWKS = true,
-          httpOptions = {},
-          ...clientMetadata
-        } = config.get<Record<string, any>>('OIDC_CONFIG', {});
         return {
-          issuer,
-          clientMetadata: clientMetadata as any,
-          useJWKS,
           publicKey: config.get('PUBLIC_KEY'),
-          httpOptions: {
-            timeout: 20000,
-            ...httpOptions,
-          },
         };
       },
       inject: [ConfigService],

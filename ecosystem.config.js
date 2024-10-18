@@ -37,6 +37,7 @@ module.exports = {
       autorestart: true,
       env_production: {
         PORT: 3003,
+        GLOBAL_PREFIX_URI: '/identity',
         OIDC_PATH: '/oauth2',
         INFRASTRUCTURE_SERVICE_PORT: 3000,
       },

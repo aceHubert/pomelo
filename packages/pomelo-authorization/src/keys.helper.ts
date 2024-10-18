@@ -54,14 +54,14 @@ export const getKeyFromFile = async (path: string): Promise<string | undefined> 
 };
 
 export const getPublicKey = async (
-  pkcs8 = DEV_PUBLIC_KEY,
+  spki = DEV_PUBLIC_KEY,
   alg = 'RS256',
   options?: PEMImportOptions,
 ): Promise<KeyLike> => {
-  if (pkcs8 === DEV_PUBLIC_KEY) {
+  if (spki === DEV_PUBLIC_KEY) {
     logger.warn('Using default public key, please provide your own public key in production');
   }
-  return importSPKI(pkcs8, alg, options);
+  return importSPKI(spki, alg, options);
 };
 
 export const getPrivateKey = async (

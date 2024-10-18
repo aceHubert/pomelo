@@ -40,19 +40,7 @@ INFRASTRUCTURE_DATABASE_CONNECTION: "mysql://user:password@host:port/database"
 IDENTITY_DATABASE_CONNECTION: "mysql://user:password@host:port/database"
 # table prefix
 TABLE_PREFIX: "po_"
-# jwt public key
-PUBLIC_KEY: "private_key"
-# openid-client authentication configuration
-OIDC_CONFIG:
-  # openid-connect issuer
-  issuer: "${server.origin}/oauth2"
-  # use jwks to verify jwt
-  useJWKS: true
-  # client metadata
-  # https://github.com/panva/node-openid-client/blob/main/docs/README.md#new-clientmetadata-jwks-options
-  client_id: "client_id"
-  client_secret: "client_secret"
-  # http options
-  # https://github.com/panva/node-openid-client/blob/main/docs/README.md#customizing-http-requests
-  httpOptions:
-    timeout: 1000
+# public key, for jwt verification
+PUBLIC_KEY: "public_key"
+# private key, for jwt signing & generate oidc jwks
+PRIVATE_KEY: "private_key

@@ -14,16 +14,14 @@ export interface OidcConfigOptions {
   debug?: boolean;
 
   /**
-   * Issuer Identifier, URL using the https scheme with no query or fragment component.
-   */
-  issuer: string;
-
-  /**
    * path base
    * @default /oidc
    */
   path?: string;
 
+  /**
+   * json web key set
+   */
   jwks?: JWKS;
 
   /**

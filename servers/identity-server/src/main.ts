@@ -37,7 +37,6 @@ bootstrap<NestExpressApplication>(AppModule, {
     const port = configService.get<number>('server.port', 3000);
     const cors = configService.get<boolean | CorsOptions>('server.cors', false);
     globalPrefix = normalizeRoutePath(configService.get<string>('server.globalPrefixUri', ''));
-    const issuer = `${configService.getOrThrow('server.origin')}${globalPrefix}`;
     isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
     swaggerPath = normalizeRoutePath(configService.get<string>('swagger.path', '/doc'));
     isGraphqlDebug = configService.get<boolean>('graphql.debug', false);
@@ -95,20 +94,6 @@ bootstrap<NestExpressApplication>(AppModule, {
                 )
                 .setVersion(version)
                 .addBearerAuth()
-                .addOAuth2({
-                  type: 'oauth2',
-                  flows: {
-                    authorizationCode: {
-                      authorizationUrl: issuer + '/connect/authorize',
-                      tokenUrl: issuer + '/connect/token',
-                      scopes: {
-                        openid: 'openid',
-                        profile: 'profile',
-                      },
-                    },
-                  },
-                  // openIdConnectUrl: issuer + '/.well-known/openid-configuration',
-                })
                 .addTag('clients', 'Clients.')
                 .addTag('identityResources', 'Identity Resources.')
                 .addTag('apiResources', 'Api Resources.')

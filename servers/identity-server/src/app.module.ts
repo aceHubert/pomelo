@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { createLocalJWKSet } from 'jose';
 import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -23,8 +22,8 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
-import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule, getJWKS } from '@ace-pomelo/nestjs-authorization';
+import { configuration, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import { AuthorizationModule, getJWKS, createLocalJWKSet } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
@@ -216,12 +215,8 @@ const logger = new Logger('AppModule', { timestamp: true });
     OidcConfigModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService, storageOptions: StorageOptions) => ({
-        debug: config.get('debug', false),
-        issuer: 'http://fakeissuer.com',
-        //  `${config.getOrThrow('server.origin')}${normalizeRoutePath(
-        //   config.get<string>('server.globalPrefixUri', ''),
-        // )}`,
-        path: normalizeRoutePath(config.get('OIDC_PATH', '/oidc')),
+        debug: config.get('OIDC_DEBUG', false),
+        path: config.get('OIDC_PATH'),
         jwks: await getJWKS(config.get('PRIVATE_KEY')),
         storage: storageOptions.use,
       }),
