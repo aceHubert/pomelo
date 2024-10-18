@@ -45,14 +45,15 @@ PUBLIC_KEY: "private_key"
 # openid-client authentication configuration
 OIDC_CONFIG:
   # openid-connect issuer
-  issuer: "${server.origin}/oauth2"
+  issuer: "${server.origin}/identity/oauth2"
   # use jwks to verify jwt
   useJWKS: true
-  # client metadata
-  # https://github.com/panva/node-openid-client/blob/main/docs/README.md#new-clientmetadata-jwks-options
-  client_id: "client_id"
-  client_secret: "client_secret"
   # http options
   # https://github.com/panva/node-openid-client/blob/main/docs/README.md#customizing-http-requests
   httpOptions:
     timeout: 1000
+# bff client metadata
+# https://github.com/panva/node-openid-client/blob/main/docs/README.md#new-clientmetadata-jwks-options
+# INFRASTRUCTURE_BFF_CLIENT_METADATA:
+  # client_id: "client_id"
+  # client_secret: "client_secret"

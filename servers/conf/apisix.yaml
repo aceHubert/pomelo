@@ -16,9 +16,10 @@ routes:
         _meta:
           disable: true
         bearer_only: false
-        client_id: CLIENT_ID
-        client_secret: CLIENT_SECRET
-        discovery: http://pomelo-server:3003/oauth2/.well-known/openid-configuration
+        # set client metadata
+        # client_id: CLIENT_ID
+        # client_secret: CLIENT_SECRET
+        discovery: http://pomelo-server:3003/identity/oauth2/.well-known/openid-configuration
         unauth_action: pass
         use_jwks: true
       proxy-rewrite:
@@ -61,7 +62,7 @@ routes:
       proxy-rewrite:
         regex_uri:
           - ^/action/identity(/?)(.*)
-          - /$2
+          - /identity/$2
     upstream:
       nodes:
         - host: pomelo-server

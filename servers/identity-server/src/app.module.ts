@@ -218,6 +218,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       useFactory: async (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('debug', false),
         issuer: 'http://fakeissuer.com',
+        // update issuer in each request
         //  `${config.getOrThrow('server.origin')}${normalizeRoutePath(
         //   config.get<string>('server.globalPrefixUri', ''),
         // )}`,

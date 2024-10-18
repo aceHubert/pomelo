@@ -152,15 +152,17 @@ const logger = new Logger('AppModule', { timestamp: true });
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => {
-        const {
-          issuer,
-          useJWKS = true,
-          httpOptions = {},
-          ...clientMetadata
-        } = config.get<Record<string, any>>('OIDC_CONFIG', {});
+        const { issuer, useJWKS = true, httpOptions = {} } = config.get<Record<string, any>>('OIDC_CONFIG', {});
+        const clientMetadata = config.get<{ client_id: string; [key: string]: any }>(
+          'INFRASTRUCTURE_BFF_CLIENT_METADATA',
+          {
+            client_id: '75a9c633-cfde-4954-b35c-9344ed9b781a',
+            client_secret: 'NzVhOWM2MzMtY2ZkZS00OTU0LWIzNWMtOTM0NGVkOWI3ODFhLlhDeTZLU19xVEc',
+          },
+        );
         return {
           issuer,
-          clientMetadata: clientMetadata as any,
+          clientMetadata,
           useJWKS,
           publicKey: await getPublicKey(config.get('PUBLIC_KEY')),
           httpOptions: {
