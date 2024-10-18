@@ -125,5 +125,5 @@ jobs:
             docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
-            docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/pomelo.conf
+            docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/server.conf
             docker exec ${{ vars.NGINX_CONTAINER }} nginx -s reload
