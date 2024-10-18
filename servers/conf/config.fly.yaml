@@ -12,7 +12,9 @@ graphql:
   # path: "/graphql"
 # server configuration
 server:
-  origin: "https://pomelo-server.fly.dev:3003"
+  # cors:
+  #   - "*"
+  # credentials: true
 # redis connection, from fly secrets
 # REDIS_URL: "redis://host:port/db"
 # infrastructure database connection, from fly secrets
@@ -21,15 +23,5 @@ server:
 # IDENTITY_DATABASE_CONNECTION: "mysql://user:password@host:port/database"
 # table prefix
 TABLE_PREFIX: "po_"
-# oidc redirect uri, default: ${server.origin}
+# set web oidc redirect uris, default: ${server.origin}
 WEB_URL: "https://pomelo-client.fly.dev:3011"
-# openid-client authentication configuration
-OIDC_CONFIG:
-  # openid-connect issuer
-  issuer: "${server.origin}/oauth2"
-  # use jwks to verify jwt
-  useJWKS: true
-  # http options
-  # https://github.com/panva/node-openid-client/blob/main/docs/README.md#customizing-http-requests
-  httpOptions:
-    timeout: 60000

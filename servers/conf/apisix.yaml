@@ -14,7 +14,7 @@ routes:
       cors:
       openid-connect:
         _meta:
-          disable: true
+          disable: false
         bearer_only: false
         # set client metadata
         # client_id: CLIENT_ID
