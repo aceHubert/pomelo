@@ -40,10 +40,7 @@ export async function syncDatabase(app: INestApplication<any>) {
   if (needInitDates) {
     logger.debug('Start to initialize datas!');
     try {
-      const origin = configService.get(
-        'server.origin',
-        'http://localhost:' + configService.get<number>('server.port', 3000),
-      );
+      const origin = configService.get('server.origin');
       const webURL = configService.get('WEB_URL', origin);
 
       await datasourceService.initDatas({

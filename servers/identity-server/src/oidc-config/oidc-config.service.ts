@@ -14,6 +14,7 @@ import {
 } from 'oidc-provider';
 import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
+import { ModuleRef } from '@nestjs/core';
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { ClientDataSource, IdentityResourceDataSource } from '../datasource';
@@ -35,6 +36,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   private logger = new Logger(OidcConfigService.name, { timestamp: true });
 
   constructor(
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
     @Inject(OIDC_CONFIG_OPTIONS) private readonly options: OidcConfigOptions,
     private readonly accountProviderService: AccountProviderService,
     private readonly identityResourceDataSource: IdentityResourceDataSource,
@@ -42,13 +44,19 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
   ) {}
 
   private get globalPrefix(): string {
-    return normalizeRoutePath(new url.URL(this.options.issuer).pathname);
+    const appConfig = this.moduleRef['container'].applicationConfig;
+    return normalizeRoutePath(appConfig?.getGlobalPrefix() ?? '');
+  }
+
+  private get oidcPath(): string {
+    return normalizeRoutePath(this.options.path ?? '/oidc');
   }
 
   async createModuleOptions(): Promise<OidcModuleOptions> {
     return {
-      issuer: this.options.issuer,
-      path: this.options.path,
+      // use fake issuer, update issuer from each request
+      issuer: `http://fakeissuer.com${this.globalPrefix}${this.oidcPath}`,
+      path: this.oidcPath,
       oidc: await this.getConfiguration(),
       proxy: true,
       factory: (issuer, config) => {
@@ -109,7 +117,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         provider.use(async (ctx, next) => {
           // set issuer dynamically
           // @ts-expect-error readonly types
-          provider.issuer = ctx.origin;
+          provider.issuer = `${ctx.origin}${this.globalPrefix}${this.oidcPath}`;
 
           if (ctx.method === 'GET' && ctx.path === checkSessionRoute) {
             ctx.type = 'html';
@@ -256,7 +264,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           const params = new url.URLSearchParams({});
           params.set(
             'returnUrl',
-            `${this.globalPrefix}${
+            `${this.globalPrefix}${this.oidcPath}${
               // @ts-expect-error type error
               normalizeRoutePath(ctx.oidc.provider.pathFor('authorization'))
             }?${new url.URLSearchParams(interaction.params as Record<string, any>).toString()}`,
