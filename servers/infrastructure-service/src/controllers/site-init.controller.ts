@@ -1,4 +1,5 @@
 import path from 'path';
+import { upperFirst } from 'lodash';
 import { UniqueConstraintError } from 'sequelize';
 import { Controller, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -43,7 +44,7 @@ export class SiteInitController {
   @MessagePattern(SiteInitPattern.IsRequired)
   async isRequired() {
     if (this.fileEnv.getEnv(name) === 'PENDING') {
-      if (!(await this.checkAdminExists())) {
+      if (await this.checkAdminExists()) {
         this.fileEnv.setEnv(name, version);
         this.logger.debug('Datas already initialized!');
         return false;
@@ -68,8 +69,8 @@ export class SiteInitController {
             {
               loginName: this.adminName,
               loginPwd: md5(payload.password),
-              niceName: 'Admin',
-              displayName: 'Admin',
+              niceName: upperFirst(this.adminName),
+              displayName: upperFirst(this.adminName),
               email: payload.email,
               url: '',
               status: UserStatus.Enabled,
