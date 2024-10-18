@@ -55,8 +55,6 @@ export default Form.create({})(
         props.form.validateFields((err, values) => {
           if (err) return;
 
-          loading.value = true;
-
           siteInitApi
             .start({
               variables: {

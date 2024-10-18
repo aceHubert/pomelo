@@ -88,6 +88,9 @@ module.exports = defineConfig({
   },
   devServer: {
     allowedHosts: 'all',
+    client: {
+      overlay: false,
+    },
     host: devHost,
     port: devPort,
     server: isHttps
@@ -151,6 +154,12 @@ module.exports = defineConfig({
         'runtime',
         'admin',
       ],
+    },
+    login: {
+      entry: 'src/login/main.ts',
+      template: 'public/index.html',
+      filename: 'login.html',
+      chunks: ['chunk-vendors', 'chunk-common', 'chunk-antdv', 'runtime', 'login'],
     },
     initialize: {
       entry: 'src/initialize/main.ts',
@@ -523,7 +532,7 @@ module.exports = defineConfig({
                 propList: ['*'],
                 mediaQuery: false,
                 exclude:
-                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|node_modules\/@pomelo\/theme|packages\/pomelo-theme|src\/admin|src\/initialize|desktop.less|desktop.module.less/i,
+                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|node_modules\/@pomelo\/theme|packages\/pomelo-theme|src\/admin|src\/login|src\/initialize|desktop.less|desktop.module.less/i,
               },
             ],
           ],

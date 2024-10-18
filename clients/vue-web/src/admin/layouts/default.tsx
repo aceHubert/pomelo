@@ -137,13 +137,14 @@ export default defineComponent({
 
     const handleActionClick = (key: AvatarDropdownAction | 'password-modify') => {
       switch (key) {
-        case 'password-modify':
-          locationMixin.goTo(
-            `${trailingSlash(userManager.settings.authority)}password/modify?returnUrl=${encodeURIComponent(
-              location.href,
-            )}&clientId=${userManager.settings.client_id}`,
-          );
-          break;
+        // TODO: modify password
+        // case 'password-modify':
+        //   locationMixin.goTo(
+        //     `${trailingSlash(userManager.settings.authority)}password/modify?returnUrl=${encodeURIComponent(
+        //       location.href,
+        //     )}&clientId=${userManager.settings.client_id}`,
+        //   );
+        //   break;
         case 'setting-drawer':
           settingDrawerVisible.value = !settingDrawerVisible.value;
           break;

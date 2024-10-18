@@ -18,7 +18,8 @@ export const basicLink = split(
   },
   createWebsocketLink(graphqlSubscriptionBase, {
     connectionParams: async () => {
-      const token = await auth.userManager
+      const token = await auth
+        .getUserManager()
         .getUser()
         .then((user) => user?.access_token)
         .catch(() => '');
@@ -31,9 +32,9 @@ export const basicLink = split(
   }),
   from([
     errorHandler({
-      unauthHandler: () => auth.userManager.signin(),
+      unauthHandler: () => auth.getUserManager().signin(),
       retry: async () => {
-        const user = await auth.userManager.signinSilent();
+        const user = await auth.getUserManager().signinSilent?.();
         if (user && !user.expired) {
           return {
             Authorization: `Bearer ${user.access_token}`,
@@ -47,7 +48,8 @@ export const basicLink = split(
       },
     }),
     setHeaders(async () => {
-      const accessToken = await auth.userManager
+      const accessToken = await auth
+        .getUserManager()
         .getUser()
         .then((user) => user?.access_token)
         .catch(() => '');

@@ -1,5 +1,5 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
-import { KeyLike, JWTVerifyGetKey } from 'jose';
+import { JWTVerifyGetKey } from 'jose';
 import { ClientMetadata, HttpOptions } from 'openid-client';
 import { ChannelType } from './multitenant.interface';
 
@@ -14,7 +14,7 @@ export type AuthorizationOptions = {
   /**
    * Public key to verify the jwt token.
    */
-  publicKey?: KeyLike | JWTVerifyGetKey;
+  publicKey?: string | JWTVerifyGetKey;
 
   /**
    * Discovery endpoint URL of the identity server.

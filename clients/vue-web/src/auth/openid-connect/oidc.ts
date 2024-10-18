@@ -2,10 +2,10 @@ import * as Oidc from 'oidc-client-ts';
 import { trailingSlash } from '@ace-util/core';
 import { Modal } from '@/components';
 import { STORAGE_PREFIX } from '@/store/utils';
-import { i18n } from '../i18n';
+import { i18n } from '../../i18n';
 
 // Types
-import type { UserManager } from './user-manager';
+import type { UserManager } from '../user-manager';
 
 export type SigninSilentArgs = Oidc.SigninSilentArgs;
 export type SigninArgs = Oidc.SigninRedirectArgs & { noInteractive?: boolean };

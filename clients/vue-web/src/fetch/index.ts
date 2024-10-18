@@ -21,7 +21,8 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) => {
   const locale = i18n.locale;
-  const token = await auth.userManager
+  const token = await auth
+    .getUserManager()
     .getUser()
     .then((user) => user?.access_token)
     .catch(() => '');
@@ -54,23 +55,26 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
 
   if (error.isAxiosError && error.response.status === 401) {
     // 重试登录，refresh token 重新获取 access token，如果再不成功则退出重新登录
-    return auth.userManager
-      .signinSilent()
-      .then((user) => {
-        if (user) {
-          const headers = {
-            ...error.config.headers,
-            Authorization: `Bearer ${user.access_token}`,
-          };
-          return axiosInstance({ ...error.config, headers });
-        } else {
-          throw new Error('No user found!');
-        }
-      })
-      .catch(() => {
-        auth.userManager.signin();
-        return new Promise(() => {});
-      });
+    const userManager = auth.getUserManager();
+    if (userManager.signinSilent) {
+      return userManager
+        .signinSilent()
+        .then((user) => {
+          if (user) {
+            const headers = {
+              ...error.config.headers,
+              Authorization: `Bearer ${user.access_token}`,
+            };
+            return axiosInstance({ ...error.config, headers });
+          } else {
+            throw new Error('No user found!');
+          }
+        })
+        .catch(() => {
+          userManager.signin();
+          return new Promise(() => {});
+        });
+    }
   }
 
   const { data = {} } = error.response as { data: any };

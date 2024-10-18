@@ -27,7 +27,7 @@ import {
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule, AuthorizationService, getPublicKey } from '@ace-pomelo/nestjs-authorization';
+import { AuthorizationModule, AuthorizationService } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
@@ -162,7 +162,7 @@ const logger = new Logger('AppModule', { timestamp: true });
           issuer,
           clientMetadata: clientMetadata as any,
           useJWKS,
-          publicKey: await getPublicKey(config.get('PUBLIC_KEY')),
+          publicKey: config.get('PUBLIC_KEY'),
           httpOptions: {
             timeout: 20000,
             ...httpOptions,
@@ -285,6 +285,17 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService],
     }),
+    OptionModule,
+    TermTaxonomyModule,
+    TemplateModule,
+    UserModule.forRootAsync({
+      useFactory: (config: ConfigService) => ({
+        isGlobal: true,
+        privateKey: config.get('PRIVATE_KEY'),
+        tokenExpiresIn: config.get('JWT_EXPIRES_IN'),
+      }),
+      inject: [ConfigService],
+    }),
     // ObsModule.forRootAsync({
     //   useFactory: (config: ConfigService) => ({
     //     accessKey: config.get('OBS_ACCESS_KEY', ''),
@@ -312,10 +323,6 @@ const logger = new Logger('AppModule', { timestamp: true });
     //   }),
     //   inject: [ConfigService],
     // }),
-    OptionModule,
-    TermTaxonomyModule,
-    TemplateModule,
-    UserModule,
   ],
   controllers: [AppController],
   providers: [

@@ -78,3 +78,24 @@ export class UserMeta extends Meta {
   @Field((type) => ID)
   userId!: number;
 }
+
+@ObjectType({ description: 'User verify result' })
+export class UserVerifyResult {
+  /**
+   * Verify success
+   */
+  @Field((type) => Boolean)
+  success!: boolean;
+
+  /**
+   * Token when success is true
+   */
+  @Field({ nullable: true })
+  token?: string;
+
+  /**
+   * Faild message when success is false
+   */
+  @Field({ nullable: true })
+  message?: string;
+}

@@ -12,7 +12,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@ace-fetch/graphql-vue": "^0.5.0",
+    "@ace-fetch/graphql-vue": "^0.5.4",
     "@ace-fetch/vue": "^0.5.0",
     "@ace-pomelo/shared": "workspace:^",
     "@ace-pomelo/theme": "workspace:^",
@@ -53,6 +53,7 @@
     "graphql-tag": "^2.12.6",
     "graphql-ws": "^5.11.2",
     "highlight.js": "^10.7.1",
+    "jwt-decode": "^4.0.0",
     "lazyload": "^2.0.0-rc.2",
     "lodash-es": "^4.17.21",
     "markdown-it": "^13.0.1",

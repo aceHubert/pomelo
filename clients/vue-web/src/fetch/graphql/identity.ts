@@ -9,9 +9,9 @@ const graphqlBase = getEnv('identityGraphqlBase', `${window.location.origin}/gra
 //  Identity graphql link
 export const identityLink = from([
   errorHandler({
-    unauthHandler: () => auth.userManager.signin(),
+    unauthHandler: () => auth.getUserManager().signin(),
     retry: async () => {
-      const user = await auth.userManager.signinSilent();
+      const user = await auth.getUserManager().signinSilent?.();
       if (user && !user.expired) {
         return {
           Authorization: `Bearer ${user.access_token}`,
@@ -25,7 +25,8 @@ export const identityLink = from([
     },
   }),
   setHeaders(async () => {
-    const accessToken = await auth.userManager
+    const accessToken = await auth
+      .getUserManager()
       .getUser()
       .then((user) => user?.access_token)
       .catch(() => '');

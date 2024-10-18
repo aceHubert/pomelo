@@ -1,25 +1,30 @@
-import { getEnv } from '@ace-util/core';
-import { OidcUserManagerCreator } from './oidc';
+import { userManager as LocalUserManager } from './local';
+import { userManager as OidcUserManager } from './openid-connect';
 
 // Types
 import type _Vue from 'vue';
-import type { UserManagerSettings } from 'oidc-client-ts';
+import type { UserManager as OidcUserManagerType } from 'oidc-client-ts';
+import type { UserManager } from './user-manager';
 
-const userManager = new OidcUserManagerCreator(getEnv<UserManagerSettings>('oidc', {} as any, window._ENV));
-
-userManager.events.addUserSignedOut(() => {
-  userManager.removeUser();
-});
+function getUserManager(
+  type: 'oidc' | 'local' = 'local',
+): UserManager & Partial<Pick<OidcUserManagerType, 'signinSilent' | 'storeUser'>> {
+  return type === 'oidc' ? OidcUserManager : LocalUserManager;
+}
 
 export const auth = {
-  userManager,
+  getUserManager,
   install(Vue: typeof _Vue) {
-    Vue.prototype.$userManager = userManager;
+    Object.defineProperty(Vue.prototype, '$userManager', {
+      get() {
+        return getUserManager(this.$config.authType);
+      },
+    });
   },
 };
 
 declare module 'vue/types/vue' {
   interface Vue {
-    readonly $userManager: typeof userManager;
+    readonly $userManager: ReturnType<typeof getUserManager>;
   }
 }

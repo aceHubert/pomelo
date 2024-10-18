@@ -21,7 +21,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-fetch/graphql-vue@npm:^0.5.0":
+"@ace-fetch/graphql-vue@npm:^0.5.4":
   version: 0.5.4
   resolution: "@ace-fetch/graphql-vue@npm:0.5.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql-vue%2F-%2Fgraphql-vue-0.5.4.tgz"
   dependencies:
@@ -208,7 +208,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/vue-web@workspace:clients/vue-web"
   dependencies:
-    "@ace-fetch/graphql-vue": ^0.5.0
+    "@ace-fetch/graphql-vue": ^0.5.4
     "@ace-fetch/vue": ^0.5.0
     "@ace-pomelo/shared": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
@@ -263,6 +263,7 @@ __metadata:
     graphql-tag: ^2.12.6
     graphql-ws: ^5.11.2
     highlight.js: ^10.7.1
+    jwt-decode: ^4.0.0
     lazyload: ^2.0.0-rc.2
     lodash-es: ^4.17.21
     markdown-it: ^13.0.1
@@ -16635,6 +16636,13 @@ __metadata:
   version: 3.1.2
   resolution: "jwt-decode@npm:3.1.2"
   checksum: 20a4b072d44ce3479f42d0d2c8d3dabeb353081ba4982e40b83a779f2459a70be26441be6c160bfc8c3c6eadf9f6380a036fbb06ac5406b5674e35d8c4205eeb
+  languageName: node
+  linkType: hard
+
+"jwt-decode@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "jwt-decode@npm:4.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fjwt-decode%2F-%2Fjwt-decode-4.0.0.tgz"
+  checksum: 390e2edcb31a92e86c8cbdd1edeea4c0d62acd371f8a8f0a8878e499390c0ecf4c658b365c4e941e4ef37d0170e4ca650aaa49f99a45c0b9695a235b210154b0
   languageName: node
   linkType: hard
 

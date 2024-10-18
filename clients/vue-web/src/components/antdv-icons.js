@@ -24,6 +24,7 @@ export { default as EditTwoTone } from '@ant-design/icons/lib/twotone/EditTwoTon
 export { default as ExclamationCircleOutline } from '@ant-design/icons/lib/outline/ExclamationCircleOutline';
 export { default as ExclamationCircleFill } from '@ant-design/icons/lib/fill/ExclamationCircleFill';
 export { default as EyeOutline } from '@ant-design/icons/lib/outline/EyeOutline';
+export { default as EyeInvisibleOutline } from '@ant-design/icons/lib/outline/EyeInvisibleOutline';
 export { default as FileOutline } from '@ant-design/icons/lib/outline/FileOutline';
 export { default as GlobalOutline } from '@ant-design/icons/lib/outline/GlobalOutline';
 export { default as InfoCircleOutline } from '@ant-design/icons/lib/outline/InfoCircleOutline';

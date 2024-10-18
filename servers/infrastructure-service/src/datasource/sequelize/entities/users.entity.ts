@@ -11,8 +11,6 @@ export class Users
   >
   implements UserAttributes
 {
-  public static readonly associations = {};
-
   public id!: number;
   public loginName!: string;
   public loginPwd!: string;

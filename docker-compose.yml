@@ -42,6 +42,9 @@ services:
     restart: always
     volumes:
       - conf:/app/conf
+      - ${PWD}/uploads:/app/content/uploads
+      - ${PWD}/plugins:/app/content/plugins
+      - ${PWD}/themes:/app/content/themes
       - ${PWD}/logs:/app/logs
     ports:
       # - 3000:3000 # infrastructure microservice
@@ -75,11 +78,11 @@ services:
       - server
     ##network_mode: host
     ports:
-      - '3180:9180/tcp' # admin_control: true
-      - '3080:9080/tcp'  # http
-      - '3091:9091/tcp'  # prometheus
-      - '3443:9443/tcp'  # tls http/2
-      - '3092:9092/tcp' # enable_control: true
+      - '9180:9180/tcp' # admin_control: true
+      - '9080:9080/tcp'  # http
+      - '9091:9091/tcp'  # prometheus
+      - '9443:9443/tcp'  # tls http/2
+      - '9092:9092/tcp' # enable_control: true
     networks:
       - default
 networks:
@@ -96,5 +99,5 @@ volumes:
     # driver: local
     # driver_opts:
     #   type: none
-    #   device: ${PWD}/${DEPLOY_DIR:-release}
+    #   device: ${PWD}/${CONF_DIR:-CONF}
     #   o: bind

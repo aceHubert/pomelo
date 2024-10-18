@@ -1,8 +1,9 @@
-import { jwtVerify, createRemoteJWKSet, KeyLike } from 'jose';
+import { jwtVerify, createRemoteJWKSet, SignJWT, KeyLike, SignOptions } from 'jose';
 import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { AuthorizationOptions } from './interfaces/authorization-options.interface';
 import { Params, ChannelType } from './interfaces/multitenant.interface';
+import { getPublicKey, getPrivateKey } from './keys.helper';
 import { AUTHORIZATION_OPTIONS } from './constants';
 
 @Injectable()
@@ -86,20 +87,55 @@ export class AuthorizationService {
   }
 
   /**
+   * create access token by public key
+   * @param payload token payload
+   * @param key private key
+   * @param options token options
+   * @param options.publicKey public key
+   * @param options.protectedHeader protected header, default { alg: 'RS256' }
+   * @param options.expiresIn token expires in, default 24h
+   * @param options.issuer token issuer, default ''
+   * @param options.audience token audience, default ''
+   * @returns access token
+   */
+  async createToken(
+    payload: { sub: string; [key: string]: any },
+    key?: string,
+    options: {
+      alg?: string;
+      issuer?: string;
+      audience?: string | string[];
+      expiresIn?: string | number;
+    } & SignOptions = {},
+  ) {
+    const { alg = 'RS256', expiresIn = '24h', issuer = '', audience = '', ...signOptions } = options;
+
+    const jwt = new SignJWT(payload)
+      .setProtectedHeader({ alg })
+      .setIssuer(issuer)
+      .setIssuedAt()
+      .setAudience(audience)
+      .setSubject(payload.sub)
+      .setExpirationTime(expiresIn);
+
+    return jwt.sign(await getPrivateKey(key, alg), signOptions);
+  }
+
+  /**
    * verify access token
    * @param accessToken access token
    * @param tenantId tenant id
    * @param channelType channel type
    */
   async verifyToken(accessToken: string, tenantId?: string, channelType?: ChannelType) {
-    let idpInfo;
-    if (this.options.publicKey) {
+    let idpInfo, publicKey;
+
+    if ((publicKey = await this.getPublicKey())) {
       // usePublicKey
-      let getKey;
-      if (typeof (getKey = this.options.publicKey) === 'function') {
-        return (await jwtVerify(accessToken, getKey)).payload;
+      if (typeof publicKey === 'function') {
+        return (await jwtVerify(accessToken, publicKey)).payload;
       } else {
-        return (await jwtVerify(accessToken, this.options.publicKey as KeyLike)).payload;
+        return (await jwtVerify(accessToken, publicKey as KeyLike)).payload;
       }
     } else if (this.options.useJWKS && (idpInfo = await this.getIdpInfo(tenantId, channelType)).getKey) {
       // useJwks
@@ -126,6 +162,18 @@ export class AuthorizationService {
       channelType = fixedChannelType;
     }
     return { tenantId, channelType };
+  }
+
+  private PublicKey: KeyLike | undefined;
+  private async getPublicKey() {
+    if (this.options.publicKey) {
+      if (typeof this.options.publicKey === 'function') {
+        return this.options.publicKey;
+      } else {
+        return this.PublicKey || (this.PublicKey = await getPublicKey(this.options.publicKey));
+      }
+    }
+    return;
   }
 
   private getIdpInfosKey(tenantId?: string, channelType?: ChannelType): string {

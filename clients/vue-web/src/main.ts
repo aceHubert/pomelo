@@ -84,7 +84,9 @@ async function createApp() {
   return context;
 }
 
-const trySignin = once((userManager: Vue['$userManager']) => userManager.signinSilent().catch(() => null));
+const trySignin = once(
+  (userManager: Vue['$userManager']) => userManager.signinSilent?.().catch(() => null) ?? Promise.resolve(),
+);
 // preset anonymous routes
 function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
   const userManager = this.$userManager;
