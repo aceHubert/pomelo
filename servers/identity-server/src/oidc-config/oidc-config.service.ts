@@ -264,7 +264,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           const params = new url.URLSearchParams({});
           params.set(
             'returnUrl',
-            `${this.globalPrefix}${this.oidcPath}${
+            `${this.globalPrefix}${
               // @ts-expect-error type error
               normalizeRoutePath(ctx.oidc.provider.pathFor('authorization'))
             }?${new url.URLSearchParams(interaction.params as Record<string, any>).toString()}`,

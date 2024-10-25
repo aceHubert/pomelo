@@ -164,9 +164,26 @@ const logger = new Logger('AppModule', { timestamp: true });
     }),
     AuthorizationModule.forRootAsync({
       isGlobal: true,
-      useFactory: async (config: ConfigService) => ({
-        publicKey: createLocalJWKSet(await getJWKS(config.get('PRIVATE_KEY'))),
-      }),
+      useFactory: async (config: ConfigService) => {
+        const { keys } = await getJWKS([config.get('PRIVATE_KEY')].filter(Boolean) as string[]);
+        return {
+          verifyingKey: createLocalJWKSet({
+            keys: keys.map((jwk) => ({
+              kty: jwk.kty,
+              use: jwk.use,
+              key_ops: jwk.key_ops ? [...jwk.key_ops] : undefined,
+              kid: jwk.kid,
+              alg: jwk.alg,
+              crv: jwk.crv,
+              e: jwk.e,
+              n: jwk.n,
+              x: jwk.x,
+              x5c: jwk.x5c ? [...jwk.x5c] : undefined,
+              y: jwk.y,
+            })),
+          }),
+        };
+      },
       inject: [ConfigService],
     }),
     RamAuthorizationModule.forRoot({
@@ -217,7 +234,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       useFactory: async (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('OIDC_DEBUG', false),
         path: config.get('OIDC_PATH'),
-        jwks: await getJWKS(config.get('PRIVATE_KEY')),
+        jwks: await getJWKS([config.get('PRIVATE_KEY')].filter(Boolean) as string[]),
         storage: storageOptions.use,
       }),
       inject: [ConfigService, STORAGE_OPTIONS],
