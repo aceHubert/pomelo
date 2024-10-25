@@ -1,4 +1,4 @@
-import { Injectable, Inject, NestMiddleware } from '@nestjs/common';
+import { Injectable, Inject, Logger, NestMiddleware } from '@nestjs/common';
 import { JWTPayload } from 'jose';
 import { AuthorizationService } from './authroized.service';
 import { fromAuthHeaderAsBearerToken } from './utils/extract-jwt';
@@ -7,6 +7,8 @@ import { AUTHORIZATION_OPTIONS } from './constants';
 
 @Injectable()
 export class UserMiddleware implements NestMiddleware {
+  private logger = new Logger(UserMiddleware.name, { timestamp: true });
+
   constructor(
     @Inject(AUTHORIZATION_OPTIONS) private readonly options: AuthorizationOptions,
     private authService: AuthorizationService,
@@ -34,7 +36,8 @@ export class UserMiddleware implements NestMiddleware {
       req[this.options.userProperty!] = payload;
 
       next();
-    } catch (err) {
+    } catch (err: any) {
+      this.logger.debug(err.message);
       next();
     }
   }

@@ -1,9 +1,9 @@
-import { jwtVerify, createRemoteJWKSet, SignJWT, KeyLike, SignOptions } from 'jose';
+import { jwtVerify, createRemoteJWKSet, SignJWT, KeyLike, JWTHeaderParameters, SignOptions } from 'jose';
 import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { AuthorizationOptions } from './interfaces/authorization-options.interface';
 import { Params, ChannelType } from './interfaces/multitenant.interface';
-import { getPublicKey, getPrivateKey } from './keys.helper';
+import { getVerifyingKey } from './keys.helper';
 import { AUTHORIZATION_OPTIONS } from './constants';
 
 @Injectable()
@@ -89,7 +89,7 @@ export class AuthorizationService {
   /**
    * create access token by public key
    * @param payload token payload
-   * @param key private key
+   * @param signingKey private key
    * @param options token options
    * @param options.publicKey public key
    * @param options.protectedHeader protected header, default { alg: 'RS256' }
@@ -100,25 +100,34 @@ export class AuthorizationService {
    */
   async createToken(
     payload: { sub: string; [key: string]: any },
-    key?: string,
+    signingKey: string | KeyLike,
     options: {
-      alg?: string;
       issuer?: string;
       audience?: string | string[];
       expiresIn?: string | number;
+      protectedHeader?: JWTHeaderParameters;
     } & SignOptions = {},
   ) {
-    const { alg = 'RS256', expiresIn = '24h', issuer = '', audience = '', ...signOptions } = options;
+    const {
+      protectedHeader = { alg: 'RS256' },
+      expiresIn = '24h',
+      issuer = '',
+      audience = '',
+      ...signOptions
+    } = options;
 
     const jwt = new SignJWT(payload)
-      .setProtectedHeader({ alg })
+      .setProtectedHeader(protectedHeader)
       .setIssuer(issuer)
       .setIssuedAt()
       .setAudience(audience)
       .setSubject(payload.sub)
       .setExpirationTime(expiresIn);
 
-    return jwt.sign(await getPrivateKey(key, alg), signOptions);
+    return jwt.sign(
+      typeof signingKey === 'string' ? await getVerifyingKey(signingKey, protectedHeader.alg) : signingKey,
+      signOptions,
+    );
   }
 
   /**
@@ -130,12 +139,12 @@ export class AuthorizationService {
   async verifyToken(accessToken: string, tenantId?: string, channelType?: ChannelType) {
     let idpInfo, publicKey;
 
-    if ((publicKey = await this.getPublicKey())) {
+    if ((publicKey = await this.getVerifyingKey())) {
       // usePublicKey
       if (typeof publicKey === 'function') {
         return (await jwtVerify(accessToken, publicKey)).payload;
       } else {
-        return (await jwtVerify(accessToken, publicKey as KeyLike)).payload;
+        return (await jwtVerify(accessToken, publicKey)).payload;
       }
     } else if (this.options.useJWKS && (idpInfo = await this.getIdpInfo(tenantId, channelType)).getKey) {
       // useJwks
@@ -164,13 +173,19 @@ export class AuthorizationService {
     return { tenantId, channelType };
   }
 
-  private PublicKey: KeyLike | undefined;
-  private async getPublicKey() {
-    if (this.options.publicKey) {
-      if (typeof this.options.publicKey === 'function') {
-        return this.options.publicKey;
+  private VerifyingKeyCache: KeyLike | undefined;
+  private async getVerifyingKey() {
+    if (this.options.verifyingKey) {
+      if (typeof this.options.verifyingKey === 'function') {
+        return this.options.verifyingKey;
       } else {
-        return this.PublicKey || (this.PublicKey = await getPublicKey(this.options.publicKey));
+        return (
+          this.VerifyingKeyCache ||
+          (this.VerifyingKeyCache =
+            typeof this.options.verifyingKey === 'string'
+              ? await getVerifyingKey(this.options.verifyingKey)
+              : this.options.verifyingKey)
+        );
       }
     }
     return;

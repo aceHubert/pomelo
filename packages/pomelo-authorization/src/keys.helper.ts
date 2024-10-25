@@ -53,7 +53,7 @@ export const getKeyFromFile = async (path: string): Promise<string | undefined> 
   }
 };
 
-export const getPublicKey = async (
+export const getVerifyingKey = async (
   spki = DEV_PUBLIC_KEY,
   alg = 'RS256',
   options?: PEMImportOptions,
@@ -64,7 +64,7 @@ export const getPublicKey = async (
   return importSPKI(spki, alg, options);
 };
 
-export const getPrivateKey = async (
+export const getSigningKey = async (
   pkcs8 = DEV_PRIVATE_KEY,
   alg = 'RS256',
   options?: PEMImportOptions,
@@ -75,11 +75,24 @@ export const getPrivateKey = async (
   return importPKCS8(pkcs8, alg, options);
 };
 
-export const getJWKS = async (pkcs8 = DEV_PRIVATE_KEY): Promise<JSONWebKeySet> => {
-  const key = await getPrivateKey(pkcs8);
-  const jwk = await exportJWK(key);
+/**
+ * get JSON Web Key Set
+ * @param pkcs8 private keys
+ * @returns
+ */
+export const getJWKS = async (keys: (string | KeyLike)[]): Promise<JSONWebKeySet> => {
+  if (keys.length === 0) {
+    logger.warn('No keys provided, using default private key');
+    keys.push(DEV_PRIVATE_KEY);
+  }
   return {
-    keys: [jwk],
+    keys: await Promise.all(
+      keys.map(async (pkcs8) => {
+        const key = typeof pkcs8 === 'string' ? await getSigningKey(pkcs8) : pkcs8;
+        const jwk = await exportJWK(key);
+        return jwk;
+      }),
+    ),
   };
   // {
   //   keys: [
