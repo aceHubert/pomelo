@@ -30,6 +30,9 @@ import IconLightTheme from '@admin/assets/icons/light-theme.svg?inline';
 import { getDefaultMenus } from '../configs/menu.config';
 import classes from './default.module.less';
 
+// Types
+import type { AuthType } from '@/auth';
+
 export default defineComponent({
   name: 'DefaultLayout',
   setup() {
@@ -37,6 +40,7 @@ export default defineComponent({
     const route = useRoute();
     const i18n = useI18n();
     const homeUrl = useOptions(OptionPresetKeys.Home);
+    const authType = useOptions<AuthType>('auth_type');
     const appMixin = useAppMixin();
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
@@ -121,7 +125,7 @@ export default defineComponent({
     //         ]);
     //     });
     // } else {
-    menus.value = getDefaultMenus();
+    menus.value = getDefaultMenus(authType.value);
     // }
 
     const menuBreadcrumbs = ref<BreadcrumbConfig[]>([]);
