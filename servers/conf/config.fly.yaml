@@ -11,7 +11,7 @@ graphql:
   # graphql path
   # path: "/graphql"
 # server configuration
-server:
+# server:
   # cors:
   #   - "*"
   # credentials: true

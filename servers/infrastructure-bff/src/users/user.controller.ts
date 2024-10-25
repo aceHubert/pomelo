@@ -46,7 +46,7 @@ import { UserClaims } from './interfaces/user-claims.interface';
 import { UserOptions } from './interfaces/user-options.interface';
 import { NewUserDto } from './dto/new-user.dto';
 import { NewUserMetaDto } from './dto/new-user-meta.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserPasswordDto } from './dto/update-user.dto';
 import { PagedUserQueryDto } from './dto/user-query.dto';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { UserModelResp, UserWithMetasModelResp, PagedUserResp, UserMetaModelResp } from './resp/user-model.resp';
@@ -279,6 +279,23 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     }
   }
 
+  @Patch('password/update')
+  @RamAuthorized(UserAction.UpdatePassword)
+  @ApiOkResponse({
+    description: '"true" if success or "false" if user does not exist',
+    type: () => createResponseSuccessType({}, 'UpdateUserStatusModelSuccessResp'),
+  })
+  async updateUserPassword(@Body() model: UpdateUserPasswordDto, @User() requestUser?: RequestUser): Promise<void> {
+    return this.basicService
+      .send<void>(UserPattern.UpdatePassword, {
+        id: requestUser?.sub,
+        username: model.username,
+        oldPwd: md5(model.oldPwd),
+        newPwd: md5(model.newPwd),
+      })
+      .lastValue();
+  }
+
   /**
    * Delete user permanently (must be in "trash" status)
    */
@@ -346,7 +363,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
             ...claims,
             ...rest,
           },
-          this.options.privateKey,
+          this.options.signingKey,
           {
             issuer: req.get('origin'),
             expiresIn: this.options.tokenExpiresIn,

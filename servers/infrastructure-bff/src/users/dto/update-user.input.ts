@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, IsLocale } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsLocale, IsDefined, MinLength } from 'class-validator';
 import { InputType, Field, PartialType, PickType } from '@nestjs/graphql';
 import { UserStatus, UserRole } from '@ace-pomelo/shared/server';
 import { NewUserInput } from './new-user.input';
@@ -43,4 +43,29 @@ export class UpdateUserInput extends PartialType(
   @IsOptional()
   @IsLocale()
   locale?: string;
+}
+
+@InputType({ description: 'Update user password input' })
+export class UpdateUserPasswordInput {
+  /**
+   * User name
+   */
+  @IsDefined()
+  @IsString()
+  username!: string;
+
+  /**
+   * Old password
+   */
+  @IsDefined()
+  @IsString()
+  oldPwd!: string;
+
+  /**
+   * New password
+   */
+  @IsDefined()
+  @IsString()
+  @MinLength(6)
+  newPwd!: string;
 }

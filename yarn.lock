@@ -5004,6 +5004,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keyv/serialize@npm:*":
+  version: 1.0.1
+  resolution: "@keyv/serialize@npm:1.0.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40keyv%2Fserialize%2F-%2Fserialize-1.0.1.tgz"
+  dependencies:
+    buffer: ^6.0.3
+  checksum: ff3dd9a6246b17fca3d1b0aba312dea931059fdecc36027f4d8133e59dbb3554a0a516b1f3dfc7fb2b3ca7a3d6fa307804f299566ab214febd3fb9d0502eebed
+  languageName: node
+  linkType: hard
+
 "@koa/cors@npm:^3.3.0":
   version: 3.4.3
   resolution: "@koa/cors@npm:3.4.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40koa%2Fcors%2F-%2Fcors-3.4.3.tgz"
@@ -9230,6 +9239,15 @@ __metadata:
     mime-types: ^2.1.18
     ylru: ^1.2.0
   checksum: 18db4d59452669ccbfd7146a1510a37eb28e9eccf18ca7a4eb603dff2edc5cccdca7498fc3042a2978f76f11151fba486eb9eb69d9afa3fb124957870aef4fd3
+  languageName: node
+  linkType: hard
+
+"cache-manager@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "cache-manager@npm:6.1.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fcache-manager%2F-%2Fcache-manager-6.1.1.tgz"
+  dependencies:
+    keyv: ^5.1.0
+  checksum: e1136297ade1e7256891242333fcdf6d2eb1fb7795c140b45a606d895a9f5f025ea5bd134a7b68aa3c219e80ae005af73bc26d59e9ab532d05ea539242a79b0f
   languageName: node
   linkType: hard
 
@@ -16684,6 +16702,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"keyv@npm:^5.1.0":
+  version: 5.1.2
+  resolution: "keyv@npm:5.1.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fkeyv%2F-%2Fkeyv-5.1.2.tgz"
+  dependencies:
+    "@keyv/serialize": "*"
+  checksum: 959978b3574e704edf3772f9b447dc779c24a53c09c0297912ac55595013d8b6cbfa529f2019b3952deeadafe82257cc7fac2fdc0077d242553a74015a36d198
+  languageName: node
+  linkType: hard
+
 "kind-of@npm:^3.0.2":
   version: 3.2.2
   resolution: "kind-of@npm:3.2.2"
@@ -19802,6 +19829,7 @@ __metadata:
     babel-jest: ^27.0.6
     babel-plugin-import: ^1.13.5
     bytes: ^3.1.2
+    cache-manager: ^6.1.1
     casual: ^1.6.2
     class-transformer: ^0.5.1
     class-validator: ^0.13.2

@@ -26,7 +26,7 @@ import { UserClaims } from './interfaces/user-claims.interface';
 import { UserOptions } from './interfaces/user-options.interface';
 import { NewUserInput } from './dto/new-user.input';
 import { NewUserMetaInput } from './dto/new-user-meta.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import { UpdateUserInput, UpdateUserPasswordInput } from './dto/update-user.input';
 import { PagedUserArgs } from './dto/user.args';
 import { VerifyUserInput } from './dto/verify-user.input';
 import { User as UserModel, UserMeta, PagedUser, UserVerifyResult } from './models/user.model';
@@ -165,6 +165,22 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
       .lastValue();
   }
 
+  @RamAuthorized(UserAction.UpdatePassword)
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update user password' })
+  async updateUserPassword(
+    @Args('model', { type: () => UpdateUserPasswordInput }) model: UpdateUserPasswordInput,
+    @User() requestUser?: RequestUser,
+  ): Promise<void> {
+    await this.basicService
+      .send<void>(UserPattern.UpdatePassword, {
+        id: requestUser ? Number(requestUser.sub) : undefined,
+        username: model.username,
+        oldPwd: md5(model.oldPwd),
+        newPwd: md5(model.newPwd),
+      })
+      .lastValue();
+  }
+
   @RamAuthorized(UserAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete user permanently.' })
   async deleteUser(
@@ -223,7 +239,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
             ...claims,
             ...rest,
           },
-          this.options.privateKey,
+          this.options.signingKey,
           {
             issuer: req.get('origin'),
             expiresIn: this.options.tokenExpiresIn,
