@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { defineComponent } from '@vue/composition-api';
 import { List } from 'vant';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { useLocationMixin } from '@/mixins';
 import { safeJSONParse } from '@/utils';
 import classes from './mobile.module.less';

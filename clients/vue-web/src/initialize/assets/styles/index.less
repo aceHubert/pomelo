@@ -1,16 +1,12 @@
-@import '~@ace-pomelo/theme/lib/index';
-@import (reference, multiple) '@ace-pomelo/theme/lib/themes/default';
-@import (multiple) '@ace-pomelo/theme/lib/core/colors';
-@import (multiple) 'antdv-layout-pro/style/component-reset';
-@import (reference, multiple) 'antdv-layout-pro/style/themes/default';
+@import '@ace-pomelo/theme/lib/index';
+@import '@ace-pomelo/theme/lib/themes/default';
+@import '@ace-pomelo/theme/lib/core/colors';
+@import 'antdv-layout-pro/style/component-reset';
+@import 'antdv-layout-pro/style/themes/default';
 
-// Dark theme
-.theme-dark {
-  @import (reference, multiple) '@ace-pomelo/theme/lib/themes/dark';
-  @import (multiple) '@ace-pomelo/theme/lib/core/colors';
-  @import (multiple) 'antdv-layout-pro/style/component-reset';
-  @import (reference, multiple) 'antdv-layout-pro/style/themes/default';
-  @import (reference) '../../../assets/styles/variables';
+body {
+  background: var(--body-background, #fff) url('@/assets/images/big_bg.png') no-repeat right bottom;
+  background-size: contain;
 }
 
 .app-content {
@@ -46,6 +42,7 @@
 
       &.selected {
         color: @var-primary;
+        cursor:not-allowed;
       }
     }
 

@@ -3,7 +3,7 @@ import { createResource } from '@vue-async/resource-manager';
 import { Card, Button, Form, Alert, Select, Table, Result } from 'ant-design-vue';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
-import { useI18n, useDeviceType } from '@/hooks';
+import { useI18n, useDeviceType } from '@/composables';
 import { PageBreadcrumb } from '@/admin/components';
 import { useClientApi } from '@/admin/fetch';
 

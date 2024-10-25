@@ -5,7 +5,7 @@ import { absoluteGo } from '@ace-util/core';
 import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '@ace-fetch/core';
 import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
 import { loadingRef, errorRef, SharedError } from '@/shared';
-import { auth } from '@/auth';
+import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 
 // Types
@@ -20,21 +20,19 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) => {
-  const locale = i18n.locale;
-  const token = await auth
-    .getUserManager()
-    .getUser()
-    .then((user) => user?.access_token)
-    .catch(() => '');
+  const locale = i18n.locale,
+    userManager = Authoriztion.getInstance().userManager,
+    token = await userManager
+      .getUser()
+      .then((user) => user?.access_token)
+      .catch(() => '');
 
   if (SUPPORTS_CORS) {
+    token && headers.set('Authorization', `Bearer ${token}`);
+    locale && headers.set('x-custom-locale', locale);
     return {
       params,
-      headers: {
-        ...headers,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(locale ? { 'x-custom-locale': locale } : {}),
-      },
+      headers,
       ...context,
     };
   } else {
@@ -55,14 +53,14 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
 
   if (error.isAxiosError && error.response.status === 401) {
     // 重试登录，refresh token 重新获取 access token，如果再不成功则退出重新登录
-    const userManager = auth.getUserManager();
+    const userManager = Authoriztion.getInstance().userManager;
     if (userManager.signinSilent) {
       return userManager
         .signinSilent()
         .then((user) => {
           if (user) {
             const headers = {
-              ...error.config.headers,
+              ...error.config?.headers,
               Authorization: `Bearer ${user.access_token}`,
             };
             return axiosInstance({ ...error.config, headers });

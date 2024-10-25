@@ -6,7 +6,7 @@ import { Loading } from 'vant';
 import * as Vant from '@formily-portal/vant';
 import { Page } from '@formily-portal/vant';
 import { Result } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { checkSchemaValid, type IFormilySchema } from '../form/utils';
 
 // Types

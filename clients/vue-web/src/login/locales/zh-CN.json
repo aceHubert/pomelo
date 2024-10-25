@@ -85,5 +85,7 @@
       }
     }
   },
-  "page_login": {}
+  "page_login": {},
+  "page_password_modify": {},
+  "page_password_forgot": {}
 }

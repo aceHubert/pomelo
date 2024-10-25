@@ -1,6 +1,9 @@
 import { jwtDecode, type JwtPayload } from 'jwt-decode';
-import { UserManager, type IUser } from '../user-manager';
-import { getToken, setToken } from './helper';
+import { absoluteGo } from '@ace-util/core';
+import { Modal } from '@/components';
+import { i18n } from '@/i18n';
+import { UserManager, type IUser, type ISigninArgs, type ISignoutArgs } from '../user-manager';
+import { getToken, setToken, removeToken } from './helper';
 
 /**
  * Protocol claims that could be removed by default from profile.
@@ -33,10 +36,15 @@ class Timer {
 }
 
 class User implements IUser {
-  constructor(
-    private readonly payload: JwtPayload,
-    private readonly options: { filterProtocolClaims?: boolean | string[] },
-  ) {}
+  payload: JwtPayload;
+
+  constructor(private readonly token: string, private readonly options: { filterProtocolClaims?: boolean | string[] }) {
+    this.payload = jwtDecode(token);
+  }
+
+  get access_token() {
+    return this.token;
+  }
 
   get profile() {
     const result = { ...this.payload } as IUser['profile'];
@@ -76,37 +84,58 @@ class User implements IUser {
   }
 }
 
-class LocalUserManagerCreator extends UserManager {
+export class LocalUserManagerCreator extends UserManager {
   constructor(private readonly options: { filterProtocolClaims?: boolean | string[] } = {}) {
     super();
   }
 
-  getUser() {
+  getUser(): Promise<IUser | null> {
     const token = getToken();
-    if (!token) {
-      const payload = jwtDecode(token);
-      return Promise.resolve(new User(payload, this.options));
+    if (token) {
+      return Promise.resolve(new User(token, this.options));
     }
     return Promise.resolve(null);
   }
-  signin() {
+
+  modifyPassword(): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        window.location.href = process.env.BASE_URL + 'login';
+        absoluteGo(`/login/password/modify?returnUrl=${encodeURIComponent(location.pathname)}`);
         resolve();
-      }, 1000);
+      }, 0);
     });
   }
-  signout() {
+
+  signin(args: ISigninArgs = {}): Promise<void> {
+    const { noInteractive, redirect_uri = location.pathname } = args;
+    if (noInteractive) {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          absoluteGo(`${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirect_uri)}`);
+          resolve();
+        }, 0);
+      });
+    } else {
+      Modal.destroyAll();
+      Modal.confirm({
+        icon: 'logout',
+        title: i18n.tv('session_timeout_confirm.title', 'OOPS!'),
+        content: i18n.tv('session_timeout_confirm.content', '登录会话已超时，需要您重新登录。'),
+        okText: i18n.tv('session_timeout_confirm.ok_text', '重新登录') as string,
+        onOk: () => this.signin({ noInteractive: true }),
+      });
+      return new Promise<void>(() => {});
+    }
+  }
+  signout(args: ISignoutArgs = {}): Promise<void> {
+    const { redirect_uri = location.pathname } = args;
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        window.location.href = process.env.BASE_URL + 'login';
+        window.location.href = `${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirect_uri)}`;
         resolve();
-      }, 1000);
+      }, 0);
     });
   }
 }
 
-export const userManager = new LocalUserManagerCreator();
-
-export { setToken };
+export { setToken, removeToken };

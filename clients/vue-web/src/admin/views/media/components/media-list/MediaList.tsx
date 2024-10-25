@@ -4,7 +4,7 @@ import { Input, Button, Space, Radio, Icon, Spin, Progress, Card, Upload, Pagina
 import { Cropper } from 'vue-advanced-cropper';
 import { createResource } from '@vue-async/resource-manager';
 import { message, Modal } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { useUploadMixin } from '@/mixins';
 import { useResApi } from '@/fetch/apis';
 import FileUnknownSvg from '@admin/assets/icons/file-unknown-fill.svg';

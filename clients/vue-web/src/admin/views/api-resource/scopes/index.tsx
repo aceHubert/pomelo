@@ -4,7 +4,7 @@ import { useRouter } from 'vue2-helpers/vue-router';
 import { Card, Button, Descriptions, Tag, Space, Result } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { Modal, message } from '@/components';
-import { useI18n, useDeviceType } from '@/hooks';
+import { useI18n, useDeviceType } from '@/composables';
 import { PageBreadcrumb } from '@/admin/components';
 import { useApiResourceApi } from '@/admin/fetch';
 import { default as ScopeForm } from '../components/ApiScopeForm';

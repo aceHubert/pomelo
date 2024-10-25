@@ -87,12 +87,12 @@ const promiseToObservable = <T>(promise: () => Promise<T>, reject?: (error: Erro
 /**
  * Error handler
  * @param options options
- * @param option.unauthHandler to login page
+ * @param option.unauthorize to unauthorization page
  * @param options.retry get Authorization header
  * @param options.initialize to initialize site
  */
 export const errorHandler = (options: {
-  unauthHandler: () => Promise<void>;
+  unauthorize: () => Promise<void>;
   retry?: () => Promise<Record<string, any>>;
   initialize?: () => Promise<void> | void;
 }) =>
@@ -100,7 +100,7 @@ export const errorHandler = (options: {
     // 重试登录，refresh token 重新获取 access token，如果再不成功则退出重新登录
     const tryLogin = () => {
       if (options.retry) {
-        return promiseToObservable(options.retry, options.unauthHandler).flatMap((customHeaders) => {
+        return promiseToObservable(options.retry, options.unauthorize).flatMap((customHeaders) => {
           operation.setContext({
             headers: {
               ...operation.getContext().headers,
@@ -110,7 +110,7 @@ export const errorHandler = (options: {
           return forward(operation);
         });
       } else {
-        options.unauthHandler();
+        options.unauthorize();
         return;
       }
     };

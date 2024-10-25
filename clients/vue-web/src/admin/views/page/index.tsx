@@ -8,7 +8,7 @@ import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { OptionPresetKeys, UserCapability, TemplateStatus } from '@ace-pomelo/shared/client';
 import { message } from '@/components';
 import { usePageApi, PresetTemplateType } from '@/fetch/apis';
-import { useI18n, useOptions, useUserManager, useDeviceType } from '@/hooks';
+import { useI18n, useOptions, useUserManager, useDeviceType } from '@/composables';
 import { useLocationMixin } from '@/mixins';
 import { useUserMixin, useTemplateMixin } from '@/admin/mixins';
 import classes from './index.module.less';

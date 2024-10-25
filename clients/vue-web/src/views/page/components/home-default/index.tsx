@@ -3,7 +3,7 @@ import { createResource } from '@vue-async/resource-manager';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { SkeletonLoader, Result } from '@/components';
 import { useDeviceMixin } from '@/mixins';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { usePostApi } from '@/fetch/apis';
 
 const MobileComponent = () => import(/* webpackChunkName: "mobile" */ './mobile');

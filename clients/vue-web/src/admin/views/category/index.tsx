@@ -1,6 +1,6 @@
 import { defineComponent } from '@vue/composition-api';
 import { Alert, Icon } from 'ant-design-vue';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import classes from './index.module.less';
 
 export default defineComponent({

@@ -35,7 +35,7 @@ import {
 } from '@ace-pomelo/shared/client';
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePageApi, PageMetaPresetKeys, TemplateStatus, TemplateCommentStatus } from '@/fetch/apis';
-import { useI18n, useUserManager, useOptions } from '@/hooks';
+import { useI18n, useUserManager, useOptions } from '@/composables';
 import { useLocationMixin } from '@/mixins';
 import { safeJSONParse } from '@/utils';
 import { useUserMixin, useDesignerMixin, useFormilyMixin } from '@/admin/mixins';

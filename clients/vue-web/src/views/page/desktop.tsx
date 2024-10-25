@@ -6,7 +6,7 @@ import { FormGrid, FormCollapse, FormTab, Space } from '@formily/antdv';
 import * as Antdv from '@formily-portal/antdv';
 import { Page } from '@formily-portal/antdv';
 import { Spin, Result } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { checkSchemaValid, type IFormilySchema } from '../form/utils';
 
 // Types

@@ -50,7 +50,7 @@ export const defaultSettings: {
     multiTab: false,
   },
   color: {
-    theme: Theme.Dark,
+    theme: Theme.Light,
     primaryColor: '#FA541C',
   },
   language: {

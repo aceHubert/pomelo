@@ -1,4 +1,5 @@
 export interface IUser {
+  access_token: string;
   /** The claims represented by a combination of the id_token and the user info endpoint */
   get profile(): {
     sub: string;
@@ -17,20 +18,27 @@ export interface ISigninArgs {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ISignoutArgs {}
+export interface ISignoutArgs {
+  /** The URL to redirect to after the signin request */
+  redirect_uri?: string;
+}
 
 /**
  * 用户管理基类
  */
 export abstract class UserManager<
-  SigninArgs extends ISigninArgs = any,
-  SignoutArgs extends ISignoutArgs = any,
-  User extends IUser = any,
+  SigninArgs extends ISigninArgs = ISigninArgs,
+  SignoutArgs extends ISignoutArgs = ISignoutArgs,
+  User extends IUser = IUser,
 > {
   /**
    * 获取用户
    */
   abstract getUser(): Promise<User | null>;
+  /**
+   * 修改密码
+   */
+  abstract modifyPassword(): Promise<void>;
   /**
    * 触发跳转到授权页面, 并确保登录完成后跳转到当前页面
    */

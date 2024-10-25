@@ -2,7 +2,7 @@ import { reactive } from '@vue/composition-api';
 import { isAbsoluteUrl, absoluteGo, trailingSlash } from '@ace-util/core';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { OptionPresetKeys } from '@ace-pomelo/shared/client';
-import { useOptions } from '@/hooks';
+import { useOptions } from '@/composables';
 
 // types
 import type { Route, RawLocation } from 'vue-router';

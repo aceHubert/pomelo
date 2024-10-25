@@ -1,6 +1,6 @@
 import { reactive } from '@vue/composition-api';
 import { OptionPresetKeys } from '@ace-pomelo/shared/client';
-import { useOptions } from '@/hooks';
+import { useOptions } from '@/composables';
 
 export const useUserMixin = () => {
   const userRoles = useOptions(OptionPresetKeys.UserRoles);

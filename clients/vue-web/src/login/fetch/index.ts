@@ -22,6 +22,15 @@ export interface UserVerifyFaildResult {
   message: string;
 }
 
+export interface ModifyPasswordInput {
+  // 用户名
+  username: string;
+  // 旧密码
+  oldPwd: string;
+  // 新密码
+  newPwd: string;
+}
+
 export const useLoginApi = defineRegistGraphql('login', {
   definition: {
     signIn: gql`
@@ -36,5 +45,10 @@ export const useLoginApi = defineRegistGraphql('login', {
       { result: UserVerifySuccessResult | UserVerifyFaildResult },
       { model: UserVerifyInput }
     >,
+    modifyPassword: gql`
+      mutation updateUserPassword($model: UpdateUserPasswordInput!) {
+        result: updateUserPassword(model: $model)
+      }
+    ` as TypedMutationDocumentNode<{ result: null }, { model: ModifyPasswordInput }>,
   },
 });

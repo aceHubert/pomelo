@@ -4,7 +4,7 @@ import { Theme } from 'antdv-layout-pro/types';
 import { warn } from '@ace-util/core';
 import { UserMetaPresetKeys } from '@ace-pomelo/shared/client';
 import { useUserApi } from '@/fetch/apis';
-import { useI18n, useOptions, useUserManager, useEffect } from '@/hooks';
+import { useI18n, useOptions, useUserManager, useEffect } from '@/composables';
 import { useAppStore } from '@/store';
 
 // Types

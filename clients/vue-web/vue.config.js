@@ -321,7 +321,7 @@ module.exports = defineConfig({
         },
       });
 
-      config.optimization.runtimeChunk('single');
+      config.optimization.runtimeChunk({ name: (entrypoint) => `runtime-${entrypoint.name}` });
     });
   },
   configureWebpack: (config) => {
@@ -551,6 +551,7 @@ module.exports = defineConfig({
           javascriptEnabled: true,
           modifyVars: {
             hack: 'true;@import "./src/assets/styles/variables.less";',
+            baseURL: publicPath,
           },
         },
       },

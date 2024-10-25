@@ -5,7 +5,7 @@ import { useRouter } from 'vue2-helpers/vue-router';
 import { Alert, Button, Form, Card, DatePicker, Input, Select, Icon, Result } from 'ant-design-vue';
 import { copyTextToClipboard } from '@ace-pomelo/shared/client';
 import { message } from '@/components';
-import { useI18n, useDeviceType } from '@/hooks';
+import { useI18n, useDeviceType } from '@/composables';
 import { PageBreadcrumb } from '@/admin/components';
 import { useApiResourceApi } from '@/admin/fetch';
 

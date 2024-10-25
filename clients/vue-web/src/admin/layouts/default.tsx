@@ -1,6 +1,6 @@
 import { defineComponent, ref, computed, onMounted, nextTick } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
+import { isAbsoluteUrl } from '@ace-util/core';
 import { Icon, Space, Tooltip, Menu, Spin } from 'ant-design-vue';
 import {
   ConfigProvider,
@@ -21,7 +21,7 @@ import {
 } from 'antdv-layout-pro/types';
 import { OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
-import { useUserManager, usePubSubMessage, useI18n, useOptions } from '@/hooks';
+import { useUserManager, usePubSubMessage, useI18n, useOptions } from '@/composables';
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
 import { RouterView } from '@/layouts/components';
 import { loadingRef } from '@/shared';
@@ -137,14 +137,9 @@ export default defineComponent({
 
     const handleActionClick = (key: AvatarDropdownAction | 'password-modify') => {
       switch (key) {
-        // TODO: modify password
-        // case 'password-modify':
-        //   locationMixin.goTo(
-        //     `${trailingSlash(userManager.settings.authority)}password/modify?returnUrl=${encodeURIComponent(
-        //       location.href,
-        //     )}&clientId=${userManager.settings.client_id}`,
-        //   );
-        //   break;
+        case 'password-modify':
+          userManager.modifyPassword();
+          break;
         case 'setting-drawer':
           settingDrawerVisible.value = !settingDrawerVisible.value;
           break;

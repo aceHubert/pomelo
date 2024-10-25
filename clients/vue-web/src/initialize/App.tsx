@@ -1,7 +1,7 @@
 import { defineComponent, computed } from '@vue/composition-api';
 import { ConfigProvider } from '@/components/config-provider';
 import { Spin, ANT_PREFIX_CLS } from '@/components/antdv-helper';
-import { useI18n } from '@/hooks/i18n';
+import { useI18n } from '@/composables';
 import { useDeviceMixin } from '@/mixins/device';
 import { useAppStore } from '@/store/app';
 import { loadingRef } from '@/shared';
@@ -37,7 +37,6 @@ export default defineComponent({
     return (
       <ConfigProvider
         prefixCls={ANT_PREFIX_CLS}
-        theme={this.theme}
         primaryColor={this.primaryColor}
         device={this.device}
         i18nRender={(...args: [string, string, Record<string, string>]) => this.$tv(...args) as string}

@@ -4,7 +4,7 @@ import { createResource } from '@vue-async/resource-manager';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { Button, Card, List, Result } from 'ant-design-vue';
 import { Modal, message } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { PageBreadcrumb } from '@/admin/components';
 import { useApiResourceApi } from '@/admin/fetch';
 

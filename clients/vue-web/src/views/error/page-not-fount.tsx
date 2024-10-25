@@ -1,6 +1,6 @@
 import { defineComponent } from '@vue/composition-api';
 import { Result } from 'ant-design-vue';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 
 export default defineComponent({
   name: 'PageNotFound',

@@ -1,6 +1,6 @@
 import { defineComponent, ref, computed, watch, h } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { sanitizeComponent } from '@/components';
 import { useAppStore } from '@/store';
 

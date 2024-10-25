@@ -9,3 +9,7 @@ export function getToken() {
 export function setToken(token: string) {
   return storage.set(TOKEN_KEY, token);
 }
+
+export function removeToken() {
+  return storage.remove(TOKEN_KEY);
+}

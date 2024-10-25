@@ -1,6 +1,6 @@
 import { from } from '@apollo/client/core';
 import { getEnv, absoluteGo } from '@ace-util/core';
-import { auth } from '@/auth';
+import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 import { createHttpLink, setHeaders, errorHandler } from './utils/links';
 
@@ -9,9 +9,9 @@ const graphqlBase = getEnv('identityGraphqlBase', `${window.location.origin}/gra
 //  Identity graphql link
 export const identityLink = from([
   errorHandler({
-    unauthHandler: () => auth.getUserManager().signin(),
+    unauthorize: () => Authoriztion.getInstance().userManager.signin(),
     retry: async () => {
-      const user = await auth.getUserManager().signinSilent?.();
+      const user = await Authoriztion.getInstance().userManager.signinSilent?.();
       if (user && !user.expired) {
         return {
           Authorization: `Bearer ${user.access_token}`,
@@ -25,14 +25,14 @@ export const identityLink = from([
     },
   }),
   setHeaders(async () => {
-    const accessToken = await auth
-      .getUserManager()
-      .getUser()
-      .then((user) => user?.access_token)
-      .catch(() => '');
+    const userManager = Authoriztion.getInstance().userManager,
+      token = await userManager
+        .getUser()
+        .then((user) => user?.access_token)
+        .catch(() => '');
     const headers = {};
 
-    accessToken && (headers['Authorization'] = `Bearer ${accessToken}`);
+    token && (headers['Authorization'] = `Bearer ${token}`);
     i18n.locale && (headers['x-custom-locale'] = i18n.locale);
 
     return headers;

@@ -3,7 +3,7 @@ import { createResource } from '@vue-async/resource-manager';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { Card, Descriptions, Button, Switch, Space, Tag, Result } from 'ant-design-vue';
 import { Modal, message } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { useIdentityResourceApi } from '@/admin/fetch';
 import { default as ResourceForm } from './components/IdentityResourceForm';
 

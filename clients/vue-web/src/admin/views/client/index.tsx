@@ -5,7 +5,7 @@ import { defineComponent, ref, reactive, computed, set, nextTick } from '@vue/co
 import { Button, Card, Form, Input, Space, Descriptions, Icon, Tag, Radio } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { Modal, message } from '@/components';
-import { useI18n, useDeviceType } from '@/hooks';
+import { useI18n, useDeviceType } from '@/composables';
 import { useClientApi } from '@/admin/fetch';
 import classes from './index.module.less';
 

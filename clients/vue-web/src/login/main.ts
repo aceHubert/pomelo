@@ -4,6 +4,7 @@ import 'custom-event-polyfill';
 
 import Vue, { type ComponentOptions } from 'vue';
 import VueCompositionApi from '@vue/composition-api';
+import { Authoriztion } from '@/auth';
 import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
@@ -18,8 +19,9 @@ import './assets/styles/index.less';
 import zhCN from './locales/zh-CN.json';
 import enUS from './locales/en-US.json';
 
-Vue.use(VueCompositionApi);
 Vue.config.productionTip = false;
+Vue.use(VueCompositionApi);
+Vue.use(Authoriztion);
 
 const plugins: Function[] = [];
 

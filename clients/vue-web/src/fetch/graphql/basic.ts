@@ -1,7 +1,7 @@
 import { split, from } from '@apollo/client/core';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { getEnv, absoluteGo } from '@ace-util/core';
-import { auth } from '@/auth';
+import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 import { createHttpUploadLink, createWebsocketLink, setHeaders, errorHandler } from './utils/links';
 
@@ -18,11 +18,11 @@ export const basicLink = split(
   },
   createWebsocketLink(graphqlSubscriptionBase, {
     connectionParams: async () => {
-      const token = await auth
-        .getUserManager()
-        .getUser()
-        .then((user) => user?.access_token)
-        .catch(() => '');
+      const userManager = Authoriztion.getInstance().userManager,
+        token = await userManager
+          .getUser()
+          .then((user) => user?.access_token)
+          .catch(() => '');
 
       return {
         token,
@@ -32,9 +32,9 @@ export const basicLink = split(
   }),
   from([
     errorHandler({
-      unauthHandler: () => auth.getUserManager().signin(),
+      unauthorize: () => Authoriztion.getInstance().userManager.signin(),
       retry: async () => {
-        const user = await auth.getUserManager().signinSilent?.();
+        const user = await Authoriztion.getInstance().userManager.signinSilent?.();
         if (user && !user.expired) {
           return {
             Authorization: `Bearer ${user.access_token}`,
@@ -48,14 +48,14 @@ export const basicLink = split(
       },
     }),
     setHeaders(async () => {
-      const accessToken = await auth
-        .getUserManager()
-        .getUser()
-        .then((user) => user?.access_token)
-        .catch(() => '');
+      const userManager = Authoriztion.getInstance().userManager,
+        token = await userManager
+          .getUser()
+          .then((user) => user?.access_token)
+          .catch(() => '');
       const headers = {};
 
-      accessToken && (headers['Authorization'] = `Bearer ${accessToken}`);
+      token && (headers['Authorization'] = `Bearer ${token}`);
       i18n.locale && (headers['x-custom-locale'] = i18n.locale);
 
       return headers;

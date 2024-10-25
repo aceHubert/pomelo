@@ -3,7 +3,7 @@ import { ref, reactive, computed, watch, set } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { OptionPresetKeys, TemplateStatus } from '@ace-pomelo/shared/client';
 import { message } from '@/components';
-import { useI18n, useOptions } from '@/hooks';
+import { useI18n, useOptions } from '@/composables';
 import { useTemplateApi, useTermTaxonomyApi } from '@/fetch/apis';
 
 // Types
