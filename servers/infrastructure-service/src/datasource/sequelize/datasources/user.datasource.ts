@@ -778,7 +778,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
             [Op.or]: [
               { loginName: username },
               isEmail(username) && { email: username },
-              isPhoneNumber(username!, region!) && { mobile: username },
+              isPhoneNumber(username!, region) && { mobile: username },
             ].filter(Boolean) as any,
             loginPwd: oldPwd,
           },

@@ -14,6 +14,12 @@ export interface InfrastructureDatasourceOptions {
   tablePrefix?: string;
 
   /**
+   * options cache ttl
+   * @default 6000
+   */
+  optionsCacheTTL?: number;
+
+  /**
    * translate function
    * @param key key
    * @param fallback fallback value

@@ -22,11 +22,10 @@ bootstrap(AppModule, {
 
     // sync database
     await syncDatabase(app);
-
-    const host = configService.get<string>('server.host', '');
-    const port = configService.get<number>('server.port', 3000);
-    const tcpHost = configService.get<string>('server.tcpHost', host);
-    const tcpPort = configService.get<number>('server.tcpPort', port);
+    const host = configService.get<string>('server.host');
+    const port = configService.get<number>('server.port');
+    const tcpHost = configService.get<string>('server.tcpHost');
+    const tcpPort = configService.get<number>('server.tcpPort');
     const cors = configService.get<boolean | CorsOptions>('server.cors', false);
     globalPrefix = normalizeRoutePath(configService.get<string>('server.globalPrefixUri', ''));
     isSwaggerDebug = configService.get<boolean>('swagger.debug', false);
@@ -68,8 +67,8 @@ bootstrap(AppModule, {
         : void 0,
       microserviceService: {
         strategy: new I18nServerTcp({
-          host: tcpHost,
-          port: tcpPort,
+          host: tcpHost ?? host,
+          port: tcpPort ?? port,
         }),
       },
       hybridOptions: {
