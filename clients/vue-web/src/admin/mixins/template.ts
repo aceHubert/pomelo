@@ -1,10 +1,10 @@
 import { lowerCase } from 'lodash-es';
 import { ref, reactive, computed, watch, set } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { OptionPresetKeys, TemplateStatus } from '@ace-pomelo/shared/client';
+import { OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { message } from '@/components';
 import { useI18n, useOptions } from '@/composables';
-import { useTemplateApi, useTermTaxonomyApi } from '@/fetch/apis';
+import { useTemplateApi, useTermTaxonomyApi, TemplateStatus } from '@/fetch/apis';
 
 // Types
 import type { PagedTemplateItem, TemplateStatusCountItem, TemplateMonthCountItem } from '@/fetch/apis';
