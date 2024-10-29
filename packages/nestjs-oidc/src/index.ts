@@ -1,4 +1,6 @@
 export * from './version';
+export * from './helpers/user';
+export * from './helpers/claims';
 export * from './controllers';
 export * from './decorators';
 export * from './filters';
