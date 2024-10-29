@@ -11,7 +11,7 @@ import { Text } from '@formily/antdv-prototypes';
 import { Form as VanForm, Submit as VanSubmit } from '@formily/vant';
 import * as Vant from '@formily/vant';
 import { Text as VanText } from '@formily/vant-prototypes';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 
 // Types
 import type { TreeNode } from '@designable/core';

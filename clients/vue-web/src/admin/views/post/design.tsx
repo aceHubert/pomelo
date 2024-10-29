@@ -28,7 +28,7 @@ import {
 } from '@ace-pomelo/shared/client';
 import { Modal, message } from '@/components';
 import { useTemplateApi, usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
-import { useI18n, useUserManager, useOptions, useDeviceType } from '@/hooks';
+import { useI18n, useUserManager, useOptions, useDeviceType } from '@/composables';
 import { useLocationMixin } from '@/mixins';
 import { safeJSONParse } from '@/utils';
 import { useUserMixin, useDesignerMixin } from '@/admin/mixins';

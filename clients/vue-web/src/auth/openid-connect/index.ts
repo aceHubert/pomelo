@@ -1,16 +1,19 @@
 import * as Oidc from 'oidc-client-ts';
-import { trailingSlash } from '@ace-util/core';
+import { trailingSlash, absoluteGo } from '@ace-util/core';
 import { Modal } from '@/components';
 import { STORAGE_PREFIX } from '@/store/utils';
-import { i18n } from '../i18n';
+import { i18n } from '@/i18n/index';
 
 // Types
-import type { UserManager } from './user-manager';
+import type { UserManager } from '../user-manager';
 
-export type SigninSilentArgs = Oidc.SigninSilentArgs;
-export type SigninArgs = Oidc.SigninRedirectArgs & { noInteractive?: boolean };
-export type SignoutArgs = Oidc.SignoutRedirectArgs;
-
+export interface SigninSilentArgs extends Oidc.SigninSilentArgs {}
+export interface SigninArgs extends Oidc.SigninRedirectArgs {
+  noInteractive?: boolean;
+}
+export interface SignoutArgs extends Oidc.SignoutRedirectArgs {
+  redirect_uri?: string;
+}
 export const RedirectKey = `${STORAGE_PREFIX}/oidc.redirect`;
 export const LoginNameKey = `${STORAGE_PREFIX}/oidc.login_name`;
 export const IgnoreRoutes = ['/signin', '/signout'].map(
@@ -31,14 +34,14 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       }
     },
     writable: false,
-    enumerable: false,
+    enumerable: true,
   },
   getRedirect: {
     value: function () {
       return localStorage.getItem(RedirectKey) || '/';
     },
     writable: false,
-    enumerable: false,
+    enumerable: true,
   },
   // 存储登录时需要的额外参数
   prepareSignIn: {
@@ -52,7 +55,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       });
     },
     writable: false,
-    enumerable: false,
+    enumerable: true,
   },
   // 从存储中获取登录参数
   getExtraQueryParams: {
@@ -72,7 +75,24 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       });
     },
     writable: false,
-    enumerable: false,
+    enumerable: true,
+  },
+  modifyPassword: {
+    value: function (this: Oidc.UserManager) {
+      const { authority, client_id } = this.settings;
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          absoluteGo(
+            `${trailingSlash(authority)}password/modify?returnUrl=${encodeURIComponent(
+              location.href,
+            )}&clientId=${client_id}`,
+          );
+          resolve();
+        }, 0);
+      });
+    },
+    writable: false,
+    enumerable: true,
   },
   // 重写 signinSilent 方法，跳转之前构造登录参数
   signinSilent: {
@@ -89,7 +109,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       });
     },
     writable: false,
-    enumerable: false,
+    enumerable: true,
   },
   // try to sign in to get access token if user center is authorized and stay in current page
   // otherwise, redirect to user center to sign in
@@ -131,23 +151,31 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       }
     },
     writable: false,
-    enumerable: false,
+    enumerable: true,
   },
   // sign out and redirect to user center
   // then redirect to home page after authorized
   signout: {
     value: function (this: Oidc.UserManager, args: SignoutArgs = {}) {
+      const {
+        redirect_uri,
+        post_logout_redirect_uri,
+        redirectMethod = 'replace', // 默认使用 replace 跳转
+        extraQueryParams,
+        ...restArgs
+      } = args;
       // 退出前保存用户识别信息
       return this.getUser().then((user) =>
         this.prepareSignIn(user || void 0).then(() => {
           const $signOut = () =>
             this.signoutRedirect({
               ...args,
-              redirectMethod: args.redirectMethod ?? 'replace', // 默认使用 replace 跳转
+              ...restArgs,
+              post_logout_redirect_uri: post_logout_redirect_uri || redirect_uri,
+              redirectMethod,
               extraQueryParams: {
-                ...args.extraQueryParams,
+                ...extraQueryParams, // add extra query params
                 ui_locales: i18n.locale, // add locale
-                // add extra query params
               },
             });
 
@@ -160,7 +188,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       );
     },
     writable: false,
-    enumerable: false,
+    enumerable: true,
   },
 });
 
@@ -181,6 +209,7 @@ declare module 'oidc-client-ts' {
     saveRedirect(redirectUrl?: string): void;
     prepareSignIn(user?: Oidc.User): Promise<void>;
     getExtraQueryParams(user?: Oidc.User): Promise<Record<string, string | number | boolean>>;
+    modifyPassword(): Promise<void>;
     signin(args?: SigninArgs): Promise<void>;
     signout(args?: SignoutArgs): Promise<void>;
   }

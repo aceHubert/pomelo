@@ -4,7 +4,6 @@ import { Logger } from '@nestjs/common';
 import {
   ForbiddenError,
   jsonSafelyParse,
-  OptionAutoload,
   OptionPresetKeys,
   UserMetaPresetKeys,
   UserCapability,
@@ -14,9 +13,6 @@ import { Options, UserMeta } from '../entities';
 
 // https://github.com/microsoft/TypeScript/issues/47663
 import type {} from 'sequelize/types/utils';
-
-const __AUTOLOAD_OPTIONS__ = new Map<string, string>(); // Autoload options 缓存
-const __OPTIONS__ = new Map<string, string>(); // Not autoload options 缓存
 
 export abstract class BaseDataSource {
   protected readonly logger!: Logger;
@@ -44,59 +40,6 @@ export abstract class BaseDataSource {
    */
   protected get translate() {
     return this.datasourceService.translate;
-  }
-
-  /**
-   * Autoload Options from option table
-   * 优先返回带有tablePrefix的value
-   */
-  protected get autoloadOptions() {
-    // 避免每次从缓存字符串序列化
-    if (__AUTOLOAD_OPTIONS__.size > 0) {
-      return Promise.resolve(Object.fromEntries(__AUTOLOAD_OPTIONS__));
-    } else {
-      return (async () => {
-        // 赋默认值，initialize 会多次执行
-        const options = await Options.findAll({
-          attributes: ['optionName', 'optionValue'],
-          where: {
-            autoload: OptionAutoload.Yes,
-          },
-        }).then((options) =>
-          // 优先取带有 tablePrefix 的值
-          options.reduce((prev, curr, index, arr) => {
-            let key = curr.optionName,
-              value;
-
-            if (curr.optionName.startsWith(this.tablePrefix)) {
-              key = curr.optionName.substring(this.tablePrefix.length);
-              value = curr.optionValue;
-            } else if (
-              !(value = arr.find(
-                ({ optionName }) => optionName === `${this.tablePrefix}${curr.optionName}`,
-              )?.optionValue)
-            ) {
-              value = curr.optionValue;
-            }
-            prev[key] = value;
-            return prev;
-          }, {} as Record<string, string>),
-        );
-        // 缓存
-        Object.entries(options).forEach(([key, value]) => {
-          __AUTOLOAD_OPTIONS__.set(key, value);
-        });
-        return options;
-      })();
-    }
-  }
-
-  /**
-   * 修改 Options 时重置缓存，下次重新加载
-   */
-  protected resetOptions() {
-    __AUTOLOAD_OPTIONS__.clear();
-    __OPTIONS__.clear();
   }
 
   /**
@@ -210,36 +153,37 @@ export abstract class BaseDataSource {
    * 获取 option value (优先从缓存中取)
    * @param optionName optionName（优先返回带有tablePrefix的value）
    */
-  protected async getOption<V extends string>(optionName: string): Promise<V | undefined> {
-    // 从autoload options缓存中取值
-    let value = (await this.autoloadOptions)[optionName] as V | undefined;
-    // 从非autoload options缓存中取值
-    if (value === void 0) {
-      value = __OPTIONS__.get(optionName) as V | undefined;
-    }
+  protected async getOption<T extends string = string>(optionName: string): Promise<T | undefined> {
+    // 从缓存中取值
+    let value = await this.datasourceService.optionsCache.get<string>(optionName);
     // 如果缓存中没有，从数据库查询
-    if (value === void 0) {
+    if (value === null) {
       const options = await Options.findAll({
         attributes: ['optionName', 'optionValue'],
         where: {
           optionName: [optionName, `${this.tablePrefix}${optionName}`],
-          autoload: OptionAutoload.No,
         },
       });
 
       // 先找带有当前table前缀的参数
-      value = options.find((option) => option.optionName === `${this.tablePrefix}${optionName}`)?.optionValue as
-        | V
-        | undefined;
+      value = options.find((option) => option.optionName === `${this.tablePrefix}${optionName}`)?.optionValue ?? null;
 
       // 如果没有，找不带前缀的参数
-      if (value === void 0) {
-        value = options.find((option) => option.optionName === optionName)?.optionValue as V | undefined;
+      if (value === null) {
+        value = options.find((option) => option.optionName === optionName)?.optionValue ?? null;
       }
 
       // 缓存
-      value !== void 0 && __OPTIONS__.set(optionName, value);
+      value !== null && this.datasourceService.optionsCache.set(optionName, value);
     }
-    return value;
+
+    return value === null ? undefined : (value as T);
+  }
+
+  /**
+   * 修改 Options 时重置缓存，下次重新加载
+   */
+  protected resetOptions() {
+    this.datasourceService.optionsCache.clear();
   }
 }

@@ -161,7 +161,7 @@ export const configuration = (): ConfigFactory<ConfigObject> => () => {
     contentPath: ensureDirPath(process.env.CONTENT_PATH, 'content'),
     server: {
       host: process.env.HOST,
-      port: process.env.PORT,
+      port: Number(process.env.PORT || 3000),
       tcpHost: process.env.TCP_HOST,
       tcpPort: process.env.TCP_PORT,
       origin: process.env.ORIGIN,

@@ -1,0 +1,125 @@
+{
+  "name": "English",
+  "description": "English Language Pack",
+  "site_title": "Pomelo Site Initialization",
+  "common": {
+    "btn_text": {
+      "go_back": "Go back",
+      "back_to_home": "return to home page",
+      "cancel": "Cancel",
+      "collapse": "Collapse",
+      "confirm": "Confirm",
+      "close": "Close",
+      "create": "Create",
+      "add": "Add",
+      "edit": "Edit",
+      "update": "Update",
+      "delete": "Delete",
+      "expand": "Expand",
+      "no": "No",
+      "ok": "Ok",
+      "submit": "Submit",
+      "reset": "Reset",
+      "save": "Save",
+      "search": "Search",
+      "upload": "Upload",
+      "yes": "Yes",
+      "in_operation": "In operation",
+      "view": "View",
+      "preview": "Preview",
+      "select": "Select",
+      "skip": "Skip",
+      "crop": "Crop",
+      "skip_crop": "Skip Crop"
+    },
+    "btn_tips": {
+      "go_back": "Go back"
+    },
+    "dialog": {
+      "title": {
+        "comfirm": "Confirm",
+        "tips": "Tips"
+      },
+      "btn": {
+        "cancel": "@:common.btn_text.cancel",
+        "confirm": "@:common.btn_text.confirm",
+        "no": "@:common.btn_text.no",
+        "ok": "@:common.btn_text.ok",
+        "yes": "@:common.btn_text.yes"
+      }
+    },
+    "placeholder": {
+      "choose": "Please select {field}",
+      "input": "Please enter {field}",
+      "search": "Search for \"{field}\""
+    },
+    "search": {
+      "bulk_delete_action_text": "Delete",
+      "keyword_placeholder": "Search"
+    },
+    "tips": {
+      "afternoon": "good afternoon",
+      "early_morning": "Good morning",
+      "evening": "good evening",
+      "morning": "good morning",
+      "noon": "good afternoon",
+      "loading_text": "Loading...",
+      "theme": "Theme"
+    },
+    "error": {
+      "internal_error": "System error, please try again later!",
+      "load_module_failed": "Module load failed!",
+      "no_capability": "Sorry, you do not have permission to operate this page!",
+      "no_token_provide": "no token provided!",
+      "page_not_found": "Page not found!",
+      "refresh_token_required": "No token available for refresh!",
+      "unauthorized": "Sorry, you do not have permission to access this site.",
+      "bulk_row_select_reqrired": "Please select at least one row of data!",
+      "delete_faild": {
+        "default": "Delete failed!",
+        "with_message": "Delete failed with error: {message}!"
+      },
+      "bluk_apply_faild": {
+        "default": "Batch operation failed!",
+        "with_message": "Batch operation failed with error: {message}!"
+      }
+    }
+  },
+  "page_login": {
+    "title": "Sign In",
+    "form": {
+      "description": "Sign in to Pomelo",
+      "username_label": "UserName",
+      "username_placeholder": "LoginName/Email/Mobile",
+      "username_required": "UserName is required",
+      "password_label": "Password",
+      "password_placeholder": "Please enter the password",
+      "password_required": "Password is required",
+      "password_min_length": "Password must be at least {min} characters",
+      "remember_me_label": "Remember me",
+      "forgot_password_label": "Forgot password?",
+      "submit_btn_text": "Sign In",
+      "submit_success": "Sign in success, redirecting..."
+    }
+  },
+  "page_password_modify": {
+    "title": "Modify Password",
+    "form": {
+      "description": "Modify your password",
+      "username_label": "UserName",
+      "username_placeholder": "Please enter the username",
+      "username_required": "UserName is required",
+      "old_password_label": "Old Password",
+      "old_password_placeholder": "Please enter the old password",
+      "old_password_required": "Old password is required",
+      "new_password_label": "New Password",
+      "new_password_placeholder": "Please enter the new password",
+      "new_password_required": "New password is required",
+      "new_password_min_length": "New password must be at least {min} characters",
+      "submit_btn_text": "@:common.btn_text.submit",
+      "cancel_btn_text": "@:common.btn_text.cancel",
+      "submit_success": "Sign in success, redirecting..."
+    }
+  },
+  "page_password_forgot": {}
+}

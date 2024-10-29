@@ -3,7 +3,7 @@ import { defineComponent, ref, reactive, computed, set } from '@vue/composition-
 import { Button, Card, Descriptions, Icon, Space, Tag } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { Modal, message } from '@/components';
-import { useI18n, useDeviceType } from '@/hooks';
+import { useI18n, useDeviceType } from '@/composables';
 import { useApiResourceApi } from '@/admin/fetch';
 import { default as ResourceForm } from './components/ApiResourceForm';
 import classes from './index.module.less';

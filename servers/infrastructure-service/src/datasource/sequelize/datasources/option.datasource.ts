@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
+import { ValidationError, UserCapability, OptionAutoload } from '@ace-pomelo/shared/server';
 import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Options } from '../entities';
 import { OptionModel, OptionArgs, NewOptionInput, UpdateOptionInput } from '../interfaces/option.interface';
@@ -62,10 +62,32 @@ export class OptionDataSource extends BaseDataSource {
   }
 
   /**
-   * 获取应用程序启动里需要加载的配置项（内存缓存，修改时重新加载）
+   * 获取应用程序启动里需要加载的配置项
    */
   getAutoloads(): Promise<Record<string, string>> {
-    return this.autoloadOptions;
+    return Options.findAll({
+      attributes: ['optionName', 'optionValue'],
+      where: {
+        autoload: OptionAutoload.Yes,
+      },
+    }).then((options) =>
+      options.reduce((prev, curr, index, arr) => {
+        let key = curr.optionName,
+          value;
+
+        // 优先取带有 tablePrefix 的值
+        if (curr.optionName.startsWith(this.tablePrefix)) {
+          key = curr.optionName.substring(this.tablePrefix.length);
+          value = curr.optionValue;
+        } else if (
+          !(value = arr.find(({ optionName }) => optionName === `${this.tablePrefix}${curr.optionName}`)?.optionValue)
+        ) {
+          value = curr.optionValue;
+        }
+        prev[key] = value;
+        return prev;
+      }, {} as Record<string, string>),
+    );
   }
 
   /**
@@ -73,8 +95,8 @@ export class OptionDataSource extends BaseDataSource {
    * 反回第一个匹配name(优先查找带有tablePrefix)的值
    * @param optionName optionName
    */
-  getValue<V extends string>(optionName: string): Promise<V | undefined> {
-    return this.getOption<V>(optionName);
+  getValue(optionName: string): Promise<string | undefined> {
+    return this.getOption(optionName);
   }
 
   /**
@@ -112,7 +134,6 @@ export class OptionDataSource extends BaseDataSource {
     }
 
     const option = await Options.create(model);
-    super.resetOptions();
     return option.toJSON<OptionModel>();
   }
 
@@ -127,8 +148,14 @@ export class OptionDataSource extends BaseDataSource {
 
     await Options.update(model, {
       where: { id },
+    }).then(([count]) => {
+      if (count > 0) {
+        // 删除缓存
+        Options.findByPk(id, { attributes: ['optionName'] }).then((option) => {
+          this.datasourceService.optionsCache.del(option!.optionName);
+        });
+      }
     });
-    super.resetOptions();
   }
 
   /**
@@ -148,7 +175,13 @@ export class OptionDataSource extends BaseDataSource {
 
     await Options.destroy({
       where: { id },
+    }).then((count) => {
+      if (count > 0) {
+        // 删除缓存
+        Options.findByPk(id, { attributes: ['optionName'] }).then((option) => {
+          this.datasourceService.optionsCache.del(option!.optionName);
+        });
+      }
     });
-    super.resetOptions();
   }
 }

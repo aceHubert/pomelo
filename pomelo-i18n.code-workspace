@@ -54,6 +54,11 @@
     "i18n-ally.sourceLanguage": "zh-CN",
     "i18n-ally.localesPaths": ["src/i18n", "src/i18n/langs"],
     "i18n-ally.ignoreFiles": ["zh-CN_basic.json"],
-    "i18n-ally.translate.engines": ["baidu", "google", "deepl"]
+    "i18n-ally.translate.engines": [
+      "baidu",
+      "google",
+      "deepl"
+    ],
+    "liveServer.settings.multiRootWorkspaceName": "pomelo"
   }
 }

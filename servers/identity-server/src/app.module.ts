@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { createLocalJWKSet } from 'jose';
 import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -24,7 +23,7 @@ import {
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule, getJWKS } from '@ace-pomelo/nestjs-authorization';
+import { AuthorizationModule, getJWKS, createLocalJWKSet } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
@@ -165,9 +164,26 @@ const logger = new Logger('AppModule', { timestamp: true });
     }),
     AuthorizationModule.forRootAsync({
       isGlobal: true,
-      useFactory: async (config: ConfigService) => ({
-        publicKey: createLocalJWKSet(await getJWKS(config.get('PRIVATE_KEY'))),
-      }),
+      useFactory: async (config: ConfigService) => {
+        const { keys } = await getJWKS([config.get('PRIVATE_KEY')].filter(Boolean) as string[]);
+        return {
+          verifyingKey: createLocalJWKSet({
+            keys: keys.map((jwk) => ({
+              kty: jwk.kty,
+              use: jwk.use,
+              key_ops: jwk.key_ops ? [...jwk.key_ops] : undefined,
+              kid: jwk.kid,
+              alg: jwk.alg,
+              crv: jwk.crv,
+              e: jwk.e,
+              n: jwk.n,
+              x: jwk.x,
+              x5c: jwk.x5c ? [...jwk.x5c] : undefined,
+              y: jwk.y,
+            })),
+          }),
+        };
+      },
       inject: [ConfigService],
     }),
     RamAuthorizationModule.forRoot({
@@ -218,7 +234,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       useFactory: async (config: ConfigService, storageOptions: StorageOptions) => ({
         debug: config.get('OIDC_DEBUG', false),
         path: config.get('OIDC_PATH'),
-        jwks: await getJWKS(config.get('PRIVATE_KEY')),
+        jwks: await getJWKS([config.get('PRIVATE_KEY')].filter(Boolean) as string[]),
         storage: storageOptions.use,
       }),
       inject: [ConfigService, STORAGE_OPTIONS],

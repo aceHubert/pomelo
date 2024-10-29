@@ -3,7 +3,7 @@ import hljs from 'highlight.js/lib/core';
 import Lazyload from 'lazyload';
 import { defineComponent, computed, onMounted } from '@vue/composition-api';
 import { TemplatePageType } from '@ace-pomelo/shared/client';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { useLocationMixin } from '@/mixins';
 import { PostMetaPresetKeys } from '@/fetch/apis';
 import { safeJSONParse } from '@/utils';

@@ -13,7 +13,7 @@ import {
   Icon,
 } from 'ant-design-vue';
 import { ColorInput } from 'antdv-layout-pro';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { PropertyType } from '../utils/constants';
 
 // Types

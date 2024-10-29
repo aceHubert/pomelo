@@ -1,0 +1,70 @@
+@import '@ace-pomelo/theme/lib/index';
+@import (reference, multiple) '@ace-pomelo/theme/lib/themes/default';
+@import (multiple) '@ace-pomelo/theme/lib/core/colors';
+@import (multiple) 'antdv-layout-pro/style/component-reset';
+@import (reference, multiple) 'antdv-layout-pro/style/themes/default';
+
+body {
+  background: var(--body-background, #fff) url('@/assets/images/big_bg.png') no-repeat right bottom;
+  background-size: contain;
+}
+
+.app-content {
+  &__wrapper {
+    width: 100%;
+    height: 100%;
+    // transition: 0.3s;
+    position: relative;
+
+    &.content-width-fixed {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    // webkit h1 在section下字号不正常， layout 使用section布局
+    h1 {
+      font-size: 2em;
+    }
+
+    .locales {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 1000;
+      padding: 20px;
+      display: flex;
+    }
+
+    .locale-item {
+      padding: 0 8px;
+      flex: 1;
+      cursor: pointer;
+
+      &.selected {
+        color: @var-primary;
+        cursor:not-allowed;
+      }
+    }
+
+    .locale-item + .locale-item {
+      position: relative;
+
+      &:before {
+        .setLeftLine(@border-color-base);
+        top: 4px;
+        bottom: 4px;
+      }
+    }
+  }
+
+  &__loading {
+    padding-top: 30%;
+    background-color: fadeout(@white, 30%);
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+  }
+}

@@ -4,8 +4,9 @@ import { absoluteGo } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { Form, Input, Select, Button } from 'ant-design-vue';
 import { message } from '@/components/antdv-helper';
-import { useI18n } from '@/hooks/i18n';
+import { useI18n } from '@/composables';
 import { useDeviceMixin } from '@/mixins/device';
+import { formatError } from '@/fetch/graphql/utils/helpers';
 import { useSiteInitApi } from '@/initialize/fetch';
 import classes from './index.module.less';
 
@@ -55,8 +56,6 @@ export default Form.create({})(
         props.form.validateFields((err, values) => {
           if (err) return;
 
-          loading.value = true;
-
           siteInitApi
             .start({
               variables: {
@@ -77,7 +76,7 @@ export default Form.create({})(
               });
             })
             .catch((err) => {
-              message.error(err.message);
+              message.error(formatError(err).message);
             });
         });
       };
@@ -105,6 +104,7 @@ export default Form.create({})(
                     ],
                   },
                 ]}
+                size="large"
                 placeholder={i18n.tv('page_site_init.form.title_placeholder', '请输入站点标题')}
               />
             </Form.Item>
@@ -128,6 +128,7 @@ export default Form.create({})(
                     ],
                   },
                 ]}
+                size="large"
                 placeholder={i18n.tv('page_site_init.form.password_placeholder', '请输入管理员密码')}
               />
             </Form.Item>
@@ -148,6 +149,7 @@ export default Form.create({})(
                     ],
                   },
                 ]}
+                size="large"
                 placeholder={i18n.tv('page_site_init.form.email_placeholder', '请输入管理员邮箱')}
               />
             </Form.Item>
@@ -169,6 +171,7 @@ export default Form.create({})(
                     ],
                   },
                 ]}
+                size="large"
                 placeholder={i18n.tv('page_site_init.form.home_url_placeholder', '请输入主页地址')}
               />
             </Form.Item>
@@ -186,6 +189,7 @@ export default Form.create({})(
                     ],
                   },
                 ]}
+                size="large"
                 placeholder={i18n.tv('page_site_init.form.locale_placeholder', '请输入默认语言')}
               >
                 <Select.Option value="en-US">English</Select.Option>

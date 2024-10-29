@@ -1,5 +1,5 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
-import { KeyLike, JWTVerifyGetKey } from 'jose';
+import { JWTVerifyGetKey, KeyLike } from 'jose';
 import { ClientMetadata, HttpOptions } from 'openid-client';
 import { ChannelType } from './multitenant.interface';
 
@@ -14,7 +14,7 @@ export type AuthorizationOptions = {
   /**
    * Public key to verify the jwt token.
    */
-  publicKey?: KeyLike | JWTVerifyGetKey;
+  verifyingKey?: string | KeyLike | JWTVerifyGetKey;
 
   /**
    * Discovery endpoint URL of the identity server.
@@ -25,6 +25,17 @@ export type AuthorizationOptions = {
    * Use jwks to verify the jwt token.
    */
   useJWKS?: boolean;
+
+  /**
+   * URL of the token verification endpoint of the identity server.
+   */
+  introspectionEndpoint?: string;
+
+  /**
+   * Authentication method name for token introspection.
+   * @default client_secret_basic
+   */
+  introspectionEndpointAuthMethod?: string;
 
   /**
    * openid-client http options

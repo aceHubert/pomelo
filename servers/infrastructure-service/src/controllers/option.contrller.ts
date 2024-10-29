@@ -23,7 +23,7 @@ export class OptionController {
 
   @MessagePattern(OptionPattern.GetValue)
   getValue(@Payload('optionName') optionName: string): Promise<string | undefined> {
-    return this.optionDataSource.getValue<string>(optionName);
+    return this.optionDataSource.getValue(optionName);
   }
 
   @MessagePattern(OptionPattern.GetList)

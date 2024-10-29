@@ -1,18 +1,50 @@
+export interface IUser {
+  access_token: string;
+  /** The claims represented by a combination of the id_token and the user info endpoint */
+  get profile(): {
+    sub: string;
+    [key: string]: any;
+  };
+
+  /** Calculated value indicating if the access token is expired */
+  get expired(): boolean | undefined;
+}
+
+export interface ISigninArgs {
+  /** If true, the signin request will not be interactive */
+  noInteractive?: boolean;
+  /** The URL to redirect to after the signin request */
+  redirect_uri?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ISignoutArgs {
+  /** The URL to redirect to after the signin request */
+  redirect_uri?: string;
+}
+
 /**
  * 用户管理基类
- * TODO: 考虑一下用 interface 还是 abstract class
  */
-export interface UserManager<SigninArgs = any, SignoutArgs = any, User = any> {
+export abstract class UserManager<
+  SigninArgs extends ISigninArgs = ISigninArgs,
+  SignoutArgs extends ISignoutArgs = ISignoutArgs,
+  User extends IUser = IUser,
+> {
   /**
    * 获取用户
    */
-  getUser(): Promise<User | null>;
+  abstract getUser(): Promise<User | null>;
+  /**
+   * 修改密码
+   */
+  abstract modifyPassword(): Promise<void>;
   /**
    * 触发跳转到授权页面, 并确保登录完成后跳转到当前页面
    */
-  signin(args?: SigninArgs): Promise<void>;
+  abstract signin(args?: SigninArgs): Promise<void>;
   /**
    * 触发跳转到结束会话页
    */
-  signout(args?: SignoutArgs): Promise<void>;
+  abstract signout(args?: SignoutArgs): Promise<void>;
 }

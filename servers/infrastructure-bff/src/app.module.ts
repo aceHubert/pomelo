@@ -27,7 +27,13 @@ import {
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
-import { AuthorizationModule, AuthorizationService, getPublicKey } from '@ace-pomelo/nestjs-authorization';
+import {
+  AuthorizationModule,
+  AuthorizationService,
+  createLocalJWKSet,
+  getJWKS,
+  getSigningKey,
+} from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
@@ -152,8 +158,23 @@ const logger = new Logger('AppModule', { timestamp: true });
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => {
+        const { keys } = await getJWKS([config.get('PRIVATE_KEY')].filter(Boolean) as string[]);
         return {
-          publicKey: await getPublicKey(config.get('PUBLIC_KEY')),
+          verifyingKey: createLocalJWKSet({
+            keys: keys.map((jwk) => ({
+              kty: jwk.kty,
+              use: jwk.use,
+              key_ops: jwk.key_ops ? [...jwk.key_ops] : undefined,
+              kid: jwk.kid,
+              alg: jwk.alg,
+              crv: jwk.crv,
+              e: jwk.e,
+              n: jwk.n,
+              x: jwk.x,
+              x5c: jwk.x5c ? [...jwk.x5c] : undefined,
+              y: jwk.y,
+            })),
+          }),
         };
       },
       inject: [ConfigService],
@@ -272,6 +293,17 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService],
     }),
+    OptionModule,
+    TermTaxonomyModule,
+    TemplateModule,
+    UserModule.forRootAsync({
+      useFactory: async (config: ConfigService) => ({
+        isGlobal: true,
+        signingKey: await getSigningKey(config.get('PRIVATE_KEY')),
+        tokenExpiresIn: config.get('JWT_EXPIRES_IN'),
+      }),
+      inject: [ConfigService],
+    }),
     // ObsModule.forRootAsync({
     //   useFactory: (config: ConfigService) => ({
     //     accessKey: config.get('OBS_ACCESS_KEY', ''),
@@ -299,10 +331,6 @@ const logger = new Logger('AppModule', { timestamp: true });
     //   }),
     //   inject: [ConfigService],
     // }),
-    OptionModule,
-    TermTaxonomyModule,
-    TemplateModule,
-    UserModule,
   ],
   controllers: [AppController],
   providers: [

@@ -4,7 +4,7 @@ import DecoupledEditor from '@ckeditor/ckeditor5-build-decoupled-document';
 import BalloonEditor from '@ckeditor/ckeditor5-build-balloon';
 // import { obsUpload, obsDisplayUrl } from '../../../media/utils/obs';
 import { Modal } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 // import { useResApi } from '@/fetch/graphql';
 import { MediaList } from '../../../media/components';
 import './index.less';

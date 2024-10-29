@@ -119,7 +119,7 @@ export async function syncDatabase(app: INestApplication<any>) {
           {
             applicationType: 'native',
             clientId: '75a9c633-cfde-4954-b35c-9344ed9b781a',
-            clientName: 'Pomelo BFF Server',
+            clientName: 'Pomelo ApiSix Gateway',
             accessTokenFormat: 'jwt',
             requireAuthTime: true,
             requirePkce: true,

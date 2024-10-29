@@ -1,3 +1,4 @@
+import { AuthType } from '@/auth';
 import IconDashboard from '@admin/assets/icons/dashboard.svg?inline';
 import IconPictures from '@admin/assets/icons/pictures.svg?inline';
 import IconCagetory from '@admin/assets/icons/category.svg?inline';
@@ -15,7 +16,7 @@ import IconScope from '@admin/assets/icons/scope.svg?inline';
 // Types
 import type { MenuConfig } from 'antdv-layout-pro/types';
 
-export const getDefaultMenus = (): MenuConfig[] => [
+export const getDefaultMenus = (type?: AuthType): MenuConfig[] => [
   {
     key: 'dashboard',
     title: (i18nRender) => i18nRender('menu.dashboard', '仪表盘'),
@@ -154,6 +155,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
         path: '/clients',
         icon: IconSettings,
         position: 'top',
+        display: type !== AuthType.Oidc ? false : void 0,
         children: [
           {
             key: 'clients',

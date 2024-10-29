@@ -6,7 +6,7 @@ import { Card, Descriptions, Popconfirm, Space, Spin } from 'ant-design-vue';
 import { SearchForm, AsyncTable } from 'antdv-layout-pro';
 import { TemplateStatus } from '@ace-pomelo/shared/client';
 import { useTemplateApi } from '@/fetch/apis';
-import { useI18n, useUserManager } from '@/hooks';
+import { useI18n, useUserManager } from '@/composables';
 import { useDeviceMixin } from '@/mixins';
 import { useTemplateMixin } from '@/admin/mixins';
 import { TemplateType } from './constants';

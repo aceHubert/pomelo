@@ -35,7 +35,7 @@ import {
 import { trailingSlash, equals, warn } from '@ace-util/core';
 import { Modal, message } from '@/components';
 import { useTemplateApi, useFormApi, FormMetaPresetKeys } from '@/fetch/apis';
-import { useI18n, useUserManager, useOptions } from '@/hooks';
+import { useI18n, useUserManager, useOptions } from '@/composables';
 import { useLocationMixin } from '@/mixins';
 import { safeJSONParse } from '@/utils';
 import { useUserMixin, useDesignerMixin, useFormilyMixin } from '@/admin/mixins';

@@ -6,12 +6,12 @@ import Vue, { type ComponentOptions } from 'vue';
 import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
+import { Authoriztion, AuthType } from '@/auth';
 import { Modal } from '@/components';
 import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
 import { pinia } from '@/store';
-import { auth } from '@/auth';
 import * as plugins from '@/plugins';
 
 // Local
@@ -24,10 +24,10 @@ import './assets/styles/index.less';
 import zhCN from './locales/zh-CN.json';
 import enUS from './locales/en-US.json';
 
+Vue.config.productionTip = false;
 Vue.use(VueCompositionApi);
 Vue.use(ResourceManagerVuePlugin, { mode: 'visible' });
-Vue.use(auth);
-Vue.config.productionTip = false;
+Vue.use(Authoriztion);
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {
@@ -120,10 +120,12 @@ function clearModals(this: Vue) {
 createApp().then(({ app, router }) => {
   const _app = new Vue(app);
 
+  // Set auth type
+  const authType = _app.$config.auth_type as AuthType;
+  authType && Object.values(AuthType).includes(authType) && Authoriztion.setType(authType);
+
   router.beforeEach(authMiddleware.bind(_app));
-
   router.afterEach(clearModals.bind(_app));
-
   router.isReady().then(() => {
     authMiddleware.call(_app, router.currentRoute, router.currentRoute, (path) => {
       // If not redirected

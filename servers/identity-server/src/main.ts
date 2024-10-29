@@ -33,8 +33,8 @@ bootstrap<NestExpressApplication>(AppModule, {
     // sync database
     await syncDatabase(app);
 
-    const host = configService.get<string>('server.host', '');
-    const port = configService.get<number>('server.port', 3000);
+    const host = configService.get<string>('server.host');
+    const port = configService.get<number>('server.port');
     const cors = configService.get<boolean | CorsOptions>('server.cors', false);
     globalPrefix = normalizeRoutePath(configService.get<string>('server.globalPrefixUri', ''));
     isSwaggerDebug = configService.get<boolean>('swagger.debug', false);

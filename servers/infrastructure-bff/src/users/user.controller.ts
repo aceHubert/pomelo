@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ApiTags, ApiQuery, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
 import {
   Inject,
@@ -15,11 +15,13 @@ import {
   ParseIntPipe,
   ParseArrayPipe,
   ParseEnumPipe,
+  Req,
   Res,
   HttpStatus,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Authorized } from '@ace-pomelo/nestjs-authorization';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { AuthorizationService, Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   ParseQueryPipe,
@@ -39,11 +41,16 @@ import {
 import { UserAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
+import { UserService } from './user.service';
+import { UserClaims } from './interfaces/user-claims.interface';
+import { UserOptions } from './interfaces/user-options.interface';
 import { NewUserDto } from './dto/new-user.dto';
 import { NewUserMetaDto } from './dto/new-user-meta.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserPasswordDto } from './dto/update-user.dto';
 import { PagedUserQueryDto } from './dto/user-query.dto';
+import { VerifyUserDto } from './dto/verify-user.dto';
 import { UserModelResp, UserWithMetasModelResp, PagedUserResp, UserMetaModelResp } from './resp/user-model.resp';
+import { USER_OPTIONS } from './constants';
 
 @ApiTags('user')
 @Authorized()
@@ -64,7 +71,12 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     return [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
   },
 }) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+  constructor(
+    @Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy,
+    @Inject(USER_OPTIONS) private readonly options: UserOptions,
+    private readonly userService: UserService,
+    private readonly authService: AuthorizationService,
+  ) {
     super(basicService);
   }
 
@@ -94,24 +106,11 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.basicService
-      .send<UserModelResp | undefined>(UserPattern.Get, {
-        id,
-        fields: [
-          'id',
-          'loginName',
-          'niceName',
-          'displayName',
-          'mobile',
-          'email',
-          'url',
-          'status',
-          'updatedAt',
-          'createdAt',
-        ],
-        requestUserId: Number(requestUser.sub),
-      })
-      .lastValue();
+    const result = await this.userService.getUser(
+      id,
+      ['id', 'loginName', 'niceName', 'displayName', 'mobile', 'email', 'url', 'status', 'updatedAt', 'createdAt'],
+      Number(requestUser.sub),
+    );
 
     let metas;
     if (result) {
@@ -119,7 +118,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
         .send<MetaModelResp[]>(UserPattern.GetMetas, {
           userId: id,
           metaKeys,
-          fields: ['id', 'userId', 'metaKey', 'metaValue'],
+          fields: ['id', 'metaKey', 'metaValue'],
         })
         .lastValue();
     }
@@ -193,7 +192,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
 
     const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
       await this.basicService
-        .send(UserPattern.Create, {
+        .send<UserModelResp>(UserPattern.Create, {
           ...input,
           loginPwd: md5(input.loginPwd).toString(),
           niceName: input.loginName,
@@ -280,6 +279,23 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     }
   }
 
+  @Patch('password/update')
+  @RamAuthorized(UserAction.UpdatePassword)
+  @ApiOkResponse({
+    description: '"true" if success or "false" if user does not exist',
+    type: () => createResponseSuccessType({}, 'UpdateUserStatusModelSuccessResp'),
+  })
+  async updateUserPassword(@Body() model: UpdateUserPasswordDto, @User() requestUser?: RequestUser): Promise<void> {
+    return this.basicService
+      .send<void>(UserPattern.UpdatePassword, {
+        id: requestUser?.sub,
+        username: model.username,
+        oldPwd: md5(model.oldPwd),
+        newPwd: md5(model.newPwd),
+      })
+      .lastValue();
+  }
+
   /**
    * Delete user permanently (must be in "trash" status)
    */
@@ -303,5 +319,58 @@ export class UserController extends createMetaController('user', UserMetaModelRe
       this.logger.error(e);
       return this.faild(e.message);
     }
+  }
+
+  /**
+   * Sign in
+   */
+  @Post('signin')
+  @Anonymous()
+  async signIn(@Body() input: VerifyUserDto, @Req() req: Request, @I18n() i18n: I18nContext) {
+    const result = await this.basicService
+      .send<false | UserModelResp>(UserPattern.Verify, {
+        username: input.username,
+        password: md5(input.password).toString(),
+      })
+      .lastValue();
+    if (result) {
+      const account: UserClaims = {
+        id: result.id,
+        login_name: result.loginName,
+        display_name: result.displayName,
+        nice_name: result.niceName,
+        url: result.url,
+        updated_at: new Date(result.updatedAt).getTime(),
+      };
+
+      if (result.email) {
+        account['email'] = result.email;
+        account['email_verified'] = true;
+      }
+
+      if (result.mobile) {
+        account['phone_number'] = result.mobile;
+        account['phone_number_verified'] = true;
+      }
+
+      const claims = await this.userService.getClaims(result.id);
+      const { id: accountId, ...rest } = account;
+
+      return this.success({
+        data: await this.authService.createToken(
+          {
+            sub: String(accountId),
+            ...claims,
+            ...rest,
+          },
+          this.options.signingKey,
+          {
+            issuer: req.get('origin'),
+            expiresIn: this.options.tokenExpiresIn,
+          },
+        ),
+      });
+    }
+    return this.faild(i18n.tv('user.login.fail', 'Username or Password is incorrect!'));
   }
 }

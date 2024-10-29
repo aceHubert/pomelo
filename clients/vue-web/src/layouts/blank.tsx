@@ -2,7 +2,7 @@ import { upperFirst } from 'lodash-es';
 import { defineComponent } from '@vue/composition-api';
 import { ConfigProvider, Spin, ANT_PREFIX_CLS } from '@/components';
 import { useAppMixin, useDeviceMixin } from '@/mixins';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { loadingRef } from '@/shared';
 import { RouterView } from './components';
 import classes from './blank.module.less';

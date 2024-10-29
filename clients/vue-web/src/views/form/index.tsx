@@ -5,7 +5,7 @@ import { getActiveFetch } from '@ace-fetch/vue';
 import { createResource } from '@vue-async/resource-manager';
 import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { SkeletonLoader, Result } from '@/components';
-import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
+import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/composables';
 import { useFormApi, FormMetaPresetKeys } from '@/fetch/apis';
 
 const MobileForm = () => import(/* webpackChunkName: "mobile" */ './mobile');

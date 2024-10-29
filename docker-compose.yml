@@ -78,11 +78,11 @@ services:
       - server
     ##network_mode: host
     ports:
-      - '3180:9180/tcp' # admin_control: true
-      - '3080:9080/tcp'  # http
-      - '3091:9091/tcp'  # prometheus
-      - '3443:9443/tcp'  # tls http/2
-      - '3092:9092/tcp' # enable_control: true
+      - '9180:9180/tcp' # admin_control: true
+      - '9080:9080/tcp'  # http
+      - '9091:9091/tcp'  # prometheus
+      - '9443:9443/tcp'  # tls http/2
+      - '9092:9092/tcp' # enable_control: true
     networks:
       - default
 networks:

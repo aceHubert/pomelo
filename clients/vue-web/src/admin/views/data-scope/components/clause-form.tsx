@@ -2,7 +2,7 @@ import { defineComponent, ref, reactive, computed, watch } from '@vue/compositio
 import { Button, Input, InputNumber, Select, Checkbox, DatePicker, Tooltip } from 'ant-design-vue';
 import { warn, promisify, equals } from '@ace-util/core';
 import { message } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { ClauseOperator, ClauseLogical, GroupState, ClauseValueType } from '../constants';
 import './styles/clause-form.less';
 

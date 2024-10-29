@@ -3,7 +3,7 @@ import { warn, isAbsoluteUrl, trailingSlash } from '@ace-util/core';
 import { createResource } from '@vue-async/resource-manager';
 import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { SkeletonLoader, Result } from '@/components';
-import { useI18n, useOptions, useEffect, expose } from '@/hooks';
+import { useI18n, useOptions, useEffect, expose } from '@/composables';
 import { useDeviceMixin } from '@/mixins';
 import { usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
 

@@ -4,7 +4,7 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { createResource } from '@vue-async/resource-manager';
 import { getFrameworkSchema, OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { SkeletonLoader, Result } from '@/components';
-import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/hooks';
+import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/composables';
 import { usePageApi, PageMetaPresetKeys } from '@/fetch/apis';
 import { HomeDefault } from './components/home-default';
 

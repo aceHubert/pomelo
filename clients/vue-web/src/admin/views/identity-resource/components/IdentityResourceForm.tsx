@@ -1,6 +1,6 @@
 import { defineComponent } from '@vue/composition-api';
 import { Form, Input, Switch } from 'ant-design-vue';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 
 // Types
 import type { WrappedFormUtils } from 'ant-design-vue/types/form/form';

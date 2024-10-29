@@ -4,7 +4,7 @@ import { Icon, Spin, Drawer, Descriptions, Upload } from 'ant-design-vue';
 import { createResource } from '@vue-async/resource-manager';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { message } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { useUploadMixin, useLocationMixin } from '@/mixins';
 import { useResApi } from '@/fetch/apis';
 import FileUnknownSvg from '@admin/assets/icons/file-unknown-fill.svg';

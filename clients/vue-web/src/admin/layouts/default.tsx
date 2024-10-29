@@ -1,6 +1,6 @@
 import { defineComponent, ref, computed, onMounted, nextTick } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { isAbsoluteUrl, trailingSlash } from '@ace-util/core';
+import { isAbsoluteUrl } from '@ace-util/core';
 import { Icon, Space, Tooltip, Menu, Spin } from 'ant-design-vue';
 import {
   ConfigProvider,
@@ -21,7 +21,7 @@ import {
 } from 'antdv-layout-pro/types';
 import { OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { Modal, sanitizeComponent, ANT_PREFIX_CLS } from '@/components';
-import { useUserManager, usePubSubMessage, useI18n, useOptions } from '@/hooks';
+import { useUserManager, usePubSubMessage, useI18n, useOptions } from '@/composables';
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
 import { RouterView } from '@/layouts/components';
 import { loadingRef } from '@/shared';
@@ -30,6 +30,9 @@ import IconLightTheme from '@admin/assets/icons/light-theme.svg?inline';
 import { getDefaultMenus } from '../configs/menu.config';
 import classes from './default.module.less';
 
+// Types
+import type { AuthType } from '@/auth';
+
 export default defineComponent({
   name: 'DefaultLayout',
   setup() {
@@ -37,6 +40,7 @@ export default defineComponent({
     const route = useRoute();
     const i18n = useI18n();
     const homeUrl = useOptions(OptionPresetKeys.Home);
+    const authType = useOptions<AuthType>('auth_type');
     const appMixin = useAppMixin();
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
@@ -121,7 +125,7 @@ export default defineComponent({
     //         ]);
     //     });
     // } else {
-    menus.value = getDefaultMenus();
+    menus.value = getDefaultMenus(authType.value);
     // }
 
     const menuBreadcrumbs = ref<BreadcrumbConfig[]>([]);
@@ -138,11 +142,7 @@ export default defineComponent({
     const handleActionClick = (key: AvatarDropdownAction | 'password-modify') => {
       switch (key) {
         case 'password-modify':
-          locationMixin.goTo(
-            `${trailingSlash(userManager.settings.authority)}password/modify?returnUrl=${encodeURIComponent(
-              location.href,
-            )}&clientId=${userManager.settings.client_id}`,
-          );
+          userManager.modifyPassword();
           break;
         case 'setting-drawer':
           settingDrawerVisible.value = !settingDrawerVisible.value;

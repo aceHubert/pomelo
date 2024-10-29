@@ -7,7 +7,7 @@ import { Form, FormButtonGroup, Submit } from '@formily/antdv';
 import * as Antdv from '@formily/antdv';
 import { Spin, Result } from '@/components';
 import { useLocationMixin } from '@/mixins';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { FormMetaPresetKeys } from '@/fetch/apis';
 import { safeJSONParse } from '@/utils';
 import { checkSchemaValid, type IFormilySchema } from './utils';

@@ -6,6 +6,7 @@ export class UserAction implements IRAMActionDefine {
   static readonly Create = 'user.create';
   static readonly Update = 'user.update';
   static readonly UpdateStatus = 'user.update.status';
+  static readonly UpdatePassword = 'user.update.password';
   static readonly Delete = 'user.delete';
 
   // metas

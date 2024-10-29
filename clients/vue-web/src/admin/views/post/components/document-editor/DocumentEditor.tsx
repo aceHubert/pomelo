@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { defineComponent } from '@vue/composition-api';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { HtmlEditor } from '../html-editor';
 import './index.less';
 

@@ -17,7 +17,7 @@ import {
 } from 'ant-design-vue';
 import { useRouter } from 'vue2-helpers/vue-router';
 import { Modal, message } from '@/components';
-import { useI18n } from '@/hooks';
+import { useI18n } from '@/composables';
 import { useClientApi } from '@/admin/fetch';
 import { MediaList } from '../media/components';
 import classes from './detail.module.less';

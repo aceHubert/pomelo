@@ -1,5 +1,6 @@
 import { Injectable, Inject, Logger, OnApplicationShutdown } from '@nestjs/common';
 import { SyncOptions, CreationAttributes } from 'sequelize';
+import { createCache } from 'cache-manager';
 import { InfrastructureDatasourceOptions } from './interfaces/infrastructure-datasource-options.interface';
 import { DataInitArgs } from './interfaces/data-init-args.interface';
 import { Sequelize, SequelizeOptions } from './sequelize/sequelize';
@@ -24,6 +25,7 @@ import { INFRASTRUCTURE_DATASOURCE_OPTIONS } from './constants';
 export class InfrastructureDatasourceService implements OnApplicationShutdown {
   private readonly logger = new Logger(Sequelize.name, { timestamp: true });
   readonly sequelize: Readonly<Sequelize>;
+  readonly optionsCache: ReturnType<typeof createCache>;
 
   constructor(@Inject(INFRASTRUCTURE_DATASOURCE_OPTIONS) private readonly options: InfrastructureDatasourceOptions) {
     const sequelizeOptions: SequelizeOptions = {
@@ -64,6 +66,7 @@ export class InfrastructureDatasourceService implements OnApplicationShutdown {
               ...options.connection.define,
             },
           });
+    this.optionsCache = createCache({ ttl: options.optionsCacheTTL ?? 6000 });
   }
 
   get tablePrefix() {
