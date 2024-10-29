@@ -1,3 +1,20 @@
+consumers:
+  - username: pomelo_oidc
+    plugins:
+      key-auth:
+        key: pomelo-oidc
+      openid-connect:
+        bearer_only: true
+        # set client metadata
+        # client_id: CLIENT_ID
+        # client_secret: CLIENT_SECRET
+        discovery: http://pomelo-server:3003/identity/oauth2/.well-known/openid-configuration
+        unauth_action: pass
+        use_jwks: true
+  - username: pomelo_local
+    plugins:
+      key-auth:
+        key: pomelo-local
 routes:
   - uri: /action/basic*
     name: pomelo-basic
@@ -11,17 +28,13 @@ routes:
       - OPTIONS
       - CONNECT
     plugins:
-      cors:
-      openid-connect:
+      key-auth:
         _meta:
           disable: false
-        bearer_only: false
-        # set client metadata
-        # client_id: CLIENT_ID
-        # client_secret: CLIENT_SECRET
-        discovery: http://pomelo-server:3003/identity/oauth2/.well-known/openid-configuration
-        unauth_action: pass
-        use_jwks: true
+        header: apikey
+        hide_credentials: true
+        query: key
+      cors:
       proxy-rewrite:
         regex_uri:
           - ^/action/basic(/?)(.*)
