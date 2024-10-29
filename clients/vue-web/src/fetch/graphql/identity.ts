@@ -25,12 +25,16 @@ export const identityLink = from([
     },
   }),
   setHeaders(async () => {
-    const userManager = Authoriztion.getInstance().userManager,
+    const instance = Authoriztion.getInstance(),
+      authType = instance.type,
+      userManager = instance.userManager,
       token = await userManager
         .getUser()
         .then((user) => user?.access_token)
         .catch(() => '');
-    const headers = {};
+    const headers = {
+      apikey: `pomelo-${authType}`,
+    };
 
     token && (headers['Authorization'] = `Bearer ${token}`);
     i18n.locale && (headers['x-custom-locale'] = i18n.locale);

@@ -16,20 +16,23 @@ export const basicLink = split(
     const definition = getMainDefinition(query);
     return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
   },
-  createWebsocketLink(graphqlSubscriptionBase, {
-    connectionParams: async () => {
-      const userManager = Authoriztion.getInstance().userManager,
-        token = await userManager
-          .getUser()
-          .then((user) => user?.access_token)
-          .catch(() => '');
+  createWebsocketLink(
+    graphqlSubscriptionBase + (graphqlSubscriptionBase.indexOf('?') >= 0 ? '&' : '?') + 'key=pomelo-local',
+    {
+      connectionParams: async () => {
+        const userManager = Authoriztion.getInstance().userManager,
+          token = await userManager
+            .getUser()
+            .then((user) => user?.access_token)
+            .catch(() => '');
 
-      return {
-        token,
-        lang: i18n.locale,
-      };
+        return {
+          token,
+          lang: i18n.locale,
+        };
+      },
     },
-  }),
+  ),
   from([
     errorHandler({
       unauthorize: () => Authoriztion.getInstance().userManager.signin(),
@@ -48,12 +51,16 @@ export const basicLink = split(
       },
     }),
     setHeaders(async () => {
-      const userManager = Authoriztion.getInstance().userManager,
+      const instance = Authoriztion.getInstance(),
+        authType = instance.type,
+        userManager = instance.userManager,
         token = await userManager
           .getUser()
           .then((user) => user?.access_token)
           .catch(() => '');
-      const headers = {};
+      const headers = {
+        apikey: `pomelo-${authType}`,
+      };
 
       token && (headers['Authorization'] = `Bearer ${token}`);
       i18n.locale && (headers['x-custom-locale'] = i18n.locale);

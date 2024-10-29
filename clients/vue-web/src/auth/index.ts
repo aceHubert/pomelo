@@ -13,8 +13,8 @@ export enum AuthType {
 }
 
 export class Authoriztion {
-  private static type: AuthType;
   private static instance: Authoriztion;
+  type: AuthType;
   userManager: UserManager & Partial<Pick<OidcUserManagerType, 'signinSilent' | 'storeUser'>>;
 
   constructor(type: AuthType.Oidc, options: ConstructorParameters<typeof OidcUserManagerCreator>[0]);
@@ -23,6 +23,7 @@ export class Authoriztion {
     type: AuthType,
     options: ConstructorParameters<typeof LocalUserManagerCreator | typeof OidcUserManagerCreator>[0],
   ) {
+    this.type = type;
     if (type === AuthType.Oidc) {
       const userManager = new OidcUserManagerCreator(options as OidcUserManngerSetions);
 
@@ -36,9 +37,8 @@ export class Authoriztion {
   }
 
   static setType = (type: AuthType) => {
-    if (this.type === type) return this;
+    if (this.instance?.type === type) return this;
 
-    this.type = type;
     this.instance =
       type === AuthType.Oidc
         ? new Authoriztion(AuthType.Oidc, getEnv<OidcUserManngerSetions>('oidc', {} as any, window._ENV))
