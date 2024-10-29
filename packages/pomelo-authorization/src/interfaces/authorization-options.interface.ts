@@ -27,6 +27,17 @@ export type AuthorizationOptions = {
   useJWKS?: boolean;
 
   /**
+   * URL of the token verification endpoint of the identity server.
+   */
+  introspectionEndpoint?: string;
+
+  /**
+   * Authentication method name for token introspection.
+   * @default client_secret_basic
+   */
+  introspectionEndpointAuthMethod?: string;
+
+  /**
    * openid-client http options
    */
   httpOptions?: HttpOptions;

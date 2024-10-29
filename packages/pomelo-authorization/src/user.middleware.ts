@@ -18,7 +18,7 @@ export class UserMiddleware implements NestMiddleware {
     try {
       const { tenantId, channelType } = this.authService.getMultitenantParamsFromRequest(req);
 
-      let userStr: string, payload: JWTPayload;
+      let userStr: string, payload: JWTPayload | undefined;
       if ((userStr = req.headers[this.options.setUserinfoHeader!] as string)) {
         // from apisix
         payload = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
@@ -30,10 +30,12 @@ export class UserMiddleware implements NestMiddleware {
         payload = await this.authService.verifyToken(accessToken);
       }
 
-      payload['tenant_id'] = tenantId;
-      payload['channel_type'] = channelType;
+      if (payload) {
+        payload['tenant_id'] = tenantId;
+        payload['channel_type'] = channelType;
 
-      req[this.options.userProperty!] = payload;
+        req[this.options.userProperty!] = payload;
+      }
 
       next();
     } catch (err: any) {
