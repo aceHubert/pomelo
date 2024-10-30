@@ -1,5 +1,5 @@
-import { Controller, Get, Header, Next, Param, Req, Res } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Controller, Get, All, Header, Next, Param, Req, Res } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 import { User, UserProfile } from '../helpers/user';
 import { IsAvailableRouteForMultitenant, CurrentUser } from '../decorators';
 import { Params } from '../interfaces';
@@ -16,14 +16,14 @@ export class AuthController {
     return user?.profile ?? { isGuest: true };
   }
 
+  @All('/login/callback')
+  loginCallback(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction, @Param() params: Params) {
+    this.oidcService.login(req, res, next, params);
+  }
+
   @Get('/login')
   @Header('Cache-Control', 'no-store, max-age=0')
-  login(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Next() next: (error?: Error | any) => void,
-    @Param() params: Params,
-  ) {
+  login(@Req() req: Request, @Res() res: Response, @Next() next: NextFunction, @Param() params: Params) {
     this.oidcService.login(req, res, next, params);
   }
 

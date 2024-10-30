@@ -4,7 +4,6 @@ import {
   AuthMultitenantMultiChannelController,
   AuthMultitenantController,
   AuthController,
-  LoginCallbackController,
   TenantSwitchController,
 } from './controllers';
 import { GuestTokenGuard, TokenGuard, TenancyGuard } from './guards';
@@ -14,6 +13,13 @@ import { OidcService } from './oidc.service';
 import { SessionSerializer } from './session.serializer';
 import { mergeDefaults } from './utils/merge-defaults';
 import { OIDC_MODULE_OPTIONS } from './oidc.constants';
+
+const Controllers = [
+  AuthController,
+  AuthMultitenantController,
+  AuthMultitenantMultiChannelController,
+  TenantSwitchController,
+];
 
 @Module({})
 export class OidcModule implements NestModule {
@@ -34,16 +40,7 @@ export class OidcModule implements NestModule {
     return {
       module: OidcModule,
       global: isGlobal,
-      controllers:
-        options.disableMiddleware === true
-          ? []
-          : [
-              AuthController,
-              AuthMultitenantController,
-              AuthMultitenantMultiChannelController,
-              LoginCallbackController,
-              TenantSwitchController,
-            ],
+      controllers: options.disableMiddleware === true ? [] : Controllers,
       providers: [
         {
           provide: OIDC_MODULE_OPTIONS,
@@ -66,16 +63,7 @@ export class OidcModule implements NestModule {
     return {
       module: OidcModule,
       global: options.isGlobal,
-      controllers:
-        options.disableMiddleware === true
-          ? []
-          : [
-              AuthController,
-              AuthMultitenantController,
-              AuthMultitenantMultiChannelController,
-              LoginCallbackController,
-              TenantSwitchController,
-            ],
+      controllers: options.disableMiddleware === true ? [] : Controllers,
       imports: options.imports,
       providers: [
         ...this.createAsyncProviders(options),

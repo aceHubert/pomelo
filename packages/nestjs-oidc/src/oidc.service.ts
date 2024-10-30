@@ -173,7 +173,8 @@ export class OidcService {
                 return next(err);
               }
               user.refresh_expires_in && this.updateSessionDuration(user.refresh_expires_in, req);
-              const state = req.query['state'] as string;
+              // support response_mode=form_post
+              const state = (req.method.toLowerCase() === 'post' ? req.body : req.query)['state'] as string;
               const buff = Buffer.from(state, 'base64').toString('utf-8');
               const stateObj = JSON.parse(buff);
               let url: string = stateObj['redirect_url'];
