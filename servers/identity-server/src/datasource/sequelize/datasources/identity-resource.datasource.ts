@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@ace-pomelo/shared/server';
 import { WhereOptions, Order, Attributes, Op, Includeable } from 'sequelize';
-import { IdentityDatasourceService } from '../../datasource.service';
 import { IdentityResources, IdentityClaims, IdentityProperties } from '../entities';
 import {
   IdentityResourceModel,
@@ -21,10 +20,6 @@ import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class IdentityResourceDataSource extends BaseDataSource {
-  constructor(datasourceService: IdentityDatasourceService) {
-    super(datasourceService);
-  }
-
   /**
    * Get identity resource
    * @param id identity resource id

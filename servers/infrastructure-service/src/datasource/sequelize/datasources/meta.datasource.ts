@@ -1,16 +1,12 @@
 import { lowerFirst, flattenDeep, groupBy } from 'lodash';
 import { Op } from 'sequelize';
 import { UserInputError, ValidationError, RuntimeError } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Model } from '..';
 import { MetaModel, NewMetaInput } from '../interfaces/meta.interface';
 import { MetaDataSource as IMetaDataSource } from '../interfaces/meta-data-source.interface';
 import { BaseDataSource } from './base.datasource';
 
 /**
- * 默认根据子类名查找实体及字段 Id
- * 如子类名为 PostDataSource, 则会查找 TemplateMeta 模型 及 templateId 字段
- * 如需要指定模型及字段名，可在子类构造函数中进行修改
  * metaKey 不可以同时存在带有前缀的参数，如：po_locale 和 locale, 根据metaKey 修改的时候会被同时修改
  * metaKey 前缀为 $ 为关键字，无法操作，内部调用直接用原模型操作
  */
@@ -18,14 +14,21 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   extends BaseDataSource
   implements IMetaDataSource<MetaReturnType, NewMetaInputType>
 {
-  protected metaModelIdFieldName: string; // 如 templateId
-  protected metaModelName: string; // 如 TemplateMeta
+  private metaModelIdFieldName: string; // 如 templateId
+  private metaModelName: string; // 如 TemplateMeta
 
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
+  /**
+   * 如未指定则默认根据子类名查找实体及字段 Id，
+   * 如子类名为 TemplateDataSource, 则会查找 TemplateMeta 模型 及 templateId 字段
+   * @param options 指定实体模型名及字段名
+   * @param options.metaModelName 实体模型名
+   * @param options.metaModelIdFieldName 实体模型 id 字段名
+   */
+  constructor(options?: { metaModelName: string; metaModelIdFieldName: string }) {
+    super();
     const rootModelName = this.constructor.name.replace(/DataSource$/, '');
-    this.metaModelIdFieldName = `${lowerFirst(rootModelName)}Id`;
-    this.metaModelName = `${rootModelName}Meta`;
+    this.metaModelIdFieldName = options?.metaModelIdFieldName || `${lowerFirst(rootModelName)}Id`;
+    this.metaModelName = options?.metaModelName || `${rootModelName}Meta`;
   }
 
   private get metaModel() {

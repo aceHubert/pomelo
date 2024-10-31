@@ -1,6 +1,6 @@
 import { words, capitalize } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   ForbiddenError,
   jsonSafelyParse,
@@ -17,7 +17,10 @@ import type {} from 'sequelize/types/utils';
 export abstract class BaseDataSource {
   protected readonly logger!: Logger;
 
-  constructor(protected readonly datasourceService: InfrastructureDatasourceService) {
+  @Inject()
+  protected readonly datasourceService!: InfrastructureDatasourceService;
+
+  constructor() {
     this.logger = new Logger(this.constructor.name, { timestamp: true });
   }
 

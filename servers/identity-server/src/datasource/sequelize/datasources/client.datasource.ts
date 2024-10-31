@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@ace-pomelo/shared/server';
 import { Includeable, Op, WhereOptions } from 'sequelize';
-import { IdentityDatasourceService } from '../../datasource.service';
 import {
   Clients,
   ClientCorsOrigins,
@@ -48,10 +47,6 @@ import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class ClientDataSource extends BaseDataSource {
-  constructor(datasourceService: IdentityDatasourceService) {
-    super(datasourceService);
-  }
-
   /**
    * get client
    * @param clientId client id (clientId field)

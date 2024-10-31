@@ -1,16 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability, OptionAutoload } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Options } from '../entities';
 import { OptionModel, OptionArgs, NewOptionInput, UpdateOptionInput } from '../interfaces/option.interface';
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class OptionDataSource extends BaseDataSource {
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
-  }
-
   /**
    * 获取 Options
    * 返回的 optionName 如果含有 table 前缀， 会去掉前缀

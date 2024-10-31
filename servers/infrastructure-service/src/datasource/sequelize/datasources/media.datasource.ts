@@ -1,7 +1,6 @@
 import { Op, WhereOptions } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, MediaMetaPresetKeys, UserCapability } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Medias, MediaMeta } from '../entities';
 import {
   MediaModel,
@@ -17,10 +16,6 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class MediaDataSource extends MetaDataSource<MediaMetaModel, NewMediaMetaInput> {
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
-  }
-
   /**
    * 获取媒体
    * @param id Media Id

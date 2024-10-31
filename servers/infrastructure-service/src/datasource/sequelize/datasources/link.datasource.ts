@@ -1,17 +1,12 @@
 import { Op } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Links } from '../entities';
 import { LinkModel, PagedLinkModel, PagedLinkArgs, NewLinkInput, UpdateLinkInput } from '../interfaces/link.interface';
 import { BaseDataSource } from './base.datasource';
 
 @Injectable()
 export class LinkDataSource extends BaseDataSource {
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
-  }
-
   get(id: number, fields: string[]): Promise<LinkModel | undefined> {
     return Links.findByPk(id, {
       attributes: this.filterFields(fields, Links),

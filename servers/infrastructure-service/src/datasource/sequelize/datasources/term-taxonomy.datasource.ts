@@ -2,7 +2,6 @@ import { isUndefined } from 'lodash';
 import { WhereOptions, Model, Attributes, Transaction, Op } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { TermTaxonomy, TermRelationships } from '../entities';
 import {
   TermTaxonomyMetaModel,
@@ -19,10 +18,6 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class TermTaxonomyDataSource extends MetaDataSource<TermTaxonomyMetaModel, NewTermTaxonomyMetaInput> {
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
-  }
-
   /**
    * 获取协议
    * @param id Term Id

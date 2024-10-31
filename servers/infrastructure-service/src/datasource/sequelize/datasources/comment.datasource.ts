@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Comments, CommentMeta } from '../entities';
 import {
   CommentModel,
@@ -15,10 +14,6 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewCommentMetaInput> {
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
-  }
-
   /**
    * 获取评论
    * @param id 评论 Id

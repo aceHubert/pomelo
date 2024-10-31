@@ -10,7 +10,6 @@ import {
   TemplateStatus,
   TemplatePresetType,
 } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Templates, TemplateMeta, TermTaxonomy, TermRelationships } from '../entities';
 import {
   TemplateInnerStatus,
@@ -58,10 +57,6 @@ enum TemplateMetaPresetKeys {
 
 @Injectable()
 export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTemplateMetaInput> {
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
-  }
-
   /**
    * 修正唯一名称，在末尾添加数字
    * @param name 唯一名称，用于URL地址

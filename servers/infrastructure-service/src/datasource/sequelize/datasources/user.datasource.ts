@@ -11,7 +11,6 @@ import {
   UserMetaPresetKeys,
   OptionPresetKeys,
 } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceService } from '../../datasource.service';
 import { Users, UserMeta } from '../entities';
 import {
   UserModel,
@@ -27,10 +26,6 @@ import { MetaDataSource } from './meta.datasource';
 
 @Injectable()
 export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInput> {
-  constructor(datasourceService: InfrastructureDatasourceService) {
-    super(datasourceService);
-  }
-
   private async getFieldsValue<F extends keyof UserModel>(
     idOrUserName: number | string,
     fields: F[],

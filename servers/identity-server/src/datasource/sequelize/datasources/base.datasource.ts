@@ -1,11 +1,14 @@
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import { IdentityDatasourceService } from '../../datasource.service';
 
 export abstract class BaseDataSource {
   protected readonly logger: Logger;
 
-  constructor(protected readonly datasourceService: IdentityDatasourceService) {
+  @Inject()
+  protected readonly datasourceService!: IdentityDatasourceService;
+
+  constructor() {
     this.logger = new Logger(this.constructor.name, { timestamp: true });
   }
 
