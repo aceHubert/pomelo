@@ -1,6 +1,7 @@
-import { SetMetadata, UseGuards, applyDecorators } from '@nestjs/common';
+import { SetMetadata, UseGuards, UseFilters, applyDecorators } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { TokenGuard } from '../guards/token.guard';
+import { UnauthorizedFilter } from '../filters/unauthorized.filter';
 import { getArrayFromOverloadedRest } from '../utils/array-overload';
 import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY } from '../oidc.constants';
 
@@ -18,6 +19,7 @@ export function Authorized(...rolesOrRoleArray: Array<string | string[]>): Metho
     SetMetadata(AUTHORIZATION_KEY, true), // 验证登录
     SetMetadata(AUTHORIZATION_ROLE_KEY, getArrayFromOverloadedRest(rolesOrRoleArray)), // 角色权限
     UseGuards(TokenGuard), // 使用 Guards
+    UseFilters(UnauthorizedFilter), // 使用 Filters
   );
 }
 
@@ -25,6 +27,7 @@ export function Anonymous(): ClassDecorator & MethodDecorator {
   return applyDecorators(
     SetMetadata(ALLOWANONYMOUS_KEY, true), // 匿名访问
     UseGuards(TokenGuard), // 使用 Guards
+    UseFilters(UnauthorizedFilter), // 使用 Filters
   );
 }
 
@@ -41,6 +44,7 @@ export function FieldAuthorized(role: string, ...others: string[]): PropertyDeco
     Extensions({
       roles, // 角色
     }),
-    UseGuards(TokenGuard),
+    UseGuards(TokenGuard), // 使用 Guards
+    UseFilters(UnauthorizedFilter), // 使用 Filters
   );
 }

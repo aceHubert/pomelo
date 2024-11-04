@@ -13,4 +13,3 @@ export * from './oidc.module';
 export * from './oidc.service';
 export * from './oidc.strategy';
 export * from './oidc.setup-session';
-export * from './oidc.constants';

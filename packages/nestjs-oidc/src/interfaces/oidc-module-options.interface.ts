@@ -61,10 +61,16 @@ export type OidcModuleOptions = {
   httpOptions?: HttpOptions;
 
   /**
-   * Disable to register Login Middleware (and all Controllers)
+   * Disable to register Auth Controllers
    * @default false
    */
-  disableMiddleware?: boolean;
+  disableController?: boolean;
+
+  /**
+   * Prompt the login page if the user has already authenticated before
+   * @default true
+   */
+  promptLogin?: boolean;
 
   /**
    * is global module
@@ -86,8 +92,8 @@ interface OidcChannelOptions {
 
 export interface OidcOptionsFactory {
   createModuleConfig():
-    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>>
-    | Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>;
+    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>>
+    | Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>;
 }
 
 export interface OidcModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
@@ -96,16 +102,16 @@ export interface OidcModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> 
    */
   isGlobal?: boolean;
   /**
-   * Disable to register Login Controller
+   * Disable to register Auth Controllers
    * @default false
    */
-  disableMiddleware?: boolean;
+  disableController?: boolean;
   useExisting?: Type<OidcOptionsFactory>;
   useClass?: Type<OidcOptionsFactory>;
   useFactory?: (
     ...args: any[]
   ) =>
-    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>>
-    | Omit<OidcModuleOptions, 'isGlobal' | 'disableMiddleware'>;
+    | Promise<Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>>
+    | Omit<OidcModuleOptions, 'isGlobal' | 'disableController'>;
   inject?: any[];
 }

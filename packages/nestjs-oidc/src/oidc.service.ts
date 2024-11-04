@@ -127,7 +127,7 @@ export class OidcService {
       req.session['channelType'] = channelType;
 
       const isEmbeded = req.headers && req.headers['sec-fetch-dest'] === 'iframe' ? true : false;
-      let redirectUrl = req.query['redirect_url'] ?? '/';
+      let redirectUrl = req.query['redirect'] ?? '/';
 
       if (isEmbeded) {
         const ssoUrl = `${req.protocol}://${req.headers.host}${req.url}${
@@ -154,7 +154,7 @@ export class OidcService {
         }
 
         redirectUrl = Buffer.from(
-          JSON.stringify({ redirect_url: `${prefix}${redirectUrl}`, loginpopup: loginpopup }),
+          JSON.stringify({ redirect: `${prefix}${redirectUrl}`, loginpopup: loginpopup }),
           'utf-8',
         ).toString('base64');
         passport.authenticate(
@@ -177,7 +177,7 @@ export class OidcService {
               const state = (req.method.toLowerCase() === 'post' ? req.body : req.query)['state'] as string;
               const buff = Buffer.from(state, 'base64').toString('utf-8');
               const stateObj = JSON.parse(buff);
-              let url: string = stateObj['redirect_url'];
+              let url: string = stateObj['redirect'];
               url = !url.startsWith('/') ? `/${url}` : url;
               const loginpopup = stateObj['loginpopup'];
               if (loginpopup) {
@@ -314,27 +314,6 @@ export class OidcService {
   }
 
   // #endregion
-
-  getPrefixFromRequest(req: Request) {
-    const { tenantId, channelType } = this.getMultitenantParamsFromRequest(req);
-
-    const prefix = [tenantId, channelType].filter(Boolean).join('/');
-    return prefix ? `/${prefix}` : '';
-  }
-
-  getMultitenantParamsFromRequest(req: Request): Params {
-    const routeParams = req.params && req.params[0] && req.params[0].split('/');
-    const fixedChannelType = this.options.channelType;
-    let tenantId, channelType;
-    if (routeParams && routeParams[1] && (routeParams[1] === ChannelType.b2c || routeParams[1] === ChannelType.b2e)) {
-      tenantId = routeParams[0];
-      channelType = routeParams[1];
-    } else if (routeParams && (fixedChannelType === ChannelType.b2c || fixedChannelType === ChannelType.b2e)) {
-      tenantId = routeParams[0];
-      channelType = fixedChannelType;
-    }
-    return { tenantId, channelType };
-  }
 
   private getPrefix(...args: Array<Params>) {
     const { tenantId, channelType } = this.getMultitenantParams(...args);

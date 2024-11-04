@@ -1,12 +1,5 @@
 import { Reflector } from '@nestjs/core';
-import {
-  Inject,
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Inject, CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import { Request } from 'express';
 import { OidcService } from '../oidc.service';
@@ -14,6 +7,7 @@ import { OidcModuleOptions } from '../interfaces/oidc-module-options.interface';
 import { AUTHORIZATION_KEY, AUTHORIZATION_ROLE_KEY, ALLOWANONYMOUS_KEY, OIDC_MODULE_OPTIONS } from '../oidc.constants';
 import { hasDecorator } from '../utils/has-decorator';
 import { getContextObject } from '../utils/get-context-object';
+import { UnauthorizedError } from '../utils/errors';
 
 @Injectable()
 export class TokenGuard implements CanActivate {
@@ -41,6 +35,8 @@ export class TokenGuard implements CanActivate {
     // no @Authorized() decorator, return true
     if (!authorized) return true;
 
+    const redirect = this.options.disableController !== true && ctx.headers['accept']?.includes('text/html');
+
     if (ctx.isAuthenticated()) {
       if (ctx.user.expired) {
         if (ctx.user.refresh_token) {
@@ -55,10 +51,10 @@ export class TokenGuard implements CanActivate {
               data.refresh_expires_in && this.oidcService.updateSessionDuration(data.refresh_expires_in as number, ctx);
             })
             .catch((err) => {
-              throw new UnauthorizedException(err);
+              throw new UnauthorizedError(err, redirect);
             });
         } else {
-          throw new UnauthorizedException(`Access denied, You don't have permission for this action!`);
+          throw new UnauthorizedError(`Access denied, You don't have permission for this action!`, redirect);
         }
       }
 
@@ -90,14 +86,14 @@ export class TokenGuard implements CanActivate {
         for (const field in fieldRoles) {
           if (!this.hasRolePermission(ctx.user, fieldRoles[field])) {
             // false return 403
-            throw new UnauthorizedException(`Access denied, You don't capability for field "${field}"!)`);
+            throw new UnauthorizedError(`Access denied, You don't capability for field "${field}"!)`, redirect);
           }
         }
       }
 
       return true;
     } else {
-      throw new UnauthorizedException(`Access denied, You don't have permission for this action!`);
+      throw new UnauthorizedError(`Access denied, You don't have permission for this action!`, redirect);
     }
   }
 

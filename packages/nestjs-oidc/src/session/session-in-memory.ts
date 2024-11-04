@@ -1,16 +1,18 @@
 import { INestApplication } from '@nestjs/common';
-import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import passport from 'passport';
-import { baseSession } from './base-session';
+import { createExpressSession } from './express-session';
 
-export function sessionInMemory(app: INestApplication, name: string) {
-  const session = loadPackage('express-session', 'MemoryStore', () => require('express-session'));
-  app.use(
-    session({
-      name,
-      ...baseSession,
-    }),
-  );
+export function sessionInMemory(
+  app: INestApplication,
+  name: string,
+  options?: {
+    sessionStrategy?: (options: { name: string; [key: string]: any }) => any;
+    // rest of sessionStrategy options
+    [key: string]: any;
+  },
+) {
+  const { sessionStrategy, ...rest } = options ?? {};
+  app.use((sessionStrategy ?? createExpressSession)({ ...rest, name }));
   app.use(passport.initialize());
   app.use(passport.session());
 }

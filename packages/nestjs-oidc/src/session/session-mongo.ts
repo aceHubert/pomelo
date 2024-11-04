@@ -1,16 +1,29 @@
 import { INestApplication } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
 import passport from 'passport';
-import { baseSession } from './base-session';
+import ConnectMongo from 'connect-mongo';
+import { createExpressSession } from './express-session';
 
-export const sessionMongo = (app: INestApplication, name: string, options: ConnectMongoOptions) => {
-  const session = loadPackage('express-session', 'MemoryStore', () => require('express-session'));
-  const MongoStore = loadPackage('connect-mongo', 'SessionModule', () => require('connect-mongo'));
+export const sessionMongo = (
+  app: INestApplication,
+  name: string,
+  options: {
+    connectMongoOptions: ConnectMongoOptions;
+    sessionStrategy?: (options: { name: string; store: ConnectMongo; [key: string]: any }) => any;
+    // rest of sessionStrategy options
+    [key: string]: any;
+  },
+) => {
+  const MongoStore = loadPackage('connect-mongo', 'SessionModule', () =>
+    require('connect-mongo'),
+  ) as typeof ConnectMongo;
+
+  const { sessionStrategy, connectMongoOptions, ...rest } = options;
   app.use(
-    session({
+    (sessionStrategy ?? createExpressSession)({
+      ...rest,
       name,
-      ...baseSession,
-      store: MongoStore.create(options),
+      store: MongoStore.create(connectMongoOptions),
     }),
   );
   app.use(passport.initialize());

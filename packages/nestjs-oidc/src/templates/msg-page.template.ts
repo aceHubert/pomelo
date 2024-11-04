@@ -1,7 +1,4 @@
 import background from './helpers/background.helper';
-import icon from './helpers/icon.helper';
-
-export type PresetIconName = 'warning' | 'exit' | '404';
 
 export type RedirectOptions = {
   link: string;
@@ -20,7 +17,7 @@ export function renderMsgPage(context: {
   title: string;
   subtitle?: string;
   description?: string;
-  icon?: PresetIconName | string;
+  icon?: string;
   redirect?: RedirectOptions;
   backLabel?: string;
   primaryColor?: string;
@@ -126,7 +123,7 @@ export function renderMsgPage(context: {
 
   <body>
       <div class="container">
-          ${context.icon ? `<div class="icon-msg"><img src="${icon(context.icon)}" alt="icon"/></div>` : ''}
+          ${context.icon ? `<div class="icon-msg"><img src="${context.icon}" alt="icon"/></div>` : ''}
           <div class="text">
               <h1 class="title">${context.title}</h1>
               ${!!context.subtitle ? `<h2 class="subtitle">${context.subtitle}</h2>` : ''}

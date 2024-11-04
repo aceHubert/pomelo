@@ -17,12 +17,14 @@ const defaultModuleOptions: Partial<OidcModuleOptions> = {
 
   // other behavior
   usePKCE: true,
+  disableController: false,
+  promptLogin: true,
 };
 
 export function mergeDefaults(options: Omit<OidcModuleOptions, 'isGlobal'>): Omit<OidcModuleOptions, 'isGlobal'> {
-  const newOptions = { ...defaultModuleOptions, ...options };
-
-  newOptions.authParams = { ...defaultModuleOptions.authParams, ...options.authParams };
-
-  return newOptions;
+  return {
+    ...defaultModuleOptions,
+    ...options,
+    authParams: { ...defaultModuleOptions.authParams, ...options.authParams },
+  };
 }

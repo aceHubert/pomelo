@@ -1,7 +1,7 @@
 {
   "name": "nestjs-oidc",
   "description": "OpenID-Connect client module for NestJS.",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "author": "Hubert<yi.xiang@live.com>",
   "main": "lib/index.js",
   "module": "esm/index.js",
@@ -66,6 +66,7 @@
     "@types/express-session": "^1.17.10",
     "@types/passport": "^1.0.9",
     "@types/uuid": "^9.0.7",
+    "connect-mongo": "^5.1.0",
     "express-session": "^1.17.3"
   },
   "peerDependencies": {
