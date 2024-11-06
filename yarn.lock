@@ -10225,6 +10225,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"connect-redis@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "connect-redis@npm:7.1.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fconnect-redis%2F-%2Fconnect-redis-7.1.1.tgz"
+  peerDependencies:
+    express-session: ">=1"
+  checksum: ac91ee818d0f467866b6982f66b3423fee58de9da3562618f6d1df2ddeea426354c1efe70b3f799be1b52e3cc67f2043b9ae203678fd3ff9db5dff44b078f0ca
+  languageName: node
+  linkType: hard
+
 "consola@npm:^2.15.0":
   version: 2.15.3
   resolution: "consola@npm:2.15.3"
@@ -10997,7 +11006,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^4.3.1":
+"debug@npm:^4.3.0, debug@npm:^4.3.1":
   version: 4.3.7
   resolution: "debug@npm:4.3.7::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fdebug%2F-%2Fdebug-4.3.7.tgz"
   dependencies:
@@ -17553,6 +17562,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^4.0.3":
+  version: 4.1.5
+  resolution: "lru-cache@npm:4.1.5::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Flru-cache%2F-%2Flru-cache-4.1.5.tgz"
+  dependencies:
+    pseudomap: ^1.0.2
+    yallist: ^2.1.2
+  checksum: 4bb4b58a36cd7dc4dcec74cbe6a8f766a38b7426f1ff59d4cf7d82a2aa9b9565cd1cb98f6ff60ce5cd174524868d7bc9b7b1c294371851356066ca9ac4cf135a
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^5.1.1":
   version: 5.1.1
   resolution: "lru-cache@npm:5.1.1"
@@ -17850,6 +17869,16 @@ __metadata:
     next-tick: ^1.1.0
     timers-ext: ^0.1.7
   checksum: 4065d94416dbadac56edf5947bf342beca0e9f051f33ad60d7c4baf3f6ca0f3c6fdb770c5caed5a89c0ceaf9121428582f396445d591785281383d60aa883418
+  languageName: node
+  linkType: hard
+
+"memorystore@npm:^1.6.7":
+  version: 1.6.7
+  resolution: "memorystore@npm:1.6.7::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fmemorystore%2F-%2Fmemorystore-1.6.7.tgz"
+  dependencies:
+    debug: ^4.3.0
+    lru-cache: ^4.0.3
+  checksum: caa5cc523ec39ad8b317ddb5560771df28a10266281066f554bd77b2179a34f21f06891fffbcfe875ed1afc79cf7e106714eff98189ded1e6bfc273159d07948
   languageName: node
   linkType: hard
 
@@ -18544,10 +18573,12 @@ __metadata:
     "@types/passport": ^1.0.9
     "@types/uuid": ^9.0.7
     connect-mongo: ^5.1.0
+    connect-redis: ^7.1.1
     cookie: ^0.5.0
     express-session: ^1.17.3
     flatted: ^3.2.6
     jose: ^4.15.9
+    memorystore: ^1.6.7
     openid-client: ^5.6.5
     passport: ^0.6.0
     querystring: ^0.2.1
@@ -18557,7 +18588,7 @@ __metadata:
     "@nestjs/core": ^10.0.0
     "@nestjs/graphql": ^11.0.0
     connect-mongo: 4.6.0
-    express-session: ^1.17.3
+    connect-redis: ^7.1.1
     graphql: ^16.0.0
     graphql-parse-resolve-info: ^4.12.0
   peerDependenciesMeta:
@@ -18565,7 +18596,7 @@ __metadata:
       optional: true
     connect-mongo:
       optional: true
-    express-session:
+    connect-redis:
       optional: true
     graphql:
       optional: true

@@ -1,18 +1,31 @@
 import { INestApplication } from '@nestjs/common';
+import session, { SessionOptions } from 'express-session';
+import createMemoryStore from 'memorystore';
 import passport from 'passport';
-import { createExpressSession } from './express-session';
+import { defaultOptions } from './base-session';
 
+const MomeryStore = createMemoryStore(session);
+
+/**
+ * setup session with in-memory store
+ */
 export function sessionInMemory(
   app: INestApplication,
-  name: string,
-  options?: {
-    sessionStrategy?: (options: { name: string; [key: string]: any }) => any;
-    // rest of sessionStrategy options
-    [key: string]: any;
+  options?: Partial<SessionOptions> & {
+    memoryOptions?: ConstructorParameters<ReturnType<typeof createMemoryStore>>[0];
   },
 ) {
-  const { sessionStrategy, ...rest } = options ?? {};
-  app.use((sessionStrategy ?? createExpressSession)({ ...rest, name }));
+  const { memoryOptions, ...rest } = options ?? {};
+  app.use(
+    session({
+      ...defaultOptions(),
+      ...rest,
+      store: new MomeryStore({
+        checkPeriod: 86400000, // prune expired entries every 24h
+        ...memoryOptions,
+      }),
+    }),
+  );
   app.use(passport.initialize());
   app.use(passport.session());
 }

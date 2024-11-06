@@ -25,9 +25,9 @@ export class MisdirectedExceptionFilter implements ExceptionFilter {
     const requestedChannel = request.params.channelType;
     const originalTenant = request.user?.profile.tenantId;
     const originalChannel = request.user?.profile.channelType;
-    httpAdapter.redirect(
+    return httpAdapter.redirect(
       response,
-      HttpStatus.MOVED_PERMANENTLY,
+      HttpStatus.FOUND,
       `/tenant-switch-warn?requestedTenant=${requestedTenant}&requestedChannel=${requestedChannel}&originalTenant=${originalTenant}&originalChannel=${originalChannel}`,
     );
   }

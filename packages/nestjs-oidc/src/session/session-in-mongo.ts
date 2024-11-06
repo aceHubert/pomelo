@@ -1,28 +1,28 @@
 import { INestApplication } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
+import session, { SessionOptions } from 'express-session';
 import passport from 'passport';
 import ConnectMongo from 'connect-mongo';
-import { createExpressSession } from './express-session';
+import { defaultOptions } from './base-session';
 
-export const sessionMongo = (
+/**
+ * setup session with mongo store
+ */
+export const sessionInMongo = (
   app: INestApplication,
-  name: string,
-  options: {
+  options: Partial<SessionOptions> & {
     connectMongoOptions: ConnectMongoOptions;
-    sessionStrategy?: (options: { name: string; store: ConnectMongo; [key: string]: any }) => any;
-    // rest of sessionStrategy options
-    [key: string]: any;
   },
 ) => {
   const MongoStore = loadPackage('connect-mongo', 'SessionModule', () =>
     require('connect-mongo'),
   ) as typeof ConnectMongo;
 
-  const { sessionStrategy, connectMongoOptions, ...rest } = options;
+  const { connectMongoOptions, ...rest } = options;
   app.use(
-    (sessionStrategy ?? createExpressSession)({
+    session({
+      ...defaultOptions(),
       ...rest,
-      name,
       store: MongoStore.create(connectMongoOptions),
     }),
   );

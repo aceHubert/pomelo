@@ -1,7 +1,7 @@
 {
   "name": "nestjs-oidc",
   "description": "OpenID-Connect client module for NestJS.",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "author": "Hubert<yi.xiang@live.com>",
   "main": "lib/index.js",
   "module": "esm/index.js",
@@ -39,7 +39,7 @@
   ],
   "scripts": {
     "serve": "run -T concurrently --raw \"tsc --project tsconfig.json -watch\"",
-    "build": "run -T rimraf dist && yarn build:version && yarn build:cjs && yarn build:esm",
+    "build": "run -T rimraf -rf lib esm dist && yarn build:version && yarn build:cjs && yarn build:esm",
     "build:version": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "build:cjs": "run -T tsc --project tsconfig.build.json",
     "build:esm": "run -T tsc --project tsconfig.build.json --module es2015 --outDir esm",
@@ -52,8 +52,10 @@
   "dependencies": {
     "@nestjs/passport": "^10.0.0",
     "cookie": "^0.5.0",
+    "express-session": "^1.17.3",
     "flatted": "^3.2.6",
     "jose": "^4.15.9",
+    "memorystore": "^1.6.7",
     "openid-client": "^5.6.5",
     "passport": "^0.6.0",
     "querystring": "^0.2.1",
@@ -67,14 +69,14 @@
     "@types/passport": "^1.0.9",
     "@types/uuid": "^9.0.7",
     "connect-mongo": "^5.1.0",
-    "express-session": "^1.17.3"
+    "connect-redis": "^7.1.1"
   },
   "peerDependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^11.0.0",
     "connect-mongo": "4.6.0",
-    "express-session": "^1.17.3",
+    "connect-redis": "^7.1.1",
     "graphql": "^16.0.0",
     "graphql-parse-resolve-info": "^4.12.0"
   },
@@ -85,7 +87,7 @@
     "connect-mongo": {
       "optional": true
     },
-    "express-session": {
+    "connect-redis": {
       "optional": true
     },
     "graphql": {

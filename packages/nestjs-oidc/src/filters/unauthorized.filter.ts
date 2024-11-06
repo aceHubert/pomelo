@@ -31,9 +31,9 @@ export class UnauthorizedFilter implements ExceptionFilter {
     const prefix = this.getPrefixFromRequest(request);
 
     // If you're using the multitenancy authentication, you'll need to get the prefix
-    httpAdapter.redirect(
+    return httpAdapter.redirect(
       response,
-      HttpStatus.MOVED_PERMANENTLY,
+      HttpStatus.FOUND,
       `${prefix}/login?redirect=${httpAdapter.getRequestUrl(request)}${searchParams ? `&${searchParams}` : ''}`,
     );
   }
