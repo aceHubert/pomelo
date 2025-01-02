@@ -784,9 +784,14 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       return false;
     }
     try {
-      const { origin } = new URL(value);
+      const { origin, protocol, hostname, port } = new URL(value);
       // Origin: <scheme> "://" <hostname> [ ":" <port> ]
-      return value === origin;
+      let originValue = origin;
+      // chrome-extension://<extension-id> is not a valid origin
+      if (originValue === 'null') {
+        originValue = `${protocol}//${hostname}${port ? `:${port}` : ''}`;
+      }
+      return value === originValue;
     } catch (err) {
       return false;
     }
