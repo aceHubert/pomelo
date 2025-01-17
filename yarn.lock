@@ -153,7 +153,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/shared@workspace:packages/pomelo-shared"
   dependencies:
-    "@ace-util/core": ^0.3.0
+    "@ace-util/core": ^0.5.0
     "@nestjs/common": ^10.0.0
     "@nestjs/config": ^3.2.3
     "@nestjs/core": ^10.0.0
@@ -212,7 +212,8 @@ __metadata:
     "@ace-fetch/vue": ^0.5.0
     "@ace-pomelo/shared": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
-    "@ace-util/core": ^0.3.0
+    "@ace-util/core": ^0.5.0
+    "@ace-util/injects": ^0.3.10
     "@apollo/client": ^3.6.9
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-build-decoupled-document": ^40.0.0
@@ -304,6 +305,33 @@ __metadata:
   dependencies:
     lodash.get: ^4.4.2
   checksum: d983bbb7d278ebc24238062835a32e89834ca839ba199ff9156a2cdf9b4619a707c768f7d1477899ddb1852d8aecaaad4b32273a37d3c259126d932fe93c5f54
+  languageName: node
+  linkType: hard
+
+"@ace-util/core@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "@ace-util/core@npm:0.5.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-util%2Fcore%2F-%2Fcore-0.5.0.tgz"
+  dependencies:
+    "@ace-util/enquire": ^0.1.0
+    lodash.get: ^4.4.2
+  checksum: 7ff69c309ad779f2ba819411f7bd0ae129043b92a727c4867513dc8216882ad3bc0b5399348b8d742e391409cfb4b347ad28979d8d707c35ab425c9ade528307
+  languageName: node
+  linkType: hard
+
+"@ace-util/enquire@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@ace-util/enquire@npm:0.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-util%2Fenquire%2F-%2Fenquire-0.1.0.tgz"
+  checksum: c352d00c10f44bd3d143fc553b6e967edac31405c2b937862b08c2a6b6f9b87fe1961915bc671a25207e8a02d75cb5f4a67656189602ecf918c74ee7f0cfd25b
+  languageName: node
+  linkType: hard
+
+"@ace-util/injects@npm:^0.3.10":
+  version: 0.3.10
+  resolution: "@ace-util/injects@npm:0.3.10::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-util%2Finjects%2F-%2Finjects-0.3.10.tgz"
+  dependencies:
+    "@ace-util/core": ^0.5.0
+    warning: ^4.0.3
+  checksum: 33c8fbca40241cdf2ae206211a867327f676110878cbae35b0893d1ae41cd64fe3815effdd05fdb2c56ec8042532caa6d3594c76ddf70fea99e00adef47bd600
   languageName: node
   linkType: hard
 
@@ -8223,7 +8251,7 @@ __metadata:
   resolution: "antdv-layout-pro@workspace:packages/antdv-layout-pro"
   dependencies:
     "@ace-pomelo/theme": ^0.1.0-alpha.2
-    "@ace-util/core": ^0.3.0
+    "@ace-util/core": ^0.5.0
     "@iconfu/svg-inject": ^1.2.3
     "@types/lodash.clonedeep": ^4.5.0
     "@types/lodash.debounce": ^4.0.7
