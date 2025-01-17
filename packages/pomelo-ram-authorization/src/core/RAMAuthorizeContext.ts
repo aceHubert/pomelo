@@ -15,7 +15,7 @@ export class RAMAuthorizeContext {
   /**
    * The target action name to evaluate.
    */
-  ActionName: string;
+  readonly ActionName: string;
 
   /**
    * Creates a new instance of <see cref="RAMAuthorizeContext"/>

@@ -1,3 +1,5 @@
+import { AuthorizeEffect } from './AuthorizeEffect';
+
 /**
  * 授权语句。
  */
@@ -5,7 +7,7 @@ export class RAMStatement {
   /**
    * 授权类型。Effect 取值 为 Allow 或 Deny。比如，"Effect": "Allow"
    */
-  Effect!: string;
+  Effect!: AuthorizeEffect;
   /**
    * 操作名称列表
    * Action支持多值，取值为定义的API操作名称，其格式定义如下：
