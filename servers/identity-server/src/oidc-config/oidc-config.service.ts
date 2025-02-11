@@ -26,6 +26,7 @@ import {
   renderPostLogoutSuccessSourceTemplate,
   renderExceptionTemplate,
 } from './templates';
+import { policy } from './interaction_policy';
 import { OidcConfigAdapter } from './oidc-config.adapter';
 import { OidcConfigStorage } from './oidc-config.storage';
 import { OidcConfigOptions } from './interfaces/oidc-config-options.interface';
@@ -256,6 +257,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         revocation: '/connect/revocation',
       },
       interactions: {
+        policy,
         url: (ctx, interaction) => {
           this.logger.debug(
             `interaction: ${interaction.prompt.name}, reason: ${interaction.prompt.reasons.join(', ')}`,

@@ -57,6 +57,7 @@ export { default as SettingOutline } from '@ant-design/icons/lib/outline/Setting
 export { default as SmileOutline } from '@ant-design/icons/lib/outline/SmileOutline';
 export { default as StarOutline } from '@ant-design/icons/lib/outline/StarOutline';
 export { default as StarFill } from '@ant-design/icons/lib/fill/StarFill';
+export { default as SwapOutline } from '@ant-design/icons/lib/outline/SwapOutline';
 export { default as TagOutline } from '@ant-design/icons/lib/outline/TagOutline';
 export { default as TagsOutline } from '@ant-design/icons/lib/outline/TagsOutline';
 export { default as TableOutline } from '@ant-design/icons/lib/outline/TableOutline';

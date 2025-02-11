@@ -6,7 +6,7 @@
     "serve:client:vue": "yarn workspace @ace-pomelo/vue-web run serve",
     "serve:client:react": "yarn workspace @ace-pomelo/react-web run serve",
     "start:servers": "rimraf dist && concurrently \"npm:start:server:*\"",
-    "start:server:identity-server": "concurrently --raw \"grunt --gruntfile ./servers/identity-server/Gruntfile.js dev\" \"nest build identity-server --builder=webpack --watch\"",
+    "start:server:identity-server": "yarn workspace @ace-pomelo/theme run build && concurrently --raw \"grunt --gruntfile ./servers/identity-server/Gruntfile.js dev\" \"nest build identity-server --builder=webpack --watch\"",
     "start:server:infrastructure-service": "nest build infrastructure-service --builder=webpack --watch",
     "start:server:infrastructure-bff": "nest build infrastructure-bff --builder=webpack --watch",
     "build:local": "cross-env ENV_JS=env/env.local.js BASE_URL=/ yarn build:clients && yarn build:servers",
