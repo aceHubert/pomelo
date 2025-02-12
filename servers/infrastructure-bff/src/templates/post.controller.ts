@@ -365,7 +365,7 @@ export class PostTemplateController extends BaseController {
   ) {
     try {
       await this.basicService
-        .send<void>(TemplatePattern.Update, {
+        .send<void>(TemplatePattern.UpdatePost, {
           ...model,
           id,
           requestUserId: Number(requestUser.sub),

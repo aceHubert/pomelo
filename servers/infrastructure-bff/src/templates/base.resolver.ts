@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader';
 import { upperFirst } from 'lodash';
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
@@ -293,7 +293,7 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
   @Anonymous()
   @Query((returns) => Template, { nullable: true, description: 'Get template.' })
   template(
-    @Args('id', { type: () => ID, description: 'Template id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<Template | undefined> {
@@ -495,7 +495,7 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     description: 'Update template (must not be in "trash" status).',
   })
   async updateTemplate(
-    @Args('id', { type: () => ID, description: 'Form id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateTemplateInput }) model: UpdateTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
@@ -527,7 +527,7 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     description: 'Update template stauts (must not be in "trash" status)',
   })
   async updateTemplateStatus(
-    @Args('id', { type: () => ID, description: 'Template id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @Args('status', { type: () => TemplateStatus, description: 'status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
@@ -565,7 +565,7 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     description: 'Restore template (must be in "trash" status)',
   })
   async restoreTemplate(
-    @Args('id', { type: () => ID, description: 'Template id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     await this.basicService
@@ -599,7 +599,7 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     description: 'Delete template permanently (must be in "trash" status).',
   })
   async deleteTemplate(
-    @Args('id', { type: () => ID, description: 'Template id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     await this.basicService

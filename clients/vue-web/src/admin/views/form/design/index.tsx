@@ -25,7 +25,6 @@ import { Button, Checkbox, Radio, Divider, Collapse, Icon, Form, Input, Space } 
 import { useConfigProvider, expose } from 'antdv-layout-pro/shared';
 import { Theme } from 'antdv-layout-pro/types';
 import {
-  TemplateStatus,
   UserCapability,
   OptionPresetKeys,
   getFrameworkSchema,
@@ -34,7 +33,7 @@ import {
 } from '@ace-pomelo/shared/client';
 import { trailingSlash, equals, warn } from '@ace-util/core';
 import { Modal, message } from '@/components';
-import { useTemplateApi, useFormApi, FormMetaPresetKeys } from '@/fetch/apis';
+import { useTemplateApi, useFormApi, TemplateStatus, FormMetaPresetKeys } from '@/fetch/apis';
 import { useI18n, useUserManager, useOptions } from '@/composables';
 import { useLocationMixin } from '@/mixins';
 import { safeJSONParse } from '@/utils';

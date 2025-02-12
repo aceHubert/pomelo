@@ -160,7 +160,8 @@
   "layout_default": {
     "page_style_setting_title": "Display Settings",
     "avatar_menu_item": {
-      "modify_password": "Modify Password"
+      "modify_password": "Modify Password",
+      "select_account": "Switch Account"
     },
     "signout": {
       "tooltip": "Sign out",

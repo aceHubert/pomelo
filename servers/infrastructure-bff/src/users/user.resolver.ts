@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Context, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
@@ -63,7 +63,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.Detail)
   @Query((returns) => UserModel, { nullable: true, description: 'Get user.' })
   user(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser: RequestUser,
   ): Promise<UserModel | undefined> {
@@ -136,7 +136,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update user.' })
   async updateUser(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
@@ -152,7 +152,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.UpdateStatus)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update user stauts' })
   async updateUserStatus(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @Args('status', { type: () => UserStatus, description: 'status' }) status: UserStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
@@ -184,7 +184,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete user permanently.' })
   async deleteUser(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     await this.basicService

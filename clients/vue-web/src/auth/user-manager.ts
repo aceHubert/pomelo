@@ -15,12 +15,14 @@ export interface ISigninArgs {
   noInteractive?: boolean;
   /** The URL to redirect to after the signin request */
   redirect_uri?: string;
+  [key: string]: any;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ISignoutArgs {
   /** The URL to redirect to after the signin request */
   redirect_uri?: string;
+  [key: string]: any;
 }
 
 /**

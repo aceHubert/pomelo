@@ -1,0 +1,8 @@
+<% if (process.env.NODE_ENV === 'production') { %>
+<link rel="stylesheet" href="<%= baseURL %>style/login.min.css" />
+<% } else { %>
+<link rel="stylesheet" href="<%= baseURL %>style/login.css" />
+<% } %>
+<%- primaryStyleVars %>
+<div id="app"><%- content %> <%- include('partials/footer') %></div>
+<%- contentFor('title') %> <%= tv('identity-server.select_account.page_title', 'Select Account', i18nLang) %>

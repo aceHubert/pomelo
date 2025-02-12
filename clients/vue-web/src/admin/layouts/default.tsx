@@ -139,13 +139,19 @@ export default defineComponent({
           true) === false,
     );
 
-    const handleActionClick = (key: AvatarDropdownAction | 'password-modify') => {
+    const handleActionClick = (key: AvatarDropdownAction | 'password-modify' | 'select-account') => {
       switch (key) {
         case 'password-modify':
           userManager.modifyPassword();
           break;
         case 'setting-drawer':
           settingDrawerVisible.value = !settingDrawerVisible.value;
+          break;
+        case 'select-account':
+          userManager.signin({
+            noInteractive: true,
+            prompt: 'select_account',
+          });
           break;
         case 'signout':
           // 以免多次调用跳转循环
@@ -217,14 +223,18 @@ export default defineComponent({
 
     return () => {
       const avatarMenuItems = [
-        <Menu.Item key="password-modify">
-          <Icon type="key" />
-          {i18n.tv('layout_default.avatar_menu_item.modify_password', '修改密码')}
-        </Menu.Item>,
         <Menu.Item key="setting-drawer">
           <Icon component={appMixin.theme === Theme.Dark ? IconDarkTheme : IconLightTheme} />
           {i18n.tv('layout_default.page_style_setting_title', '显示设置')}
         </Menu.Item>,
+        <Menu.Item key="password-modify">
+          <Icon type="key" />
+          {i18n.tv('layout_default.avatar_menu_item.modify_password', '修改密码')}
+        </Menu.Item>,
+        // <Menu.Item key="select-account">
+        //   <Icon type="swap" />
+        //   {i18n.tv('layout_default.avatar_menu_item.select_account', '切换账号')}
+        // </Menu.Item>,
       ];
 
       return (

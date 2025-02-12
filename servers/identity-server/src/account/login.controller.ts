@@ -9,7 +9,7 @@ import { KoaContextWithOIDC } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
-import { getLoginTemplate, getConsentTemplate } from '@/common/templates';
+import { getLoginTemplate, getConsentTemplate, getSelectAccountTemplate } from '@/common/templates';
 import { IdentityResourceDataSource } from '@/datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { LoginDto } from './dto/login.dto';
@@ -46,7 +46,7 @@ export class LoginController extends BaseController {
     const interaction = await this.ensureInteraction(req, res, returnUrl);
     if (!interaction) return;
 
-    const { prompt, params } = interaction;
+    const { prompt, params, session } = interaction;
     let client: KoaContextWithOIDC['oidc']['entities']['Client'],
       clientProperties: Record<string, any> = {};
 
@@ -59,7 +59,8 @@ export class LoginController extends BaseController {
       }); // loginPage.xxx or consentPage.x;
     }
 
-    let wrapper: string, form: string;
+    let wrapper: string = '',
+      form: string = '';
 
     const appConfig = this.moduleRef['container'].applicationConfig;
     const primaryColor = clientProperties['primaryColor'] as string;
@@ -202,7 +203,56 @@ export class LoginController extends BaseController {
             : ''
         }
       </form>`;
-    } else {
+    } else if (prompt.name === 'select_account') {
+      const customWrapperTemplate = clientProperties['selectAccountPage.template']
+        ? getSelectAccountTemplate(clientProperties['selectAccountPage.template'])
+        : undefined;
+
+      // TODO: 企业对应的账户列表
+      const accountIds = [
+        { value: '1', name: '企业 A' },
+        { value: '5', name: '企业 B' },
+        { value: '', name: '企业 C' },
+      ];
+
+      wrapper =
+        customWrapperTemplate ||
+        `<div class="wrapper-placeholder">
+        <%- locales %>
+        <div class="wrapper">
+          <div class="mb-2 pb-2 border-bottom">
+            <h1 class="title">${i18n.tv('identity-server.select_account.wrapper.title', 'Select account')}</h1>
+          </div>
+          <%- form %>
+          <div class="text-end mt-4">
+            <button type="submit" class="btn btn-primary" form="select-account-confirm-form">${i18n.tv(
+              'identity-server.select_account.wrapper.confirm_btn_text',
+              'Confirm',
+            )}</button>
+          </div>
+        </div>
+      </div>`;
+
+      form = `
+      <form id="select-account-confirm-form" action="${normalizeRoutePath(
+        appConfig?.getGlobalPrefix() ?? '',
+      )}/login/select/account${
+        returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''
+      }" method="POST" autocomplete="off">
+        ${accountIds
+          .map(
+            ({ value, name }) => `<div class="form-check">
+              <input class="form-check-input" type="radio" name="accountId" id="accountId_${value}" value="${value}" ${
+              session!.accountId === value ? 'checked' : ''
+            } />
+              <label class="form-check-label" for="accountId_${value}">
+              ${name}
+              </label>
+            </div>`,
+          )
+          .join(' ')}
+        </form>`;
+    } else if (prompt.name === 'consent') {
       const missingScopes = new Set(prompt.details.missingOIDCScope as string[]);
       const resourceMap = new Map<string, string>();
       await this.identityResourceDataSource.getList(['name', 'displayName', 'description']).then((result) => {
@@ -287,7 +337,6 @@ export class LoginController extends BaseController {
         }
         </form>`;
     }
-
     res.render(prompt.name, {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
       content: ejs.render(wrapper, {
@@ -427,5 +476,34 @@ export class LoginController extends BaseController {
     };
 
     await this.oidcService.provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
+  }
+
+  @Post('select/account')
+  async selectAccount(
+    @Query('returnUrl') returnUrl: string | undefined,
+    @Body('accountId') accountId: string,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+    @I18n() i18n: I18nContext,
+  ) {
+    const interaction = await this.ensureInteraction(req, res, returnUrl);
+    if (!interaction) return;
+
+    await this.oidcService.provider.interactionFinished(
+      req,
+      res,
+      accountId
+        ? {
+            login: {
+              accountId,
+            },
+            select_account: {},
+          }
+        : {
+            error: 'invalid_request',
+            error_description: 'account not found',
+          },
+      { mergeWithLastSubmission: true },
+    );
   }
 }

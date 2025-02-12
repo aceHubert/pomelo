@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Parent, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
@@ -153,7 +153,7 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
   @Anonymous()
   @Query((returns) => PostTemplate, { nullable: true, description: 'Get post template.' })
   postTemplate(
-    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Post id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PostTemplate | undefined> {
@@ -320,12 +320,12 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     description: 'Update post template (must not be in "trash" status).',
   })
   async updatePostTemplate(
-    @Args('id', { type: () => ID, description: 'Post id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Post id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdatePostTemplateInput }) model: UpdatePostTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     await this.basicService
-      .send<void>(TemplatePattern.Update, {
+      .send<void>(TemplatePattern.UpdatePost, {
         ...model,
         id,
         requestUserId: Number(requestUser.sub),
