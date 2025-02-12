@@ -159,7 +159,7 @@ export class TermTaxonomyController extends createMetaController(
     description: 'Term taxonomy model',
     type: () => createResponseSuccessType({ data: TermTaxonomyModelResp }),
   })
-  async get(@Param('id') id: number) {
+  async get(@Param('id', ParseIntPipe) id: number) {
     const result = await this.basicService
       .send<TermTaxonomyModelResp | undefined>(TermTaxonomyPattern.Get, {
         id,
@@ -200,7 +200,7 @@ export class TermTaxonomyController extends createMetaController(
     description: 'Term taxonomy relationship model',
     type: () => createResponseSuccessType({ data: TermRelationshipModelResp }),
   })
-  async createRelationship(@Param('id') termTaxonomyId: number, @Param('objectId') objectId: number) {
+  async createRelationship(@Param('id', ParseIntPipe) termTaxonomyId: number, @Param('objectId') objectId: number) {
     const result = await this.basicService
       .send<TermRelationshipModelResp>(TermTaxonomyPattern.CreateRelationship, { termTaxonomyId, objectId })
       .lastValue();
@@ -240,7 +240,7 @@ export class TermTaxonomyController extends createMetaController(
     description: 'no data content',
     type: () => createResponseSuccessType({}),
   })
-  async delete(@Param('id') id: number) {
+  async delete(@Param('id', ParseIntPipe) id: number) {
     try {
       await this.basicService.send(TermTaxonomyPattern.Delete, { id }).lastValue();
       return this.success();
@@ -281,7 +281,7 @@ export class TermTaxonomyController extends createMetaController(
     description: 'no data content',
     type: () => createResponseSuccessType({}),
   })
-  async deleteRelationship(@Param('id') termTaxonomyId: number, @Param('objectId') objectId: number) {
+  async deleteRelationship(@Param('id', ParseIntPipe) termTaxonomyId: number, @Param('objectId') objectId: number) {
     try {
       await this.basicService
         .send<void>(TermTaxonomyPattern.DeleteRelationship, {

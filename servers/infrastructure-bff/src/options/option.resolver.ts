@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
@@ -22,7 +22,10 @@ export class OptionResolver extends BaseResolver {
 
   @Anonymous()
   @Query((returns) => Option, { nullable: true, description: 'Get option.' })
-  option(@Args('id', { type: () => ID }) id: number, @Fields() fields: ResolveTree): Promise<Option | undefined> {
+  option(
+    @Args('id', { type: () => ID }, ParseIntPipe) id: number,
+    @Fields() fields: ResolveTree,
+  ): Promise<Option | undefined> {
     return this.basicService
       .send<Option | undefined>(OptionPattern.Get, {
         id,
@@ -81,7 +84,7 @@ export class OptionResolver extends BaseResolver {
   @RamAuthorized(OptionAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update option.' })
   updateOption(
-    @Args('id', { type: () => ID, description: 'Option id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Option id' }, ParseIntPipe) id: number,
     @Args('model') model: UpdateOptionInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
@@ -97,7 +100,7 @@ export class OptionResolver extends BaseResolver {
   @RamAuthorized(OptionAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete option permanently.' })
   deleteOption(
-    @Args('id', { type: () => ID, description: 'Option id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Option id' }, ParseIntPipe) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     return this.basicService

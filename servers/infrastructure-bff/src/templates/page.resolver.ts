@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
@@ -110,7 +110,7 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
   @Anonymous()
   @Query((returns) => PageTemplate, { nullable: true, description: 'Get page template.' })
   pageTemplate(
-    @Args('id', { type: () => ID, description: 'Page id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Page id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
@@ -248,12 +248,12 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     description: 'Update page template (must not be in "trash" status).',
   })
   async updatePageTemplate(
-    @Args('id', { type: () => ID, description: 'Page id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Page id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdatePageTemplateInput }) model: UpdatePageTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     await this.basicService
-      .send<void>(TemplatePattern.Update, {
+      .send<void>(TemplatePattern.UpdatePage, {
         ...model,
         id,
         requestUserId: Number(requestUser.sub),

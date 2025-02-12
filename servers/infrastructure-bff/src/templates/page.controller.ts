@@ -373,7 +373,7 @@ export class PageTemplateController extends BaseController {
   ) {
     try {
       await this.basicService
-        .send<void>(TemplatePattern.Update, {
+        .send<void>(TemplatePattern.UpdatePage, {
           ...input,
           id,
           requestUserId: Number(requestUser.sub),

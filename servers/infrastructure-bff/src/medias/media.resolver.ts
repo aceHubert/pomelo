@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
@@ -233,7 +233,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
 
   @Mutation(() => Media, { nullable: true, description: 'Crop image.' })
   async cropImage(
-    @Args('id', { type: () => ID, description: 'Media id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Media id' }, ParseIntPipe) id: number,
     @Args('options', { type: () => ImageCropOptionsInput }) options: ImageCropOptionsInput,
     @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
@@ -338,7 +338,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   @Query(() => Media, { nullable: true, description: 'Get media by id.' })
   @RamAuthorized(MediaAction.Detail)
   async media(
-    @Args('id', { type: () => ID, description: 'Media id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Media id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<Media | undefined> {
     const media = await this.basicService
@@ -433,7 +433,7 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
 
   @Mutation(() => VoidResolver, { nullable: true, description: 'Delete media.' })
   async updateMedia(
-    @Args('id', { type: () => ID, description: 'Media id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Media id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateMediaInput }) model: UpdateMediaInput,
     @Args('metaData', { type: () => MediaMetaDataInput, nullable: true }) metaData: MediaMetaDataInput | undefined,
     @User()

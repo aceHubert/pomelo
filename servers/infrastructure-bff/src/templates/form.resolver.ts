@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
@@ -102,7 +102,7 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
   @Anonymous()
   @Query((returns) => FormTemplate, { nullable: true, description: 'Get form template.' })
   formTemplate(
-    @Args('id', { type: () => ID, description: 'Form id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Form id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ) {
@@ -194,12 +194,12 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     description: 'Update form template (must not be in "trash" status).',
   })
   async updateFormTemplate(
-    @Args('id', { type: () => ID, description: 'Form id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Form id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateFormTemplateInput }) model: UpdateFormTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     await this.basicService
-      .send<void>(TemplatePattern.Update, {
+      .send<void>(TemplatePattern.UpdateForm, {
         ...model,
         id,
         requestUserId: Number(requestUser.sub),

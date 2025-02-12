@@ -1,3 +1,4 @@
+import { ParseIntPipe } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
@@ -34,7 +35,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.Detail)
   @Query((returns) => ApiResource, { nullable: true, description: 'Get api scope.' })
   apiResource(
-    @Args('id', { type: () => ID, description: 'Api resource id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<ApiResource | undefined> {
     return this.apiResourceDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.ApiResource));
@@ -62,7 +63,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update api scope.' })
   async updateApiResource(
-    @Args('id', { type: () => ID, description: 'Api resource id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) id: number,
     @Args('model') input: UpdateApiResourceInput,
   ): Promise<void> {
     await this.apiResourceDataSource.update(id, input);
@@ -70,7 +71,9 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope.' })
-  async deleteApiResource(@Args('id', { type: () => ID, description: 'Api resource id' }) id: number): Promise<void> {
+  async deleteApiResource(
+    @Args('id', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.apiResourceDataSource.delete(id);
   }
 
@@ -97,14 +100,16 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.DeleteClaim)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api claim permanently.' })
-  async deleteApiClaim(@Args('id', { type: () => ID, description: 'Api claim id' }) id: number): Promise<void> {
+  async deleteApiClaim(
+    @Args('id', { type: () => ID, description: 'Api claim id' }, ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.apiResourceDataSource.deleteClaim(id);
   }
 
   @RamAuthorized(ApiResourceAction.ScopeDetail)
   @Query((returns) => ApiScope, { nullable: true, description: 'Get api scope.' })
   apiScope(
-    @Args('id', { type: () => ID, description: 'Api scope id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Api scope id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<ApiScope | undefined> {
     return this.apiResourceDataSource.getScope(id, this.getFieldNames(fields.fieldsByTypeName.ApiScope));
@@ -136,7 +141,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update api scope.' })
   async updateApiScope(
-    @Args('id', { type: () => ID, description: 'Api scope id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Api scope id' }, ParseIntPipe) id: number,
     @Args('model') input: UpdateApiScopeInput,
   ): Promise<void> {
     await this.apiResourceDataSource.updateScope(id, input);
@@ -144,7 +149,9 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope.' })
-  async deleteApiScope(@Args('id', { type: () => ID, description: 'Api scope id' }) id: number): Promise<void> {
+  async deleteApiScope(
+    @Args('id', { type: () => ID, description: 'Api scope id' }, ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.apiResourceDataSource.deleteScope(id);
   }
 
@@ -172,7 +179,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.DeleteScopeClaim)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope claim permanently.' })
   async deleteApiScopeClaim(
-    @Args('id', { type: () => ID, description: 'Api scope claim id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Api scope claim id' }, ParseIntPipe) id: number,
   ): Promise<void> {
     await this.apiResourceDataSource.deleteScopeClaim(id);
   }
@@ -212,7 +219,9 @@ export class ApiResourceResolver extends BaseResolver {
 
   @RamAuthorized(ApiResourceAction.DeleteSecret)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api secret permanently.' })
-  async deleteApiSecret(@Args('id', { type: () => ID, description: 'Api secret id' }) id: number): Promise<void> {
+  async deleteApiSecret(
+    @Args('id', { type: () => ID, description: 'Api secret id' }, ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.apiResourceDataSource.deleteSecret(id);
   }
 
@@ -240,7 +249,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.DeleteProperty)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete api scope property permanently.' })
   async deleteApiProperty(
-    @Args('id', { type: () => ID, description: 'Api resopurce property id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Api resopurce property id' }, ParseIntPipe) id: number,
   ): Promise<void> {
     await this.apiResourceDataSource.deleteProperty(id);
   }

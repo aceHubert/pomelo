@@ -1,3 +1,4 @@
+import { ParseIntPipe } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
@@ -26,7 +27,7 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.Detail)
   @Query((returns) => IdentityResource, { nullable: true, description: 'Get identity resource.' })
   identityResource(
-    @Args('id', { type: () => ID, description: 'Identity resource id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Identity resource id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<IdentityResource | undefined> {
     return this.identityResourceDataSource.get(id, this.getFieldNames(fields.fieldsByTypeName.IdentityResource));
@@ -60,7 +61,7 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update identity resource.' })
   async updateIdentityResource(
-    @Args('id', { type: () => ID, description: 'Identity resource id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Identity resource id' }, ParseIntPipe) id: number,
     @Args('model') input: UpdateIdentityResourceInput,
   ): Promise<void> {
     await this.identityResourceDataSource.update(id, input);
@@ -69,7 +70,7 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete identity resource.' })
   async deleteIdentityResource(
-    @Args('id', { type: () => ID, description: 'Identity resource id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Identity resource id' }, ParseIntPipe) id: number,
   ): Promise<void> {
     await this.identityResourceDataSource.delete(id);
   }
@@ -98,7 +99,7 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.DeleteClaim)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete identity claim permanently.' })
   async deleteIdentityClaim(
-    @Args('id', { type: () => ID, description: 'Identity claim id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Identity claim id' }, ParseIntPipe) id: number,
   ): Promise<void> {
     await this.identityResourceDataSource.deleteClaim(id);
   }
@@ -130,7 +131,7 @@ export class IdentityResourceResolver extends BaseResolver {
     description: 'Delete identity resource property permanently.',
   })
   async deleteIdentityProperty(
-    @Args('id', { type: () => ID, description: 'Identity resopurce property id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Identity resopurce property id' }, ParseIntPipe) id: number,
   ): Promise<void> {
     await this.identityResourceDataSource.deleteProperty(id);
   }

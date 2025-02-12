@@ -233,7 +233,7 @@ export class FormTemplateController extends BaseController {
   ) {
     try {
       await this.basicService
-        .send<void>(TemplatePattern.Update, {
+        .send<void>(TemplatePattern.UpdateForm, {
           ...input,
           id,
           requestUserId: Number(requestUser.sub),
