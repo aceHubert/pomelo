@@ -77,15 +77,6 @@ export enum TemplateCommentStatus {
 }
 
 /**
- * 模版页面类型
- */
-export enum TemplatePageType {
-  Default = 'default',
-  Cover = 'cover',
-  FullWidth = 'full-width',
-}
-
-/**
  * 用户状态
  */
 export enum UserStatus {

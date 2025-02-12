@@ -1,11 +1,19 @@
 import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 
 // Types
-import type { TemplatePageType } from '@ace-pomelo/shared/client';
 import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fetch/graphql';
 import type { PagedTemplateArgs, TemplateModel, NewTemplateInput, TemplateStatusCountItem } from '.';
 import type { TermTaxonomyModel } from '../term-taxonomy';
 import type { Paged } from '../types';
+
+/**
+ * 模版页面类型
+ */
+export enum TemplatePageType {
+  Default = 'default',
+  Cover = 'cover',
+  FullWidth = 'full-width',
+}
 
 export interface PagedPostTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {
   tagId?: string;

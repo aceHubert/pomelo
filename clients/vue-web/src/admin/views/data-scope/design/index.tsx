@@ -4,8 +4,8 @@ import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { Button, Card, Dropdown, Form, Input, Menu, Icon } from 'ant-design-vue';
 import { getActiveFetch } from '@ace-fetch/vue';
 import { warn } from '@ace-util/core';
-import { TemplateStatus } from '@ace-pomelo/shared/client';
 import { message } from '@/components';
+import { TemplateStatus } from '@/fetch/apis';
 import { useDesignerMixin } from '@/admin/mixins/designer';
 import { ClauseForm } from '../components';
 import { TemplateType } from '../constants';
@@ -146,7 +146,7 @@ export default Form.create({})(
               return data;
             });
           } else if (typeof item.valueSource === 'function') {
-            return item.valueSource(fetch!.client).then((data) => {
+            return item.valueSource(fetch!.client.get).then((data) => {
               item.valueSource = data; // 缓存
               return data;
             });
