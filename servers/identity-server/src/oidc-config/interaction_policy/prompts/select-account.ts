@@ -1,7 +1,7 @@
 import { interactionPolicy } from 'oidc-provider';
 // import { isPhoneNumber } from 'class-validator';
 
-const { Prompt, Check } = interactionPolicy;
+const { Prompt } = interactionPolicy;
 
 export default () =>
   new Prompt(
