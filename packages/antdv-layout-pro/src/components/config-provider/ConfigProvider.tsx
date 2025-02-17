@@ -1,4 +1,4 @@
-import { defineComponent, watch, onMounted, onBeforeUnmount } from 'vue-demi';
+import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from 'vue-demi';
 import { ConfigProvider as AntConfigProvider } from 'ant-design-vue';
 import { DeviceType, Theme } from '../../types';
 import { removeClass, addClass, genColor, addCssText, removeCssText } from './utils';
@@ -40,15 +40,15 @@ export default defineComponent({
   mixins: [AntConfigProvider],
   props: {
     theme: {
-      type: String,
-      default: Theme.Light,
+      type: String as PropType<Theme>,
+      default: Theme.Auto,
     },
     primaryColor: {
       type: String,
       default: '#1890ff',
     },
     device: {
-      type: String,
+      type: String as PropType<DeviceType>,
       default: DeviceType.Desktop,
     },
     i18nRender: {
@@ -60,15 +60,32 @@ export default defineComponent({
   setup(props) {
     let dispose: (() => void) | undefined;
 
+    const systemTheme = ref<string>();
+
     onMounted(() => {
       let removeClasses: string[] = [];
       const styleProviderId = 'style-provider';
 
+      const themeMedia = window.matchMedia('(prefers-color-scheme: light)');
+      systemTheme.value = themeMedia.matches ? Theme.Light : Theme.Dark;
+      const onPrefersColorScheme = (e: MediaQueryListEvent): void => {
+        systemTheme.value = e.matches ? Theme.Light : Theme.Dark;
+      };
+      try {
+        themeMedia.addEventListener('change', onPrefersColorScheme);
+      } catch {
+        try {
+          themeMedia.addListener(onPrefersColorScheme);
+        } catch {
+          // ate by dog
+        }
+      }
+
       const unWatchToggleClass = watch(
-        [() => props.device, () => props.theme],
-        ([device, theme]) => {
+        [() => props.device, () => props.theme, systemTheme],
+        ([device, theme, systemTheme]) => {
           removeClasses.length && removeClass(document.body, removeClasses.join(' '));
-          const addClasses = (removeClasses = [`theme-${theme}`, `is-${device}`]);
+          const addClasses = (removeClasses = [`theme-${theme === Theme.Auto ? systemTheme : theme}`, `is-${device}`]);
           addClass(document.body, addClasses.join(' '));
         },
         {
@@ -77,11 +94,14 @@ export default defineComponent({
       );
 
       const unWatchCssVariable = watch(
-        [() => props.primaryColor, () => props.theme],
-        ([primaryColor, theme]) => {
-          const colors = genColor(primaryColor, { isDark: theme === Theme.Dark });
+        [() => props.primaryColor, () => props.theme, systemTheme],
+        ([primaryColor, theme, systemTheme]) => {
+          const _theme = theme === Theme.Auto ? systemTheme : theme;
+          const colors = genColor(primaryColor, {
+            isDark: _theme === Theme.Dark,
+          });
           addCssText(
-            `:root .theme-${theme} {\n${Object.keys(colors)
+            `:root .theme-${_theme} {\n${Object.keys(colors)
               .map((key) =>
                 key === 'base' ? `  --theme-primary: ${colors[key]};` : `  --theme-${key}: ${colors[key]};`,
               )
