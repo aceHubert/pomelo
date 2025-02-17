@@ -40,11 +40,11 @@ export default defineComponent({
   },
   props: {
     visible: { type: Boolean, default: false },
-    theme: { type: String, default: Theme.Light },
+    theme: { type: String as PropType<Theme>, default: Theme.Auto },
     primaryColor: { type: String, default: defaultPrimaryColor },
     presetColors: { type: [Array, Function] as PropType<SettingDrawerProps['presetColors']> },
-    layout: { type: String, default: LayoutType.MixedMenu },
-    contentWidth: { type: String, default: ContentWidth.Fluid },
+    layout: { type: String as PropType<LayoutType>, default: LayoutType.MixedMenu },
+    contentWidth: { type: String as PropType<ContentWidth>, default: ContentWidth.Fluid },
     fixedHeader: { type: Boolean, default: true },
     autoHideHeader: { type: Boolean, default: false },
     fixSiderbar: { type: Boolean, default: true },
@@ -58,6 +58,18 @@ export default defineComponent({
       default: 'components.setting_drawer',
     },
   },
+  emits: [
+    'change',
+    'update:theme',
+    'update:primaryColor',
+    'update:layout',
+    'update:contentWidth',
+    'update:fixedHeader',
+    'update:autoHideHeader',
+    'update:fixSiderbar',
+    'update:colorWeak',
+    // 'update:multiTab',
+  ],
   setup(props: SettingDrawerProps, { emit, slots }) {
     const configProvider = useConfigProvider();
 
@@ -138,12 +150,12 @@ export default defineComponent({
       return colors;
     });
 
-    const handleThemeChange = (theme: Theme) => () => {
+    const handleThemeChange = (theme: Theme) => {
       configs.theme = theme;
       emit('update:theme', theme);
     };
 
-    const handleColorChange = (color: string) => () => {
+    const handleColorChange = (color: string) => {
       configs.primaryColor = color;
       emit('update:primaryColor', color);
     };
@@ -206,42 +218,59 @@ export default defineComponent({
           <h3 class={`${prefixCls}__title`}>
             {configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.title`, 'Page Style')}
           </h3>
-          <div class={`${prefixCls}__block-checkbox`}>
-            <Tooltip
-              title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.reallight`, 'Reallight style')}
-            >
-              <div class={`${prefixCls}-block-checkbox__item`} onClick={handleThemeChange(Theme.RealLight)}>
-                <img src={IconReallight} alt="real-light" />
-                {configs.theme === Theme.RealLight && (
-                  <div class="selected-icon">
-                    <Icon type="check" />
-                  </div>
-                )}
-              </div>
-            </Tooltip>
-            <Tooltip title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.light`, 'Light style')}>
-              <div class={`${prefixCls}-block-checkbox__item`} onClick={handleThemeChange(Theme.Light)}>
-                <img src={IconLight} alt="light" />
-                {configs.theme === Theme.Light && (
-                  <div class="selected-icon">
-                    <Icon type="check" />
-                  </div>
-                )}
-              </div>
-            </Tooltip>
-            {props.darkModeSupport && (
-              <Tooltip title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.dark`, 'Dark style')}>
-                <div class={`${prefixCls}-block-checkbox__item`} onClick={handleThemeChange(Theme.Dark)}>
-                  <img src={IconDark} alt="dark" />
-                  {configs.theme === Theme.Dark && (
+          <List split={false}>
+            <List.Item class="py-0">
+              <Switch
+                slot="actions"
+                size="small"
+                checked={configs.theme === Theme.Auto}
+                onChange={(checked) => handleThemeChange(checked ? Theme.Auto : Theme.Light)}
+              />
+              <List.Item.Meta>
+                <template slot="title">
+                  {configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.auto`, 'Auto Mode')}
+                </template>
+              </List.Item.Meta>
+            </List.Item>
+          </List>
+          {configs.theme !== Theme.Auto && (
+            <div class={`${prefixCls}__block-checkbox`}>
+              <Tooltip
+                title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.reallight`, 'Reallight style')}
+              >
+                <div class={`${prefixCls}-block-checkbox__item`} onClick={() => handleThemeChange(Theme.RealLight)}>
+                  <img src={IconReallight} alt="real-light" />
+                  {configs.theme === Theme.RealLight && (
                     <div class="selected-icon">
                       <Icon type="check" />
                     </div>
                   )}
                 </div>
               </Tooltip>
-            )}
-          </div>
+              <Tooltip title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.light`, 'Light style')}>
+                <div class={`${prefixCls}-block-checkbox__item`} onClick={() => handleThemeChange(Theme.Light)}>
+                  <img src={IconLight} alt="light" />
+                  {configs.theme === Theme.Light && (
+                    <div class="selected-icon">
+                      <Icon type="check" />
+                    </div>
+                  )}
+                </div>
+              </Tooltip>
+              {props.darkModeSupport && (
+                <Tooltip title={configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.dark`, 'Dark style')}>
+                  <div class={`${prefixCls}-block-checkbox__item`} onClick={() => handleThemeChange(Theme.Dark)}>
+                    <img src={IconDark} alt="dark" />
+                    {configs.theme === Theme.Dark && (
+                      <div class="selected-icon">
+                        <Icon type="check" />
+                      </div>
+                    )}
+                  </div>
+                </Tooltip>
+              )}
+            </div>
+          )}
         </div>
 
         <div class="mb-6">
@@ -251,7 +280,7 @@ export default defineComponent({
           <div style="height: 20px">
             {presetColors.value.map((item) => (
               <Tooltip class={`${prefixCls}__block-color`} title={item.key} key={item.color}>
-                <Tag color={item.color} onClick={handleColorChange(item.color)}>
+                <Tag color={item.color} onClick={() => handleColorChange(item.color)}>
                   {item.color === configs.primaryColor && <Icon type="check" />}
                 </Tag>
               </Tooltip>
@@ -334,12 +363,12 @@ export default defineComponent({
                   onChange={handleFixedHeader}
                 />
                 <List.Item.Meta>
-                  <div
+                  <span
                     slot="title"
                     style={{ textDecoration: configs.layout === LayoutType.SiderMenu ? 'line-through' : 'unset' }}
                   >
                     {configProvider.i18nRender(`${props.i18nKeyPrefix}.fixed_header.title`, 'Fixed Header')}
-                  </div>
+                  </span>
                 </List.Item.Meta>
               </List.Item>
               <List.Item>
@@ -359,12 +388,12 @@ export default defineComponent({
                       'Available when fixed header is enabled',
                     )}
                   >
-                    <div style={{ opacity: !configs.fixedHeader ? '0.5' : '1' }}>
+                    <span style={{ opacity: !configs.fixedHeader ? '0.5' : '1' }}>
                       {configProvider.i18nRender(
                         `${props.i18nKeyPrefix}.auto_hide_header.title`,
                         'Hide Header On Scroll',
                       )}
-                    </div>
+                    </span>
                   </Tooltip>
                 </List.Item.Meta>
               </List.Item>
@@ -377,12 +406,12 @@ export default defineComponent({
                   onChange={handleFixSiderbar}
                 />
                 <List.Item.Meta>
-                  <div
+                  <span
                     slot="title"
                     style={{ textDecoration: configs.layout === LayoutType.TopMenu ? 'line-through' : 'unset' }}
                   >
                     {configProvider.i18nRender(`${props.i18nKeyPrefix}.fixed_sidebar.title`, 'Fixed Sidebar')}
-                  </div>
+                  </span>
                 </List.Item.Meta>
               </List.Item>
             </List>
@@ -398,15 +427,15 @@ export default defineComponent({
               <List.Item>
                 <Switch slot="actions" size="small" checked={configs.colorWeak} onChange={handleColorWeak} />
                 <List.Item.Meta>
-                  <div slot="title">
+                  <template slot="title">
                     {configProvider.i18nRender(`${props.i18nKeyPrefix}.weak_mode.title`, 'Weak Mode')}
-                  </div>
+                  </template>
                 </List.Item.Meta>
               </List.Item>
               {/* <List.Item>
                   <Switch slot="actions" size="small" checked={configs.multiTab} onChange={handleMultiTab} />
                   <List.Item.Meta>
-                    <div slot="title">{configProvider.i18nRender(`${props.i18nKeyPrefix}.multi_tab.title`, 'Multipe Tabs Mode')}</div>
+                    <template slot="title">{configProvider.i18nRender(`${props.i18nKeyPrefix}.multi_tab.title`, 'Multipe Tabs Mode')}</template>
                   </List.Item.Meta>
                 </List.Item> */}
             </List>

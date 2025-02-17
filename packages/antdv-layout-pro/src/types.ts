@@ -105,6 +105,10 @@ export enum DeviceType {
 
 export enum Theme {
   /**
+   * Follow the system settings
+   */
+  Auto = 'auto',
+  /**
    * Header & Sider 显示为浅色
    */
   RealLight = 'reallight',
