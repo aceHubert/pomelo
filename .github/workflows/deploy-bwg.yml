@@ -27,8 +27,6 @@ permissions:
   packages: write
 
 jobs:
-  # This disables the entire workflow
-  if: false
   cache:
     runs-on: ubuntu-latest
     steps:
