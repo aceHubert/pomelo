@@ -1,7 +1,7 @@
 # debug locally
 # act -W ./.github/workflows/deploy.yml --secret-file ./.github/.secrets --var-file ./.github/.vars -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest
 
-name: Deploy
+name: Deploy-HWCloud
 
 on:
   # release:
@@ -9,12 +9,15 @@ on:
   push: # push 到主分支自动 发布
     branches: ['master']
     paths-ignore: # 忽略一些不必要的文件
+      - '.vscode/**'
+      - '.devcontainer/**'
       - '.gitignore'
       - 'nginx.conf'
       - 'Gruntfile.js'
       - 'README.md'
-      - '.vscode/**'
-      - '.devcontainer/**'
+      - '*.dev*'
+      - '*.local*'
+      - '*.test*'
   # pull_request:
   #   branches: ['master']
 
@@ -125,5 +128,5 @@ jobs:
             docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
-            docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/server.conf
-            docker exec ${{ vars.NGINX_CONTAINER }} nginx -s reload
+            docker cp pomelo-server:/app/nginx-server.conf ${{ vars.HW_NGINX_CONF_DIR }}/server.conf
+            /etc/init.d/nginx -s reload
