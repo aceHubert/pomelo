@@ -121,6 +121,7 @@ jobs:
           key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
           debug: true
+          command_timeout: 30m
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.DOCKER_COMPOSE_DIR }}
