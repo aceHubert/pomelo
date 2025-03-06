@@ -116,11 +116,13 @@ jobs:
       - name: Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
+          host: ${{ secrets.HW_SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
           username: ${{ secrets.SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
           key: ${{ secrets.SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
+          debug: true
           script: | # 发布镜像并删除之前的镜像
+            whoami
             cd ${{ vars.DOCKER_COMPOSE_DIR }}
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
             echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin https://${{ env.REGISTRY }}
