@@ -9,7 +9,7 @@
   env.identityGraphqlBase = 'http://localhost:9080/pomelo/identity/graphql';
 
   env.oidc = {
-    authority: 'http://localhost:5002/oauth2',
+    authority: 'http://localhost:5003/oauth2',
     client_id: clientId,
     redirect_uri: baseUrl + '/signin.html',
     post_logout_redirect_uri: baseUrl,
