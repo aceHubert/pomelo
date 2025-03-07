@@ -23,6 +23,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  REGISTRY_MIRROR: ghcr.nju.edu.cn
   IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
 
 permissions:
@@ -125,11 +126,9 @@ jobs:
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.DOCKER_COMPOSE_DIR }}
-            echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
-            echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin https://${{ env.REGISTRY }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
-            docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
-            docker logout https://${{ env.REGISTRY }}
+            docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             rm -f .env.${{ github.run_id }}
             docker cp pomelo-server:/app/nginx-server.conf ${{ vars.HW_NGINX_CONF_DIR }}/server.conf
-            /etc/init.d/nginx -s reload
+            /etc/init.d/nginx reload
