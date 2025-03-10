@@ -101,8 +101,8 @@ jobs:
           key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
       - name: Build
         run: yarn build:clients && yarn build:servers
-      - name: Show Dir
-        run: ls
+      - name: List dist dir
+        run: ls dist
       - name: Build the  Docker image
         run:
           | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
@@ -115,6 +115,8 @@ jobs:
     environment:
       name: 'production'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: Copy docker compose file to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -126,22 +128,22 @@ jobs:
           target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
           overwrite: true
       - name: Replace domain in nginx conf file
-          uses: jacobtomlinson/gha-find-replace@v3
-          with:
-            include: "nginx.conf"
-            find: "example.com"
-            replace: "${{ vars.DOMAIN}}"
-            regex: false
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          include: "nginx.conf"
+          find: "example.com"
+          replace: "${{ vars.DOMAIN}}"
+          regex: false
       - name: Copy nginx conf file to server
-          uses: appleboy/scp-action@v0.1.7
-          with:
-            host: ${{ secrets.HW_SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
-            username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
-            key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
-            port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
-            source: "nginx.conf" # 本地文件路径
-            target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
-            overwrite: true
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HW_SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
+          username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
+          key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
+          port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
+          source: "nginx.conf" # 本地文件路径
+          target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
+          overwrite: true
       - name: Deploy
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -149,15 +151,14 @@ jobs:
           username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
           key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
-          debug: true
-          command_timeout: 60m
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
+            echo -e "ORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}" >> .env.${{ github.run_id }}
             mv docker-compose.deploy.yml docker-compose.yml
-            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secret.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}" > .env.${{ github.run_id }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
             docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             rm -f .env.${{ github.run_id }}
-            mv nginx.conf ${{ vars.NGINX_CONF_DIR }}/pomelo.conf
+            mv nginx.conf ${{ vars.HW_NGINX_CONF_DIR }}/pomelo.conf
             /etc/init.d/nginx reload

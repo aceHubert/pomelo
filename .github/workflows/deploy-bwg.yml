@@ -100,8 +100,8 @@ jobs:
           key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
       - name: Build
         run: yarn build:clients && yarn build:servers
-      - name: Show Dir
-        run: ls
+      - name: List dist dir
+        run: ls dist
       - name: Build the  Docker image
         run:
           | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
@@ -121,8 +121,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
           key: ${{ secrets.SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
-          debug: true
-          command_timeout: 60m
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
@@ -133,4 +131,4 @@ jobs:
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
             docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/pomelo.conf
-            docker exec ${{ vars.NGINX_CONTAINER }} nginx -s reload
+            docker exec ${{ vars.NGINX_CONTAINER_NAME }} nginx -s reload
