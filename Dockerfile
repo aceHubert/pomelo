@@ -30,7 +30,7 @@ FROM --platform=${BUILD_PLATFORM} node:${NODE_VERSION} AS runtime
 COPY --from=builder /app/clients/vue-web/dist /app/clients/web/
 COPY --from=builder /app/dist/servers /app/servers/
 COPY --from=builder /app/.yarn /app/.yarn/
-COPY --from=builder /app/package*.json /app/ecosystem.config.js /app/nginx-server.conf /app/.yarnrc.yml /app/yarn.lock /app/
+COPY --from=builder /app/package*.json /app/ecosystem.config.js /app/.yarnrc.yml /app/yarn.lock /app/
 
 WORKDIR /app
 # 安装 Nodejs 运行时文件
@@ -39,7 +39,7 @@ RUN yarn workspaces focus --production --all
 
 # copy runtime files
 FROM --platform=${BUILD_PLATFORM} node:${NODE_VERSION} AS deploy
-COPY --from=runtime /app/servers /app/clients /app/ecosystem.config.js /app/nginx-server.conf /app/
+COPY --from=runtime /app/servers /app/clients /app/ecosystem.config.js /app/
 COPY --from=runtime /app/node_modules /app/node_modules/
 
 # NODE_ENV 环境

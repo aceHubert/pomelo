@@ -1,45 +1,26 @@
 # vim: set shiftwidth=2 tabstop=2 softtabstop=-1 expandtab:
 
 # >  cat > .env.docker.local
-# // Apple M1
-# BUILD_PLATFORM=linux/arm64/v8
-# BUILD_TAG=0.0.1
-# BUILD_IGNORE=true
-# BUILD_OPTION=build:local
-# RUNTIME_ENV=production
-# SERVE_ENV=local
-# SERVE_APPS=''
+#   BUILD_TAG=0.0.1
+#   BUILD_IGNORE=true
+#   DEBUG=true
+#   ENV_FILE=.env.local
 
-# // Build
-# > docker compose --env-file .env.docker.local build
-
-# // Build & Run
-# > rm -rf release && mkdir release && docker compose --env-file .env.docker.local up --build --force-recreate -d
+# > mkdir release
+# > docker compose --env-file .env.docker.local up --build --force-recreate  -d
 
 # version: '3.1'
 
 services:
   server:
-    build:
-      context: ${BUILD_CONTEXT:-.}
-      dockerfile: Dockerfile
-      args:
-        BUILD_PLATFORM: ${BUILD_PLATFORM:-linux/amd64}
-        BUILD_IGNORE: ${BUILD_IGNORE:-false} # ignore exectuing build in Dockerfile
-        BUILD_OPTION: ${BUILD_OPTION:-build} # scripts in package.json
-        RUNTIME_ENV: ${RUNTIME_ENV:-production} # runtime env, production | development
-        SERVE_ENV: ${SERVE_ENV:-production} # env in ecosystem.config.js, production | fly
-        SERVE_APPS: ${SERVE_APPS} # apps in ecosystem.config.js, run all apps if empty
-        BUILDKIT_INLINE_CACHE: true
-        BUILDKIT_CONTEXT_KEEP_GIT_DIR: true
-      cache_from:
-        - pomelo:latest
-      target: deploy
-      tags:
-        - pomelo:${BUILD_TAG:-latest}
-    image: pomelo
+    image: ${IMAGE_REPOSITORY:-ghcr.io/acehubert/pomelo}
     container_name: pomelo-server
     restart: always
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '3'
     environment:
       - DEBUG=${DEBUG:-false}
       - ORIGIN=${ORIGIN:-https://example.com}
@@ -47,7 +28,7 @@ services:
       - INFRASTRUCTURE_DATABASE_CONNECTION=${INFRASTRUCTURE_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
       - IDENTITY_DATABASE_CONNECTION=${IDENTITY_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
     volumes:
-      - conf:/app/conf
+      - ${PWD}/conf:/app/conf
       - ${PWD}/uploads:/app/content/uploads
       - ${PWD}/plugins:/app/content/plugins
       - ${PWD}/themes:/app/content/themes
@@ -62,7 +43,7 @@ services:
       - 3011:3011 # web
     external_links:
       - ${MYSQL_CONTAINER_NAME:-mysql-default-5.7}:mysql
-      - ${REDIS_CONTAINER_NAME:-redis-default-6.2}:redis
+      - ${REDIS_CONTAINER_NAME:-redis-default-7.2}:redis
     networks:
       - default
       - mysql
@@ -74,12 +55,7 @@ services:
     environment:
       - APISIX_STAND_ALONE=true
     volumes:
-      - type: volume
-        source: conf
-        target: /usr/local/apisix/conf/apisix.yaml
-        volume:
-          nocopy: true
-          subpath: apisix.yaml
+      - ${PWD}/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
       - ${PWD}/logs/apisix:/usr/local/apisix/logs
     privileged: true
     depends_on:
@@ -100,12 +76,11 @@ networks:
   redis:
     name: ${REDIS_NETWORK_NAME:-redis_default}
     external: true
-volumes:
-  conf:
-    name: pomelo-conf
-    external: true
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   device: ${PWD}/${CONF_DIR:-CONF}
-    #   o: bind
+# volumes:
+#   conf:
+#    name: pomelo-conf
+#     driver: local
+#     driver_opts:
+#       type: none
+#       device: ${PWD}/${CONF_DIR:-conf}
+#       o: bind

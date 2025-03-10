@@ -15,6 +15,15 @@ graphql:
   # cors:
   #   - "*"
   # credentials: true
+# upload configuration
+upload:
+  # upload path
+  dest: "uploads"
+  # upload file size limit, a byte number,
+  # or string(https://github.com/visionmedia/bytes.js), default: 10MB
+  maxFileSize: 1000000
+  # upload file count limit, default: 10
+  maxFiles: 10
 # redis connection, from fly secrets
 # REDIS_URL: "redis://host:port/db"
 # infrastructure database connection, from fly secrets
@@ -22,6 +31,6 @@ graphql:
 # identity database connection, from fly secrets
 # IDENTITY_DATABASE_CONNECTION: "mysql://user:password@host:port/database"
 # table prefix
-TABLE_PREFIX: "po_"
+# TABLE_PREFIX: "po_"
 # set web oidc redirect uris, default: ${server.origin}
 WEB_URL: "https://pomelo-client.fly.dev:3011"

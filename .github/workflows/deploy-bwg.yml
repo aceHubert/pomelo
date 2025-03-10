@@ -9,12 +9,16 @@ on:
   push: # push 到主分支自动 发布
     branches: ['master']
     paths-ignore: # 忽略一些不必要的文件
+      - '.vscode/**'
+      - '.devcontainer/**'
       - '.gitignore'
       - 'nginx.conf'
       - 'Gruntfile.js'
       - 'README.md'
-      - '.vscode/**'
-      - '.devcontainer/**'
+      - 'docker-compose.*'
+      - '*.dev*'
+      - '*.local*'
+      - '*.test*'
   # pull_request:
   #   branches: ['master']
 
@@ -121,12 +125,12 @@ jobs:
           command_timeout: 60m
           script: | # 发布镜像并删除之前的镜像
             whoami
-            cd ${{ vars.DOCKER_COMPOSE_DIR }}
+            cd ${{ vars.PROJECT_DIR }}
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
             echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin https://${{ env.REGISTRY }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
             docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
-            docker cp pomelo-server:/app/nginx-server.conf ${{ vars.NGINX_CONF_DIR }}/server.conf
+            docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/pomelo.conf
             docker exec ${{ vars.NGINX_CONTAINER }} nginx -s reload
