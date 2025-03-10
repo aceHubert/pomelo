@@ -134,6 +134,13 @@ jobs:
           find: "example.com"
           replace: "${{ vars.DOMAIN}}"
           regex: false
+      - name: Replace nginx server directory in nginx conf file
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          include: "nginx.conf"
+          find: "/etc/nginx"
+          replace: "${{ vars.HW_NGINX_SERVER_DIR}}"
+          regex: false
       - name: Copy nginx conf file to server
         uses: appleboy/scp-action@v0.1.7
         with:
