@@ -1,0 +1,168 @@
+# debug locally
+# act -W ./.github/workflows/deploy.yml --secret-file ./.github/.secrets --var-file ./.github/.vars -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest
+
+name: Deploy-HWCloud
+
+on:
+  # release:
+  #   types: [published]
+  push: # push 到主分支自动 发布
+    branches: ['master']
+    paths-ignore: # 忽略一些不必要的文件
+      - '.vscode/**'
+      - '.devcontainer/**'
+      - '.gitignore'
+      - 'README.md'
+      - '*.dev*'
+      - '*.local*'
+      - '*.test*'
+  # pull_request:
+  #   branches: ['master']
+
+env:
+  REGISTRY: ghcr.io
+  REGISTRY_MIRROR: ghcr.nju.edu.cn
+  IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16.14'
+      - name: Cache main install
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-node-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Cache submodules
+        uses: actions/cache@v3
+        id: submodules-cache
+        with:
+          path: .submodules
+          key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-submodules-
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn install --mode=skip-build && npx vue-demi-fix
+      - name: Build Submodules
+        if: steps.submodules-cache.outputs.cache-hit != 'true'
+        run: yarn build:submodules
+  docker-build:
+    needs: cache
+    runs-on: ubuntu-latest
+    environment:
+      name: 'production'
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }} # 声明镜像源
+          username: ${{ github.actor }} # 当前github 用户名
+          password: ${{ secrets.GITHUB_TOKEN }} # 当前github token
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16.14'
+      - name: Restore main install cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            node_modules
+            .yarn/cache
+          key: ${{ runner.os }}-node-${{ hashFiles('yarn.lock') }}
+      - name: Restore submodules cache
+        uses: actions/cache/restore@v3
+        with:
+          path: .submodules
+          key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
+      - name: Build
+        run: yarn build:clients && yarn build:servers
+      - name: List dist dir
+        run: ls dist
+      - name: Build the  Docker image
+        run:
+          | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
+          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest
+  ssh-deploy:
+    needs: docker-build
+    runs-on: ubuntu-latest
+    environment:
+      name: 'production'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Copy docker compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HW_SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
+          username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
+          key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
+          port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
+          source: "docker-compose.deploy.yml" # 本地文件路径
+          target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
+          overwrite: true
+      - name: Replace domain in nginx conf file
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          include: "nginx.conf"
+          find: "example.com"
+          replace: "${{ vars.DOMAIN}}"
+          regex: false
+      - name: Replace nginx server directory in nginx conf file
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          include: "nginx.conf"
+          find: "/etc/nginx"
+          replace: "${{ vars.HW_NGINX_SERVER_DIR}}"
+          regex: false
+      - name: Copy nginx conf file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HW_SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
+          username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
+          key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
+          port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
+          source: "nginx.conf" # 本地文件路径
+          target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
+          overwrite: true
+      - name: Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HW_SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
+          username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
+          key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
+          port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
+          script: | # 发布镜像并删除之前的镜像
+            whoami
+            cd ${{ vars.PROJECT_DIR }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
+            echo -e "ORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}" >> .env.${{ github.run_id }}
+            mv docker-compose.deploy.yml docker-compose.yml
+            docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
+            docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
+            rm -f .env.${{ github.run_id }}
+            mv nginx.conf ${{ vars.HW_NGINX_CONF_DIR }}/pomelo.conf
+            /etc/init.d/nginx reload

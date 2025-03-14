@@ -1,7 +1,7 @@
 # debug locally
 # act -W ./.github/workflows/deploy.yml --secret-file ./.github/.secrets --var-file ./.github/.vars -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest
 
-name: Deploy
+name: Deploy-BWG
 
 on:
   # release:
@@ -9,12 +9,13 @@ on:
   push: # push 到主分支自动 发布
     branches: ['master']
     paths-ignore: # 忽略一些不必要的文件
-      - '.gitignore'
-      - 'nginx.conf'
-      - 'Gruntfile.js'
-      - 'README.md'
       - '.vscode/**'
       - '.devcontainer/**'
+      - '.gitignore'
+      - 'README.md'
+      - '*.dev*'
+      - '*.local*'
+      - '*.test*'
   # pull_request:
   #   branches: ['master']
 
@@ -96,8 +97,8 @@ jobs:
           key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
       - name: Build
         run: yarn build:clients && yarn build:servers
-      - name: Show Dir
-        run: ls
+      - name: List dist dir
+        run: ls dist
       - name: Build the  Docker image
         run:
           | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
@@ -118,12 +119,13 @@ jobs:
           key: ${{ secrets.SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
           script: | # 发布镜像并删除之前的镜像
-            cd ${{ vars.DOCKER_COMPOSE_DIR }}
+            whoami
+            cd ${{ vars.PROJECT_DIR }}
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
             echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin https://${{ env.REGISTRY }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
             docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
-            docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/server.conf
-            docker exec ${{ vars.NGINX_CONTAINER }} nginx -s reload
+            docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/pomelo.conf
+            docker exec ${{ vars.NGINX_CONTAINER_NAME }} nginx -s reload

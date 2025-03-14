@@ -1,3 +1,4 @@
+import { WhereOptions, Attributes } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability, OptionAutoload } from '@ace-pomelo/shared/server';
 import { Options } from '../entities';
@@ -37,11 +38,14 @@ export class OptionDataSource extends BaseDataSource {
    * @param fields 返回的字段
    */
   getList(query: OptionArgs, fields: string[]): Promise<OptionModel[]> {
+    const { optionNames, ...rest } = query;
+    const where: WhereOptions<Attributes<Options>> = rest;
+    if (optionNames?.length) {
+      where.optionName = optionNames;
+    }
     return Options.findAll({
       attributes: this.filterFields(fields, Options),
-      where: {
-        ...query,
-      },
+      where,
     }).then((options) =>
       options.map((option) => {
         const { optionName, ...rest } = option.toJSON();

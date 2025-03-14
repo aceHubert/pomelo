@@ -50,7 +50,6 @@
             "outDir": "dist/servers/conf"
           }
         ],
-        "watchAssets": true,
         "plugins": [
           {
             "name": "@nestjs/swagger",
@@ -127,7 +126,6 @@
             "outDir": "dist/servers/identity-server/"
           }
         ],
-        "watchAssets": true,
         "plugins": [
           {
             "name": "@nestjs/swagger",
