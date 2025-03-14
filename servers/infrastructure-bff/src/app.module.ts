@@ -71,6 +71,18 @@ const logger = new Logger('AppModule', { timestamp: true });
           ).flatMap((file) => [path.join(__dirname, file), path.join(__dirname, '../', file)]),
       load: [configuration()],
     }),
+    ServeStaticModule.forRootAsync({
+      useFactory: (config: ConfigService) =>
+        process.env.NODE_ENV !== 'production' // only serve static files in development mode
+          ? [
+              {
+                rootPath: config.getOrThrow<string>('contentPath'),
+                renderPath: /$(uploads|languages|themes|plugins)\//i,
+              },
+            ]
+          : [],
+      inject: [ConfigService],
+    }),
     Log4jsModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
@@ -94,15 +106,6 @@ const logger = new Logger('AppModule', { timestamp: true });
           pm2: !isDebug,
         };
       },
-      inject: [ConfigService],
-    }),
-    ServeStaticModule.forRootAsync({
-      useFactory: (config: ConfigService) => [
-        {
-          rootPath: config.getOrThrow<string>('contentPath'),
-          renderPath: /$(uploads|languages)\//i,
-        },
-      ],
       inject: [ConfigService],
     }),
     I18nModule.forRootAsync({
