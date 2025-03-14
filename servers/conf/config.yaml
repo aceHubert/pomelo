@@ -21,14 +21,14 @@ graphql:
 #       - "https://example.com:3000"
 #     credentials: true
 # upload configuration
-upload:
-  # upload path
-  dest: "uploads"
-  # upload file size limit, a byte number,
-  # or string(https://github.com/visionmedia/bytes.js), default: 10MB
-  maxFileSize: 1000000
-  # upload file count limit, default: 10
-  maxFiles: 10
+# upload:
+#   # upload path
+#   dest: "./content"
+#   # upload file size limit, a byte number,
+#   # or string(https://github.com/visionmedia/bytes.js), default: 10MB
+#   maxFileSize: 1000000
+#   # upload file count limit, default: 10
+#   maxFiles: 10
 # # redis connection string
 # # redis[s] :// [[username :] password@] host [:port][/database]
 # #           [?[timeout=timeout[d|h|m|s|ms|us|ns]] [&clientName=clientName]

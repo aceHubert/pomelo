@@ -4,7 +4,6 @@ consumers:
       key-auth:
         key: pomelo-oidc
       openid-connect:
-        bearer_only: true
         # set client metadata
         # client_id: CLIENT_ID
         # client_secret: CLIENT_SECRET
