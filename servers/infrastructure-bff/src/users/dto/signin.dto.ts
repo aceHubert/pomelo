@@ -1,6 +1,6 @@
-import { VerifyUserValidator } from './verify-user.validator';
+import { SignInValidator } from './signin.validator';
 
-export class VerifyUserDto extends VerifyUserValidator {
+export class VerifyUserDto extends SignInValidator {
   /**
    * Username
    */

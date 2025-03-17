@@ -1,8 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { VerifyUserValidator } from './verify-user.validator';
+import { SignInValidator } from './signin.validator';
 
-@InputType({ description: 'Verify user input' })
-export class VerifyUserInput extends VerifyUserValidator {
+@InputType({ description: 'Sign in input' })
+export class SignInInput extends SignInValidator {
   /**
    * Username
    */

@@ -54,15 +54,18 @@ export const basicLink = split(
       const instance = Authoriztion.getInstance(),
         authType = instance.type,
         userManager = instance.userManager,
-        token = await userManager
+        authorization = await userManager
           .getUser()
-          .then((user) => user?.access_token)
+          .then((user) => {
+            if (!user || user.expired) return '';
+            return [user.token_type, user.access_token].filter(Boolean).join(' ');
+          })
           .catch(() => '');
       const headers = {
         apikey: `pomelo-${authType}`,
       };
 
-      token && (headers['Authorization'] = `Bearer ${token}`);
+      authorization && (headers['Authorization'] = authorization);
       i18n.locale && (headers['x-custom-locale'] = i18n.locale);
 
       return headers;

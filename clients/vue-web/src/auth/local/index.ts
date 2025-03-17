@@ -5,6 +5,10 @@ import { i18n } from '@/i18n';
 import { UserManager, type IUser, type ISigninArgs, type ISignoutArgs } from '../user-manager';
 import { getToken, setToken, removeToken } from './helper';
 
+export interface UserManagerOptions {
+  filterProtocolClaims?: boolean | string[];
+}
+
 /**
  * Protocol claims that could be removed by default from profile.
  * Derived from the following sets of claims:
@@ -38,12 +42,21 @@ class Timer {
 class User implements IUser {
   payload: JwtPayload;
 
-  constructor(private readonly token: string, private readonly options: { filterProtocolClaims?: boolean | string[] }) {
+  constructor(
+    private readonly token: string,
+    private readonly options: UserManagerOptions & {
+      tokenType?: string;
+    },
+  ) {
     this.payload = jwtDecode(token);
   }
 
   get access_token() {
     return this.token;
+  }
+
+  get token_type() {
+    return this.options.tokenType ?? 'Bearer';
   }
 
   get profile() {
@@ -85,14 +98,15 @@ class User implements IUser {
 }
 
 export class LocalUserManagerCreator extends UserManager {
-  constructor(private readonly options: { filterProtocolClaims?: boolean | string[] } = {}) {
+  constructor(private readonly options: UserManagerOptions = {}) {
     super();
   }
 
   getUser(): Promise<IUser | null> {
-    const token = getToken();
-    if (token) {
-      return Promise.resolve(new User(token, this.options));
+    const { accessToken, tokenType } = getToken();
+    if (accessToken) {
+      const user = new User(accessToken, { tokenType, ...this.options });
+      return Promise.resolve(user);
     }
     return Promise.resolve(null);
   }

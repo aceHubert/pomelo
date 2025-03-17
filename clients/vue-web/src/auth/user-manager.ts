@@ -1,5 +1,6 @@
 export interface IUser {
   access_token: string;
+  token_type: string;
   /** The claims represented by a combination of the id_token and the user info endpoint */
   get profile(): {
     sub: string;

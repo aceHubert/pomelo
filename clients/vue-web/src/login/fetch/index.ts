@@ -3,20 +3,25 @@ import { defineRegistGraphql, gql } from '@ace-fetch/graphql-vue';
 // Types
 import type { TypedMutationDocumentNode } from '@ace-fetch/graphql';
 
-export interface UserVerifyInput {
+export interface SignInVerifyInput {
   // 用户名
   username: string;
   // 密码
   password: string;
 }
 
-export interface UserVerifySuccessResult {
+export interface SignInVerifySuccessResult {
   // 是否登录成功
   success: true;
-  token: string;
+  // access token
+  accessToken: string;
+  // token type
+  tokenType: string;
+  // 过期时间
+  expiresAt: number;
 }
 
-export interface UserVerifyFaildResult {
+export interface SignInVerifyFaildResult {
   // 是否登录成功
   success: false;
   message: string;
@@ -34,16 +39,18 @@ export interface ModifyPasswordInput {
 export const useLoginApi = defineRegistGraphql('login', {
   definition: {
     signIn: gql`
-      mutation signIn($model: VerifyUserInput!) {
+      mutation signIn($model: SignInInput!) {
         result: signIn(model: $model) {
           success
-          token
+          accessToken
+          tokenType
+          expiresAt
           message
         }
       }
     ` as TypedMutationDocumentNode<
-      { result: UserVerifySuccessResult | UserVerifyFaildResult },
-      { model: UserVerifyInput }
+      { result: SignInVerifySuccessResult | SignInVerifyFaildResult },
+      { model: SignInVerifyInput }
     >,
     modifyPassword: gql`
       mutation updateUserPassword($model: UpdateUserPasswordInput!) {

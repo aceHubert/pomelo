@@ -161,8 +161,10 @@ const logger = new Logger('AppModule', { timestamp: true });
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => {
-        const { keys } = await getJWKS([config.get('PRIVATE_KEY')].filter(Boolean) as string[]);
+        const privateKey = config.get('PRIVATE_KEY');
+        const { keys } = await getJWKS([privateKey].filter(Boolean) as string[]);
         return {
+          signingKey: await getSigningKey(privateKey),
           verifyingKey: createLocalJWKSet({
             keys: keys.map((jwk) => ({
               kty: jwk.kty,
@@ -302,7 +304,6 @@ const logger = new Logger('AppModule', { timestamp: true });
     UserModule.forRootAsync({
       useFactory: async (config: ConfigService) => ({
         isGlobal: true,
-        signingKey: await getSigningKey(config.get('PRIVATE_KEY')),
         tokenExpiresIn: config.get('JWT_EXPIRES_IN'),
       }),
       inject: [ConfigService],

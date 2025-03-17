@@ -87,3 +87,35 @@ export class UserMetaModelResp extends MetaModelResp {
   @ApiResponseProperty()
   userId!: number;
 }
+
+export class SignInResultResp {
+  /**
+   * Verify success
+   */
+  @ApiResponseProperty()
+  success!: boolean;
+
+  /**
+   * AccessToken, when success is true
+   */
+  @ApiResponseProperty()
+  accessToken?: string;
+
+  /**
+   * TokenType, when success is true
+   */
+  @ApiResponseProperty()
+  tokenType?: string;
+
+  /**
+   * Expires time, when success is true
+   */
+  @ApiResponseProperty()
+  expiresAt?: number;
+
+  /**
+   * Faild message when success is false
+   */
+  @ApiResponseProperty()
+  message?: string;
+}

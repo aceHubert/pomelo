@@ -60,7 +60,7 @@ export default Form.create({})(
             })
             .then(({ result }) => {
               if (result.success) {
-                setToken(result.token);
+                setToken(result.accessToken, result.tokenType);
                 message.success({
                   content: i18n.tv('page_login.form.submit_success', '登录成功!') as string,
                   onClose: redirect,

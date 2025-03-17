@@ -2,10 +2,9 @@ import moment from 'moment';
 import hljs from 'highlight.js/lib/core';
 import Lazyload from 'lazyload';
 import { defineComponent, computed, onMounted } from '@vue/composition-api';
-import { TemplatePageType } from '@ace-pomelo/shared/client';
 import { useI18n } from '@/composables';
 import { useLocationMixin } from '@/mixins';
-import { PostMetaPresetKeys } from '@/fetch/apis';
+import { PostMetaPresetKeys, TemplatePageType } from '@/fetch/apis';
 import { safeJSONParse } from '@/utils';
 import classes from './desktop.module.less';
 

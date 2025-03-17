@@ -1,11 +1,6 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
-import { KeyLike } from '@ace-pomelo/nestjs-authorization';
 
 export interface UserOptions {
-  /**
-   * private key to sign the jwt token.
-   */
-  signingKey: string | KeyLike;
   /**
    * token expires in seconds
    */
