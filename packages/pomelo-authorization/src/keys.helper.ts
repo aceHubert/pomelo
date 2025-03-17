@@ -53,6 +53,12 @@ export const getKeyFromFile = async (path: string): Promise<string | undefined> 
   }
 };
 
+/**
+ * import verifying key from string
+ * @param spki public key
+ * @param alg algorithm
+ * @param options import options
+ */
 export const getVerifyingKey = async (
   spki = DEV_PUBLIC_KEY,
   alg = 'RS256',
@@ -64,6 +70,12 @@ export const getVerifyingKey = async (
   return importSPKI(spki, alg, options);
 };
 
+/**
+ * import signing key from string
+ * @param pkcs8 private key
+ * @param alg algorithm
+ * @param options import options
+ */
 export const getSigningKey = async (
   pkcs8 = DEV_PRIVATE_KEY,
   alg = 'RS256',
@@ -89,8 +101,7 @@ export const getJWKS = async (keys: (string | KeyLike)[]): Promise<JSONWebKeySet
     keys: await Promise.all(
       keys.map(async (pkcs8) => {
         const key = typeof pkcs8 === 'string' ? await getSigningKey(pkcs8) : pkcs8;
-        const jwk = await exportJWK(key);
-        return jwk;
+        return exportJWK(key);
       }),
     ),
   };

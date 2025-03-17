@@ -1,10 +1,10 @@
-import { jwtVerify, createRemoteJWKSet, SignJWT, KeyLike, JWTHeaderParameters, SignOptions } from 'jose';
+import { jwtVerify, createRemoteJWKSet, SignJWT, KeyLike, SignOptions } from 'jose';
 import { BaseClient, Issuer } from 'openid-client';
 import { Injectable, Inject, Logger, UnauthorizedException } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
-import { AuthorizationOptions } from './interfaces/authorization-options.interface';
+import { AuthorizationOptions, XOR } from './interfaces/authorization-options.interface';
 import { Params, ChannelType } from './interfaces/multitenant.interface';
-import { getVerifyingKey } from './keys.helper';
+import { getSigningKey, getVerifyingKey } from './keys.helper';
 import { AUTHORIZATION_OPTIONS } from './constants';
 
 @Injectable()
@@ -109,34 +109,37 @@ export class AuthorizationService {
    */
   async createToken(
     payload: { sub: string; [key: string]: any },
-    signingKey: string | KeyLike,
-    options: {
-      issuer?: string;
-      audience?: string | string[];
-      expiresIn?: string | number;
-      protectedHeader?: JWTHeaderParameters;
-    } & SignOptions = {},
+    options: XOR<
+      {
+        claimsFactory?: (signJWT: SignJWT) => void;
+      },
+      {
+        issuer?: string;
+        audience?: string | string[];
+        expiresIn?: string | number;
+      }
+    > &
+      SignOptions = {},
   ) {
-    const {
-      protectedHeader = { alg: 'RS256' },
-      expiresIn = '24h',
-      issuer = '',
-      audience = '',
-      ...signOptions
-    } = options;
+    const { claimsFactory, expiresIn = '24h', issuer = '', audience = '', ...signOptions } = options;
+
+    const signingKey = await this.getSigningKey();
+    if (!signingKey) {
+      throw new Error('No signing key found!');
+    }
 
     const jwt = new SignJWT(payload)
-      .setProtectedHeader(protectedHeader)
-      .setIssuer(issuer)
+      .setProtectedHeader(this.options.jwtHeaderParameters!)
       .setIssuedAt()
-      .setAudience(audience)
-      .setSubject(payload.sub)
-      .setExpirationTime(expiresIn);
+      .setSubject(payload.sub);
 
-    return jwt.sign(
-      typeof signingKey === 'string' ? await getVerifyingKey(signingKey, protectedHeader.alg) : signingKey,
-      signOptions,
-    );
+    if (claimsFactory) {
+      claimsFactory(jwt);
+    } else {
+      jwt.setIssuer(issuer).setAudience(audience).setExpirationTime(expiresIn);
+    }
+
+    return jwt.sign(signingKey, signOptions);
   }
 
   /**
@@ -182,7 +185,24 @@ export class AuthorizationService {
     return { tenantId, channelType };
   }
 
+  private SigningKeyCache: KeyLike | undefined;
   private VerifyingKeyCache: KeyLike | undefined;
+  private async getSigningKey() {
+    if (this.options.signingKey) {
+      return (
+        this.SigningKeyCache ||
+        (this.SigningKeyCache =
+          typeof this.options.signingKey === 'string'
+            ? await getSigningKey(
+                this.options.signingKey,
+                this.options.jwtHeaderParameters!.alg,
+                this.options.pemImportOptions,
+              )
+            : this.options.signingKey)
+      );
+    }
+    return;
+  }
   private async getVerifyingKey() {
     if (this.options.verifyingKey) {
       if (typeof this.options.verifyingKey === 'function') {
@@ -192,7 +212,11 @@ export class AuthorizationService {
           this.VerifyingKeyCache ||
           (this.VerifyingKeyCache =
             typeof this.options.verifyingKey === 'string'
-              ? await getVerifyingKey(this.options.verifyingKey)
+              ? await getVerifyingKey(
+                  this.options.verifyingKey,
+                  this.options.jwtHeaderParameters!.alg,
+                  this.options.pemImportOptions,
+                )
               : this.options.verifyingKey)
         );
       }

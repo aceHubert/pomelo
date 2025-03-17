@@ -9,6 +9,9 @@ import {
 import { AUTHORIZATION_OPTIONS } from './constants';
 
 const DefaultAuthorizationOptions: Partial<AuthorizationOptions> = {
+  jwtHeaderParameters: {
+    alg: 'RS256',
+  },
   setUserinfoHeader: 'x-userinfo',
   userProperty: 'user',
 };
