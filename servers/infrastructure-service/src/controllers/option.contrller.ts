@@ -16,6 +16,14 @@ export class OptionController {
     return this.optionDataSource.get(id, fields);
   }
 
+  @MessagePattern(OptionPattern.GetByName)
+  getByName(
+    @Payload('optionName') optionName: string,
+    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
+  ): Promise<OptionModel | undefined> {
+    return this.optionDataSource.getByName(optionName, fields);
+  }
+
   @MessagePattern(OptionPattern.GetAutoloads)
   getAutoloads(): Promise<Record<string, string>> {
     return this.optionDataSource.getAutoloads();

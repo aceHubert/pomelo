@@ -38,6 +38,7 @@ export class LinkPattern {
 
 export class OptionPattern {
   static readonly Get = { cmd: 'option.get' };
+  static readonly GetByName = { cmd: 'option.get.byName' };
   static readonly GetAutoloads = { cmd: 'option.get.autoloads' };
   static readonly GetValue = { cmd: 'option.get.value' };
   static readonly GetList = { cmd: 'option.getList' };
