@@ -1,4 +1,5 @@
 import { getEnv } from '@ace-util/core';
+import { AuthType } from '@/types';
 import { LocalUserManagerCreator } from './local';
 import { OidcUserManagerCreator } from './openid-connect';
 
@@ -6,11 +7,6 @@ import { OidcUserManagerCreator } from './openid-connect';
 import type _Vue from 'vue';
 import type { UserManager as OidcUserManagerType, UserManagerSettings as OidcUserManngerSetions } from 'oidc-client-ts';
 import type { UserManager } from './user-manager';
-
-export enum AuthType {
-  Oidc = 'oidc',
-  Local = 'local',
-}
 
 export class Authoriztion {
   private static instance: Authoriztion;

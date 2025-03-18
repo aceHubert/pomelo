@@ -111,6 +111,11 @@ export class LocalUserManagerCreator extends UserManager {
     return Promise.resolve(null);
   }
 
+  removeUser(): Promise<void> {
+    removeToken();
+    return Promise.resolve();
+  }
+
   modifyPassword(): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(() => {

@@ -39,6 +39,10 @@ export abstract class UserManager<
    */
   abstract getUser(): Promise<User | null>;
   /**
+   * 移除用户
+   */
+  abstract removeUser(): Promise<void>;
+  /**
    * 修改密码
    */
   abstract modifyPassword(): Promise<void>;

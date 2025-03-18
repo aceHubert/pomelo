@@ -1,4 +1,4 @@
-import { AuthType } from '@/auth';
+import { AuthType } from '@/types';
 import IconDashboard from '@admin/assets/icons/dashboard.svg?inline';
 import IconPictures from '@admin/assets/icons/pictures.svg?inline';
 import IconCagetory from '@admin/assets/icons/category.svg?inline';
@@ -153,7 +153,7 @@ export const getDefaultMenus = (type?: AuthType): MenuConfig[] => [
         key: 'access_control',
         title: (i18nRender) => i18nRender('menu.access_control', '访问控制'),
         path: '/clients',
-        icon: IconSettings,
+        icon: 'IconSettings',
         position: 'top',
         display: type !== AuthType.Oidc ? false : void 0,
         children: [
@@ -338,6 +338,13 @@ export const getDefaultMenus = (type?: AuthType): MenuConfig[] => [
         position: 'top',
         children: [
           {
+            key: 'auth-type',
+            title: (i18nRender) => i18nRender('menu.auth_type', '认证方式'),
+            path: '/settings/auth-type',
+            icon: 'safety',
+            position: 'side',
+          },
+          {
             key: 'submodules-root',
             title: (i18nRender) => i18nRender('menu.submodule.root', '模块'),
             path: '/submodules',
@@ -392,6 +399,13 @@ export const getDefaultMenus = (type?: AuthType): MenuConfig[] => [
                 position: 'side',
               },
             ],
+          },
+          {
+            key: 'cache-clear',
+            title: (i18nRender) => i18nRender('menu.cache_clear', '清除缓存'),
+            path: '/settings/cache-clear',
+            icon: 'sync',
+            position: 'side',
           },
         ],
       },

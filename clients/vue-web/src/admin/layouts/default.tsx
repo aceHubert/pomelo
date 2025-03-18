@@ -25,13 +25,14 @@ import { useUserManager, usePubSubMessage, useI18n, useOptions } from '@/composa
 import { useAppMixin, useDeviceMixin, useLocationMixin } from '@/mixins';
 import { RouterView } from '@/layouts/components';
 import { loadingRef } from '@/shared';
+import { AuthTypeOptionName } from '@/constants';
 import IconDarkTheme from '@admin/assets/icons/dark-theme.svg?inline';
 import IconLightTheme from '@admin/assets/icons/light-theme.svg?inline';
 import { getDefaultMenus } from '../configs/menu.config';
 import classes from './default.module.less';
 
 // Types
-import type { AuthType } from '@/auth';
+import type { AuthType } from '@/types';
 
 export default defineComponent({
   name: 'DefaultLayout',
@@ -40,7 +41,7 @@ export default defineComponent({
     const route = useRoute();
     const i18n = useI18n();
     const homeUrl = useOptions(OptionPresetKeys.Home);
-    const authType = useOptions<AuthType>('auth_type');
+    const authType = useOptions<AuthType>(AuthTypeOptionName);
     const appMixin = useAppMixin();
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();

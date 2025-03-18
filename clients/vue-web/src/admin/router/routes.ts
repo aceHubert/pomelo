@@ -295,6 +295,22 @@ export const routes: Array<RouteConfig> = [
     ],
   },
   {
+    path: '/settings',
+    component: RouterChild,
+    children: [
+      {
+        name: 'auth-type',
+        path: 'auth-type',
+        component: () => import(/* webpackChunkName: "settings" */ '../views/settings/auth-type'),
+      },
+      {
+        name: 'cache-clear',
+        path: 'cache-clear',
+        component: () => import(/* webpackChunkName: "settings" */ '../views/settings/cache-clear'),
+      },
+    ],
+  },
+  {
     name: 'signout',
     path: '/signout',
   },

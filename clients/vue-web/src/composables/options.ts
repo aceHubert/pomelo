@@ -4,10 +4,10 @@ import { warn } from '@ace-util/core';
 // Types
 import type { Ref } from '@vue/composition-api';
 
-export function useOptions<T extends string = string>(key: string): Ref<T | undefined>;
+export function useOptions<T extends string = string>(name: string): Ref<T | undefined>;
 export function useOptions(): Readonly<Record<string, string>>;
 export function useOptions<T extends string = string>(
-  key?: string,
+  name?: string,
 ): Ref<T | undefined> | Readonly<Record<string, string>> {
   const instance = getCurrentInstance();
   if (!instance) {
@@ -18,8 +18,8 @@ export function useOptions<T extends string = string>(
   // provide from plugins/options
   const options = instance.proxy.$config || {};
 
-  if (key) {
-    return toRef(options, key) as Ref<T | undefined>;
+  if (name) {
+    return toRef(options, name) as Ref<T | undefined>;
   }
   return options;
 }
