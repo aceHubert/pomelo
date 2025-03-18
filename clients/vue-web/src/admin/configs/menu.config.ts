@@ -153,7 +153,7 @@ export const getDefaultMenus = (type?: AuthType): MenuConfig[] => [
         key: 'access_control',
         title: (i18nRender) => i18nRender('menu.access_control', '访问控制'),
         path: '/clients',
-        icon: 'IconSettings',
+        icon: IconSettings,
         position: 'top',
         display: type !== AuthType.Oidc ? false : void 0,
         children: [
