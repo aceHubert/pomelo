@@ -38,12 +38,8 @@
   <body>
     <p id="msg">Redirecting...</p>
     <p id="home"><a href="./">Home</a></p>
-    <script src="//unpkg.com/oidc-client-ts@2.4.0/dist/browser/oidc-client-ts.min.js"></script>
-    <script>
-      // fallback to local oidc-client-ts.min.js
-      window.oidc || document.write('<script src="./static/js/oidc-client-ts.min.js"><\/script>');
-    </script>
-    <script src="./static/js/env.js"></script>
+    <script src="/static/js/oidc-client-ts.min.js"></script>
+    <script src="/static/js/env.js"></script>
     <script>
       var msgEl = document.getElementById('msg');
       var homeBtn = document.getElementById('home');
