@@ -9,6 +9,7 @@ import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
 import { pinia } from '@/store';
+import * as plugins from '@/plugins';
 
 // Local
 import { router } from './router/index';
@@ -22,8 +23,6 @@ import enUS from './locales/en-US.json';
 Vue.config.productionTip = false;
 Vue.use(VueCompositionApi);
 Vue.use(Authoriztion);
-
-const plugins: Function[] = [];
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {
