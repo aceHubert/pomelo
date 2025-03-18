@@ -4,12 +4,14 @@ import { useUserManager } from '@/composables';
 import { OptionAutoload, useBasicApi } from '@/fetch/apis/basic';
 import { AuthType } from '@/types';
 import { AuthTypeOptionName } from '@/constants';
+import { useDeviceMixin } from '@/mixins';
 
 export default defineComponent({
   name: 'AuthType',
   setup() {
     const userManager = useUserManager();
     const basicApi = useBasicApi();
+    const deviceMixin = useDeviceMixin();
     const optionId = ref<string>();
     const authType = ref<AuthType>();
     const loading = ref(false);
@@ -72,7 +74,7 @@ export default defineComponent({
     });
 
     return () => (
-      <Card bordered={false}>
+      <Card bordered={false} size={deviceMixin.isMobile ? 'small' : 'default'}>
         <h2>认证设置</h2>
         <p class="text--secondary mb-5">
           请通过 apisix 设置 Identity Service 鉴权设置，详细配置请查看

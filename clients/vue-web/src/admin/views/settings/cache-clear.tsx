@@ -1,11 +1,13 @@
 import { defineComponent, ref } from '@vue/composition-api';
 import { Card, Button, message } from 'ant-design-vue';
 import { useBasicApi } from '@/fetch/apis/basic';
+import { useDeviceMixin } from '@/mixins';
 
 export default defineComponent({
   setup() {
-    const loading = ref(false);
     const basicApi = useBasicApi();
+    const deviceMixin = useDeviceMixin();
+    const loading = ref(false);
 
     const handleClearCache = async () => {
       try {
@@ -20,7 +22,7 @@ export default defineComponent({
     };
 
     return () => (
-      <Card>
+      <Card bordered={false} size={deviceMixin.isMobile ? 'small' : 'default'}>
         <h2>系统缓存</h2>
         <p class="text--secondary mb-5">
           清除系统缓存可以确保获取最新的配置数据。当您修改了系统配置但未立即生效时，可尝试清除缓存。
