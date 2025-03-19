@@ -43,8 +43,11 @@
     <script>
       var msgEl = document.getElementById('msg');
       var homeBtn = document.getElementById('home');
+      var RedirectKey = 'po/oidc.redirect';
+
       var redirect = function () {
-        var url = localStorage.getItem('po/oidc.redirect') || './';
+        var url = localStorage.getItem(RedirectKey) || './';
+        localStorage.removeItem(RedirectKey);
         if (history.replaceState) {
           history.replaceState({}, document.title, url);
           history.go(0);
@@ -53,8 +56,7 @@
         }
       };
 
-      const settings = window._ENV ? window._ENV.oidc || {} : {};
-      new oidc.UserManager(settings)
+      new oidc.UserManager(window._ENV ? window._ENV.oidc || {} : {})
         .signinRedirectCallback()
         .then(function (user) {
           if (!user) {

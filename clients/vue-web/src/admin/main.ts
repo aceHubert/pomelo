@@ -93,7 +93,7 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
 
   if (to.name === 'signout') {
     userManager.signout({
-      redirect_uri: `${window.location.origin}${router.options.base ?? '/'}`.substring(0, -1),
+      redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
     });
   } else if (to.meta?.anonymous === true) {
     next();
@@ -102,7 +102,7 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
       if (user === null || user.expired) {
         userManager.signin({
           noInteractive: true,
-          redirect_uri: `${window.location.origin}${router.options.base ?? '/'}${to.fullPath.slice(1)}`,
+          redirect_uri: `${router.options.base ?? '/'}${to.fullPath.slice(1)}`,
         });
       } else {
         // next();

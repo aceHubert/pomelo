@@ -126,7 +126,7 @@ export class LocalUserManagerCreator extends UserManager {
   }
 
   signin(args: ISigninArgs = {}): Promise<void> {
-    const { noInteractive, redirect_uri = location.pathname } = args;
+    const { noInteractive, redirect_uri = '/' } = args;
     if (noInteractive) {
       return new Promise<void>((resolve) => {
         setTimeout(() => {
@@ -141,13 +141,17 @@ export class LocalUserManagerCreator extends UserManager {
         title: i18n.tv('session_timeout_confirm.title', 'OOPS!'),
         content: i18n.tv('session_timeout_confirm.content', '登录会话已超时，需要您重新登录。'),
         okText: i18n.tv('session_timeout_confirm.ok_text', '重新登录') as string,
-        onOk: () => this.signin({ noInteractive: true }),
+        onOk: () =>
+          this.signin({
+            ...args,
+            noInteractive: true,
+          }),
       });
       return new Promise<void>(() => {});
     }
   }
   signout(args: ISignoutArgs = {}): Promise<void> {
-    const { redirect_uri = location.pathname } = args;
+    const { redirect_uri = '/' } = args;
     return new Promise<void>((resolve) => {
       setTimeout(() => {
         window.location.href = `${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirect_uri)}`;
