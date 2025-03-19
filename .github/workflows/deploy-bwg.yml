@@ -95,6 +95,8 @@ jobs:
         with:
           path: .submodules
           key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
+      - name: Update Browserslist DB
+        run: npx update-browserslist-db@latest
       - name: Build
         run: yarn build:clients && yarn build:servers
       - name: List dist dir
