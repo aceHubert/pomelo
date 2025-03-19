@@ -1,6 +1,7 @@
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 import { Logger } from '@nestjs/common';
-import { importSPKI, importPKCS8, exportJWK, KeyLike, JSONWebKeySet, PEMImportOptions } from 'jose';
+import { importSPKI, importPKCS8, exportJWK, JWK, KeyLike, JSONWebKeySet, PEMImportOptions } from 'jose';
 
 const DEV_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArcLJ7hUNc3YmjqEL2QlB
@@ -42,6 +43,38 @@ dJu1aa1nPvwShOcmabWhEw==
 -----END PRIVATE KEY-----`;
 
 const logger = new Logger('keys', { timestamp: true });
+
+const calculateKid = (jwk: JWK) => {
+  let components;
+
+  switch (jwk.kty) {
+    case 'RSA':
+      components = {
+        e: jwk.e,
+        kty: 'RSA',
+        n: jwk.n,
+      };
+      break;
+    case 'EC':
+      components = {
+        crv: jwk.crv,
+        kty: 'EC',
+        x: jwk.x,
+        y: jwk.y,
+      };
+      break;
+    case 'OKP':
+      components = {
+        crv: jwk.crv,
+        kty: 'OKP',
+        x: jwk.x,
+      };
+      break;
+    default:
+  }
+
+  return crypto.createHash('sha256').update(JSON.stringify(components)).digest('base64url');
+};
 
 export const getKeyFromFile = async (path: string): Promise<string | undefined> => {
   try {
@@ -101,7 +134,10 @@ export const getJWKS = async (keys: (string | KeyLike)[]): Promise<JSONWebKeySet
     keys: await Promise.all(
       keys.map(async (pkcs8) => {
         const key = typeof pkcs8 === 'string' ? await getSigningKey(pkcs8) : pkcs8;
-        return exportJWK(key);
+        return exportJWK(key).then((jwk) => {
+          jwk.kid || (jwk.kid = calculateKid(jwk));
+          return jwk;
+        });
       }),
     ),
   };
