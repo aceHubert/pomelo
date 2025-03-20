@@ -9,6 +9,7 @@ import {
 import { AUTHORIZATION_OPTIONS } from './constants';
 
 const DefaultAuthorizationOptions: Partial<AuthorizationOptions> = {
+  jwtExpiresIn: '1d',
   jwtHeaderParameters: {
     alg: 'RS256',
   },

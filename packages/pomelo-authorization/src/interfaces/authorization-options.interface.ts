@@ -22,6 +22,12 @@ export type AuthorizationOptions = {
   verifyingKey?: string | KeyLike | JWTVerifyGetKey;
 
   /**
+   * JWT expires in time.
+   * @default 1d
+   */
+  jwtExpiresIn?: string | number;
+
+  /**
    * JWT header parameters for singing jwt.
    * @default { alg: 'RS256' }
    */

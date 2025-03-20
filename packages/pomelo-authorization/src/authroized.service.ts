@@ -121,7 +121,13 @@ export class AuthorizationService {
     > &
       SignOptions = {},
   ) {
-    const { claimsFactory, expiresIn = '24h', issuer = '', audience = '', ...signOptions } = options;
+    const {
+      claimsFactory,
+      expiresIn = this.options.jwtExpiresIn!,
+      issuer = '',
+      audience = '',
+      ...signOptions
+    } = options;
 
     const signingKey = await this.getSigningKey();
     if (!signingKey) {
