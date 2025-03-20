@@ -163,7 +163,7 @@ jobs:
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
-            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ github.run_id }}" > .env.${{ github.run_id }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:alpha-${{ github.run_id }}" > .env.${{ github.run_id }}
             echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}" >> .env.${{ github.run_id }}
             mv docker-compose.deploy.yml docker-compose.yml
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
