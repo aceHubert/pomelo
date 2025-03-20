@@ -41,7 +41,8 @@ services:
     container_name: pomelo-server
     restart: always
     environment:
-      - DEBUG=${DEBUG:-false}
+      - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
+      - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
       - ORIGIN=${ORIGIN:-https://example.com}
       - REDIS_URL=${REDIS_URL:-redis://host:port/db}
       - INFRASTRUCTURE_DATABASE_CONNECTION=${INFRASTRUCTURE_DATABASE_CONNECTION:-mysql://user:password@host:port/database}

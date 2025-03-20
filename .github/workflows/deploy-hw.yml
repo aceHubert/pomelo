@@ -105,9 +105,8 @@ jobs:
       - name: Build the  Docker image
         run:
           | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest
+          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-${{ github.run_id }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ github.run_id }}
   ssh-deploy:
     needs: docker-build
     runs-on: ubuntu-latest
@@ -160,8 +159,8 @@ jobs:
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
-            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
-            echo -e "ORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}" >> .env.${{ github.run_id }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ github.run_id }}" > .env.${{ github.run_id }}
+            echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}" >> .env.${{ github.run_id }}
             mv docker-compose.deploy.yml docker-compose.yml
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
             docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
