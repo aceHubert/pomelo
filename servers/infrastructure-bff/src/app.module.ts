@@ -86,7 +86,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     Log4jsModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
-        const logDir = config.get('LOG_FILENAME_DIR', path.join(config.getOrThrow<string>('contentPath'), 'logs'));
+        const logDir = config.get('LOG_FILENAME_DIR', path.join(config.getOrThrow<string>('contentPath'), '../logs'));
         return {
           isGlobal: true,
           appenders: {
