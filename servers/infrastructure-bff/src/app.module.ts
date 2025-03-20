@@ -86,20 +86,21 @@ const logger = new Logger('AppModule', { timestamp: true });
     Log4jsModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
+        const logDir = config.get('LOG_FILENAME_DIR', path.join(config.getOrThrow<string>('contentPath'), 'logs'));
         return {
           isGlobal: true,
           appenders: {
             dateFile: {
               type: 'dateFile',
-              filename: config.get('LOG_FILENAME', './logs/infrastructure-bff.log'),
               keepFileExt: true,
+              filename: path.join(logDir, '/infrastructure-bff.log'),
               layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
             },
           },
           categories: {
             default: {
-              enableCallStack: true,
-              appenders: config.get('LOG_APPENDERS', ['stdout', 'dateFile']),
+              enableCallStack: isDebug,
+              appenders: ['stdout', 'dateFile'],
               level: config.get('LOG_LEVEL', isDebug ? 'debug' : 'info'),
             },
           },
@@ -180,6 +181,11 @@ const logger = new Logger('AppModule', { timestamp: true });
               y: jwk.y,
             })),
           }),
+          jwtExpiresIn: config.get('JWT_EXPIRES_IN'),
+          jwtHeaderParameters: {
+            alg: config.get('JWT_ALGORITHM', 'RS256'),
+            typ: 'JWT',
+          },
         };
       },
       inject: [ConfigService],
@@ -279,7 +285,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       useFactory: (config: ConfigService) => ({
         storage: multer.diskStorage({
           // 临时上传文件目录
-          destination: path.join(config.get('upload.dest', config.getOrThrow<string>('contentPath')), 'uploads'),
+          destination: path.join(config.get('upload.dest', config.getOrThrow<string>('contentPath')), 'tmp_uploads'),
         }),
         // config.get('file_storage') === 'disk'
         //   ? multer.diskStorage({ destination: config.get('file_dest') })
@@ -295,18 +301,15 @@ const logger = new Logger('AppModule', { timestamp: true });
       // isGlobal: true,
       useFactory: (config: ConfigService) => ({
         dest: config.get('upload.dest', config.getOrThrow<string>('contentPath')),
+        staticPrefix: config.get('upload.staticPrefix'),
       }),
       inject: [ConfigService],
     }),
     OptionModule,
     TermTaxonomyModule,
     TemplateModule,
-    UserModule.forRootAsync({
-      useFactory: async (config: ConfigService) => ({
-        isGlobal: true,
-        tokenExpiresIn: config.get('JWT_EXPIRES_IN'),
-      }),
-      inject: [ConfigService],
+    UserModule.forRoot({
+      isGlobal: true,
     }),
     // ObsModule.forRootAsync({
     //   useFactory: (config: ConfigService) => ({

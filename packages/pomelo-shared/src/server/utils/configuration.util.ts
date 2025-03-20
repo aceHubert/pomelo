@@ -1,7 +1,5 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import * as yaml from 'js-yaml';
-import { merge } from 'lodash';
 import { default as bytes } from 'bytes';
 import { Logger } from '@nestjs/common';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
@@ -95,9 +93,13 @@ export interface ConfigObject {
    */
   upload: {
     /**
-     * upload directory
+     * upload directory, default is contentPath
      */
     dest?: string;
+    /**
+     * static prefix, default is 'uploads'
+     */
+    staticPrefix?: string;
     /**
      * max file size(bytes)
      */
@@ -187,6 +189,7 @@ export const configuration = (): ConfigFactory<ConfigObject> => () => {
     },
     upload: {
       dest: process.env.UPLOAD_DEST,
+      staticPrefix: process.env.UPLOAD_STATIC_PREFIX || '/uploads',
       maxFileSize:
         process.env.UPLOAD_LIMIT !== void 0
           ? !Number.isNaN(parseInt(process.env.UPLOAD_LIMIT))
@@ -200,20 +203,5 @@ export const configuration = (): ConfigFactory<ConfigObject> => () => {
     },
   };
 
-  // merge config from yaml file
-  const configFile = path.join(config.configPath, process.env.CONFIG_FILE || 'config.yaml');
-  return new Promise<boolean>((resolve) => {
-    fs.access(configFile, fs.constants.F_OK, (err) => {
-      if (err) resolve(false);
-
-      resolve(true);
-    });
-  }).then((exists) => {
-    if (exists) {
-      logger.debug(`Merge config file from "${configFile}"`);
-      return merge(config, yaml.load(fs.readFileSync(configFile, 'utf8')) as Record<string, any>);
-    }
-    logger.debug(`Config path "${configFile}" not exists`);
-    return config;
-  });
+  return config;
 };

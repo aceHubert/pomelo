@@ -41,20 +41,21 @@ import '@/common/extends/i18n.extend';
     Log4jsModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
+        const logDir = config.get('LOG_FILENAME_DIR', path.join(config.getOrThrow<string>('contentPath'), '/logs'));
         return {
           isGlobal: true,
           appenders: {
             dateFile: {
               type: 'dateFile',
-              filename: config.get('LOG_FILENAME', './logs/infrastructure-service.log'),
               keepFileExt: true,
+              filename: path.join(logDir, '/infrastructure-service.log'),
               layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
             },
           },
           categories: {
             default: {
-              enableCallStack: true,
-              appenders: config.get('LOG_APPENDERS', ['stdout', 'dateFile']),
+              enableCallStack: isDebug,
+              appenders: ['stdout', 'dateFile'],
               level: config.get('LOG_LEVEL', isDebug ? 'debug' : 'info'),
             },
           },
