@@ -1,4 +1,13 @@
-import { NestModule, Module, DynamicModule, Provider, Inject, RequestMethod, MiddlewareConsumer } from '@nestjs/common';
+import {
+  NestModule,
+  Module,
+  DynamicModule,
+  Provider,
+  Inject,
+  RequestMethod,
+  MiddlewareConsumer,
+  Logger,
+} from '@nestjs/common';
 import { AuthorizationService } from './authroized.service';
 import { UserMiddleware } from './user.middleware';
 import {
@@ -19,11 +28,14 @@ const DefaultAuthorizationOptions: Partial<AuthorizationOptions> = {
 
 @Module({})
 export class AuthorizationModule implements NestModule {
+  private logger = new Logger(AuthorizationModule.name, { timestamp: true });
+
   constructor(@Inject(AUTHORIZATION_OPTIONS) private readonly options: AuthorizationOptions) {}
 
   configure(consumer: MiddlewareConsumer) {
-    this.options.disableMiddleware !== true &&
-      consumer.apply(UserMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
+    const shouldDisableMiddleware = this.options.disableMiddleware === true;
+    this.logger.debug(`Disable middleware: ${shouldDisableMiddleware}`);
+    !shouldDisableMiddleware && consumer.apply(UserMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 
   static forRoot({ isGlobal, ...options }: AuthorizationOptions): DynamicModule {
