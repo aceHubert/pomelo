@@ -48,7 +48,7 @@ services:
       - INFRASTRUCTURE_DATABASE_CONNECTION=${INFRASTRUCTURE_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
       - IDENTITY_DATABASE_CONNECTION=${IDENTITY_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
       - TABLE_PREFIX=${TABLE_PREFIX:-po_}
-      - LOG_LEVEL=${LOGGER_LEVEL:-info}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       - conf:/app/conf
       - ${PWD}/uploads:/app/content/uploads
