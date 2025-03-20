@@ -22,6 +22,7 @@ on:
 env:
   REGISTRY: ghcr.io
   REGISTRY_MIRROR: ghcr.nju.edu.cn
+  BUILD_PLATFORM: linux/amd64,linux/arm64
   IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
 
 permissions:
@@ -102,11 +103,14 @@ jobs:
         run: yarn build:clients && yarn build:servers
       - name: List dist dir
         run: ls dist
-      - name: Build the  Docker image
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build image
         run:
-          | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-${{ github.run_id }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ github.run_id }}
+          | # 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
+          docker buildx build --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-latest --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-${{ github.run_id }} --platform ${{env.BUILD_PLATFORM}} --push .
   ssh-deploy:
     needs: docker-build
     runs-on: ubuntu-latest
@@ -122,22 +126,22 @@ jobs:
           username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
           key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
-          source: "docker-compose.deploy.yml" # 本地文件路径
+          source: 'docker-compose.deploy.yml' # 本地文件路径
           target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
           overwrite: true
       - name: Replace domain in nginx conf file
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          include: "nginx.conf"
-          find: "example.com"
-          replace: "${{ vars.DOMAIN}}"
+          include: 'nginx.conf'
+          find: 'example.com'
+          replace: '${{ vars.DOMAIN}}'
           regex: false
       - name: Replace nginx server directory in nginx conf file
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          include: "nginx.conf"
-          find: "/etc/nginx"
-          replace: "${{ vars.HW_NGINX_SERVER_DIR}}"
+          include: 'nginx.conf'
+          find: '/etc/nginx'
+          replace: '${{ vars.HW_NGINX_SERVER_DIR}}'
           regex: false
       - name: Copy nginx conf file to server
         uses: appleboy/scp-action@v0.1.7
@@ -146,7 +150,7 @@ jobs:
           username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
           key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
-          source: "nginx.conf" # 本地文件路径
+          source: 'nginx.conf' # 本地文件路径
           target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
           overwrite: true
       - name: Deploy
