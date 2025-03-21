@@ -6,8 +6,8 @@ import { useDeviceMixin } from '@/mixins';
 import { useI18n } from '@/composables';
 import { usePostApi } from '@/fetch/apis';
 
-const MobileComponent = () => import(/* webpackChunkName: "mobile" */ './mobile');
-const DesktopComponent = () => import(/* webpackChunkName: "desktop" */ './desktop');
+const MobileComponent = () => import('./mobile');
+const DesktopComponent = () => import('./desktop');
 
 export const HomeDefault = defineComponent({
   name: 'PageView',

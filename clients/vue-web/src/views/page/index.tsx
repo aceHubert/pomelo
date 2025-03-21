@@ -8,8 +8,8 @@ import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/composa
 import { usePageApi, PageMetaPresetKeys } from '@/fetch/apis';
 import { HomeDefault } from './components/home-default';
 
-const MobilePage = () => import(/* webpackChunkName: "mobile" */ './mobile');
-const DesktopPage = () => import(/* webpackChunkName: "desktop" */ './desktop');
+const MobilePage = () => import('./mobile');
+const DesktopPage = () => import('./desktop');
 
 export default defineComponent({
   name: 'PageView',

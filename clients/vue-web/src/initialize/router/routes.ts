@@ -5,7 +5,7 @@ export const routes: Array<RouteConfig> = [
   {
     name: 'siteInit',
     path: '/',
-    component: () => import(/* webpackChunkName: "common" */ '../views/index/index'),
+    component: () => import(/* webpackChunkName: "initialize-common" */ '../views/index/index'),
     meta: {
       breadcrumb: false,
       anonymous: true,
@@ -14,7 +14,7 @@ export const routes: Array<RouteConfig> = [
   {
     name: 'not-found',
     path: '*',
-    component: () => import(/* webpackChunkName: "common" */ '@/views/error/page-not-fount'),
+    component: () => import(/* webpackChunkName: "initialize-common" */ '@/views/error/page-not-fount'),
     meta: {
       anonymous: true,
     },
