@@ -4,10 +4,10 @@
       "path": "."
     },
     {
-      "path": "clients/vue-web"
+      "path": "clients/web"
     },
     {
-      "path": "clients/react-web"
+      "path": "clients/miniprogram"
     }
   ],
   "settings": {

@@ -8,8 +8,8 @@ import { SkeletonLoader, Result } from '@/components';
 import { useI18n, useOptions, useEffect, useDeviceType, expose } from '@/composables';
 import { useFormApi, FormMetaPresetKeys } from '@/fetch/apis';
 
-const MobileForm = () => import(/* webpackChunkName: "mobile" */ './mobile');
-const DesktopForm = () => import(/* webpackChunkName: "desktop" */ './desktop');
+const MobileForm = () => import('./mobile');
+const DesktopForm = () => import('./desktop');
 
 export default defineComponent({
   name: 'FormView',

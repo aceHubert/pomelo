@@ -7,8 +7,8 @@ import { useI18n, useOptions, useEffect, expose } from '@/composables';
 import { useDeviceMixin } from '@/mixins';
 import { usePostApi, PostMetaPresetKeys } from '@/fetch/apis';
 
-const MobilePost = () => import(/* webpackChunkName: "mobile" */ './mobile');
-const DesktopPost = () => import(/* webpackChunkName: "desktop" */ './desktop');
+const MobilePost = () => import('./mobile');
+const DesktopPost = () => import('./desktop');
 
 export default defineComponent({
   name: 'PostView',
