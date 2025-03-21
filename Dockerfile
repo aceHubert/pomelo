@@ -36,7 +36,7 @@ RUN if [ "$BUILD_IGNORE" = "true" ]; then \
 
 # install runtime files
 FROM base AS runtime
-COPY --from=builder /app/clients/vue-web/dist /app/clients/web/
+COPY --from=builder /app/clients/web/dist /app/clients/web/
 COPY --from=builder /app/dist/servers /app/servers/
 COPY --from=builder /app/.yarn /app/.yarn/
 COPY --from=builder /app/package*.json /app/ecosystem.config.js /app/.yarnrc.yml /app/yarn.lock /app/

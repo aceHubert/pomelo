@@ -1,6 +1,6 @@
 {
-  "name": "@ace-pomelo/vue-web",
-  "description": "Vue frontend project for pomelo.",
+  "name": "@ace-pomelo/web",
+  "description": "Frontend project for pomelo.",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",

@@ -204,9 +204,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/vue-web@workspace:clients/vue-web":
+"@ace-pomelo/web@workspace:clients/web":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/vue-web@workspace:clients/vue-web"
+  resolution: "@ace-pomelo/web@workspace:clients/web"
   dependencies:
     "@ace-fetch/graphql-vue": ^0.9.0
     "@ace-fetch/vue": ^0.9.0
@@ -3807,9 +3807,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-vue2": ^3.0.1
@@ -3822,9 +3822,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.2.2
     "@formily/grid": ^2.2.2
@@ -3846,9 +3846,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-vue2": ^3.0.1
@@ -3861,9 +3861,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.2.2
     "@formily/grid": ^2.2.2
@@ -3885,9 +3885,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -3897,9 +3897,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -3909,9 +3909,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -3921,9 +3921,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@monaco-editor/loader": ^1.3.2
     monaco-editor: ^0.34.0
@@ -3937,9 +3937,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.0.8
     "@formily/grid": ^2.0.8
@@ -4049,9 +4049,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -4061,9 +4061,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.0.12
     "@formily/grid": ^2.0.12
