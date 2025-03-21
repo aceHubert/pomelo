@@ -18,6 +18,11 @@ export enum DeviceType {
   Mobile = 'mobile',
 }
 
+export enum AuthType {
+  Oidc = 'oidc',
+  Local = 'local',
+}
+
 /**
  * Theme
  */

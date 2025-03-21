@@ -6,7 +6,8 @@
 const fs = require('fs');
 
 const cdnConfig = {
-  publicPath: '//unpkg.com',
+  // publicPath: '//unpkg.com',
+  publicPath: '//cdn.jsdmirror.com/npm',
   links: [
     // {path: 'xxx.css', prefetch: true}
   ],

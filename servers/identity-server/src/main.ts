@@ -76,7 +76,7 @@ bootstrap<NestExpressApplication>(AppModule, {
         ? {
             path: globalPrefix,
             exclude: [
-              { path: '', method: RequestMethod.GET },
+              // { path: '', method: RequestMethod.GET }, #FIXME: 会导致 Middleware 无法生效
               { path: 'health', method: RequestMethod.GET },
             ],
           }

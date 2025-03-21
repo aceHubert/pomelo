@@ -145,7 +145,11 @@ Object.defineProperties(Oidc.UserManager.prototype, {
           title: i18n.tv('session_timeout_confirm.title', 'OOPS!'),
           content: i18n.tv('session_timeout_confirm.content', '登录会话已超时，需要您重新登录。'),
           okText: i18n.tv('session_timeout_confirm.ok_text', '重新登录') as string,
-          onOk: () => this.signin({ noInteractive: true }),
+          onOk: () =>
+            this.signin({
+              ...args,
+              noInteractive: true,
+            }),
         });
         return Promise.resolve(() => {});
       }
@@ -167,11 +171,15 @@ Object.defineProperties(Oidc.UserManager.prototype, {
       // 退出前保存用户识别信息
       return this.getUser().then((user) =>
         this.prepareSignIn(user || void 0).then(() => {
+          let redirectUri = post_logout_redirect_uri;
+          if (redirect_uri) {
+            redirectUri = /https?:\/\//.test(redirect_uri) ? redirect_uri : `${location.origin}${redirect_uri}`;
+          }
           const $signOut = () =>
             this.signoutRedirect({
               ...args,
               ...restArgs,
-              post_logout_redirect_uri: post_logout_redirect_uri || redirect_uri,
+              post_logout_redirect_uri: redirectUri,
               redirectMethod,
               extraQueryParams: {
                 ...extraQueryParams, // add extra query params

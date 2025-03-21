@@ -21,7 +21,9 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  BUILD_PLATFORM: linux/amd64,linux/arm64
   IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+  IMAGE_TAG: $(echo alpha-${{ github.run_id }} | tr '[:upper:]' '[:lower:]')
 
 permissions:
   contents: read
@@ -95,16 +97,20 @@ jobs:
         with:
           path: .submodules
           key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
+      - name: Update Browserslist DB
+        run: npx update-browserslist-db@latest
       - name: Build
         run: yarn build:clients && yarn build:servers
       - name: List dist dir
         run: ls dist
-      - name: Build the  Docker image
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build image
         run:
-          | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker build . --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}
-          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest
+          | # 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
+          docker buildx build --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-deploy --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-deploy --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }} --platform ${{env.BUILD_PLATFORM}} --push .
   ssh-deploy:
     needs: docker-build
     runs-on: ubuntu-latest
@@ -121,10 +127,11 @@ jobs:
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
-            echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}" > .env.${{ github.run_id }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}" > .env.${{ github.run_id }}
+            echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
             echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin https://${{ env.REGISTRY }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
-            docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ github.run_id }}) | xargs --no-run-if-empty docker rmi
+            docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}) | xargs --no-run-if-empty docker rmi
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
             docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/pomelo.conf

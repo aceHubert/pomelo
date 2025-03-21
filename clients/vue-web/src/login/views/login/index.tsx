@@ -5,10 +5,12 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { Form, Input, Button, Row, Col } from 'ant-design-vue';
 import { setToken, removeToken } from '@/auth/local';
 import { message } from '@/components/antdv-helper';
-import { useI18n } from '@/composables';
+import { useI18n, useOptions } from '@/composables';
 import { useDeviceMixin } from '@/mixins/device';
 import { formatError } from '@/fetch/graphql/utils/helpers';
 import { useLoginApi } from '@/login/fetch';
+import { AuthTypeOptionName } from '@/constants';
+import { AuthType } from '@/types';
 import classes from './index.module.less';
 
 // Types
@@ -27,6 +29,7 @@ export default Form.create({})(
       };
     },
     setup(props: SiteInitProps) {
+      const authType = useOptions<AuthType>(AuthTypeOptionName);
       const i18n = useI18n();
       const deviceMixin = useDeviceMixin();
       const route = useRoute();
@@ -36,6 +39,11 @@ export default Form.create({})(
         const redirect = (route.query.returnUrl as string) || '/';
         absoluteGo(redirect, true);
       };
+
+      if (authType.value && authType.value !== AuthType.Local) {
+        redirect();
+        return;
+      }
 
       const loading = ref(false);
       const handleSubmit = (e: Event) => {
@@ -60,7 +68,7 @@ export default Form.create({})(
             })
             .then(({ result }) => {
               if (result.success) {
-                setToken(result.token);
+                setToken(result.accessToken, result.tokenType);
                 message.success({
                   content: i18n.tv('page_login.form.submit_success', '登录成功!') as string,
                   onClose: redirect,

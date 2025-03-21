@@ -70,6 +70,12 @@ routes:
       - TRACE
       - PURGE
     plugins:
+      key-auth:
+        _meta:
+          disable: false
+        header: apikey
+        hide_credentials: true
+        query: key
       cors:
       proxy-rewrite:
         regex_uri:

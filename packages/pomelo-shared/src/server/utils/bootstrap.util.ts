@@ -123,6 +123,15 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
       globalPrefix = path;
       app.setGlobalPrefix(path, options);
     }
+
+    // 将根路径重定向到 globalPrefix
+    app.use((req: any, res: any, next: any) => {
+      if (req.url === '/') {
+        res.redirect(globalPrefix);
+      } else {
+        next();
+      }
+    });
   }
 
   // enable cors

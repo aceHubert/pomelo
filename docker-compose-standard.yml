@@ -13,7 +13,7 @@
 
 services:
   server:
-    image: ${IMAGE_REPOSITORY:-ghcr.io/acehubert/pomelo}
+    image: ${IMAGE_REPOSITORY:-ghcr.io/acehubert/pomelo:latest}
     container_name: pomelo-server
     restart: always
     logging:
@@ -22,12 +22,14 @@ services:
         max-size: '100m'
         max-file: '3'
     environment:
-      - DEBUG=${DEBUG:-false}
+      - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
+      - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
       - ORIGIN=${ORIGIN:-https://example.com}
       - REDIS_URL=${REDIS_URL:-redis://host:port/db}
       - INFRASTRUCTURE_DATABASE_CONNECTION=${INFRASTRUCTURE_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
       - IDENTITY_DATABASE_CONNECTION=${IDENTITY_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
       - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       - ${PWD}/conf:/app/conf
       - ${PWD}/uploads:/app/content/uploads
@@ -63,11 +65,11 @@ services:
       - server
     ##network_mode: host
     ports:
-      - '9180:9180/tcp' # admin_control: true
+      # - '9180:9180/tcp' # admin_control: true
       - '9080:9080/tcp'  # http
-      - '9091:9091/tcp'  # prometheus
-      - '9443:9443/tcp'  # tls http/2
-      - '9092:9092/tcp' # enable_control: true
+      # - '9091:9091/tcp'  # prometheus
+      # - '9443:9443/tcp'  # tls http/2
+      # - '9092:9092/tcp' # enable_control: true
     networks:
       - default
 networks:

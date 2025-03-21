@@ -5,6 +5,10 @@ import { i18n } from '@/i18n';
 import { UserManager, type IUser, type ISigninArgs, type ISignoutArgs } from '../user-manager';
 import { getToken, setToken, removeToken } from './helper';
 
+export interface UserManagerOptions {
+  filterProtocolClaims?: boolean | string[];
+}
+
 /**
  * Protocol claims that could be removed by default from profile.
  * Derived from the following sets of claims:
@@ -38,12 +42,21 @@ class Timer {
 class User implements IUser {
   payload: JwtPayload;
 
-  constructor(private readonly token: string, private readonly options: { filterProtocolClaims?: boolean | string[] }) {
+  constructor(
+    private readonly token: string,
+    private readonly options: UserManagerOptions & {
+      tokenType?: string;
+    },
+  ) {
     this.payload = jwtDecode(token);
   }
 
   get access_token() {
     return this.token;
+  }
+
+  get token_type() {
+    return this.options.tokenType ?? 'Bearer';
   }
 
   get profile() {
@@ -85,16 +98,22 @@ class User implements IUser {
 }
 
 export class LocalUserManagerCreator extends UserManager {
-  constructor(private readonly options: { filterProtocolClaims?: boolean | string[] } = {}) {
+  constructor(private readonly options: UserManagerOptions = {}) {
     super();
   }
 
   getUser(): Promise<IUser | null> {
-    const token = getToken();
-    if (token) {
-      return Promise.resolve(new User(token, this.options));
+    const { accessToken, tokenType } = getToken();
+    if (accessToken) {
+      const user = new User(accessToken, { tokenType, ...this.options });
+      return Promise.resolve(user);
     }
     return Promise.resolve(null);
+  }
+
+  removeUser(): Promise<void> {
+    removeToken();
+    return Promise.resolve();
   }
 
   modifyPassword(): Promise<void> {
@@ -107,7 +126,7 @@ export class LocalUserManagerCreator extends UserManager {
   }
 
   signin(args: ISigninArgs = {}): Promise<void> {
-    const { noInteractive, redirect_uri = location.pathname } = args;
+    const { noInteractive, redirect_uri = '/' } = args;
     if (noInteractive) {
       return new Promise<void>((resolve) => {
         setTimeout(() => {
@@ -122,13 +141,17 @@ export class LocalUserManagerCreator extends UserManager {
         title: i18n.tv('session_timeout_confirm.title', 'OOPS!'),
         content: i18n.tv('session_timeout_confirm.content', '登录会话已超时，需要您重新登录。'),
         okText: i18n.tv('session_timeout_confirm.ok_text', '重新登录') as string,
-        onOk: () => this.signin({ noInteractive: true }),
+        onOk: () =>
+          this.signin({
+            ...args,
+            noInteractive: true,
+          }),
       });
       return new Promise<void>(() => {});
     }
   }
   signout(args: ISignoutArgs = {}): Promise<void> {
-    const { redirect_uri = location.pathname } = args;
+    const { redirect_uri = '/' } = args;
     return new Promise<void>((resolve) => {
       setTimeout(() => {
         window.location.href = `${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirect_uri)}`;

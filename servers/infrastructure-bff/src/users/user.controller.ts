@@ -21,7 +21,7 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { AuthorizationService, Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   ParseQueryPipe,
@@ -42,15 +42,18 @@ import { UserAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { UserService } from './user.service';
-import { UserClaims } from './interfaces/user-claims.interface';
-import { UserOptions } from './interfaces/user-options.interface';
 import { NewUserDto } from './dto/new-user.dto';
 import { NewUserMetaDto } from './dto/new-user-meta.dto';
 import { UpdateUserDto, UpdateUserPasswordDto } from './dto/update-user.dto';
 import { PagedUserQueryDto } from './dto/user-query.dto';
-import { VerifyUserDto } from './dto/verify-user.dto';
-import { UserModelResp, UserWithMetasModelResp, PagedUserResp, UserMetaModelResp } from './resp/user-model.resp';
-import { USER_OPTIONS } from './constants';
+import { VerifyUserDto } from './dto/signin.dto';
+import {
+  UserModelResp,
+  UserWithMetasModelResp,
+  PagedUserResp,
+  UserMetaModelResp,
+  SignInResultResp,
+} from './resp/user-model.resp';
 
 @ApiTags('user')
 @Authorized()
@@ -71,12 +74,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     return [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
   },
 }) {
-  constructor(
-    @Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy,
-    @Inject(USER_OPTIONS) private readonly options: UserOptions,
-    private readonly userService: UserService,
-    private readonly authService: AuthorizationService,
-  ) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy, private readonly userService: UserService) {
     super(basicService);
   }
 
@@ -326,6 +324,10 @@ export class UserController extends createMetaController('user', UserMetaModelRe
    */
   @Post('signin')
   @Anonymous()
+  @ApiOkResponse({
+    description: 'user sign in result',
+    type: () => createResponseSuccessType({ data: SignInResultResp }, 'UserSignInResultModelSuccessResp'),
+  })
   async signIn(@Body() input: VerifyUserDto, @Req() req: Request, @I18n() i18n: I18nContext) {
     const result = await this.basicService
       .send<false | UserModelResp>(UserPattern.Verify, {
@@ -334,43 +336,20 @@ export class UserController extends createMetaController('user', UserMetaModelRe
       })
       .lastValue();
     if (result) {
-      const account: UserClaims = {
-        id: result.id,
-        login_name: result.loginName,
-        display_name: result.displayName,
-        nice_name: result.niceName,
-        url: result.url,
-        updated_at: new Date(result.updatedAt).getTime(),
-      };
-
-      if (result.email) {
-        account['email'] = result.email;
-        account['email_verified'] = true;
-      }
-
-      if (result.mobile) {
-        account['phone_number'] = result.mobile;
-        account['phone_number_verified'] = true;
-      }
-
-      const claims = await this.userService.getClaims(result.id);
-      const { id: accountId, ...rest } = account;
+      const token = await this.userService.createAccessToken(result, req.get('origin'));
 
       return this.success({
-        data: await this.authService.createToken(
-          {
-            sub: String(accountId),
-            ...claims,
-            ...rest,
-          },
-          this.options.signingKey,
-          {
-            issuer: req.get('origin'),
-            expiresIn: this.options.tokenExpiresIn,
-          },
-        ),
+        data: {
+          success: true,
+          ...token,
+        },
       });
     }
-    return this.faild(i18n.tv('user.login.fail', 'Username or Password is incorrect!'));
+    return this.success({
+      data: {
+        success: false,
+        message: i18n.tv('user.login.fail', 'Username or Password is incorrect!'),
+      },
+    });
   }
 }

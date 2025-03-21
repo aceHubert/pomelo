@@ -50,6 +50,7 @@ export { default as PlusSquareOutline } from '@ant-design/icons/lib/outline/Plus
 export { default as ProfileOutline } from '@ant-design/icons/lib/outline/ProfileOutline';
 export { default as QuestionCircleOutline } from '@ant-design/icons/lib/outline/QuestionCircleOutline';
 export { default as RightOutline } from '@ant-design/icons/lib/outline/RightOutline';
+export { default as SafetyOutline } from '@ant-design/icons/lib/outline/SafetyOutline';
 export { default as SaveOutline } from '@ant-design/icons/lib/outline/SaveOutline';
 export { default as SearchOutline } from '@ant-design/icons/lib/outline/SearchOutline';
 export { default as SelectOutline } from '@ant-design/icons/lib/outline/SelectOutline';
@@ -58,6 +59,7 @@ export { default as SmileOutline } from '@ant-design/icons/lib/outline/SmileOutl
 export { default as StarOutline } from '@ant-design/icons/lib/outline/StarOutline';
 export { default as StarFill } from '@ant-design/icons/lib/fill/StarFill';
 export { default as SwapOutline } from '@ant-design/icons/lib/outline/SwapOutline';
+export { default as SyncOutline } from '@ant-design/icons/lib/outline/SyncOutline';
 export { default as TagOutline } from '@ant-design/icons/lib/outline/TagOutline';
 export { default as TagsOutline } from '@ant-design/icons/lib/outline/TagsOutline';
 export { default as TableOutline } from '@ant-design/icons/lib/outline/TableOutline';

@@ -35,6 +35,17 @@ export class OptionResolver extends BaseResolver {
   }
 
   @Anonymous()
+  @Query((returns) => Option, { nullable: true, description: 'Get option by name.' })
+  optionByName(@Args('name') name: string, @Fields() fields: ResolveTree): Promise<Option | undefined> {
+    return this.basicService
+      .send<Option | undefined>(OptionPattern.GetByName, {
+        optionName: name,
+        fields: this.getFieldNames(fields.fieldsByTypeName.Option),
+      })
+      .lastValue();
+  }
+
+  @Anonymous()
   @Query((returns) => String, { nullable: true, description: 'Get option value by name.' })
   optionValue(@Args('name') name: string): Promise<string | undefined> {
     return this.basicService

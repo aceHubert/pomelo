@@ -127,7 +127,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           }
           await next();
 
-          if (ctx.oidc.route === 'discovery') {
+          if (ctx.oidc?.route === 'discovery') {
             ctx.body.check_session_iframe = ctx.oidc.urlFor('discovery').replace(discoveryRoute, checkSessionRoute);
           }
         });

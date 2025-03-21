@@ -6,12 +6,14 @@ import Vue, { type ComponentOptions } from 'vue';
 import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
-import { Authoriztion, AuthType } from '@/auth';
+import { Authoriztion } from '@/auth';
 import { Modal } from '@/components';
 import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
 import { pinia } from '@/store';
+import { AuthTypeOptionName } from '@/constants';
+import { AuthType } from '@/types';
 import * as plugins from '@/plugins';
 
 // Local
@@ -90,7 +92,9 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
   const userManager = this.$userManager;
 
   if (to.name === 'signout') {
-    userManager.signout();
+    userManager.signout({
+      redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
+    });
   } else if (to.meta?.anonymous === true) {
     next();
   } else {
@@ -98,7 +102,7 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
       if (user === null || user.expired) {
         userManager.signin({
           noInteractive: true,
-          redirect_uri: `${window.location.origin}${router.options.base ?? '/'}${to.fullPath.slice(1)}`,
+          redirect_uri: `${router.options.base ?? '/'}${to.fullPath.slice(1)}`,
         });
       } else {
         // next();
@@ -121,7 +125,7 @@ createApp().then(({ app, router }) => {
   const _app = new Vue(app);
 
   // Set auth type
-  const authType = _app.$config.auth_type as AuthType;
+  const authType = _app.$config[AuthTypeOptionName] as AuthType;
   authType && Object.values(AuthType).includes(authType) && Authoriztion.setType(authType);
 
   router.beforeEach(authMiddleware.bind(_app));

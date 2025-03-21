@@ -3,6 +3,8 @@ import * as fs from 'fs';
 import { APP_PIPE, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
+import { TerminusModule } from '@nestjs/terminus';
 import { I18nModule, I18nService, I18nValidationPipe } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration } from '@ace-pomelo/shared/server';
@@ -27,6 +29,8 @@ import '@/common/extends/i18n.extend';
 
 @Module({
   imports: [
+    HttpModule,
+    TerminusModule,
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,
@@ -41,20 +45,21 @@ import '@/common/extends/i18n.extend';
     Log4jsModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
+        const logDir = config.get('LOG_FILENAME_DIR', path.join(config.getOrThrow<string>('contentPath'), '../logs'));
         return {
           isGlobal: true,
           appenders: {
             dateFile: {
               type: 'dateFile',
-              filename: config.get('LOG_FILENAME', './logs/infrastructure-service.log'),
               keepFileExt: true,
+              filename: path.join(logDir, '/infrastructure-service.log'),
               layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
             },
           },
           categories: {
             default: {
-              enableCallStack: true,
-              appenders: config.get('LOG_APPENDERS', ['stdout', 'dateFile']),
+              enableCallStack: isDebug,
+              appenders: ['stdout', 'dateFile'],
               level: config.get('LOG_LEVEL', isDebug ? 'debug' : 'info'),
             },
           },

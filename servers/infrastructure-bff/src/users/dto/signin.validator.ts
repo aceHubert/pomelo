@@ -1,6 +1,6 @@
 import { IsDefined, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export abstract class VerifyUserValidator {
+export abstract class SignInValidator {
   @IsDefined()
   @IsNotEmpty()
   @IsString()
