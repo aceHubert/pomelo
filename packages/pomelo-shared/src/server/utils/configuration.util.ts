@@ -37,14 +37,6 @@ export interface ConfigObject {
      */
     port?: number | string;
     /**
-     * tcp host
-     */
-    tcpHost?: string;
-    /**
-     * tcp port
-     */
-    tcpPort?: number | string;
-    /**
      * server origin
      */
     origin?: string;
@@ -116,36 +108,45 @@ export interface ConfigObject {
  * ensure directory path from user setter or create fallback directory
  * @param setter customized path, absolute or relative to basePath
  */
-export const ensureDirPath = (setter: string | undefined, dirname: string, alias?: string) => {
+export const ensureDirPath = (setter: string | undefined, dirname: string, alias?: string[]) => {
+  const CWD = process.cwd(),
+    parentCWD = path.resolve(CWD, '../');
   if (setter) {
     if (fs.existsSync(setter)) {
       // 配置为绝对路径
-    } else if ((setter = path.join(process.cwd(), setter)) && fs.existsSync(setter)) {
+    } else if ((setter = path.join(CWD, setter)) && fs.existsSync(setter)) {
       // 配置为相对路径
     } else {
-      setter = undefined;
+      // 重置为 undefined
+      setter = void 0;
     }
   }
   if (!setter) {
-    // 从调用方法的文件向上查找 content 目录到 cwd() 父目录为止
-    const cwd = process.cwd(),
-      parentCWD = path.resolve(cwd, '../');
+    // 从调用方法的文件向上查找目录到 cwd 父目录为止
+    const dirnames = alias ? [dirname, ...alias] : [dirname];
     let parentDir = path.dirname(require.main?.filename || __filename);
-    while (!fs.existsSync(path.join(parentDir, dirname))) {
-      logger.debug(`Directory "${dirname}" is not exists in "${parentDir}"`);
+    while (
+      dirnames.every((dir) => {
+        const fullDir = path.join(parentDir, dir),
+          exists = fs.existsSync(fullDir);
+        exists && (setter = fullDir);
+        return !exists;
+      })
+    ) {
       if (parentDir === parentCWD) {
         break;
       }
       parentDir = path.resolve(parentDir, '../');
     }
-    // 查找到 content 目录或者 cwd() 同级目录创建 content 目录
-    setter = path.join(parentDir, dirname);
-    if (!fs.existsSync(setter)) {
+
+    // 未找到目录则在 cwd 下创建目录
+    if (!setter) {
+      setter = path.join(CWD, dirname);
       fs.mkdirSync(setter, { recursive: true });
-      logger.debug(`Create directory "${dirname}" in "${parentDir}"`);
+      logger.debug(`Create directory "${setter}"`);
     }
   }
-  logger.debug(`${alias ?? dirname} path: ${setter}`);
+  logger.debug(`path: ${setter}`);
   return setter;
 };
 
@@ -159,13 +160,11 @@ export const configuration = (): ConfigFactory<ConfigObject> => () => {
   const debugMode = process.env.DEBUG !== void 0 ? process.env.DEBUG === 'true' : process.env.NODE_ENV !== 'production';
   const config: ConfigObject = {
     debug: debugMode,
-    configPath: ensureDirPath(process.env.CONFIG_PATH, 'conf', 'config'),
+    configPath: ensureDirPath(process.env.CONFIG_PATH, 'conf', ['config']),
     contentPath: ensureDirPath(process.env.CONTENT_PATH, 'content'),
     server: {
       host: process.env.HOST,
-      port: Number(process.env.PORT || 3000),
-      tcpHost: process.env.TCP_HOST,
-      tcpPort: process.env.TCP_PORT,
+      port: process.env.PORT ? Number(process.env.PORT) : void 0,
       origin: process.env.ORIGIN,
       globalPrefixUri: process.env.GLOBAL_PREFIX_URI,
       cors:

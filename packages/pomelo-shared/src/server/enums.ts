@@ -38,16 +38,6 @@ export enum TermPresetTaxonomy {
 }
 
 /**
- * 预设媒体无数据 Key
- */
-export enum MediaMetaPresetKeys {
-  /**
-   * 额外参数
-   */
-  Matedata = 'mate_data',
-}
-
-/**
  * 模版状态
  */
 export enum TemplateStatus {

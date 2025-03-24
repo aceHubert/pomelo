@@ -123,6 +123,7 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
       globalPrefix = path;
       app.setGlobalPrefix(path, options);
     }
+    logger.debug('global prefix is set to: ' + globalPrefix);
 
     // 将根路径重定向到 globalPrefix
     app.use((req: any, res: any, next: any) => {
@@ -141,7 +142,7 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
       logger.debug('cors is enabled');
     } else {
       app.enableCors(cors);
-      logger.debug('cors is enabled', cors);
+      logger.debug(`cors is enabled with config "${JSON.stringify(cors)}"`);
     }
   }
 
@@ -170,20 +171,16 @@ export async function bootstrap<NestApplication extends INestApplication<any> = 
     }
     const document = SwaggerModule.createDocument(app, config, documentOptions);
     SwaggerModule.setup(path, app, document, customOptions);
-    logger.debug(`swigger is enabled with path: ${path}`);
   }
 
   // microservice
+  let microservice;
   if (microserviceOptions) {
-    app.connectMicroservice<MicroserviceOptions>(microserviceOptions, hybridOptions);
+    microservice = app.connectMicroservice<MicroserviceOptions>(microserviceOptions, hybridOptions);
     await app.startAllMicroservices();
-    logger.debug(`microservice is started`);
   }
 
   await app.listen(port || 3000, host || '');
-  logger.log(
-    `Service is running on: ${await app.getUrl()}${globalPrefix ? ' with global prefix: ' + globalPrefix : ''}`,
-  );
 
-  return app;
+  return { app, microservice };
 }

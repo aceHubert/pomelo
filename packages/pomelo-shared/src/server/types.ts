@@ -30,3 +30,21 @@ export type ResponseError = {
   statusCode?: number;
   message: string;
 };
+
+/**
+ * Response schema.
+ */
+export type ResponseOf<T extends Record<string, any>> = ResponseSuccess<T> | ResponseError;
+
+/**
+ * Paged response success schema.
+ */
+export type PagedResponseSuccess<T> = ResponseSuccess<{
+  rows: Array<T>;
+  total: number;
+}>;
+
+/**
+ * Paged response schema.
+ */
+export type PagedResponseOf<T> = PagedResponseSuccess<T> | ResponseError;
