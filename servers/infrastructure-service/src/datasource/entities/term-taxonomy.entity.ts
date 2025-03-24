@@ -1,4 +1,12 @@
-import { Optional } from '../shared/types';
+import { Optional } from './types';
+
+/**
+ * 预设类别
+ */
+export enum TermPresetTaxonomy {
+  Category = 'category',
+  Tag = 'tag',
+}
 
 export interface TermTaxonomyAttributes {
   id: number;

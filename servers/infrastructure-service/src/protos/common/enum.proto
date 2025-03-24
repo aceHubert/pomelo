@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.EnumValueOptions { optional string Value = 1001; }

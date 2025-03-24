@@ -3,50 +3,55 @@ import { ApiTags, ApiQuery, ApiBody, ApiOkResponse, ApiCreatedResponse, ApiNoCon
 import {
   Inject,
   Controller,
-  Param,
   Query,
+  Param,
   Body,
   Get,
   Post,
-  Patch,
   Put,
+  Patch,
   Delete,
   ParseIntPipe,
-  ParseEnumPipe,
   ParseArrayPipe,
+  ParseEnumPipe,
   ValidationPipe,
   Res,
   HttpStatus,
+  OnModuleInit,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   createResponseSuccessType,
   ApiAuthCreate,
-  User,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   QueryRequired,
+  User,
   RequestUser,
-  TemplateStatus,
   TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  TemplatePattern,
+  TemplateStatus,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import {
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceClient,
+  GetTemplateOptionsRequest,
+  GetPagedTemplateRequest,
+} from '@ace-pomelo/shared/server/proto-ts/template';
 import { TemplateAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
-import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { NewTemplateMetaDto } from './dto/new-template-meta.dto';
 import { PagedBaseTemplateQueryDto, BaseTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewTemplateDto } from './dto/new-template.dto';
 import { UpdateTemplateDto, BulkUpdateTemplateStatusDto } from './dto/update-template.dto';
 import {
   TemplateModelResp,
-  TemplateOptionResp,
-  PagedTemplateResp,
   TemplateWithMetasModelResp,
   TemplateMetaModelResp,
+  PagedTemplateResp,
+  TemplateOptionResp,
   TemplateStatusCount,
   TemplateDayCount,
   TemplateMonthCount,
@@ -56,26 +61,39 @@ import {
 @ApiTags('templates')
 @Authorized()
 @Controller('api/templates')
-export class TemplateController extends createMetaController('template', TemplateMetaModelResp, NewTemplateMetaDto, {
-  authDecorator: (method) => {
-    const ramAction =
-      method === 'getMeta'
-        ? TemplateAction.MetaDetail
-        : method === 'getMetas'
-        ? TemplateAction.MetaList
-        : method === 'createMeta' || method === 'createMetas'
-        ? TemplateAction.MetaCreate
-        : method === 'updateMeta' || method === 'updateMetaByKey'
-        ? TemplateAction.MetaUpdate
-        : TemplateAction.MetaDelete;
+export class TemplateController
+  extends createMetaController('template', TemplateMetaModelResp, NewTemplateMetaDto, {
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? TemplateAction.MetaDetail
+          : method === 'getMetas'
+          ? TemplateAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? TemplateAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? TemplateAction.MetaUpdate
+          : TemplateAction.MetaDelete;
 
-    return method === 'getMeta' || method === 'getMetas'
-      ? [RamAuthorized(ramAction), Anonymous()]
-      : [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
-  },
-}) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
+    },
+  })
+  implements OnModuleInit
+{
+  private templateServiceClient!: TemplateServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
   }
 
   /**
@@ -89,29 +107,29 @@ export class TemplateController extends createMetaController('template', Templat
   })
   async getOptions(@Query(ParseQueryPipe) query: BaseTemplateOptionQueryDto) {
     const { type, categoryId, categoryName, ...restQuery } = query;
-    const result = await this.basicService
-      .send<TemplateOptionResp[]>(TemplatePattern.GetOptions, {
-        query: {
-          ...restQuery,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const { options } = await this.templateServiceClient
+      .getOptions({
+        ...restQuery,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetTemplateOptionsRequest['taxonomies'],
         type,
+        fields: ['id', 'name', 'title'],
       })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: options,
     });
   }
 
@@ -126,19 +144,15 @@ export class TemplateController extends createMetaController('template', Templat
     type: () => createResponseSuccessType({ data: [TemplateStatusCount] }, 'TemplateCountByStatusModelSuccessResp'),
   })
   async getCountByStatus(@Param('type') type: string, @User() requestUser: RequestUser) {
-    const result = await this.basicService
-      .send<
-        Array<{
-          status: TemplateStatus;
-          count: number;
-        }>
-      >(TemplatePattern.CountByStatus, {
+    const { counts } = await this.templateServiceClient
+      .getCountByStatus({
         type,
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: counts,
     });
   }
 
@@ -163,15 +177,16 @@ export class TemplateController extends createMetaController('template', Templat
     @Query('includeTrash') includeTrash: boolean,
     @User() requestUser: RequestUser,
   ) {
-    const result = await this.basicService
-      .send<number>(TemplatePattern.CountBySelf, {
+    const { counts } = await this.templateServiceClient
+      .getSelfCount({
         type,
-        includeTrashStatus: !!includeTrash,
+        includeTrashStatus: includeTrash,
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: counts,
     });
   }
 
@@ -193,14 +208,15 @@ export class TemplateController extends createMetaController('template', Templat
     type: () => createResponseSuccessType({ data: [TemplateDayCount] }, 'TemplateCountByDayModelSuccessResp'),
   })
   async getCountByDay(@QueryRequired('month') month: string, @Param('type') type: string) {
-    const result = await this.basicService
-      .send<Array<{ day: string; count: number }>>(TemplatePattern.CountByDay, {
+    const { counts } = await this.templateServiceClient
+      .getCountByDay({
         month,
         type,
       })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: counts,
     });
   }
 
@@ -233,11 +249,16 @@ export class TemplateController extends createMetaController('template', Templat
     @Query('year') year: string,
     @Param('type') type: string,
   ) {
-    const result = await this.basicService
-      .send<Array<{ month: string; count: number }>>(TemplatePattern.CountByMonth, { months, year, type })
+    const { counts } = await this.templateServiceClient
+      .getCountByMonth({
+        year,
+        months,
+        type,
+      })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: counts,
     });
   }
 
@@ -252,13 +273,14 @@ export class TemplateController extends createMetaController('template', Templat
     type: () => createResponseSuccessType({ data: [TemplateYearCount] }, 'TemplateCountByYearModelSuccessResp'),
   })
   async getCountByYear(@Param('type') type: string) {
-    const result = await this.basicService
-      .send<Array<{ year: string; count: number }>>(TemplatePattern.CountByYear, {
+    const { counts } = await this.templateServiceClient
+      .getCountByYear({
         type,
       })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: counts,
     });
   }
 
@@ -285,16 +307,16 @@ export class TemplateController extends createMetaController('template', Templat
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.basicService
-      .send<TemplateModelResp | undefined>(TemplatePattern.GetByName, {
+    const { template } = await this.templateServiceClient
+      .getByName({
         name,
         fields: [
           'id',
           'name',
           'title',
           'author',
-          'excerpt',
           'content',
+          'excerpt',
           'status',
           'type',
           'commentStatus',
@@ -307,23 +329,23 @@ export class TemplateController extends createMetaController('template', Templat
       .lastValue();
 
     let metas;
-    if (result && metaKeys?.length) {
-      metas = await this.basicService
-        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
-          templateId: result.id,
-          metaKeys,
+    if (template && metaKeys?.length) {
+      ({ metas } = await this.templateServiceClient
+        .getMetas({
+          templateId: template.id,
+          metaKeys: metaKeys,
           fields: ['id', 'metaKey', 'metaValue'],
         })
-        .lastValue();
+        .lastValue());
     }
 
-    if (result === undefined) {
+    if (!template) {
       res.status(HttpStatus.NO_CONTENT);
     }
 
     return this.success({
       data: {
-        ...result,
+        ...template,
         metas,
       },
     });
@@ -354,16 +376,16 @@ export class TemplateController extends createMetaController('template', Templat
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.basicService
-      .send<TemplateModelResp | undefined>(TemplatePattern.Get, {
+    const { template } = await this.templateServiceClient
+      .get({
         id,
         fields: [
           'id',
           'name',
           'title',
           'author',
-          'excerpt',
           'content',
+          'excerpt',
           'status',
           'type',
           'commentStatus',
@@ -376,23 +398,23 @@ export class TemplateController extends createMetaController('template', Templat
       .lastValue();
 
     let metas;
-    if (result) {
-      metas = await this.basicService
-        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
-          templateId: result.id,
-          metaKeys,
+    if (template && metaKeys?.length) {
+      ({ metas } = await this.templateServiceClient
+        .getMetas({
+          templateId: template.id,
+          metaKeys: metaKeys,
           fields: ['id', 'metaKey', 'metaValue'],
         })
-        .lastValue();
+        .lastValue());
     }
 
-    if (result === undefined) {
+    if (!template) {
       res.status(HttpStatus.NO_CONTENT);
     }
 
     return this.success({
       data: {
-        ...result,
+        ...template,
         metas,
       },
     });
@@ -409,24 +431,22 @@ export class TemplateController extends createMetaController('template', Templat
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedBaseTemplateQueryDto, @User() requestUser: RequestUser) {
     const { type, categoryId, categoryName, ...restQuery } = query;
-    const result = await this.basicService
-      .send<PagedTemplateResp>(TemplatePattern.GetPaged, {
-        query: {
-          ...restQuery,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const result = await this.templateServiceClient
+      .getPaged({
+        ...restQuery,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetPagedTemplateRequest['taxonomies'],
         type,
         fields: [
           'id',
@@ -461,14 +481,33 @@ export class TemplateController extends createMetaController('template', Templat
     type: () => createResponseSuccessType({ data: TemplateModelResp }, 'TemplateModelSuccessResp'),
   })
   async create(@Body() input: NewTemplateDto, @User() requestUser: RequestUser) {
-    const { id, title, author, excerpt, content, type, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.basicService
-        .send<TemplateModelResp>(TemplatePattern.Create, {
-          ...input,
-          excerpt: input.excerpt || '',
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
+    const {
+      template: {
+        id,
+        title,
+        author,
+        excerpt,
+        content,
+        type,
+        status,
+        commentStatus,
+        commentCount,
+        updatedAt,
+        createdAt,
+      },
+    } = await this.templateServiceClient
+      .create({
+        ...input,
+        excerpt: input.excerpt || '',
+        metas: [],
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
+
+    if (status === TemplateStatus.Pending) {
+      // TODO: send WS message to admin to review
+    }
+
     return this.success({
       data: {
         id,
@@ -502,13 +541,18 @@ export class TemplateController extends createMetaController('template', Templat
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.Update, {
+      await this.templateServiceClient
+        .update({
           ...input,
           id,
           requestUserId: Number(requestUser.sub),
         })
         .lastValue();
+
+      if (input.status === TemplateStatus.Pending) {
+        // TODO: send WS message to admin to review
+      }
+
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -532,8 +576,8 @@ export class TemplateController extends createMetaController('template', Templat
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.UpdateName, {
+      await this.templateServiceClient
+        .updateName({
           id,
           name,
           requestUserId: Number(requestUser.sub),
@@ -562,8 +606,8 @@ export class TemplateController extends createMetaController('template', Templat
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.UpdateStatus, {
+      await this.templateServiceClient
+        .updateStatus({
           id,
           status,
           requestUserId: Number(requestUser.sub),
@@ -588,8 +632,8 @@ export class TemplateController extends createMetaController('template', Templat
   })
   async bulkUpdateStatus(@Body() model: BulkUpdateTemplateStatusDto, @User() requestUser: RequestUser) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.BulkUpdateStatus, {
+      await this.templateServiceClient
+        .bulkUpdateStatus({
           ...model,
           requestUserId: Number(requestUser.sub),
         })
@@ -613,8 +657,8 @@ export class TemplateController extends createMetaController('template', Templat
   })
   async restore(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.Restore, {
+      await this.templateServiceClient
+        .restore({
           id,
           requestUserId: Number(requestUser.sub),
         })
@@ -639,8 +683,8 @@ export class TemplateController extends createMetaController('template', Templat
   })
   async bulkRestore(@Body() ids: number[], @User() requestUser: RequestUser) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.BulkRestore, {
+      await this.templateServiceClient
+        .bulkRestore({
           ids,
           requestUserId: Number(requestUser.sub),
         })
@@ -664,8 +708,8 @@ export class TemplateController extends createMetaController('template', Templat
   })
   async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.Delete, {
+      await this.templateServiceClient
+        .delete({
           id,
           requestUserId: Number(requestUser.sub),
         })
@@ -690,8 +734,8 @@ export class TemplateController extends createMetaController('template', Templat
   })
   async bulkDelete(@Body() ids: number[], @User() requestUser: RequestUser) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.BulkDelete, {
+      await this.templateServiceClient
+        .bulkDelete({
           ids,
           requestUserId: Number(requestUser.sub),
         })

@@ -107,8 +107,9 @@ bootstrap<NestExpressApplication>(AppModule, {
         : void 0,
     };
   },
-}).then(async (app) => {
+}).then(async ({ app }) => {
   const appUrl = await app.getUrl();
+  logger.log(`Http server is running on: ${appUrl}${globalPrefix}`);
   logger.log(`OpenID-Connect discovery endpoint: ${appUrl}${globalPrefix}${oidcPath}/.well-known/openid-configuration`);
   isSwaggerDebug && logger.log(`Swagger server is running on: ${appUrl}${globalPrefix}${swaggerPath}`);
   isGraphqlDebug && logger.log(`Graphql server is running on: ${appUrl}${globalPrefix}${graphqlPath}`);

@@ -95,9 +95,11 @@ bootstrap<NestExpressApplication>(AppModule, {
         : void 0,
     };
   },
-}).then(async (app) => {
-  isSwaggerDebug && logger.log(`Swagger server is running on: ${await app.getUrl()}${globalPrefix}${swaggerPath}`);
-  isGraphqlDebug && logger.log(`Graphql server is running on: ${await app.getUrl()}${globalPrefix}${graphqlPath}`);
+}).then(async ({ app }) => {
+  const appUrl = await app.getUrl();
+  logger.log(`Http server is running on: ${appUrl}${globalPrefix}`);
+  isSwaggerDebug && logger.log(`Swagger server is running on: ${appUrl}${globalPrefix}${swaggerPath}`);
+  isGraphqlDebug && logger.log(`Graphql server is running on: ${appUrl}${globalPrefix}${graphqlPath}`);
 
   // hot reload
   if (module.hot) {

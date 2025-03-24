@@ -10,13 +10,13 @@ export interface ImageScaleModel {
   name: string;
 }
 
-export type MediaMetaDataModel = {
+export interface MediaMetaDataModel {
   fileSize: number;
   width?: number;
   height?: number;
   imageScales?: ImageScaleModel[];
   [key: string]: any;
-};
+}
 
 export interface MediaModel extends Attributes<Medias> {
   metaData?: MediaMetaDataModel;

@@ -1,4 +1,4 @@
-import { Optional } from '../shared/types';
+import { Optional } from './types';
 
 export interface TemplateMetaAttributes {
   id: number;

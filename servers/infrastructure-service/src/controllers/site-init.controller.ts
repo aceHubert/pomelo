@@ -3,27 +3,31 @@ import { upperFirst } from 'lodash';
 import { UniqueConstraintError } from 'sequelize';
 import { Controller, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   md5,
   FileEnv,
-  UserStatus,
-  UserRole,
-  OptionAutoload,
   OptionPresetKeys,
-  TermPresetTaxonomy,
   UserMetaPresetKeys,
-  SiteInitPattern,
+  UserRole,
+  UserStatus,
+  OptionAutoload,
 } from '@ace-pomelo/shared/server';
+import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
+import { BoolValue } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/wrappers';
+import {
+  SiteInitServiceControllerMethods,
+  SiteInitServiceController,
+  StartOptionRequest,
+} from '@ace-pomelo/shared/server/proto-ts/site-init';
 import { IgnoreDbCheckInterceptor } from '@/common/interceptors/db-check.interceptor';
 import { getDefaultUserRoles } from '@/common/utils/user.util';
+import { name, InfrastructureDatasourceService, UserDataSource, TermPresetTaxonomy } from '../datasource';
 import { version } from '../version';
-import { name, InfrastructureDatasourceService, UserDataSource } from '../datasource';
-import { SiteInitPayload } from './payload/site-init.payload';
 
 @IgnoreDbCheckInterceptor()
 @Controller()
-export class SiteInitController {
+@SiteInitServiceControllerMethods()
+export class SiteInitController implements SiteInitServiceController {
   private logger = new Logger(SiteInitController.name, { timestamp: true });
   private readonly adminName = 'admin';
   private readonly fileEnv: FileEnv;
@@ -41,25 +45,26 @@ export class SiteInitController {
     return this.userDataSource.isLoginNameExists(this.adminName);
   }
 
-  @MessagePattern(SiteInitPattern.IsRequired)
-  async isRequired() {
+  /**
+   * Check if the datas is required to be initialized
+   */
+  async isRequired(): Promise<BoolValue> {
     if (this.fileEnv.getEnv(name) === 'PENDING') {
       if (await this.checkAdminExists()) {
         this.fileEnv.setEnv(name, version);
         this.logger.debug('Datas already initialized!');
-        return false;
+        return { value: false };
       } else {
-        return true;
+        return { value: true };
       }
     }
-    return false;
+    return { value: false };
   }
 
   /**
    * Initialize the datas
    */
-  @MessagePattern(SiteInitPattern.Start)
-  async start(@Payload() payload: SiteInitPayload) {
+  async start({ title, password, email, homeUrl, siteUrl, locale }: StartOptionRequest): Promise<Empty> {
     if (await this.isRequired()) {
       this.logger.debug('Start to initialize datas!');
       try {
@@ -68,10 +73,10 @@ export class SiteInitController {
           users: [
             {
               loginName: this.adminName,
-              loginPwd: md5(payload.password),
+              loginPwd: md5(password),
               niceName: upperFirst(this.adminName),
               displayName: upperFirst(this.adminName),
-              email: payload.email,
+              email: email,
               url: '',
               status: UserStatus.Enabled,
               metas: [
@@ -93,14 +98,14 @@ export class SiteInitController {
             },
           ],
           options: [
-            { optionName: OptionPresetKeys.SiteUrl, optionValue: payload.siteUrl },
-            { optionName: OptionPresetKeys.Home, optionValue: payload.homeUrl },
-            { optionName: OptionPresetKeys.BlogName, optionValue: payload.title },
+            { optionName: OptionPresetKeys.SiteUrl, optionValue: siteUrl },
+            { optionName: OptionPresetKeys.Home, optionValue: homeUrl },
+            { optionName: OptionPresetKeys.BlogName, optionValue: title },
             { optionName: OptionPresetKeys.BlogDescription, optionValue: 'Just another Pomelo site' },
             { optionName: OptionPresetKeys.BlogCharset, optionValue: 'UTF-8' },
             { optionName: OptionPresetKeys.SiteIcon, optionValue: '' },
             { optionName: OptionPresetKeys.UsersCanRegister, optionValue: '0' },
-            { optionName: OptionPresetKeys.AdminEmail, optionValue: payload.email },
+            { optionName: OptionPresetKeys.AdminEmail, optionValue: email },
             {
               optionName: OptionPresetKeys.AdminEmialLifespan,
               optionValue: String(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000),
@@ -162,7 +167,7 @@ export class SiteInitController {
             // 带数据库前缀属性
             {
               optionName: OptionPresetKeys.Locale,
-              optionValue: payload.locale,
+              optionValue: locale,
               nameWithTablePrefix: true,
             },
             {
@@ -208,5 +213,6 @@ export class SiteInitController {
     } else {
       this.logger.debug('Datas lready initialized!');
     }
+    return {};
   }
 }

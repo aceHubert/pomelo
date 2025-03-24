@@ -1,0 +1,748 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "common/shared.proto";
+import "common/meta.proto";
+// import "common/enum.proto";
+
+// /**
+//  * 模板相关枚举定义
+//  */
+// message Template {
+//   /**
+//    * 模板状态枚举
+//    */
+//   enum Status {
+//     Draft = 0 [ (Value) = 'draft' ];     // 草稿
+//     Pending = 1 [ (Value) = 'pending' ]; // 待审核
+//     Publish = 2 [ (Value) = 'publish' ]; // 已发布
+//     Private = 3 [ (Value) = 'private' ]; // 私密
+//     Future = 4 [ (Value) = 'future' ];   // 定时发布
+//     Trash = 5 [ (Value) = 'trash' ];     // 回收站
+//   }
+
+//   /**
+//    * 评论状态枚举
+//    */
+//   enum CommentStatus {
+//     Closed = 0 [ (Value) = 'close' ]; // 关闭评论
+//     Open = 1 [ (Value) = 'open' ];    // 开放评论
+//   }
+// }
+
+/**
+ * 模板模型，表示系统中的内容模板
+ */
+message TemplateModel {
+  // 模板ID
+  int32 id = 1;
+  // 标题
+  string title = 2;
+  // 名称（唯一标识）
+  string name = 3;
+  // 作者ID
+  int32 author = 4;
+  // 内容
+  string content = 5;
+  // 摘要
+  string excerpt = 6;
+  // 模板类型
+  string type = 7;
+  // 状态
+  string status = 8;
+  // 排序
+  int32 order = 9;
+  // 父模板ID
+  optional int32 parent = 10;
+  // 评论状态
+  string commentStatus = 11;
+  // 评论数量
+  int32 commentCount = 12;
+  // 创建时间
+  google.protobuf.Timestamp createdAt = 100;
+  // 更新时间
+  google.protobuf.Timestamp updatedAt = 99;
+}
+
+/**
+ * 获取模板请求
+ */
+message GetTemplateRequest {
+  // 模板ID
+  int32 id = 2;
+  // 模板类型
+  optional string type = 3;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+  // 请求用户ID（权限控制）
+  optional int32 requestUserId = 101;
+}
+
+/**
+ * 根据名称获取模板请求
+ */
+message GetTemplateByNameRequest {
+  // 模板名称
+  string name = 2;
+  // 模板类型
+  optional string type = 3;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+  // 请求用户ID（权限控制）
+  optional int32 requestUserId = 101;
+}
+
+/**
+ * 获取模板响应
+ */
+message GetTemplateResponse {
+  // 模板信息
+  optional TemplateModel template = 1;
+}
+
+/**
+ * 获取模板名称列表请求
+ */
+message GetTemplateNamesRequest {
+  // 模板类型
+  string type = 1;
+}
+
+/**
+ * 获取模板名称列表响应
+ */
+message GetTemplateNamesResponse {
+  // 名称列表
+  repeated string names = 1;
+}
+
+/**
+ * 获取模板选项请求
+ */
+message GetTemplateOptionsRequest {
+  /**
+   * 分类筛选
+   */
+  message Taxonomy {
+    // 分类类型
+    string type = 1;
+    // 分类标识（名称或ID）
+    oneof kind {
+      string name = 2; // 分类名称
+      int32 id = 3;    // 分类ID
+    }
+  }
+  // 分页偏移量
+  optional int32 offset = 1;
+  // 每页数量限制
+  optional int32 limit = 2;
+  // 模板类型
+  string type = 3;
+  // 关键字搜索
+  optional string keyword = 4;
+  // 搜索字段
+  optional string keywordField = 5;
+  // 作者筛选
+  optional int32 author = 6;
+  // 日期筛选
+  optional string date = 7;
+  // 分类筛选列表
+  repeated Taxonomy taxonomies = 9;
+  // 需要返回的字段列表（默认返回id和title）
+  repeated string fields = 100;
+}
+
+/**
+ * 获取模板选项响应
+ */
+message GetTemplateOptionsResponse {
+  /**
+   * 模板选项信息
+   */
+  message TemplateOption {
+    // 模板ID
+    int32 id = 1;
+    // 标题
+    string title = 2;
+    // 名称
+    string name = 3;
+  }
+  // 选项列表
+  repeated TemplateOption options = 1;
+}
+
+/**
+ * 分页获取模板请求
+ */
+message GetPagedTemplateRequest {
+  /**
+   * 分类筛选
+   */
+  message Taxonomy {
+    // 分类类型
+    string type = 1;
+    // 分类标识（名称或ID）
+    oneof kind {
+      string name = 2; // 分类名称
+      int32 id = 3;    // 分类ID
+    }
+  }
+  // 分页偏移量
+  optional int32 offset = 1;
+  // 每页数量限制
+  optional int32 limit = 2;
+  // 模板类型
+  string type = 3;
+  // 关键字搜索
+  optional string keyword = 4;
+  // 搜索字段
+  optional string keywordField = 5;
+  // 作者筛选
+  optional int32 author = 6;
+  // 日期筛选
+  optional string date = 7;
+  // 状态筛选
+  optional string status = 8;
+  // 分类筛选列表
+  repeated Taxonomy taxonomies = 9;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+  // 请求用户ID（权限控制）
+  optional int32 requestUserId = 101;
+}
+
+/**
+ * 分页获取模板响应
+ */
+message GetPagedTemplateResponse {
+  // 模板列表
+  repeated TemplateModel rows = 1;
+  // 总数量
+  int32 total = 2;
+}
+
+/**
+ * 获取个人模板数量请求
+ */
+message GetTemplateSelfCountRequest {
+  // 模板类型
+  string type = 1;
+  // 是否包含回收站状态
+  bool includeTrashStatus = 2;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 获取个人模板数量响应
+ */
+message GetTemplateSelfCountResponse {
+  // 模板总数
+  int32 counts = 1;
+}
+
+/**
+ * 获取每日模板数量请求
+ */
+message GetTemplateCountByDayRequest {
+  // 模板类型
+  string type = 1;
+  // 月份（格式：YYYY-MM）
+  string month = 2;
+}
+
+/**
+ * 获取每日模板数量响应
+ */
+message GetTemplateCountByDayResponse {
+  /**
+   * 日期计数信息
+   */
+  message Counts {
+    // 日期（格式：YYYY-MM-DD）
+    string day = 1;
+    // 数量
+    int32 count = 2;
+  }
+  // 每日统计列表
+  repeated Counts counts = 1;
+}
+
+/**
+ * 获取每月模板数量请求
+ */
+message GetTemplateCountByMonthRequest {
+  // 模板类型
+  string type = 1;
+  // 年份（可选，格式：YYYY）
+  optional string year = 2;
+  // 最近几个月（默认12个月）
+  optional int32 months = 3;
+}
+
+/**
+ * 获取每月模板数量响应
+ */
+message GetTemplateCountByMonthResponse {
+  /**
+   * 月份计数信息
+   */
+  message Counts {
+    // 月份（格式：YYYY-MM）
+    string month = 1;
+    // 数量
+    int32 count = 2;
+  }
+  // 每月统计列表
+  repeated Counts counts = 1;
+}
+
+/**
+ * 获取每年模板数量请求
+ */
+message GetTemplateCountByYearRequest {
+  // 模板类型
+  string type = 1;
+}
+
+/**
+ * 获取每年模板数量响应
+ */
+message GetTemplateCountByYearResponse {
+  /**
+   * 年份计数信息
+   */
+  message Counts {
+    // 年份（格式：YYYY）
+    string year = 1;
+    // 数量
+    int32 count = 2;
+  }
+  // 每年统计列表
+  repeated Counts counts = 1;
+}
+
+/**
+ * 获取各状态模板数量请求
+ */
+message GetTemplateCountByStatusRequest {
+  // 模板类型
+  string type = 1;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 获取各状态模板数量响应
+ */
+message GetTemplateCountByStatusResponse {
+  /**
+   * 状态计数信息
+   */
+  message Counts {
+    // 状态
+    string status = 1;
+    // 数量
+    int32 count = 2;
+  }
+  // 状态统计列表
+  repeated Counts counts = 1;
+}
+
+/**
+ * 获取修订版本数量响应
+ */
+message GetTemplateRevisionCountResponse {
+  // 修订版本总数
+  int32 counts = 1;
+}
+
+/**
+ * 获取修订版本列表请求
+ */
+message GetTemplateRevisionsRquest {
+  // 模板ID
+  int32 id = 1;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 获取修订版本列表响应
+ */
+message GetTemplateRevisionsResponse {
+  // 修订版本列表
+  repeated TemplateModel revisions = 1;
+}
+
+/**
+ * 创建模板请求
+ */
+message CreateTemplateRequest {
+  // 模板名称
+  optional string name = 1;
+  // 标题
+  optional string title = 2;
+  // 内容
+  optional string content = 3;
+  // 摘要
+  string excerpt = 4;
+  // 类型
+  string type = 5;
+  // 状态
+  optional string status = 6;
+  // 评论状态
+  optional string commentStatus = 7;
+  // 元数据列表
+  repeated CreateMetaRequest metas = 8;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 创建预设类型模板请求
+ */
+message CreatePresetTypeTemplateRequest {
+  // 模板名称
+  optional string name = 1;
+  // 标题
+  optional string title = 2;
+  // 内容
+  optional string content = 3;
+  // 摘要（仅用于文章类型）
+  optional string excerpt = 4;
+  // 状态
+  optional string status = 5;
+  // 评论状态
+  optional string commentStatus = 6;
+  // 元数据列表
+  repeated CreateMetaRequest metas = 7;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 创建模板响应
+ */
+message CreateTemplateResponse {
+  // 创建的模板信息
+  TemplateModel template = 1;
+}
+
+/**
+ * 更新模板请求
+ */
+message UpdateTemplateRequest {
+  // 模板ID
+  int32 id = 1;
+  // 名称
+  optional string name = 2;
+  // 标题
+  optional string title = 3;
+  // 内容
+  optional string content = 4;
+  // 摘要
+  optional string excerpt = 5;
+  // 状态
+  optional string status = 6;
+  // 评论状态
+  optional string commentStatus = 7;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 更新模板状态请求
+ */
+message UpdateTemplateStatusRequest {
+  // 模板ID
+  int32 id = 1;
+  // 新状态
+  string status = 2;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 批量更新模板状态请求
+ */
+message BulkUpdateTemplateStatusRequest {
+  // 模板ID列表
+  repeated int32 ids = 1;
+  // 新状态
+  string status = 2;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 更新评论数量请求
+ */
+message UpdateCommentCountRequest {
+  // 模板ID
+  int32 id = 1;
+  // 新的评论数量
+  int32 count = 2;
+}
+
+/**
+ * 更新模板名称请求
+ */
+message UpdateTemplateNameRequest {
+  // 模板ID
+  int32 id = 1;
+  // 新名称
+  string name = 2;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 恢复模板请求
+ */
+message RestoreTemplateRequest {
+  // 模板ID
+  int32 id = 1;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 批量恢复模板请求
+ */
+message BulkRestoreTemplateRequest {
+  // 模板ID列表
+  repeated int32 ids = 1;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 删除模板请求
+ */
+message DeleteTemplateRequest {
+  // 模板ID
+  int32 id = 1;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 批量删除模板请求
+ */
+message BulkDeleteTemplateRequest {
+  // 模板ID列表
+  repeated int32 ids = 1;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 模板元数据模型
+ */
+message TemplateMetaModel {
+  // 元数据ID
+  int32 id = 1;
+  // 模板ID
+  int32 templateId = 2;
+  // 元数据键名
+  string metaKey = 3;
+  // 元数据值
+  optional string metaValue = 4;
+}
+
+/**
+ * 获取模板元数据响应
+ */
+message GetTemplateMetaResponse {
+  // 元数据信息
+  optional TemplateMetaModel meta = 1;
+}
+
+/**
+ * 获取模板元数据列表请求
+ */
+message GetTemplateMetasRequest {
+  /**
+   * 模板ID列表包装
+   */
+  message TemplateIds {
+    // 模板ID列表
+    repeated int32 value = 1;
+  }
+  // 单个模板ID或多个模板ID列表
+  oneof kind {
+    // 单个模板ID
+    int32 templateId = 1;
+    // 多个模板ID列表
+    TemplateIds templateIds = 2;
+  }
+  // 要获取的元数据键名列表
+  repeated string metaKeys = 3;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取模板元数据列表响应
+ */
+message GetTemplateMetasResponse {
+  // 元数据列表
+  repeated TemplateMetaModel metas = 1;
+}
+
+/**
+ * 创建模板元数据请求
+ */
+message CreateTemplateMetaRequest {
+  // 模板ID
+  int32 templateId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 元数据值
+  optional string metaValue = 3;
+}
+
+/**
+ * 创建模板元数据响应
+ */
+message CreateTemplateMetaResponse {
+  // 创建的元数据信息
+  TemplateMetaModel meta = 1;
+}
+
+/**
+ * 批量创建模板元数据请求
+ */
+message CreateTemplateMetasRequest {
+  // 模板ID
+  int32 templateId = 1;
+  // 要创建的元数据列表
+  repeated TemplateMetaModel metas = 3;
+}
+
+/**
+ * 批量创建模板元数据响应
+ */
+message CreateTemplateMetasResponse {
+  // 创建的元数据列表
+  repeated TemplateMetaModel metas = 1;
+}
+
+/**
+ * 通过键名更新模板元数据请求
+ */
+message UpdateTemplateMetaByKeyRequest {
+  // 模板ID
+  int32 templateId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 新的元数据值
+  string metaValue = 3;
+  // 如果不存在是否创建
+  optional bool createIfNotExist = 4;
+}
+
+/**
+ * 通过键名删除模板元数据请求
+ */
+message DeleteTemplateMetaByKeyRequest {
+  // 模板ID
+  int32 templateId = 1;
+  // 要删除的元数据键名
+  string metaKey = 2;
+}
+
+/**
+ * 模板服务接口定义
+ */
+service TemplateService {
+  // 获取单个模板
+  rpc Get(GetTemplateRequest) returns (GetTemplateResponse) {}
+  // 根据名称获取模板
+  rpc GetByName(GetTemplateByNameRequest) returns (GetTemplateResponse) {}
+  // 获取模板选项列表
+  rpc GetOptions(GetTemplateOptionsRequest)
+      returns (GetTemplateOptionsResponse) {}
+  // 获取模板名称列表
+  rpc GetNames(GetTemplateNamesRequest) returns (GetTemplateNamesResponse) {}
+  // 获取个人模板数量
+  rpc GetSelfCount(GetTemplateSelfCountRequest)
+      returns (GetTemplateSelfCountResponse) {}
+  // 获取每日模板数量
+  rpc GetCountByDay(GetTemplateCountByDayRequest)
+      returns (GetTemplateCountByDayResponse) {}
+  // 获取每月模板数量
+  rpc GetCountByMonth(GetTemplateCountByMonthRequest)
+      returns (GetTemplateCountByMonthResponse) {}
+  // 获取每年模板数量
+  rpc GetCountByYear(GetTemplateCountByYearRequest)
+      returns (GetTemplateCountByYearResponse) {}
+  // 获取各状态模板数量
+  rpc GetCountByStatus(GetTemplateCountByStatusRequest)
+      returns (GetTemplateCountByStatusResponse) {}
+  // 分页获取模板列表
+  rpc GetPaged(GetPagedTemplateRequest) returns (GetPagedTemplateResponse) {}
+  // 获取修订版本数量
+  rpc GetRevisionCount(IdRequest) returns (GetTemplateRevisionCountResponse) {}
+  // 获取修订版本列表
+  rpc GetRevisions(GetTemplateRevisionsRquest)
+      returns (GetTemplateRevisionsResponse) {}
+  // 创建新模板
+  rpc Create(CreateTemplateRequest) returns (CreateTemplateResponse) {}
+  // 创建表单模板
+  rpc CreateForm(CreatePresetTypeTemplateRequest)
+      returns (CreateTemplateResponse) {}
+  // 创建页面模板
+  rpc CreatePage(CreatePresetTypeTemplateRequest)
+      returns (CreateTemplateResponse) {}
+  // 创建文章模板
+  rpc CreatePost(CreatePresetTypeTemplateRequest)
+      returns (CreateTemplateResponse) {}
+  // 更新模板
+  rpc Update(UpdateTemplateRequest) returns (google.protobuf.Empty) {}
+  // 更新模板名称
+  rpc UpdateName(UpdateTemplateNameRequest) returns (google.protobuf.Empty) {}
+  // 更新模板状态
+  rpc UpdateStatus(UpdateTemplateStatusRequest)
+      returns (google.protobuf.Empty) {}
+  // 批量更新模板状态
+  rpc BulkUpdateStatus(BulkUpdateTemplateStatusRequest)
+      returns (google.protobuf.Empty) {}
+  // 更新评论数量
+  rpc UpdateCommentCount(UpdateCommentCountRequest)
+      returns (google.protobuf.Empty) {}
+  // 恢复模板
+  rpc Restore(RestoreTemplateRequest) returns (google.protobuf.Empty) {}
+  // 批量恢复模板
+  rpc BulkRestore(BulkRestoreTemplateRequest) returns (google.protobuf.Empty) {}
+  // 删除模板
+  rpc Delete(DeleteTemplateRequest) returns (google.protobuf.Empty) {}
+  // 批量删除模板
+  rpc BulkDelete(BulkDeleteTemplateRequest) returns (google.protobuf.Empty) {}
+  // 获取元数据
+  rpc GetMeta(GetMetaRequest) returns (GetTemplateMetaResponse) {}
+  // 获取元数据列表
+  rpc GetMetas(GetTemplateMetasRequest) returns (GetTemplateMetasResponse) {}
+  // 创建元数据
+  rpc CreateMeta(CreateTemplateMetaRequest)
+      returns (CreateTemplateMetaResponse) {}
+  // 批量创建元数据
+  rpc CreateMetas(CreateTemplateMetasRequest)
+      returns (CreateTemplateMetasResponse) {}
+  // 更新元数据
+  rpc UpdateMeta(UpdateMetaRequest) returns (google.protobuf.Empty) {}
+  // 通过键名更新元数据
+  rpc UpdateMetaByKey(UpdateTemplateMetaByKeyRequest)
+      returns (google.protobuf.Empty) {}
+  // 删除元数据
+  rpc DeleteMeta(DeleteMetaRequest) returns (google.protobuf.Empty) {}
+  // 通过键名删除元数据
+  rpc DeleteMetaByKey(DeleteTemplateMetaByKeyRequest)
+      returns (google.protobuf.Empty) {}
+}

@@ -1,3 +1,4 @@
+export * from './types';
 export * from './options.entity';
 export * from './template.entity';
 export * from './template-meta.entity';

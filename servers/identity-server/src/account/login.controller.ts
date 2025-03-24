@@ -59,8 +59,8 @@ export class LoginController extends BaseController {
       }); // loginPage.xxx or consentPage.x;
     }
 
-    let wrapper: string = '',
-      form: string = '';
+    let wrapper = '',
+      form = '';
 
     const appConfig = this.moduleRef['container'].applicationConfig;
     const primaryColor = clientProperties['primaryColor'] as string;
@@ -337,6 +337,7 @@ export class LoginController extends BaseController {
         }
         </form>`;
     }
+
     res.render(prompt.name, {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
       content: ejs.render(wrapper, {
@@ -484,7 +485,6 @@ export class LoginController extends BaseController {
     @Body('accountId') accountId: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-    @I18n() i18n: I18nContext,
   ) {
     const interaction = await this.ensureInteraction(req, res, returnUrl);
     if (!interaction) return;

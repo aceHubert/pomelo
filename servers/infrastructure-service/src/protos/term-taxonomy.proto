@@ -1,0 +1,418 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/empty.proto";
+import "common/meta.proto";
+
+/**
+ * 分类法模型，用于描述内容的分类体系
+ */
+message TermTaxonomyModel {
+  // 分类ID
+  int32 id = 1;
+  // 分类名称
+  string name = 2;
+  // 别名（URL友好的标识符）
+  string slug = 3;
+  // 分类法类型（如category、tag等）
+  string taxonomy = 4;
+  // 分类描述
+  string description = 5;
+  // 父分类ID（用于层级结构）
+  int32 parentId = 6;
+  // 分组标识
+  int32 group = 7;
+  // 使用计数
+  int32 count = 8;
+}
+
+/**
+ * 分类关系模型，用于描述内容与分类的关联关系
+ */
+message TermRelationshipModel {
+  // 关联对象ID（如文章ID）
+  int32 objectId = 1;
+  // 分类ID
+  int32 termTaxonomyId = 2;
+  // 排序顺序
+  int32 order = 3;
+}
+
+/**
+ * 获取分类请求
+ */
+message GetTermTaxonomyRequest {
+  // 分类ID
+  int32 id = 1;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取分类响应
+ */
+message GetTermTaxonomyResponse {
+  // 分类信息
+  optional TermTaxonomyModel termTaxonomy = 1;
+}
+
+/**
+ * 获取分类列表请求
+ */
+message GetTermTaxonomiesRequest {
+  // 分类法类型
+  string taxonomy = 1;
+  // 父分类ID筛选
+  optional int32 parentId = 2;
+  // 关键字搜索
+  optional string keyword = 3;
+  // 分组筛选
+  optional int32 group = 4;
+  // 排除的分类ID列表
+  repeated int32 excludes = 5;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取分类列表响应
+ */
+message GetTermTaxonomiesResponse {
+  // 分类列表
+  repeated TermTaxonomyModel termTaxonomies = 1;
+}
+
+/**
+ * 根据父分类ID批量获取子分类请求
+ */
+message GetTermTaxonomiesByParentIdsRequest {
+  // 父分类ID列表
+  repeated int32 parentIds = 1;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 根据父分类ID批量获取子分类响应
+ */
+message GetTermTaxonomiesByParentIdsResponse {
+  /**
+   * 父分类及其子分类信息
+   */
+  message ParentIdTermTaxonomies {
+    // 父分类ID
+    int32 parentId = 1;
+    // 子分类列表
+    repeated TermTaxonomyModel value = 2;
+  }
+  // 按父分类分组的子分类列表
+  repeated ParentIdTermTaxonomies termTaxonomies = 1;
+}
+
+/**
+ * 根据对象ID批量获取关联分类请求
+ */
+message GetTermTaxonomiesByObjectIdsRequest {
+  // 分类法类型
+  string taxonomy = 1;
+  // 对象ID列表（如文章ID列表）
+  repeated int32 objectIds = 2;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 根据对象ID批量获取关联分类响应
+ */
+message GetTermTaxonomiesByObjectIdsResponse {
+  /**
+   * 对象及其关联分类信息
+   */
+  message ObjectIdTermTaxonomies {
+    // 对象ID
+    int32 objectId = 1;
+    // 关联的分类列表
+    repeated TermTaxonomyModel value = 2;
+  }
+  // 按对象分组的分类列表
+  repeated ObjectIdTermTaxonomies termTaxonomies = 1;
+}
+
+/**
+ * 获取单个对象的关联分类请求
+ */
+message GetTermTaxonomiesByObjectIdRequest {
+  // 分类法类型
+  string taxonomy = 1;
+  // 对象ID
+  int32 objectId = 2;
+  // 父分类ID筛选
+  optional int32 parentId = 3;
+  // 分组筛选
+  optional int32 group = 4;
+  // 是否降序排序
+  optional bool desc = 5;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取单个对象的关联分类响应
+ */
+message GetTermTaxonomiesByObjectIdResponse {
+  // 关联的分类列表
+  repeated TermTaxonomyModel termTaxonomies = 1;
+}
+
+/**
+ * 创建分类请求
+ */
+message CreateTermTaxonomyRequest {
+  // 分类名称
+  string name = 1;
+  // 别名（可选）
+  optional string slug = 2;
+  // 分类法类型
+  string taxonomy = 3;
+  // 分类描述
+  string description = 4;
+  // 父分类ID
+  optional int32 parentId = 5;
+  // 分组标识
+  optional int32 group = 6;
+  // 关联的对象ID
+  optional int32 objectId = 7;
+}
+
+/**
+ * 创建分类响应
+ */
+message CreateTermTaxonomyResponse {
+  // 创建的分类信息
+  TermTaxonomyModel termTaxonomy = 1;
+}
+
+/**
+ * 创建分类关系请求
+ */
+message CreateRelationshipRequest {
+  // 对象ID
+  int32 objectId = 1;
+  // 分类ID
+  int32 termTaxonomyId = 2;
+  // 排序顺序
+  optional int32 order = 3;
+}
+
+/**
+ * 创建分类关系响应
+ */
+message CreateRelationshipResponse {
+  // 创建的关系信息
+  TermRelationshipModel relationship = 1;
+}
+
+/**
+ * 更新分类请求
+ */
+message UpdateTermTaxonomyRequest {
+  // 分类ID
+  int32 id = 1;
+  // 分类名称
+  optional string name = 2;
+  // 别名
+  optional string slug = 3;
+  // 分类描述
+  optional string description = 4;
+  // 父分类ID
+  optional int32 parentId = 5;
+  // 分组标识
+  optional int32 group = 6;
+}
+
+/**
+ * 删除分类关系请求
+ */
+message DeleteRelationshipRequest {
+  // 对象ID
+  int32 objectId = 1;
+  // 分类ID
+  int32 termTaxonomyId = 2;
+}
+
+/**
+ * 删除分类请求
+ */
+message DeleteTermTaxonomyRequest {
+  // 分类ID
+  int32 id = 1;
+}
+
+/**
+ * 批量删除分类请求
+ */
+message BulkDeleteTermTaxonomyRequest {
+  // 分类ID列表
+  repeated int32 ids = 1;
+}
+
+/**
+ * 分类元数据模型
+ */
+message TermTaxonomyMetaModel {
+  // 元数据ID
+  int32 id = 1;
+  // 分类ID
+  int32 termTaxonomyId = 2;
+  // 元数据键名
+  string metaKey = 3;
+  // 元数据值
+  optional string metaValue = 4;
+}
+
+/**
+ * 获取分类元数据响应
+ */
+message GetTermTaxonomyMetaResponse {
+  // 元数据信息
+  optional TermTaxonomyMetaModel meta = 1;
+}
+
+/**
+ * 获取分类元数据列表请求
+ */
+message GetTermTaxonomyMetasRequest {
+  /**
+   * 分类ID列表包装
+   */
+  message TermTaxonomyIds {
+    // 分类ID列表
+    repeated int32 value = 1;
+  }
+  // 单个分类ID或分类ID列表
+  oneof kind {
+    // 单个分类ID
+    int32 termTaxonomyId = 1;
+    // 多个分类ID列表
+    TermTaxonomyIds termTaxonomyIds = 2;
+  }
+  // 要获取的元数据键名列表
+  repeated string metaKeys = 3;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取分类元数据列表响应
+ */
+message GetTermTaxonomyMetasResponse {
+  // 元数据列表
+  repeated TermTaxonomyMetaModel metas = 1;
+}
+
+/**
+ * 创建分类元数据请求
+ */
+message CreateTermTaxonomyMetaRequest {
+  // 分类ID
+  int32 termTaxonomyId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 元数据值
+  optional string metaValue = 3;
+}
+
+/**
+ * 创建分类元数据响应
+ */
+message CreateTermTaxonomyMetaResponse {
+  // 创建的元数据信息
+  TermTaxonomyMetaModel meta = 1;
+}
+
+/**
+ * 批量创建分类元数据请求
+ */
+message CreateTermTaxonomyMetasRequest {
+  // 分类ID
+  int32 termTaxonomyId = 1;
+  // 要创建的元数据列表
+  repeated TermTaxonomyMetaModel metas = 3;
+}
+
+/**
+ * 批量创建分类元数据响应
+ */
+message CreateTermTaxonomyMetasResponse {
+  // 创建的元数据列表
+  repeated TermTaxonomyMetaModel metas = 1;
+}
+
+/**
+ * 通过键名更新分类元数据请求
+ */
+message UpdateTermTaxonomyMetaByKeyRequest {
+  // 分类ID
+  int32 termTaxonomyId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 新的元数据值
+  string metaValue = 3;
+  // 如果不存在是否创建
+  optional bool createIfNotExist = 4;
+}
+
+/**
+ * 通过键名删除分类元数据请求
+ */
+message DeleteTermTaxonomyMetaByKeyRequest {
+  // 分类ID
+  int32 termTaxonomyId = 1;
+  // 要删除的元数据键名
+  string metaKey = 2;
+}
+
+/**
+ * 分类服务接口定义
+ */
+service TermTaxonomyService {
+  // 获取单个分类
+  rpc Get(GetTermTaxonomyRequest) returns (GetTermTaxonomyResponse) {}
+  // 获取分类列表
+  rpc GetList(GetTermTaxonomiesRequest) returns (GetTermTaxonomiesResponse) {}
+  // 根据父分类ID获取子分类列表
+  rpc GetListByParentIds(GetTermTaxonomiesByParentIdsRequest) returns (GetTermTaxonomiesByParentIdsResponse) {}
+  // 根据对象ID获取关联分类列表
+  rpc GetListByObjectIds(GetTermTaxonomiesByObjectIdsRequest) returns (GetTermTaxonomiesByObjectIdsResponse) {}
+  // 获取单个对象的关联分类列表
+  rpc GetListByObjectId(GetTermTaxonomiesByObjectIdRequest) returns (GetTermTaxonomiesByObjectIdResponse) {}
+  // 创建新分类
+  rpc Create(CreateTermTaxonomyRequest) returns (CreateTermTaxonomyResponse) {}
+  // 创建分类关系
+  rpc CreateRelationship(CreateRelationshipRequest) returns (CreateRelationshipResponse) {}
+  // 更新分类
+  rpc Update(UpdateTermTaxonomyRequest) returns (google.protobuf.Empty) {}
+  // 删除分类关系
+  rpc DeleteRelationship(DeleteRelationshipRequest) returns (google.protobuf.Empty) {}
+  // 删除分类
+  rpc Delete(DeleteTermTaxonomyRequest) returns (google.protobuf.Empty) {}
+  // 批量删除分类
+  rpc BulkDelete(BulkDeleteTermTaxonomyRequest) returns (google.protobuf.Empty) {}
+  // 获取元数据
+  rpc GetMeta(GetMetaRequest) returns (GetTermTaxonomyMetaResponse) {}
+  // 获取元数据列表
+  rpc GetMetas(GetTermTaxonomyMetasRequest) returns (GetTermTaxonomyMetasResponse) {}
+  // 创建元数据
+  rpc CreateMeta(CreateTermTaxonomyMetaRequest) returns (CreateTermTaxonomyMetaResponse) {}
+  // 批量创建元数据
+  rpc CreateMetas(CreateTermTaxonomyMetasRequest) returns (CreateTermTaxonomyMetasResponse) {}
+  // 更新元数据
+  rpc UpdateMeta(UpdateMetaRequest) returns (google.protobuf.Empty) {}
+  // 通过键名更新元数据
+  rpc UpdateMetaByKey(UpdateTermTaxonomyMetaByKeyRequest) returns (google.protobuf.Empty) {}
+  // 删除元数据
+  rpc DeleteMeta(DeleteMetaRequest) returns (google.protobuf.Empty) {}
+  // 通过键名删除元数据
+  rpc DeleteMetaByKey(DeleteTermTaxonomyMetaByKeyRequest) returns (google.protobuf.Empty) {}
+}

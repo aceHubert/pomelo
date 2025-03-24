@@ -1,46 +1,70 @@
-import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { LinkPattern } from '@ace-pomelo/shared/server';
-import { LinkDataSource, LinkModel, PagedLinkModel } from '../datasource/index';
-import { NewLinkPayload, UpdateLinkPayload, PagedLinkQueryPayload } from './payload/link.payload';
+import { Controller } from '@nestjs/common';
+import { LinkTarget } from '@ace-pomelo/shared/server';
+import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
+import {
+  LinkServiceControllerMethods,
+  LinkServiceController,
+  GetLinkRequest,
+  GetLinkResponse,
+  GetPagedLinkRequest,
+  GetPagedLinkResponse,
+  CreateLinkRequest,
+  CreateLinkResponse,
+  UpdateLinkRequest,
+  DeleteLinkRequest,
+} from '@ace-pomelo/shared/server/proto-ts/link';
+import { WrapperLinkVisible, WrapperLinkTarget } from '@/common/utils/wrapper-enum.util';
+import { LinkDataSource } from '../datasource';
 
 @Controller()
-export class LinkController {
+@LinkServiceControllerMethods()
+export class LinkController implements LinkServiceController {
   constructor(private readonly linkDataSource: LinkDataSource) {}
 
-  @MessagePattern(LinkPattern.Get)
-  get(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<LinkModel | undefined> {
-    return this.linkDataSource.get(id, fields);
+  get({ fields, id }: GetLinkRequest): Promise<GetLinkResponse> {
+    return this.linkDataSource.get(id, fields).then((result) => {
+      return { link: result };
+    });
   }
 
-  @MessagePattern(LinkPattern.GetPaged)
-  getPaged(
-    @Payload('query') query: PagedLinkQueryPayload,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<PagedLinkModel> {
+  getPaged({ fields, ...query }: GetPagedLinkRequest): Promise<GetPagedLinkResponse> {
     return this.linkDataSource.getPaged(query, fields);
   }
 
-  @MessagePattern(LinkPattern.Create)
-  create(@Payload() payload: NewLinkPayload): Promise<LinkModel> {
-    const { requestUserId, ...model } = payload;
-    return this.linkDataSource.create(model, requestUserId);
+  create({ requestUserId, ...model }: CreateLinkRequest): Promise<CreateLinkResponse> {
+    return this.linkDataSource
+      .create(
+        {
+          ...model,
+          visible: WrapperLinkVisible.asValueOrDefault(model.visible, void 0),
+          target: WrapperLinkTarget.asValueOrDefault(model.target, LinkTarget.Blank),
+        },
+        requestUserId,
+      )
+      .then((result) => {
+        return { link: result };
+      });
   }
 
-  @MessagePattern(LinkPattern.Update)
-  update(@Payload() payload: UpdateLinkPayload): Promise<void> {
-    const { id, requestUserId, ...model } = payload;
-    return this.linkDataSource.update(id, model, requestUserId);
+  update({ id, requestUserId, ...model }: UpdateLinkRequest): Promise<Empty> {
+    return this.linkDataSource
+      .update(
+        id,
+        {
+          ...model,
+          visible: WrapperLinkVisible.asValueOrDefault(model.visible, void 0),
+          target: WrapperLinkTarget.asValueOrDefault(model.target, void 0),
+        },
+        requestUserId,
+      )
+      .then(() => {
+        return {};
+      });
   }
 
-  @MessagePattern(LinkPattern.Delete)
-  async delete(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.linkDataSource.delete(id, requestUserId);
+  async delete({ id, requestUserId }: DeleteLinkRequest): Promise<Empty> {
+    return this.linkDataSource.delete(id, requestUserId).then(() => {
+      return {};
+    });
   }
 }

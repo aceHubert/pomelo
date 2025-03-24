@@ -1,6 +1,6 @@
 import { Optional, DataTypes } from 'sequelize';
-import { MediaMetaPresetKeys } from '@ace-pomelo/shared/server';
 import { MediaAttributes, MediaCreationAttributes } from '../../entities/medias.entity';
+import { MediaMetaPresetKeys } from '../../entities/media-meta.entity';
 import { Model } from '../model/model';
 import { MediaMeta } from './media-meta.entity';
 

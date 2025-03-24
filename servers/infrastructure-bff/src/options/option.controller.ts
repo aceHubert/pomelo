@@ -13,8 +13,9 @@ import {
   ParseIntPipe,
   Res,
   HttpStatus,
+  OnModuleInit,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
@@ -25,9 +26,9 @@ import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   RequestUser,
-  INFRASTRUCTURE_SERVICE,
-  OptionPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import { OptionServiceClient, OPTION_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/option';
 import { OptionAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
 import { OptionQueryDto } from './dto/option-query.dto';
@@ -38,9 +39,15 @@ import { OptionResp } from './resp/option.resp';
 @ApiTags('options')
 @Authorized()
 @Controller('api/options')
-export class OptionController extends BaseController {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) private readonly basicService: ClientProxy) {
+export class OptionController extends BaseController implements OnModuleInit {
+  private optionServiceClient!: OptionServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
     super();
+  }
+
+  onModuleInit() {
+    this.optionServiceClient = this.client.getService<OptionServiceClient>(OPTION_SERVICE_NAME);
   }
 
   /**
@@ -53,9 +60,9 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: {} }, 'AutoloadOptionsModelsSuccessResp'),
   })
   async getAutoloadOptions() {
-    const result = await this.basicService.send<Record<string, string>>(OptionPattern.GetAutoloads, {}).lastValue();
+    const { options } = await this.optionServiceClient.getAutoloads({}).lastValue();
     return this.success({
-      data: result,
+      data: options,
     });
   }
 
@@ -70,17 +77,18 @@ export class OptionController extends BaseController {
   })
   @ApiNoContentResponse({ description: 'Option not found' })
   async get(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res: Response) {
-    const result = await this.basicService
-      .send<OptionResp | undefined>(OptionPattern.Get, {
+    const { option } = await this.optionServiceClient
+      .get({
         id,
         fields: ['id', 'optionName', 'optionValue', 'autoload'],
       })
       .lastValue();
-    if (result === undefined) {
+
+    if (!option) {
       res.status(HttpStatus.NO_CONTENT);
     }
     return this.success({
-      data: result,
+      data: option,
     });
   }
 
@@ -95,17 +103,15 @@ export class OptionController extends BaseController {
   })
   @ApiNoContentResponse({ description: 'Option not found' })
   async getByName(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
-    const result = await this.basicService
-      .send<OptionResp | undefined>(OptionPattern.GetByName, {
-        optionName: name,
-        fields: ['id', 'optionName', 'optionValue', 'autoload'],
-      })
+    const { option } = await this.optionServiceClient
+      .getByName({ optionName: name, fields: ['id', 'optionName', 'optionValue', 'autoload'] })
       .lastValue();
-    if (result === undefined) {
+
+    if (!option) {
       res.status(HttpStatus.NO_CONTENT);
     }
     return this.success({
-      data: result,
+      data: option,
     });
   }
 
@@ -124,16 +130,17 @@ export class OptionController extends BaseController {
   })
   @ApiNoContentResponse({ description: 'Option not found' })
   async getValue(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
-    const value = await this.basicService
-      .send<string | undefined>(OptionPattern.GetValue, {
+    const { optionValue } = await this.optionServiceClient
+      .getValue({
         optionName: name,
       })
       .lastValue();
-    if (value === undefined) {
+
+    if (optionValue === undefined) {
       res.status(HttpStatus.NO_CONTENT);
     }
     return this.success({
-      data: value,
+      data: optionValue,
     });
   }
 
@@ -148,14 +155,15 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: [OptionResp] }, 'OptionModelsSuccessResp'),
   })
   async getList(@Query(ParseQueryPipe) query: OptionQueryDto) {
-    const result = await this.basicService
-      .send<OptionResp[]>(OptionPattern.GetList, {
-        query,
+    const { options } = await this.optionServiceClient
+      .getList({
+        ...query,
+        optionNames: query.optionNames ? { value: query.optionNames } : undefined,
         fields: ['id', 'optionName', 'optionValue', 'autoload'],
       })
       .lastValue();
     return this.success({
-      data: result,
+      data: options,
     });
   }
 
@@ -171,7 +179,7 @@ export class OptionController extends BaseController {
   })
   async clearCache() {
     try {
-      await this.basicService.send<void>(OptionPattern.Reset, {}).lastValue();
+      await this.optionServiceClient.reset({}).lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -190,14 +198,14 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
   })
   async create(@Body() input: NewOptionDto, @User() requestUser: RequestUser) {
-    const result = await this.basicService
-      .send<OptionResp>(OptionPattern.Create, {
+    const { option } = await this.optionServiceClient
+      .create({
         ...input,
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
     return this.success({
-      data: result,
+      data: option,
     });
   }
 
@@ -217,8 +225,8 @@ export class OptionController extends BaseController {
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(OptionPattern.Update, {
+      await this.optionServiceClient
+        .update({
           ...input,
           id,
           requestUserId: Number(requestUser.sub),
@@ -243,8 +251,8 @@ export class OptionController extends BaseController {
   })
   async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
     try {
-      await this.basicService
-        .send<void>(OptionPattern.Delete, {
+      await this.optionServiceClient
+        .delete({
           id,
           requestUserId: Number(requestUser.sub),
         })

@@ -112,31 +112,18 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
   }
 
   /**
-   * 根据实体 ID 获取元数据
-   * 如果 metaKeys 为空或长度为0，则会返回所有非私有（$前缀）的的数据
-   * @param modelId 实体 Id
-   * @param metaKeys meta keys(不需要添加 table 前缀会自动匹配到带有前缀的数据, ALL 为所有)
+   * 根据实体 Id(s) 获取元数据
+   * @param modelIdOrIds 实体 Id 或 Id 数组
+   * @param metaKeys meta keys(不需要添加 table 前缀会自动匹配到带有前缀的数据, 为空或长度为0，则会返回所有非私有（$前缀）的的数据)
    * @param fields 返回字段
    */
-  getMetas(modelId: number, metaKeys: string[] | undefined, fields: string[]): Promise<MetaReturnType[]>;
-  /**
-   * 根据实体 id 数组获取元数据，返回对象
-   * @param modelId 实体 Id 数组
-   * @param metaKeys 过滤的字段(不需要添加 table 前缀会自动匹配到带有前缀的数据, ALL 为所有)
-   * @param fields 返回字段
-   */
-  getMetas(
-    modelId: number[],
-    metaKeys: string[] | undefined,
-    fields: string[],
-  ): Promise<Record<number, MetaReturnType[]>>;
   getMetas(
     modelIdOrIds: number | number[],
     metaKeys: string[] | undefined,
     fields: string[],
-  ): Promise<MetaReturnType[] | Record<string, MetaReturnType[]>> {
-    // 用于在查询多个Id的情况下后面的分组
-    if (!fields.includes(this.metaModelIdFieldName)) {
+  ): Promise<MetaReturnType[]> {
+    // 如果是数组返回实体 Id 字段
+    if (Array.isArray(modelIdOrIds)) {
       fields.push(this.metaModelIdFieldName);
     }
     return this.metaModel
@@ -161,25 +148,13 @@ export abstract class MetaDataSource<MetaReturnType extends MetaModel, NewMetaIn
         },
       })
       .then((metas) => {
-        const format = (meta: Model<MetaModel>) => {
+        return metas.map((meta: Model<MetaModel>) => {
           const { metaKey, ...rest } = meta.toJSON();
           return {
             ...rest,
             metaKey: this.fixMetaKey(metaKey),
           } as unknown as MetaReturnType;
-        };
-        if (Array.isArray(modelIdOrIds)) {
-          return metas.reduce((prev, curr) => {
-            const key = (curr as any)[this.metaModelIdFieldName] as number;
-            if (!prev[key]) {
-              prev[key] = [];
-            }
-            prev[key].push(format(curr));
-            return prev;
-          }, {} as Record<number, MetaReturnType[]>);
-        } else {
-          return metas.map(format);
-        }
+        });
       });
   }
 

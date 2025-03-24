@@ -14,8 +14,11 @@ import {
   ParseArrayPipe,
   Res,
   HttpStatus,
+  OnModuleInit,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   createResponseSuccessType,
   ApiAuthCreate,
@@ -23,16 +26,19 @@ import {
   ValidatePayloadExistsPipe,
   User,
   RequestUser,
+  TemplateStatus,
   TemplatePresetType,
   TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  TemplatePattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
-import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
+import {
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceClient,
+  GetTemplateOptionsRequest,
+  GetPagedTemplateRequest,
+} from '@ace-pomelo/shared/server/proto-ts/template';
 import { FormTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
-import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { PagedFormTemplateQueryDto, FormTemplateOptionQueryDto } from './dto/template-query.dto';
 import { NewFormTemplateDto } from './dto/new-template.dto';
 import {
@@ -49,9 +55,15 @@ import { UpdateFormTemplateDto } from './dto/update-template.dto';
 @ApiTags('templates/form')
 @Authorized()
 @Controller({ path: 'api/template/forms', scope: Scope.REQUEST })
-export class FormTemplateController extends BaseController {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+export class FormTemplateController extends BaseController implements OnModuleInit {
+  private templateServiceClient!: TemplateServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
     super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
   }
 
   /**
@@ -65,29 +77,29 @@ export class FormTemplateController extends BaseController {
   })
   async getOptions(@Query(ParseQueryPipe) query: FormTemplateOptionQueryDto) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.basicService
-      .send<FormTemplateOptionResp[]>(TemplatePattern.GetOptions, {
-        query: {
-          ...restQuery,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const { options } = await this.templateServiceClient
+      .getOptions({
+        ...restQuery,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetTemplateOptionsRequest['taxonomies'],
         type: TemplatePresetType.Form,
+        fields: ['id', 'name', 'title'],
       })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: options,
     });
   }
 
@@ -114,8 +126,8 @@ export class FormTemplateController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.basicService
-      .send<FormTemplateModelResp | undefined>(TemplatePattern.Get, {
+    const { template } = await this.templateServiceClient
+      .get({
         id,
         type: TemplatePresetType.Form,
         fields: ['id', 'title', 'author', 'content', 'status', 'updatedAt', 'createdAt'],
@@ -124,23 +136,23 @@ export class FormTemplateController extends BaseController {
       .lastValue();
 
     let metas;
-    if (result) {
-      metas = await this.basicService
-        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
-          templateId: result.id,
+    if (template && metaKeys?.length) {
+      ({ metas } = await this.templateServiceClient
+        .getMetas({
+          templateId: template.id,
           metaKeys,
           fields: ['id', 'metaKey', 'metaValue'],
         })
-        .lastValue();
+        .lastValue());
     }
 
-    if (result === undefined) {
+    if (!template) {
       res.status(HttpStatus.NO_CONTENT);
     }
 
     return this.success({
       data: {
-        ...result,
+        ...template,
         metas,
       },
     });
@@ -157,24 +169,22 @@ export class FormTemplateController extends BaseController {
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedFormTemplateQueryDto, @User() requestUser: RequestUser) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.basicService
-      .send<PagedFormTemplateResp>(TemplatePattern.GetPaged, {
-        query: {
-          ...restQuery,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const templates = await this.templateServiceClient
+      .getPaged({
+        ...restQuery,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetPagedTemplateRequest['taxonomies'],
         type: TemplatePresetType.Form,
         fields: ['id', 'title', 'author', 'status', 'updatedAt', 'createdAt'],
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
@@ -182,7 +192,7 @@ export class FormTemplateController extends BaseController {
       .lastValue();
 
     return this.success({
-      data: result,
+      data: templates,
     });
   }
 
@@ -197,12 +207,20 @@ export class FormTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: FormTemplateModelResp }, 'FormTemplateModelSuccessResp'),
   })
   async create(@Body() input: NewFormTemplateDto, @User() requestUser: RequestUser) {
-    const { id, title, author, content, status, updatedAt, createdAt } = await this.basicService
-      .send<FormTemplateModelResp>(TemplatePattern.CreateForm, {
+    const {
+      template: { id, title, author, content, status, updatedAt, createdAt },
+    } = await this.templateServiceClient
+      .createForm({
         ...input,
+        metas: [],
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
+
+    if (status === TemplateStatus.Pending) {
+      // TODO: send WS message to admin to review
+    }
+
     return this.success({
       data: {
         id,
@@ -232,34 +250,22 @@ export class FormTemplateController extends BaseController {
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.UpdateForm, {
+      await this.templateServiceClient
+        .update({
           ...input,
           id,
           requestUserId: Number(requestUser.sub),
         })
         .lastValue();
+
+      if (input.status === TemplateStatus.Pending) {
+        // TODO: send WS message to admin to review
+      }
+
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
       return this.faild(e.message);
     }
   }
-
-  /**
-   * Delete form template permanently
-   */
-  // @Delete(':id')
-  // @RamAuthorized(FormTemplateAction.Delete)
-  // @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  // @ApiOkResponse({
-  //   description: 'no data content',
-  //   type: () => createResponseSuccessType({}, 'DeleteFormTemplateSuccessResp'),
-  // })
-  // @ApiUnauthorizedResponse()
-  // @ApiForbiddenResponse()
-  // async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
-  //   await this.templateDataSource.delete(id, requestUser);
-  //   return this.success();
-  // }
 }

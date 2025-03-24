@@ -12,4 +12,9 @@ export class OptionArgs extends OptionArgsValidator {
    */
   @Field((type) => OptionAutoload)
   autoload?: OptionAutoload;
+
+  /**
+   * Option names to query
+   */
+  optionNames?: string[];
 }

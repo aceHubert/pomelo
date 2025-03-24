@@ -1,6 +1,6 @@
 import { Optional, DataTypes } from 'sequelize';
 import { TemplateStatus, TemplatePresetType, TemplateCommentStatus } from '@ace-pomelo/shared/server';
-import { TemplateAttributes, TemplateCreationAttributes } from '../../entities/template.entity';
+import { TemplateAttributes, TemplateCreationAttributes, TemplateInnerStatus } from '../../entities/template.entity';
 import { Model } from '../model/model';
 import { TemplateMeta } from './template-meta.entity';
 import { TermRelationships } from './term-relationships.entity';
@@ -19,7 +19,7 @@ export class Templates extends Model<
   public content!: string;
   public excerpt!: string;
   public type!: string;
-  public status!: TemplateStatus;
+  public status!: TemplateStatus | TemplateInnerStatus;
   public order!: number;
   public parent?: number;
   public commentStatus!: TemplateCommentStatus;

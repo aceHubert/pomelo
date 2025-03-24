@@ -12,8 +12,9 @@ import {
   Delete,
   ParseIntPipe,
   HttpStatus,
+  OnModuleInit,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Anonymous, Authorized } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
@@ -23,10 +24,13 @@ import {
   ApiAuthCreate,
   TermPresetTaxonomy,
   OptionPresetKeys,
-  INFRASTRUCTURE_SERVICE,
-  OptionPattern,
-  TermTaxonomyPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import {
+  TermTaxonomyServiceClient,
+  TERM_TAXONOMY_SERVICE_NAME,
+} from '@ace-pomelo/shared/server/proto-ts/term-taxonomy';
+import { OptionServiceClient, OPTION_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/option';
 import { TermTaxonomyAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
 import { NewTermTaxonomyMetaDto } from './dto/new-term-taxonomy-meta.dto';
@@ -46,11 +50,8 @@ import {
 @ApiTags('term-taxonomy')
 @Authorized()
 @Controller({ path: 'api/taxonoies', scope: Scope.REQUEST })
-export class TermTaxonomyController extends createMetaController(
-  'termTaxonomy',
-  TermTaxonomyMetaModelResp,
-  NewTermTaxonomyMetaDto,
-  {
+export class TermTaxonomyController
+  extends createMetaController('termTaxonomy', TermTaxonomyMetaModelResp, NewTermTaxonomyMetaDto, {
     authDecorator: (method) => {
       const ramAction =
         method === 'getMeta'
@@ -67,10 +68,23 @@ export class TermTaxonomyController extends createMetaController(
         ? [RamAuthorized(ramAction), Anonymous()]
         : [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
     },
-  },
-) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  })
+  implements OnModuleInit
+{
+  private termTaxonomyServiceClient!: TermTaxonomyServiceClient;
+  private optionServiceClient!: OptionServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
+    super();
+  }
+
+  onModuleInit() {
+    this.termTaxonomyServiceClient = this.client.getService<TermTaxonomyServiceClient>(TERM_TAXONOMY_SERVICE_NAME);
+    this.optionServiceClient = this.client.getService<OptionServiceClient>(OPTION_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.termTaxonomyServiceClient;
   }
 
   /**
@@ -84,24 +98,26 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
   })
   async getCategoryList(@Query(ParseQueryPipe) query: CategoryTermTaxonomyQueryDto) {
-    let excludes: number[] | undefined;
+    let excludes: number[] = [];
     if (query.includeDefault !== true) {
-      const defaultCategoryId = await this.basicService
-        .send<string>(OptionPattern.GetValue, {
+      const { optionValue: defaultCategoryId } = await this.optionServiceClient
+        .getValue({
           optionName: OptionPresetKeys.DefaultCategory,
         })
         .lastValue();
       excludes = [Number(defaultCategoryId)];
     }
-    const result = await this.basicService
-      .send<TermTaxonomyModelResp[]>(TermTaxonomyPattern.GetList, {
-        query: { ...query, excludes, taxonomy: TermPresetTaxonomy.Category },
+    const { termTaxonomies } = await this.termTaxonomyServiceClient
+      .getList({
+        ...query,
+        excludes,
+        taxonomy: TermPresetTaxonomy.Category,
         fields: ['id', 'name', 'slug', 'description', 'parentId', 'group', 'count'],
       })
       .lastValue();
 
     return this.success({
-      data: result,
+      data: termTaxonomies,
     });
   }
 
@@ -116,14 +132,16 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
   })
   async getTagList(@Query(ParseQueryPipe) query: TagTermTaxonomyQueryDto) {
-    const result = await this.basicService
-      .send<TermTaxonomyModelResp[]>(TermTaxonomyPattern.GetList, {
-        query: { ...query, taxonomy: TermPresetTaxonomy.Tag },
+    const { termTaxonomies } = await this.termTaxonomyServiceClient
+      .getList({
+        ...query,
+        excludes: [],
+        taxonomy: TermPresetTaxonomy.Tag,
         fields: ['id', 'name', 'slug', 'description', 'parentId', 'group', 'count'],
       })
       .lastValue();
     return this.success({
-      data: result,
+      data: termTaxonomies,
     });
   }
 
@@ -138,15 +156,16 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: [TermTaxonomyModelResp] }),
   })
   async getList(@Query(ParseQueryPipe) query: TermTaxonomyQueryDto) {
-    const result = await this.basicService
-      .send<TermTaxonomyModelResp[]>(TermTaxonomyPattern.GetList, {
-        query,
+    const { termTaxonomies } = await this.termTaxonomyServiceClient
+      .getList({
+        ...query,
+        excludes: query.exclude || [],
         fields: ['id', 'name', 'slug', 'taxonomy', 'description', 'parentId', 'group', 'count'],
       })
       .lastValue();
 
     return this.success({
-      data: result,
+      data: termTaxonomies,
     });
   }
 
@@ -160,15 +179,15 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: TermTaxonomyModelResp }),
   })
   async get(@Param('id', ParseIntPipe) id: number) {
-    const result = await this.basicService
-      .send<TermTaxonomyModelResp | undefined>(TermTaxonomyPattern.Get, {
+    const { termTaxonomy } = await this.termTaxonomyServiceClient
+      .get({
         id,
         fields: ['id', 'name', 'slug', 'taxonomy', 'description', 'parentId', 'group', 'count'],
       })
       .lastValue();
 
     return this.success({
-      data: result,
+      data: termTaxonomy,
     });
   }
 
@@ -183,10 +202,10 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: TermTaxonomyModelResp }),
   })
   async create(@Body() input: NewTermTaxonomyDto) {
-    const result = await this.basicService.send<TermTaxonomyModelResp>(TermTaxonomyPattern.Create, input).lastValue();
+    const { termTaxonomy } = await this.termTaxonomyServiceClient.create(input).lastValue();
 
     return this.success({
-      data: result,
+      data: termTaxonomy,
     });
   }
 
@@ -201,12 +220,12 @@ export class TermTaxonomyController extends createMetaController(
     type: () => createResponseSuccessType({ data: TermRelationshipModelResp }),
   })
   async createRelationship(@Param('id', ParseIntPipe) termTaxonomyId: number, @Param('objectId') objectId: number) {
-    const result = await this.basicService
-      .send<TermRelationshipModelResp>(TermTaxonomyPattern.CreateRelationship, { termTaxonomyId, objectId })
+    const { relationship } = await this.termTaxonomyServiceClient
+      .createRelationship({ termTaxonomyId, objectId })
       .lastValue();
 
     return this.success({
-      data: result,
+      data: relationship,
     });
   }
 
@@ -222,7 +241,7 @@ export class TermTaxonomyController extends createMetaController(
   })
   async update(@Param('id', ParseIntPipe) id: number, @Body(ValidatePayloadExistsPipe) input: UpdateTermTaxonomyDto) {
     try {
-      await this.basicService.send<void>(TermTaxonomyPattern.Update, { id, ...input }).lastValue();
+      await this.termTaxonomyServiceClient.update({ id, ...input }).lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -242,7 +261,7 @@ export class TermTaxonomyController extends createMetaController(
   })
   async delete(@Param('id', ParseIntPipe) id: number) {
     try {
-      await this.basicService.send(TermTaxonomyPattern.Delete, { id }).lastValue();
+      await this.termTaxonomyServiceClient.delete({ id }).lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -263,7 +282,7 @@ export class TermTaxonomyController extends createMetaController(
   })
   async bulkDelete(@Body() ids: number[]) {
     try {
-      await this.basicService.send<void>(TermTaxonomyPattern.BulkDelete, { ids }).lastValue();
+      await this.termTaxonomyServiceClient.bulkDelete({ ids }).lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -283,8 +302,8 @@ export class TermTaxonomyController extends createMetaController(
   })
   async deleteRelationship(@Param('id', ParseIntPipe) termTaxonomyId: number, @Param('objectId') objectId: number) {
     try {
-      await this.basicService
-        .send<void>(TermTaxonomyPattern.DeleteRelationship, {
+      await this.termTaxonomyServiceClient
+        .deleteRelationship({
           objectId,
           termTaxonomyId,
         })

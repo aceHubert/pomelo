@@ -22,10 +22,9 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
-import { configuration, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import { configuration, POMELO_SERVICE_PACKAGE_NAME, ErrorHandlerClientGrpcProxy } from '@ace-pomelo/shared/server';
 import { AuthorizationModule, getJWKS, createLocalJWKSet } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
-import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { IdentityDatasourceModule } from './datasource/datasource.module';
@@ -132,13 +131,20 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       clients: [
         {
-          name: INFRASTRUCTURE_SERVICE,
+          name: POMELO_SERVICE_PACKAGE_NAME,
           useFactory: (config: ConfigService) => ({
-            customClass: ErrorHandlerClientTCP,
+            customClass: ErrorHandlerClientGrpcProxy,
             options: {
-              host: config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
-              port: config.getOrThrow('INFRASTRUCTURE_SERVICE_PORT'),
-              serializer: new I18nSerializer(),
+              package: POMELO_SERVICE_PACKAGE_NAME,
+              protoPath: path.join(__dirname, 'protos/index.proto'),
+              url: `${config.get('INFRASTRUCTURE_GRPC_HOST', 'localhost')}:${config.getOrThrow(
+                'INFRASTRUCTURE_GRPC_PORT',
+              )}`,
+              loader: {
+                longs: Number,
+                defaults: true,
+                oneofs: true,
+              },
             },
           }),
           inject: [ConfigService],

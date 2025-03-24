@@ -23,21 +23,21 @@ import {
   ApiCreatedResponse,
   ApiNoContentResponse,
 } from '@nestjs/swagger';
-import { ClientProxy } from '@nestjs/microservices';
-import { createResponseSuccessType, createMetaPattern } from '@ace-pomelo/shared/server';
+import { createResponseSuccessType } from '@ace-pomelo/shared/server';
+import {
+  MetaServiceClient,
+  MetaResponse,
+  GetMetasRequest,
+  CreateMetaRequest,
+  CreateMetasRequest,
+  UpdateMetaByKeyRequest,
+  DeleteMetaByKeyRequest,
+} from '../utils/meta-service.util';
 import { NewMetaDto } from './dto/new-meta.dto';
 import { UpdateMetaDto } from './dto/update-meta.dto';
 import { BaseController } from './base.controller';
 
-export type Method =
-  | 'getMeta'
-  | 'getMetas'
-  | 'createMeta'
-  | 'createMetas'
-  | 'updateMeta'
-  | 'updateMetaByKey'
-  | 'deleteMeta'
-  | 'deleteMetaByKey';
+export type MethodName = keyof MetaServiceClient<any>;
 
 export type Options = {
   /**
@@ -48,18 +48,22 @@ export type Options = {
   /**
    * authorize decorator(s)
    */
-  authDecorator?: (method: Method) => MethodDecorator | MethodDecorator[];
+  authDecorator?: (method: MethodName) => MethodDecorator | MethodDecorator[];
 };
 
 /**
  * Create Meta Controller
- * @param modelName model name, action/param prefix and pattern prefix(camelCase, e.g. 'template' -> '/:templateId/metas')
+ * @param modelName model name
  * @param metaModelRespType meta model response data type (swagger ApiOkResponse)
  * @param newMetaDtoType new meta dto type (swagger ApiBody)
  * @param options options
  */
-export function createMetaController<MetaModelRespType, NewMetaDtoType>(
-  modelName: string,
+export function createMetaController<
+  ModelName extends string,
+  MetaModelRespType extends MetaResponse<ModelName>,
+  NewMetaDtoType extends CreateMetaRequest<ModelName>,
+>(
+  modelName: ModelName,
   metaModelRespType: Type<MetaModelRespType>,
   newMetaDtoType: Type<NewMetaDtoType>,
   { descriptionName, authDecorator }: Options = {},
@@ -67,9 +71,7 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
   const _upperFirstModelName = upperFirst(modelName);
   const _descriptionName = descriptionName || lowerCase(modelName);
 
-  const pattern = createMetaPattern(modelName);
-
-  const AuthDecorate = (method: Method): MethodDecorator => {
+  const AuthDecorate = (method: MethodName): MethodDecorator => {
     if (authDecorator) {
       const decorators = authDecorator(method);
       return Array.isArray(decorators) ? applyDecorators(...decorators) : decorators;
@@ -79,9 +81,11 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
   };
 
   abstract class MetaController extends BaseController {
-    constructor(protected readonly basicService: ClientProxy) {
+    constructor() {
       super();
     }
+
+    abstract get metaServiceClient(): MetaServiceClient<ModelName>;
 
     /**
      * 获取元数据
@@ -95,19 +99,14 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
     })
     @ApiNoContentResponse({ description: `${_descriptionName} meta not found` })
     async getMeta(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res: Response) {
-      const result = await this.basicService
-        .send<MetaModelRespType | undefined>(pattern.GetMeta, {
-          id,
-          fields: ['id', 'metaKey', 'metaValue'],
-        })
-        .lastValue();
+      const { meta } = await this.metaServiceClient.getMeta({ id, fields: ['id', 'metaKey', 'metaValue'] }).lastValue();
 
-      if (result === undefined) {
+      if (meta === undefined) {
         res.status(HttpStatus.NO_CONTENT);
       }
 
       return this.success({
-        data: result,
+        data: meta,
       });
     }
 
@@ -132,16 +131,16 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
       @Param(`${modelName}Id`, ParseIntPipe) modelId: number,
       @Query('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
     ) {
-      const result = await this.basicService
-        .send<MetaModelRespType[]>(pattern.CreateMetas, {
+      const { metas } = await this.metaServiceClient
+        .getMetas({
           [`${modelName}Id`]: modelId,
-          metaKeys,
+          metaKeys: metaKeys ?? [],
           fields: ['id', 'metaKey', 'metaValue'],
-        })
+        } as GetMetasRequest<ModelName>)
         .lastValue();
 
       return this.success({
-        data: result,
+        data: metas,
       });
     }
 
@@ -157,10 +156,10 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
       type: () => createResponseSuccessType({ data: metaModelRespType }, `${_upperFirstModelName}MetaModelSuccessResp`),
     })
     async createMeta(@Body() input: NewMetaDtoType) {
-      const result = await this.basicService.send<MetaModelRespType>(pattern.CreateMeta, input).lastValue();
+      const { meta } = await this.metaServiceClient.createMeta(input).lastValue();
 
       return this.success({
-        data: result,
+        data: meta,
       });
     }
 
@@ -177,14 +176,12 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
         createResponseSuccessType({ data: [metaModelRespType] }, `${_upperFirstModelName}MetaModelsSuccessResp`),
     })
     async createMetas(@Param(`${modelName}Id`, ParseIntPipe) modelId: number, @Body() models: NewMetaDto[]) {
-      const result = await this.basicService
-        .send<MetaModelRespType[]>(pattern.CreateMetas, {
-          [`${modelName}Id`]: modelId,
-          models,
-        })
+      const { metas } = await this.metaServiceClient
+        .createMetas({ [`${modelName}Id`]: modelId, metas: models } as CreateMetasRequest<ModelName>)
         .lastValue();
+
       return this.success({
-        data: result,
+        data: metas,
       });
     }
 
@@ -201,12 +198,7 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
     })
     async updateMeta(@Param('id', ParseIntPipe) id: number, @Body('metaValue') metaValue: string) {
       try {
-        await this.basicService
-          .send<void>(pattern.UpdateMeta, {
-            id,
-            metaValue,
-          })
-          .lastValue();
+        await this.metaServiceClient.updateMeta({ id, metaValue }).lastValue();
         return this.success();
       } catch (e: any) {
         this.logger.error(e);
@@ -232,14 +224,15 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
       @Body('createIfNotExists') createIfNotExists?: boolean,
     ) {
       try {
-        await this.basicService
-          .send<void>(pattern.UpdateMetaByKey, {
+        await this.metaServiceClient
+          .updateMetaByKey({
             [`${modelName}Id`]: modelId,
             metaKey,
             metaValue,
             createIfNotExists,
-          })
+          } as UpdateMetaByKeyRequest<ModelName>)
           .lastValue();
+
         return this.success();
       } catch (e: any) {
         this.logger.error(e);
@@ -259,7 +252,7 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
     })
     async deleteMeta(@Param('id', ParseIntPipe) id: number) {
       try {
-        await this.basicService.send<void>(pattern.DeleteMeta, { id }).lastValue();
+        await this.metaServiceClient.deleteMeta({ id }).lastValue();
         return this.success();
       } catch (e: any) {
         this.logger.error(e);
@@ -279,11 +272,8 @@ export function createMetaController<MetaModelRespType, NewMetaDtoType>(
     })
     async deleteMetaByKey(@Param(`${modelName}Id`, ParseIntPipe) modelId: number, @Param('metaKey') metaKey: string) {
       try {
-        await this.basicService
-          .send(pattern.DeleteMetaByKey, {
-            [`${modelName}Id`]: modelId,
-            metaKey,
-          })
+        await this.metaServiceClient
+          .deleteMetaByKey({ [`${modelName}Id`]: modelId, metaKey } as DeleteMetaByKeyRequest<ModelName>)
           .lastValue();
         return this.success();
       } catch (e: any) {

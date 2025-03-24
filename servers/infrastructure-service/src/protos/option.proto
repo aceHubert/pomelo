@@ -1,0 +1,189 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+// import "common/enum.proto";
+
+// /**
+//  * 选项相关枚举定义
+//  */
+//  message Option {
+//   /**
+//    * 自动加载枚举
+//    */
+//   enum AutoLoad {
+//     No = 0 [ (Value) = 'no' ];   // 不显示
+//     Yes = 1 [ (Value) = 'yes' ]; // 显示
+//   }
+// }
+
+/**
+ * 选项模型，存储系统配置信息
+ */
+message OptionModel {
+  // 选项ID
+  int32 id = 1;
+  // 选项名称，作为选项的唯一标识
+  string optionName = 2;
+  // 选项值，存储实际配置内容
+  string optionValue = 3;
+  // 是否自动加载 ("yes"/"no")
+  string autoload = 4;
+}
+
+/**
+ * 获取选项请求
+ */
+message GetOptionRequest {
+  // 选项ID
+  int32 id = 1;
+  // 需要返回的字段
+  repeated string fields = 100;
+}
+
+message GetOptionByNameRequest {
+  // 选项名称
+  string optionName = 1;
+  // 需要返回的字段
+  repeated string fields = 100;
+}
+
+/**
+ * 获取选项响应
+ */
+message GetOptionResponse {
+  // 选项信息
+  optional OptionModel option = 1;
+}
+
+/**
+ * 获取自动加载选项响应
+ */
+message GetAutoloadOptionsResponse {
+  // 选项名称与值的映射关系
+  map<string, string> options = 1;
+}
+
+/**
+ * 根据名称获取选项值请求
+ */
+message GetOptionValueRequest {
+  // 选项名称
+  string optionName = 1;
+}
+
+/**
+ * 获取选项值响应
+ */
+message GetOptionValueResponse {
+  // 选项值
+  optional string optionValue = 1;
+}
+
+/**
+ * 选项名称集合
+ */
+message OptionNames {
+  // 选项名称列表
+  repeated string value = 1;
+}
+
+/**
+ * 获取多个选项请求
+ */
+message GetOptionsRequest {
+  // 可以按名称列表或自动加载状态筛选
+  optional OptionNames optionNames = 1;
+  // 自动加载状态筛选
+  optional string autoload = 2;
+  // 需要返回的字段
+  repeated string fields = 100;
+}
+
+/**
+ * 获取多个选项响应
+ */
+message GetOptionsResponse {
+  // 选项列表
+  repeated OptionModel options = 1;
+}
+
+/**
+ * 检查选项是否存在请求
+ */
+message IsExistRequest {
+  // 选项名称
+  string optionName = 1;
+}
+
+/**
+ * 创建选项请求
+ */
+message CreateOptionRequest {
+  // 选项名称
+  string optionName = 2;
+  // 选项值
+  string optionValue = 3;
+  // 是否自动加载
+  optional string autoload = 4;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 创建选项响应
+ */
+message CreateOptionResponse {
+  // 创建的选项信息
+  OptionModel option = 1;
+}
+
+/**
+ * 更新选项请求
+ */
+message UpdateOptionRequest {
+  // 选项ID
+  int32 id = 1;
+  // 新的选项值
+  string optionValue = 3;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 删除选项请求
+ */
+message DeleteOptionRequest {
+  // 选项ID
+  int32 id = 1;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 选项服务接口定义
+ */
+service OptionService {
+  // 获取单个选项
+  rpc Get(GetOptionRequest) returns (GetOptionResponse) {}
+  // 根据名称获取选项
+  rpc GetByName(GetOptionByNameRequest) returns (GetOptionResponse) {}
+  // 获取所有自动加载的选项
+  rpc GetAutoloads(google.protobuf.Empty) returns (GetAutoloadOptionsResponse) {}
+  // 根据名称获取选项值
+  rpc GetValue(GetOptionValueRequest) returns (GetOptionValueResponse) {}
+  // 获取多个选项
+  rpc GetList(GetOptionsRequest) returns (GetOptionsResponse) {}
+  // 检查选项是否存在
+  rpc IsExists(IsExistRequest) returns (google.protobuf.BoolValue) {}
+  // 创建新选项
+  rpc Create(CreateOptionRequest) returns (CreateOptionResponse) {}
+  // 更新选项值
+  rpc Update(UpdateOptionRequest) returns (google.protobuf.Empty) {}
+  // 重置所有选项
+  rpc Reset(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  // 删除选项
+  rpc Delete(DeleteOptionRequest) returns (google.protobuf.Empty) {}
+}

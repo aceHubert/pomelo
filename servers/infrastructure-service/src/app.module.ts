@@ -5,21 +5,20 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { TerminusModule } from '@nestjs/terminus';
-import { I18nModule, I18nService, I18nValidationPipe } from 'nestjs-i18n';
+import { I18nModule, I18nContext, I18nValidationPipe, GrpcMetadataResolver } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
 import { configuration } from '@ace-pomelo/shared/server';
 import { InfrastructureDatasourceModule } from '@/datasource/datasource.module';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
-import { I18nTcpResolver } from './common/utils/i18n-server-tcp.util';
 import { SiteInitController } from './controllers/site-init.controller';
 import { CommentController } from './controllers/comment.controller';
 import { LinkController } from './controllers/link.controller';
 import { MediaController } from './controllers/media.controller';
-import { OptionController } from './controllers/option.contrller';
+import { OptionController } from './controllers/option.controller';
 import { TemplateController } from './controllers/template.controller';
 import { TermTaxonomyController } from './controllers/term-taxonomy.controller';
-import { UserController } from './controllers/user.constroller';
+import { UserController } from './controllers/user.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -91,12 +90,12 @@ import '@/common/extends/i18n.extend';
           logging: isDebug,
         };
       },
-      resolvers: [new I18nTcpResolver(['lang', 'locale'])],
+      resolvers: [new GrpcMetadataResolver(['lang', 'locale'])],
       inject: [ConfigService],
     }),
     InfrastructureDatasourceModule.registerAsync({
       isGlobal: true,
-      useFactory: (config: ConfigService, i18n: I18nService) => ({
+      useFactory: (config: ConfigService) => ({
         isGlobal: true,
         connection: config.get('INFRASTRUCTURE_DATABASE_CONNECTION')
           ? config.get<string>('INFRASTRUCTURE_DATABASE_CONNECTION')!
@@ -113,13 +112,16 @@ import '@/common/extends/i18n.extend';
               },
             },
         tablePrefix: config.get('TABLE_PREFIX'),
-        translate: (key, fallback, args) =>
-          i18n.translate(key, {
+        translate: (key, fallback, args) => {
+          const i18n = I18nContext.current();
+          if (!i18n) return fallback;
+          return i18n.translate(key, {
             defaultValue: fallback,
             args,
-          }),
+          });
+        },
       }),
-      inject: [ConfigService, I18nService],
+      inject: [ConfigService],
     }),
   ],
   controllers: [

@@ -1,6 +1,6 @@
 import { SignInValidator } from './signin.validator';
 
-export class VerifyUserDto extends SignInValidator {
+export class SigninDto extends SignInValidator {
   /**
    * Username
    */

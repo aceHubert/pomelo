@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsString, IsLocale, IsDefined, MinLength } from 'class-validator';
-import { InputType, Field, PartialType, PickType } from '@nestjs/graphql';
+import { ID, InputType, Field, PartialType, PickType } from '@nestjs/graphql';
 import { UserStatus, UserRole } from '@ace-pomelo/shared/server';
 import { NewUserInput } from './new-user.input';
 
@@ -60,6 +60,23 @@ export class UpdateUserPasswordInput {
   @IsDefined()
   @IsString()
   oldPwd!: string;
+
+  /**
+   * New password
+   */
+  @IsDefined()
+  @IsString()
+  @MinLength(6)
+  newPwd!: string;
+}
+
+@InputType({ description: 'Reset user password input' })
+export class ResetUserPasswordInput {
+  /**
+   * User Id
+   */
+  @Field(() => ID)
+  userId!: number;
 
   /**
    * New password

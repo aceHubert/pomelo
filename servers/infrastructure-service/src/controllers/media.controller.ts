@@ -1,77 +1,113 @@
-import { Controller, ParseIntPipe, ParseArrayPipe, DefaultValuePipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { MediaPattern } from '@ace-pomelo/shared/server';
+import { Controller } from '@nestjs/common';
+import { BoolValue } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/wrappers';
+import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
 import {
-  MediaDataSource,
-  MediaModel,
-  PagedMediaModel,
-  MediaMetaDataModel,
-  MediaMetaModel,
-  NewMediaMetaInput,
-} from '../datasource/index';
+  MEDIA_SERVICE_NAME,
+  MediaServiceControllerMethods,
+  MediaServiceController,
+  MediaMetaDataModel as GRPCMediaMetaDataModel,
+  GetMediaRequest,
+  GetMediaResponse,
+  GetMediaByNameRequest,
+  GetPagedMediaRequest,
+  GetPagedMediaResponse,
+  IsMediaExistRequest,
+  CreateMediaRequest,
+  CreateMediaResponse,
+  UpdateMediaRequest,
+  UpdateMediaMetaDataRequest,
+} from '@ace-pomelo/shared/server/proto-ts/media';
+import { MediaDataSource, MediaMetaDataModel } from '../datasource';
 import { createMetaController } from './meta.controller';
-import { PagedMediaQueryPayload, NewMediaPayload, UpdateMediaPayload } from './payload/media.payload';
 
 @Controller()
-export class MediaController extends createMetaController<MediaMetaModel, NewMediaMetaInput>('media') {
+@MediaServiceControllerMethods()
+export class MediaController
+  extends createMetaController('media', MEDIA_SERVICE_NAME)
+  implements MediaServiceController
+{
   constructor(private readonly mediaDatasource: MediaDataSource) {
     super(mediaDatasource);
   }
 
-  @MessagePattern(MediaPattern.Get)
-  get(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<MediaModel | undefined> {
-    return this.mediaDatasource.get(id, fields);
+  private toGRPCMetaData(metaData: MediaMetaDataModel): GRPCMediaMetaDataModel {
+    const { fileSize, width, height, imageScales = [], ...otherMetas } = metaData;
+    return {
+      fileSize,
+      width,
+      height,
+      imageScales,
+      otherMetas,
+    };
   }
 
-  @MessagePattern(MediaPattern.GetByName)
-  getByName(
-    @Payload('fileName', new DefaultValuePipe('')) fileName: string,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<MediaModel | undefined> {
-    return this.mediaDatasource.getByName(fileName, fields);
+  get({ fields, id }: GetMediaRequest): Promise<GetMediaResponse> {
+    return this.mediaDatasource.get(id, fields).then((result) => {
+      if (!result) return { media: void 0 };
+
+      const { metaData, ...rest } = result;
+      return {
+        media: {
+          ...rest,
+          metaData: metaData && this.toGRPCMetaData(metaData),
+        },
+      };
+    });
   }
 
-  @MessagePattern(MediaPattern.GetPaged)
-  getPaged(
-    @Payload('query') query: PagedMediaQueryPayload,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<PagedMediaModel> {
-    return this.mediaDatasource.getPaged(query, fields);
+  getByName({ fields, fileName }: GetMediaByNameRequest): Promise<GetMediaResponse> {
+    if (!fileName) return Promise.resolve({ media: void 0 });
+
+    return this.mediaDatasource.getByName(fileName, fields).then((result) => {
+      if (!result) return { media: void 0 };
+
+      const { metaData, ...rest } = result;
+      return {
+        media: {
+          ...rest,
+          metaData: metaData && this.toGRPCMetaData(metaData),
+        },
+      };
+    });
   }
 
-  @MessagePattern(MediaPattern.FilenameExists)
-  async isExists(@Payload('fileName') fileName: string): Promise<boolean> {
-    if (!fileName) return true;
-
-    return this.mediaDatasource.isExists(fileName);
+  getPaged({ fields, ...query }: GetPagedMediaRequest): Promise<GetPagedMediaResponse> {
+    return this.mediaDatasource.getPaged(query, fields).then(({ rows, ...rest }) => {
+      return {
+        ...rest,
+        rows: rows.map(({ metaData, ...rest }) => ({
+          ...rest,
+          metaData: metaData && this.toGRPCMetaData(metaData),
+        })),
+      };
+    });
   }
 
-  @MessagePattern(MediaPattern.Create)
-  create(@Payload() payload: NewMediaPayload): Promise<
-    MediaModel & {
-      metaData: MediaMetaDataModel;
-      metas: MediaMetaModel[];
-    }
-  > {
-    const { requestUserId, metaData, ...model } = payload;
-    return this.mediaDatasource.create(model, metaData, requestUserId);
+  isExists({ fileName }: IsMediaExistRequest): Promise<BoolValue> {
+    if (!fileName) return Promise.resolve({ value: true });
+
+    return this.mediaDatasource.isExists(fileName).then((result) => {
+      return { value: result };
+    });
   }
 
-  @MessagePattern(MediaPattern.Update)
-  update(@Payload() payload: UpdateMediaPayload): Promise<void> {
-    const { id, requestUserId, metaData, ...model } = payload;
-    return this.mediaDatasource.update(id, model, metaData, requestUserId);
+  create({ requestUserId, metaData, ...model }: CreateMediaRequest): Promise<CreateMediaResponse> {
+    return this.mediaDatasource.create(model, metaData, requestUserId).then(({ metaData, metas, ...media }) => ({
+      media,
+      metaData: this.toGRPCMetaData(metaData),
+      metas,
+    }));
   }
 
-  @MessagePattern(MediaPattern.UpdateMetaData)
-  updateMetaData(
-    @Payload('mediaId', ParseIntPipe) mediaId: number,
-    @Payload('metaData') metaData: MediaMetaDataModel,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.mediaDatasource.updateMetaData(mediaId, metaData, requestUserId);
+  update({ id, requestUserId, metaData, ...model }: UpdateMediaRequest): Promise<Empty> {
+    return this.mediaDatasource.update(id, model, metaData, requestUserId).then(() => {
+      return {};
+    });
+  }
+
+  updateMetaData({ id, metaData, requestUserId }: UpdateMediaMetaDataRequest): Promise<Empty> {
+    return this.mediaDatasource.updateMetaData(id, metaData, requestUserId).then(() => {
+      return {};
+    });
   }
 }

@@ -1,23 +1,31 @@
 import { HttpAdapterHost } from '@nestjs/core';
-import { Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Resolver, Context, Query, Mutation, Args } from '@nestjs/graphql';
-import { INFRASTRUCTURE_SERVICE, SiteInitPattern } from '@ace-pomelo/shared/server';
+import { POMELO_SERVICE_PACKAGE_NAME } from '@ace-pomelo/shared/server';
+import { SiteInitServiceClient, SITE_INIT_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/site-init';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
 import { SiteInitArgsInput } from './dto/init-args.input';
 
 @Resolver()
-export class SiteInitResolver extends BaseResolver {
+export class SiteInitResolver extends BaseResolver implements OnModuleInit {
+  private siteInitServiceClient!: SiteInitServiceClient;
+
   constructor(
     private readonly httpAdapterHost: HttpAdapterHost,
-    @Inject(INFRASTRUCTURE_SERVICE) private readonly basicService: ClientProxy,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc,
   ) {
     super();
   }
 
+  onModuleInit() {
+    this.siteInitServiceClient = this.client.getService<SiteInitServiceClient>(SITE_INIT_SERVICE_NAME);
+  }
+
   @Query(() => Boolean, { description: 'It is required to initial site before running.' })
-  checkSiteInitialRequired(): Promise<boolean> {
-    return this.basicService.send<boolean>(SiteInitPattern.IsRequired, {}).lastValue();
+  async checkSiteInitialRequired(): Promise<boolean> {
+    const { value: needInitDates } = await this.siteInitServiceClient.isRequired({}).lastValue();
+    return needInitDates;
   }
 
   @Mutation(() => Boolean, { description: 'Start to initialize site datas.' })
@@ -27,6 +35,7 @@ export class SiteInitResolver extends BaseResolver {
   ) {
     const httpAdapter = this.httpAdapterHost.httpAdapter;
     const platformName = httpAdapter.getType();
+
     let siteUrl = '';
     if (platformName === 'express') {
       siteUrl = `${request.protocol}://${request.get('host')}`;
@@ -36,13 +45,12 @@ export class SiteInitResolver extends BaseResolver {
     }
 
     try {
-      await this.basicService
-        .send<void>(SiteInitPattern.Start, {
+      await this.siteInitServiceClient
+        .start({
           ...initArgs,
           siteUrl,
         })
         .lastValue();
-
       return true;
     } catch (err) {
       this.logger.error(err);

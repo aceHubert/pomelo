@@ -21,6 +21,11 @@ export class TermTaxonomyQueryDto extends TermTaxonomyArgsValidator {
    * Group id
    */
   group?: number;
+
+  /**
+   * Exclude ids
+   */
+  exclude?: number[];
 }
 
 export class CategoryTermTaxonomyQueryDto extends OmitType(TermTaxonomyQueryDto, ['taxonomy'] as const) {

@@ -1,88 +1,124 @@
-import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { TermTaxonomyPattern } from '@ace-pomelo/shared/server';
-import { TermTaxonomyDataSource, TermTaxonomyModel, TermRelationshipModel } from '../datasource/index';
-import { createMetaController } from './meta.controller';
+import { Controller } from '@nestjs/common';
+import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
 import {
-  ListTermTaxonomyByObjectIdPayload,
-  ListTermTaxonomyQueryPayload,
-  NewTermRelationshipPayload,
-  NewTermTaxonomyPayload,
-  UpdateTermTaxonomyPayload,
-} from './payload/term-taxonomy.payload';
+  TERM_TAXONOMY_SERVICE_NAME,
+  TermTaxonomyServiceControllerMethods,
+  TermTaxonomyServiceController,
+  GetTermTaxonomyRequest,
+  GetTermTaxonomyResponse,
+  GetTermTaxonomiesRequest,
+  GetTermTaxonomiesResponse,
+  GetTermTaxonomiesByParentIdsRequest,
+  GetTermTaxonomiesByParentIdsResponse,
+  GetTermTaxonomiesByObjectIdRequest,
+  GetTermTaxonomiesByObjectIdResponse,
+  GetTermTaxonomiesByObjectIdsRequest,
+  GetTermTaxonomiesByObjectIdsResponse,
+  CreateTermTaxonomyRequest,
+  CreateTermTaxonomyResponse,
+  CreateRelationshipRequest,
+  CreateRelationshipResponse,
+  UpdateTermTaxonomyRequest,
+  DeleteRelationshipRequest,
+  DeleteTermTaxonomyRequest,
+  BulkDeleteTermTaxonomyRequest,
+} from '@ace-pomelo/shared/server/proto-ts/term-taxonomy';
+import { TermTaxonomyDataSource } from '../datasource';
+import { createMetaController } from './meta.controller';
 
 @Controller()
-export class TermTaxonomyController extends createMetaController('termTaxonomy') {
+@TermTaxonomyServiceControllerMethods()
+export class TermTaxonomyController
+  extends createMetaController('termTaxonomy', TERM_TAXONOMY_SERVICE_NAME)
+  implements TermTaxonomyServiceController
+{
   constructor(private readonly termTaxonomyDataSource: TermTaxonomyDataSource) {
     super(termTaxonomyDataSource);
   }
 
-  @MessagePattern(TermTaxonomyPattern.Get)
-  get(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<TermTaxonomyModel | undefined> {
-    return this.termTaxonomyDataSource.get(id, fields);
+  get({ id, fields }: GetTermTaxonomyRequest): Promise<GetTermTaxonomyResponse> {
+    return this.termTaxonomyDataSource.get(id, fields).then((result) => {
+      return { termTaxonomy: result };
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.GetList)
-  async getList(
-    @Payload('parentIds', new ParseArrayPipe({ items: Number, optional: true })) parentIds: number[],
-    @Payload('query') query: ListTermTaxonomyQueryPayload,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<TermTaxonomyModel[] | Record<number, TermTaxonomyModel[]>> {
-    if (!parentIds && !query) return [];
-    return this.termTaxonomyDataSource.getList(parentIds || query, fields);
+  async getList({ fields, ...query }: GetTermTaxonomiesRequest): Promise<GetTermTaxonomiesResponse> {
+    return this.termTaxonomyDataSource.getList(query, fields).then((result) => {
+      return { termTaxonomies: result };
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.GetListByObjectIds)
-  getListByObjectIds(
-    @Payload('objectIds', new ParseArrayPipe({ items: Number })) objectIds: number[],
-    @Payload('taxonomy') taxonomy: string,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<Record<number, TermTaxonomyModel[]>> {
-    return this.termTaxonomyDataSource.getListByObjectId(objectIds, taxonomy, fields);
+  getListByParentIds({
+    fields,
+    parentIds,
+  }: GetTermTaxonomiesByParentIdsRequest): Promise<GetTermTaxonomiesByParentIdsResponse> {
+    return this.termTaxonomyDataSource.getList(parentIds, fields).then((result) => {
+      return {
+        termTaxonomies: Object.entries(result).map(([parentId, value]) => ({
+          parentId: +parentId,
+          value,
+        })),
+      };
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.GetListByObjectId)
-  getListByObjectId(
-    @Payload('query') query: ListTermTaxonomyByObjectIdPayload,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<TermTaxonomyModel[]> {
-    return this.termTaxonomyDataSource.getListByObjectId(query, fields);
+  getListByObjectIds({
+    fields,
+    objectIds,
+    taxonomy,
+  }: GetTermTaxonomiesByObjectIdsRequest): Promise<GetTermTaxonomiesByObjectIdsResponse> {
+    return this.termTaxonomyDataSource.getListByObjectId(objectIds, taxonomy, fields).then((result) => {
+      return {
+        termTaxonomies: Object.entries(result).map(([objectId, value]) => ({
+          objectId: +objectId,
+          value,
+        })),
+      };
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.Create)
-  create(@Payload() payload: NewTermTaxonomyPayload): Promise<TermTaxonomyModel> {
-    return this.termTaxonomyDataSource.create(payload);
+  getListByObjectId({
+    fields,
+    ...query
+  }: GetTermTaxonomiesByObjectIdRequest): Promise<GetTermTaxonomiesByObjectIdResponse> {
+    return this.termTaxonomyDataSource.getListByObjectId(query, fields).then((result) => {
+      return { termTaxonomies: result };
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.CreateRelationship)
-  createRelationship(payload: NewTermRelationshipPayload): Promise<TermRelationshipModel> {
-    return this.termTaxonomyDataSource.createRelationship(payload);
+  create(request: CreateTermTaxonomyRequest): Promise<CreateTermTaxonomyResponse> {
+    return this.termTaxonomyDataSource.create(request).then((result) => {
+      return { termTaxonomy: result };
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.Update)
-  update(@Payload() payload: UpdateTermTaxonomyPayload): Promise<void> {
-    const { id, ...model } = payload;
-    return this.termTaxonomyDataSource.update(id, model);
+  createRelationship(request: CreateRelationshipRequest): Promise<CreateRelationshipResponse> {
+    return this.termTaxonomyDataSource.createRelationship(request).then((result) => {
+      return { relationship: result };
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.DeleteRelationship)
-  deleteRelationship(
-    @Payload('objectId', ParseIntPipe) objectId: number,
-    @Payload('termTaxonomyId', ParseIntPipe) termTaxonomyId: number,
-  ): Promise<void> {
-    return this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId);
+  update({ id, ...model }: UpdateTermTaxonomyRequest): Promise<Empty> {
+    return this.termTaxonomyDataSource.update(id, model).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.Delete)
-  delete(@Payload('id', ParseIntPipe) id: number): Promise<void> {
-    return this.termTaxonomyDataSource.delete(id);
+  deleteRelationship({ objectId, termTaxonomyId }: DeleteRelationshipRequest): Promise<Empty> {
+    return this.termTaxonomyDataSource.deleteRelationship(objectId, termTaxonomyId).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(TermTaxonomyPattern.BulkDelete)
-  bulkDelete(@Payload('ids', new ParseArrayPipe({ items: Number })) ids: number[]): Promise<void> {
-    return this.termTaxonomyDataSource.bulkDelete(ids);
+  delete({ id }: DeleteTermTaxonomyRequest): Promise<Empty> {
+    return this.termTaxonomyDataSource.delete(id).then(() => {
+      return {};
+    });
+  }
+
+  bulkDelete({ ids }: BulkDeleteTermTaxonomyRequest): Promise<Empty> {
+    return this.termTaxonomyDataSource.bulkDelete(ids).then(() => {
+      return {};
+    });
   }
 }

@@ -1,15 +1,7 @@
 import { Observable, firstValueFrom, lastValueFrom } from 'rxjs';
 
-declare module 'rxjs' {
-  interface Observable<T> {
-    firstValue<D>(defaultValue: D): Promise<T | D>;
-    firstValue(): Promise<T>;
-    lastValue<D>(defaultValue: D): Promise<T | D>;
-    lastValue(): Promise<T>;
-  }
-}
 /**
- * ClientProxy send undefined value return EmptyError in firstValueFrom and  lastValueFrom,
+ * Client send undefined value return EmptyError in firstValueFrom and  lastValueFrom,
  * Set default value to avoid EmptyError
  */
 Object.defineProperties(Observable.prototype, {
@@ -28,3 +20,12 @@ Object.defineProperties(Observable.prototype, {
     configurable: false,
   },
 });
+
+declare module 'rxjs' {
+  interface Observable<T> {
+    firstValue<D>(defaultValue: D): Promise<T | D>;
+    firstValue(): Promise<T>;
+    lastValue<D>(defaultValue: D): Promise<T | D>;
+    lastValue(): Promise<T>;
+  }
+}

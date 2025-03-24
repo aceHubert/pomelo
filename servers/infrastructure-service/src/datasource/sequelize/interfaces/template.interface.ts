@@ -4,17 +4,7 @@ import { Templates } from '../entities';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
 
-export enum TemplateInnerStatus {
-  AutoDraft = 'auto draft', // 新建
-  Inherit = 'inherit', // 编辑副本
-}
-
-export enum TemplateInnerType {
-  Revision = 'revision', // 修订版本
-}
-
-/* ----------BASE--------------- */
-
+// #region BASE
 /**
  * Template 返回实体模型
  */
@@ -139,7 +129,9 @@ export interface NewTemplateInput
 export interface UpdateTemplateInput
   extends Partial<Pick<NewTemplateInput, 'title' | 'name' | 'content' | 'excerpt' | 'status' | 'commentStatus'>> {}
 
-/* ----------表单--------------- */
+// #endregion
+
+// #region  表单
 
 /**
  * Form 新建实体模型
@@ -159,7 +151,9 @@ export interface NewFormTemplateInput extends Pick<CreationAttributes<Templates>
 export interface UpdateFormTemplateInput
   extends Partial<Pick<NewFormTemplateInput, 'title' | 'name' | 'content' | 'status' | 'commentStatus'>> {}
 
-/* ----------页面--------------- */
+// #endregion
+
+// #region  页面
 
 /**
  * Page 新建实体模型
@@ -179,7 +173,9 @@ export interface NewPageTemplateInput extends Pick<CreationAttributes<Templates>
 export interface UpdatePageTemplateInput
   extends Partial<Pick<NewPageTemplateInput, 'title' | 'name' | 'content' | 'status' | 'commentStatus'>> {}
 
-/* ----------文章--------------- */
+// #endregion
+
+// #region  文章
 
 /**
  * Post 新建实体模型
@@ -197,3 +193,5 @@ export interface NewPostTemplateInput
  */
 export interface UpdatePostTemplateInput
   extends Partial<Pick<NewPostTemplateInput, 'title' | 'name' | 'excerpt' | 'content' | 'status' | 'commentStatus'>> {}
+
+// #endregion

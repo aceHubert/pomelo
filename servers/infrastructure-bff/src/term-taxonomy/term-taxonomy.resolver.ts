@@ -1,19 +1,17 @@
 import DataLoader from 'dataloader';
-import { Inject, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, ParseIntPipe, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
 import { Anonymous, Authorized } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
+import { Fields, OptionPresetKeys, TermPresetTaxonomy, POMELO_SERVICE_PACKAGE_NAME } from '@ace-pomelo/shared/server';
 import {
-  Fields,
-  OptionPresetKeys,
-  TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  OptionPattern,
-  TermTaxonomyPattern,
-} from '@ace-pomelo/shared/server';
+  TermTaxonomyServiceClient,
+  TERM_TAXONOMY_SERVICE_NAME,
+} from '@ace-pomelo/shared/server/proto-ts/term-taxonomy';
+import { OptionServiceClient, OPTION_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/option';
 import { TermTaxonomyAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { NewTermTaxonomyInput } from './dto/new-term-taxonomy.input';
@@ -26,79 +24,99 @@ import { TermTaxonomy, TermTaxonomyMeta, TermRelationship } from './models/term-
 
 @Authorized()
 @Resolver(() => TermTaxonomy)
-export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermTaxonomyMeta, NewTermTaxonomyMetaInput, {
-  authDecorator: (method) => {
-    const ramAction =
-      method === 'getMeta'
-        ? TermTaxonomyAction.MetaDetail
-        : method === 'getMetas' || method === 'fieldMetas'
-        ? TermTaxonomyAction.MetaList
-        : method === 'createMeta' || method === 'createMetas'
-        ? TermTaxonomyAction.MetaCreate
-        : method === 'updateMeta' || method === 'updateMetaByKey'
-        ? TermTaxonomyAction.MetaUpdate
-        : TermTaxonomyAction.MetaDelete;
+export class TermTaxonomyResolver
+  extends createMetaResolver('termTaxonomy', TermTaxonomy, TermTaxonomyMeta, NewTermTaxonomyMetaInput, {
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? TermTaxonomyAction.MetaDetail
+          : method === 'getMetas' || method === 'fieldMetas'
+          ? TermTaxonomyAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? TermTaxonomyAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? TermTaxonomyAction.MetaUpdate
+          : TermTaxonomyAction.MetaDelete;
 
-    return method === 'getMeta' || method === 'getMetas'
-      ? [RamAuthorized(ramAction), Anonymous()]
-      : [RamAuthorized(ramAction)];
-  },
-}) {
-  private cascadeLoader!: DataLoader<{ parentId: number; fields: string[] }, TermTaxonomy[]>;
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction)];
+    },
+  })
+  implements OnModuleInit
+{
+  private termTaxonomyServiceClient!: TermTaxonomyServiceClient;
+  private optionServiceClient!: OptionServiceClient;
 
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
-    this.cascadeLoader = new DataLoader(async (keys) => {
-      if (keys.length) {
-        // 所有调用的 fields 都是相同的
-        const results = await basicService
-          .send<Record<number, TermTaxonomy[]>>(TermTaxonomyPattern.GetList, {
-            parentIds: keys.map((key) => key.parentId),
-            fields: keys[0].fields,
-          })
-          .lastValue();
-        return keys.map(({ parentId }) => results[parentId] || []);
-      } else {
-        return Promise.resolve([]);
-      }
-    });
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
+    super();
+  }
+
+  onModuleInit() {
+    this.termTaxonomyServiceClient = this.client.getService<TermTaxonomyServiceClient>(TERM_TAXONOMY_SERVICE_NAME);
+    this.optionServiceClient = this.client.getService<OptionServiceClient>(OPTION_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.termTaxonomyServiceClient;
+  }
+
+  private _cascadeLoader!: DataLoader<{ parentId: number; fields: string[] }, TermTaxonomy[]>;
+  get cascadeLoader() {
+    return (
+      this._cascadeLoader ||
+      (this._cascadeLoader = new DataLoader(async (keys) => {
+        if (keys.length) {
+          // 所有调用的 fields 都是相同的
+          const { termTaxonomies } = await this.termTaxonomyServiceClient
+            .getListByParentIds({
+              parentIds: keys.map((key) => key.parentId),
+              fields: keys[0].fields,
+            })
+            .lastValue();
+          return keys.map(({ parentId }) => termTaxonomies.find((item) => item.parentId === parentId)?.value || []);
+        } else {
+          return Promise.resolve([]);
+        }
+      }))
+    );
   }
 
   @Anonymous()
   @Query((returns) => TermTaxonomy, { nullable: true, description: 'Get term taxonomy.' })
-  termTaxonomy(
+  async termTaxonomy(
     @Args('id', { type: () => ID, description: 'Term taxonomy id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy | undefined> {
-    return this.basicService
-      .send<TermTaxonomy>(TermTaxonomyPattern.Get, {
+    const { termTaxonomy } = await this.termTaxonomyServiceClient
+      .get({
         id,
         fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       })
       .lastValue();
+    return termTaxonomy || undefined;
   }
 
   @RamAuthorized(TermTaxonomyAction.List)
   @Query((returns) => [TermTaxonomy!], { description: 'Get term taxonomy list.' })
-  termTaxonomies(@Args() args: TermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
-    return this.basicService
-      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetList, {
-        query: args,
+  async termTaxonomies(@Args() args: TermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
+    const { termTaxonomies } = await this.termTaxonomyServiceClient
+      .getList({
+        ...args,
+        excludes: args.exclude || [],
         fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       })
-      .lastValue()
-      .then((terms) =>
-        terms.map((term) =>
-          // 级联查询将参数传给 children
-          Object.assign(
-            {
-              taxonomy: args.taxonomy,
-              group: args.group,
-            },
-            term,
-          ),
-        ),
-      );
+      .lastValue();
+    return termTaxonomies.map((term) =>
+      // 级联查询将参数传给 children
+      Object.assign(
+        {
+          taxonomy: args.taxonomy,
+          group: args.group,
+        },
+        term,
+      ),
+    );
   }
 
   @RamAuthorized(TermTaxonomyAction.CategoryList)
@@ -107,56 +125,56 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
     @Args() args: CategoryTermTaxonomyArgs,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy[]> {
-    let excludes: number[] | undefined;
+    let excludes: number[] = [];
     if (args.includeDefault !== true) {
-      const defaultCategoryId = await this.basicService
-        .send<string>(OptionPattern.GetValue, {
+      const { optionValue: defaultCategoryId } = await this.optionServiceClient
+        .getValue({
           optionName: OptionPresetKeys.DefaultCategory,
         })
         .lastValue();
       excludes = [Number(defaultCategoryId)];
     }
-    return this.basicService
-      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetList, {
-        query: { ...args, excludes, taxonomy: TermPresetTaxonomy.Category },
+    const { termTaxonomies } = await this.termTaxonomyServiceClient
+      .getList({
+        ...args,
+        excludes,
+        taxonomy: TermPresetTaxonomy.Category,
         fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       })
-      .lastValue()
-      .then((terms) =>
-        terms.map((term) =>
-          // 级联查询将参数传给 children
-          Object.assign(
-            {
-              taxonomy: TermPresetTaxonomy.Category,
-              group: args.group,
-            },
-            term,
-          ),
-        ),
-      );
+      .lastValue();
+    return termTaxonomies.map((term) =>
+      // 级联查询将参数传给 children
+      Object.assign(
+        {
+          taxonomy: TermPresetTaxonomy.Category,
+          group: args.group,
+        },
+        term,
+      ),
+    );
   }
 
   @RamAuthorized(TermTaxonomyAction.TagList)
   @Query((returns) => [TermTaxonomy!], { description: 'Get category taxonomy list.' })
-  tagTermTaxonomies(@Args() args: TagTermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
-    return this.basicService
-      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetList, {
-        query: { ...args, taxonomy: TermPresetTaxonomy.Tag },
+  async tagTermTaxonomies(@Args() args: TagTermTaxonomyArgs, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
+    const { termTaxonomies } = await this.termTaxonomyServiceClient
+      .getList({
+        ...args,
+        excludes: [],
+        taxonomy: TermPresetTaxonomy.Tag,
         fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       })
-      .lastValue()
-      .then((terms) =>
-        terms.map((term) =>
-          // 级联查询将参数传给 children
-          Object.assign(
-            {
-              taxonomy: TermPresetTaxonomy.Tag,
-              group: args.group,
-            },
-            term,
-          ),
-        ),
-      );
+      .lastValue();
+    return termTaxonomies.map((term) =>
+      // 级联查询将参数传给 children
+      Object.assign(
+        {
+          taxonomy: TermPresetTaxonomy.Tag,
+          group: args.group,
+        },
+        term,
+      ),
+    );
   }
 
   @ResolveField((returns) => [TermTaxonomy!], { description: 'Get cascade term taxonomies.' })
@@ -169,32 +187,35 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
 
   @RamAuthorized(TermTaxonomyAction.ListByObjectId)
   @Query((returns) => [TermTaxonomy!], { description: 'Get term taxonomies by objectId.' })
-  termTaxonomiesByObjectId(
+  async termTaxonomiesByObjectId(
     @Args() args: TermTaxonomyByObjectIdArgs,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy[]> {
-    return this.basicService
-      .send<TermTaxonomy[]>('termTaxonomy.getListByObjectId', {
-        query: args,
+    const { termTaxonomies } = await this.termTaxonomyServiceClient
+      .getListByObjectId({
+        ...args,
         fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       })
       .lastValue();
+    return termTaxonomies;
   }
 
   @RamAuthorized(TermTaxonomyAction.Create)
   @Mutation((returns) => TermTaxonomy, { description: 'Create a new term taxonomy.' })
-  createTermTaxonomy(
+  async createTermTaxonomy(
     @Args('model', { type: () => NewTermTaxonomyInput }) model: NewTermTaxonomyInput,
   ): Promise<TermTaxonomy> {
-    return this.basicService.send<TermTaxonomy>(TermTaxonomyPattern.Create, model).lastValue();
+    const { termTaxonomy } = await this.termTaxonomyServiceClient.create(model).lastValue();
+    return termTaxonomy;
   }
 
   @RamAuthorized(TermTaxonomyAction.CreateRelationship)
   @Mutation((returns) => TermRelationship, { description: 'Create a new term relationship.' })
-  createTermRelationship(
+  async createTermRelationship(
     @Args('model', { type: () => NewTermRelationshipInput }) model: NewTermRelationshipInput,
   ): Promise<TermRelationship> {
-    return this.basicService.send<TermRelationship>(TermTaxonomyPattern.CreateRelationship, model).lastValue();
+    const { relationship } = await this.termTaxonomyServiceClient.createRelationship(model).lastValue();
+    return relationship;
   }
 
   @RamAuthorized(TermTaxonomyAction.Update)
@@ -203,7 +224,7 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
     @Args('id', { type: () => ID, description: 'Term id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateTermTaxonomyInput }) model: UpdateTermTaxonomyInput,
   ): Promise<void> {
-    await this.basicService.send<void>(TermTaxonomyPattern.Update, { id, ...model }).lastValue();
+    await this.termTaxonomyServiceClient.update({ id, ...model }).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.Delete)
@@ -214,7 +235,7 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
   async deleteTermTaxonomy(
     @Args('id', { type: () => ID, description: 'Term id' }, ParseIntPipe) id: number,
   ): Promise<void> {
-    await this.basicService.send(TermTaxonomyPattern.Delete, { id }).lastValue();
+    await this.termTaxonomyServiceClient.delete({ id }).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.BulkDelete)
@@ -225,7 +246,7 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
   async bulkDeleteTermTaxonomy(
     @Args('ids', { type: () => [ID!], description: 'Term ids' }) ids: number[],
   ): Promise<void> {
-    await this.basicService.send<void>(TermTaxonomyPattern.BulkDelete, { ids }).lastValue();
+    await this.termTaxonomyServiceClient.bulkDelete({ ids }).lastValue();
   }
 
   @RamAuthorized(TermTaxonomyAction.DeleteRelationship)
@@ -234,8 +255,8 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
     @Args('objectId', { type: () => ID, description: 'Object id' }) objectId: number,
     @Args('termTaxonomyId', { type: () => ID, description: 'Term taxonomy id' }) termTaxonomyId: number,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TermTaxonomyPattern.DeleteRelationship, {
+    await this.termTaxonomyServiceClient
+      .deleteRelationship({
         objectId,
         termTaxonomyId,
       })

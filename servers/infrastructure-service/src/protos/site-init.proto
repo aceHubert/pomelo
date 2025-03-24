@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+/**
+ * 站点初始化配置请求
+ * 用于首次启动时配置站点的基本信息
+ */
+message StartOptionRequest {
+  // 站点标题
+  string title = 1;
+  // 管理员初始密码
+  string password = 2;
+  // 管理员电子邮箱
+  string email = 3;
+  // web端访问地址
+  string homeUrl = 4;
+  // 静态资源地址
+  string siteUrl = 5;
+  // 默认语言设置
+  string locale = 6;
+}
+
+/**
+ * 站点初始化服务接口定义
+ * 用于处理站点的首次初始化流程
+ */
+service SiteInitService {
+  // 检查是否需要初始化站点
+  rpc IsRequired(google.protobuf.Empty) returns (google.protobuf.BoolValue) {}
+  // 开始执行站点初始化
+  rpc Start(StartOptionRequest) returns (google.protobuf.Empty) {}
+}

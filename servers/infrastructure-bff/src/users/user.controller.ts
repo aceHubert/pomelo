@@ -18,35 +18,34 @@ import {
   Req,
   Res,
   HttpStatus,
+  OnModuleInit,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
+  md5,
+  createResponseSuccessType,
+  User,
+  RequestUser,
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   ApiAuthCreate,
-  User,
-  RequestUser,
-  md5,
-  createResponseSuccessType,
   OptionPresetKeys,
   UserStatus,
-  UserRole,
-  INFRASTRUCTURE_SERVICE,
-  UserPattern,
-  OptionPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import { UserServiceClient, USER_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/user';
+import { OptionServiceClient, OPTION_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/option';
 import { UserAction } from '@/common/actions';
 import { createMetaController } from '@/common/controllers/meta.controller';
-import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { UserService } from './user.service';
 import { NewUserDto } from './dto/new-user.dto';
 import { NewUserMetaDto } from './dto/new-user-meta.dto';
-import { UpdateUserDto, UpdateUserPasswordDto } from './dto/update-user.dto';
+import { UpdateUserDto, UpdateUserPasswordDto, ResetUserPasswordDto } from './dto/update-user.dto';
 import { PagedUserQueryDto } from './dto/user-query.dto';
-import { VerifyUserDto } from './dto/signin.dto';
+import { SigninDto } from './dto/signin.dto';
 import {
   UserModelResp,
   UserWithMetasModelResp,
@@ -58,24 +57,42 @@ import {
 @ApiTags('user')
 @Authorized()
 @Controller({ path: 'api/users', scope: Scope.REQUEST })
-export class UserController extends createMetaController('user', UserMetaModelResp, NewUserMetaDto, {
-  authDecorator: (method) => {
-    const ramAction =
-      method === 'getMeta'
-        ? UserAction.MetaDetail
-        : method === 'getMetas'
-        ? UserAction.MetaList
-        : method === 'createMeta' || method === 'createMetas'
-        ? UserAction.MetaCreate
-        : method === 'updateMeta' || method === 'updateMetaByKey'
-        ? UserAction.MetaUpdate
-        : UserAction.MetaDelete;
+export class UserController
+  extends createMetaController('user', UserMetaModelResp, NewUserMetaDto, {
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? UserAction.MetaDetail
+          : method === 'getMetas'
+          ? UserAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? UserAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? UserAction.MetaUpdate
+          : UserAction.MetaDelete;
 
-    return [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
-  },
-}) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy, private readonly userService: UserService) {
-    super(basicService);
+      return [RamAuthorized(ramAction), ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])];
+    },
+  })
+  implements OnModuleInit
+{
+  private userServiceClient!: UserServiceClient;
+  private optionServiceClient!: OptionServiceClient;
+
+  constructor(
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc,
+    private readonly userService: UserService,
+  ) {
+    super();
+  }
+
+  onModuleInit() {
+    this.userServiceClient = this.client.getService<UserServiceClient>(USER_SERVICE_NAME);
+    this.optionServiceClient = this.client.getService<OptionServiceClient>(OPTION_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.userServiceClient;
   }
 
   /**
@@ -104,30 +121,20 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @User() requestUser: RequestUser,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.userService.getUser(
-      id,
-      ['id', 'loginName', 'niceName', 'displayName', 'mobile', 'email', 'url', 'status', 'updatedAt', 'createdAt'],
-      Number(requestUser.sub),
-    );
+    const user = await this.userService.getUser(id, Number(requestUser.sub));
 
     let metas;
-    if (result) {
-      metas = await this.basicService
-        .send<MetaModelResp[]>(UserPattern.GetMetas, {
-          userId: id,
-          metaKeys,
-          fields: ['id', 'metaKey', 'metaValue'],
-        })
-        .lastValue();
+    if (user) {
+      metas = await this.userService.getMetas(id, metaKeys ?? []);
     }
 
-    if (result === undefined) {
+    if (user === undefined) {
       res.status(HttpStatus.NO_CONTENT);
     }
 
     return this.success({
       data: {
-        ...result,
+        ...user,
         metas,
       },
     });
@@ -144,9 +151,9 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     type: () => createResponseSuccessType({ data: PagedUserResp }, 'PagedUserSuccessResp'),
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedUserQueryDto, @User() requestUser: RequestUser) {
-    const result = await this.basicService
-      .send<PagedUserResp>(UserPattern.GetPaged, {
-        query,
+    const result = await this.userServiceClient
+      .getPaged({
+        ...query,
         fields: [
           'id',
           'loginName',
@@ -179,27 +186,29 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     type: () => createResponseSuccessType({ data: UserModelResp }, 'UserModelSuccessResp'),
   })
   async create(@Body() input: NewUserDto, @User() requestUser: RequestUser) {
-    let capabilities = input.capabilities;
+    let capabilities = input.capabilities as string | undefined;
     if (!capabilities) {
-      capabilities = await this.basicService
-        .send<UserRole>(OptionPattern.GetValue, {
+      ({ optionValue: capabilities } = await this.optionServiceClient
+        .getValue({
           optionName: OptionPresetKeys.DefaultRole,
         })
-        .lastValue();
+        .lastValue());
     }
 
-    const { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt } =
-      await this.basicService
-        .send<UserModelResp>(UserPattern.Create, {
-          ...input,
-          loginPwd: md5(input.loginPwd).toString(),
-          niceName: input.loginName,
-          displayName: input.loginName,
-          status: UserStatus.Enabled,
-          capabilities,
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
+    const {
+      user: { id, loginName, niceName, displayName, mobile, email, url, status, updatedAt, createdAt },
+    } = await this.userServiceClient
+      .create({
+        ...input,
+        loginPwd: md5(input.loginPwd).toString(),
+        niceName: input.loginName,
+        displayName: input.loginName,
+        status: UserStatus.Enabled,
+        capabilities,
+        metas: [],
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     return this.success({
       data: {
@@ -233,8 +242,8 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(UserPattern.Update, {
+      await this.userServiceClient
+        .update({
           ...model,
           id,
           requestUserId: Number(requestUser.sub),
@@ -254,7 +263,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
   @RamAuthorized(UserAction.UpdateStatus)
   @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
-    description: '"true" if success or "false" if user does not exist',
+    description: 'no data content',
     type: () => createResponseSuccessType({}, 'UpdateUserStatusModelSuccessResp'),
   })
   async updateStatus(
@@ -263,13 +272,7 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(UserPattern.UpdateStatus, {
-          id,
-          status,
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
+      await this.userServiceClient.updateStatus({ id, status, requestUserId: Number(requestUser.sub) }).lastValue();
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -280,18 +283,46 @@ export class UserController extends createMetaController('user', UserMetaModelRe
   @Patch('password/update')
   @RamAuthorized(UserAction.UpdatePassword)
   @ApiOkResponse({
-    description: '"true" if success or "false" if user does not exist',
-    type: () => createResponseSuccessType({}, 'UpdateUserStatusModelSuccessResp'),
+    description: 'no data content',
+    type: () => createResponseSuccessType({}, 'UpdateUserPasswordModelSuccessResp'),
   })
-  async updateUserPassword(@Body() model: UpdateUserPasswordDto, @User() requestUser?: RequestUser): Promise<void> {
-    return this.basicService
-      .send<void>(UserPattern.UpdatePassword, {
-        id: requestUser?.sub,
-        username: model.username,
-        oldPwd: md5(model.oldPwd),
-        newPwd: md5(model.newPwd),
-      })
-      .lastValue();
+  async updateLoginPassword(@Body() model: UpdateUserPasswordDto, @User() requestUser?: RequestUser) {
+    try {
+      await this.userServiceClient
+        .updateLoginPassword({
+          id: requestUser?.sub ? Number(requestUser.sub) : undefined,
+          username: model.username,
+          oldPwd: md5(model.oldPwd),
+          newPwd: md5(model.newPwd),
+        })
+        .lastValue();
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
+  }
+
+  @Patch('password/reset')
+  @RamAuthorized(UserAction.ResetPassword)
+  @ApiOkResponse({
+    description: 'no data content',
+    type: () => createResponseSuccessType({}, 'ResetUserPasswordModelSuccessResp'),
+  })
+  async resetLoginPassword(@Body() model: ResetUserPasswordDto, @User() requestUser: RequestUser) {
+    try {
+      await this.userServiceClient
+        .resetLoginPassword({
+          id: model.id,
+          newPwd: md5(model.newPwd),
+          requestUserId: Number(requestUser.sub),
+        })
+        .lastValue();
+      return this.success();
+    } catch (e: any) {
+      this.logger.error(e);
+      return this.faild(e.message);
+    }
   }
 
   /**
@@ -306,8 +337,8 @@ export class UserController extends createMetaController('user', UserMetaModelRe
   })
   async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
     try {
-      await this.basicService
-        .send<void>(UserPattern.Delete, {
+      await this.userServiceClient
+        .delete({
           id,
           requestUserId: Number(requestUser.sub),
         })
@@ -328,16 +359,15 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     description: 'user sign in result',
     type: () => createResponseSuccessType({ data: SignInResultResp }, 'UserSignInResultModelSuccessResp'),
   })
-  async signIn(@Body() input: VerifyUserDto, @Req() req: Request, @I18n() i18n: I18nContext) {
-    const result = await this.basicService
-      .send<false | UserModelResp>(UserPattern.Verify, {
+  async signIn(@Body() input: SigninDto, @Req() req: Request, @I18n() i18n: I18nContext) {
+    const { verified, user } = await this.userServiceClient
+      .verifyUser({
         username: input.username,
         password: md5(input.password).toString(),
       })
       .lastValue();
-    if (result) {
-      const token = await this.userService.createAccessToken(result, req.get('origin'));
-
+    if (verified) {
+      const token = await this.userService.createAccessToken(user!, req.get('origin'));
       return this.success({
         data: {
           success: true,

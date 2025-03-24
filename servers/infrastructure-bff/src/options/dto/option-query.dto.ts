@@ -15,4 +15,9 @@ export class OptionQueryDto extends OptionArgsValidator {
     description: 'Is option load automatically in application start',
   })
   autoload?: OptionAutoload;
+
+  /**
+   * Option names to query
+   */
+  optionNames?: string[];
 }

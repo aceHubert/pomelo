@@ -1,19 +1,14 @@
-import { Optional } from '../shared/types';
+import { LinkVisible, LinkTarget } from '@ace-pomelo/shared/server';
+import { Optional } from './types';
 
 export interface LinkAttributes {
   id: number;
   url: string;
   name: string;
   image: string;
-  /**
-   * _blank/_self
-   */
-  target: string;
+  target: LinkTarget;
   description: string;
-  /**
-   * yes/no
-   */
-  visible: string;
+  visible: LinkVisible;
   userId: number;
   rel?: string;
   rss?: string;

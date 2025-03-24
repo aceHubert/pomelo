@@ -24,6 +24,12 @@ export class TermTaxonomyArgs extends TermTaxonomyArgsValidator {
    */
   @Field((type) => Int)
   group?: number;
+
+  /**
+   * Exclude term ids
+   */
+  @Field((type) => [Int])
+  exclude?: number[];
 }
 
 @ArgsType()

@@ -1,240 +1,314 @@
-import { Controller, ParseIntPipe, ParseArrayPipe, ParseBoolPipe, ParseEnumPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { TemplateStatus, TemplatePresetType, TemplatePattern } from '@ace-pomelo/shared/server';
+import { Controller } from '@nestjs/common';
+import { TemplatePresetType } from '@ace-pomelo/shared/server';
+import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
+import { IdRequest } from '@ace-pomelo/shared/server/proto-ts/common/shared';
 import {
-  TemplateDataSource,
-  TemplateModel,
-  PagedTemplateModel,
-  TemplateOptionModel,
-  TemplateMetaModel,
-  NewTemplateMetaInput,
-} from '../datasource/index';
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceControllerMethods,
+  TemplateServiceController,
+  GetTemplateRequest,
+  GetTemplateByNameRequest,
+  GetTemplateResponse,
+  GetTemplateOptionsRequest,
+  GetTemplateOptionsResponse,
+  GetTemplateNamesRequest,
+  GetTemplateNamesResponse,
+  GetTemplateCountByDayRequest,
+  GetTemplateCountByDayResponse,
+  GetTemplateCountByMonthRequest,
+  GetTemplateCountByMonthResponse,
+  GetTemplateCountByYearRequest,
+  GetTemplateCountByYearResponse,
+  GetTemplateCountByStatusRequest,
+  GetTemplateCountByStatusResponse,
+  GetPagedTemplateRequest,
+  GetPagedTemplateResponse,
+  GetTemplateSelfCountRequest,
+  GetTemplateSelfCountResponse,
+  GetTemplateRevisionCountResponse,
+  GetTemplateRevisionsRquest,
+  GetTemplateRevisionsResponse,
+  CreateTemplateRequest,
+  CreatePresetTypeTemplateRequest,
+  CreateTemplateResponse,
+  UpdateTemplateRequest,
+  UpdateTemplateStatusRequest,
+  BulkUpdateTemplateStatusRequest,
+  UpdateTemplateNameRequest,
+  UpdateCommentCountRequest,
+  RestoreTemplateRequest,
+  BulkRestoreTemplateRequest,
+  DeleteTemplateRequest,
+  BulkDeleteTemplateRequest,
+} from '@ace-pomelo/shared/server/proto-ts/template';
+import { WrapperTemplateStatus, WrapperTemplateCommentStatus } from '@/common/utils/wrapper-enum.util';
+import { TemplateDataSource } from '../datasource';
 import { createMetaController } from './meta.controller';
-import {
-  NewFormTemplatePayload,
-  NewPageTemplatePayload,
-  NewPostTemplatePayload,
-  NewTemplatePayload,
-  PagedTemplateQueryPayload,
-  TemplateOptionQueryPayload,
-  UpdateFormTemplatePayload,
-  UpdatePageTemplatePayload,
-  UpdatePostTemplatePayload,
-  UpdateTemplatePayload,
-} from './payload/template.payload';
 
 @Controller()
-export class TemplateController extends createMetaController<TemplateMetaModel, NewTemplateMetaInput>('template') {
+@TemplateServiceControllerMethods()
+export class TemplateController
+  extends createMetaController('template', TEMPLATE_SERVICE_NAME)
+  implements TemplateServiceController
+{
   constructor(private readonly templateDataSource: TemplateDataSource) {
     super(templateDataSource);
   }
 
-  @MessagePattern(TemplatePattern.Get)
-  get(
-    @Payload('id', ParseIntPipe) @Payload('id', ParseIntPipe) id: number,
-    @Payload('type') type: string | undefined,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-    @Payload('requestUserId', new ParseIntPipe({ optional: true })) requestUserId?: number,
-  ): Promise<TemplateModel | undefined> {
-    return this.templateDataSource.get(id, type, fields, requestUserId);
+  get({ fields, id, type, requestUserId }: GetTemplateRequest): Promise<GetTemplateResponse> {
+    return this.templateDataSource.get(id, type, fields, requestUserId).then((result) => {
+      return { template: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.GetByName)
-  getByName(
-    @Payload('name') name: string,
-    @Payload('type') type: string | undefined,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-    @Payload('requestUserId', new ParseIntPipe({ optional: true })) requestUserId?: number,
-  ): Promise<TemplateModel | undefined> {
-    return this.templateDataSource.getByName(name, type, fields, requestUserId);
+  getByName({ fields, name, type, requestUserId }: GetTemplateByNameRequest): Promise<GetTemplateResponse> {
+    return this.templateDataSource.getByName(name, type, fields, requestUserId).then((result) => {
+      return { template: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.GetOptions)
-  getOptions(
-    @Payload('query') query: TemplateOptionQueryPayload,
-    @Payload('type') type: string,
-    @Payload('fields', new ParseArrayPipe({ items: String, optional: true })) fields = ['id', 'title'],
-  ): Promise<TemplateOptionModel[]> {
-    return this.templateDataSource.getOptions(query, type, fields);
+  getOptions({
+    fields,
+    type,
+    keywordField,
+    taxonomies,
+    ...query
+  }: GetTemplateOptionsRequest): Promise<GetTemplateOptionsResponse> {
+    if (fields.length === 0) {
+      fields = ['id', 'title'];
+    }
+
+    if (keywordField && !['title', 'name'].includes(keywordField)) {
+      keywordField = 'title';
+    }
+
+    return this.templateDataSource
+      .getOptions(
+        {
+          ...query,
+          keywordField: keywordField as any, // type error
+          taxonomies: taxonomies as any,
+        },
+        type,
+        fields,
+      )
+      .then((result) => {
+        return { options: result };
+      });
   }
 
-  @MessagePattern(TemplatePattern.GetNames)
-  getNames(@Payload('type') type: string): Promise<string[]> {
-    return this.templateDataSource.getNames(type);
+  getNames({ type }: GetTemplateNamesRequest): Promise<GetTemplateNamesResponse> {
+    return this.templateDataSource.getNames(type).then((result) => {
+      return { names: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.CountBySelf)
-  getCountBySelf(
-    @Payload('type') type: string,
-    @Payload('includeTrashStatus', ParseBoolPipe) includeTrashStatus: boolean,
-    @Payload('requestUserId', ParseIntPipe) @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ) {
-    return this.templateDataSource.getCountBySelf(type, includeTrashStatus, requestUserId);
+  getCountByDay({ type, month }: GetTemplateCountByDayRequest): Promise<GetTemplateCountByDayResponse> {
+    return this.templateDataSource.getCountByDay(month, type).then((result) => {
+      return { counts: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.CountByDay)
-  getCountByDay(@Payload('month') month: string, @Payload('type') type: string) {
-    return this.templateDataSource.getCountByDay(month, type);
+  getCountByMonth({ type, year, months }: GetTemplateCountByMonthRequest): Promise<GetTemplateCountByMonthResponse> {
+    return this.templateDataSource.getCountByMonth({ year, months }, type).then((result) => {
+      return { counts: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.CountByMonth)
-  getCountByMonth(
-    @Payload('yarn') year: string | undefined,
-    @Payload('months', new ParseIntPipe({ optional: true })) months: number | undefined,
-    @Payload('type') type: string,
-  ) {
-    return this.templateDataSource.getCountByMonth({ year, months }, type);
+  getCountByYear({ type }: GetTemplateCountByYearRequest): Promise<GetTemplateCountByYearResponse> {
+    return this.templateDataSource.getCountByYear(type).then((result) => {
+      return { counts: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.CountByYear)
-  getCountByYear(@Payload('type') type: string) {
-    return this.templateDataSource.getCountByYear(type);
+  getCountByStatus({
+    type,
+    requestUserId,
+  }: GetTemplateCountByStatusRequest): Promise<GetTemplateCountByStatusResponse> {
+    return this.templateDataSource.getCountByStatus(type, requestUserId).then((result) => {
+      return { counts: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.CountByStatus)
-  getCountByStatus(
-    @Payload('type') type: string,
-    @Payload('requestUserId', ParseIntPipe) @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ) {
-    return this.templateDataSource.getCountByStatus(type, requestUserId);
+  getPaged({
+    fields,
+    type,
+    keywordField,
+    status,
+    taxonomies,
+    requestUserId,
+    ...query
+  }: GetPagedTemplateRequest): Promise<GetPagedTemplateResponse> {
+    if (keywordField && !['title', 'name'].includes(keywordField)) {
+      keywordField = 'title';
+    }
+    return this.templateDataSource.getPaged(
+      {
+        ...query,
+        status: WrapperTemplateStatus.asValueOrDefault(status, void 0),
+        keywordField: keywordField as any, // type error
+        taxonomies: taxonomies as any,
+      },
+      type,
+      fields,
+      requestUserId,
+    );
   }
 
-  @MessagePattern(TemplatePattern.GetPaged)
-  getPaged(
-    @Payload('query') query: PagedTemplateQueryPayload,
-    @Payload('type') type: string,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-    @Payload('requestUserId', new ParseIntPipe({ optional: true })) requestUserId?: number,
-  ): Promise<PagedTemplateModel> {
-    return this.templateDataSource.getPaged(query, type, fields, requestUserId);
+  getSelfCount({
+    type,
+    includeTrashStatus,
+    requestUserId,
+  }: GetTemplateSelfCountRequest): Promise<GetTemplateSelfCountResponse> {
+    return this.templateDataSource.getSelfCount(type, includeTrashStatus, requestUserId).then((result) => {
+      return { counts: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.GetRevisionCount)
-  getRevisionCount(@Payload('id', ParseIntPipe) @Payload('id', ParseIntPipe) id: number) {
-    return this.templateDataSource.getRevisionCount(id);
+  getRevisionCount({ id }: IdRequest): Promise<GetTemplateRevisionCountResponse> {
+    return this.templateDataSource.getRevisionCount(id).then((result) => {
+      return { counts: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.GetRevisionList)
-  getRevisions(
-    @Payload('id', ParseIntPipe) @Payload('id', ParseIntPipe) id: number,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-    @Payload('requestUserId', ParseIntPipe) @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ) {
-    return this.templateDataSource.getRevisions(id, fields, requestUserId);
+  getRevisions({ fields, id, requestUserId }: GetTemplateRevisionsRquest): Promise<GetTemplateRevisionsResponse> {
+    return this.templateDataSource.getRevisions(id, fields, requestUserId).then((result) => {
+      return { revisions: result };
+    });
   }
 
-  @MessagePattern(TemplatePattern.CreateForm)
-  createForm(@Payload() payload: NewFormTemplatePayload): Promise<TemplateModel> {
-    const { requestUserId, ...model } = payload;
-    return this.templateDataSource.create(model, TemplatePresetType.Form, requestUserId);
+  createForm({ requestUserId, ...model }: CreatePresetTypeTemplateRequest): Promise<CreateTemplateResponse> {
+    return this.templateDataSource
+      .create(
+        {
+          ...model,
+          excerpt: model.excerpt || '',
+          status: WrapperTemplateStatus.asValueOrDefault(model.status, void 0),
+          commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, void 0),
+        },
+        TemplatePresetType.Form,
+        requestUserId,
+      )
+      .then((result) => {
+        return { template: result };
+      });
   }
 
-  @MessagePattern(TemplatePattern.CreatePage)
-  createPage(@Payload() payload: NewPageTemplatePayload): Promise<TemplateModel> {
-    const { requestUserId, ...model } = payload;
-    return this.templateDataSource.create(model, TemplatePresetType.Page, requestUserId);
+  createPage({ requestUserId, ...model }: CreatePresetTypeTemplateRequest): Promise<CreateTemplateResponse> {
+    return this.templateDataSource
+      .create(
+        {
+          ...model,
+          excerpt: model.excerpt || '',
+          status: WrapperTemplateStatus.asValueOrDefault(model.status, void 0),
+          commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, void 0),
+        },
+        TemplatePresetType.Page,
+        requestUserId,
+      )
+      .then((result) => {
+        return { template: result };
+      });
   }
 
-  @MessagePattern(TemplatePattern.CreatePost)
-  createPost(@Payload() payload: NewPostTemplatePayload): Promise<TemplateModel> {
-    const { requestUserId, ...model } = payload;
-    return this.templateDataSource.create(model, TemplatePresetType.Post, requestUserId);
+  createPost({ requestUserId, ...model }: CreatePresetTypeTemplateRequest): Promise<CreateTemplateResponse> {
+    return this.templateDataSource
+      .create(
+        {
+          ...model,
+          excerpt: model.excerpt || '',
+          status: WrapperTemplateStatus.asValueOrDefault(model.status, void 0),
+          commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, void 0),
+        },
+        TemplatePresetType.Post,
+        requestUserId,
+      )
+      .then((result) => {
+        return { template: result };
+      });
   }
 
-  @MessagePattern(TemplatePattern.Create)
-  create(@Payload() payload: NewTemplatePayload): Promise<TemplateModel> {
-    const { type, requestUserId, ...model } = payload;
-    return this.templateDataSource.create(model, type, requestUserId);
+  create({ type, requestUserId, ...model }: CreateTemplateRequest): Promise<CreateTemplateResponse> {
+    return this.templateDataSource
+      .create(
+        {
+          ...model,
+          status: WrapperTemplateStatus.asValueOrDefault(model.status, void 0),
+          commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, void 0),
+        },
+        type,
+        requestUserId,
+      )
+      .then((result) => {
+        return { template: result };
+      });
   }
 
-  @MessagePattern(TemplatePattern.UpdateForm)
-  updateForm(@Payload() payload: UpdateFormTemplatePayload): Promise<void> {
-    const { id, requestUserId, ...model } = payload;
-    return this.templateDataSource.update(id, model, requestUserId);
+  update({ id, requestUserId, ...model }: UpdateTemplateRequest): Promise<Empty> {
+    return this.templateDataSource
+      .update(
+        id,
+        {
+          ...model,
+          status: WrapperTemplateStatus.asValueOrDefault(model.status, void 0),
+          commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, void 0),
+        },
+        requestUserId,
+      )
+      .then(() => {
+        return {};
+      });
   }
 
-  @MessagePattern(TemplatePattern.UpdatePage)
-  updatePage(@Payload() payload: UpdatePageTemplatePayload): Promise<void> {
-    const { id, requestUserId, ...model } = payload;
-    return this.templateDataSource.update(id, model, requestUserId);
+  updateName({ id, name, requestUserId }: UpdateTemplateNameRequest): Promise<Empty> {
+    return this.templateDataSource.updateName(id, name, requestUserId).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(TemplatePattern.UpdatePost)
-  updatePost(@Payload() payload: UpdatePostTemplatePayload): Promise<void> {
-    const { id, requestUserId, ...model } = payload;
-    return this.templateDataSource.update(id, model, requestUserId);
+  updateStatus({ id, status, requestUserId }: UpdateTemplateStatusRequest): Promise<Empty> {
+    return this.templateDataSource
+      .updateStatus(id, WrapperTemplateStatus.asValueOrThrow(status), requestUserId)
+      .then(() => {
+        return {};
+      });
   }
 
-  @MessagePattern(TemplatePattern.Update)
-  update(@Payload() payload: UpdateTemplatePayload): Promise<void> {
-    const { id, requestUserId, ...model } = payload;
-    return this.templateDataSource.update(id, model, requestUserId);
+  bulkUpdateStatus({ ids, status, requestUserId }: BulkUpdateTemplateStatusRequest): Promise<Empty> {
+    return this.templateDataSource
+      .bulkUpdateStatus(ids, WrapperTemplateStatus.asValueOrThrow(status), requestUserId)
+      .then(() => {
+        return {};
+      });
   }
 
-  @MessagePattern(TemplatePattern.UpdateName)
-  updateName(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('name') name: string,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.templateDataSource.updateName(id, name, requestUserId);
+  updateCommentCount({ id, count }: UpdateCommentCountRequest): Promise<Empty> {
+    return this.templateDataSource.updateCommentCount(id, count).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(TemplatePattern.UpdateStatus)
-  updateStatus(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('status', new ParseEnumPipe(TemplateStatus)) status: TemplateStatus,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.templateDataSource.updateStatus(id, status, requestUserId);
+  restore({ id, requestUserId }: RestoreTemplateRequest): Promise<Empty> {
+    return this.templateDataSource.restore(id, requestUserId).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(TemplatePattern.BulkUpdateStatus)
-  bulkUpdateStatus(
-    @Payload('ids', new ParseArrayPipe({ items: Number })) ids: number[],
-    @Payload('status', new ParseEnumPipe(TemplateStatus)) status: TemplateStatus,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.templateDataSource.bulkUpdateStatus(ids, status, requestUserId);
+  bulkRestore({ ids, requestUserId }: BulkRestoreTemplateRequest): Promise<Empty> {
+    return this.templateDataSource.bulkRestore(ids, requestUserId).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(TemplatePattern.UpdateCommentCount)
-  updateCommentCount(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('count', ParseIntPipe) count: number,
-  ): Promise<void> {
-    return this.templateDataSource.updateCommentCount(id, count);
+  delete({ id, requestUserId }: DeleteTemplateRequest): Promise<Empty> {
+    return this.templateDataSource.delete(id, requestUserId).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(TemplatePattern.Restore)
-  restore(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.templateDataSource.restore(id, requestUserId);
-  }
-
-  @MessagePattern(TemplatePattern.BulkRestore)
-  bulkRestore(
-    @Payload('ids', new ParseArrayPipe({ items: Number })) ids: number[],
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.templateDataSource.bulkRestore(ids, requestUserId);
-  }
-
-  @MessagePattern(TemplatePattern.Delete)
-  delete(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.templateDataSource.delete(id, requestUserId);
-  }
-
-  @MessagePattern(TemplatePattern.BulkDelete)
-  bulkDelete(
-    @Payload('ids', new ParseArrayPipe({ items: Number })) ids: number[],
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.templateDataSource.bulkDelete(ids, requestUserId);
+  bulkDelete({ ids, requestUserId }: BulkDeleteTemplateRequest): Promise<Empty> {
+    return this.templateDataSource.bulkDelete(ids, requestUserId).then(() => {
+      return {};
+    });
   }
 }

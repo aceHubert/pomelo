@@ -1,5 +1,5 @@
-import { Inject, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, ParseIntPipe, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
@@ -12,11 +12,18 @@ import {
   TemplateStatus,
   TemplatePresetType,
   TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  TemplatePattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import {
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceClient,
+  TemplateModel,
+  GetTemplateOptionsRequest,
+  GetPagedTemplateRequest,
+} from '@ace-pomelo/shared/server/proto-ts/template';
 import { TemplateAction, FormTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
+import { WrapperTemplateStatus } from '@/common/utils/wrapper-enum.util';
 import { MessageService } from '@/messages/message.service';
 import { createAuthorFieldResolver } from './base.resolver';
 import { NewFormTemplateInput } from './dto/new-template.input';
@@ -29,16 +36,16 @@ import { FormTemplate, PagedFormTemplate, FormTemplateOption, PagedFormTemplateI
 @Authorized()
 @Resolver(() => PagedFormTemplateItem)
 export class PagedFormTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedFormTemplateItem, true) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
 @Authorized()
 @Resolver(() => FormTemplate)
 export class FormTemplateAuthorResolver extends createAuthorFieldResolver(FormTemplate) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
@@ -46,75 +53,107 @@ export class FormTemplateAuthorResolver extends createAuthorFieldResolver(FormTe
 
 @Authorized()
 @Resolver(() => PagedFormTemplateItem)
-export class PagedFormTemplateItemMetaFieldResolver extends createMetaFieldResolver(PagedFormTemplateItem, {
-  modelName: 'template',
-  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
-}) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+export class PagedFormTemplateItemMetaFieldResolver
+  extends createMetaFieldResolver('template', PagedFormTemplateItem, {
+    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+  })
+  implements OnModuleInit
+{
+  private templateServiceClient!: TemplateServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
   }
 }
 
 @Authorized()
 @Resolver(() => FormTemplate)
-export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, {
-  modelName: 'template',
-  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
-}) {
+export class FormTemplateResolver
+  extends createMetaFieldResolver('template', FormTemplate, {
+    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+  })
+  implements OnModuleInit
+{
+  private templateServiceClient!: TemplateServiceClient;
+
   constructor(
-    @Inject(INFRASTRUCTURE_SERVICE) private basicService: ClientProxy,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc,
     private readonly messageService: MessageService,
   ) {
-    super(basicService);
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
+  }
+
+  private mapToFormTemplate(model: TemplateModel): FormTemplate {
+    return {
+      ...model,
+      status: WrapperTemplateStatus.asValueOrDefault(model.status, TemplateStatus.Publish),
+    };
   }
 
   @Anonymous()
   @Query((returns) => [FormTemplateOption], { nullable: true, description: 'Get form template options.' })
-  formTemplateOptions(
+  async formTemplateOptions(
     @Args() args: FormTemplateOptionArgs,
     @Fields() fields: ResolveTree,
   ): Promise<FormTemplateOption[]> {
     const { categoryId, categoryName, ...restArgs } = args;
-    return this.basicService
-      .send<FormTemplateOption[]>(TemplatePattern.GetOptions, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const { options } = await this.templateServiceClient
+      .getOptions({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetTemplateOptionsRequest['taxonomies'],
         type: TemplatePresetType.Form,
         fields: this.getFieldNames(fields.fieldsByTypeName.FormTemplateOption),
       })
       .lastValue();
+
+    return options;
   }
 
   @Anonymous()
   @Query((returns) => FormTemplate, { nullable: true, description: 'Get form template.' })
-  formTemplate(
+  async formTemplate(
     @Args('id', { type: () => ID, description: 'Form id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
-  ) {
-    return this.basicService
-      .send<FormTemplate | undefined>(TemplatePattern.Get, {
+  ): Promise<FormTemplate | undefined> {
+    const { template } = await this.templateServiceClient
+      .get({
         id,
         type: TemplatePresetType.Form,
-        // content 不在模型里
-        fields: ['content', ...this.getFieldNames(fields.fieldsByTypeName.FormTemplate)],
+        fields: this.getFieldNames(fields.fieldsByTypeName.FormTemplate),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
       .lastValue();
+
+    return template ? this.mapToFormTemplate(template) : undefined;
   }
 
   @Query((returns) => PagedFormTemplate, { description: 'Get paged form templates.' })
@@ -124,31 +163,33 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @User() requestUser?: RequestUser,
   ): Promise<PagedFormTemplate> {
     const { categoryId, categoryName, ...restArgs } = args;
-    return this.basicService
-      .send<PagedFormTemplate>(TemplatePattern.GetPaged, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    return this.templateServiceClient
+      .getPaged({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetPagedTemplateRequest['taxonomies'],
         type: TemplatePresetType.Form,
         fields: this.getFieldNames(
           fields.fieldsByTypeName.PagedFormTemplate.rows.fieldsByTypeName.PagedFormTemplateItem,
         ),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
-      .lastValue();
+      .lastValue()
+      .then(({ rows, ...rest }) => ({
+        ...rest,
+        rows: rows.map((row) => this.mapToFormTemplate(row)),
+      }));
   }
 
   @RamAuthorized(FormTemplateAction.Create)
@@ -157,35 +198,28 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @Args('model', { type: () => NewFormTemplateInput }) model: NewFormTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<FormTemplate> {
-    const { id, title, author, content, status, updatedAt, createdAt } = await this.basicService
-      .send<FormTemplate>(TemplatePattern.CreateForm, {
+    const { template } = await this.templateServiceClient
+      .createForm({
         ...model,
+        metas: model.metas || [],
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
 
     // 新建（当状态为需要审核）审核消息推送
-    if (status === TemplateStatus.Pending) {
+    if (template.status === TemplateStatus.Pending) {
       await this.messageService.publish(
         {
           eventName: 'createFormReview',
           payload: {
-            id,
+            id: template.id,
           },
         },
         { excludes: [requestUser.sub] },
       );
     }
 
-    return {
-      id,
-      title,
-      author,
-      content,
-      status,
-      updatedAt,
-      createdAt,
-    };
+    return this.mapToFormTemplate(template);
   }
 
   @RamAuthorized(FormTemplateAction.Update)
@@ -198,8 +232,8 @@ export class FormTemplateResolver extends createMetaFieldResolver(FormTemplate, 
     @Args('model', { type: () => UpdateFormTemplateInput }) model: UpdateFormTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.UpdateForm, {
+    await this.templateServiceClient
+      .update({
         ...model,
         id,
         requestUserId: Number(requestUser.sub),

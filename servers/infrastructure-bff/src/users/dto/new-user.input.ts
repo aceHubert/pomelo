@@ -1,5 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { UserRole } from '@ace-pomelo/shared/server';
+import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 import { NewUserValidator } from './new-user.validator';
 
 @InputType({ description: 'New user input' })
@@ -64,4 +65,9 @@ export class NewUserInput extends NewUserValidator {
    * Client url
    */
   url!: string;
+
+  /**
+   * New metas
+   */
+  metas?: NewMetaInput[];
 }

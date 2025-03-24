@@ -10,7 +10,6 @@ import {
   HealthIndicatorFunction,
   HealthCheckResult,
 } from '@nestjs/terminus';
-
 import { AppService } from './app.service';
 
 @ApiExcludeController()
@@ -39,10 +38,10 @@ export class AppController {
 
     indicatorFunctions.push(() =>
       this.microservice.pingCheck('infrastructure-service', {
-        transport: Transport.TCP,
+        transport: Transport.GRPC,
         options: {
-          host: this.config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
-          port: this.config.get('INFRASTRUCTURE_SERVICE_PORT', 3000),
+          host: this.config.get('INFRASTRUCTURE_GRPC_HOST', 'localhost'),
+          port: this.config.getOrThrow('INFRASTRUCTURE_GRPC_PORT'),
         },
       }),
     );

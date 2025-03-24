@@ -26,7 +26,12 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
-import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import {
+  configuration,
+  normalizeRoutePath,
+  POMELO_SERVICE_PACKAGE_NAME,
+  ErrorHandlerClientGrpcProxy,
+} from '@ace-pomelo/shared/server';
 import {
   AuthorizationModule,
   AuthorizationService,
@@ -35,11 +40,11 @@ import {
   getSigningKey,
 } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
-import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';
 import { MessageModule } from './messages/message.module';
 import { SiteInitModule } from './site-init/site-init.module';
+import { CommentsModule } from './comments/comments.module';
 import { OptionModule } from './options/option.module';
 import { TermTaxonomyModule } from './term-taxonomy/term-taxonomy.module';
 import { TemplateModule } from './templates/template.module';
@@ -146,13 +151,20 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       clients: [
         {
-          name: INFRASTRUCTURE_SERVICE,
+          name: POMELO_SERVICE_PACKAGE_NAME,
           useFactory: (config: ConfigService) => ({
-            customClass: ErrorHandlerClientTCP,
+            customClass: ErrorHandlerClientGrpcProxy,
             options: {
-              host: config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
-              port: config.getOrThrow('INFRASTRUCTURE_SERVICE_PORT'),
-              serializer: new I18nSerializer(),
+              package: POMELO_SERVICE_PACKAGE_NAME,
+              protoPath: path.join(__dirname, 'protos/index.proto'),
+              url: `${config.get('INFRASTRUCTURE_GRPC_HOST', 'localhost')}:${config.getOrThrow(
+                'INFRASTRUCTURE_GRPC_PORT',
+              )}`,
+              loader: {
+                longs: Number,
+                defaults: true,
+                oneofs: true,
+              },
             },
           }),
           inject: [ConfigService],
@@ -305,6 +317,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService],
     }),
+    CommentsModule,
     OptionModule,
     TermTaxonomyModule,
     TemplateModule,

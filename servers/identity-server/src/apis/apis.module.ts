@@ -1,14 +1,10 @@
 import { Module } from '@nestjs/common';
-
-const controllers = require.context('./', true, /\.controller\.ts$/);
-const resolvers = require.context('./', true, /\.resolver\.ts$/);
+import { ApiResourceResolver } from './api-resources/api-resource.resolver';
+import { ClientResolver } from './clients/client.resolver';
+import { IdentityResourceResolver } from './identity-resources/identity-resource.resolver';
 
 @Module({
-  controllers: controllers.keys().flatMap((key) => {
-    return Object.values(controllers(key));
-  }),
-  providers: resolvers.keys().flatMap((key) => {
-    return Object.values(resolvers(key));
-  }),
+  controllers: [],
+  providers: [ApiResourceResolver, ClientResolver, IdentityResourceResolver],
 })
 export class ApisModule {}

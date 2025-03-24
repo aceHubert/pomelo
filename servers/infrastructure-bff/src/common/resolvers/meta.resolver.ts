@@ -1,25 +1,24 @@
 import DataLoader from 'dataloader';
-import { camelCase, lowerCase, upperFirst } from 'lodash';
+import { lowerCase, upperFirst } from 'lodash';
 import { Type, applyDecorators, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
 import { VoidResolver } from 'graphql-scalars';
-import { Fields, createMetaPattern } from '@ace-pomelo/shared/server';
+import { Fields } from '@ace-pomelo/shared/server';
 import { ResolveTree } from 'graphql-parse-resolve-info';
+import {
+  MetaServiceClient,
+  MetaResponse,
+  GetMetasRequest,
+  CreateMetaRequest,
+  CreateMetasRequest,
+  UpdateMetaByKeyRequest,
+  DeleteMetaByKeyRequest,
+} from '../utils/meta-service.util';
 import { NewMetaInput } from './dto/new-meta.input';
 import { Meta } from './models/meta.model';
 import { BaseResolver } from './base.resolver';
 
-export type Method =
-  | 'getMeta'
-  | 'getMetas'
-  | 'fieldMetas'
-  | 'createMeta'
-  | 'createMetas'
-  | 'updateMeta'
-  | 'updateMetaByKey'
-  | 'deleteMeta'
-  | 'deleteMetaByKey';
+export type MethodName = keyof MetaServiceClient<any> | 'fieldMetas';
 
 export type Options = {
   /**
@@ -28,7 +27,7 @@ export type Options = {
    * Query/Mutation name prefix(e.g. termTaxonomy -> termTaxonomyMeta)
    * @default camelCase(resolverType.name)
    */
-  modelName?: string;
+  // modelName?: string;
   /**
    * description model name for resolver (lower case).
    * @default lowerCase(modelName)
@@ -38,28 +37,26 @@ export type Options = {
   /**
    * authorize decorator(s)
    */
-  authDecorator?: (method: Method) => MethodDecorator | MethodDecorator[];
+  authDecorator?: (method: MethodName) => MethodDecorator | MethodDecorator[];
 };
 
 /**
  * use DataLoader to batch load metas field resolver
+ * @param modelName Model name
  * @param resolverType Resolver type
  * @param options options
  */
-export function createMetaFieldResolver<MetaReturnType>(
+export function createMetaFieldResolver<ModelName extends string>(
+  modelName: ModelName,
   resolverType: Function,
   {
-    modelName,
     descriptionName,
     authDecorator,
   }: Omit<Options, 'authDecorator'> & {
     authDecorator?: () => MethodDecorator | MethodDecorator[];
   },
 ) {
-  const _modelName = modelName || camelCase(resolverType.name);
-  const _descriptionName = descriptionName || lowerCase(_modelName);
-
-  const pattern = createMetaPattern(_modelName);
+  const _descriptionName = descriptionName || lowerCase(modelName);
 
   const AuthDecorate = (): MethodDecorator => {
     if (authDecorator) {
@@ -72,21 +69,30 @@ export function createMetaFieldResolver<MetaReturnType>(
 
   @Resolver(() => resolverType, { isAbstract: true })
   abstract class MetaFieldResolver extends BaseResolver {
-    private metaLoader!: DataLoader<{ modelId: number; metaKeys?: string[]; fields: string[] }, MetaReturnType[]>;
+    private metaLoader;
 
-    constructor(basicService: ClientProxy) {
+    constructor() {
       super();
-      this.metaLoader = new DataLoader(async (keys) => {
+      this.metaLoader = this.createMetaLoader();
+    }
+
+    protected abstract get metaServiceClient(): MetaServiceClient<ModelName>;
+
+    private createMetaLoader(): DataLoader<
+      { modelId: number; metaKeys?: string[]; fields: string[] },
+      MetaResponse<ModelName>[]
+    > {
+      return new DataLoader(async (keys) => {
         if (keys.length) {
           // 所有调用的 metaKeys 和 fields 都是相同的
-          const results = await basicService
-            .send<Record<number, MetaReturnType[]>>(pattern.GetMetas, {
-              [`${_modelName}Ids`]: keys.map((key) => key.modelId),
+          const { metas } = await this.metaServiceClient
+            .getMetas({
+              [`${modelName}Ids`]: keys.map((key) => key.modelId),
               metaKeys: keys[0].metaKeys,
               fields: keys[0].fields,
-            })
+            } as GetMetasRequest<ModelName>)
             .lastValue();
-          return keys.map(({ modelId }) => results[modelId] || []);
+          return keys.map(({ modelId }) => metas.filter((meta) => meta[`${modelName}Id`] === modelId) || []);
         } else {
           return Promise.resolve([]);
         }
@@ -126,19 +132,21 @@ export function createMetaFieldResolver<MetaReturnType>(
  * @param newMetaInputType new meta input type (Mutation input type)
  * @param options options
  */
-export function createMetaResolver<MetaReturnType, NewMetaInputType>(
+export function createMetaResolver<
+  ModelName extends string,
+  MetaReturnType extends MetaResponse<ModelName>,
+  NewMetaInputType extends CreateMetaRequest<ModelName>,
+>(
+  modelName: ModelName,
   resolverType: Function,
   metaReturnType: Type<MetaReturnType>,
   newMetaInputType: Type<NewMetaInputType>,
-  { modelName, descriptionName, authDecorator }: Options = {},
+  { descriptionName, authDecorator }: Options = {},
 ) {
-  const _modelName = modelName || camelCase(resolverType.name);
-  const _upperFirstModelName = upperFirst(_modelName);
-  const _descriptionName = descriptionName || lowerCase(_modelName);
+  const _upperFirstModelName = upperFirst(modelName);
+  const _descriptionName = descriptionName || lowerCase(modelName);
 
-  const pattern = createMetaPattern(_modelName);
-
-  const AuthDecorate = (method: Method): MethodDecorator => {
+  const AuthDecorate = (method: MethodName): MethodDecorator => {
     if (authDecorator) {
       const decorators = authDecorator(method);
       return Array.isArray(decorators) ? applyDecorators(...decorators) : decorators;
@@ -148,13 +156,12 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
   };
 
   @Resolver({ isAbstract: true })
-  abstract class MetaResolver extends createMetaFieldResolver<MetaReturnType>(resolverType, {
-    modelName: _modelName,
+  abstract class MetaResolver extends createMetaFieldResolver(modelName, resolverType, {
     descriptionName: _descriptionName,
     authDecorator: () => AuthDecorate('fieldMetas'),
   }) {
-    constructor(protected readonly basicService: ClientProxy) {
-      super(basicService);
+    constructor() {
+      super();
     }
 
     /**
@@ -163,7 +170,7 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
     @AuthDecorate('getMeta')
     @Query((returns) => metaReturnType, {
       nullable: true,
-      name: `${_modelName}Meta`,
+      name: `${modelName}Meta`,
       description: `Get ${_descriptionName} meta.`,
     })
     getMeta(
@@ -178,8 +185,8 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       id: number,
       @Fields() fields: ResolveTree,
     ) {
-      return this.basicService
-        .send<MetaReturnType | undefined>(pattern.GetMeta, {
+      return this.metaServiceClient
+        .getMeta({
           id,
           fields: this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]),
         })
@@ -191,11 +198,11 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
      */
     @AuthDecorate('getMetas')
     @Query((returns) => [metaReturnType!], {
-      name: `${_modelName}Metas`,
+      name: `${modelName}Metas`,
       description: `Get ${_descriptionName} metas.`,
     })
     getMetas(
-      @Args(`${_modelName}Id`, {
+      @Args(`${modelName}Id`, {
         type: () => ID,
         description: `${_descriptionName} Id`,
       })
@@ -208,12 +215,12 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       metaKeys: string[] | undefined,
       @Fields() fields: ResolveTree,
     ) {
-      return this.basicService
-        .send<MetaReturnType[]>(pattern.GetMetas, {
-          [`${_modelName}Id`]: modelId,
+      return this.metaServiceClient
+        .getMetas({
+          [`${modelName}Id`]: modelId,
           metaKeys,
           fields: this.getFieldNames(fields.fieldsByTypeName[metaReturnType.name]),
-        })
+        } as GetMetasRequest<ModelName>)
         .lastValue();
     }
 
@@ -227,7 +234,7 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Create a new ${_descriptionName} meta.`,
     })
     createMeta(@Args('model', { type: () => newMetaInputType }) model: NewMetaInputType) {
-      return this.basicService.send<MetaReturnType>(pattern.CreateMeta, model).lastValue();
+      return this.metaServiceClient.createMeta(model).lastValue();
     }
 
     /**
@@ -239,18 +246,15 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Create the bulk of ${_descriptionName} metas.`,
     })
     createMetas(
-      @Args(`${_modelName}id`, {
+      @Args(`${modelName}id`, {
         type: () => ID,
         description: `${_descriptionName} id`,
       })
       modelId: number,
       @Args('metas', { type: () => [NewMetaInput!] }) models: NewMetaInput[],
     ) {
-      return this.basicService
-        .send<MetaReturnType[]>(pattern.CreateMetas, {
-          [`${_modelName}Id`]: modelId,
-          models,
-        })
+      return this.metaServiceClient
+        .createMetas({ [`${modelName}Id`]: modelId, metas: models } as CreateMetasRequest<ModelName>)
         .lastValue();
     }
 
@@ -268,12 +272,7 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       id: number,
       @Args('metaValue') metaValue: string,
     ) {
-      await this.basicService
-        .send<void>(pattern.UpdateMeta, {
-          id,
-          metaValue,
-        })
-        .lastValue();
+      await this.metaServiceClient.updateMeta({ id, metaValue }).lastValue();
     }
 
     /**
@@ -287,7 +286,7 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
     })
     async updateMetaByKey(
       @Args(
-        `${_modelName}Id`,
+        `${modelName}Id`,
         {
           type: () => ID,
           description: `${_descriptionName} Id`,
@@ -303,13 +302,13 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       })
       createIfNotExists?: boolean,
     ) {
-      await this.basicService
-        .send<void>(pattern.UpdateMetaByKey, {
-          [`${_modelName}Id`]: modelId,
+      await this.metaServiceClient
+        .updateMetaByKey({
+          [`${modelName}Id`]: modelId,
           metaKey,
           metaValue,
           createIfNotExists,
-        })
+        } as UpdateMetaByKeyRequest<ModelName>)
         .lastValue();
     }
 
@@ -326,7 +325,7 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       @Args('id', { type: () => ID, description: `${_descriptionName} meta Id` }, ParseIntPipe)
       id: number,
     ) {
-      await this.basicService.send<void>(pattern.DeleteMeta, { id }).lastValue();
+      await this.metaServiceClient.deleteMeta({ id }).lastValue();
     }
 
     /**
@@ -339,18 +338,15 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Delete ${_descriptionName} meta by meta key.`,
     })
     async deleteMetaByKey(
-      @Args(`${_modelName}Id`, {
+      @Args(`${modelName}Id`, {
         type: () => ID,
         description: `${_descriptionName} Id`,
       })
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
     ): Promise<void> {
-      await this.basicService
-        .send<void>(pattern.DeleteMetaByKey, {
-          [`${_modelName}Id`]: modelId,
-          metaKey,
-        })
+      await this.metaServiceClient
+        .deleteMetaByKey({ [`${modelName}Id`]: modelId, metaKey } as DeleteMetaByKeyRequest<ModelName>)
         .lastValue();
     }
   }

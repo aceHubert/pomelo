@@ -88,7 +88,7 @@ export class SignInResult {
   success!: boolean;
 
   /**
-   * Token when success is true
+   * AccessToken, when success is true
    */
   @Field({ nullable: true })
   accessToken?: string;

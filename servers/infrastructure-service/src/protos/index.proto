@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "comment.proto";
+import "link.proto";
+import "media.proto";
+import "option.proto";
+import "site-init.proto";
+import "template.proto";
+import "term-taxonomy.proto";
+import "user.proto";

@@ -1,5 +1,5 @@
-import { Inject, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, ParseIntPipe, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Resolver, ResolveField, Parent, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
@@ -10,14 +10,25 @@ import {
   User,
   RequestUser,
   TemplateStatus,
+  TemplateCommentStatus,
   TemplatePresetType,
   TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  TemplatePattern,
-  TermTaxonomyPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import {
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceClient,
+  TemplateModel,
+  GetTemplateOptionsRequest,
+  GetPagedTemplateRequest,
+} from '@ace-pomelo/shared/server/proto-ts/template';
+import {
+  TERM_TAXONOMY_SERVICE_NAME,
+  TermTaxonomyServiceClient,
+} from '@ace-pomelo/shared/server/proto-ts/term-taxonomy';
 import { TemplateAction, PostTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
+import { WrapperTemplateCommentStatus, WrapperTemplateStatus } from '@/common/utils/wrapper-enum.util';
 import { MessageService } from '@/messages/message.service';
 import { TermTaxonomy } from '../term-taxonomy/models/term-taxonomy.model';
 import { TaxonomyFieldResolver, createAuthorFieldResolver } from './base.resolver';
@@ -34,9 +45,8 @@ export class PagedPostTemplateItemTaxonomyFieldResolver extends TaxonomyFieldRes
   private categoryDataLoader;
   private tagDataLoader;
 
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
-
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
     this.categoryDataLoader = this.createDataLoader(TermPresetTaxonomy.Category);
     this.tagDataLoader = this.createDataLoader(TermPresetTaxonomy.Tag);
   }
@@ -69,16 +79,16 @@ export class PagedPostTemplateItemTaxonomyFieldResolver extends TaxonomyFieldRes
 @Authorized()
 @Resolver(() => PagedPostTemplateItem)
 export class PagedPostTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedPostTemplateItem, true) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
 @Authorized()
 @Resolver(() => PostTemplate)
 export class PostTemplateAuthorResolver extends createAuthorFieldResolver(PostTemplate) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
@@ -86,130 +96,163 @@ export class PostTemplateAuthorResolver extends createAuthorFieldResolver(PostTe
 
 @Authorized()
 @Resolver(() => PagedPostTemplateItem)
-export class PagedPostTemplateItemMetaFieldResolver extends createMetaFieldResolver(PagedPostTemplateItem, {
-  modelName: 'template',
-  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
-}) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+export class PagedPostTemplateItemMetaFieldResolver
+  extends createMetaFieldResolver('template', PagedPostTemplateItem, {
+    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+  })
+  implements OnModuleInit
+{
+  private templateServiceClient!: TemplateServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
   }
 }
 
 @Authorized()
 @Resolver(() => PostTemplate)
-export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, {
-  modelName: 'template',
+export class PostTemplateResolver extends createMetaFieldResolver('template', PostTemplate, {
   authDecorator: () => RamAuthorized(TemplateAction.MetaList),
 }) {
+  private templateServiceClient!: TemplateServiceClient;
+  private termTaxonomyServiceClient!: TermTaxonomyServiceClient;
+
   constructor(
-    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc,
     private readonly messageService: MessageService,
   ) {
-    super(basicService);
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+    this.termTaxonomyServiceClient = this.client.getService<TermTaxonomyServiceClient>(TERM_TAXONOMY_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
+  }
+
+  private mapToPostTemplate(model: TemplateModel): PostTemplate {
+    return {
+      ...model,
+      status: WrapperTemplateStatus.asValueOrDefault(model.status, TemplateStatus.Publish),
+      commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, TemplateCommentStatus.Open),
+    };
   }
 
   @Anonymous()
   @Query((returns) => [PostTemplateOption], { nullable: true, description: 'Get post template options.' })
-  postTemplateOptions(
+  async postTemplateOptions(
     @Args() args: PostTemplateOptionArgs,
     @Fields() fields: ResolveTree,
   ): Promise<PostTemplateOption[]> {
     const { categoryId, categoryName, tagId, tagName, ...restArgs } = args;
-    return this.basicService
-      .send<PostTemplateOption[]>(TemplatePattern.GetOptions, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-            tagId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Tag,
-                  id: tagId,
-                }
-              : tagName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Tag,
-                  name: tagName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const { options } = await this.templateServiceClient
+      .getOptions({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+          tagId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                id: tagId,
+              }
+            : tagName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                name: tagName,
+              }
+            : false,
+        ].filter(Boolean) as GetTemplateOptionsRequest['taxonomies'],
         type: TemplatePresetType.Post,
         fields: this.getFieldNames(fields.fieldsByTypeName.PostTemplateOption),
       })
       .lastValue();
+
+    return options;
   }
 
   @Anonymous()
   @Query((returns) => PostTemplate, { nullable: true, description: 'Get post template.' })
-  postTemplate(
+  async postTemplate(
     @Args('id', { type: () => ID, description: 'Post id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PostTemplate | undefined> {
-    return this.basicService
-      .send<PostTemplate | undefined>(TemplatePattern.Get, {
+    const { template } = await this.templateServiceClient
+      .get({
         id,
         type: TemplatePresetType.Post,
         fields: this.getFieldNames(fields.fieldsByTypeName.PostTemplate),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
       .lastValue();
+
+    return template ? this.mapToPostTemplate(template) : undefined;
   }
 
   @Anonymous()
   @Query((returns) => PostTemplate, { nullable: true, description: 'Get post template by alias name.' })
-  postTemplateByName(
+  async postTemplateByName(
     @Args('name', { type: () => String, description: 'Post name' }) name: string,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PostTemplate | undefined> {
-    return this.basicService
-      .send<PostTemplate | undefined>(TemplatePattern.GetByName, {
+    const { template } = await this.templateServiceClient
+      .getByName({
         name,
         type: TemplatePresetType.Post,
         fields: this.getFieldNames(fields.fieldsByTypeName.PostTemplate),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
       .lastValue();
+
+    return template ? this.mapToPostTemplate(template) : undefined;
   }
 
   @Anonymous()
   @ResolveField((returns) => [TermTaxonomy!], { description: 'Categories' })
   categories(@Parent() { id: objectId }: { id: number }, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
-    return this.basicService
-      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetListByObjectId, {
-        query: {
-          objectId,
-          taxonomy: TermPresetTaxonomy.Category,
-        },
+    return this.termTaxonomyServiceClient
+      .getListByObjectId({
+        objectId,
+        taxonomy: TermPresetTaxonomy.Category,
         fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       })
-      .lastValue();
+      .lastValue()
+      .then((result) => result.termTaxonomies);
   }
 
   @Anonymous()
   @ResolveField((returns) => [TermTaxonomy!], { description: 'Tags' })
   tags(@Parent() { id: objectId }: { id: number }, @Fields() fields: ResolveTree): Promise<TermTaxonomy[]> {
-    return this.basicService
-      .send<TermTaxonomy[]>(TermTaxonomyPattern.GetListByObjectId, {
-        query: {
-          objectId,
-          taxonomy: TermPresetTaxonomy.Tag,
-        },
+    return this.termTaxonomyServiceClient
+      .getListByObjectId({
+        objectId,
+        taxonomy: TermPresetTaxonomy.Tag,
         fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
       })
-      .lastValue();
+      .lastValue()
+      .then((result) => result.termTaxonomies);
   }
 
   @Anonymous()
@@ -228,90 +271,75 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     @User() requestUser?: RequestUser,
   ): Promise<PagedPostTemplate> {
     const { categoryId, categoryName, tagId, tagName, ...restArgs } = args;
-    const { rows, total } = await this.basicService
-      .send<PagedPostTemplate>(TemplatePattern.GetPaged, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-            tagId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Tag,
-                  id: tagId,
-                }
-              : tagName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Tag,
-                  name: tagName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    return this.templateServiceClient
+      .getPaged({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+          tagId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                id: tagId,
+              }
+            : tagName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Tag,
+                name: tagName,
+              }
+            : false,
+        ].filter(Boolean) as GetPagedTemplateRequest['taxonomies'],
         type: TemplatePresetType.Post,
         fields: this.getFieldNames(
           fields.fieldsByTypeName.PagedPostTemplate.rows.fieldsByTypeName.PagedPostTemplateItem,
         ),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
-      .lastValue();
-
-    return {
-      rows,
-      total,
-    };
+      .lastValue()
+      .then(({ rows, ...rest }) => ({
+        ...rest,
+        rows: rows.map((row) => this.mapToPostTemplate(row)),
+      }));
   }
 
   @RamAuthorized(PostTemplateAction.Create)
   @Mutation((returns) => PostTemplate, { description: 'Create a new post template.' })
-  async createPostTempate(
+  async createPostTemplate(
     @Args('model', { type: () => NewPostTemplateInput }) model: NewPostTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<PostTemplate> {
-    const { id, name, title, author, content, excerpt, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.basicService
-        .send<PostTemplate>(TemplatePattern.CreatePost, {
-          ...model,
-          excerpt: model.excerpt || '',
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
+    const { template } = await this.templateServiceClient
+      .createPost({
+        ...model,
+        excerpt: model.excerpt || '',
+        metas: model.metas || [],
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     // 新建（当状态为需要审核）审核消息推送
-    if (status === TemplateStatus.Pending) {
+    if (template.status === TemplateStatus.Pending) {
       await this.messageService.publish(
         {
           eventName: 'createPostReview',
           payload: {
-            id,
+            id: template.id,
           },
         },
         { excludes: [requestUser.sub] },
       );
     }
 
-    return {
-      id,
-      name,
-      title,
-      author,
-      content,
-      excerpt,
-      status,
-      commentStatus,
-      commentCount,
-      updatedAt,
-      createdAt,
-    };
+    return this.mapToPostTemplate(template);
   }
 
   @RamAuthorized(PostTemplateAction.Update)
@@ -324,8 +352,8 @@ export class PostTemplateResolver extends createMetaFieldResolver(PostTemplate, 
     @Args('model', { type: () => UpdatePostTemplateInput }) model: UpdatePostTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.UpdatePost, {
+    await this.templateServiceClient
+      .update({
         ...model,
         id,
         requestUserId: Number(requestUser.sub),

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
-import { Comments, CommentMeta } from '../entities';
+import { Users, Comments, CommentMeta } from '../entities';
 import {
   CommentModel,
   CommentMetaModel,
@@ -59,17 +59,24 @@ export class CommentDataSource extends MetaDataSource<CommentMetaModel, NewComme
   async create(model: NewCommentInput, requestUserId: number): Promise<CommentModel> {
     const { metas, ...rest } = model;
 
+    let author = model.author;
+    if (!author) {
+      const user = await Users.findByPk(requestUserId);
+      author = user?.displayName || '';
+    }
+
     const t = await this.datasourceService.sequelize.transaction();
     try {
       const comment = await Comments.create(
         {
           ...rest,
+          author,
           userId: requestUserId,
         },
         { transaction: t },
       );
 
-      if (metas && metas.length) {
+      if (metas?.length) {
         CommentMeta.bulkCreate(
           metas.map((meta) => {
             return {

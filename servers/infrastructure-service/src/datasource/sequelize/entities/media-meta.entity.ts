@@ -1,6 +1,9 @@
 import { DataTypes } from 'sequelize';
-import { MediaMetaPresetKeys } from '@ace-pomelo/shared/server';
-import { MediaMetaAttributes, MediaMetaCreationAttributes } from '../../entities/media-meta.entity';
+import {
+  MediaMetaAttributes,
+  MediaMetaCreationAttributes,
+  MediaMetaPresetKeys,
+} from '../../entities/media-meta.entity';
 import { Model } from '../model/model';
 
 export class MediaMeta extends Model<MediaMetaAttributes, Omit<MediaMetaCreationAttributes, 'id'>> {

@@ -1,0 +1,369 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "common/meta.proto";
+
+/**
+ * 媒体资源模型，表示系统中的文件和图片资源
+ */
+message MediaModel {
+  // 媒体ID
+  int32 id = 1;
+  // 存储的文件名
+  string fileName = 2;
+  // 原始文件名
+  string originalFileName = 3;
+  // 文件扩展名
+  string extension = 4;
+  // MIME类型
+  string mimeType = 5;
+  // 文件存储路径
+  string path = 6;
+  // 上传用户ID
+  optional int32 userId = 7;
+  // 媒体元数据信息
+  optional MediaMetaDataModel metaData = 8;
+  // 创建时间
+  google.protobuf.Timestamp createdAt = 100;
+}
+
+/**
+ * 图片缩略图模型，表示不同尺寸的图片版本
+ */
+message ImageScaleModel {
+  // 图片宽度
+  int32 width = 1;
+  // 图片高度
+  int32 height = 2;
+  // 存储路径
+  string path = 3;
+  // 缩略图名称
+  string name = 4;
+}
+
+/**
+ * 媒体元数据模型，包含文件和图片的详细信息
+ */
+message MediaMetaDataModel {
+  // 文件大小（字节）
+  int32 fileSize = 1;
+  // 图片宽度（仅图片类型）
+  optional int32 width = 2;
+  // 图片高度（仅图片类型）
+  optional int32 height = 3;
+  // 图片缩略图列表（仅图片类型）
+  repeated ImageScaleModel imageScales = 4;
+  // 其他元数据信息
+  google.protobuf.Struct otherMetas = 5;
+}
+
+/**
+ * 获取媒体资源请求
+ */
+message GetMediaRequest {
+  // 媒体资源ID
+  int32 id = 1;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 根据文件名获取媒体资源请求
+ */
+message GetMediaByNameRequest {
+  // 文件名
+  string fileName = 1;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取媒体资源响应
+ */
+message GetMediaResponse {
+  // 媒体资源信息
+  optional MediaModel media = 1;
+}
+
+/**
+ * 分页获取媒体资源请求
+ */
+message GetPagedMediaRequest {
+  // 分页偏移量
+  optional int32 offset = 1;
+  // 每页数量限制
+  optional int32 limit = 2;
+  // 关键字搜索
+  optional string keyword = 3;
+  // 文件扩展名过滤
+  repeated string extensions = 4;
+  // MIME类型过滤
+  repeated string mimeTypes = 5;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 分页获取媒体资源响应
+ */
+message GetPagedMediaResponse {
+  // 媒体资源列表
+  repeated MediaModel rows = 1;
+  // 总数量
+  int32 total = 2;
+}
+
+/**
+ * 检查媒体文件是否存在请求
+ */
+message IsMediaExistRequest {
+  // 文件名
+  string fileName = 1;
+}
+
+/**
+ * 媒体元数据创建请求
+ */
+message MediaMetaDataRequest {
+  // 文件大小（字节）
+  int32 fileSize = 1;
+  // 图片宽度（仅图片类型）
+  optional int32 width = 2;
+  // 图片高度（仅图片类型）
+  optional int32 height = 3;
+}
+
+/**
+ * 创建媒体资源请求
+ */
+message CreateMediaRequest {
+  // 文件名
+  string fileName = 2;
+  // 原始文件名
+  string originalFileName = 3;
+  // 文件扩展名
+  string extension = 4;
+  // MIME类型
+  string mimeType = 5;
+  // 文件存储路径
+  string path = 6;
+  // 媒体元数据信息
+  MediaMetaDataRequest metaData = 7;
+  // 媒体元数据列表
+  repeated CreateMetaRequest metas = 8;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 创建媒体资源响应
+ */
+message CreateMediaResponse {
+  // 创建的媒体资源信息
+  MediaModel media = 1;
+  // 媒体元数据
+  MediaMetaDataModel metaData = 2;
+  // 元数据列表
+  repeated MediaMetaModel metas = 3;
+}
+
+/**
+ * 更新媒体资源请求
+ */
+message UpdateMediaRequest {
+  // 媒体资源ID
+  int32 id = 1;
+  // 文件名
+  optional string fileName = 2;
+  // 原始文件名
+  optional string originalFileName = 3;
+  // 文件扩展名
+  optional string extension = 4;
+  // MIME类型
+  optional string mimeType = 5;
+  // 文件存储路径
+  optional string path = 6;
+  // 媒体元数据信息
+  optional MediaMetaDataRequest metaData = 7;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 更新媒体元数据请求
+ */
+message UpdateMediaMetaDataRequest {
+  // 媒体资源ID
+  int32 id = 1;
+  // 媒体元数据信息
+  MediaMetaDataRequest metaData = 2;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 媒体元数据模型
+ */
+message MediaMetaModel {
+  // 元数据ID
+  int32 id = 1;
+  // 媒体资源ID
+  int32 mediaId = 2;
+  // 元数据键名
+  string metaKey = 3;
+  // 元数据值
+  optional string metaValue = 4;
+}
+
+/**
+ * 获取媒体元数据响应
+ */
+message GetMediaMetaResponse {
+  // 元数据信息
+  optional MediaMetaModel meta = 1;
+}
+
+/**
+ * 获取媒体元数据列表请求
+ */
+message GetMediaMetasRequest {
+  /**
+   * 媒体资源ID列表包装
+   */
+  message MediaIds {
+    // 媒体资源ID列表
+    repeated int32 value = 1;
+  }
+  // 单个媒体ID或多个媒体ID列表
+  oneof kind {
+    // 单个媒体资源ID
+    int32 mediaId = 1;
+    // 多个媒体资源ID列表
+    MediaIds mediaIds = 2;
+  }
+  // 要获取的元数据键名列表
+  repeated string metaKeys = 3;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取媒体元数据列表响应
+ */
+message GetMediaMetasResponse {
+  // 元数据列表
+  repeated MediaMetaModel metas = 1;
+}
+
+/**
+ * 创建媒体元数据请求
+ */
+message CreateMediaMetaRequest {
+  // 媒体资源ID
+  int32 mediaId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 元数据值
+  optional string metaValue = 3;
+}
+
+/**
+ * 创建媒体元数据响应
+ */
+message CreateMediaMetaResponse {
+  // 创建的元数据信息
+  MediaMetaModel meta = 1;
+}
+
+/**
+ * 批量创建媒体元数据请求
+ */
+message CreateMediaMetasRequest {
+  // 媒体资源ID
+  int32 mediaId = 1;
+  // 要创建的元数据列表
+  repeated MediaMetaModel metas = 3;
+}
+
+/**
+ * 批量创建媒体元数据响应
+ */
+message CreateMediaMetasResponse {
+  // 创建的元数据列表
+  repeated MediaMetaModel metas = 1;
+}
+
+/**
+ * 更新媒体元数据请求
+ */
+message UpdateMediaMetaRequest {
+  // 元数据ID
+  int32 id = 1;
+  // 新的元数据值
+  string metaValue = 2;
+}
+
+/**
+ * 通过键名更新媒体元数据请求
+ */
+message UpdateMediaMetaByKeyRequest {
+  // 媒体资源ID
+  int32 mediaId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 新的元数据值
+  string metaValue = 3;
+  // 如果不存在是否创建
+  optional bool createIfNotExist = 4;
+}
+
+/**
+ * 通过键名删除媒体元数据请求
+ */
+message DeleteMediaMetaByKeyRequest {
+  // 媒体资源ID
+  int32 mediaId = 1;
+  // 要删除的元数据键名
+  string metaKey = 2;
+}
+
+/**
+ * 媒体服务接口定义
+ */
+service MediaService {
+  // 获取单个媒体资源
+  rpc Get(GetMediaRequest) returns (GetMediaResponse) {}
+  // 根据文件名获取媒体资源
+  rpc GetByName(GetMediaByNameRequest) returns (GetMediaResponse) {}
+  // 分页获取媒体资源列表
+  rpc GetPaged(GetPagedMediaRequest) returns (GetPagedMediaResponse) {}
+  // 检查媒体文件是否存在
+  rpc IsExists(IsMediaExistRequest) returns (google.protobuf.BoolValue) {}
+  // 创建新的媒体资源
+  rpc Create(CreateMediaRequest) returns (CreateMediaResponse) {}
+  // 更新媒体资源
+  rpc Update(UpdateMediaRequest) returns (google.protobuf.Empty) {}
+  // 更新媒体元数据
+  rpc UpdateMetaData(UpdateMediaMetaDataRequest) returns (google.protobuf.Empty) {}
+  // 获取元数据
+  rpc GetMeta(GetMetaRequest) returns (GetMediaMetaResponse) {}
+  // 获取元数据列表
+  rpc GetMetas(GetMediaMetasRequest) returns (GetMediaMetasResponse) {}
+  // 创建元数据
+  rpc CreateMeta(CreateMediaMetaRequest) returns (CreateMediaMetaResponse) {}
+  // 批量创建元数据
+  rpc CreateMetas(CreateMediaMetasRequest) returns (CreateMediaMetasResponse) {}
+  // 更新元数据
+  rpc UpdateMeta(UpdateMediaMetaRequest) returns (google.protobuf.Empty) {}
+  // 通过键名更新元数据
+  rpc UpdateMetaByKey(UpdateMediaMetaByKeyRequest) returns (google.protobuf.Empty) {}
+  // 删除元数据
+  rpc DeleteMeta(DeleteMetaRequest) returns (google.protobuf.Empty) {}
+  // 通过键名删除元数据
+  rpc DeleteMetaByKey(DeleteMediaMetaByKeyRequest) returns (google.protobuf.Empty) {}
+}

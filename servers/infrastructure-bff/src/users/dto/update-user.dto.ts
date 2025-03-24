@@ -70,3 +70,19 @@ export class UpdateUserPasswordDto {
   @MinLength(6)
   newPwd!: string;
 }
+
+export class ResetUserPasswordDto {
+  /**
+   * User id
+   */
+  @IsDefined()
+  id!: number;
+
+  /**
+   * New password
+   */
+  @IsDefined()
+  @IsString()
+  @MinLength(6)
+  newPwd!: string;
+}

@@ -5,7 +5,7 @@ import moment from 'moment';
 import Jimp from 'jimp';
 import { camelCase } from 'lodash';
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
 import {
   md5,
   normalizeRoutePath,
@@ -13,19 +13,12 @@ import {
   stripTrailingSlash,
   isAbsoluteUrl,
   OptionPresetKeys,
-  INFRASTRUCTURE_SERVICE,
-  OptionPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import { OptionServiceClient, OPTION_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/option';
+import { MediaModel, MediaMetaDataModel, ImageScaleModel } from '@ace-pomelo/shared/server/proto-ts/media';
 import { MediaOptions } from './interfaces/media-options.interface';
-import {
-  File,
-  ImageScaleType,
-  ImageScales,
-  FileSaveOptions,
-  ImageScaleModel,
-  MediaMetaDataModel,
-  MediaModel,
-} from './interfaces/media.interface';
+import { File, ImageScaleType, ImageScales, FileSaveOptions } from './interfaces/media.interface';
 import { MEDIA_OPTIONS } from './constants';
 
 const stat = promisify(fs.stat);
@@ -37,11 +30,13 @@ const writeFile = promisify(fs.writeFile);
 export class MediaService {
   private logger = new Logger('MediaService', { timestamp: true });
   private quality: Record<ImageScaleType, number>;
+  private optionServiceClient: OptionServiceClient;
 
   constructor(
     @Inject(MEDIA_OPTIONS) private readonly options: Required<MediaOptions>,
-    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) protected readonly client: ClientGrpc,
   ) {
+    this.optionServiceClient = this.client.getService<OptionServiceClient>(OPTION_SERVICE_NAME);
     this.quality =
       typeof options.quality === 'number'
         ? Object.values(ImageScaleType).reduce((prev, curr) => {
@@ -195,6 +190,8 @@ export class MediaService {
 
     const metaData: MediaMetaDataModel = {
       fileSize: Buffer.byteLength(file),
+      imageScales: [],
+      otherMetas: {},
     };
 
     // 是否支持 Jimp 操作
@@ -224,29 +221,43 @@ export class MediaService {
 
       if (this.isScaleable(options.mimeType)) {
         const imageScales: ImageScaleModel[] = [];
+
         // thumbnail
         const {
           [OptionPresetKeys.ThumbnailSizeWidth]: width = '150',
           [OptionPresetKeys.ThumbnailSizeHeight]: height = '150',
           [OptionPresetKeys.ThumbnailCrop]: crop = '1',
-        } = await this.basicService
-          .send<Array<{ optionName: string; optionValue: string | undefined }>>(OptionPattern.GetList, {
-            query: {
-              optionNames: [
+          [OptionPresetKeys.MediumSizeWidth]: mediumWidth = '300',
+          [OptionPresetKeys.MediumSizeHeight]: mediumHeight = '300',
+          [OptionPresetKeys.LargeSizeWidth]: largeWidth = '1200',
+          [OptionPresetKeys.LargeSizeHeight]: largeHeight = '1200',
+          [OptionPresetKeys.MediumLargeSizeWidth]: mediumLargeWidth = '768',
+          [OptionPresetKeys.MediumLargeSizeHeight]: mediumLargeHeight = '0',
+        } = await this.optionServiceClient
+          .getList({
+            optionNames: {
+              value: [
                 OptionPresetKeys.ThumbnailSizeWidth,
                 OptionPresetKeys.ThumbnailSizeHeight,
                 OptionPresetKeys.ThumbnailCrop,
+                OptionPresetKeys.MediumSizeWidth,
+                OptionPresetKeys.MediumSizeHeight,
+                OptionPresetKeys.LargeSizeWidth,
+                OptionPresetKeys.LargeSizeHeight,
+                OptionPresetKeys.MediumLargeSizeWidth,
+                OptionPresetKeys.MediumLargeSizeHeight,
               ],
             },
             fields: ['optionName', 'optionValue'],
           })
           .lastValue()
-          .then((res) =>
-            res.reduce((prev, curr) => {
+          .then(({ options }) =>
+            options.reduce((prev, curr) => {
               prev[curr.optionName] = curr.optionValue;
               return prev;
             }, {} as Record<string, string | undefined>),
           );
+
         const thumbnail = await this.scaleToThumbnail(
           image,
           (imgOptions) => this.getImageDestWithSuffix(filePath, `${imgOptions.width}x${imgOptions.height}`),
@@ -266,36 +277,6 @@ export class MediaService {
           this.quality[ImageScaleType.Scaled],
         );
         scaled && imageScales.push({ ...scaled, name: ImageScaleType.Scaled });
-
-        // other sizes
-        const {
-          [OptionPresetKeys.MediumSizeWidth]: mediumWidth = '300',
-          [OptionPresetKeys.MediumSizeHeight]: mediumHeight = '300',
-          [OptionPresetKeys.LargeSizeWidth]: largeWidth = '1200',
-          [OptionPresetKeys.LargeSizeHeight]: largeHeight = '1200',
-          [OptionPresetKeys.MediumLargeSizeWidth]: mediumLargeWidth = '768',
-          [OptionPresetKeys.MediumLargeSizeHeight]: mediumLargeHeight = '0',
-        } = await this.basicService
-          .send<Array<{ optionName: string; optionValue: string | undefined }>>(OptionPattern.GetList, {
-            query: {
-              optionNames: [
-                OptionPresetKeys.MediumSizeWidth,
-                OptionPresetKeys.MediumSizeHeight,
-                OptionPresetKeys.LargeSizeWidth,
-                OptionPresetKeys.LargeSizeHeight,
-                OptionPresetKeys.MediumLargeSizeWidth,
-                OptionPresetKeys.MediumLargeSizeHeight,
-              ],
-            },
-            fields: ['optionName', 'optionValue'],
-          })
-          .lastValue()
-          .then((res) =>
-            res.reduce((prev, curr) => {
-              prev[curr.optionName] = curr.optionValue;
-              return prev;
-            }, {} as Record<string, string | undefined>),
-          );
 
         const resizeArr = [
           {
@@ -352,11 +333,12 @@ export class MediaService {
    * @param metaData Media metadata
    */
   async toFileModel(media: MediaModel, metaData?: MediaMetaDataModel): Promise<File> {
-    const siteUrl = await this.basicService
-      .send<string>(OptionPattern.GetValue, {
+    const { optionValue: siteUrl } = await this.optionServiceClient
+      .getValue({
         optionName: OptionPresetKeys.SiteUrl,
       })
       .lastValue();
+
     const { imageScales = [], fileSize, width, height } = metaData ?? { fileSize: 0 };
     return {
       original: {

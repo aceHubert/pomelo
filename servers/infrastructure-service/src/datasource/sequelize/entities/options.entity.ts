@@ -7,7 +7,7 @@ export class Options extends Model<OptionAttributes, Optional<Omit<OptionCreatio
   public id!: number;
   public optionName!: string;
   public optionValue!: string;
-  public autoload!: string;
+  public autoload!: OptionAutoload;
 }
 
 Options.initialize = function initialize(sequelize, { prefix }) {

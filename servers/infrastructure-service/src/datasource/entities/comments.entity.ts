@@ -1,4 +1,5 @@
-import { Optional } from '../shared/types';
+import { CommentType } from '@ace-pomelo/shared/server';
+import { Optional } from './types';
 
 export interface CommentAttributes {
   id: number;
@@ -10,7 +11,7 @@ export interface CommentAttributes {
   content: string;
   approved: boolean;
   edited: boolean;
-  type: string;
+  type: CommentType;
   agent?: string;
   parentId: number;
   userId: number;

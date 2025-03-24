@@ -1,4 +1,5 @@
-import { Optional } from '../shared/types';
+import { UserStatus } from '@ace-pomelo/shared/server';
+import { Optional } from './types';
 
 export interface UserAttributes {
   id: number;
@@ -9,7 +10,7 @@ export interface UserAttributes {
   mobile?: string;
   email?: string;
   url: string;
-  status: number;
+  status: UserStatus;
   updatedAt: Date;
   createdAt: Date;
 }

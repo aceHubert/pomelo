@@ -1,46 +1,59 @@
-import { Controller, ParseIntPipe, ParseArrayPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CommentPattern } from '@ace-pomelo/shared/server';
-import { CommentDataSource, CommentModel, PagedCommentModel } from '../datasource/index';
-import { NewCommentPayload, PagedCommentQueryPayload, UpdateCommentPayload } from './payload/comment.payload';
+import { Controller } from '@nestjs/common';
+import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
+import {
+  COMMENT_SERVICE_NAME,
+  CommentServiceControllerMethods,
+  CommentServiceController,
+  GetCommentRequest,
+  GetCommentResponse,
+  GetPagedCommentRequest,
+  GetPagedCommentResponse,
+  CreateCommentRequest,
+  CreateCommentResponse,
+  UpdateCommentRequest,
+  DeleteCommentRequest,
+} from '@ace-pomelo/shared/server/proto-ts/comment';
+import { WrapperCommentType } from '@/common/utils/wrapper-enum.util';
+import { CommentDataSource } from '../datasource';
+import { createMetaController } from './meta.controller';
 
 @Controller()
-export class CommentController {
-  constructor(private readonly commentDataSource: CommentDataSource) {}
-
-  @MessagePattern(CommentPattern.Get)
-  get(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<CommentModel | undefined> {
-    return this.commentDataSource.get(id, fields);
+@CommentServiceControllerMethods()
+export class CommentController
+  extends createMetaController('comment', COMMENT_SERVICE_NAME)
+  implements CommentServiceController
+{
+  constructor(private readonly commentDataSource: CommentDataSource) {
+    super(commentDataSource);
   }
 
-  @MessagePattern(CommentPattern.GetPaged)
-  getPaged(
-    @Payload('query') query: PagedCommentQueryPayload,
-    @Payload('fields', new ParseArrayPipe({ items: String })) fields: string[],
-  ): Promise<PagedCommentModel> {
+  get({ fields, id }: GetCommentRequest): Promise<GetCommentResponse> {
+    return this.commentDataSource.get(id, fields).then((result) => {
+      return { comment: result };
+    });
+  }
+
+  getPaged({ fields, ...query }: GetPagedCommentRequest): Promise<GetPagedCommentResponse> {
     return this.commentDataSource.getPaged(query, fields);
   }
 
-  @MessagePattern(CommentPattern.Create)
-  create(@Payload() payload: NewCommentPayload): Promise<CommentModel> {
-    const { requestUserId, ...model } = payload;
-    return this.commentDataSource.create(model, requestUserId);
+  create({ requestUserId, ...model }: CreateCommentRequest): Promise<CreateCommentResponse> {
+    return this.commentDataSource
+      .create({ ...model, type: WrapperCommentType.asValueOrDefault(model.type, void 0) }, requestUserId)
+      .then((result) => {
+        return { comment: result };
+      });
   }
 
-  @MessagePattern(CommentPattern.Update)
-  update(@Payload() payload: UpdateCommentPayload): Promise<void> {
-    const { id, requestUserId, ...model } = payload;
-    return this.commentDataSource.update(id, model, requestUserId);
+  update({ id, requestUserId, ...model }: UpdateCommentRequest): Promise<Empty> {
+    return this.commentDataSource.update(id, model, requestUserId).then(() => {
+      return {};
+    });
   }
 
-  @MessagePattern(CommentPattern.Delete)
-  delete(
-    @Payload('id', ParseIntPipe) id: number,
-    @Payload('requestUserId', ParseIntPipe) requestUserId: number,
-  ): Promise<void> {
-    return this.commentDataSource.delete(id, requestUserId);
+  delete({ id, requestUserId }: DeleteCommentRequest): Promise<Empty> {
+    return this.commentDataSource.delete(id, requestUserId).then(() => {
+      return {};
+    });
   }
 }

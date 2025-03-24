@@ -1,21 +1,27 @@
 import moment from 'moment';
 import { snakeCase } from 'lodash';
-import { Injectable, Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { AuthorizationService } from '@ace-pomelo/nestjs-pomelo-authorization';
-import { INFRASTRUCTURE_SERVICE, UserMetaPresetKeys, UserPattern } from '@ace-pomelo/shared/server';
+import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
+import { AuthorizationService } from '@ace-pomelo/nestjs-authorization';
+import { UserMetaPresetKeys, POMELO_SERVICE_PACKAGE_NAME } from '@ace-pomelo/shared/server';
+import { UserServiceClient, UserModel, USER_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/user';
 import { UserOptions } from './interfaces/user-options.interface';
-import { UserModel } from './interfaces/user-model.interface';
 import { UserClaims } from './interfaces/user-claims.interface';
 import { USER_OPTIONS } from './constants';
 
 @Injectable()
-export class UserService {
+export class UserService implements OnModuleInit {
+  private userServiceClient!: UserServiceClient;
+
   constructor(
-    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
     @Inject(USER_OPTIONS) private readonly options: UserOptions,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) protected readonly client: ClientGrpc,
     private readonly authService: AuthorizationService,
   ) {}
+
+  onModuleInit() {
+    this.userServiceClient = this.client.getService<UserServiceClient>(USER_SERVICE_NAME);
+  }
 
   /**
    * Get user
@@ -25,6 +31,7 @@ export class UserService {
    */
   getUser(
     id: number,
+    requestUserId: number,
     fields = [
       'id',
       'loginName',
@@ -37,15 +44,11 @@ export class UserService {
       'updatedAt',
       'createdAt',
     ],
-    requestUserId: number,
   ) {
-    return this.basicService
-      .send<UserModel | undefined>(UserPattern.Get, {
-        id,
-        fields,
-        requestUserId,
-      })
-      .lastValue();
+    return this.userServiceClient
+      .getUser({ id, fields, requestUserId })
+      .lastValue()
+      .then(({ user }) => user);
   }
 
   /**
@@ -55,13 +58,10 @@ export class UserService {
    * @param fields Fields to get
    */
   getMetas(id: number, metaKeys: string[], fields = ['id', 'metaKey', 'metaValue']) {
-    return this.basicService
-      .send<Array<{ id: string; metaKey: string; metaValue: string }>>(UserPattern.GetMetas, {
-        userId: id,
-        metaKeys,
-        fields,
-      })
-      .lastValue();
+    return this.userServiceClient
+      .getMetas({ userId: id, metaKeys, fields })
+      .lastValue()
+      .then(({ metas }) => metas);
   }
 
   /**
@@ -103,7 +103,7 @@ export class UserService {
       display_name: user.displayName,
       nice_name: user.niceName,
       url: user.url,
-      updated_at: new Date(user.updatedAt).getTime(),
+      updated_at: user.updatedAt.getTime(),
     };
 
     if (user.email) {

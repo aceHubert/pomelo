@@ -1,19 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { WhereOptions, Attributes, Includeable, Transaction, Op, Order } from 'sequelize';
+import { WhereOptions, Attributes, Includeable, Transaction, Op, Order, GroupedCountResultItem } from 'sequelize';
 import {
   UserInputError,
   ForbiddenError,
   ValidationError,
   UserCapability,
   OptionPresetKeys,
-  TermPresetTaxonomy,
   TemplateStatus,
   TemplatePresetType,
 } from '@ace-pomelo/shared/server';
+import { TemplateInnerStatus, TemplateInnerType, TermPresetTaxonomy } from '../../entities';
 import { Templates, TemplateMeta, TermTaxonomy, TermRelationships } from '../entities';
 import {
-  TemplateInnerStatus,
-  TemplateInnerType,
   TemplateModel,
   TemplateOptionArgs,
   TemplateOptionModel,
@@ -546,34 +544,6 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
   }
 
   /**
-   * 获取我的数量 (不包含草稿的)
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @access Authorized
-   * @param type 类型
-   * @param includeTrashStatus 包含草稿状态
-   * @param requestUserId 请求的用户ID
-   */
-  getCountBySelf(type: string, includeTrashStatus: boolean, requestUserId: number) {
-    const notIn: Array<TemplateStatus | TemplateInnerStatus> = [...TemplateOperateStatus];
-    if (!includeTrashStatus) {
-      notIn.push(TemplateStatus.Trash);
-    }
-
-    return Templates.count({
-      where: {
-        type,
-        status: {
-          // 不包含所有的操作时的状态
-          [Op.notIn]: notIn,
-        },
-        author: requestUserId,
-      },
-    });
-  }
-
-  /**
    * 按天分组获取数量
    * @author Hubert
    * @since 2020-10-01
@@ -628,7 +598,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       },
       // TODO: 只支持 mssql 和 mysql
       group: this.datasourceService.sequelize.getDialect() === 'mssql' ? mssqlDayCol : 'day',
-    });
+    }) as Promise<Array<GroupedCountResultItem & { day: string }>>;
   }
 
   /**
@@ -709,7 +679,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       },
       // TODO: 只支持 mssql 和 mysql
       group: this.datasourceService.sequelize.getDialect() === 'mssql' ? mssqlMonthCol : 'month',
-    });
+    }) as Promise<Array<GroupedCountResultItem & { month: string }>>;
   }
 
   /**
@@ -750,7 +720,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       },
       // TODO: 只支持 mssql 和 mysql
       group: this.datasourceService.sequelize.getDialect() === 'mssql' ? mssqlYearCol : 'year',
-    });
+    }) as Promise<Array<GroupedCountResultItem & { year: string }>>;
   }
 
   /**
@@ -814,7 +784,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       attributes: ['status'],
       where,
       group: 'status',
-    });
+    }) as Promise<Array<GroupedCountResultItem & { status: TemplateStatus }>>;
   }
 
   /**
@@ -1023,6 +993,34 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       rows: rows.map((row) => row.toJSON()),
       total,
     }));
+  }
+
+  /**
+   * 获取我的数量 (不包含草稿的)
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access Authorized
+   * @param type 类型
+   * @param includeTrashStatus 包含草稿状态
+   * @param requestUserId 请求的用户ID
+   */
+  getSelfCount(type: string, includeTrashStatus: boolean, requestUserId: number) {
+    const notIn: Array<TemplateStatus | TemplateInnerStatus> = [...TemplateOperateStatus];
+    if (!includeTrashStatus) {
+      notIn.push(TemplateStatus.Trash);
+    }
+
+    return Templates.count({
+      where: {
+        type,
+        status: {
+          // 不包含所有的操作时的状态
+          [Op.notIn]: notIn,
+        },
+        author: requestUserId,
+      },
+    });
   }
 
   /**

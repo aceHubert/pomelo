@@ -26,7 +26,12 @@ export interface PagedCommentArgs extends PagedArgs {
 
 export interface PagedCommentModel extends Paged<CommentModel> {}
 
-export interface NewCommentInput extends Omit<CreationAttributes<Comments>, 'userId'> {
+export interface NewCommentInput extends Omit<CreationAttributes<Comments>, 'author' | 'userId'> {
+  /**
+   * Author name
+   */
+  author?: string;
+
   /**
    * metaKey 不可以重复
    */

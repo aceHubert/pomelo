@@ -1,6 +1,6 @@
 import * as path from 'path';
-import { Inject, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, ParseIntPipe, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { VoidResolver } from 'graphql-scalars';
@@ -16,14 +16,13 @@ import {
   RequestUser,
   UserCapability,
   ForbiddenError,
-  INFRASTRUCTURE_SERVICE,
-  UserPattern,
-  MediaPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import { MediaServiceClient, MEDIA_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/media';
+import { UserServiceClient, USER_SERVICE_NAME } from '@ace-pomelo/shared/server/proto-ts/user';
 import { MediaAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { MediaOptions } from './interfaces/media-options.interface';
-import { MediaModel, PagedMediaModel } from './interfaces/media.interface';
 import { MediaService } from './media.service';
 import { PagedMediaArgs } from './dto/media.args';
 import {
@@ -39,30 +38,45 @@ import { MEDIA_OPTIONS } from './constants';
 
 @Authorized()
 @Resolver(() => Media)
-export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMediaMetaInput, {
-  authDecorator: (method) => {
-    const ramAction =
-      method === 'getMeta'
-        ? MediaAction.MetaDetail
-        : method === 'getMetas' || method === 'fieldMetas'
-        ? MediaAction.MetaList
-        : method === 'createMeta' || method === 'createMetas'
-        ? MediaAction.MetaCreate
-        : method === 'updateMeta' || method === 'updateMetaByKey'
-        ? MediaAction.MetaUpdate
-        : MediaAction.MetaDelete;
+export class MediaResolver
+  extends createMetaResolver('media', Media, MediaMeta, NewMediaMetaInput, {
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? MediaAction.MetaDetail
+          : method === 'getMetas' || method === 'fieldMetas'
+          ? MediaAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? MediaAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? MediaAction.MetaUpdate
+          : MediaAction.MetaDelete;
 
-    return method === 'getMeta' || method === 'getMetas'
-      ? [RamAuthorized(ramAction), Anonymous()]
-      : [RamAuthorized(ramAction)];
-  },
-}) {
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction)];
+    },
+  })
+  implements OnModuleInit
+{
+  private mediaServiceClient!: MediaServiceClient;
+  private userServiceClient!: UserServiceClient;
+
   constructor(
     @Inject(MEDIA_OPTIONS) private readonly mediaOptions: Required<MediaOptions>,
-    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc,
     private readonly mediaService: MediaService,
   ) {
-    super(basicService);
+    super();
+  }
+
+  onModuleInit() {
+    this.mediaServiceClient = this.client.getService<MediaServiceClient>(MEDIA_SERVICE_NAME);
+    this.userServiceClient = this.client.getService<UserServiceClient>(USER_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.mediaServiceClient;
   }
 
   @Mutation(() => Media)
@@ -74,10 +88,10 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
   ): Promise<Media> {
-    // 检测是否有上传文件的权限，没有则抛出异常不处理文件流
-    const hasCapability = await this.basicService
-      .send<boolean>(UserPattern.HasCapability, {
-        id: Number(requestUser.sub),
+    // Check if user has permission to upload files
+    const { value: hasCapability } = await this.userServiceClient
+      .hasCapability({
+        requestUserId: Number(requestUser.sub),
         capability: UserCapability.UploadFiles,
       })
       .lastValue();
@@ -103,8 +117,8 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     const fileBuffer = Buffer.concat(buffers);
 
     const md5 = await this.mediaService.getFileMd5(fileBuffer);
-    let media = await this.basicService
-      .send<MediaModel | undefined>(MediaPattern.GetByName, {
+    let { media } = await this.mediaServiceClient
+      .getByName({
         fileName: md5,
         fields: ['id', 'fileName', 'originalFileName', 'extension', 'mimeType', 'path', 'createdAt'],
       })
@@ -123,17 +137,19 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
         md5,
         crop: options?.crop,
       });
-      media = await this.basicService
-        .send<MediaModel>(MediaPattern.Create, {
+
+      ({ media } = await this.mediaServiceClient
+        .create({
           fileName: md5FileName,
           originalFileName,
           extension,
           mimeType: mimetype,
           path,
           metaData,
+          metas: [],
           requestUserId: Number(requestUser.sub),
         })
-        .lastValue();
+        .lastValue());
     }
 
     const { original, ...rest } = await this.mediaService.toFileModel(media, media.metaData);
@@ -155,10 +171,10 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
   ): Promise<Media[]> {
-    // 检测是否有上传文件的权限，没有则抛出异常不处理文件流
-    const hasCapability = await this.basicService
-      .send<boolean>(UserPattern.HasCapability, {
-        id: Number(requestUser.sub),
+    // Check if user has permission to upload files
+    const { value: hasCapability } = await this.userServiceClient
+      .hasCapability({
+        requestUserId: Number(requestUser.sub),
         capability: UserCapability.UploadFiles,
       })
       .lastValue();
@@ -185,8 +201,8 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
         const fileName = Buffer.from(filename, 'latin1').toString('utf8');
         const fileBuffer = Buffer.concat(buffers);
         const md5 = await this.mediaService.getFileMd5(fileBuffer);
-        let media = await this.basicService
-          .send<MediaModel | undefined>(MediaPattern.GetByName, {
+        let { media } = await this.mediaServiceClient
+          .getByName({
             fileName: md5,
             fields: ['id', 'fileName', 'originalFileName', 'extension', 'mimeType', 'path', 'createdAt'],
           })
@@ -204,17 +220,19 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
             mimeType: mimetype,
             md5,
           });
-          media = await this.basicService
-            .send<MediaModel>(MediaPattern.Create, {
+
+          ({ media } = await this.mediaServiceClient
+            .create({
               fileName: md5FileName,
               originalFileName,
               extension,
               mimeType: mimetype,
               path,
               metaData,
+              metas: [],
               requestUserId: Number(requestUser.sub),
             })
-            .lastValue();
+            .lastValue());
         }
 
         const { original, ...rest } = await this.mediaService.toFileModel(media, media.metaData);
@@ -238,10 +256,10 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @I18n() i18n: I18nContext,
     @User() requestUser: RequestUser,
   ): Promise<Media | undefined> {
-    // 检测是否有编辑文件的权限，没有则抛出异常不处理文件流
-    const hasCapability = await this.basicService
-      .send<boolean>(UserPattern.HasCapability, {
-        id: Number(requestUser.sub),
+    // Check if user has permission to edit files
+    const { value: hasCapability } = await this.userServiceClient
+      .hasCapability({
+        requestUserId: Number(requestUser.sub),
         capability: UserCapability.EditFiles,
       })
       .lastValue();
@@ -252,8 +270,8 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
       );
     }
 
-    const media = await this.basicService
-      .send<MediaModel | undefined>(MediaPattern.Get, {
+    const { media } = await this.mediaServiceClient
+      .get({
         id,
         fields: ['fileName', 'originalFileName', 'extension', 'mimeType', 'path', 'createdAt'],
       })
@@ -281,9 +299,10 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
           height: options.height,
         },
       });
+
       if (options.replace) {
-        await this.basicService
-          .send<void>(MediaPattern.Update, {
+        await this.mediaServiceClient
+          .update({
             id,
             fileName: md5FileName,
             path: filePath,
@@ -309,14 +328,15 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
           createdAt: media.createdAt,
         };
       } else {
-        const newMedia = await this.basicService
-          .send<MediaModel>(MediaPattern.Create, {
+        const { media: newMedia } = await this.mediaServiceClient
+          .create({
             fileName: md5FileName,
             originalFileName,
             extension,
             mimeType: media.mimeType,
             path: filePath,
             metaData,
+            metas: [],
             requestUserId: Number(requestUser.sub),
           })
           .lastValue();
@@ -341,8 +361,8 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     @Args('id', { type: () => ID, description: 'Media id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<Media | undefined> {
-    const media = await this.basicService
-      .send<MediaModel | undefined>(MediaPattern.Get, {
+    const { media } = await this.mediaServiceClient
+      .get({
         id,
         fields: [
           ...new Set(this.getFieldNames(fields.fieldsByTypeName.Media).concat(['fileName', 'path', 'extension'])),
@@ -368,9 +388,11 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   @Query(() => PagedMedia, { description: 'Get paged medias.' })
   @RamAuthorized(MediaAction.PagedList)
   async medias(@Args() args: PagedMediaArgs, @Fields() fields: ResolveTree): Promise<PagedMedia> {
-    const { rows, ...rest } = await this.basicService
-      .send<PagedMediaModel>(MediaPattern.GetPaged, {
-        query: args,
+    const { rows, ...rest } = await this.mediaServiceClient
+      .getPaged({
+        ...args,
+        mimeTypes: args.mimeTypes || [],
+        extensions: args.extensions || [],
         fields: [
           ...new Set(
             this.getFieldNames(fields.fieldsByTypeName.PagedMedia.rows.fieldsByTypeName.Media).concat([
@@ -409,13 +431,13 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
   async createMedia(
     @Args('model', { type: () => NewMediaInput }) model: NewMediaInput,
     @Args('metaData', { type: () => MediaMetaDataInput }) metaData: MediaMetaDataInput,
-    @User()
-    requestUser: RequestUser,
+    @User() requestUser: RequestUser,
   ): Promise<Media> {
-    const media = await this.basicService
-      .send<MediaModel>(MediaPattern.Create, {
+    const { media } = await this.mediaServiceClient
+      .create({
         ...model,
         metaData,
+        metas: model.metas || [],
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
@@ -431,16 +453,15 @@ export class MediaResolver extends createMetaResolver(Media, MediaMeta, NewMedia
     };
   }
 
-  @Mutation(() => VoidResolver, { nullable: true, description: 'Delete media.' })
+  @Mutation(() => VoidResolver, { nullable: true, description: 'Update media.' })
   async updateMedia(
     @Args('id', { type: () => ID, description: 'Media id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateMediaInput }) model: UpdateMediaInput,
     @Args('metaData', { type: () => MediaMetaDataInput, nullable: true }) metaData: MediaMetaDataInput | undefined,
-    @User()
-    requestUser: RequestUser,
+    @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(MediaPattern.Update, {
+    await this.mediaServiceClient
+      .update({
         ...model,
         id,
         metaData,

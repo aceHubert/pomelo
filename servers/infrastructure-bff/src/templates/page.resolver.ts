@@ -1,5 +1,5 @@
-import { Inject, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, OnModuleInit, ParseIntPipe } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
@@ -11,14 +11,22 @@ import {
   RequestUser,
   OptionPresetKeys,
   TemplateStatus,
+  TemplateCommentStatus,
   TemplatePresetType,
   TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  OptionPattern,
-  TemplatePattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import {
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceClient,
+  TemplateModel,
+  GetTemplateOptionsRequest,
+  GetPagedTemplateRequest,
+} from '@ace-pomelo/shared/server/proto-ts/template';
+import { OPTION_SERVICE_NAME, OptionServiceClient } from '@ace-pomelo/shared/server/proto-ts/option';
 import { TemplateAction, PageTemplateAction } from '@/common/actions';
 import { createMetaFieldResolver } from '@/common/resolvers/meta.resolver';
+import { WrapperTemplateCommentStatus, WrapperTemplateStatus } from '@/common/utils/wrapper-enum.util';
 import { MessageService } from '@/messages/message.service';
 import { createAuthorFieldResolver } from './base.resolver';
 import { NewPageTemplateInput } from './dto/new-template.input';
@@ -31,16 +39,16 @@ import { PageTemplate, PagedPageTemplate, PageTemplateOption, PagedPageTemplateI
 @Authorized()
 @Resolver(() => PagedPageTemplateItem)
 export class PagedPageTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedPageTemplateItem, true) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
 @Authorized()
 @Resolver(() => PageTemplate)
 export class PageTemplateAuthorResolver extends createAuthorFieldResolver(PageTemplate) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
@@ -48,85 +56,121 @@ export class PageTemplateAuthorResolver extends createAuthorFieldResolver(PageTe
 
 @Authorized()
 @Resolver(() => PagedPageTemplateItem)
-export class PagedPageTemplateItemMetaFieldResolver extends createMetaFieldResolver(PagedPageTemplateItem, {
-  modelName: 'template',
-  authDecorator: () => RamAuthorized(TemplateAction.MetaList),
-}) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+export class PagedPageTemplateItemMetaFieldResolver
+  extends createMetaFieldResolver('template', PagedPageTemplateItem, {
+    authDecorator: () => RamAuthorized(TemplateAction.MetaList),
+  })
+  implements OnModuleInit
+{
+  private templateServiceClient!: TemplateServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
   }
 }
 
 @Authorized()
 @Resolver(() => PageTemplate)
-export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, {
-  modelName: 'template',
+export class PageTemplateResolver extends createMetaFieldResolver('template', PageTemplate, {
   authDecorator: () => RamAuthorized(TemplateAction.MetaList),
 }) {
+  private templateServiceClient!: TemplateServiceClient;
+  private optionServiceClient!: OptionServiceClient;
+
   constructor(
-    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc,
     private readonly messageService: MessageService,
   ) {
-    super(basicService);
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+    this.optionServiceClient = this.client.getService<OptionServiceClient>(OPTION_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
+  }
+
+  private mapToPageTemplate(model: TemplateModel): PageTemplate {
+    return {
+      ...model,
+      status: WrapperTemplateStatus.asValueOrDefault(model.status, TemplateStatus.Publish),
+      commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, TemplateCommentStatus.Open),
+    };
   }
 
   @Anonymous()
   @Query((returns) => [String!], { description: ' Get page alias paths' })
   pageAliasPaths(): Promise<string[]> {
-    return this.basicService.send<string[]>(TemplatePattern.GetNames, { type: TemplatePresetType.Page }).lastValue();
+    return this.templateServiceClient
+      .getNames({ type: TemplatePresetType.Page })
+      .lastValue()
+      .then(({ names }) => names);
   }
 
   @Anonymous()
   @Query((returns) => [PageTemplateOption], { nullable: true, description: 'Get page template options.' })
-  pageTemplateOptions(
+  async pageTemplateOptions(
     @Args() args: PageTemplateOptionArgs,
     @Fields() fields: ResolveTree,
   ): Promise<PageTemplateOption[]> {
     const { categoryId, categoryName, ...restArgs } = args;
-    return this.basicService
-      .send<PageTemplateOption[]>(TemplatePattern.GetOptions, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const { options } = await this.templateServiceClient
+      .getOptions({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetTemplateOptionsRequest['taxonomies'],
         type: TemplatePresetType.Page,
         fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplateOption),
       })
       .lastValue();
+
+    return options;
   }
 
   @Anonymous()
   @Query((returns) => PageTemplate, { nullable: true, description: 'Get page template.' })
-  pageTemplate(
+  async pageTemplate(
     @Args('id', { type: () => ID, description: 'Page id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
-    return this.basicService
-      .send<PageTemplate | undefined>(TemplatePattern.Get, {
+    const { template } = await this.templateServiceClient
+      .get({
         id,
         type: TemplatePresetType.Page,
         fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
       .lastValue();
+
+    return template ? this.mapToPageTemplate(template) : undefined;
   }
 
   @Anonymous()
   @Query((returns) => PageTemplate, { nullable: true, description: 'Get page template by alias name.' })
-  pageTemplateByName(
+  async pageTemplateByName(
     @Args('name', {
       type: () => String,
       nullable: true,
@@ -136,110 +180,101 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PageTemplate | undefined> {
-    if (name) {
-      return this.basicService
-        .send<PageTemplate>(TemplatePattern.GetByName, {
-          name,
-          type: TemplatePresetType.Page,
-          fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-          requestUserId: requestUser ? Number(requestUser.sub) : undefined,
-        })
-        .lastValue();
-    } else {
-      return this.basicService
-        .send<string | undefined>(OptionPattern.GetValue, {
-          optionName: OptionPresetKeys.PageOnFront,
-        })
-        .lastValue()
-        .then((id) => {
-          if (id) {
-            return this.basicService
-              .send<PageTemplate>(TemplatePattern.Get, {
-                id: Number(id),
-                type: TemplatePresetType.Page,
-                fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
-                requestUserId: requestUser ? Number(requestUser.sub) : undefined,
-              })
-              .lastValue();
-          }
-          return undefined;
-        });
-    }
+    const { template } = name
+      ? await this.templateServiceClient
+          .getByName({
+            name,
+            type: TemplatePresetType.Page,
+            fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
+            requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+          })
+          .lastValue()
+      : await this.optionServiceClient
+          .getValue({
+            optionName: OptionPresetKeys.PageOnFront,
+          })
+          .lastValue()
+          .then(({ optionValue: id }) => {
+            if (id) {
+              return this.templateServiceClient
+                .get({
+                  id: Number(id),
+                  type: TemplatePresetType.Page,
+                  fields: this.getFieldNames(fields.fieldsByTypeName.PageTemplate),
+                  requestUserId: requestUser ? Number(requestUser.sub) : undefined,
+                })
+                .lastValue();
+            }
+            return { template: undefined };
+          });
+
+    return template ? this.mapToPageTemplate(template) : undefined;
   }
 
   @Query((returns) => PagedPageTemplate, { description: 'Get paged page templates.' })
-  pageTemplates(
+  async pageTemplates(
     @Args() args: PagedPageTemplateArgs,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<PagedPageTemplate> {
     const { categoryId, categoryName, ...restArgs } = args;
-    return this.basicService
-      .send<PagedPageTemplate>(TemplatePattern.GetPaged, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    return this.templateServiceClient
+      .getPaged({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetPagedTemplateRequest['taxonomies'],
         type: TemplatePresetType.Page,
         fields: this.getFieldNames(
           fields.fieldsByTypeName.PagedPageTemplate.rows.fieldsByTypeName.PagedPageTemplateItem,
         ),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
-      .lastValue();
+      .lastValue()
+      .then(({ rows, ...rest }) => ({
+        ...rest,
+        rows: rows.map((row) => this.mapToPageTemplate(row)),
+      }));
   }
 
   @RamAuthorized(PageTemplateAction.Create)
   @Mutation((returns) => PageTemplate, { description: 'Create a new page template.' })
-  async createPageTempate(
+  async createPageTemplate(
     @Args('model', { type: () => NewPageTemplateInput }) model: NewPageTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<PageTemplate> {
-    const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.basicService
-        .send<PageTemplate>(TemplatePattern.CreatePage, {
-          ...model,
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
+    const { template } = await this.templateServiceClient
+      .createPage({
+        ...model,
+        metas: model.metas || [],
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
 
     // 新建（当状态为需要审核）审核消息推送
-    if (status === TemplateStatus.Pending) {
+    if (template.status === TemplateStatus.Pending) {
       await this.messageService.publish(
         {
           eventName: 'createPageReview',
           payload: {
-            id,
+            id: template.id,
           },
         },
         { excludes: [requestUser.sub] },
       );
     }
 
-    return {
-      id,
-      name,
-      title,
-      author,
-      content,
-      status,
-      commentStatus,
-      commentCount,
-      updatedAt,
-      createdAt,
-    };
+    return this.mapToPageTemplate(template);
   }
 
   @RamAuthorized(PageTemplateAction.Update)
@@ -252,8 +287,8 @@ export class PageTemplateResolver extends createMetaFieldResolver(PageTemplate, 
     @Args('model', { type: () => UpdatePageTemplateInput }) model: UpdatePageTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.UpdatePage, {
+    await this.templateServiceClient
+      .update({
         ...model,
         id,
         requestUserId: Number(requestUser.sub),

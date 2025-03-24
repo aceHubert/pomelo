@@ -1,6 +1,7 @@
 import { Op, WhereOptions } from 'sequelize';
 import { Injectable } from '@nestjs/common';
-import { ValidationError, MediaMetaPresetKeys, UserCapability } from '@ace-pomelo/shared/server';
+import { ValidationError, UserCapability } from '@ace-pomelo/shared/server';
+import { MediaMetaPresetKeys } from '../../entities';
 import { Medias, MediaMeta } from '../entities';
 import {
   MediaModel,

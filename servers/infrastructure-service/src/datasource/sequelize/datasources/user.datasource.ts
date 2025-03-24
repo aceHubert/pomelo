@@ -1,15 +1,15 @@
 import { isUndefined } from 'lodash';
 import { CountryCode } from 'libphonenumber-js';
 import { isEmail, isPhoneNumber } from 'class-validator';
-import { WhereOptions, Attributes, Op } from 'sequelize';
+import { WhereOptions, Attributes, Op, GroupedCountResultItem } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import {
   ForbiddenError,
   ValidationError,
-  UserStatus,
   UserCapability,
   UserMetaPresetKeys,
   OptionPresetKeys,
+  UserStatus,
 } from '@ace-pomelo/shared/server';
 import { Users, UserMeta } from '../entities';
 import {
@@ -62,16 +62,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async get(fields: string[], requestUserIdOrUsername: number | string): Promise<UserModel | undefined>;
   /**
-   * 匿名获取用户信息（只允许获取非敏感信息 "id" ,"loginName", "niceName", "displayName", "url" 字段）
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @param idOrUsername 用户 Id 或 登录名/邮箱/手机号码
-   * @param fields 返回的字段
-   */
-  async get(idOrUsername: number | string, fields: string[]): Promise<UserModel | undefined>;
-  /**
-   * 获取用户信息 (必须要有权限才查以获取)
+   * 获取其它用户信息
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -82,26 +73,18 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    */
   async get(idOrUsername: number | string, fields: string[], requestUserId: number): Promise<UserModel | undefined>;
   async get(
-    ...args: [string[], number | string] | [number | string, string[]] | [number | string, string[], number]
+    ...args: [string[], number | string] | [number | string, string[], number]
   ): Promise<UserModel | undefined> {
     let idOrUserName: number | string, fields: string[], requestUserId: number;
 
-    if (args.length === 3) {
-      [idOrUserName, fields, requestUserId] = args;
-      if (idOrUserName !== requestUserId) {
-        // 查询非自己时是否有获取权限
-        await this.hasCapability(UserCapability.EditUsers, requestUserId);
-      }
+    if (Array.isArray(args[0])) {
+      // 获取当前用户信息
+      [fields, idOrUserName] = args as [string[], number | string];
     } else {
-      if (typeof args[0] === 'number' || typeof args[0] === 'string') {
-        // 匿名查询
-        [idOrUserName, fields] = args as unknown as [number | string, string[]];
-        // 只允许获取非敏感信息
-        fields = fields.filter((field) => ['id', 'loginName', 'niceName', 'displayName', 'url'].includes(field));
-      } else {
-        // 获取当前用户信息
-        [fields, idOrUserName] = args as [string[], number | string];
-      }
+      [idOrUserName, fields, requestUserId] = args as [number | string, string[], number];
+
+      // 查询非自己时是否有获取权限
+      await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
     // 排除登录密码
@@ -146,13 +129,9 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param fields 返回的字段
    * @param requestUserId 请求的用户Id
    */
-  async getList(ids: number[], fields: string[], requestUserId?: number): Promise<UserModel[]> {
-    if (!requestUserId) {
-      fields = fields.filter((field) => ['id', 'loginName', 'niceName', 'displayName', 'url'].includes(field));
-    } else {
-      // 是否有查看用户列表权限
-      await this.hasCapability(UserCapability.ListUsers, requestUserId);
-    }
+  async getList(ids: number[], fields: string[], requestUserId: number): Promise<UserModel[]> {
+    // 是否有查看用户列表权限
+    await this.hasCapability(UserCapability.ListUsers, requestUserId);
 
     // 排除登录密码
     fields = fields.filter((field) => field !== 'loginPwd');
@@ -258,10 +237,15 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [ListUsers]
-   * @param id 用户 Id
    * @param requestUserId 请求的用户Id
+   * @param id 用户 Id, 为空时获取当前请求用户，否则需要检验请求用户是否有查看用户列表权限
    */
-  async getCapabilities(id: number, requestUserId: number): Promise<UserCapability[]> {
+  async getCapabilities(requestUserId: number, id?: number): Promise<UserCapability[]> {
+    if (!id) {
+      // 获取当前请求用户
+      id = requestUserId;
+    }
+
     if (id !== requestUserId) {
       // 是否有查看用户列表权限
       await this.hasCapability(UserCapability.ListUsers, requestUserId);
@@ -285,7 +269,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     return Users.count({
       attributes: ['status'],
       group: 'status',
-    });
+    }) as Promise<
+      Array<
+        GroupedCountResultItem & {
+          status: UserStatus;
+        }
+      >
+    >;
   }
 
   /**
@@ -319,7 +309,13 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         },
       ],
       group: 'userRole',
-    });
+    }) as Promise<
+      Array<
+        GroupedCountResultItem & {
+          userRole: string;
+        }
+      >
+    >;
   }
 
   /**
@@ -427,59 +423,56 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         { transaction: t },
       );
 
-      let metaCreationModels: NewUserMetaInput[] = [
-        {
-          userId: user.id,
-          metaKey: UserMetaPresetKeys.NickName,
-          metaValue: model.loginName,
-        },
-        {
-          userId: user.id,
-          metaKey: UserMetaPresetKeys.FirstName,
-          metaValue: model.firstName || '',
-        },
-        {
-          userId: user.id,
-          metaKey: UserMetaPresetKeys.LastName,
-          metaValue: model.lastName || '',
-        },
-        {
-          userId: user.id,
-          metaKey: UserMetaPresetKeys.Avatar,
-          metaValue: model.avator || '',
-        },
-        {
-          userId: user.id,
-          metaKey: UserMetaPresetKeys.Description,
-          metaValue: model.description || '',
-        },
-        {
-          userId: user.id,
-          metaKey: UserMetaPresetKeys.Locale,
-          metaValue: model.locale || '',
-        },
-        {
-          userId: user.id,
-          metaKey: UserMetaPresetKeys.AdminColor,
-          metaValue: model.adminColor || '',
-        },
-        {
-          userId: user.id,
-          metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
-          metaValue: model.capabilities,
-        },
-      ];
       // 添加元数据
-      if (model.metas) {
-        metaCreationModels = metaCreationModels.concat(
-          model.metas.map((meta) => ({
+      await UserMeta.bulkCreate(
+        [
+          {
+            userId: user.id,
+            metaKey: UserMetaPresetKeys.NickName,
+            metaValue: model.loginName,
+          },
+          {
+            userId: user.id,
+            metaKey: UserMetaPresetKeys.FirstName,
+            metaValue: model.firstName || '',
+          },
+          {
+            userId: user.id,
+            metaKey: UserMetaPresetKeys.LastName,
+            metaValue: model.lastName || '',
+          },
+          {
+            userId: user.id,
+            metaKey: UserMetaPresetKeys.Avatar,
+            metaValue: model.avator || '',
+          },
+          {
+            userId: user.id,
+            metaKey: UserMetaPresetKeys.Description,
+            metaValue: model.description || '',
+          },
+          {
+            userId: user.id,
+            metaKey: UserMetaPresetKeys.Locale,
+            metaValue: model.locale || '',
+          },
+          {
+            userId: user.id,
+            metaKey: UserMetaPresetKeys.AdminColor,
+            metaValue: model.adminColor || '',
+          },
+          {
+            userId: user.id,
+            metaKey: `${this.tablePrefix}${UserMetaPresetKeys.Capabilities}`,
+            metaValue: model.capabilities,
+          },
+          ...(model.metas?.map((meta) => ({
             ...meta,
             userId: user.id,
-          })),
-        );
-      }
-
-      await UserMeta.bulkCreate(metaCreationModels, { transaction: t });
+          })) ?? []),
+        ],
+        { transaction: t },
+      );
 
       await t.commit();
 
@@ -494,18 +487,40 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 修改用户，mobile, email 要求必须是唯一，否则会抛出 ValidationError
+   * 修改用户（本人不允许修改状态和权限配置）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(修改非自己信息)]
-   * @param id 用户 Id
-   * @param model 修改实体模型
    * @param requestUserId 请求的用户Id
+   * @param model 修改实体模型
+   * @param id 用户 Id, 为空时获取当前请求用户，否则需要检验请求用户是否有修改权限
    */
-  async update(id: number, model: UpdateUserInput, requestUserId: number): Promise<void> {
-    // 修改非自己信息，是否有修改权限
+  async update(requestUserId: number, model: UpdateUserInput, id?: number): Promise<void> {
+    if (!id) {
+      // 修改当前请求用户
+      id = requestUserId;
+
+      if (model.status) {
+        // 本人不能修改状态
+        throw new ForbiddenError(
+          this.translate(
+            'infrastructure-service.datasource.user.cannot_update_status_by_self',
+            'Cannot update status by yourself!',
+          ),
+        );
+      } else if (model.capabilities) {
+        // 本人不能修改权限配置
+        throw new ForbiddenError(
+          this.translate(
+            'infrastructure-service.datasource.user.cannot_update_capabilities_by_self',
+            'Cannot update capabilities by yourself!',
+          ),
+        );
+      }
+    }
     if (id !== requestUserId) {
+      // 修改非自己信息，是否有修改权限
       await this.hasCapability(UserCapability.EditUsers, requestUserId);
     }
 
@@ -636,7 +651,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 修改用户Email
+   * 修改用户Email（非本人修改时需要编辑用户权限）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
@@ -645,7 +660,11 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param email Email
    * @param requestUserId 请求的用户Id
    */
-  async updateEmail(id: number, email: string, requestUserId: number): Promise<void> {
+  async updateEmail(requestUserId: number, email: string, id?: number): Promise<void> {
+    if (!id) {
+      // 修改当前请求用户
+      id = requestUserId;
+    }
     // 修改非自己信息，是否有修改权限
     if (id !== requestUserId) {
       await this.hasCapability(UserCapability.EditUsers, requestUserId);
@@ -682,16 +701,20 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 修改用户手机号码
+   * 修改用户手机号码（非本人修改时需要编辑用户权限）
    * @author Hubert
    * @since 2020-10-01
    * @version 0.0.1
    * @access capabilities: [EditUsers(修改非自己信息)]
-   * @param id 用户 Id
-   * @param mobile 手机号码
    * @param requestUserId 请求的用户Id
+   * @param mobile 手机号码
+   * @param id 用户 Id, 为空时获取当前请求用户，否则需要检验请求用户是否有修改权限
    */
-  async updateMobile(id: number, mobile: string, requestUserId: number): Promise<void> {
+  async updateMobile(requestUserId: number, mobile: string, id?: number): Promise<void> {
+    if (!id) {
+      // 修改当前请求用户
+      id = requestUserId;
+    }
     // 修改非自己信息，是否有修改权限
     if (id !== requestUserId) {
       await this.hasCapability(UserCapability.EditUsers, requestUserId);
@@ -752,12 +775,12 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 通过户Id/用户名修改密码
+   * 通过户Id/用户名修改本人密码
    * @param idOrUsername 用户 Id/登录名/邮箱/手机号码
    * @param oldPwd 旧密码
    * @param newPwd 新密码
    */
-  async updateLoginPwd(idOrUsername: number | string, oldPwd: string, newPwd: string): Promise<void> {
+  async updateLoginPassowrd(idOrUsername: number | string, oldPwd: string, newPwd: string): Promise<void> {
     const id = typeof idOrUsername === 'number' ? idOrUsername : undefined,
       username = id ? undefined : (idOrUsername as string),
       region = username ? await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion) : undefined;
@@ -804,11 +827,25 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
   }
 
   /**
-   * 重置密码
-   * @param id 用户 Id
-   * @param password 新密码
+   * 重置密码（非本人重置时需要编辑用户权限）
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [EditUsers(修改非自己信息)]
+   * @param requestUserId 请求的用户Id
+   * @param newPwd 新密码
+   * @param id 用户 Id, 为空时获取当前请求用户，否则需要检验请求用户是否有修改权限
    */
-  async resetLoginPwd(id: number, password: string): Promise<void> {
+  async resetLoginPassword(requestUserId: number, newPwd: string, id?: number): Promise<void> {
+    if (!id) {
+      // 修改当前请求用户
+      id = requestUserId;
+    }
+    if (id !== requestUserId) {
+      // 是否有修改用户权限
+      await this.hasCapability(UserCapability.EditUsers, requestUserId);
+    }
+
     const user = await Users.findByPk(id);
     if (user) {
       if (user.status === UserStatus.Disabled) {
@@ -816,7 +853,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           this.translate('infrastructure-service.datasource.user.user_disabled', 'User is disabled!'),
         );
       }
-      user.loginPwd = password;
+      user.loginPwd = newPwd;
       user.save();
     } else {
       throw new ValidationError(

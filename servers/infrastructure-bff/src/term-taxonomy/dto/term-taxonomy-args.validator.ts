@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsNotEmpty, IsInt } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsInt, IsArray } from 'class-validator';
 
 export abstract class TermTaxonomyArgsValidator {
   @IsOptional()
@@ -17,4 +17,9 @@ export abstract class TermTaxonomyArgsValidator {
   @IsOptional()
   @IsInt()
   abstract group?: number;
+
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  abstract exclude?: number[];
 }

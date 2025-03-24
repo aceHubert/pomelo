@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+// MetaModel 表示元数据信息
+message MetaModel {
+  // 元数据的唯一标识符
+  int32 id = 1;
+  // 元数据的键
+  string metaKey = 2;
+  // 元数据的值，可以为空
+  optional string metaValue = 3;
+}
+
+// GetMetaRequest 表示获取元数据的请求
+message GetMetaRequest {
+  // 要获取的元数据的唯一标识符
+  int32 id = 1;
+  // 要获取的字段列表
+  repeated string fields = 100;
+}
+
+// CreateMetaRequest 表示创建新元数据的请求
+message CreateMetaRequest {
+  // 新元数据的键
+  string metaKey = 1;
+  // 新元数据的值，可以为空
+  optional string metaValue = 2;
+}
+
+// UpdateMetaRequest 表示更新现有元数据的请求
+message UpdateMetaRequest {
+  // 要更新的元数据的唯一标识符
+  int32 id = 1;
+  // 要设置的新值
+  string metaValue = 2;
+}
+
+// DeleteMetaRequest 表示删除元数据的请求
+message DeleteMetaRequest {
+  // 要删除的元数据的唯一标识符
+  int32 id = 1;
+}

@@ -1,97 +1,194 @@
-import { ParseIntPipe, ParseArrayPipe, DefaultValuePipe } from '@nestjs/common';
-import { Payload, MessagePattern } from '@nestjs/microservices';
-import { createMetaPattern } from '@ace-pomelo/shared/server';
-import { MetaDataSource } from '../datasource/index';
-import { NewMetaPayload } from './payload/meta.payload';
+import { GrpcMethod } from '@nestjs/microservices';
+import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
+import { MetaDataSource } from '../datasource';
+
+type addModelId<ModelName extends string> = {
+  [K in `${ModelName}Id`]: number;
+};
+
+type addModelIds<ModelName extends string> = {
+  [K in `${ModelName}Ids`]: {
+    value: number[];
+  };
+};
+
+type MetaResponse<ModelName extends string> = {
+  id: number;
+  metaKey: string;
+  metaValue?: string;
+} & addModelId<ModelName>;
+
+export type GetMetaRequest = {
+  id: number;
+  fields: string[];
+};
+
+export type GetMetaResponse<ModelName extends string> = {
+  meta?: MetaResponse<ModelName>;
+};
+
+export type GetMetasRequest<ModelName extends string> = {
+  metaKeys: string[];
+  fields: string[];
+} & Partial<addModelId<ModelName> & addModelIds<ModelName>>;
+
+export type GetMetasResponse<ModelName extends string> = {
+  metas: MetaResponse<ModelName>[];
+};
+
+export type CreateMetaRequest<ModelName extends string> = {
+  metaKey: string;
+  metaValue?: string;
+} & addModelId<ModelName>;
+
+export type CreateMetaResponse<ModelName extends string> = {
+  meta: MetaResponse<ModelName>;
+};
+
+export type CreateMetasRequest<ModelName extends string> = {
+  metas: {
+    metaKey: string;
+    metaValue?: string;
+  }[];
+} & addModelId<ModelName>;
+
+export type CreateMetasResponse<ModelName extends string> = {
+  metas: MetaResponse<ModelName>[];
+};
+
+export type UpdateMetaRequest = {
+  id: number;
+  metaValue: string;
+};
+
+export type UpdateMetaByKeyRequest<ModelName extends string> = {
+  metaKey: string;
+  metaValue: string;
+  createIfNotExists?: boolean;
+} & addModelId<ModelName>;
+
+export type DeleteMetaRequest = {
+  id: number;
+};
+
+export type DeleteMetaByKeyRequest<ModelName extends string> = {
+  metaKey: string;
+} & addModelId<ModelName>;
+
+export interface MetaServiceController<ModelName extends string> {
+  getMeta(request: GetMetaRequest): Promise<GetMetaResponse<ModelName>>;
+  getMetas(request: GetMetasRequest<ModelName>): Promise<GetMetasResponse<ModelName>>;
+  createMeta(request: CreateMetaRequest<ModelName>): Promise<CreateMetaResponse<ModelName>>;
+  createMetas(request: CreateMetasRequest<ModelName>): Promise<CreateMetasResponse<ModelName>>;
+  updateMeta(request: UpdateMetaRequest): Promise<Empty>;
+  updateMetaByKey(request: UpdateMetaByKeyRequest<ModelName>): Promise<Empty>;
+  deleteMeta(request: DeleteMetaRequest): Promise<Empty>;
+  deleteMetaByKey(request: DeleteMetaByKeyRequest<ModelName>): Promise<Empty>;
+}
 
 /**
  * 创建 Meta Controller
- * DataSources 必须有 getMetas/createMeta/updateMeta/updateMetaByKey/deleteMeta 方法
  */
-export function createMetaController<MetaModelType, NewMetaPayloadType>(modelName: string) {
-  const pattern = createMetaPattern(modelName);
+export function createMetaController<ModelName extends string>(modelName: ModelName, serviceName: string) {
+  abstract class MetaController implements MetaServiceController<ModelName> {
+    constructor(
+      private readonly metaDataSource: MetaDataSource<MetaResponse<ModelName>, CreateMetaRequest<ModelName>>,
+    ) {}
 
-  abstract class MetaController {
-    constructor(private readonly metaDataSource: MetaDataSource<MetaModelType, NewMetaPayloadType>) {}
     /**
      * 获取元数据
      */
-    @MessagePattern(pattern.GetMeta)
-    getMeta(
-      @Payload('id', ParseIntPipe) id: number,
-      @Payload('fields', new ParseArrayPipe({ items: String, optional: true }))
-      fields: string[] = ['id', 'metaKey', 'metaValue'],
-    ): Promise<MetaModelType | undefined> {
-      return this.metaDataSource.getMeta(id, fields);
+    @GrpcMethod(serviceName, 'getMeta')
+    getMeta({ fields, id }: GetMetaRequest): Promise<GetMetaResponse<ModelName>> {
+      // fields 默认值为
+      if (fields.length === 0) fields = ['id', 'metaKey', 'metaValue'];
+      return this.metaDataSource.getMeta(id, fields).then((meta) => {
+        return { meta };
+      });
     }
 
     /**
      * 获取元数据集合
      */
-    @MessagePattern(pattern.GetMetas)
-    async getMetas(
-      @Payload(`${modelName}Id`, new ParseIntPipe({ optional: true })) modelId: number,
-      @Payload(`${modelName}Ids`, new ParseArrayPipe({ items: Number, optional: true })) modelIds: number[],
-      @Payload('metaKeys', new ParseArrayPipe({ optional: true })) metaKeys: string[] | undefined,
-      @Payload('fields', new ParseArrayPipe({ items: String, optional: true }))
-      fields: string[] = ['id', 'metaKey', 'metaValue'],
-    ): Promise<MetaModelType[] | Record<number, MetaModelType[]>> {
-      if (!modelId && !modelIds) return [];
+    @GrpcMethod(serviceName, 'getMetas')
+    getMetas({ fields, metaKeys, ...rest }: GetMetasRequest<ModelName>): Promise<GetMetasResponse<ModelName>> {
+      const modelId: number | number[] = (rest as any)[`${modelName}Id`] ?? (rest as any)[`${modelName}Ids`]?.value;
+      if (!modelId) return Promise.resolve({ metas: [] });
 
-      return this.metaDataSource.getMetas(modelId ?? modelIds, metaKeys, fields);
+      // fields 默认值为
+      if (fields.length === 0) fields = ['id', 'metaKey', 'metaValue'];
+
+      return this.metaDataSource.getMetas(modelId, metaKeys, fields).then((metas) => {
+        return { metas };
+      });
     }
 
     /**
      * 新建元数据
      */
-    @MessagePattern(pattern.CreateMeta)
-    createMeta(@Payload() payload: NewMetaPayloadType) {
-      return this.metaDataSource.createMeta(payload);
+    @GrpcMethod(serviceName, 'createMeta')
+    createMeta(request: CreateMetaRequest<ModelName>): Promise<CreateMetaResponse<ModelName>> {
+      return this.metaDataSource.createMeta(request).then((meta) => {
+        return { meta };
+      });
     }
 
     /**
      * 批量新建元数据
      */
-    @MessagePattern(pattern.CreateMetas)
-    createMetas(@Payload(`${modelName}Id`, ParseIntPipe) modelId: number, @Payload('models') models: NewMetaPayload[]) {
-      return this.metaDataSource.bulkCreateMeta(modelId, models);
+    @GrpcMethod(serviceName, 'createMetas')
+    createMetas({ metas, ...rest }: CreateMetasRequest<ModelName>): Promise<CreateMetasResponse<ModelName>> {
+      const modelId = (rest as any)[`${modelName}Id`];
+      return this.metaDataSource.bulkCreateMeta(modelId, metas).then((metas) => {
+        return { metas };
+      });
     }
 
     /**
      * 修改元数据
      */
-    @MessagePattern(pattern.UpdateMeta)
-    updateMeta(@Payload('id', ParseIntPipe) id: number, @Payload('metaValue') metaValue: string) {
-      return this.metaDataSource.updateMeta(id, metaValue);
+    @GrpcMethod(serviceName, 'updateMeta')
+    updateMeta({ id, metaValue }: UpdateMetaRequest): Promise<Empty> {
+      return this.metaDataSource.updateMeta(id, metaValue).then(() => {
+        return {};
+      });
     }
 
     /**
      * 根据 metaKey 修改元数据
      */
-    @MessagePattern(pattern.UpdateMetaByKey)
-    updateMetaByKey(
-      @Payload(`${modelName}Id`, ParseIntPipe) modelId: number,
-      @Payload('metaKey') metaKey: string,
-      @Payload('metaValue') metaValue: string,
-      @Payload('createIfNotExists', new DefaultValuePipe(false)) createIfNotExists?: boolean,
-    ) {
-      return this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists);
+    @GrpcMethod(serviceName, 'updateMetaByKey')
+    updateMetaByKey({
+      metaKey,
+      metaValue,
+      createIfNotExists = false,
+      ...rest
+    }: UpdateMetaByKeyRequest<ModelName>): Promise<Empty> {
+      const modelId = (rest as any)[`${modelName}Id`];
+      return this.metaDataSource.updateMetaByKey(modelId, metaKey, metaValue, createIfNotExists).then(() => {
+        return {};
+      });
     }
 
     /**
      * 删除元数据
      */
-    @MessagePattern(pattern.DeleteMeta)
-    deleteMeta(@Payload('id', ParseIntPipe) id: number) {
-      return this.metaDataSource.deleteMeta(id);
+    @GrpcMethod(serviceName, 'deleteMeta')
+    deleteMeta({ id }: DeleteMetaRequest): Promise<Empty> {
+      return this.metaDataSource.deleteMeta(id).then(() => {
+        return {};
+      });
     }
 
     /**
      * 根据 metaKey 添加元数据
      */
-    @MessagePattern(pattern.DeleteMetaByKey)
-    deleteMetaByKey(@Payload(`${modelName}Id`, ParseIntPipe) modelId: number, @Payload('metaKey') metaKey: string) {
-      return this.metaDataSource.deleteMetaByKey(modelId, metaKey);
+    @GrpcMethod(serviceName, 'deleteMetaByKey')
+    deleteMetaByKey({ metaKey, ...rest }: DeleteMetaByKeyRequest<ModelName>): Promise<Empty> {
+      const modelId = (rest as any)[`${modelName}Id`];
+      return this.metaDataSource.deleteMetaByKey(modelId, metaKey).then(() => {
+        return {};
+      });
     }
   }
 

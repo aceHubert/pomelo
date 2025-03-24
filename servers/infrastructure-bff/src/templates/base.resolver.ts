@@ -1,7 +1,7 @@
 import DataLoader from 'dataloader';
 import { upperFirst } from 'lodash';
-import { Inject, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Inject, ParseIntPipe, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
@@ -12,14 +12,25 @@ import {
   User,
   RequestUser,
   TemplateStatus,
+  TemplateCommentStatus,
   TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  TemplatePattern,
-  TermTaxonomyPattern,
-  UserPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
+import {
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceClient,
+  GetTemplateOptionsRequest,
+  TemplateModel,
+  GetPagedTemplateRequest,
+} from '@ace-pomelo/shared/server/proto-ts/template';
+import {
+  TERM_TAXONOMY_SERVICE_NAME,
+  TermTaxonomyServiceClient,
+} from '@ace-pomelo/shared/server/proto-ts/term-taxonomy';
+import { USER_SERVICE_NAME, UserServiceClient } from '@ace-pomelo/shared/server/proto-ts/user';
 import { TemplateAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
+import { WrapperTemplateStatus, WrapperTemplateCommentStatus } from '@/common/utils/wrapper-enum.util';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { MessageService } from '@/messages/message.service';
 import { TermTaxonomy } from '@/term-taxonomy/models/term-taxonomy.model';
@@ -45,28 +56,33 @@ import {
 /**
  * Taxonomy base field resolver
  */
-export abstract class TaxonomyFieldResolver extends BaseResolver {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+export abstract class TaxonomyFieldResolver extends BaseResolver implements OnModuleInit {
+  protected termTaxonomyServiceClient!: TermTaxonomyServiceClient;
+
+  constructor(private readonly client: ClientGrpc) {
     super();
   }
 
+  onModuleInit() {
+    this.termTaxonomyServiceClient = this.client.getService<TermTaxonomyServiceClient>(TERM_TAXONOMY_SERVICE_NAME);
+  }
+
   protected createDataLoader(taxonomy: string): DataLoader<{ objectId: number; fields: string[] }, TermTaxonomy[]> {
-    const termLoaderFn = async (keys: Readonly<Array<{ objectId: number; fields: string[] }>>) => {
+    return new DataLoader(async (keys: Readonly<Array<{ objectId: number; fields: string[] }>>) => {
       if (keys.length) {
         // 所有调用的 taxonomy 和 fields 都是相同的
-        const results = await this.basicService
-          .send<Record<number, TermTaxonomy[]>>(TermTaxonomyPattern.GetListByObjectIds, {
+        const { termTaxonomies } = await this.termTaxonomyServiceClient
+          .getListByObjectIds({
             objectIds: keys.map((key) => key.objectId),
             taxonomy,
             fields: keys[0].fields,
           })
           .lastValue();
-        return keys.map(({ objectId }) => results[objectId] || []);
+        return keys.map(({ objectId }) => termTaxonomies.find((item) => item.objectId === objectId)?.value || []);
       } else {
         return Promise.resolve([]);
       }
-    };
-    return new DataLoader(termLoaderFn);
+    });
   }
 }
 
@@ -92,16 +108,15 @@ export const createTaxonomyFieldResolver = (
   abstract class TaxonomyResolver extends TaxonomyFieldResolver {
     private taxonomyDataLoader;
 
-    constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-      super(basicService);
-
+    constructor(client: ClientGrpc) {
+      super(client);
       this.taxonomyDataLoader = this.createDataLoader(options.taxonomy);
     }
 
     @ResolveField(options.propertyName, (returns) => [TermTaxonomy!], {
       description: options.description || upperFirst(options.propertyName),
     })
-    getDynamicTaxonomies(
+    async getDynamicTaxonomies(
       @Parent() { id: objectId }: { id: number },
       @Fields() fields: ResolveTree,
     ): Promise<TermTaxonomy[]> {
@@ -111,15 +126,15 @@ export const createTaxonomyFieldResolver = (
           fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
         });
       } else {
-        return this.basicService
-          .send<TermTaxonomy[]>(TermTaxonomyPattern.GetListByObjectId, {
-            query: {
-              objectId,
-              taxonomy: options.taxonomy,
-            },
+        const { termTaxonomies } = await this.termTaxonomyServiceClient
+          .getListByObjectId({
+            objectId,
+            taxonomy: options.taxonomy,
             fields: this.getFieldNames(fields.fieldsByTypeName.TermTaxonomy),
           })
           .lastValue();
+
+        return termTaxonomies;
       }
     }
   }
@@ -129,14 +144,17 @@ export const createTaxonomyFieldResolver = (
 
 @Authorized()
 @Resolver(() => PagedTemplateItem)
-export class PagedTemplateItemCategoryResolver extends createTaxonomyFieldResolver(PagedTemplateItem, {
-  propertyName: 'categories',
-  taxonomy: TermPresetTaxonomy.Category,
-  description: 'Categories',
-  useDataLoader: true,
-}) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+export class PagedTemplateItemCategoryResolver
+  extends createTaxonomyFieldResolver(PagedTemplateItem, {
+    propertyName: 'categories',
+    taxonomy: TermPresetTaxonomy.Category,
+    description: 'Categories',
+    useDataLoader: true,
+  })
+  implements OnModuleInit
+{
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
@@ -146,8 +164,8 @@ export class TemplateCategoryResolver extends createTaxonomyFieldResolver(Templa
   taxonomy: TermPresetTaxonomy.Category,
   description: 'Categories',
 }) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 // #endregion
@@ -165,22 +183,34 @@ export const createAuthorFieldResolver = (
   useDataLoader?: boolean,
 ) => {
   @Resolver(() => resolverType, { isAbstract: true })
-  abstract class AuthorResolver extends BaseResolver {
+  abstract class AuthorResolver extends BaseResolver implements OnModuleInit {
+    protected userServiceClient!: UserServiceClient;
     private authorDataLoader;
 
-    constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+    constructor(private readonly client: ClientGrpc) {
       super();
+      this.authorDataLoader = this.createDataLoader();
+    }
 
-      this.authorDataLoader = new DataLoader(async (keys: Readonly<Array<{ id: number; fields: string[] }>>) => {
+    onModuleInit() {
+      this.userServiceClient = this.client.getService<UserServiceClient>(USER_SERVICE_NAME);
+    }
+
+    private createDataLoader(): DataLoader<
+      { id: number; fields: string[]; requestUserId: number },
+      SimpleUser | undefined
+    > {
+      return new DataLoader(async (keys: Readonly<Array<{ id: number; fields: string[]; requestUserId: number }>>) => {
         if (keys.length) {
-          const results = await basicService
-            .send<SimpleUser[]>(UserPattern.GetList, {
+          const { users } = await this.userServiceClient
+            .getList({
               ids: [...new Set(keys.map((key) => key.id))],
               fields: keys[0].fields,
+              requestUserId: keys[0].requestUserId,
             })
             .lastValue();
 
-          return keys.map(({ id }) => results.find((item) => item.id === id));
+          return keys.map(({ id }) => users.find((item) => item.id === id));
         } else {
           return Promise.resolve([]);
         }
@@ -194,19 +224,23 @@ export const createAuthorFieldResolver = (
     getAuthor(
       @Parent() { author: id }: { author: number },
       @Fields() fields: ResolveTree,
+      @User() requestUser: RequestUser,
     ): Promise<SimpleUser | undefined> {
       if (useDataLoader) {
         return this.authorDataLoader.load({
           id,
           fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser),
+          requestUserId: Number(requestUser.sub),
         });
       } else {
-        return this.basicService
-          .send<SimpleUser | undefined>(UserPattern.Get, {
+        return this.userServiceClient
+          .getUser({
             id,
             fields: this.getFieldNames(fields.fieldsByTypeName.SimpleUser),
+            requestUserId: Number(requestUser.sub),
           })
-          .lastValue();
+          .lastValue()
+          .then(({ user }) => user);
       }
     }
   }
@@ -217,16 +251,16 @@ export const createAuthorFieldResolver = (
 @Authorized()
 @Resolver(() => PagedTemplateItem)
 export class PagedTemplateItemAuthorResolver extends createAuthorFieldResolver(PagedTemplateItem, true) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
 @Authorized()
 @Resolver(() => Template)
 export class TemplateAuthorResolver extends createAuthorFieldResolver(Template) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
-    super(basicService);
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) client: ClientGrpc) {
+    super(client);
   }
 }
 
@@ -234,29 +268,50 @@ export class TemplateAuthorResolver extends createAuthorFieldResolver(Template) 
 
 @Authorized()
 @Resolver(() => Template)
-export class TemplateResolver extends createMetaResolver(Template, TemplateMeta, NewTemplateMetaInput, {
-  authDecorator: (method) => {
-    const ramAction =
-      method === 'getMeta'
-        ? TemplateAction.MetaDetail
-        : method === 'getMetas' || method === 'fieldMetas'
-        ? TemplateAction.MetaList
-        : method === 'createMeta' || method === 'createMetas'
-        ? TemplateAction.MetaCreate
-        : method === 'updateMeta' || method === 'updateMetaByKey'
-        ? TemplateAction.MetaUpdate
-        : TemplateAction.MetaDelete;
+export class TemplateResolver
+  extends createMetaResolver('template', Template, TemplateMeta, NewTemplateMetaInput, {
+    authDecorator: (method) => {
+      const ramAction =
+        method === 'getMeta'
+          ? TemplateAction.MetaDetail
+          : method === 'getMetas' || method === 'fieldMetas'
+          ? TemplateAction.MetaList
+          : method === 'createMeta' || method === 'createMetas'
+          ? TemplateAction.MetaCreate
+          : method === 'updateMeta' || method === 'updateMetaByKey'
+          ? TemplateAction.MetaUpdate
+          : TemplateAction.MetaDelete;
 
-    return method === 'getMeta' || method === 'getMetas'
-      ? [RamAuthorized(ramAction), Anonymous()]
-      : [RamAuthorized(ramAction)];
-  },
-}) {
+      return method === 'getMeta' || method === 'getMetas'
+        ? [RamAuthorized(ramAction), Anonymous()]
+        : [RamAuthorized(ramAction)];
+    },
+  })
+  implements OnModuleInit
+{
+  private templateServiceClient!: TemplateServiceClient;
+
   constructor(
-    @Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy,
+    @Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc,
     private readonly messageService: MessageService,
   ) {
-    super(basicService);
+    super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+  }
+
+  get metaServiceClient() {
+    return this.templateServiceClient;
+  }
+
+  private mapToTemplate(model: TemplateModel): Template {
+    return {
+      ...model,
+      status: WrapperTemplateStatus.asValueOrDefault(model.status, TemplateStatus.Publish),
+      commentStatus: WrapperTemplateCommentStatus.asValueOrDefault(model.commentStatus, TemplateCommentStatus.Open),
+    };
   }
 
   @Anonymous()
@@ -266,60 +321,64 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Fields() fields: ResolveTree,
   ): Promise<TemplateOption[]> {
     const { type, categoryId, categoryName, ...restArgs } = args;
-    return this.basicService
-      .send<TemplateOption[]>(TemplatePattern.GetOptions, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const { options } = await this.templateServiceClient
+      .getOptions({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetTemplateOptionsRequest['taxonomies'],
         type,
         fields: this.getFieldNames(fields.fieldsByTypeName.TemplateOption),
       })
       .lastValue();
+
+    return options;
   }
 
   @Anonymous()
   @Query((returns) => Template, { nullable: true, description: 'Get template.' })
-  template(
+  async template(
     @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<Template | undefined> {
-    return this.basicService
-      .send<Template | undefined>(TemplatePattern.Get, {
+    const { template } = await this.templateServiceClient
+      .get({
         id,
         fields: this.getFieldNames(fields.fieldsByTypeName.Template),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
       .lastValue();
+
+    return template ? this.mapToTemplate(template) : undefined;
   }
 
   @Anonymous()
   @Query((returns) => Template, { nullable: true, description: 'Get post template by alias name.' })
-  templateByName(
+  async templateByName(
     @Args('name', { type: () => String, description: 'Post name' }) name: string,
     @Fields() fields: ResolveTree,
     @User() requestUser?: RequestUser,
   ): Promise<Template | undefined> {
-    return this.basicService
-      .send<Template | undefined>(TemplatePattern.GetByName, {
+    const { template } = await this.templateServiceClient
+      .getByName({
         name,
         fields: this.getFieldNames(fields.fieldsByTypeName.Template),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
       .lastValue();
+
+    return template ? this.mapToTemplate(template) : undefined;
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -328,17 +387,18 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
     @User() requestUser: RequestUser,
   ): Promise<Array<{ status: TemplateStatus; count: number }>> {
-    return this.basicService
-      .send<
-        Array<{
-          status: TemplateStatus;
-          count: number;
-        }>
-      >(TemplatePattern.CountByStatus, {
+    return this.templateServiceClient
+      .getCountByStatus({
         type,
         requestUserId: Number(requestUser.sub),
       })
-      .lastValue();
+      .lastValue()
+      .then(({ counts }) =>
+        counts.map(({ status, ...rest }) => ({
+          ...rest,
+          status: WrapperTemplateStatus.asValueOrDefault(status, TemplateStatus.Publish),
+        })),
+      );
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -349,13 +409,14 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     includeTrash: boolean,
     @User() requestUser: RequestUser,
   ): Promise<number> {
-    return this.basicService
-      .send<number>(TemplatePattern.CountBySelf, {
+    return this.templateServiceClient
+      .getSelfCount({
         type,
         includeTrashStatus: includeTrash,
         requestUserId: Number(requestUser.sub),
       })
-      .lastValue();
+      .lastValue()
+      .then((result) => result.counts);
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -364,12 +425,13 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
     @Args('month', { description: 'Month (format：yyyyMM)' }) month: string,
   ): Promise<Array<{ day: string; count: number }>> {
-    return this.basicService
-      .send<Array<{ day: string; count: number }>>(TemplatePattern.CountByDay, {
+    return this.templateServiceClient
+      .getCountByDay({
         month,
         type,
       })
-      .lastValue();
+      .lastValue()
+      .then((result) => result.counts);
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -384,9 +446,14 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     })
     months: number | undefined,
   ): Promise<Array<{ month: string; count: number }>> {
-    return this.basicService
-      .send<Array<{ month: string; count: number }>>(TemplatePattern.CountByMonth, { months, year, type })
-      .lastValue();
+    return this.templateServiceClient
+      .getCountByMonth({
+        months,
+        year,
+        type,
+      })
+      .lastValue()
+      .then((result) => result.counts);
   }
 
   @RamAuthorized(TemplateAction.Counts)
@@ -394,11 +461,12 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
   templateCountByYear(
     @Args('type', { type: () => String, description: 'Template type' }) type: string,
   ): Promise<Array<{ year: string; count: number }>> {
-    return this.basicService
-      .send<Array<{ year: string; count: number }>>(TemplatePattern.CountByYear, {
+    return this.templateServiceClient
+      .getCountByYear({
         type,
       })
-      .lastValue();
+      .lastValue()
+      .then((result) => result.counts);
   }
 
   @Query((returns) => PagedTemplate, { description: 'Get paged templates.' })
@@ -408,29 +476,31 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @User() requestUser?: RequestUser,
   ): Promise<PagedTemplate> {
     const { type, categoryId, categoryName, ...restArgs } = args;
-    return this.basicService
-      .send<PagedTemplate>(TemplatePattern.GetPaged, {
-        query: {
-          ...restArgs,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    return this.templateServiceClient
+      .getPaged({
+        ...restArgs,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetPagedTemplateRequest['taxonomies'],
         type,
         fields: this.getFieldNames(fields.fieldsByTypeName.PagedTemplate.rows.fieldsByTypeName.PagedTemplateItem),
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
-      .lastValue();
+      .lastValue()
+      .then(({ rows, ...rest }) => ({
+        ...rest,
+        rows: rows.map((model) => this.mapToTemplate(model)),
+      }));
   }
 
   @RamAuthorized(TemplateAction.Create)
@@ -439,54 +509,29 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('model', { type: () => NewTemplateInput }) model: NewTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<Template> {
-    const {
-      id,
-      name,
-      title,
-      author,
-      content,
-      excerpt,
-      type,
-      status,
-      commentStatus,
-      commentCount,
-      updatedAt,
-      createdAt,
-    } = await this.basicService
-      .send<Template>(TemplatePattern.Create, {
+    const { template } = await this.templateServiceClient
+      .create({
         ...model,
         excerpt: model.excerpt || '',
+        metas: model.metas || [],
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
 
     // 新建（当状态为需要审核）审核消息推送
-    if (status === TemplateStatus.Pending) {
+    if (template.status === TemplateStatus.Pending) {
       await this.messageService.publish(
         {
           eventName: 'createTemplateReview',
           payload: {
-            id,
+            id: template.id,
           },
         },
         { excludes: [requestUser.sub] },
       );
     }
 
-    return {
-      id,
-      name,
-      title,
-      author,
-      content,
-      excerpt,
-      status,
-      type,
-      commentStatus,
-      commentCount,
-      updatedAt,
-      createdAt,
-    };
+    return this.mapToTemplate(template);
   }
 
   @RamAuthorized(TemplateAction.Update)
@@ -499,8 +544,8 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('model', { type: () => UpdateTemplateInput }) model: UpdateTemplateInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.Update, {
+    await this.templateServiceClient
+      .update({
         ...model,
         id,
         requestUserId: Number(requestUser.sub),
@@ -531,8 +576,8 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('status', { type: () => TemplateStatus, description: 'status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.UpdateStatus, {
+    await this.templateServiceClient
+      .updateStatus({
         id,
         status,
         requestUserId: Number(requestUser.sub),
@@ -550,8 +595,8 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('status', { type: () => TemplateStatus, description: 'Status' }) status: TemplateStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.BulkUpdateStatus, {
+    await this.templateServiceClient
+      .bulkUpdateStatus({
         ids,
         status,
         requestUserId: Number(requestUser.sub),
@@ -568,8 +613,8 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.Restore, {
+    await this.templateServiceClient
+      .restore({
         id,
         requestUserId: Number(requestUser.sub),
       })
@@ -585,8 +630,8 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.BulkRestore, {
+    await this.templateServiceClient
+      .bulkRestore({
         ids,
         requestUserId: Number(requestUser.sub),
       })
@@ -602,8 +647,8 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('id', { type: () => ID, description: 'Template id' }, ParseIntPipe) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.Delete, {
+    await this.templateServiceClient
+      .delete({
         id,
         requestUserId: Number(requestUser.sub),
       })
@@ -619,8 +664,8 @@ export class TemplateResolver extends createMetaResolver(Template, TemplateMeta,
     @Args('ids', { type: () => [ID!], description: 'Template ids' }) ids: number[],
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    await this.basicService
-      .send<void>(TemplatePattern.BulkDelete, {
+    await this.templateServiceClient
+      .bulkDelete({
         ids,
         requestUserId: Number(requestUser.sub),
       })

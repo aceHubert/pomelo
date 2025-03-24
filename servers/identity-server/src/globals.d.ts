@@ -1,19 +1,10 @@
 // import { JwtPayload } from 'jsonwebtoken';
-import { ResponseSuccess, ResponseError } from '@ace-pomelo/shared/server';
 
 declare global {
   export type ConnectionParams = {
     token?: string;
     lang?: string;
   };
-
-  export type PagedResponseSuccess<T> = ResponseSuccess<{
-    rows: Array<T>;
-    total: number;
-  }>;
-
-  export type ResponseOf<T extends Record<string, any>> = ResponseSuccess<T> | ResponseError;
-  export type PagedResponseOf<T> = PagedResponseSuccess<T> | ResponseError;
 
   export type Dictionary<T> = Record<string, T>;
   /**

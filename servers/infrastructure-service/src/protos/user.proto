@@ -1,0 +1,639 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "common/shared.proto";
+import "common/meta.proto";
+
+/**
+ * 用户相关枚举和常量定义
+ */
+message User {
+  /**
+   * 用户状态枚举
+   */
+  enum Status {
+    // 禁用状态
+    Disabled = 0;
+    // 启用状态
+    Enabled = 1;
+  }
+}
+
+/**
+ * 用户模型，包含用户的基本信息
+ */
+message UserModel {
+  // 用户ID
+  int32 id = 1;
+  // 登录名称
+  string loginName = 2;
+  // 昵称
+  string niceName = 3;
+  // 显示名称
+  string displayName = 4;
+  // 手机号码
+  optional string mobile = 5;
+  // 电子邮件
+  optional string email = 6;
+  // 个人网址
+  string url = 7;
+  // 用户状态
+  User.Status status = 8;
+  // 创建时间
+  google.protobuf.Timestamp createdAt = 100;
+  // 更新时间
+  google.protobuf.Timestamp updatedAt = 99;
+}
+
+/**
+ * 获取用户请求，可以通过ID或用户名获取
+ */
+message GetUserRequest {
+  // ID或用户名二选一
+  oneof kind {
+    // 用户ID
+    int32 id = 2;
+    // 用户名
+    string username = 3;
+  }
+  // 需要返回的字段列表
+  repeated string fields = 100;
+  // 请求用户ID（用于权限控制）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 获取用户响应
+ */
+message GetUserResponse {
+  // 用户信息
+  optional UserModel user = 1;
+}
+
+/**
+ * 获取请求用户请求，用于获取当前请求者的用户信息
+ */
+message GetRequestUserRequest {
+  // ID或用户名二选一
+  oneof kind {
+    // 用户ID
+    int32 id = 2;
+    // 用户名
+    string username = 3;
+  }
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取请求用户响应
+ */
+message GetRequestUserResponse {
+  // 用户信息
+  optional UserModel user = 1;
+}
+
+/**
+ * 获取用户特定字段请求
+ */
+message GetSpecificFieldUserRequest {
+  // ID或用户名二选一
+  oneof kind {
+    // 用户ID
+    int32 id = 2;
+    // 用户名
+    string username = 3;
+  }
+}
+
+/**
+ * 获取用户电子邮件响应
+ */
+message GetUserEmailResponse {
+  /**
+   * 用户电子邮件信息
+   */
+  message UserEmail {
+    // 用户ID
+    int32 id = 1;
+    // 电子邮件地址
+    optional string email = 2;
+  }
+  // 用户电子邮件
+  optional UserEmail user = 1;
+}
+
+/**
+ * 获取用户手机号码响应
+ */
+message GetUserMobileResponse {
+  /**
+   * 用户手机号码信息
+   */
+  message UserMobile {
+    // 用户ID
+    int32 id = 1;
+    // 手机号码
+    optional string mobile = 2;
+  }
+  // 用户手机号码
+  optional UserMobile user = 1;
+}
+
+/**
+ * 获取用户权限请求
+ */
+message GetUserCapabilitiesRequest {
+  // 需要获取用户id，需要 requestUserId 有编辑权限
+  optional int32 id = 1;
+  // 请求用户id，如果id为空则作为修改的用户id（即获取本人信息）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 获取用户权限响应
+ */
+message GetUserCapabilitiesResponse {
+  // 权限列表
+  repeated string capabilities = 1;
+}
+
+/**
+ * 检查用户是否拥有特定权限请求
+ */
+message HasUserCapabilityRequest {
+  // 需要获取用户id，需要 requestUserId 有编辑权限
+  optional int32 id = 1;
+  // 要检查的权限名称
+  string capability = 2;
+  // 请求用户id，如果id为空则作为修改的用户id（即获取本人信息）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 批量获取用户请求
+ */
+message GetUsersRequest {
+  // 用户ID列表
+  repeated int32 ids = 1;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+  // 请求用户ID（用于权限控制）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 批量获取用户响应
+ */
+message GetUsersResponse {
+  // 用户列表
+  repeated UserModel users = 1;
+}
+
+/**
+ * 分页获取用户请求
+ */
+message GetPagedUserRequest {
+  // 分页偏移量
+  optional int32 offset = 1;
+  // 每页数量限制
+  optional int32 limit = 2;
+  // 关键字搜索
+  optional string keyword = 3;
+  // 按状态筛选
+  optional User.Status status = 4;
+  // 按权限筛选
+  optional string capabilities = 5;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+  // 请求用户ID（用于权限控制）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 分页获取用户响应
+ */
+message GetPagedUserResponse {
+  // 用户列表
+  repeated UserModel rows = 1;
+  // 总数量
+  int32 total = 2;
+}
+
+/**
+ * 获取用户状态统计响应
+ */
+message GetUserCountByStatusResponse {
+  /**
+   * 状态计数信息
+   */
+  message Counts {
+    // 用户状态
+    User.Status status = 1;
+    // 该状态的用户数量
+    int32 count = 2;
+  }
+  // 各状态统计列表
+  repeated Counts counts = 1;
+}
+
+/**
+ * 获取用户角色统计响应
+ */
+message GetUserCountByRoleResponse {
+  /**
+   * 角色计数信息
+   */
+  message Counts {
+    // 用户角色
+    string userRole = 1;
+    // 该角色的用户数量
+    int32 count = 2;
+  }
+  // 各角色统计列表
+  repeated Counts counts = 1;
+}
+
+/**
+ * 检查登录名是否存在请求
+ */
+message IsLoginNameExistsRequest {
+  // 登录名
+  string loginName = 1;
+}
+
+/**
+ * 检查手机号是否存在请求
+ */
+message IsMobileExistsRequest {
+  // 手机号码
+  string mobile = 1;
+}
+
+/**
+ * 检查邮箱是否存在请求
+ */
+message IsEmailExistsRequest {
+  // 电子邮件
+  string email = 1;
+}
+
+/**
+ * 创建用户请求
+ */
+message CreateUserRequest {
+  // 登录名称
+  string loginName = 1;
+  // 登录密码（MD5加密）
+  string loginPwd = 2;
+  // 昵称
+  string niceName = 3;
+  // 显示名称
+  string displayName = 4;
+  // 手机号码
+  optional string mobile = 5;
+  // 电子邮件
+  optional string email = 6;
+  // 个人网址
+  string url = 7;
+  // 用户状态
+  optional User.Status status = 8;
+  // 名
+  optional string firstName = 9;
+  // 姓
+  optional string lastName = 10;
+  // 头像
+  optional string avator = 11;
+  // 个人描述
+  optional string description = 12;
+  // 管理界面颜色主题
+  optional string adminColor = 13;
+  // 语言区域设置
+  optional string locale = 14;
+  // 用户权限
+  optional string capabilities = 15;
+  // 用户元数据
+  repeated CreateMetaRequest metas = 16;
+  // 请求用户ID（创建者ID）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 创建用户响应
+ */
+message CreateUserResponse {
+  // 创建的用户信息
+  UserModel user = 1;
+}
+
+/**
+ * 更新用户请求
+ */
+message UpdateUserRequest {
+  // 需要修改用户id，需要 requestUserId 有编辑权限
+  optional int32 id = 1;
+  // 显示名称
+  optional string displayName = 2;
+  // 个人网址
+  optional string url = 3;
+  // 用户状态
+  optional User.Status status = 4;
+  // 名
+  optional string firstName = 5;
+  // 姓
+  optional string lastName = 6;
+  // 昵称
+  optional string nickName = 7;
+  // 头像
+  optional string avator = 8;
+  // 个人描述
+  optional string description = 9;
+  // 管理界面颜色主题
+  optional string adminColor = 10;
+  // 语言区域设置
+  optional string locale = 11;
+  // 用户权限
+  optional string capabilities = 12;
+  // 请求用户id，如果id为空则作为修改的用户id，并且状态、权限配置不可修改
+  int32 requestUserId = 101;
+}
+
+/**
+ * 更新用户邮箱请求
+ */
+message UpdateUserEmailRequest {
+  // 需要修改用户id，需要 requestUserId 有编辑权限
+  optional int32 id = 2;
+  // 新的电子邮件
+  string email = 3;
+  // 请求用户id，如果id为空则作为修改的用户id（即修改本人信息）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 更新用户手机号码请求
+ */
+message UpdateUserMobileRequest {
+  // 需要修改用户id，需要 requestUserId 有编辑权限
+  optional int32 id = 1;
+  // 新的手机号码
+  string mobile = 2;
+  // 请求用户id，如果id为空则作为修改的用户id（即修改本人信息）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 更新用户状态请求
+ */
+message UpdateUserStatusRequest {
+  // 修改用户id，需要 requestUserId 有编辑权限
+  int32 id = 1;
+  // 新的用户状态
+  User.Status status = 2;
+  // 请求用户id
+  int32 requestUserId = 101;
+}
+
+/**
+ * 更新登录密码请求
+ */
+message UpdateLoginPwdRequest {
+  // id 或 username 二选一
+  oneof kind {
+    // 用户ID
+    int32 id = 1;
+    // 用户名
+    string username = 2;
+  }
+  // 旧密码（MD5加密）
+  string oldPwd = 3;
+  // 新密码（MD5加密）
+  string newPwd = 4;
+}
+
+/**
+ * 重置登录密码请求
+ */
+message ResetLoginPwdRequest {
+  // 需要修改用户id，需要 requestUserId 有编辑权限
+  optional int32 id = 1;
+  // 新密码（MD5加密）
+  string newPwd = 2;
+  // 请求用户id，如果id为空则作为修改的用户id（即修改本人信息）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 验证用户请求
+ */
+message VerifyUserRequest {
+  // 用户名
+  string username = 1;
+  // 密码（MD5加密）
+  string password = 2;
+}
+
+/**
+ * 验证用户响应
+ */
+message VerifyUserResponse {
+  // 验证是否成功
+  bool verified = 1;
+  // 用户信息（验证成功时返回）
+  optional UserModel user = 2;
+}
+
+/**
+ * 删除用户请求
+ */
+message DeleteUserRequest {
+  // 要删除的用户ID
+  int32 id = 1;
+  // 请求用户ID（用于权限控制）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 批量删除用户请求
+ */
+message BulkDeleteUserRequest {
+  // 要删除的用户ID列表
+  repeated int32 ids = 1;
+  // 请求用户ID（用于权限控制）
+  int32 requestUserId = 101;
+}
+
+/**
+ * 用户元数据模型
+ */
+message UserMetaModel {
+  // 元数据ID
+  int32 id = 1;
+  // 用户ID
+  int32 userId = 2;
+  // 元数据键名
+  string metaKey = 3;
+  // 元数据值
+  optional string metaValue = 4;
+}
+
+/**
+ * 获取用户元数据响应
+ */
+message GetUserMetaResponse {
+  // 元数据信息
+  optional UserMetaModel meta = 1;
+}
+
+/**
+ * 获取用户元数据列表请求
+ */
+message GetUserMetasRequest {
+  /**
+   * 用户ID列表包装
+   */
+  message UserIds {
+    // 用户ID列表
+    repeated int32 value = 1;
+  }
+  // 单个用户ID或多个用户ID列表
+  oneof kind {
+    // 单个用户ID
+    int32 userId = 1;
+    // 多个用户ID列表
+    UserIds userIds = 2;
+  }
+  // 要获取的元数据键名列表
+  repeated string metaKeys = 3;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取用户元数据列表响应
+ */
+message GetUserMetasResponse {
+  // 元数据列表
+  repeated UserMetaModel metas = 1;
+}
+
+/**
+ * 创建用户元数据请求
+ */
+message CreateUserMetaRequest {
+  // 用户ID
+  int32 userId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 元数据值
+  optional string metaValue = 3;
+}
+
+/**
+ * 创建用户元数据响应
+ */
+message CreateUserMetaResponse {
+  // 创建的元数据信息
+  UserMetaModel meta = 1;
+}
+
+/**
+ * 批量创建用户元数据请求
+ */
+message CreateUserMetasRequest {
+  // 用户ID
+  int32 userId = 1;
+  // 要创建的元数据列表
+  repeated UserMetaModel metas = 3;
+}
+
+/**
+ * 批量创建用户元数据响应
+ */
+message CreateUserMetasResponse {
+  // 创建的元数据列表
+  repeated UserMetaModel metas = 1;
+}
+
+/**
+ * 通过键名更新用户元数据请求
+ */
+message UpdateUserMetaByKeyRequest {
+  // 用户ID
+  int32 userId = 1;
+  // 元数据键名
+  string metaKey = 2;
+  // 新的元数据值
+  string metaValue = 3;
+  // 如果不存在是否创建
+  optional bool createIfNotExist = 4;
+}
+
+/**
+ * 通过键名删除用户元数据请求
+ */
+message DeleteUserMetaByKeyRequest {
+  // 用户ID
+  int32 userId = 1;
+  // 要删除的元数据键名
+  string metaKey = 2;
+}
+
+/**
+ * 用户服务接口定义
+ */
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc GetRequestUser(GetRequestUserRequest) returns (GetRequestUserResponse) {}
+  rpc GetEmail(GetSpecificFieldUserRequest) returns (GetUserEmailResponse) {}
+  rpc GetMobile(GetSpecificFieldUserRequest) returns (GetUserMobileResponse) {}
+  rpc GetList(GetUsersRequest) returns (GetUsersResponse) {}
+  rpc GetPaged(GetPagedUserRequest) returns (GetPagedUserResponse) {}
+  rpc GetCapabilities(GetUserCapabilitiesRequest)
+      returns (GetUserCapabilitiesResponse) {}
+  rpc HasCapability(HasUserCapabilityRequest)
+      returns (google.protobuf.BoolValue) {}
+  rpc GetCountByStatus(RequestUserIdRequest)
+      returns (GetUserCountByStatusResponse) {}
+  rpc GetCountByRole(RequestUserIdRequest)
+      returns (GetUserCountByRoleResponse) {}
+  rpc IsLoginNameExists(IsLoginNameExistsRequest)
+      returns (google.protobuf.BoolValue) {}
+  rpc IsMobileExists(IsMobileExistsRequest)
+      returns (google.protobuf.BoolValue) {}
+  rpc IsEmailExists(IsEmailExistsRequest) returns (google.protobuf.BoolValue) {}
+  rpc Create(CreateUserRequest) returns (CreateUserResponse) {}
+  rpc Update(UpdateUserRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateEmail(UpdateUserEmailRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateMobile(UpdateUserMobileRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateStatus(UpdateUserStatusRequest) returns (google.protobuf.Empty) {}
+  rpc UpdateLoginPassword(UpdateLoginPwdRequest)
+      returns (google.protobuf.Empty) {}
+  rpc ResetLoginPassword(ResetLoginPwdRequest) returns (google.protobuf.Empty) {
+  }
+  rpc VerifyUser(VerifyUserRequest) returns (VerifyUserResponse) {}
+  rpc Delete(DeleteUserRequest) returns (google.protobuf.Empty) {}
+  rpc BulkDelete(BulkDeleteUserRequest) returns (google.protobuf.Empty) {}
+  // get meta
+  rpc GetMeta(GetMetaRequest) returns (GetUserMetaResponse) {}
+  // get metas
+  rpc GetMetas(GetUserMetasRequest) returns (GetUserMetasResponse) {}
+  // create meta
+  rpc CreateMeta(CreateUserMetaRequest) returns (CreateUserMetaResponse) {}
+  // create metas
+  rpc CreateMetas(CreateUserMetasRequest) returns (CreateUserMetasResponse) {}
+  // update meta
+  rpc UpdateMeta(UpdateMetaRequest) returns (google.protobuf.Empty) {}
+  // update meta by key
+  rpc UpdateMetaByKey(UpdateUserMetaByKeyRequest)
+      returns (google.protobuf.Empty) {}
+  // delete meta
+  rpc DeleteMeta(DeleteMetaRequest) returns (google.protobuf.Empty) {}
+  // delete meta by key
+  rpc DeleteMetaByKey(DeleteUserMetaByKeyRequest)
+      returns (google.protobuf.Empty) {}
+}

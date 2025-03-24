@@ -1,0 +1,181 @@
+syntax = "proto3";
+
+package pomelo.service;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+// import "common/enum.proto";
+
+// /**
+//  * 链接相关枚举定义
+//  */
+// message Link {
+//   /**
+//    * 是否显示枚举
+//    */
+//   enum Visible {
+//     No = 0 [ (Value) = 'no' ];   // 不显示
+//     Yes = 1 [ (Value) = 'yes' ]; // 显示
+//   }
+
+//   /**
+//    * 打开方式枚举
+//    */
+//   enum Target {
+//     Blank = 0 [ (Value) = '_blank' ]; // 新窗口打开 (_blank)
+//     Self = 1 [ (Value) = '_self' ];   // 当前窗口打开 (_self)
+//   }
+// }
+
+/**
+ * 链接模型，表示系统中的链接资源
+ */
+message LinkModel {
+  // 链接ID
+  int32 id = 1;
+  // 链接地址
+  string url = 2;
+  // 链接名称
+  string name = 3;
+  // 链接图片
+  string image = 4;
+  // 打开方式 (_blank, _self)
+  string target = 5;
+  // 链接描述
+  string description = 6;
+  // 是否显示 (yes/no)
+  string visible = 7;
+  // 创建者ID
+  int32 userId = 8;
+  // 链接关系属性
+  optional string rel = 9;
+  // RSS地址
+  optional string rss = 10;
+  // 创建时间
+  google.protobuf.Timestamp createdAt = 100;
+  // 更新时间
+  google.protobuf.Timestamp updatedAt = 99;
+}
+
+/**
+ * 获取链接请求
+ */
+message GetLinkRequest {
+  // 链接ID
+  int32 id = 1;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 获取链接响应
+ */
+message GetLinkResponse {
+  // 链接信息
+  optional LinkModel link = 1;
+}
+
+/**
+ * 分页获取链接请求
+ */
+message GetPagedLinkRequest {
+  // 分页偏移量
+  optional int32 offset = 1;
+  // 每页数量限制
+  optional int32 limit = 2;
+  // 关键字搜索
+  optional string keyword = 3;
+  // 需要返回的字段列表
+  repeated string fields = 100;
+}
+
+/**
+ * 分页获取链接响应
+ */
+message GetPagedLinkResponse {
+  // 链接列表
+  repeated LinkModel rows = 1;
+  // 总数量
+  int32 total = 2;
+}
+
+/**
+ * 创建链接请求
+ */
+message CreateLinkRequest {
+  // 链接地址
+  string url = 2;
+  // 链接名称
+  string name = 3;
+  // 链接图片
+  string image = 4;
+  // 打开方式
+  string target = 5;
+  // 链接描述
+  string description = 6;
+  // 是否显示
+  string visible = 7;
+  // 链接关系属性
+  optional string rel = 9;
+  // RSS地址
+  optional string rss = 10;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 创建链接响应
+ */
+message CreateLinkResponse {
+  // 创建的链接信息
+  LinkModel link = 1;
+}
+
+/**
+ * 更新链接请求
+ */
+message UpdateLinkRequest {
+  // 链接ID
+  int32 id = 1;
+  // 链接名称
+  optional string name = 3;
+  // 链接图片
+  optional string image = 4;
+  // 打开方式
+  optional string target = 5;
+  // 链接描述
+  optional string description = 6;
+  // 是否显示
+  optional string visible = 7;
+  // 链接关系属性
+  optional string rel = 9;
+  // RSS地址
+  optional string rss = 10;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+
+/**
+ * 删除链接请求
+ */
+message DeleteLinkRequest {
+  // 链接ID
+  int32 id = 1;
+  // 请求用户ID
+  int32 requestUserId = 101;
+}
+/**
+ * 链接服务接口定义
+ */
+service LinkService {
+  // 获取单个链接
+  rpc Get(GetLinkRequest) returns (GetLinkResponse) {}
+  // 分页获取链接列表
+  rpc GetPaged(GetPagedLinkRequest) returns (GetPagedLinkResponse) {}
+  // 创建新链接
+  rpc Create(CreateLinkRequest) returns (CreateLinkResponse) {}
+  // 更新链接
+  rpc Update(UpdateLinkRequest) returns (google.protobuf.Empty) {}
+  // 删除链接
+  rpc Delete(DeleteLinkRequest) returns (google.protobuf.Empty) {}
+}

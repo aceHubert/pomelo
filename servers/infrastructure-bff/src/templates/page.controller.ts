@@ -14,8 +14,11 @@ import {
   ParseArrayPipe,
   Res,
   HttpStatus,
+  OnModuleInit,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc } from '@nestjs/microservices';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   createResponseSuccessType,
   ParseQueryPipe,
@@ -24,26 +27,29 @@ import {
   User,
   RequestUser,
   OptionPresetKeys,
+  TemplateStatus,
   TemplatePresetType,
   TermPresetTaxonomy,
-  INFRASTRUCTURE_SERVICE,
-  TemplatePattern,
-  OptionPattern,
+  POMELO_SERVICE_PACKAGE_NAME,
 } from '@ace-pomelo/shared/server';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
-import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
+import {
+  GetPagedTemplateRequest,
+  GetTemplateOptionsRequest,
+  TEMPLATE_SERVICE_NAME,
+  TemplateServiceClient,
+} from '@ace-pomelo/shared/server/proto-ts/template';
+import { OPTION_SERVICE_NAME, OptionServiceClient } from '@ace-pomelo/shared/server/proto-ts/option';
 import { PageTemplateAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
-import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { PageTemplateOptionQueryDto, PagedPageTemplateQueryDto } from './dto/template-query.dto';
 import { NewPageTemplateDto } from './dto/new-template.dto';
+import { UpdatePageTemplateDto } from './dto/update-template.dto';
 import {
   PageTemplateModelResp,
   PageTemplateWithMetasModelResp,
   PagedPageTemplateResp,
   PageTemplateOptionResp,
 } from './resp/page-model.resp';
-import { UpdatePageTemplateDto } from './dto/update-template.dto';
 
 /**
  * 表单 Restful Api 控制器
@@ -51,9 +57,17 @@ import { UpdatePageTemplateDto } from './dto/update-template.dto';
 @ApiTags('templates/page')
 @Authorized()
 @Controller({ path: 'api/template/pages', scope: Scope.REQUEST })
-export class PageTemplateController extends BaseController {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) protected readonly basicService: ClientProxy) {
+export class PageTemplateController extends BaseController implements OnModuleInit {
+  private templateServiceClient!: TemplateServiceClient;
+  private optionServiceClient!: OptionServiceClient;
+
+  constructor(@Inject(POMELO_SERVICE_PACKAGE_NAME) private readonly client: ClientGrpc) {
     super();
+  }
+
+  onModuleInit() {
+    this.templateServiceClient = this.client.getService<TemplateServiceClient>(TEMPLATE_SERVICE_NAME);
+    this.optionServiceClient = this.client.getService<OptionServiceClient>(OPTION_SERVICE_NAME);
   }
 
   /**
@@ -67,30 +81,29 @@ export class PageTemplateController extends BaseController {
   })
   async getOptions(@Query(ParseQueryPipe) query: PageTemplateOptionQueryDto) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.basicService
-      .send<PageTemplateOptionResp[]>(TemplatePattern.GetOptions, {
-        query: {
-          ...restQuery,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const { options } = await this.templateServiceClient
+      .getOptions({
+        ...restQuery,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetTemplateOptionsRequest['taxonomies'],
         type: TemplatePresetType.Page,
         fields: ['id', 'name', 'title'],
       })
       .lastValue();
+
     return this.success({
-      data: result,
+      data: options,
     });
   }
 
@@ -104,11 +117,10 @@ export class PageTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: [String] }, 'PageAliaPathsSuccessResp'),
   })
   async getPathAlias() {
-    const result = await this.basicService
-      .send<string[]>(TemplatePattern.GetNames, { type: TemplatePresetType.Page })
-      .lastValue();
+    const { names } = await this.templateServiceClient.getNames({ type: TemplatePresetType.Page }).lastValue();
+
     return this.success({
-      data: result,
+      data: names,
     });
   }
 
@@ -142,9 +154,9 @@ export class PageTemplateController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = name
-      ? await this.basicService
-          .send<PageTemplateModelResp | undefined>(TemplatePattern.GetByName, {
+    const { template } = name
+      ? await this.templateServiceClient
+          .getByName({
             name,
             type: TemplatePresetType.Page,
             fields: [
@@ -162,15 +174,15 @@ export class PageTemplateController extends BaseController {
             requestUserId: requestUser ? Number(requestUser.sub) : undefined,
           })
           .lastValue()
-      : await this.basicService
-          .send<string | undefined>(OptionPattern.GetValue, {
+      : await this.optionServiceClient
+          .getValue({
             optionName: OptionPresetKeys.PageOnFront,
           })
           .lastValue()
-          .then((id) => {
+          .then(({ optionValue: id }) => {
             if (id) {
-              return this.basicService
-                .send<PageTemplateModelResp | undefined>(TemplatePattern.Get, {
+              return this.templateServiceClient
+                .get({
                   id: Number(id),
                   type: TemplatePresetType.Page,
                   fields: [
@@ -189,27 +201,27 @@ export class PageTemplateController extends BaseController {
                 })
                 .lastValue();
             }
-            return undefined;
+            return { template: undefined };
           });
 
     let metas;
-    if (result) {
-      metas = await this.basicService
-        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
-          templateId: result.id,
+    if (template && metaKeys?.length) {
+      metas = await this.templateServiceClient
+        .getMetas({
+          templateId: template.id,
           metaKeys,
           fields: ['id', 'metaKey', 'metaValue'],
         })
         .lastValue();
     }
 
-    if (result === undefined) {
+    if (!template) {
       res.status(HttpStatus.NO_CONTENT);
     }
 
     return this.success({
       data: {
-        ...result,
+        ...template,
         metas,
       },
     });
@@ -238,8 +250,8 @@ export class PageTemplateController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.basicService
-      .send<PageTemplateModelResp | undefined>(TemplatePattern.Get, {
+    const { template } = await this.templateServiceClient
+      .get({
         id,
         type: TemplatePresetType.Page,
         fields: [
@@ -259,23 +271,23 @@ export class PageTemplateController extends BaseController {
       .lastValue();
 
     let metas;
-    if (result) {
-      metas = await this.basicService
-        .send<MetaModelResp[]>(TemplatePattern.GetMetas, {
-          templateId: result.id,
-          metaKeys,
+    if (template && metaKeys?.length) {
+      ({ metas } = await this.templateServiceClient
+        .getMetas({
+          templateId: template.id,
+          metaKeys: metaKeys || [],
           fields: ['id', 'metaKey', 'metaValue'],
         })
-        .lastValue();
+        .lastValue());
     }
 
-    if (result === undefined) {
+    if (!template) {
       res.status(HttpStatus.NO_CONTENT);
     }
 
     return this.success({
       data: {
-        ...result,
+        ...template,
         metas,
       },
     });
@@ -292,32 +304,30 @@ export class PageTemplateController extends BaseController {
   })
   async getPaged(@Query(ParseQueryPipe) query: PagedPageTemplateQueryDto, @User() requestUser: RequestUser) {
     const { categoryId, categoryName, ...restQuery } = query;
-    const result = await this.basicService
-      .send<PagedPageTemplateResp>(TemplatePattern.GetPaged, {
-        query: {
-          ...restQuery,
-          taxonomies: [
-            categoryId !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  id: categoryId,
-                }
-              : categoryName !== void 0
-              ? {
-                  type: TermPresetTaxonomy.Category,
-                  name: categoryName,
-                }
-              : false,
-          ].filter(Boolean),
-        },
+    const templates = await this.templateServiceClient
+      .getPaged({
+        ...restQuery,
+        taxonomies: [
+          categoryId !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                id: categoryId,
+              }
+            : categoryName !== void 0
+            ? {
+                type: TermPresetTaxonomy.Category,
+                name: categoryName,
+              }
+            : false,
+        ].filter(Boolean) as GetPagedTemplateRequest['taxonomies'],
         type: TemplatePresetType.Page,
-        fields: ['id', 'name', 'title', 'author', 'status', 'createdAt'],
+        fields: ['id', 'name', 'title', 'author', 'status', 'commentStatus', 'commentCount', 'updatedAt', 'createdAt'],
         requestUserId: requestUser ? Number(requestUser.sub) : undefined,
       })
       .lastValue();
 
     return this.success({
-      data: result,
+      data: templates,
     });
   }
 
@@ -332,13 +342,19 @@ export class PageTemplateController extends BaseController {
     type: () => createResponseSuccessType({ data: PageTemplateModelResp }, 'PageTemplateModelSuccessResp'),
   })
   async create(@Body() input: NewPageTemplateDto, @User() requestUser: RequestUser) {
-    const { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt } =
-      await this.basicService
-        .send<PageTemplateModelResp>(TemplatePattern.CreatePage, {
-          ...input,
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
+    const {
+      template: { id, name, title, author, content, status, commentStatus, commentCount, updatedAt, createdAt },
+    } = await this.templateServiceClient
+      .createPage({
+        ...input,
+        metas: [],
+        requestUserId: Number(requestUser.sub),
+      })
+      .lastValue();
+
+    if (status === TemplateStatus.Pending) {
+      // TODO: send WS message to admin to review
+    }
 
     return this.success({
       data: {
@@ -372,34 +388,22 @@ export class PageTemplateController extends BaseController {
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(TemplatePattern.UpdatePage, {
+      await this.templateServiceClient
+        .update({
           ...input,
           id,
           requestUserId: Number(requestUser.sub),
         })
         .lastValue();
+
+      if (input.status === TemplateStatus.Pending) {
+        // TODO: send WS message to admin to review
+      }
+
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
       return this.faild(e.message);
     }
   }
-
-  /**
-   * Delete page template permanently
-   */
-  // @Delete(':id')
-  // @RamAuthorized(PageTemplateAction.Delete)
-  // @ApiAuth('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  // @ApiOkResponse({
-  //   description: 'no data content',
-  //   type: () => createResponseSuccessType({}, 'DeletePageTemplateModelSuccessResp'),
-  // })
-  // @ApiUnauthorizedResponse()
-  // @ApiForbiddenResponse()
-  // async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
-  //   await this.templateDataSource.delete(id, requestUser);
-  //   return this.success();
-  // }
 }

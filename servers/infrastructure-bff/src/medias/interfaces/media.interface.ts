@@ -43,35 +43,3 @@ export interface FileSaveOptions {
     height: number;
   };
 }
-
-export interface ImageScaleModel {
-  width: number;
-  height: number;
-  path: string;
-  name: string;
-}
-
-export interface MediaMetaDataModel {
-  fileSize: number;
-  width?: number;
-  height?: number;
-  imageScales?: ImageScaleModel[];
-  [key: string]: any;
-}
-
-export interface MediaModel {
-  id: number;
-  fileName: string;
-  originalFileName: string;
-  extension: string;
-  mimeType: string;
-  path: string;
-  userId?: number;
-  createdAt: Date;
-  metaData?: MediaMetaDataModel;
-}
-
-export interface PagedMediaModel {
-  rows: MediaModel[];
-  total: number;
-}
