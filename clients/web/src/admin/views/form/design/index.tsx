@@ -383,12 +383,7 @@ export default defineComponent({
             submitSuccessTips: formData.submitSuccessTips,
             featureImage: formData.featureImage,
           },
-          loading: () => {
-            actionStatus.processing = true;
-            return () => {
-              actionStatus.processing = false;
-            };
-          },
+          loading: (value) => (actionStatus.processing = value),
         })
         .then(() => {
           status && (formData.status = status);

@@ -201,10 +201,7 @@ export default defineComponent({
             variables: {
               model: values,
             },
-            loading: () => {
-              adding.value = true;
-              return () => (adding.value = false);
-            },
+            loading: (value) => (adding.value = value),
           })
           .then(() => {
             isAddModalVisable.value = false;

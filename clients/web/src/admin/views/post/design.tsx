@@ -344,12 +344,7 @@ export default defineComponent({
             featureImage: postData.featureImage,
             template: postData.templatePageType,
           },
-          loading: () => {
-            actionStatus.processing = true;
-            return () => {
-              actionStatus.processing = false;
-            };
-          },
+          loading: (value) => (actionStatus.processing = value),
         })
         .then(() => {
           status && (postData.status = status);

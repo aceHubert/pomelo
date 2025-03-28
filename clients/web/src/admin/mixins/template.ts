@@ -257,11 +257,8 @@ export const useTemplateMixin = () => {
             id: record.id,
             status: TemplateStatus.Trash,
           },
-          loading: () => {
-            set(record, 'deleting', true);
-            return () => {
-              set(record, 'deleting', false);
-            };
+          loading: (value) => {
+            set(record, 'deleting', value);
           },
         })
         .catch((err) => {
@@ -278,11 +275,8 @@ export const useTemplateMixin = () => {
           variables: {
             id: record.id,
           },
-          loading: () => {
-            set(record!, 'deleting', true);
-            return () => {
-              set(record!, 'deleting', false);
-            };
+          loading: (value) => {
+            set(record!, 'deleting', value);
           },
         })
         .catch((err) => {
@@ -306,11 +300,8 @@ export const useTemplateMixin = () => {
         variables: {
           id: record.id,
         },
-        loading: () => {
-          set(record!, 'restoring', true);
-          return () => {
-            set(record!, 'restoring', false);
-          };
+        loading: (value) => {
+          set(record!, 'restoring', value);
         },
       })
       .catch((err) => {

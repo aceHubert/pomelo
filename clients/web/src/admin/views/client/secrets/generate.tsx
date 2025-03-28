@@ -144,10 +144,7 @@ export default Form.create({})(
                 clientId: props.clientId,
                 model: values,
               },
-              loading: () => {
-                adding.value = true;
-                return () => (adding.value = false);
-              },
+              loading: (value) => (adding.value = value),
             })
             .then(({ clientSecret: secret }) => {
               clientSecret.value = secret;

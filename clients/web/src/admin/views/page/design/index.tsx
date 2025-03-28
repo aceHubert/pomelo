@@ -380,12 +380,7 @@ export default defineComponent({
             },
             featureImage: pageData.featureImage,
           },
-          loading: () => {
-            actionStatus.processing = true;
-            return () => {
-              actionStatus.processing = false;
-            };
-          },
+          loading: (value) => (actionStatus.processing = value),
         })
         .then(() => {
           status && (pageData.status = status);

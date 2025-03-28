@@ -97,14 +97,11 @@ export default Form.create({})(
                 apiResourceId: props.apiResourceId,
                 model: values,
               },
-              loading: () => {
-                adding.value = true;
-                return () => (adding.value = false);
-              },
+              loading: (value) => (adding.value = value),
             })
-            .then(({ claim }) => {
+            .then(({ claim: apiClaim }) => {
               props.form.resetFields();
-              $claimsRes.$result!.push(claim);
+              $claimsRes.$result!.push(apiClaim);
             })
             .catch((err) => {
               message.error(err.message);
@@ -115,8 +112,8 @@ export default Form.create({})(
       const deleting = ref(false);
       const handleDelete = (id: string) => {
         Modal.confirm({
-          title: i18n.tv('page_api_resource_claims.delete_confirm.title', '确认'),
-          content: i18n.tv('page_api_resource_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
+          title: i18n.tv('page_api_claims.delete_confirm.title', '确认'),
+          content: i18n.tv('page_api_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
           okButtonProps: {
             props: {
               loading: deleting.value,
@@ -131,10 +128,7 @@ export default Form.create({})(
             return apiResourceApi
               .deleteClaim({
                 variables: { id },
-                loading: () => {
-                  deleting.value = true;
-                  return () => (deleting.value = false);
-                },
+                loading: (value) => (deleting.value = value),
               })
               .then(({ result }) => {
                 result &&

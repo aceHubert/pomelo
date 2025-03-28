@@ -72,10 +72,7 @@ export default defineComponent({
               variables: {
                 id,
               },
-              loading: () => {
-                deleting.value = true;
-                return () => (deleting.value = false);
-              },
+              loading: (value) => (deleting.value = value),
             })
             .then(() => {
               // 刷新客户端密匙

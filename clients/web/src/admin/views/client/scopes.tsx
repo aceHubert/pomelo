@@ -110,10 +110,7 @@ export default Form.create({})(
                 clientId: props.clientId,
                 model: values.scopes.map((item: string) => ({ scope: item })),
               },
-              loading: () => {
-                adding.value = true;
-                return () => (adding.value = false);
-              },
+              loading: (value) => (adding.value = value),
             })
             .then(({ scopes }) => {
               props.form.resetFields();
@@ -144,10 +141,7 @@ export default Form.create({})(
             return clientApi
               .deleteScope({
                 variables: { id },
-                loading: () => {
-                  deleting.value = true;
-                  return () => (deleting.value = false);
-                },
+                loading: (value) => (deleting.value = value),
               })
               .then(({ result }) => {
                 result &&

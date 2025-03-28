@@ -45,7 +45,7 @@ export default Form.create({})(
         return;
       }
 
-      const loading = ref(false);
+      const submiting = ref(false);
       const handleSubmit = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
@@ -61,10 +61,7 @@ export default Form.create({})(
                   password: sha256(values.password).toString(),
                 },
               },
-              loading: () => {
-                loading.value = true;
-                return () => (loading.value = false);
-              },
+              loading: (value) => (submiting.value = value),
             })
             .then(({ result }) => {
               if (result.success) {
@@ -150,7 +147,7 @@ export default Form.create({})(
                 size="large"
                 htmlType="submit"
                 block={deviceMixin.isMobile}
-                loading={loading.value}
+                loading={submiting.value}
               >
                 {i18n.tv('page_login.form.submit_btn_text', '登录')}
               </Button>

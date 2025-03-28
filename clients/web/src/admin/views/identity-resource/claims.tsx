@@ -90,16 +90,14 @@ export default Form.create({})(
       const handleAdd = () => {
         props.form.validateFields((err, values) => {
           if (err) return;
+
           identityResourceApi
             .createClaim({
               variables: {
                 identityResourceId: props.identityResourceId,
                 model: values,
               },
-              loading: () => {
-                adding.value = true;
-                return () => (adding.value = false);
-              },
+              loading: (value) => (adding.value = value),
             })
             .then(({ claim }) => {
               props.form.resetFields();
@@ -132,10 +130,7 @@ export default Form.create({})(
                 variables: {
                   id,
                 },
-                loading: () => {
-                  deleting.value = true;
-                  return () => (deleting.value = false);
-                },
+                loading: (value) => (deleting.value = value),
               })
               .then(({ result }) => {
                 result &&

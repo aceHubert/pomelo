@@ -17,12 +17,12 @@ export default defineComponent({
     const loading = ref(false);
 
     const loadAuthType = async () => {
-      loading.value = true;
       try {
         const { option } = await basicApi.getOptionByName({
           variables: {
             name: AuthTypeOptionName,
           },
+          loading: (value) => (loading.value = value),
         });
         if (option) {
           optionId.value = option.id;
@@ -30,8 +30,6 @@ export default defineComponent({
         }
       } catch {
         message.error('加载身份验证类型失败');
-      } finally {
-        loading.value = false;
       }
     };
 

@@ -11,13 +11,12 @@ export default defineComponent({
 
     const handleClearCache = async () => {
       try {
-        loading.value = true;
-        await basicApi.clearOptionCache();
+        await basicApi.clearOptionCache({
+          loading: (value) => (loading.value = value),
+        });
         message.success('缓存已清除');
       } catch (error) {
         message.error('清除缓存失败，请稍后重试');
-      } finally {
-        loading.value = false;
       }
     };
 

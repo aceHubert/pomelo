@@ -41,19 +41,12 @@ export default defineComponent({
           ...query,
         },
         catchError: true,
-        loading: () => {
+        loading: (value) => {
           if (subModules.rows.length) {
-            loadingMoreRef.value = true;
+            loadingMoreRef.value = value;
           } else {
-            loadingRef.value = true;
+            loadingRef.value = value;
           }
-          return () => {
-            if (subModules.rows.length) {
-              loadingMoreRef.value = false;
-            } else {
-              loadingRef.value = false;
-            }
-          };
         },
       });
       subModules.total = total;

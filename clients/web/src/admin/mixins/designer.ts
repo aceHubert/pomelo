@@ -49,10 +49,7 @@ export const useDesignerMixin = () => {
         variables: {
           newTemplate: input,
         },
-        loading: () => {
-          submitingRef.value = true;
-          return () => (submitingRef.value = false);
-        },
+        loading: (value) => (submitingRef.value = value),
       })
       .then(({ template }) => template);
   };

@@ -215,10 +215,7 @@ export default defineComponent({
                 id: editFormObj.value.id,
                 model: values,
               },
-              loading: () => {
-                saving.value = true;
-                return () => (saving.value = false);
-              },
+              loading: (value) => (saving.value = value),
             })
             .then(() => {
               isFormModalVisable.value = false;
@@ -236,10 +233,7 @@ export default defineComponent({
                 apiResourceId: props.apiResourceId,
                 model: values,
               },
-              loading: () => {
-                saving.value = true;
-                return () => (saving.value = false);
-              },
+              loading: (value) => (saving.value = value),
             })
             .then(() => {
               isFormModalVisable.value = false;
@@ -272,10 +266,7 @@ export default defineComponent({
           return apiResourceApi
             .deleteScope({
               variables: { id },
-              loading: () => {
-                deleting.value = true;
-                return () => (deleting.value = false);
-              },
+              loading: (value) => (deleting.value = value),
             })
             .then(() => {
               isFormModalVisable.value = false;

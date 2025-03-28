@@ -35,7 +35,7 @@ export default Form.create({})(
         absoluteGo(redirect, true);
       };
 
-      const loading = ref(false);
+      const submiting = ref(false);
       const handleSubmit = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
@@ -52,10 +52,7 @@ export default Form.create({})(
                   newPwd: sha256(values.newPwd).toString(),
                 },
               },
-              loading: () => {
-                loading.value = true;
-                return () => (loading.value = false);
-              },
+              loading: (value) => (submiting.value = value),
             })
             .then(() => {
               message.success({
@@ -103,7 +100,7 @@ export default Form.create({})(
                 size="large"
                 htmlType="submit"
                 block={deviceMixin.isMobile}
-                loading={loading.value}
+                loading={submiting.value}
               >
                 {i18n.tv('page_password_forgot.form.submit_btn_text', '修改')}
               </Button>

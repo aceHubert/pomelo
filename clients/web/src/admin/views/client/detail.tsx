@@ -126,10 +126,7 @@ export default Form.create({})(
                 clientId: props.clientId,
                 model: values,
               },
-              loading: () => {
-                updateClientSubmiting.value = true;
-                return () => (updateClientSubmiting.value = false);
-              },
+              loading: (value) => (updateClientSubmiting.value = value),
             })
             .then(() => {
               Object.assign($detailRes.$result!, values);
@@ -151,10 +148,7 @@ export default Form.create({})(
                 enabled: checked,
               },
             },
-            loading: () => {
-              updateStatusSubmiting.value = true;
-              return () => (updateStatusSubmiting.value = false);
-            },
+            loading: (value) => (updateStatusSubmiting.value = value),
           })
           .then(() => {
             $detailRes.$result!.enabled = checked;

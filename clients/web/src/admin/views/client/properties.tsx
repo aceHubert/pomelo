@@ -104,10 +104,7 @@ export default defineComponent({
               clientId: props.clientId,
               model: values,
             },
-            loading: () => {
-              adding.value = true;
-              return () => (adding.value = false);
-            },
+            loading: (value) => (adding.value = value),
           })
           .then(() => {
             $propertiesRes.read(props.clientId);
@@ -138,10 +135,7 @@ export default defineComponent({
           clientApi
             .deleteProperty({
               variables: { id },
-              loading: () => {
-                deleting.value = true;
-                return () => (deleting.value = false);
-              },
+              loading: (value) => (deleting.value = value),
             })
             .then(() => {
               $propertiesRes.read(props.clientId);

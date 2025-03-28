@@ -95,10 +95,7 @@ export default Form.create({})(
                 apiScopeId: props.apiScopeId,
                 model: values,
               },
-              loading: () => {
-                adding.value = true;
-                return () => (adding.value = false);
-              },
+              loading: (value) => (adding.value = value),
             })
             .then(({ scopeClaim }) => {
               props.form.resetFields();
@@ -129,10 +126,7 @@ export default Form.create({})(
             return apiResourceApi
               .deleteScopeClaim({
                 variables: { id },
-                loading: () => {
-                  deleting.value = true;
-                  return () => (deleting.value = false);
-                },
+                loading: (value) => (deleting.value = value),
               })
               .then(({ result }) => {
                 result &&

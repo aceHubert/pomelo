@@ -32,10 +32,7 @@ export default defineComponent({
           name: props.name,
         },
         catchError: true,
-        loading: () => {
-          loading.value = true;
-          return () => (loading.value = false);
-        },
+        loading: (value) => (loading.value = value),
       })
       .then(({ subModule: data }) => {
         subModule.value = data;

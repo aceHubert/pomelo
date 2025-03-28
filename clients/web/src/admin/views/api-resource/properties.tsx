@@ -102,10 +102,7 @@ export default defineComponent({
               apiResourceId: props.apiResourceId,
               model: values,
             },
-            loading: () => {
-              adding.value = true;
-              return () => (adding.value = false);
-            },
+            loading: (value) => (adding.value = value),
           })
           .then(({ property }) => {
             $propertiesRes.$result!.unshift(property);
@@ -136,10 +133,7 @@ export default defineComponent({
           apiResourceApi
             .deleteProperty({
               variables: { id },
-              loading: () => {
-                deleting.value = true;
-                return () => (deleting.value = false);
-              },
+              loading: (value) => (deleting.value = value),
             })
             .then(({ result }) => {
               result &&

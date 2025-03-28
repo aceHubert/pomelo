@@ -60,10 +60,7 @@ export default defineComponent({
               id: props.id,
               model: values,
             },
-            loading: () => {
-              updating.value = true;
-              return () => (updating.value = false);
-            },
+            loading: (value) => (updating.value = value),
           })
           .then(() => {
             Object.assign($detailRes.$result!, values);
@@ -86,10 +83,7 @@ export default defineComponent({
               [field]: checked,
             },
           },
-          loading: () => {
-            updateStatusSubmiting.value = true;
-            return () => (updateStatusSubmiting.value = false);
-          },
+          loading: (value) => (updateStatusSubmiting.value = value),
         })
         .then(({ result }) => {
           result && ($detailRes.$result![field] = checked);

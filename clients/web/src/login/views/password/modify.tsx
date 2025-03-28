@@ -34,7 +34,6 @@ export default Form.create({})(
       const loginApi = useLoginApi();
 
       const loading = ref(true);
-      const submiting = ref(false);
       const username = ref('');
       userManager
         .getUser()
@@ -52,6 +51,7 @@ export default Form.create({})(
         absoluteGo(redirect, true);
       };
 
+      const submiting = ref(false);
       const handleSubmit = (e: Event) => {
         e.preventDefault();
         e.stopPropagation();
@@ -68,10 +68,7 @@ export default Form.create({})(
                   newPwd: sha256(values.newPwd).toString(),
                 },
               },
-              loading: () => {
-                loading.value = true;
-                return () => (loading.value = false);
-              },
+              loading: (value) => (submiting.value = value),
             })
             .then(() => {
               message.success({
