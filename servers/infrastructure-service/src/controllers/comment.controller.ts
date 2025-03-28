@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
 import {
-  COMMENT_SERVICE_NAME,
   CommentServiceControllerMethods,
   CommentServiceController,
   GetCommentRequest,
@@ -19,10 +18,7 @@ import { createMetaController } from './meta.controller';
 
 @Controller()
 @CommentServiceControllerMethods()
-export class CommentController
-  extends createMetaController('comment', COMMENT_SERVICE_NAME)
-  implements CommentServiceController
-{
+export class CommentController extends createMetaController('comment') implements CommentServiceController {
   constructor(private readonly commentDataSource: CommentDataSource) {
     super(commentDataSource);
   }

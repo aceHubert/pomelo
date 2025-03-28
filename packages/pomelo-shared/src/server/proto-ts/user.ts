@@ -744,17 +744,27 @@ export function UserServiceControllerMethods() {
       'deleteMetaByKey',
     ];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      if (descriptor) {
-        GrpcMethod('UserService', method)(constructor.prototype[method], method, descriptor);
-      }
+      const descriptor: any = getPropertyDescriptorFromChain(constructor, method);
+      GrpcMethod('UserService', method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      const descriptor: any = getPropertyDescriptorFromChain(constructor, method);
       GrpcStreamMethod('UserService', method)(constructor.prototype[method], method, descriptor);
     }
   };
+
+  function getPropertyDescriptorFromChain(obj: any, prop: string) {
+    let currentObj = obj;
+    while (currentObj !== null) {
+      const descriptor = Object.getOwnPropertyDescriptor(currentObj.prototype, prop);
+      if (descriptor) {
+        return descriptor;
+      }
+      currentObj = Object.getPrototypeOf(currentObj);
+    }
+    return;
+  }
 }
 
 export const USER_SERVICE_NAME = 'UserService';

@@ -1,4 +1,3 @@
-import { GrpcMethod } from '@nestjs/microservices';
 import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
 import { MetaDataSource } from '../datasource';
 
@@ -89,7 +88,7 @@ export interface MetaServiceController<ModelName extends string> {
 /**
  * 创建 Meta Controller
  */
-export function createMetaController<ModelName extends string>(modelName: ModelName, serviceName: string) {
+export function createMetaController<ModelName extends string>(modelName: ModelName) {
   abstract class MetaController implements MetaServiceController<ModelName> {
     constructor(
       private readonly metaDataSource: MetaDataSource<MetaResponse<ModelName>, CreateMetaRequest<ModelName>>,
@@ -98,7 +97,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 获取元数据
      */
-    @GrpcMethod(serviceName, 'getMeta')
     getMeta({ fields, id }: GetMetaRequest): Promise<GetMetaResponse<ModelName>> {
       // fields 默认值为
       if (fields.length === 0) fields = ['id', 'metaKey', 'metaValue'];
@@ -110,7 +108,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 获取元数据集合
      */
-    @GrpcMethod(serviceName, 'getMetas')
     getMetas({ fields, metaKeys, ...rest }: GetMetasRequest<ModelName>): Promise<GetMetasResponse<ModelName>> {
       const modelId: number | number[] = (rest as any)[`${modelName}Id`] ?? (rest as any)[`${modelName}Ids`]?.value;
       if (!modelId) return Promise.resolve({ metas: [] });
@@ -126,7 +123,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 新建元数据
      */
-    @GrpcMethod(serviceName, 'createMeta')
     createMeta(request: CreateMetaRequest<ModelName>): Promise<CreateMetaResponse<ModelName>> {
       return this.metaDataSource.createMeta(request).then((meta) => {
         return { meta };
@@ -136,7 +132,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 批量新建元数据
      */
-    @GrpcMethod(serviceName, 'createMetas')
     createMetas({ metas, ...rest }: CreateMetasRequest<ModelName>): Promise<CreateMetasResponse<ModelName>> {
       const modelId = (rest as any)[`${modelName}Id`];
       return this.metaDataSource.bulkCreateMeta(modelId, metas).then((metas) => {
@@ -147,7 +142,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 修改元数据
      */
-    @GrpcMethod(serviceName, 'updateMeta')
     updateMeta({ id, metaValue }: UpdateMetaRequest): Promise<Empty> {
       return this.metaDataSource.updateMeta(id, metaValue).then(() => {
         return {};
@@ -157,7 +151,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 根据 metaKey 修改元数据
      */
-    @GrpcMethod(serviceName, 'updateMetaByKey')
     updateMetaByKey({
       metaKey,
       metaValue,
@@ -173,7 +166,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 删除元数据
      */
-    @GrpcMethod(serviceName, 'deleteMeta')
     deleteMeta({ id }: DeleteMetaRequest): Promise<Empty> {
       return this.metaDataSource.deleteMeta(id).then(() => {
         return {};
@@ -183,7 +175,6 @@ export function createMetaController<ModelName extends string>(modelName: ModelN
     /**
      * 根据 metaKey 添加元数据
      */
-    @GrpcMethod(serviceName, 'deleteMetaByKey')
     deleteMetaByKey({ metaKey, ...rest }: DeleteMetaByKeyRequest<ModelName>): Promise<Empty> {
       const modelId = (rest as any)[`${modelName}Id`];
       return this.metaDataSource.deleteMetaByKey(modelId, metaKey).then(() => {

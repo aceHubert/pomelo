@@ -1,7 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
 import {
-  TERM_TAXONOMY_SERVICE_NAME,
   TermTaxonomyServiceControllerMethods,
   TermTaxonomyServiceController,
   GetTermTaxonomyRequest,
@@ -29,7 +28,7 @@ import { createMetaController } from './meta.controller';
 @Controller()
 @TermTaxonomyServiceControllerMethods()
 export class TermTaxonomyController
-  extends createMetaController('termTaxonomy', TERM_TAXONOMY_SERVICE_NAME)
+  extends createMetaController('termTaxonomy')
   implements TermTaxonomyServiceController
 {
   constructor(private readonly termTaxonomyDataSource: TermTaxonomyDataSource) {

@@ -3,7 +3,6 @@ import { TemplatePresetType } from '@ace-pomelo/shared/server';
 import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
 import { IdRequest } from '@ace-pomelo/shared/server/proto-ts/common/shared';
 import {
-  TEMPLATE_SERVICE_NAME,
   TemplateServiceControllerMethods,
   TemplateServiceController,
   GetTemplateRequest,
@@ -47,10 +46,7 @@ import { createMetaController } from './meta.controller';
 
 @Controller()
 @TemplateServiceControllerMethods()
-export class TemplateController
-  extends createMetaController('template', TEMPLATE_SERVICE_NAME)
-  implements TemplateServiceController
-{
+export class TemplateController extends createMetaController('template') implements TemplateServiceController {
   constructor(private readonly templateDataSource: TemplateDataSource) {
     super(templateDataSource);
   }

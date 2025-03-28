@@ -3,6 +3,7 @@
 /docs/.next
 /coverage
 /tmp
+/ts-proto
 /.changelog
 /version.ts
 LICENSE

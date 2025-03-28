@@ -102,6 +102,7 @@ export const Struct: MessageFns<Struct> & StructWrapperFns = {
   },
 };
 
+// @ts-ignore
 function createBaseValue(): Value {
   return {};
 }

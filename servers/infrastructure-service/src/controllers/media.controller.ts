@@ -2,7 +2,6 @@ import { Controller } from '@nestjs/common';
 import { BoolValue } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/wrappers';
 import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty';
 import {
-  MEDIA_SERVICE_NAME,
   MediaServiceControllerMethods,
   MediaServiceController,
   MediaMetaDataModel as GRPCMediaMetaDataModel,
@@ -22,10 +21,7 @@ import { createMetaController } from './meta.controller';
 
 @Controller()
 @MediaServiceControllerMethods()
-export class MediaController
-  extends createMetaController('media', MEDIA_SERVICE_NAME)
-  implements MediaServiceController
-{
+export class MediaController extends createMetaController('media') implements MediaServiceController {
   constructor(private readonly mediaDatasource: MediaDataSource) {
     super(mediaDatasource);
   }

@@ -4,7 +4,6 @@ import { Empty } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/empty'
 import { BoolValue } from '@ace-pomelo/shared/server/proto-ts/google/protobuf/wrappers';
 import { RequestUserIdRequest } from '@ace-pomelo/shared/server/proto-ts/common/shared';
 import {
-  USER_SERVICE_NAME,
   UserServiceControllerMethods,
   UserServiceController,
   GetUserRequest,
@@ -44,7 +43,7 @@ import { createMetaController } from './meta.controller';
 
 @Controller()
 @UserServiceControllerMethods()
-export class UserController extends createMetaController('user', USER_SERVICE_NAME) implements UserServiceController {
+export class UserController extends createMetaController('user') implements UserServiceController {
   constructor(private readonly userDataSource: UserDataSource) {
     super(userDataSource);
   }

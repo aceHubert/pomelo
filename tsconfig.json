@@ -6,7 +6,7 @@
   "compilerOptions": {
     /* Basic Options */
     "target": "es5" /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */,
-    "module": "commonjs" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
+    "module": "nodenext" /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */,
     // if using webpack 2+ or rollup, to leverage tree shaking:
     //  "module": "es2015",
     "lib": [
@@ -81,7 +81,9 @@
       "@ace-pomelo/plugin-*": ["../plugins/*/src", "../../plugins/*/src"],
       "@ace-pomelo/theme-*": ["../themes/*/src", "../../themes/*/src"],
       "@ace-pomelo/shared/client": ["../../packages/pomelo-shared/src/client"],
+      "@ace-pomelo/shared/client/*": ["../../packages/pomelo-shared/src/client/*"],
       "@ace-pomelo/shared/server": ["../../packages/pomelo-shared/src/server"],
+      "@ace-pomelo/shared/server/*": ["../../packages/pomelo-shared/src/server/*"],
       "@ace-pomelo/nestjs-*": [
         "../packages/*/src",
         "../../packages/*/src",
@@ -113,12 +115,9 @@
     "emitDecoratorMetadata": false /* Enables experimental support for emitting type metadata for decorators. */
   },
   "exclude": [
+    "**/src/version.ts",
+    "**/proto-ts/**",
     "node_modules",
-    "**/*.spec.ts",
-    "**/*.spec.js",
-    "**/dist/",
-    "**/__test__",
-    "src/version.ts",
     "dist",
     "lib",
     "es",

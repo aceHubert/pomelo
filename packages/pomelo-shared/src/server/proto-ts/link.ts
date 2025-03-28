@@ -201,17 +201,29 @@ export function LinkServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = ['get', 'getPaged', 'create', 'update', 'delete'];
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      if (descriptor) {
-        GrpcMethod('LinkService', method)(constructor.prototype[method], method, descriptor);
-      }
+      const descriptor: any = getPropertyDescriptorFromChain(constructor, method);
+      GrpcMethod('LinkService', method)(constructor.prototype[method], method, descriptor);
     }
     const grpcStreamMethods: string[] = [];
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
+      const descriptor: any = getPropertyDescriptorFromChain(constructor, method);
       GrpcStreamMethod('LinkService', method)(constructor.prototype[method], method, descriptor);
     }
   };
+
+  function getPropertyDescriptorFromChain(obj: any, prop: string) {
+    let currentObj = obj;
+
+    while (currentObj !== null) {
+      const descriptor = Object.getOwnPropertyDescriptor(currentObj.prototype, prop);
+      if (descriptor) {
+        return descriptor;
+      }
+      currentObj = Object.getPrototypeOf(currentObj);
+    }
+
+    return undefined;
+  }
 }
 
 export const LINK_SERVICE_NAME = 'LinkService';
