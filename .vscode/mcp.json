@@ -1,0 +1,25 @@
+{
+  "servers": {
+    "Pomelo Api 文档": {
+      "command": "npx",
+      "args": ["-y", "apifox-mcp-server@latest", "--project=2454420"],
+      "envFile": "${workspaceFolder}/.env.mcp"
+    },
+    "Pomelo Template 库": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "envFile": "${workspaceFolder}/.env.mcp",
+      "env": {
+        "MYSQL_DB": "po_template"
+      }
+    },
+    "Pomelo Identity 库": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "envFile": "${workspaceFolder}/.env.mcp",
+      "env": {
+        "MYSQL_DB": "po_identity"
+      }
+    }
+  }
+}

@@ -145,3 +145,7 @@ db.lock
 # docker-compose
 /release
 /.cache
+
+# mcp config
+!.vscode/mcp.json
+.env.mcp
