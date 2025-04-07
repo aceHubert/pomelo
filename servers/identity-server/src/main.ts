@@ -62,6 +62,7 @@ bootstrap<NestExpressApplication>(AppModule, {
       .setBaseViewsDir(join(__dirname, '../', 'views'))
       .setLocal('title', 'Pomelo Identity Server')
       .setLocal('baseURL', `${globalPrefix}/`)
+      .setLocal('cdnPrefix', '//cdn.jsdmirror.com/npm/')
       .set('view engine', 'ejs')
       .set('layout', 'layouts/default')
       .set('layout extractScripts', true)
