@@ -151,6 +151,7 @@ export default defineComponent({
         case 'select-account':
           userManager.signin({
             noInteractive: true,
+            popup: true,
             prompt: 'select_account',
           });
           break;

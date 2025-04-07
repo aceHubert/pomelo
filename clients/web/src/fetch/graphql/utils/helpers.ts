@@ -64,6 +64,13 @@ export function formatError(err: Error) {
           : `Errors: ${graphQLErrors
               .map((graphQLError) => graphQLError?.message)
               .filter(Boolean)
+              .reduce((acc, cur) => {
+                // 去重
+                if (acc.indexOf(cur) === -1) {
+                  acc.push(cur);
+                }
+                return acc;
+              }, [] as string[])
               .join('; ')}`,
         extensions ? extensions.statusCode || (extensions?.code && codes[extensions?.code]) || 500 : 500,
         err,
@@ -81,6 +88,13 @@ export function formatError(err: Error) {
         : `Errors: ${graphQLErrors
             .map((graphQLError) => graphQLError?.message)
             .filter(Boolean)
+            .reduce((acc, cur) => {
+              // 去重
+              if (acc.indexOf(cur) === -1) {
+                acc.push(cur);
+              }
+              return acc;
+            }, [] as string[])
             .join('; ')}`,
       extensions ? extensions.statusCode || (extensions?.code && codes[extensions?.code as string]) || 500 : 500,
       err,

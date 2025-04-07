@@ -14,6 +14,7 @@ import { i18n } from '@/i18n';
 import { pinia } from '@/store';
 import { AuthTypeOptionName } from '@/constants';
 import { AuthType } from '@/types';
+import { errorRef, SharedError } from '@/shared';
 import * as plugins from '@/plugins';
 
 // Local
@@ -92,18 +93,32 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
   const userManager = this.$userManager;
 
   if (to.name === 'signout') {
-    userManager.signout({
-      redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
-    });
+    userManager
+      .signout({
+        popup: true,
+        // redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
+      })
+      .then(userManager.getUser)
+      .then((user) => {
+        // 未退出当前用户
+        !user && next('/');
+      });
   } else if (to.meta?.anonymous === true) {
     next();
   } else {
     userManager.getUser().then(function (user) {
       if (user === null || user.expired) {
-        userManager.signin({
-          noInteractive: true,
-          redirect_uri: `${router.options.base ?? '/'}${to.fullPath.slice(1)}`,
-        });
+        userManager
+          .signin({
+            noInteractive: true,
+            popup: true,
+            redirect_uri: `${router.options.base ?? '/'}${to.fullPath.slice(1)}`,
+          })
+          .then(next)
+          .catch(() => {
+            errorRef.value = new SharedError(i18n.tv('unauthorized.message', '授权失败, 请重试') as string, 404);
+            next();
+          });
       } else {
         // next();
         if (user.profile.role === 'subscriber') {

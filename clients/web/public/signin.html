@@ -21,11 +21,17 @@
       p {
         font-size: 14px;
         text-align: center;
-        color: #858585;
       }
 
       #msg {
         margin-top: 100px;
+        color: #3d3d3d;
+      }
+
+      #desc {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #858585;
       }
 
       #home {
@@ -37,34 +43,53 @@
 
   <body>
     <p id="msg">Redirecting...</p>
-    <p id="home"><a href="./">Home</a></p>
+    <p id="desc"></p>
+    <p id="home"><a href="javascript:;">Home</a></p>
     <script src="/static/js/oidc-client-ts.min.js"></script>
     <script src="/static/js/env.js"></script>
     <script>
       var msgEl = document.getElementById('msg');
+      var descEl = document.getElementById('desc');
       var homeBtn = document.getElementById('home');
       var RedirectKey = 'po/oidc.redirect';
 
-      var redirect = function () {
-        var url = localStorage.getItem(RedirectKey) || './';
-        localStorage.removeItem(RedirectKey);
-        if (history.replaceState) {
-          history.replaceState({}, document.title, url);
-          history.go(0);
-        } else {
-          location.replace(url);
+      var redirectInSeconds = function (seconds) {
+        var s = seconds === null || seconds === undefined ? 3 : seconds;
+        var msg = '';
+        if (s > 0) {
+          msg =
+            'Redirect in ' +
+            s +
+            ' seconds...<br/>If the window does not redirect automatically, please click the button below.';
         }
+        descEl.innerHTML = msg;
+
+        if (s <= 0) {
+          const window = window.opener || window.parent || window;
+          var url = localStorage.getItem(RedirectKey) || './';
+          localStorage.removeItem(RedirectKey);
+          if (history.replaceState) {
+            history.replaceState({}, document.title, url);
+            history.go(0);
+          } else {
+            location.replace(url);
+          }
+          return;
+        }
+        setTimeout(closeWindowInSeconds.bind(null, s - 1), 1000);
       };
 
+      homeBtn.addEventListener('click', redirectInSeconds.bind(null, 0));
+
       new oidc.UserManager(window._ENV ? window._ENV.oidc || {} : {})
-        .signinRedirectCallback()
+        .signinCallback()
         .then(function (user) {
           if (!user) {
             msgEl.innerText = 'No sign-in request pending.';
-            setTimeout(redirect, 2000);
+            redirectInSeconds(3);
             return;
           }
-          redirect();
+          redirectInSeconds(0);
         })
         .catch(function (e) {
           homeBtn.style.display = 'block';
@@ -73,7 +98,7 @@
             msgEl.innerHTML = '当前设备日期时间有误<br/>请调整为标准北京时间后重新进入';
           } else {
             msgEl.innerHTML = msg;
-            setTimeout(redirect, 2000);
+            redirectInSeconds(3);
           }
         });
     </script>

@@ -14,6 +14,8 @@ export interface IUser {
 export interface ISigninArgs {
   /** If true, the signin request will not be interactive */
   noInteractive?: boolean;
+  /** If true, the signin redirect will be a popup */
+  popup?: boolean;
   /** The URL to redirect to after the signin request */
   redirect_uri?: string;
   [key: string]: any;
@@ -21,6 +23,8 @@ export interface ISigninArgs {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ISignoutArgs {
+  /** If true, the signin redirect will be a popup */
+  popup?: boolean;
   /** The URL to redirect to after the signin request */
   redirect_uri?: string;
   [key: string]: any;

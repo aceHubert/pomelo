@@ -3,7 +3,6 @@ import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '
 import { FetchVuePlugin, createFetch } from '@ace-fetch/graphql-vue';
 import { loadingRef, errorRef, SharedError } from '@/shared';
 import { createClient } from './utils/client';
-import { formatError } from './utils/helpers';
 import { basicLink } from './basic';
 
 Vue.use(FetchVuePlugin);
@@ -36,8 +35,7 @@ graphqlFetch.use(
       if (error instanceof SharedError) {
         errorRef.value = error;
       } else {
-        const formatedError = formatError(error);
-        errorRef.value = new SharedError(formatedError.message, formatedError.code);
+        errorRef.value = new SharedError(error.message, error.code);
       }
       return new Promise(() => {
         // stop next

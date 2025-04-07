@@ -270,7 +270,7 @@ __metadata:
     markdown-it: ^13.0.1
     moment: ^2.29.4
     monaco-editor: ^0.34.0
-    oidc-client-ts: ^2.4.0
+    oidc-client-ts: ^3.2.0
     path-to-regexp: 3.2.0
     pinia: ^2.0.17
     pinia-plugin-persistedstate: ^3.1.0
@@ -6977,6 +6977,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/validator@npm:^13.11.8":
+  version: 13.12.3
+  resolution: "@types/validator@npm:13.12.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fvalidator%2F-%2Fvalidator-13.12.3.tgz"
+  checksum: 91f959fa9205e0d6a5e413b4358190b3960d8aff7792805d747dbca2463aec1f290b4c94899b5f397824720142f496f30d53855ec141429b0403da1ef8d53335
+  languageName: node
+  linkType: hard
+
 "@types/validator@npm:^13.7.17":
   version: 13.11.1
   resolution: "@types/validator@npm:13.11.1"
@@ -9772,18 +9779,29 @@ __metadata:
 
 "class-transformer@npm:^0.5.1":
   version: 0.5.1
-  resolution: "class-transformer@npm:0.5.1"
+  resolution: "class-transformer@npm:0.5.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fclass-transformer%2F-%2Fclass-transformer-0.5.1.tgz"
   checksum: f191c8b4cc4239990f5efdd790cabdd852c243ed66248e39f6616a349c910c6eed2d9fd1fbf7ee6ea89f69b4f1d0b493b27347fe0cd0ae26b47c3745a805b6d3
   languageName: node
   linkType: hard
 
 "class-validator@npm:^0.13.2":
   version: 0.13.2
-  resolution: "class-validator@npm:0.13.2"
+  resolution: "class-validator@npm:0.13.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fclass-validator%2F-%2Fclass-validator-0.13.2.tgz"
   dependencies:
     libphonenumber-js: ^1.9.43
     validator: ^13.7.0
   checksum: 0deb4c29faa18345f6989fd7eaaaa07b05caae5298603fcd6485531c6daad503e5d2b24cc1342e4fc88ae5ba0acffdc24d0fc333110ef3f21a667cd8a79e1258
+  languageName: node
+  linkType: hard
+
+"class-validator@npm:^0.14.1":
+  version: 0.14.1
+  resolution: "class-validator@npm:0.14.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fclass-validator%2F-%2Fclass-validator-0.14.1.tgz"
+  dependencies:
+    "@types/validator": ^13.11.8
+    libphonenumber-js: ^1.10.53
+    validator: ^13.9.0
+  checksum: bea808145c81ba3b185e1174d92f97a2d6ffef0558261217042552e9027222eadb9a9731a4418a07eaaa72ac334347df7a1079ff48eaadaa3ee6848a6a88995c
   languageName: node
   linkType: hard
 
@@ -16968,13 +16986,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jwt-decode@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "jwt-decode@npm:3.1.2"
-  checksum: 20a4b072d44ce3479f42d0d2c8d3dabeb353081ba4982e40b83a779f2459a70be26441be6c160bfc8c3c6eadf9f6380a036fbb06ac5406b5674e35d8c4205eeb
-  languageName: node
-  linkType: hard
-
 "jwt-decode@npm:^4.0.0":
   version: 4.0.0
   resolution: "jwt-decode@npm:4.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fjwt-decode%2F-%2Fjwt-decode-4.0.0.tgz"
@@ -17277,10 +17288,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libphonenumber-js@npm:^1.9.43":
-  version: 1.10.44
-  resolution: "libphonenumber-js@npm:1.10.44"
-  checksum: ada1bc135ce4b77eaa859a2c39d5b64cf142a76d203cb52f8f0e3097c30acba8a8faa4c6d975968333216d48448c589eb640b829ae5e95de706415684791cad9
+"libphonenumber-js@npm:^1.10.53, libphonenumber-js@npm:^1.9.43":
+  version: 1.12.6
+  resolution: "libphonenumber-js@npm:1.12.6::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Flibphonenumber-js%2F-%2Flibphonenumber-js-1.12.6.tgz"
+  checksum: 98ae28d3c8709f6e2c75396178b45b11bea47cd0638f2165170b4a32dd1ba911fdee9a51dd19d1f19feaa5d10faff4554d4ff96caa1341e77d3a7b3796f20e5e
   languageName: node
   linkType: hard
 
@@ -19339,13 +19350,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oidc-client-ts@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "oidc-client-ts@npm:2.4.0"
+"oidc-client-ts@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "oidc-client-ts@npm:3.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Foidc-client-ts%2F-%2Foidc-client-ts-3.2.0.tgz"
   dependencies:
-    crypto-js: ^4.2.0
-    jwt-decode: ^3.1.2
-  checksum: 8467db689298221f706d3358961efb0ddc789f6bd7d4765e71ae5fe62067999d2ce6e8e7584b9d991b8caa6f7fb383f75841e1cfa9e05808c34632de374f5e68
+    jwt-decode: ^4.0.0
+  checksum: 8d11e1d922d9dc310b2130e1d638e31522a4818edd88a569c58f30dd48531027e77fef0f050826aaa8b858ff093c99405463609ad1c226b0dbfb3f4022c69d24
   languageName: node
   linkType: hard
 
@@ -20244,7 +20254,7 @@ __metadata:
     casual: ^1.6.2
     chokidar-cli: ^3.0.0
     class-transformer: ^0.5.1
-    class-validator: ^0.13.2
+    class-validator: ^0.14.1
     cli-color: ^2.0.3
     compression-webpack-plugin: ^10.0.0
     concurrently: ^7.3.0
@@ -25204,7 +25214,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"validator@npm:^13.7.0, validator@npm:^13.9.0":
+"validator@npm:^13.7.0":
+  version: 13.15.0
+  resolution: "validator@npm:13.15.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fvalidator%2F-%2Fvalidator-13.15.0.tgz"
+  checksum: 0d1faacb802336e69fafde33723b6de8e1833d1a3ec2b5202ffc69b95c8140db6d4728760026d738243d706cd324ea84808deea2ed647f571a3171d03ade8031
+  languageName: node
+  linkType: hard
+
+"validator@npm:^13.9.0":
   version: 13.11.0
   resolution: "validator@npm:13.11.0"
   checksum: d1e0c27022681420756da25bc03eb08d5f0c66fb008f8ff02ebc95812b77c6be6e03d3bd05cf80ca702e23eeb73dadd66b4b3683173ea2a0bc7cc72820bee131
