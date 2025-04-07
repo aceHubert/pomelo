@@ -3,7 +3,7 @@ import { Result } from 'ant-design-vue';
 import { useI18n } from '@/composables';
 
 export default defineComponent({
-  name: 'PageNotFound',
+  name: 'Forbidden',
   head() {
     return {
       title: this.$tv('forbidden.page_title', '禁止访问') as string,
