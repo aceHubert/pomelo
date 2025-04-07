@@ -99,7 +99,7 @@ jobs:
           path: .submodules
           key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
       - name: Build
-        run: yarn build:clients && yarn build:servers
+        run: yarn build:web && yarn build:servers && yarn build:identity-server
       - name: List dist dir
         run: ls dist
       - name: Set up QEMU
