@@ -6,7 +6,6 @@ import { Form, Input, Select, Button } from 'ant-design-vue';
 import { message } from '@/components/antdv-helper';
 import { useI18n } from '@/composables';
 import { useDeviceMixin } from '@/mixins/device';
-import { formatError } from '@/fetch/graphql/utils/helpers';
 import { useSiteInitApi } from '@/initialize/fetch';
 import classes from './index.module.less';
 
@@ -76,7 +75,7 @@ export default Form.create({})(
               });
             })
             .catch((err) => {
-              message.error(formatError(err).message);
+              message.error(err.message);
             });
         });
       };

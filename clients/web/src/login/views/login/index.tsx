@@ -7,7 +7,6 @@ import { setToken, removeToken } from '@/auth/local';
 import { message } from '@/components/antdv-helper';
 import { useI18n, useOptions } from '@/composables';
 import { useDeviceMixin } from '@/mixins/device';
-import { formatError } from '@/fetch/graphql/utils/helpers';
 import { useLoginApi } from '@/login/fetch';
 import { AuthTypeOptionName } from '@/constants';
 import { AuthType } from '@/types';
@@ -78,7 +77,7 @@ export default Form.create({})(
               }
             })
             .catch((err) => {
-              message.error(formatError(err).message);
+              message.error(err.message);
             });
         });
       };
