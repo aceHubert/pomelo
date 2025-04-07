@@ -5,7 +5,7 @@
 # 查看当前构建环境信息，以及支持的架构
 # docker buildx inspect --bootstrap
 # 构建镜像
-# docker buildx build -t hubert007/pomelo:0.0.3 -t hubert007/pomelo:latest --target deploy --cache-from hubert007/pomelo:latest --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --platform linux/amd64,linux/arm64 --push .
+# docker buildx build -t hubert007/pomelo:0.0.3 -t hubert007/pomelo:latest --target deploy --cache-from hubert007/pomelo:latest --build-arg BUILD_IGNORE=true --platform linux/amd64,linux/arm64 --push .
 # 运行容器
 # docker run -it -d -p -p 3001:3001 -p 3002:3002 -p 3003:3003 -p 3004:3004 -p 3011:3011 --name pomelo-server --rm hubert007/pomelo:0.0.2
 # docker network connect --link mysql-default-5.7:mysql mysql_default pomelo-server
