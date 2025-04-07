@@ -120,7 +120,8 @@ jobs:
       - name: Get release version
         if: github.event_name == 'release'
         id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Build release image
         if: github.event_name == 'release'
         run: | # 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
