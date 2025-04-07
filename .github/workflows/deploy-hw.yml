@@ -24,7 +24,7 @@ env:
   REGISTRY_MIRROR: ghcr.nju.edu.cn
   BUILD_PLATFORM: linux/amd64,linux/arm64
   IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-  IMAGE_ALPHA_TAG: $(echo ${{ github.run_id }} | tr '[:upper:]' '[:lower:]')
+  IMAGE_DEPLOY_TAG: $(echo ${{ github.run_id }} | tr '[:upper:]' '[:lower:]')
 
 permissions:
   contents: read
@@ -115,12 +115,13 @@ jobs:
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha \
-          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_ALPHA_TAG }} \
+          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }} \
           --platform ${{env.BUILD_PLATFORM}} --push .
-      - name: Get version from package.json
+      - name: Get release version
         if: github.event_name == 'release'
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        id: get_version
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Build release image
         if: github.event_name == 'release'
         run: | # 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
@@ -130,7 +131,7 @@ jobs:
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest \
-          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.package-version.outputs.current-version}} \
+          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.get_version.outputs.VERSION }} \
           --platform ${{env.BUILD_PLATFORM}} --push .
   ssh-deploy:
     if: github.event_name != 'release'
@@ -185,11 +186,11 @@ jobs:
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
-            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_ALPHA_TAG }}" > .env.${{ github.run_id }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}" > .env.${{ github.run_id }}
             echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
             mv docker-compose-standard.yml docker-compose.yml
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
-            docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_ALPHA_TAG }}) | xargs --no-run-if-empty docker rmi
+            docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}) | xargs --no-run-if-empty docker rmi
             rm -f .env.${{ github.run_id }}
             mv nginx.conf ${{ vars.HW_NGINX_CONF_DIR }}/pomelo.conf
             /etc/init.d/nginx reload
