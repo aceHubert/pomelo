@@ -14,7 +14,7 @@
     authority: 'http://localhost:5003/oauth2',
     client_id: clientId,
     redirect_uri: withPrefixBaseUrl + '/signin.html',
-    post_logout_redirect_uri: withPrefixBaseUrl,
+    post_logout_redirect_uri: withPrefixBaseUrl + '/signout.html',
     // Add expiration nofitication time
     accessTokenExpiringNotificationTime: 10,
     // Setup to renew token access automatically
@@ -26,6 +26,7 @@
     scope: 'openid profile offline_access',
     // will revoke (reference) access tokens at logout time
     revokeAccessTokenOnSignout: true,
+    redirectMethod: 'replace',
     mergeClaims: true,
     monitorSession: true,
   };

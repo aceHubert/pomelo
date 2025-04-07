@@ -1,19 +1,21 @@
 import * as Oidc from 'oidc-client-ts';
 import { trailingSlash, absoluteGo } from '@ace-util/core';
-import { Modal } from '@/components';
+import { Modal, message } from '@/components';
 import { STORAGE_PREFIX } from '@/store/utils';
 import { i18n } from '@/i18n/index';
 
 // Types
-import type { UserManager } from '../user-manager';
+import type { UserManager, ISigninArgs, ISignoutArgs } from '../user-manager';
 
-export interface SigninSilentArgs extends Oidc.SigninSilentArgs {}
-export interface SigninArgs extends Oidc.SigninRedirectArgs {
-  noInteractive?: boolean;
+export type SigninSilentArgs = Oidc.SigninSilentArgs;
+export type SigninArgs = (Oidc.SigninRedirectArgs | Oidc.SigninPopupArgs) & ISigninArgs;
+export type SignoutArgs = (Oidc.SignoutRedirectArgs | Oidc.SignoutPopupArgs) & ISignoutArgs;
+
+if (process.env.NODE_ENV === 'development') {
+  Oidc.Log.setLogger(console);
+  Oidc.Log.setLevel(Oidc.Log.DEBUG);
 }
-export interface SignoutArgs extends Oidc.SignoutRedirectArgs {
-  redirect_uri?: string;
-}
+
 export const RedirectKey = `${STORAGE_PREFIX}/oidc.redirect`;
 export const LoginNameKey = `${STORAGE_PREFIX}/oidc.login_name`;
 export const IgnoreRoutes = ['/signin', '/signout'].map(
@@ -115,21 +117,34 @@ Object.defineProperties(Oidc.UserManager.prototype, {
   // otherwise, redirect to user center to sign in
   signin: {
     value: function (this: Oidc.UserManager, args: SigninArgs = {}) {
-      const { noInteractive, redirect_uri, ...restArgs } = args;
+      const { noInteractive, popup, redirect_uri, extraQueryParams, ...restArgs } = args;
       this.saveRedirect(redirect_uri);
       if (noInteractive) {
         return this.getUser().then((user) => {
           const removeUser = user ? this.removeUser() : Promise.resolve();
-          return Promise.all([this.getExtraQueryParams(user || void 0), removeUser]).then(([extraQueryParams]) => {
+          return Promise.all([this.getExtraQueryParams(user || void 0), removeUser]).then(([localQueryParams]) => {
             const $signIn = () =>
-              this.signinRedirect({
-                ...restArgs,
-                ui_locales: i18n.locale, // add locale
-                extraQueryParams: {
-                  ...restArgs.extraQueryParams,
-                  ...extraQueryParams,
-                },
-              });
+              popup
+                ? this.signinPopup({
+                    ...restArgs,
+                    ui_locales: i18n.locale, // add locale
+                    extraQueryParams: {
+                      ...extraQueryParams,
+                      ...localQueryParams,
+                    },
+                  }).then((user) => {
+                    if (!user) {
+                      message.error(i18n.tv('signin_popup_failed', '登录失败，请重试！') as string);
+                    }
+                  })
+                : this.signinRedirect({
+                    ...restArgs,
+                    ui_locales: i18n.locale, // add locale
+                    extraQueryParams: {
+                      ...extraQueryParams,
+                      ...localQueryParams,
+                    },
+                  });
 
             // TODO: 以其它方式登录
             // 如微信、钉钉、飞书等
@@ -161,13 +176,7 @@ Object.defineProperties(Oidc.UserManager.prototype, {
   // then redirect to home page after authorized
   signout: {
     value: function (this: Oidc.UserManager, args: SignoutArgs = {}) {
-      const {
-        redirect_uri,
-        post_logout_redirect_uri,
-        redirectMethod = 'replace', // 默认使用 replace 跳转
-        extraQueryParams,
-        ...restArgs
-      } = args;
+      const { popup, redirect_uri, post_logout_redirect_uri, extraQueryParams, ...restArgs } = args;
       // 退出前保存用户识别信息
       return this.getUser().then((user) =>
         this.prepareSignIn(user || void 0).then(() => {
@@ -175,17 +184,25 @@ Object.defineProperties(Oidc.UserManager.prototype, {
           if (redirect_uri) {
             redirectUri = /https?:\/\//.test(redirect_uri) ? redirect_uri : `${location.origin}${redirect_uri}`;
           }
+
           const $signOut = () =>
-            this.signoutRedirect({
-              ...args,
-              ...restArgs,
-              post_logout_redirect_uri: redirectUri,
-              redirectMethod,
-              extraQueryParams: {
-                ...extraQueryParams, // add extra query params
-                ui_locales: i18n.locale, // add locale
-              },
-            });
+            popup
+              ? this.signoutPopup({
+                  ...restArgs,
+                  post_logout_redirect_uri: redirectUri,
+                  extraQueryParams: {
+                    ...extraQueryParams, // add extra query params
+                    ui_locales: i18n.locale, // add locale
+                  },
+                })
+              : this.signoutRedirect({
+                  ...restArgs,
+                  post_logout_redirect_uri: redirectUri,
+                  extraQueryParams: {
+                    ...extraQueryParams, // add extra query params
+                    ui_locales: i18n.locale, // add locale
+                  },
+                });
 
           // TODO: 退出其它
           // 如微信、钉钉、飞书等用户解绑

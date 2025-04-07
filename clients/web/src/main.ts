@@ -94,7 +94,16 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
   const userManager = this.$userManager;
 
   if (to.name === 'signout') {
-    userManager.signout();
+    userManager
+      .signout({
+        popup: true,
+        // redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
+      })
+      .then(userManager.getUser)
+      .then((user) => {
+        // 未退出当前用户
+        !user && next('/');
+      });
   } else if (to.meta?.anonymous === true) {
     next();
   } else {

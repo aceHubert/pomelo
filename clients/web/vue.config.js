@@ -40,7 +40,7 @@ module.exports = defineConfig({
     themeColor: '#ffffff',
     msTileColor: '#e94709',
     mobileWebAppCapable: 'yes',
-    appleMobileWebAppCapable: 'yes', // 已弃用
+    // appleMobileWebAppCapable: 'yes', // 已弃用
     appleMobileWebAppStatusBarStyle: 'black',
     iconPaths: {
       faviconSVG: `${assetsPath}/icons/favicon.svg?v2`,

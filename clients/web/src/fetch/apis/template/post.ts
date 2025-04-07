@@ -201,7 +201,7 @@ export const usePostApi = defineRegistGraphql('template_post', {
     ` as TypedQueryDocumentNode<{ post: PostTemplateModel | null }, { id: string; metaKeys?: string[] }>,
     // 创建文章
     create: gql`
-      mutation createPost($newPostTemplate: NewPostTemplateInput! = {}) {
+      mutation createPost($newPostTemplate: NewPostTemplateInput! = { title: "", content: "" }) {
         post: createPostTempate(model: $newPostTemplate) {
           id
           name
