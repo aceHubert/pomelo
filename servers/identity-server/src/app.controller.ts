@@ -1,7 +1,7 @@
 import { Controller, Get, Render, HttpException } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { Transport } from '@nestjs/microservices';
+import { RedisOptions, Transport } from '@nestjs/microservices';
 import { parseURL } from 'ioredis/built/utils';
 import {
   HealthCheck,
@@ -46,15 +46,26 @@ export class AppController {
       }),
     );
 
-    let redisUrl: string | undefined;
+    let redisUrl: string | undefined, redisOptions: RedisOptions['options'] | undefined;
     if ((redisUrl = this.config.get('REDIS_URL'))) {
+      redisOptions = parseURL(redisUrl);
+    } else if ((redisUrl = this.config.get('REDIS_HOST'))) {
+      redisOptions = {
+        host: this.config.get('REDIS_HOST'),
+        port: this.config.get('REDIS_PORT', 6379),
+        username: this.config.get('REDIS_USERNAME'),
+        password: this.config.get('REDIS_PASSWORD'),
+        db: this.config.get('REDIS_DB', 0),
+      };
+    }
+
+    redisOptions &&
       indicatorFunctions.push(() =>
         this.microservice.pingCheck('redis', {
           transport: Transport.REDIS,
-          options: parseURL(redisUrl!),
+          options: redisOptions,
         }),
       );
-    }
 
     indicatorFunctions.push(() => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'));
 

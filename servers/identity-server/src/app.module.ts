@@ -87,7 +87,19 @@ const logger = new Logger('AppModule', { timestamp: true });
     StorageModule.forRootAsync({
       isGlobal: true,
       useFactory: (config: ConfigService) => {
-        const redisConnection = config.get('REDIS_URL');
+        const redisConnection =
+          config.get('REDIS_URL') ?? config.get('REDIS_HOST')
+            ? {
+                socket: {
+                  host: config.get('REDIS_HOST'),
+                  port: config.get('REDIS_PORT', 6379),
+                  tls: String(config.get('REDIS_USE_SSL', false)) === 'true',
+                },
+                username: config.get('REDIS_USERNAME'),
+                password: config.get('REDIS_PASSWORD'),
+                database: config.get('REDIS_DB', 0),
+              }
+            : undefined;
         return {
           use: redisConnection ? new RedisStorage(redisConnection) : new MemeryStorage(),
         };
@@ -201,18 +213,18 @@ const logger = new Logger('AppModule', { timestamp: true });
       isGlobal: true,
       useFactory: (config: ConfigService, i18n: I18nService) => ({
         isGlobal: true,
-        connection: config.get('IDENTITY_DATABASE_CONNECTION')
-          ? config.get<string>('IDENTITY_DATABASE_CONNECTION')!
+        connection: config.get('DATABASE_CONNECTION')
+          ? config.get<string>('DATABASE_CONNECTION')!
           : {
-              database: config.getOrThrow('IDENTITY_DATABASE_NAME'),
-              username: config.getOrThrow('IDENTITY_DATABASE_USERNAME'),
-              password: config.getOrThrow('IDENTITY_DATABASE_PASSWORD'),
-              dialect: config.get('IDENTITY_DATABASE_DIALECT', 'mysql'),
-              host: config.get('IDENTITY_DATABASE_HOST', 'localhost'),
-              port: config.get('IDENTITY_DATABASE_PORT', 3306),
+              database: config.getOrThrow('DATABASE_NAME'),
+              username: config.getOrThrow('DATABASE_USER'),
+              password: config.getOrThrow('DATABASE_PASSWORD'),
+              dialect: config.get('DATABASE_DIALECT', 'mysql'),
+              host: config.get('DATABASE_HOST', 'localhost'),
+              port: config.get('DATABASE_PORT', 3306),
               define: {
-                charset: config.get('IDENTITY_DATABASE_CHARSET', 'utf8'),
-                collate: config.get('IDENTITY_DATABASE_COLLATE', ''),
+                charset: config.get('DATABASE_CHARSET', 'utf8'),
+                collate: config.get('DATABASE_COLLATE', ''),
               },
             },
         tablePrefix: config.get('TABLE_PREFIX'),

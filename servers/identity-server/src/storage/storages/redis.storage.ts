@@ -1,15 +1,17 @@
-import { createClient, RedisClientType } from 'redis';
+import { createClient, RedisClientType, RedisClientOptions, RedisModules, RedisFunctions, RedisScripts } from 'redis';
 import { StorageAdpter } from '../interfaces/storage.adpter';
 
-export class RedisStorage extends StorageAdpter {
-  private readonly storage: RedisClientType;
+export class RedisStorage<
+  M extends RedisModules = RedisModules,
+  F extends RedisFunctions = RedisFunctions,
+  S extends RedisScripts = RedisScripts,
+> extends StorageAdpter {
+  private readonly storage: RedisClientType<M, F, S>;
 
-  constructor(connection: string) {
+  constructor(connection: string | RedisClientOptions<M, F, S>) {
     super();
 
-    this.storage = createClient({
-      url: connection,
-    });
+    this.storage = createClient(typeof connection === 'string' ? { url: connection } : connection);
 
     this.storage.on('connect', () => {
       this.logger.debug('Redis connected');

@@ -97,18 +97,18 @@ import '@/common/extends/i18n.extend';
       isGlobal: true,
       useFactory: (config: ConfigService) => ({
         isGlobal: true,
-        connection: config.get('INFRASTRUCTURE_DATABASE_CONNECTION')
-          ? config.get<string>('INFRASTRUCTURE_DATABASE_CONNECTION')!
+        connection: config.get('DATABASE_CONNECTION')
+          ? config.get<string>('DATABASE_CONNECTION')!
           : {
-              database: config.getOrThrow('INFRASTRUCTURE_DATABASE_NAME'),
-              username: config.getOrThrow('INFRASTRUCTURE_DATABASE_USERNAME'),
-              password: config.getOrThrow('INFRASTRUCTURE_DATABASE_PASSWORD'),
-              dialect: config.get('INFRASTRUCTURE_DATABASE_DIALECT', 'mysql'),
-              host: config.get('INFRASTRUCTURE_DATABASE_HOST', 'localhost'),
-              port: config.get('INFRASTRUCTURE_DATABASE_PORT', 3306),
+              database: config.getOrThrow('DATABASE_NAME'),
+              username: config.getOrThrow('DATABASE_USERNAME'),
+              password: config.getOrThrow('DATABASE_PASSWORD'),
+              dialect: config.get('DATABASE_DIALECT', 'mysql'),
+              host: config.get('DATABASE_HOST', 'localhost'),
+              port: config.get('DATABASE_PORT', 3306),
               define: {
-                charset: config.get('INFRASTRUCTURE_DATABASE_CHARSET', 'utf8'),
-                collate: config.get('INFRASTRUCTURE_DATABASE_COLLATE', ''),
+                charset: config.get('DATABASE_CHARSET', 'utf8'),
+                collate: config.get('DATABASE_COLLATE', ''),
               },
             },
         tablePrefix: config.get('TABLE_PREFIX'),
