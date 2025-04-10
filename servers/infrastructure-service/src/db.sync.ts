@@ -1,8 +1,7 @@
-import path from 'path';
 import { Logger, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileEnv } from '@ace-pomelo/shared/server';
 import { InfrastructureDatasourceService, name } from '@/datasource';
+import { getDbLockFileEnv } from '@/common/utils/lock-file.util';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
@@ -11,12 +10,7 @@ export async function syncDatabase(app: INestApplication<any>) {
   const configService = app.get(ConfigService);
   const datasourceService = app.get(InfrastructureDatasourceService);
 
-  // db lock
-  const lockfile = path.join(
-    configService.get<string>('configPath')!,
-    configService.get<string>('DBLOCK_FILE', 'db.lock'),
-  );
-  const fileEnv = FileEnv.getInstance(lockfile);
+  const fileEnv = getDbLockFileEnv(configService);
 
   // 初始化数据库
   await datasourceService

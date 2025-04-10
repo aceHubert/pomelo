@@ -1,4 +1,3 @@
-import path from 'path';
 import { upperFirst } from 'lodash';
 import { UniqueConstraintError } from 'sequelize';
 import { Controller, Logger } from '@nestjs/common';
@@ -21,6 +20,7 @@ import {
 } from '@ace-pomelo/shared/server/proto-ts/site-init';
 import { IgnoreDbCheckInterceptor } from '@/common/interceptors/db-check.interceptor';
 import { getDefaultUserRoles } from '@/common/utils/user.util';
+import { getDbLockFileEnv } from '@/common/utils/lock-file.util';
 import { name, InfrastructureDatasourceService, UserDataSource, TermPresetTaxonomy } from '../datasource';
 import { version } from '../version';
 
@@ -35,10 +35,9 @@ export class SiteInitController implements SiteInitServiceController {
   constructor(
     private readonly datasourceService: InfrastructureDatasourceService,
     private readonly userDataSource: UserDataSource,
-    readonly config: ConfigService,
+    readonly configService: ConfigService,
   ) {
-    const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
-    this.fileEnv = FileEnv.getInstance(lockfile);
+    this.fileEnv = getDbLockFileEnv(configService);
   }
 
   private checkAdminExists() {

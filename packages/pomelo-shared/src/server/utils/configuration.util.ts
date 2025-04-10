@@ -7,17 +7,12 @@ import { ConfigFactory } from '@nestjs/config';
 
 const logger = new Logger('Utils', { timestamp: true });
 
-export interface ConfigObject {
+export interface PresetConfigObject {
   /**
    * Debug mode
    * @default process.env.NODE_ENV !== 'production'
    */
   debug: boolean;
-  /**
-   * directory to config path that
-   * save configurations
-   */
-  configPath: string;
   /**
    * directory to content path that
    * save translations, uploads etc...
@@ -37,9 +32,14 @@ export interface ConfigObject {
      */
     port?: number | string;
     /**
-     * server origin
+     * server name
      */
-    origin?: string;
+    name?: string;
+    /**
+     * enable https
+     * @default false
+     */
+    https?: boolean;
     /**
      * global prefix uri
      */
@@ -151,21 +151,20 @@ export const ensureDirPath = (setter: string | undefined, dirname: string, alias
 };
 
 /**
- * @nestjs/config load,
- * read yaml config file from {configPath}/{process.env.CONFIG_FILE or config.yaml} to merge with default config
+ * @nestjs/config preset config load,
  */
-export const configuration = (): ConfigFactory<ConfigObject> => () => {
+export const configuration = (): ConfigFactory<PresetConfigObject> => () => {
   logger.debug(`"@nestjs/config" read from NODE_ENV(${process.env.NODE_ENV ?? 'development'})`);
 
   const debugMode = process.env.DEBUG !== void 0 ? process.env.DEBUG === 'true' : process.env.NODE_ENV !== 'production';
-  const config: ConfigObject = {
+  const config: PresetConfigObject = {
     debug: debugMode,
-    configPath: ensureDirPath(process.env.CONFIG_PATH, 'conf', ['config']),
     contentPath: ensureDirPath(process.env.CONTENT_PATH, 'content'),
     server: {
       host: process.env.HOST,
       port: process.env.PORT ? Number(process.env.PORT) : void 0,
-      origin: process.env.ORIGIN,
+      name: process.env.SERVER_NAME,
+      https: process.env.HTTPS_ENABLED === 'true',
       globalPrefixUri: process.env.GLOBAL_PREFIX_URI,
       cors:
         process.env.CORS === 'true' || process.env.CORS_ORIGIN

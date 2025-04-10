@@ -1,4 +1,3 @@
-import path from 'path';
 import { Observable } from 'rxjs';
 import { Reflector } from '@nestjs/core';
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, SetMetadata } from '@nestjs/common';
@@ -6,7 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { RpcException } from '@nestjs/microservices';
 import { I18nContext } from 'nestjs-i18n';
 import { FileEnv } from '@ace-pomelo/shared/server';
-import { name } from '../../datasource/index';
+import { name } from '@/datasource';
+import { getDbLockFileEnv } from '../utils/lock-file.util';
 
 let NeedInitDatasCache: boolean;
 const IgnoreDbCheckInterceptorName = Symbol('IgnoreDbCheckInterceptor');
@@ -22,9 +22,8 @@ export function IgnoreDbCheckInterceptor(): ClassDecorator & MethodDecorator {
 export class DbCheckInterceptor implements NestInterceptor {
   private fileEnv: FileEnv;
 
-  constructor(private readonly reflector: Reflector, readonly config: ConfigService) {
-    const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
-    this.fileEnv = FileEnv.getInstance(lockfile);
+  constructor(private readonly reflector: Reflector, readonly configService: ConfigService) {
+    this.fileEnv = getDbLockFileEnv(configService);
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {

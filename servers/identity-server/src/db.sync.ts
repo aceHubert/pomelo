@@ -1,24 +1,19 @@
-import path from 'path';
 import { UniqueConstraintError } from 'sequelize';
 import { Logger, INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileEnv } from '@ace-pomelo/shared/server';
+import { PresetConfigObject } from '@ace-pomelo/shared/server';
 import { IdentityDatasourceService, name } from '@/datasource';
+import { getDbLockFileEnv } from '@/common/utils/lock-file.util';
 import { version } from './version';
 
 const logger = new Logger('DbSync', { timestamp: true });
 
 // sync database
 export async function syncDatabase(app: INestApplication<any>) {
-  const configService = app.get(ConfigService);
+  const configService = app.get(ConfigService<PresetConfigObject>);
   const datasourceService = app.get(IdentityDatasourceService);
 
-  // db lock file
-  const lockfile = path.join(
-    configService.get<string>('configPath')!,
-    configService.get<string>('DBLOCK_FILE', 'db.lock'),
-  );
-  const fileEnv = FileEnv.getInstance(lockfile);
+  const fileEnv = getDbLockFileEnv(configService);
 
   // 初始化数据库
   await datasourceService
@@ -40,7 +35,10 @@ export async function syncDatabase(app: INestApplication<any>) {
   if (needInitDates) {
     logger.debug('Start to initialize datas!');
     try {
-      const origin = configService.get('server.origin');
+      const origin = `${configService.get<boolean>('server.https', false) ? 'http' : 'https'}://${configService.get(
+        'server.name',
+        'localhost',
+      )}`;
       const webURL = configService.get('WEB_URL', origin);
 
       await datasourceService.initDatas({
@@ -150,7 +148,9 @@ export async function syncDatabase(app: INestApplication<any>) {
             redirectUris: webURL
               ? [`${webURL}/signin`, `${webURL}/signin.html`, `${webURL}/signin-silent`, `${webURL}/signin-silent.html`]
               : [],
-            postLogoutRedirectUris: webURL ? [webURL, `${webURL}/admin`] : [],
+            postLogoutRedirectUris: webURL
+              ? [webURL, `${webURL}/signout`, `${webURL}/signout.html`, `${webURL}/admin`]
+              : [],
             secrets: [
               {
                 type: 'SharedSecret',
