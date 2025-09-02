@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader';
 import { camelCase, lowerCase, upperFirst } from 'lodash';
-import { Type, applyDecorators } from '@nestjs/common';
+import { Type, applyDecorators, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';
 import { VoidResolver } from 'graphql-scalars';
@@ -167,10 +167,14 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Get ${_descriptionName} meta.`,
     })
     getMeta(
-      @Args('id', {
-        type: () => ID,
-        description: 'meta Id',
-      })
+      @Args(
+        'id',
+        {
+          type: () => ID,
+          description: 'meta Id',
+        },
+        ParseIntPipe,
+      )
       id: number,
       @Fields() fields: ResolveTree,
     ) {
@@ -260,7 +264,7 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Update ${_descriptionName} meta value.`,
     })
     async updateMeta(
-      @Args('id', { type: () => ID, description: `${_descriptionName} meta id` })
+      @Args('id', { type: () => ID, description: `${_descriptionName} meta id` }, ParseIntPipe)
       id: number,
       @Args('metaValue') metaValue: string,
     ) {
@@ -282,10 +286,14 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Update ${_descriptionName} meta value by meta key.`,
     })
     async updateMetaByKey(
-      @Args(`${_modelName}Id`, {
-        type: () => ID,
-        description: `${_descriptionName} Id`,
-      })
+      @Args(
+        `${_modelName}Id`,
+        {
+          type: () => ID,
+          description: `${_descriptionName} Id`,
+        },
+        ParseIntPipe,
+      )
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
       @Args('metaValue', { description: 'Meta value' }) metaValue: string,
@@ -315,7 +323,7 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Delete ${_descriptionName} meta`,
     })
     async deleteMeta(
-      @Args('id', { type: () => ID, description: `${_descriptionName} meta Id` })
+      @Args('id', { type: () => ID, description: `${_descriptionName} meta Id` }, ParseIntPipe)
       id: number,
     ) {
       await this.basicService.send<void>(pattern.DeleteMeta, { id }).lastValue();

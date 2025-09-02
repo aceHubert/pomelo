@@ -32,6 +32,16 @@ export function getConsentTemplate(presetOrTemplate: string) {
   return presetConsentTemplateMap.get(presetOrTemplate) ?? getHtmlTemplate(presetOrTemplate);
 }
 
+const presetSelectAccountTemplateMap = new Map();
+
+/**
+ * auto detect select_account template
+ * @param presetOrTemplate preset template or template content(<HTML>{content}</HTML>)
+ */
+export function getSelectAccountTemplate(presetOrTemplate: string) {
+  return presetSelectAccountTemplateMap.get(presetOrTemplate) ?? getHtmlTemplate(presetOrTemplate);
+}
+
 const presetPasswordModifyTemplateMap = new Map();
 
 /**

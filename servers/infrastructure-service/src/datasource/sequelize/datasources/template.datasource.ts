@@ -1181,7 +1181,14 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         ));
 
       t.commit();
-      return template.toJSON<TemplateModel>();
+      const { status: maybyInnerStatus, ...rest } = template.toJSON<TemplateModel>();
+      return {
+        ...rest,
+        status:
+          (maybyInnerStatus as TemplateStatus | TemplateInnerStatus) === TemplateInnerStatus.AutoDraft
+            ? TemplateStatus.Draft
+            : maybyInnerStatus,
+      };
     } catch (err) {
       t.rollback();
       throw err;

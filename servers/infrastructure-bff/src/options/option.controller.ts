@@ -85,6 +85,31 @@ export class OptionController extends BaseController {
   }
 
   /**
+   * Get option by name.
+   */
+  @Get(':name/by/name')
+  @Anonymous()
+  @ApiOkResponse({
+    description: 'Option model',
+    type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
+  })
+  @ApiNoContentResponse({ description: 'Option not found' })
+  async getByName(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
+    const result = await this.basicService
+      .send<OptionResp | undefined>(OptionPattern.GetByName, {
+        optionName: name,
+        fields: ['id', 'optionName', 'optionValue', 'autoload'],
+      })
+      .lastValue();
+    if (result === undefined) {
+      res.status(HttpStatus.NO_CONTENT);
+    }
+    return this.success({
+      data: result,
+    });
+  }
+
+  /**
    * Get option value by name.
    */
   @Get(':name/value')

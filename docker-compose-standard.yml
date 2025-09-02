@@ -1,0 +1,89 @@
+# vim: set shiftwidth=2 tabstop=2 softtabstop=-1 expandtab:
+
+# >  cat > .env.docker.local
+#   BUILD_TAG=0.0.1
+#   BUILD_IGNORE=true
+#   DEBUG=true
+#   ENV_FILE=.env.local
+
+# > mkdir release
+# > docker compose --env-file .env.docker.local up --build --force-recreate  -d
+
+# version: '3.1'
+
+services:
+  server:
+    image: ${IMAGE_REPOSITORY:-ghcr.io/acehubert/pomelo:latest}
+    container_name: pomelo-server
+    restart: always
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '3'
+    environment:
+      - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
+      - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
+      - ORIGIN=${ORIGIN:-https://example.com}
+      - REDIS_URL=${REDIS_URL:-redis://host:port/db}
+      - INFRASTRUCTURE_DATABASE_CONNECTION=${INFRASTRUCTURE_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
+      - IDENTITY_DATABASE_CONNECTION=${IDENTITY_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
+      - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ${PWD}/conf:/app/conf
+      - ${PWD}/uploads:/app/content/uploads
+      - ${PWD}/plugins:/app/content/plugins
+      - ${PWD}/themes:/app/content/themes
+      - ${PWD}/logs:/app/logs
+    privileged: true
+    ports:
+      # - 3000:3000 # infrastructure microservice
+      # - 3001:3001 # infrastructure server
+      # - 3002:3002 # bff
+      - 3003:3003 # identity server
+      - 3004:3004 # static content
+      - 3011:3011 # web
+    external_links:
+      - ${MYSQL_CONTAINER_NAME:-mysql-default-5.7}:mysql
+      - ${REDIS_CONTAINER_NAME:-redis-default-7.2}:redis
+    networks:
+      - default
+      - mysql
+      - redis
+  apisix:
+    image: apache/apisix:${APISIX_IMAGE_TAG:-3.9.0-debian}
+    container_name: pomelo-apisix
+    restart: always
+    environment:
+      - APISIX_STAND_ALONE=true
+    volumes:
+      - ${PWD}/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ${PWD}/logs/apisix:/usr/local/apisix/logs
+    privileged: true
+    depends_on:
+      - server
+    ##network_mode: host
+    ports:
+      # - '9180:9180/tcp' # admin_control: true
+      - '9080:9080/tcp'  # http
+      # - '9091:9091/tcp'  # prometheus
+      # - '9443:9443/tcp'  # tls http/2
+      # - '9092:9092/tcp' # enable_control: true
+    networks:
+      - default
+networks:
+  mysql:
+    name: ${MYSQL_NETWORK_NAME:-mysql_default}
+    external: true
+  redis:
+    name: ${REDIS_NETWORK_NAME:-redis_default}
+    external: true
+# volumes:
+#   conf:
+#    name: pomelo-conf
+#     driver: local
+#     driver_opts:
+#       type: none
+#       device: ${PWD}/${CONF_DIR:-conf}
+#       o: bind

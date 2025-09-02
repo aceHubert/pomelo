@@ -22,12 +22,14 @@ export class UserMiddleware implements NestMiddleware {
       if ((userStr = req.headers[this.options.setUserinfoHeader!] as string)) {
         // from apisix
         payload = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
+        this.logger.debug(`User info from apisix: ${JSON.stringify(payload)}`);
       } else {
         // from Authroization header
         const accessToken = fromAuthHeaderAsBearerToken(req);
         if (!accessToken) throw new Error('No bearer token found in request!');
 
         payload = await this.authService.verifyToken(accessToken);
+        this.logger.debug(`User info from header: ${JSON.stringify(payload)}`);
       }
 
       if (payload) {

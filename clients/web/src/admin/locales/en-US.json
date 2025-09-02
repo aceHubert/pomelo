@@ -1,0 +1,966 @@
+{
+  "name": "English",
+  "description": "English Language Pack",
+  "site_title": "Pomelo Admin",
+  "common": {
+    "btn_text": {
+      "go_back": "Go back",
+      "back_to_home": "return to home page",
+      "cancel": "Cancel",
+      "collapse": "Collapse",
+      "confirm": "Confirm",
+      "close": "Close",
+      "create": "Create",
+      "add": "Add",
+      "edit": "Edit",
+      "update": "Update",
+      "delete": "Delete",
+      "expand": "Expand",
+      "no": "No",
+      "ok": "Ok",
+      "submit": "Submit",
+      "reset": "Reset",
+      "save": "Save",
+      "search": "Search",
+      "upload": "Upload",
+      "yes": "Yes",
+      "in_operation": "In operation",
+      "view": "View",
+      "preview": "Preview",
+      "select": "Select",
+      "skip": "Skip",
+      "crop": "Crop",
+      "skip_crop": "Skip Crop"
+    },
+    "btn_tips": {
+      "go_back": "Go back"
+    },
+    "dialog": {
+      "title": {
+        "comfirm": "Confirm",
+        "tips": "Tips"
+      },
+      "btn": {
+        "cancel": "@:common.btn_text.cancel",
+        "confirm": "@:common.btn_text.confirm",
+        "no": "@:common.btn_text.no",
+        "ok": "@:common.btn_text.ok",
+        "yes": "@:common.btn_text.yes"
+      }
+    },
+    "placeholder": {
+      "choose": "Please select {field}",
+      "input": "Please enter {field}",
+      "search": "Search for \"{field}\""
+    },
+    "search": {
+      "bulk_delete_action_text": "Delete",
+      "keyword_placeholder": "Search"
+    },
+    "tips": {
+      "afternoon": "good afternoon",
+      "early_morning": "Good morning",
+      "evening": "good evening",
+      "morning": "good morning",
+      "noon": "good afternoon",
+      "loading_text": "Loading...",
+      "theme": "Theme"
+    },
+    "error": {
+      "internal_error": "System error, please try again later!",
+      "load_module_failed": "Module load failed!",
+      "no_capability": "Sorry, you do not have permission to operate this page!",
+      "no_token_provide": "no token provided!",
+      "page_not_found": "Page not found!",
+      "refresh_token_required": "No token available for refresh!",
+      "unauthorized": "Sorry, you do not have permission to access this site.",
+      "bulk_row_select_reqrired": "Please select at least one row of data!",
+      "delete_faild": {
+        "default": "Delete failed!",
+        "with_message": "Delete failed with error: {message}!"
+      },
+      "bluk_apply_faild": {
+        "default": "Batch operation failed!",
+        "with_message": "Batch operation failed with error: {message}!"
+      }
+    }
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "post": {
+      "root": "Posts",
+      "index": "All Posts",
+      "design": "Post Design",
+      "new": "Add New",
+      "category": "Categories",
+      "tag": "Tags"
+    },
+    "page": {
+      "root": "Pages",
+      "design": "Page Design",
+      "index": "All Pages",
+      "new": "Add New"
+    },
+    "form": {
+      "root": "Forms",
+      "index": "All Forms",
+      "design": "Form Design",
+      "new": "Add New"
+    },
+    "access_control": "Access Control",
+    "clients": {
+      "list": "Clients",
+      "details": "Details",
+      "grant_types": "Grant Types",
+      "scopes": "Scopes",
+      "claims": "Claims",
+      "cors_origins": "CORS Origins",
+      "redirect_uris": "Redirect URIs",
+      "post_logout_redirect_uris": "Post Logout Redirect URIs",
+      "secrets": "Secrets",
+      "secrets_generate": "Generate Secret",
+      "properties": "Properties"
+    },
+    "api_resources": {
+      "list": "API Resources",
+      "details": "Details",
+      "scopes": "Scopes",
+      "scope_claims": "Claims",
+      "claims": "Claims",
+      "secrets": "Secrets",
+      "secrets_generate": "Generate Secret",
+      "properties": "Properties"
+    },
+    "identity_resources": {
+      "list": "Identity Resources",
+      "details": "Details",
+      "claims": "Claims",
+      "properties": "Properties"
+    },
+    "system_setting": "System Setting",
+    "data_scope": {
+      "root": "Data Scopes",
+      "index": "All Data Scopes",
+      "design": "Data Scope Design",
+      "new": "Add New"
+    },
+    "submodule": {
+      "root": "Modules",
+      "index": "All Modules",
+      "details": "Details"
+    },
+    "settings": "Settings",
+    "medias": "All Medias"
+  },
+  "session_timeout_confirm": {
+    "title": "OOPS!",
+    "content": "Session timeout, need to sign in.",
+    "ok_text": "Sign in"
+  },
+  "layout_default": {
+    "page_style_setting_title": "Display Settings",
+    "avatar_menu_item": {
+      "modify_password": "Modify Password",
+      "select_account": "Switch Account"
+    },
+    "signout": {
+      "tooltip": "Sign out",
+      "dialog": {
+        "title": "Confirm",
+        "content": "Are you sure you want to sign out?",
+        "ok_text": ":common.btn_text.yes",
+        "cancel_text": ":common.btn_text.no"
+      }
+    }
+  },
+  "page_dashboard": {
+    "title": "Dashboard",
+    "alert": {
+      "message": "Integrated Management Platform",
+      "description": {
+        "page_template": "Page Templates",
+        "module_template": "Modules Management",
+        "form_template": "Form Templates",
+        "data_scope": "Data Scopes Management",
+        "post_template": "Contents Management"
+      }
+    }
+  },
+  "page_submodules": {
+    "page_title": "Modules",
+    "details": {
+      "page_title": "Module details"
+    }
+  },
+  "page_templates": {
+    "title_label": "Title",
+    "title_placeholder": "Input a title",
+    "title_required": "Title is required!",
+    "name_label": "Customized route",
+    "name_placeholder": "Input customized route",
+    "content_placeholder": "Add content",
+    "author_label": "Author",
+    "category_label": "Category",
+    "category_placeholder": "Select a category (or type a keywork to search)",
+    "category_search_placeholder": "Input to search category",
+    "tag_label": "Tag",
+    "tag_placeholder": "Select a tag (or enter a tag to add)",
+    "comment_label": "Comment",
+    "status_options": {
+      "all": "All",
+      "draft": "Draft",
+      "pending": "Pending",
+      "publish": "Publish",
+      "private": "Private",
+      "future": "Future",
+      "trash": "Trash",
+      "self": "Mine",
+      "all_not_include_trash_data_tooltip": "Data not included in the trash status datas"
+    },
+    "template_options": {
+      "default": "Default",
+      "cover": "Cover",
+      "full_width": "Full Width"
+    },
+    "btn_text": {
+      "review": "Review",
+      "save_and_publish": "Save And Publish",
+      "save_to_draft": "Save To Draft",
+      "restore": "Restore",
+      "move_to_trush": "Move To Trash",
+      "switch_to_draft": "Switch To Draft",
+      "update": "Update",
+      "publish": "Publish",
+      "submit_to_review": "Submit To Review",
+      "review_confirm": "Approved",
+      "review_reject": "Reject"
+    },
+    "error": {
+      "move_to_trash_faild": {
+        "default": "Failed to put into the recycle bin!",
+        "with_message": "Failed to put into the recycle bin, error: {message}!"
+      },
+      "restore_faild": {
+        "default": "Restore failed!",
+        "with_message": "Restore failed with error: {message}!"
+      }
+    },
+    "filter": {
+      "all_categories_text": "All categories",
+      "all_month_count_text": "All dates"
+    },
+    "forms": {
+      "page_title": "Forms",
+      "design": {
+        "page_title": "Form Design",
+        "sider_title": "Form Settings",
+        "submit_action_placeholder": "Input action",
+        "submit_config_label": "Submit",
+        "submit_action_label": "Action:",
+        "submit_success_redirect_label": "Redirect URL when success:",
+        "submit_success_redirect_placeholder": "Input redirect url",
+        "submit_success_tips_label": "Alert text when success:",
+        "submit_success_tips_placeholder": "Input alert text"
+      },
+      "tips": {
+        "delete_confirm": "Are you sure to delete this form configuration?",
+        "unsaved_confirm": "The form configuration will be lost if it is not saved. Do you want to leave the page?",
+        "unpublishe_confirm": "Are you sure you want to put the published form configuration into the draft box?"
+      }
+    },
+    "pages": {
+      "page_title": "Pages",
+      "name_label": "Route alias",
+      "name_placeholder": "Input route alias(Optional)",
+      "design": {
+        "page_title": "Page Design",
+        "sider_title": "Page Settings",
+        "view": "View Page"
+      },
+      "tips": {
+        "delete_confirm": "Are you sure to delete this page configuration?",
+        "unsaved_confirm": "Unsaved page configuration will be lost. Do you want to leave the page?",
+        "unpublishe_confirm": "Are you sure you want to put the published page configuration into the draft box?"
+      },
+      "attribute_label": "Page Attributes"
+    },
+    "posts": {
+      "page_title": "Posts",
+      "excerpt_placeholder": "Input excerpt",
+      "excerpt_required": "Excerpt is required!",
+      "excerpt_label": "Excerpt",
+      "content_placeholder": "Input content",
+      "content_required": "Content is required!",
+      "content_label": "Content",
+      "design": {
+        "page_title": "Write Post",
+        "view": "View Post"
+      },
+      "tips": {
+        "unsaved_confirm": "Unsaved content will be lost. Do you want to leave the page?",
+        "unpublishe_confirm": "Are you sure you want to unpublish this post?",
+        "delete_confirm": "Are you sure to delete this content configuration?"
+      },
+      "attribute_label": "Post Attributes"
+    },
+    "data_scopes": {
+      "page_title": "Data Scopes",
+      "components": {
+        "clause_form": {
+          "operator_options": {
+            "include": "Include"
+          },
+          "logical_options": {
+            "or": "Or",
+            "and": "And"
+          },
+          "table_header": {
+            "logical": "Logical",
+            "field": "Field",
+            "operator": "Operator",
+            "value": "Value"
+          },
+          "tips": {
+            "group_to_selected_items": "Group the checked rows",
+            "ungroup_current_items": "Ungroup current items",
+            "group_checkbox": "Select for grouping",
+            "insert_new_row": "Insert new row",
+            "remove_current_row": "Remove current row"
+          },
+          "btn_text": {
+            "create_new_row": "Add new row"
+          },
+          "error": {
+            "clauses_definition_required": "Clauses does not define!",
+            "field_required_in_row": "Fieid is required in row {row}!",
+            "value_invalid": "Value is invalid in row {row}!",
+            "value_required_in_row": "Value is required in row {row}!",
+            "unable_to_group_those_clauses": "These clauses cannot be grouped!",
+            "no_need_to_group_those_clauses": "The selected clause grouping is unnecessary!",
+            "selected_clauses_already_has_a_group": "The selected clause already has a group!",
+            "no_crossing_between_groups": "Groups cannot be crossed!"
+          }
+        }
+      },
+      "design": {
+        "page_title": "Data Scope Design",
+        "fields_config_label": "Fields config",
+        "fields_config_placeholder": "Choose fields config",
+        "organization_label": "Organization",
+        "organization_placeholder": "Input for searching \"Organizations\"",
+        "content_label": "Clause",
+        "tips": {
+          "choose_fields_config": "Choose fields config",
+          "clause_reset_by_fields_change_confirm": "Fields config is changed and clause will reset, confirm to reset clause?",
+          "choose_organization_config": "Please input to search organizations",
+          "clause_reset_by_organization_change_confirm": "Organization config is changed and clause will reset, confirm to reset clause?"
+        },
+        "fields_config_required": "Fields config is required!",
+        "organization_required": "Organization is required!"
+      },
+      "tips": {
+        "delete_confirm": "Confirm to delete this data-scope configuration?"
+      }
+    },
+    "btn_tips": {
+      "switch_to_draft": "Switch the content into draft box",
+      "update": "Update the content",
+      "save_to_draft": "Save the content to draft box",
+      "publish": "Publish the content",
+      "submit_to_review": "Submit the content to review",
+      "review_confirm": "Content is approved to publish",
+      "review_reject": "Content is not approved to publish"
+    },
+    "design_sider": {
+      "close_settings_title": "Close"
+    },
+    "date_label": "Date",
+    "updated_at": "Last Updated",
+    "fixed_link_label": "Fixed Link",
+    "upload_feature_image_label": "Set feature image",
+    "feature_image_label": "Feature Image",
+    "discussion_label": "Discussion",
+    "allow_comment_label": "Allow comment",
+    "template_label": "Template",
+    "new_category_link_text": "Add New Category",
+    "write_excerpt_label": "Write the excerpt(Optional)",
+    "visibility_label": "Visibility",
+    "publish_set_label": "Publish",
+    "feature_image_tips": "Recommended size: 1980x300(px)",
+    "set_fixed_link_btn_text": "Update Fixed Link",
+    "feature_image_modal": {
+      "title": "Select featured image"
+    },
+    "media_modal": {
+      "title": "Select media"
+    },
+    "design_settings": {
+      "title": "Settings"
+    },
+    "setting_header": {
+      "display": "Display:",
+      "designer": "Designer:"
+    }
+  },
+  "page_media": {
+    "page_title": "Medias",
+    "search_placeholder": "Search for \"file name\"",
+    "upload_dragger_btn_text": "Click or drag file to this area to upload",
+    "upload_multiple_btn_tips": "Support for a single or bulk upload.",
+    "upload_btn_text": "Click to upload media file",
+    "upload_error": "File \"{name}\" upload failed!",
+    "image_crop": {
+      "replace_true": "Replace original file",
+      "replace_false": "Create new media files",
+      "result_title": "Result",
+      "result_left": "Left",
+      "result_top": "Top",
+      "result_width": "Width",
+      "result_height": "Height"
+    },
+    "select_image": {
+      "original": "Original",
+      "thumbnail": "Thumbnail",
+      "scaled": "Scaled",
+      "medium": "Medium",
+      "medium_large": "Medium Large",
+      "large": "Large"
+    },
+    "file_name": "File name",
+    "mime_type": "Mimetype",
+    "file_size": "File size",
+    "image_width": "Width",
+    "image_height": "Height",
+    "full_path": "URI",
+    "created_at": "Creation time",
+    "empty_list_description": "No media files!"
+  },
+  "page_clients": {
+    "page_title": "Clients",
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "table_header": {
+      "name_label": "Name",
+      "application_type_label:": "Application Type",
+      "status_label": "Status"
+    },
+    "action_btn_text": {
+      "detail": "Details",
+      "grant_type": "Grant Types",
+      "scopes": "Scopes",
+      "claims": "Claims",
+      "add": "New Client"
+    },
+    "search_placeholder": "Search for \"name\"",
+    "disabled_at": "Disabled At",
+    "updated_at": "Last Updated At"
+  },
+  "page_client_detail": {
+    "page_title": "Client Details",
+    "basic_title": "Basic Information",
+    "client_name_label": "Client name",
+    "client_id_label": "Client ID",
+    "application_type_label": "Application type",
+    "status_label": "Status",
+    "client_uri_label": "Client URI",
+    "logo_uri_label": "Logo URI",
+    "policy_uri_label": "Policy URI",
+    "policy_uri_perview_btn_text": "Preview",
+    "authentication_title": "Authentication",
+    "field_description_tips": "Description",
+    "initial_login_uri_label": "Initial Login URI",
+    "not_found": "Client does not exist!",
+    "token_title": "Token"
+  },
+  "page_client_grant_types": {
+    "page_title": "Client Grant Types",
+    "table_header": {
+      "grant_type_label": "Grant Type",
+      "action_label": "Operator"
+    },
+    "form": {
+      "grant_type_label": "Grant Type",
+      "grant_type_placeholder": "Input/Select Grant Type",
+      "grant_type_required": "Grant type is required!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this grant type permanently?"
+    },
+    "empty_text": "No grant types!",
+    "alert_message": "Grant types are a way to specify how a client wants to interact with IdertityServer."
+  },
+  "page_client_claims": {
+    "page_title": "Claims",
+    "table_header": {
+      "type_label": "Type",
+      "value_label": "Value",
+      "action_label": "Operator"
+    },
+    "form": {
+      "type_label": "Claim type",
+      "type_placeholder": "Input claim type",
+      "type_required": "Claim type is required!",
+      "value_label": "Claim value",
+      "value_placeholder": "Input claim value",
+      "value_required": "Claim value is required!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this claim permanently?"
+    },
+    "empty_text": "No claims!",
+    "alert_message": "Allows settings claims for the client (will be included in the access token)."
+  },
+  "page_client_scopes": {
+    "page_title": "Client Scopes",
+    "table_header": {
+      "scope_label": "Scope",
+      "action_label": "Operator"
+    },
+    "form": {
+      "scope_label": "Scope",
+      "scope_placeholder": "Input/Select Scope",
+      "scope_required": "Scope is required!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this scope permanently?"
+    },
+    "empty_text": "No scopes!",
+    "alert_message": "By default a client has no access to any resources - specify the allowed resources by adding the corresponding scopes names."
+  },
+  "page_client_cors_origins": {
+    "page_title": "Allowed CORS Origins",
+    "table_header": {
+      "cors_origin_label": "Origin",
+      "action_label": "Operator"
+    },
+    "form": {
+      "origin_label": "Allowed Cors Origin",
+      "origin_placeholder": "Input Origin URI",
+      "origin_required": "Origin URI is required!",
+      "origin_pattern_invalid": "Origin URI is invalid!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this cors origin permanently?"
+    },
+    "empty_text": "No cors origins!",
+    "alert_message": "If specified, will be used by the default CORS policy service implementations to build a CORS policy for JavaScript clients."
+  },
+  "page_client_redirect_uris": {
+    "page_title": "Client Redirect URIs",
+    "table_header": {
+      "redirect_uri_label": "URI",
+      "action_label": "Operator"
+    },
+    "form": {
+      "redirect_uri_label": "Redirect URI",
+      "redirect_uri_placeholder": "Input Redirect URI",
+      "redirect_uri_required": "Redirect URI is required!",
+      "redirect_uri_pattern_invalid": "Redirect URI is invalid!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this redirect uri permanently?"
+    },
+    "empty_text": "No redirect uris!",
+    "alert_message": "Specifies the allowed URIs to return tokens or authorization codes to."
+  },
+  "page_client_post_logout_redirect_uris": {
+    "page_title": "Client Post Logout Redirect URIs",
+    "table_header": {
+      "redirect_uri_label": "URI",
+      "action_label": "Operator"
+    },
+    "form": {
+      "redirect_uri_label": "Post Logout Redirect URI",
+      "redirect_uri_placeholder": "Input Post Logout Redirect URI",
+      "redirect_uri_required": "Post Logout Redirect URI is required!",
+      "redirect_uri_pattern_invalid": "Post Logout Redirect URI is invalid!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this post logout redirect uri permanently?"
+    },
+    "empty_text": "No post logout redirect uris!",
+    "alert_message": "Specifies allowed URIs to redirect to after logout, See the <a target=\"_blank\" href=\"https://openid.net/specs/openid-connect-session-1_0.html\" class=\"mx-1\">OIDC Connect Session Management spec</a> for more details."
+  },
+  "page_client_secrets": {
+    "page_title": "Client Secrets",
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this secret permanently?"
+    },
+    "expiration": "Expired",
+    "never_expired": "Never",
+    "generate_btn_text": "Generate",
+    "empty_text": "No secrets!",
+    "secret_expires_days": "{days} Day(s)",
+    "secret_expires_custom": "Custom",
+    "secret_expires_never": "Never",
+    "generate": {
+      "page_title": "Generate Client Secret",
+      "form": {
+        "description_label": "Note",
+        "description_help": "Secret use for?",
+        "description_placeholder": "Input note",
+        "description_required": "Note is required!",
+        "type_label": "Type",
+        "type_placeholder": "Select secret type",
+        "type_required": "Type is required!",
+        "expires_at_label": "Expires",
+        "expires_at_placeholder": "Select expires time",
+        "expires_at_required": "Expires time is required!",
+        "expires_at_date_placeholder": "Select expires date",
+        "expires_at_date_required": "Expires date is required!",
+        "submit_btn_text": "Generate",
+        "cancle_btn_text": "@:common.btn_text.cancel"
+      },
+      "secret_generated_tip_title": "Important",
+      "secret_generated_tip_content": "This is the only time you can see this secret value, so please copy it to a safe place.",
+      "back_btn_text": "Back",
+      "copy_success": "Copied",
+      "copy_faild": "Copy Failed"
+    }
+  },
+  "property_form": {
+    "key_label": "Key",
+    "key_placeholder": "Input/Select key",
+    "key_required": "Key is required!",
+    "value_label": "Value",
+    "value_placeholder": "Input {title}",
+    "value_required": "Value {title} is required!",
+    "value_pattern_invalid": "Value {title} is invalid!",
+    "value_validator_error": "Value {title} is invalid!",
+    "boolean_true": "True",
+    "boolean_false": "False"
+  },
+  "page_client_properties": {
+    "page_title:": "Client Properties",
+    "table_header": {
+      "key_label": "Key",
+      "value_label": "Value",
+      "action_label": "Operator"
+    },
+    "form": {
+      "basic_group_title": "Basic",
+      "authorization_group_title": "Authorization",
+      "preset_keys": {
+        "primary_color_title": "Primary Color",
+        "login_page_template_title": "Login Page Template",
+        "login_page_template_description": "ejs template, use \"<%- form>\" to render form, and form id is \"login-form\"",
+        "login_page_form_label_display_title": "Login Page Form Label Display",
+        "login_page_form_label_display_description": "Label display, Default: true",
+        "login_page_form_validate_tooltip_title": "Login Page Form Validate Message Display",
+        "login_page_form_validate_tooltip_description": "Validate message use tooltip to display, Default: false",
+        "consent_page_tmeplate_title": "Consent Page Template",
+        "consent_page_tmeplate_description": "ejs template, use \"<%- form>\" to render form, the confirm form id is \"consent-form\" and then abort form id is \"consent-abort-form\"",
+        "signout_disabled_title": "Disable signout"
+      },
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this property permanently?"
+    },
+    "empty_text": "No properties!",
+    "alert_message": "Dictionary to hold any custom client specific values as needed."
+  },
+  "page_identity_resources": {
+    "page_title": "Identity Resources",
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "search_options": {
+      "by_name": "Name",
+      "by_display_name": "Display Name"
+    },
+    "table_header": {
+      "name_label": "Name",
+      "display_name_label": "Display Name",
+      "description_label": "Description",
+      "status_label": "Status",
+      "required_label": "Required",
+      "show_in_discovery_document_label": "Show In Discovery Document"
+    },
+    "action_btn_text": {
+      "detail": "Details",
+      "claims": "Claims",
+      "add": "New Identity Resource",
+      "add_modal_cancel": "@:common.btn_text.cancel",
+      "add_modal_ok": "@:common.btn_text.save"
+    },
+    "add_modal_title": "Add Identity Resource",
+    "disabled_at": "Disabled At",
+    "updated_at": "Last Updated At"
+  },
+  "identity_resource_form": {
+    "name_label": "Name",
+    "name_help": "The unique name of the identity resource and length between 1 and 50 alphabet or \"_\" characters.",
+    "name_placeholder": "Input resource name",
+    "name_required": "Resource name is required!",
+    "name_pattern_invalid": "Allowed alphabet or \"_\" characters!",
+    "name_max_length_invalid": "Resource name must be shorter then {length}!",
+    "display_name_label": "Display Name",
+    "display_name_placeholder": "Input display name",
+    "description_label": "Description",
+    "description_placeholder": "Input description",
+    "required_label": "Required",
+    "show_in_discovery_document_label": "Show In Discovery Document"
+  },
+  "page_identity_resource_detail": {
+    "page_title": "Identity Resource Details",
+    "basic_title": "Basic Information",
+    "name_label": "Name",
+    "display_name_label": "Display Name",
+    "description_label": "Description",
+    "status_label": "Status",
+    "required_label": "Required",
+    "show_in_discovery_document_label": "Show In Discovery Document",
+    "basic_edit_modal_title": "Edit Basic Information",
+    "action_btn_text": {
+      "edit_modal_cancel": "@:common.btn_text.cancel",
+      "edit_modal_ok": "@:common.btn_text.save"
+    },
+    "not_found": "Identity Resource does not exist!"
+  },
+  "page_identity_resource_claims": {
+    "page_title": "Identity Resource Claims",
+    "table_header": {
+      "type_label": "Type",
+      "action_label": "Operator"
+    },
+    "form": {
+      "type_label": "Claim type",
+      "type_placeholder": "Input claim type",
+      "type_required": "Claim type is required!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this claim permanently?"
+    },
+    "empty_text": "No claims!",
+    "alert_message": "Allows settings claims for the identity resource."
+  },
+  "page_identity_resource_properties": {
+    "page_title:": "Identity Resource Properties",
+    "table_header": {
+      "key_label": "Key",
+      "value_label": "Value",
+      "action_label": "Operator"
+    },
+    "form": {
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this property permanently?"
+    },
+    "empty_text": "No properties!",
+    "page_title": "Identity Resource Properties",
+    "alert_message": "Dictionary to hold any custom identity resource specific values as needed."
+  },
+  "page_api_resources": {
+    "page_title": "API Resources",
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "search_options": {
+      "by_name": "Name",
+      "by_display_name": "Display Name"
+    },
+    "table_header": {
+      "name_label": "Name",
+      "display_name_label": "Display Name",
+      "description_label": "Description",
+      "status_label": "Status",
+      "last_accessed_label": "Last accessed"
+    },
+    "action_btn_text": {
+      "detail": "Details",
+      "scopes": "Scopes",
+      "claims": "Claims",
+      "add": "New API Resource",
+      "add_modal_cancel": "@:common.btn_text.cancel",
+      "add_modal_ok": "@:common.btn_text.save"
+    },
+    "add_modal_title": "Add API Resource",
+    "disabled_at": "Disabled At",
+    "updated_at": "Last Updated At"
+  },
+  "api_resource_form": {
+    "name_label": "Name",
+    "name_help": "The unique name of the API resource and length between 1 and 50 alphabet or \"_\" characters.",
+    "name_placeholder": "Input resource name",
+    "name_required": "Resource name is required!",
+    "name_pattern_invalid": "Allowed alphabet or \"_\" characters!",
+    "name_max_length_invalid": "Resource name must be shorter then {length}!",
+    "display_name_label": "Display Name",
+    "display_name_placeholder": "Input display name",
+    "description_label": "Description",
+    "description_placeholder": "Input description"
+  },
+  "api_scope_form": {
+    "name_label": "Name",
+    "name_help": "The unique name of the API scope and length between 1 and 50 alphabet or \"_\" characters.",
+    "name_placeholder": "Input resource name",
+    "name_required": "Resource name is required!",
+    "name_pattern_invalid": "Allowed alphabet or \"_\" characters!",
+    "name_max_length_invalid": "Resource name must be shorter then {length}!",
+    "display_name_label": "Display Name",
+    "display_name_placeholder": "Input display name",
+    "description_label": "Description",
+    "description_placeholder": "Input description",
+    "required_label": "Required",
+    "show_in_discovery_document_label": "Show In Discovery Document"
+  },
+  "page_api_resource_detail": {
+    "page_title": "API Resource Details",
+    "basic_title": "Basic Information",
+    "name_label": "Name",
+    "display_name_label": "Display Name",
+    "description_label": "Description",
+    "status_label": "Status",
+    "basic_edit_modal_title": "Edit Basic Information",
+    "action_btn_text": {
+      "edit_modal_cancel": "@:common.btn_text.cancel",
+      "edit_modal_ok": "@:common.btn_text.save"
+    },
+    "not_found": "API Resource does not exist!"
+  },
+  "page_api_resource_claims": {
+    "page_title": "API Resource Claims",
+    "table_header": {
+      "type_label": "Type",
+      "action_label": "Operator"
+    },
+    "form": {
+      "type_label": "Claim type",
+      "type_placeholder": "Input claim type",
+      "type_required": "Claim type is required!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this claim permanently?"
+    },
+    "empty_text": "No claims!",
+    "alert_message": "Allows settings claims for the api resource."
+  },
+  "page_api_scopes": {
+    "page_title": "API Resource Scopes",
+    "table_header": {
+      "name_label": "Name",
+      "display_name_label": "Display Name",
+      "description_label": "Description",
+      "required_label": "Required",
+      "show_in_discovery_document_label": "Show In Discovery Document"
+    },
+    "search_options": {
+      "by_name": "Name",
+      "by_display_name": "Display Name"
+    },
+    "action_btn_text": {
+      "claims": "Claims",
+      "add": "New Scope",
+      "modal_cancel": "@:common.btn_text.cancel",
+      "modal_ok": "@:common.btn_text.save"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this scope permanently?"
+    },
+    "add_modal_title": "Add API Resource",
+    "edit_modal_title": "Edit API Resource"
+  },
+  "page_api_scope_claims": {
+    "page_title": "API Resource Scope Claims",
+    "table_header": {
+      "type_label": "Type",
+      "action_label": "Operator"
+    },
+    "form": {
+      "type_label": "Claim type",
+      "type_placeholder": "Input claim type",
+      "type_required": "Claim type is required!",
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this claim permanently?"
+    },
+    "empty_text": "No scope claims!",
+    "alert_message": "Allows settings claims for the api scope."
+  },
+  "page_api_secrets": {
+    "page_title": "API Secrets",
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this secret permanently?"
+    },
+    "expiration": "Expired",
+    "never_expired": "Never",
+    "generate_btn_text": "Generate",
+    "empty_text": "No secrets!",
+    "secret_expires_days": "{days} Day(s)",
+    "secret_expires_custom": "Custom",
+    "secret_expires_never": "Never",
+    "generate": {
+      "page_title": "Generate API Secret",
+      "form": {
+        "description_label": "Note",
+        "description_help": "Secret use for?",
+        "description_placeholder": "Input note",
+        "description_required": "Note is required!",
+        "type_label": "Type",
+        "type_placeholder": "Select secret type",
+        "type_required": "Type is required!",
+        "expires_at_label": "Expires",
+        "expires_at_placeholder": "Select expires time",
+        "expires_at_required": "Expires time is required!",
+        "expires_at_date_placeholder": "Select expires date",
+        "expires_at_date_required": "Expires date is required!",
+        "submit_btn_text": "Generate",
+        "cancle_btn_text": "@:common.btn_text.cancel"
+      },
+      "secret_generated_tip_title": "Important",
+      "secret_generated_tip_content": "This is the only time you can see this secret value, so please copy it to a safe place.",
+      "back_btn_text": "Back",
+      "copy_success": "Copied",
+      "copy_faild": "Copy Failed"
+    }
+  },
+  "page_api_properties": {
+    "page_title:": "API Properties",
+    "table_header": {
+      "key_label": "Key",
+      "value_label": "Value",
+      "action_label": "Operator"
+    },
+    "form": {
+      "add_btn_text": "@:common.btn_text.add"
+    },
+    "delete_confirm": {
+      "title": "@:common.dialog.title.comfirm",
+      "content": "Are you sure to delete this property permanently?"
+    },
+    "empty_text": "No properties!",
+    "page_title": "API Resource Properties"
+  },
+  "page_api_resource_properties": {
+    "alert_message": "Dictionary to hold any custom api resource specific values as needed."
+  }
+}

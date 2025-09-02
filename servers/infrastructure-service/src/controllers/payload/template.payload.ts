@@ -73,8 +73,9 @@ export class TemplateOptionQueryPayload extends OmitType(PagedTemplateQueryPaylo
 ] as const) {}
 
 export class NewTemplatePayload extends RequestUserIdPayload {
+  @IsOptional()
   @IsString()
-  name!: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
@@ -90,11 +91,13 @@ export class NewTemplatePayload extends RequestUserIdPayload {
   @IsString()
   type!: string;
 
+  @IsOptional()
   @IsEnum(TemplateStatus)
-  status!: TemplateStatus;
+  status?: TemplateStatus;
 
+  @IsOptional()
   @IsEnum(TemplateCommentStatus)
-  commentStatus!: TemplateCommentStatus;
+  commentStatus?: TemplateCommentStatus;
 
   @IsOptional()
   @IsArray()

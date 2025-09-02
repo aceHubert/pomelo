@@ -1,3 +1,4 @@
+import { WhereOptions, Attributes } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import { ValidationError, UserCapability, OptionAutoload } from '@ace-pomelo/shared/server';
 import { Options } from '../entities';
@@ -31,17 +32,45 @@ export class OptionDataSource extends BaseDataSource {
   }
 
   /**
+   * 根据 name 获取 Options
+   * 返回的 optionName 如果含有 table 前缀， 会去掉前缀
+   * @param optionName Option name
+   * @param fields 返回的字段
+   */
+  getByName(optionName: string, fields: string[]): Promise<OptionModel | undefined> {
+    return Options.findOne({
+      attributes: this.filterFields(fields, Options),
+      where: { optionName: [optionName, `${this.tablePrefix}${optionName}`] },
+    }).then((option) => {
+      if (option) {
+        const { optionName, ...rest } = option.toJSON();
+        return {
+          ...rest,
+          optionName:
+            optionName && optionName.startsWith(this.tablePrefix)
+              ? optionName.substr(this.tablePrefix.length)
+              : optionName,
+        } as OptionModel;
+      }
+      return;
+    });
+  }
+
+  /**
    * 获取 Options 列表
    * 返回的 optionName 如果含有 table 前缀， 会去掉前缀
    * @param query 搜索条件
    * @param fields 返回的字段
    */
   getList(query: OptionArgs, fields: string[]): Promise<OptionModel[]> {
+    const { optionNames, ...rest } = query;
+    const where: WhereOptions<Attributes<Options>> = rest;
+    if (optionNames?.length) {
+      where.optionName = optionNames;
+    }
     return Options.findAll({
       attributes: this.filterFields(fields, Options),
-      where: {
-        ...query,
-      },
+      where,
     }).then((options) =>
       options.map((option) => {
         const { optionName, ...rest } = option.toJSON();

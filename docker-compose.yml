@@ -40,12 +40,22 @@ services:
     image: pomelo
     container_name: pomelo-server
     restart: always
+    environment:
+      - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
+      - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
+      - ORIGIN=${ORIGIN:-https://example.com}
+      - REDIS_URL=${REDIS_URL:-redis://host:port/db}
+      - INFRASTRUCTURE_DATABASE_CONNECTION=${INFRASTRUCTURE_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
+      - IDENTITY_DATABASE_CONNECTION=${IDENTITY_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
+      - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       - conf:/app/conf
       - ${PWD}/uploads:/app/content/uploads
       - ${PWD}/plugins:/app/content/plugins
       - ${PWD}/themes:/app/content/themes
       - ${PWD}/logs:/app/logs
+    privileged: true
     ports:
       # - 3000:3000 # infrastructure microservice
       # - 3001:3001 # infrastructure server
@@ -74,15 +84,16 @@ services:
           nocopy: true
           subpath: apisix.yaml
       - ${PWD}/logs/apisix:/usr/local/apisix/logs
+    privileged: true
     depends_on:
       - server
     ##network_mode: host
     ports:
-      - '9180:9180/tcp' # admin_control: true
+      # - '9180:9180/tcp' # admin_control: true
       - '9080:9080/tcp'  # http
-      - '9091:9091/tcp'  # prometheus
-      - '9443:9443/tcp'  # tls http/2
-      - '9092:9092/tcp' # enable_control: true
+      # - '9091:9091/tcp'  # prometheus
+      # - '9443:9443/tcp'  # tls http/2
+      # - '9092:9092/tcp' # enable_control: true
     networks:
       - default
 networks:

@@ -26,6 +26,7 @@ import {
   renderPostLogoutSuccessSourceTemplate,
   renderExceptionTemplate,
 } from './templates';
+import { policy } from './interaction_policy';
 import { OidcConfigAdapter } from './oidc-config.adapter';
 import { OidcConfigStorage } from './oidc-config.storage';
 import { OidcConfigOptions } from './interfaces/oidc-config-options.interface';
@@ -126,7 +127,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           }
           await next();
 
-          if (ctx.oidc.route === 'discovery') {
+          if (ctx.oidc?.route === 'discovery') {
             ctx.body.check_session_iframe = ctx.oidc.urlFor('discovery').replace(discoveryRoute, checkSessionRoute);
           }
         });
@@ -256,6 +257,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         revocation: '/connect/revocation',
       },
       interactions: {
+        policy,
         url: (ctx, interaction) => {
           this.logger.debug(
             `interaction: ${interaction.prompt.name}, reason: ${interaction.prompt.reasons.join(', ')}`,

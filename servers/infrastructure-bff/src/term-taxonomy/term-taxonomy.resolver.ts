@@ -1,5 +1,5 @@
 import DataLoader from 'dataloader';
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Args, ID, Parent } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
@@ -67,7 +67,7 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
   @Anonymous()
   @Query((returns) => TermTaxonomy, { nullable: true, description: 'Get term taxonomy.' })
   termTaxonomy(
-    @Args('id', { type: () => ID, description: 'Term taxonomy id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Term taxonomy id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
   ): Promise<TermTaxonomy | undefined> {
     return this.basicService
@@ -200,7 +200,7 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
   @RamAuthorized(TermTaxonomyAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update term taxonomy.' })
   async updateTermTaxonomy(
-    @Args('id', { type: () => ID, description: 'Term id' }) id: number,
+    @Args('id', { type: () => ID, description: 'Term id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateTermTaxonomyInput }) model: UpdateTermTaxonomyInput,
   ): Promise<void> {
     await this.basicService.send<void>(TermTaxonomyPattern.Update, { id, ...model }).lastValue();
@@ -211,7 +211,9 @@ export class TermTaxonomyResolver extends createMetaResolver(TermTaxonomy, TermT
     nullable: true,
     description: 'Delete term taxonomy permanently (include term relationship).',
   })
-  async deleteTermTaxonomy(@Args('id', { type: () => ID, description: 'Term id' }) id: number): Promise<void> {
+  async deleteTermTaxonomy(
+    @Args('id', { type: () => ID, description: 'Term id' }, ParseIntPipe) id: number,
+  ): Promise<void> {
     await this.basicService.send(TermTaxonomyPattern.Delete, { id }).lastValue();
   }
 

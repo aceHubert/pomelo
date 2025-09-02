@@ -1,11 +1,11 @@
 import { Request } from 'express';
-import { Inject } from '@nestjs/common';
+import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, Context, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { AuthorizationService, Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
+import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
 import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
 import {
   Fields,
@@ -22,15 +22,12 @@ import {
 import { UserAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { UserService } from './user.service';
-import { UserClaims } from './interfaces/user-claims.interface';
-import { UserOptions } from './interfaces/user-options.interface';
 import { NewUserInput } from './dto/new-user.input';
 import { NewUserMetaInput } from './dto/new-user-meta.input';
 import { UpdateUserInput, UpdateUserPasswordInput } from './dto/update-user.input';
 import { PagedUserArgs } from './dto/user.args';
-import { VerifyUserInput } from './dto/verify-user.input';
-import { User as UserModel, UserMeta, PagedUser, UserVerifyResult } from './models/user.model';
-import { USER_OPTIONS } from './constants';
+import { SignInInput } from './dto/signin.input';
+import { User as UserModel, UserMeta, PagedUser, SignInResult } from './models/user.model';
 
 @Authorized()
 @Resolver(() => UserModel)
@@ -51,19 +48,14 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     return RamAuthorized(ramAction);
   },
 }) {
-  constructor(
-    @Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy,
-    @Inject(USER_OPTIONS) private readonly options: UserOptions,
-    private readonly userService: UserService,
-    private readonly authService: AuthorizationService,
-  ) {
+  constructor(@Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy, private readonly userService: UserService) {
     super(basicService);
   }
 
   @RamAuthorized(UserAction.Detail)
   @Query((returns) => UserModel, { nullable: true, description: 'Get user.' })
   user(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
     @User() requestUser: RequestUser,
   ): Promise<UserModel | undefined> {
@@ -136,7 +128,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update user.' })
   async updateUser(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @Args('model', { type: () => UpdateUserInput }) model: UpdateUserInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
@@ -152,7 +144,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.UpdateStatus)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update user stauts' })
   async updateUserStatus(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @Args('status', { type: () => UserStatus, description: 'status' }) status: UserStatus,
     @User() requestUser: RequestUser,
   ): Promise<void> {
@@ -184,7 +176,7 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @RamAuthorized(UserAction.Delete)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete user permanently.' })
   async deleteUser(
-    @Args('id', { type: () => ID, description: 'User id' }) id: number,
+    @Args('id', { type: () => ID, description: 'User id' }, ParseIntPipe) id: number,
     @User() requestUser: RequestUser,
   ): Promise<void> {
     await this.basicService
@@ -196,12 +188,12 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   }
 
   @Anonymous()
-  @Mutation((returns) => UserVerifyResult, { description: 'Sign in.' })
+  @Mutation((returns) => SignInResult, { description: 'Sign in.' })
   async signIn(
-    @Args('model', { type: () => VerifyUserInput }) model: VerifyUserInput,
+    @Args('model', { type: () => SignInInput }) model: SignInInput,
     @Context('req') req: Request,
     @I18n() i18n: I18nContext,
-  ): Promise<UserVerifyResult> {
+  ): Promise<SignInResult> {
     const result = await this.basicService
       .send<false | UserModel>(UserPattern.Verify, {
         username: model.username,
@@ -209,42 +201,10 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
       })
       .lastValue();
     if (result) {
-      const account: UserClaims = {
-        id: result.id,
-        login_name: result.loginName,
-        display_name: result.displayName,
-        nice_name: result.niceName,
-        url: result.url,
-        updated_at: new Date(result.updatedAt).getTime(),
-      };
-
-      if (result.email) {
-        account['email'] = result.email;
-        account['email_verified'] = true;
-      }
-
-      if (result.mobile) {
-        account['phone_number'] = result.mobile;
-        account['phone_number_verified'] = true;
-      }
-
-      const claims = await this.userService.getClaims(result.id);
-      const { id: accountId, ...rest } = account;
-
+      const token = await this.userService.createAccessToken(result, req.get('origin'));
       return {
         success: true,
-        token: await this.authService.createToken(
-          {
-            sub: String(accountId),
-            ...claims,
-            ...rest,
-          },
-          this.options.signingKey,
-          {
-            issuer: req.get('origin'),
-            expiresIn: this.options.tokenExpiresIn,
-          },
-        ),
+        ...token,
       };
     }
     return {

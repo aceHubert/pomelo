@@ -231,11 +231,14 @@ export class MediaService {
           [OptionPresetKeys.ThumbnailCrop]: crop = '1',
         } = await this.basicService
           .send<Array<{ optionName: string; optionValue: string | undefined }>>(OptionPattern.GetList, {
-            optionNames: [
-              OptionPresetKeys.ThumbnailSizeWidth,
-              OptionPresetKeys.ThumbnailSizeHeight,
-              OptionPresetKeys.ThumbnailCrop,
-            ],
+            query: {
+              optionNames: [
+                OptionPresetKeys.ThumbnailSizeWidth,
+                OptionPresetKeys.ThumbnailSizeHeight,
+                OptionPresetKeys.ThumbnailCrop,
+              ],
+            },
+            fields: ['optionName', 'optionValue'],
           })
           .lastValue()
           .then((res) =>

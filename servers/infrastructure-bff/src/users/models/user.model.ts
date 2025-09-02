@@ -79,8 +79,8 @@ export class UserMeta extends Meta {
   userId!: number;
 }
 
-@ObjectType({ description: 'User verify result' })
-export class UserVerifyResult {
+@ObjectType({ description: 'Sign in result' })
+export class SignInResult {
   /**
    * Verify success
    */
@@ -91,7 +91,19 @@ export class UserVerifyResult {
    * Token when success is true
    */
   @Field({ nullable: true })
-  token?: string;
+  accessToken?: string;
+
+  /**
+   * Token type when success is true
+   */
+  @Field({ nullable: true })
+  tokenType?: string;
+
+  /**
+   * Expires time, when success is true
+   */
+  @Field({ nullable: true })
+  expiresAt?: number;
 
   /**
    * Faild message when success is false

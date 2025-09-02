@@ -1,10 +1,10 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
-import { JWTVerifyGetKey, KeyLike } from 'jose';
+import { JWTHeaderParameters, JWTVerifyGetKey, KeyLike, PEMImportOptions } from 'jose';
 import { ClientMetadata, HttpOptions } from 'openid-client';
 import { ChannelType } from './multitenant.interface';
 
-type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
-type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 
 export interface RequestUser {
   [x: string]: unknown;
@@ -12,27 +12,47 @@ export interface RequestUser {
 
 export type AuthorizationOptions = {
   /**
+   * Private key to sign the jwt token.
+   */
+  signingKey?: string | KeyLike;
+
+  /**
    * Public key to verify the jwt token.
    */
   verifyingKey?: string | KeyLike | JWTVerifyGetKey;
 
   /**
-   * Discovery endpoint URL of the identity server.
+   * JWT expires in time.
+   * @default 1d
    */
-  issuer?: string;
+  jwtExpiresIn?: string | number;
+
+  /**
+   * JWT header parameters for singing jwt.
+   * @default { alg: 'RS256' }
+   */
+  jwtHeaderParameters?: JWTHeaderParameters;
+
+  /**
+   * Options for importing string keys.
+   */
+  pemImportOptions?: PEMImportOptions;
 
   /**
    * Use jwks to verify the jwt token.
+   * issuer/issuerOrigin must be provided if set true.
    */
   useJWKS?: boolean;
 
   /**
-   * URL of the token verification endpoint of the identity server.
+   * URL of the token verification endpoint of the identity server,
+   * if discover endpoint did not provide this metadata, use this.
    */
   introspectionEndpoint?: string;
 
   /**
-   * Authentication method name for token introspection.
+   * Authentication method name for token introspection,
+   * if discover endpoint did not provide this metadata, use this.
    * @default client_secret_basic
    */
   introspectionEndpointAuthMethod?: string;
@@ -73,6 +93,10 @@ export type AuthorizationOptions = {
   isGlobal?: boolean;
 } & XOR<
   {
+    /**
+     * Discovery endpoint URL of the identity server.
+     */
+    issuer?: string;
     /**
      * Client metadata for the openid-client.
      */

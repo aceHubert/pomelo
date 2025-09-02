@@ -62,20 +62,21 @@ const logger = new Logger('AppModule', { timestamp: true });
     Log4jsModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const isDebug = config.get('debug', false);
+        const logDir = config.get('LOG_FILENAME_DIR', path.join(config.getOrThrow<string>('contentPath'), '../logs'));
         return {
           isGlobal: true,
           appenders: {
             dateFile: {
               type: 'dateFile',
-              filename: config.get('LOG_FILENAME', './logs/identity-server.log'),
               keepFileExt: true,
+              filename: path.join(logDir, 'identity-server.log'),
               layout: LOG4JS_NO_COLOUR_DEFAULT_LAYOUT,
             },
           },
           categories: {
             default: {
-              enableCallStack: true,
-              appenders: config.get('LOG_APPENDERS', ['stdout', 'dateFile']),
+              enableCallStack: isDebug,
+              appenders: ['stdout', 'dateFile'],
               level: config.get('LOG_LEVEL', isDebug ? 'debug' : 'info'),
             },
           },

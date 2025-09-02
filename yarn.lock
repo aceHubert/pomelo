@@ -12,47 +12,48 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-fetch/core@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@ace-fetch/core@npm:0.5.0"
+"@ace-fetch/core@npm:^0.9.2":
+  version: 0.9.2
+  resolution: "@ace-fetch/core@npm:0.9.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fcore%2F-%2Fcore-0.9.2.tgz"
   dependencies:
     "@ace-util/core": ^0.3.0
-  checksum: e1c8421f4d7d0287679ba290fb31653baff2c60916430eae67aaf7ab123275f5814cdc27b0e1cb8995fcd598e82cffad892c3d45a70e40e37cbefedf203f8541
+    query-string: ^7.0.0
+  checksum: 16a8b34ff032900e3d462033872df53c3422e3eb1924c053e9ee8ddedc6dbffe56a62b93bb2df3124b78e776a7bac8d1365d124234881378f0a3bc60efbe3d29
   languageName: node
   linkType: hard
 
-"@ace-fetch/graphql-vue@npm:^0.5.4":
-  version: 0.5.4
-  resolution: "@ace-fetch/graphql-vue@npm:0.5.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql-vue%2F-%2Fgraphql-vue-0.5.4.tgz"
+"@ace-fetch/graphql-vue@npm:^0.9.0":
+  version: 0.9.2
+  resolution: "@ace-fetch/graphql-vue@npm:0.9.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql-vue%2F-%2Fgraphql-vue-0.9.2.tgz"
   dependencies:
-    "@ace-fetch/graphql": ^0.5.4
+    "@ace-fetch/graphql": ^0.9.1
     "@ace-util/core": ^0.3.0
     graphql-tag: ^2.12.6
     vue-demi: ^*
-  checksum: 7fd1da156545cc00cd8fa11fe7e0e3c2254f904b1bd8f3931c3dfdc0ab2ba307e02c8783dd97206667ee1946d18838d7dc2f6bbaf27ad4a396fd00056371bad1
+  checksum: ba2892339c235636ddc5e2a0e350a311d305d3ae264df55624a177621a8162c002551c2af235e70fc349cefec67c308efe698f39f3675d572f61308bc30d734d
   languageName: node
   linkType: hard
 
-"@ace-fetch/graphql@npm:^0.5.4":
-  version: 0.5.4
-  resolution: "@ace-fetch/graphql@npm:0.5.4"
+"@ace-fetch/graphql@npm:^0.9.1":
+  version: 0.9.1
+  resolution: "@ace-fetch/graphql@npm:0.9.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql%2F-%2Fgraphql-0.9.1.tgz"
   dependencies:
     "@ace-util/core": ^0.3.0
     ts-invariant: ^0.10.3
   peerDependencies:
     graphql: ^16.0.0
-  checksum: bf72ee772ce97467592d3aeb5f2a0976c65cea4396e107540d7a50bdd4366625a829f43e4b539ff0872367ad29815cbe618284c4f192246ed35bc5a667eef8a7
+  checksum: a28d3e3c47351bebfe0b321e25006b5b2be81b5bf3f5a2bfb9f093d589d72bac9697d0dc9b4803c0ba14a43c10913fc793fa4a87c3f4845352da4c448d185d5b
   languageName: node
   linkType: hard
 
-"@ace-fetch/vue@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@ace-fetch/vue@npm:0.5.0"
+"@ace-fetch/vue@npm:^0.9.0":
+  version: 0.9.2
+  resolution: "@ace-fetch/vue@npm:0.9.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fvue%2F-%2Fvue-0.9.2.tgz"
   dependencies:
-    "@ace-fetch/core": ^0.5.0
+    "@ace-fetch/core": ^0.9.2
     "@ace-util/core": ^0.3.0
     vue-demi: ^*
-  checksum: 9ad2253b42ca1d2f2012c56b12f92a76c3259b00c2520660d2bb0f25865e7cd6607946aeab93363fac70db0db8d970094d1a9919f07266db50bea37472b46f49
+  checksum: e58f0942cfece3a0a2a6f1da392b6788841874610458ae43b9efc446c0d17194a9160ca1cf082ba0e3e4bbc98eacf92ef125d5673ed48f311fc8126b6ac45120
   languageName: node
   linkType: hard
 
@@ -177,7 +178,6 @@ __metadata:
     class-validator: ^0.13.2
     graphql: ^16.0.0
     graphql-parse-resolve-info: ^4.12.0
-    lodash-es: ^4.0.0
   peerDependenciesMeta:
     "@apollo/client":
       optional: true
@@ -204,12 +204,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/vue-web@workspace:clients/vue-web":
+"@ace-pomelo/web@workspace:clients/web":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/vue-web@workspace:clients/vue-web"
+  resolution: "@ace-pomelo/web@workspace:clients/web"
   dependencies:
-    "@ace-fetch/graphql-vue": ^0.5.4
-    "@ace-fetch/vue": ^0.5.0
+    "@ace-fetch/graphql-vue": ^0.9.0
+    "@ace-fetch/vue": ^0.9.0
     "@ace-pomelo/shared": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
     "@ace-util/core": ^0.5.0
@@ -270,7 +270,7 @@ __metadata:
     markdown-it: ^13.0.1
     moment: ^2.29.4
     monaco-editor: ^0.34.0
-    oidc-client-ts: ^2.4.0
+    oidc-client-ts: ^3.2.0
     path-to-regexp: 3.2.0
     pinia: ^2.0.17
     pinia-plugin-persistedstate: ^3.1.0
@@ -3807,9 +3807,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/antdv-prototypes@portal:../../.submodules/formily-portal-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-vue2": ^3.0.1
@@ -3822,9 +3822,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/antdv@portal:../../.submodules/formily-portal-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.2.2
     "@formily/grid": ^2.2.2
@@ -3846,9 +3846,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/vant-prototypes@portal:../../.submodules/formily-portal-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-vue2": ^3.0.1
@@ -3861,9 +3861,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily-portal/vant@portal:../../.submodules/formily-portal-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.2.2
     "@formily/grid": ^2.2.2
@@ -3885,9 +3885,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-designable@portal:../../.submodules/formily-antdv/packages/designable::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -3897,9 +3897,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-prototypes@portal:../../.submodules/formily-antdv/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -3909,9 +3909,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-setters@portal:../../.submodules/formily-antdv/packages/setters::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -3921,9 +3921,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv-settings-form@portal:../../.submodules/formily-antdv/packages/settings-form::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@monaco-editor/loader": ^1.3.2
     monaco-editor: ^0.34.0
@@ -3937,9 +3937,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/antdv@portal:../../.submodules/formily-antdv/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.0.8
     "@formily/grid": ^2.0.8
@@ -4049,9 +4049,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/vant-prototypes@portal:../../.submodules/formily-vant/packages/prototypes::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   peerDependencies:
     "@vue/composition-api": ^1.4.0
     vue: ^2.6.0 || >=3.0.0
@@ -4061,9 +4061,9 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web":
+"@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb":
   version: 0.0.0-use.local
-  resolution: "@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fvue-web%40workspace%3Aclients%2Fvue-web"
+  resolution: "@formily/vant@portal:../../.submodules/formily-vant/packages/components::locator=%40ace-pomelo%2Fweb%40workspace%3Aclients%2Fweb"
   dependencies:
     "@formily/core": ^2.0.12
     "@formily/grid": ^2.0.12
@@ -5091,22 +5091,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/apollo@npm:^11.0.0":
-  version: 11.0.6
-  resolution: "@nestjs/apollo@npm:11.0.6"
+"@nestjs/apollo@npm:^12.2.0":
+  version: 12.2.2
+  resolution: "@nestjs/apollo@npm:12.2.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40nestjs%2Fapollo%2F-%2Fapollo-12.2.2.tgz"
   dependencies:
     "@apollo/server-plugin-landing-page-graphql-playground": 4.0.0
     iterall: 1.3.0
     lodash.omit: 4.5.0
-    tslib: 2.5.2
+    tslib: 2.8.1
   peerDependencies:
     "@apollo/gateway": ^2.0.0
     "@apollo/server": ^4.3.2
     "@apollo/subgraph": ^2.0.0
     "@as-integrations/fastify": ^1.3.0 || ^2.0.0
-    "@nestjs/common": ^9.0.0
-    "@nestjs/core": ^9.3.8
-    "@nestjs/graphql": ^11.0.0
+    "@nestjs/common": ^9.3.8 || ^10.0.0
+    "@nestjs/core": ^9.3.8 || ^10.0.0
+    "@nestjs/graphql": ^12.0.0
     graphql: ^16.6.0
   peerDependenciesMeta:
     "@apollo/gateway":
@@ -5115,7 +5115,7 @@ __metadata:
       optional: true
     "@as-integrations/fastify":
       optional: true
-  checksum: 04c907ea07f0bbbe56abbfad871dec702ccf56db373c4a743fa7b5865356bd8204487fd3bc6210ee30b2620b41ac3859b3890497e06ffa1f8a877a6244902cb6
+  checksum: 0a0fee41b7a99e25081242cd23b7a46fbe6660d46f30a9fb0e83b364691189272b964ceec1bf867dcc7e1b4ba0dd226733f5be8467217deec8a83826d5c6fae8
   languageName: node
   linkType: hard
 
@@ -6905,6 +6905,13 @@ __metadata:
   version: 9.0.7
   resolution: "@types/uuid@npm:9.0.7"
   checksum: c7321194aeba9ea173efd1e721403bdf4e7ae6945f8f8cdbc87c791f4b505ccf3dbc4a8883d90b394ef13b7c2dc778045792b05dbb23b3c746f8ea347804d448
+  languageName: node
+  linkType: hard
+
+"@types/validator@npm:^13.11.8":
+  version: 13.12.3
+  resolution: "@types/validator@npm:13.12.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fvalidator%2F-%2Fvalidator-13.12.3.tgz"
+  checksum: 91f959fa9205e0d6a5e413b4358190b3960d8aff7792805d747dbca2463aec1f290b4c94899b5f397824720142f496f30d53855ec141429b0403da1ef8d53335
   languageName: node
   linkType: hard
 
@@ -9643,18 +9650,29 @@ __metadata:
 
 "class-transformer@npm:^0.5.1":
   version: 0.5.1
-  resolution: "class-transformer@npm:0.5.1"
+  resolution: "class-transformer@npm:0.5.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fclass-transformer%2F-%2Fclass-transformer-0.5.1.tgz"
   checksum: f191c8b4cc4239990f5efdd790cabdd852c243ed66248e39f6616a349c910c6eed2d9fd1fbf7ee6ea89f69b4f1d0b493b27347fe0cd0ae26b47c3745a805b6d3
   languageName: node
   linkType: hard
 
 "class-validator@npm:^0.13.2":
   version: 0.13.2
-  resolution: "class-validator@npm:0.13.2"
+  resolution: "class-validator@npm:0.13.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fclass-validator%2F-%2Fclass-validator-0.13.2.tgz"
   dependencies:
     libphonenumber-js: ^1.9.43
     validator: ^13.7.0
   checksum: 0deb4c29faa18345f6989fd7eaaaa07b05caae5298603fcd6485531c6daad503e5d2b24cc1342e4fc88ae5ba0acffdc24d0fc333110ef3f21a667cd8a79e1258
+  languageName: node
+  linkType: hard
+
+"class-validator@npm:^0.14.1":
+  version: 0.14.1
+  resolution: "class-validator@npm:0.14.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fclass-validator%2F-%2Fclass-validator-0.14.1.tgz"
+  dependencies:
+    "@types/validator": ^13.11.8
+    libphonenumber-js: ^1.10.53
+    validator: ^13.9.0
+  checksum: bea808145c81ba3b185e1174d92f97a2d6ffef0558261217042552e9027222eadb9a9731a4418a07eaaa72ac334347df7a1079ff48eaadaa3ee6848a6a88995c
   languageName: node
   linkType: hard
 
@@ -11074,6 +11092,13 @@ __metadata:
   version: 10.4.3
   resolution: "decimal.js@npm:10.4.3"
   checksum: 796404dcfa9d1dbfdc48870229d57f788b48c21c603c3f6554a1c17c10195fc1024de338b0cf9e1efe0c7c167eeb18f04548979bcc5fdfabebb7cc0ae3287bae
+  languageName: node
+  linkType: hard
+
+"decode-uri-component@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "decode-uri-component@npm:0.2.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fdecode-uri-component%2F-%2Fdecode-uri-component-0.2.2.tgz"
+  checksum: 95476a7d28f267292ce745eac3524a9079058bbb35767b76e3ee87d42e34cd0275d2eb19d9d08c3e167f97556e8a2872747f5e65cbebcac8b0c98d83e285f139
   languageName: node
   linkType: hard
 
@@ -13030,6 +13055,13 @@ __metadata:
   dependencies:
     to-regex-range: ^5.0.1
   checksum: cc283f4e65b504259e64fd969bcf4def4eb08d85565e906b7d36516e87819db52029a76b6363d0f02d0d532f0033c9603b9e2d943d56ee3b0d4f7ad3328ff917
+  languageName: node
+  linkType: hard
+
+"filter-obj@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "filter-obj@npm:1.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Ffilter-obj%2F-%2Ffilter-obj-1.1.0.tgz"
+  checksum: cf2104a7c45ff48e7f505b78a3991c8f7f30f28bd8106ef582721f321f1c6277f7751aacd5d83026cb079d9d5091082f588d14a72e7c5d720ece79118fa61e10
   languageName: node
   linkType: hard
 
@@ -16742,13 +16774,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jwt-decode@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "jwt-decode@npm:3.1.2"
-  checksum: 20a4b072d44ce3479f42d0d2c8d3dabeb353081ba4982e40b83a779f2459a70be26441be6c160bfc8c3c6eadf9f6380a036fbb06ac5406b5674e35d8c4205eeb
-  languageName: node
-  linkType: hard
-
 "jwt-decode@npm:^4.0.0":
   version: 4.0.0
   resolution: "jwt-decode@npm:4.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fjwt-decode%2F-%2Fjwt-decode-4.0.0.tgz"
@@ -17051,10 +17076,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"libphonenumber-js@npm:^1.9.43":
-  version: 1.10.44
-  resolution: "libphonenumber-js@npm:1.10.44"
-  checksum: ada1bc135ce4b77eaa859a2c39d5b64cf142a76d203cb52f8f0e3097c30acba8a8faa4c6d975968333216d48448c589eb640b829ae5e95de706415684791cad9
+"libphonenumber-js@npm:^1.10.53, libphonenumber-js@npm:^1.9.43":
+  version: 1.12.6
+  resolution: "libphonenumber-js@npm:1.12.6::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Flibphonenumber-js%2F-%2Flibphonenumber-js-1.12.6.tgz"
+  checksum: 98ae28d3c8709f6e2c75396178b45b11bea47cd0638f2165170b4a32dd1ba911fdee9a51dd19d1f19feaa5d10faff4554d4ff96caa1341e77d3a7b3796f20e5e
   languageName: node
   linkType: hard
 
@@ -19082,13 +19107,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"oidc-client-ts@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "oidc-client-ts@npm:2.4.0"
+"oidc-client-ts@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "oidc-client-ts@npm:3.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Foidc-client-ts%2F-%2Foidc-client-ts-3.2.0.tgz"
   dependencies:
-    crypto-js: ^4.2.0
-    jwt-decode: ^3.1.2
-  checksum: 8467db689298221f706d3358961efb0ddc789f6bd7d4765e71ae5fe62067999d2ce6e8e7584b9d991b8caa6f7fb383f75841e1cfa9e05808c34632de374f5e68
+    jwt-decode: ^4.0.0
+  checksum: 8d11e1d922d9dc310b2130e1d638e31522a4818edd88a569c58f30dd48531027e77fef0f050826aaa8b858ff093c99405463609ad1c226b0dbfb3f4022c69d24
   languageName: node
   linkType: hard
 
@@ -19899,7 +19923,7 @@ __metadata:
     "@commitlint/cli": ^12.1.4
     "@commitlint/config-conventional": ^12.1.4
     "@golevelup/nestjs-testing": ^0.1.2
-    "@nestjs/apollo": ^11.0.0
+    "@nestjs/apollo": ^12.2.0
     "@nestjs/axios": ^3.0.3
     "@nestjs/cli": ^10.4.0
     "@nestjs/common": ^10.0.0
@@ -19927,7 +19951,6 @@ __metadata:
     "@types/express-ejs-layouts": ^2.5.3
     "@types/graphql-upload": ^15.0.2
     "@types/jest": 27.0.2
-    "@types/js-yaml": ^4.0.9
     "@types/lodash": ^4.14.182
     "@types/md5": ^2.3.2
     "@types/multer": ^1.4.7
@@ -19952,7 +19975,7 @@ __metadata:
     cache-manager: ^6.1.1
     casual: ^1.6.2
     class-transformer: ^0.5.1
-    class-validator: ^0.13.2
+    class-validator: ^0.14.1
     cli-color: ^2.0.3
     compression-webpack-plugin: ^10.0.0
     concurrently: ^7.3.0
@@ -19992,7 +20015,6 @@ __metadata:
     ioredis: ^5.4.1
     jest: ^27.0.2
     jimp: ^0.22.8
-    js-yaml: ^4.1.0
     less: ^3.11.3
     less-loader: ^6.0.0
     less-plugin-autoprefix: ^2.0.0
@@ -20937,6 +20959,18 @@ __metadata:
     url-join: 4.0.1
     validate-npm-package-name: ^4.0.0
   checksum: 42d7d8c9152d3c0cc134ba7e01000e01f621bff9c2df44a02fc010d1962d6deb66ec91d73c89c3894dfb54b06d57a397356f33848b7180d1bcddf71533b9ac37
+  languageName: node
+  linkType: hard
+
+"query-string@npm:^7.0.0":
+  version: 7.1.3
+  resolution: "query-string@npm:7.1.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fquery-string%2F-%2Fquery-string-7.1.3.tgz"
+  dependencies:
+    decode-uri-component: ^0.2.2
+    filter-obj: ^1.1.0
+    split-on-first: ^1.0.0
+    strict-uri-encode: ^2.0.0
+  checksum: 91af02dcd9cc9227a052841d5c2eecb80a0d6489d05625df506a097ef1c59037cfb5e907f39b84643cbfd535c955abec3e553d0130a7b510120c37d06e0f4346
   languageName: node
   linkType: hard
 
@@ -22709,6 +22743,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"split-on-first@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "split-on-first@npm:1.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fsplit-on-first%2F-%2Fsplit-on-first-1.1.0.tgz"
+  checksum: 16ff85b54ddcf17f9147210a4022529b343edbcbea4ce977c8f30e38408b8d6e0f25f92cd35b86a524d4797f455e29ab89eb8db787f3c10708e0b47ebf528d30
+  languageName: node
+  linkType: hard
+
 "split2@npm:^3.0.0":
   version: 3.2.2
   resolution: "split2@npm:3.2.2"
@@ -22837,6 +22878,13 @@ __metadata:
   version: 1.1.0
   resolution: "streamsearch@npm:1.1.0"
   checksum: 1cce16cea8405d7a233d32ca5e00a00169cc0e19fbc02aa839959985f267335d435c07f96e5e0edd0eadc6d39c98d5435fb5bbbdefc62c41834eadc5622ad942
+  languageName: node
+  linkType: hard
+
+"strict-uri-encode@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "strict-uri-encode@npm:2.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fstrict-uri-encode%2F-%2Fstrict-uri-encode-2.0.0.tgz"
+  checksum: eaac4cf978b6fbd480f1092cab8b233c9b949bcabfc9b598dd79a758f7243c28765ef7639c876fa72940dac687181b35486ea01ff7df3e65ce3848c64822c581
   languageName: node
   linkType: hard
 
@@ -24089,6 +24137,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:2.8.1":
+  version: 2.8.1
+  resolution: "tslib@npm:2.8.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Ftslib%2F-%2Ftslib-2.8.1.tgz"
+  checksum: e4aba30e632b8c8902b47587fd13345e2827fa639e7c3121074d5ee0880723282411a8838f830b55100cbe4517672f84a2472667d355b81e8af165a55dc6203a
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^1.10.0, tslib@npm:^1.8.1":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
@@ -24713,7 +24768,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"validator@npm:^13.7.0, validator@npm:^13.9.0":
+"validator@npm:^13.7.0":
+  version: 13.15.0
+  resolution: "validator@npm:13.15.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fvalidator%2F-%2Fvalidator-13.15.0.tgz"
+  checksum: 0d1faacb802336e69fafde33723b6de8e1833d1a3ec2b5202ffc69b95c8140db6d4728760026d738243d706cd324ea84808deea2ed647f571a3171d03ade8031
+  languageName: node
+  linkType: hard
+
+"validator@npm:^13.9.0":
   version: 13.11.0
   resolution: "validator@npm:13.11.0"
   checksum: d1e0c27022681420756da25bc03eb08d5f0c66fb008f8ff02ebc95812b77c6be6e03d3bd05cf80ca702e23eeb73dadd66b4b3683173ea2a0bc7cc72820bee131
