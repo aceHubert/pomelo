@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { Field, ArgsType, ID, Int, IntersectionType, OmitType, PickType } from '@nestjs/graphql';
 import { TemplateStatus } from '@ace-pomelo/shared/server';
 import { PagedTemplateArgsValidator, CagetoryArgsValidator, TagArgsValidator } from './template-args.validator';
@@ -12,13 +13,14 @@ class PagedTemplateArgs extends PagedTemplateArgsValidator {
   /**
    * Author id
    */
-  @Field((type) => ID)
+  @Field(() => ID, { nullable: true })
+  @Transform(({ value }) => (value ? parseInt(value, 10) : null))
   author?: number;
 
   /**
    * Status
    */
-  @Field((type) => TemplateStatus)
+  @Field(() => TemplateStatus)
   status?: TemplateStatus;
 
   /**
@@ -34,13 +36,13 @@ class PagedTemplateArgs extends PagedTemplateArgsValidator {
   /**
    * Page offset
    */
-  @Field((type) => Int, { defaultValue: 0 })
+  @Field(() => Int, { defaultValue: 0 })
   offset?: number;
 
   /**
    * Page size
    */
-  @Field((type) => Int, { defaultValue: 20 })
+  @Field(() => Int, { defaultValue: 20 })
   limit?: number;
 }
 
@@ -49,7 +51,8 @@ class CategoryArgs extends CagetoryArgsValidator {
   /**
    * Category id
    */
-  @Field((type) => ID)
+  @Field(() => ID, { nullable: true })
+  @Transform(({ value }) => (value ? parseInt(value, 10) : null))
   categoryId?: number;
 
   /**
@@ -63,7 +66,8 @@ class TagArgs extends TagArgsValidator {
   /**
    * Tag id
    */
-  @Field((type) => ID)
+  @Field(() => ID, { nullable: true })
+  @Transform(({ value }) => (value ? parseInt(value, 10) : null))
   tagId?: number;
 
   /**

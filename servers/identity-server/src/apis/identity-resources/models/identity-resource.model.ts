@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 import { IdentityResourceModel } from '@/datasource';
 
@@ -8,6 +9,7 @@ export class IdentityResource implements IdentityResourceModel {
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**

@@ -12,24 +12,24 @@ export class PagedUserArgs extends PagedUserArgsValidator {
   /**
    * Status
    */
-  @Field((type) => UserStatus)
+  @Field(() => UserStatus)
   status?: UserStatus;
 
   /**
    * User Role
    */
-  @Field((type) => UserRole)
+  @Field(() => UserRole)
   capabilities?: UserRole;
 
   /**
    * Page offset
    */
-  @Field((type) => Int, { defaultValue: 0 })
+  @Field(() => Int, { defaultValue: 0 })
   offset?: number;
 
   /**
    * Page size
    */
-  @Field((type) => Int, { defaultValue: 20 })
+  @Field(() => Int, { defaultValue: 20 })
   limit?: number;
 }

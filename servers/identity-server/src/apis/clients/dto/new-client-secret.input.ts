@@ -11,7 +11,7 @@ export class NewClientSecretInput extends NewClientSecretValidator {
   /**
    * Expires lifetime in seconds from creation time.
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   expiresAt?: number;
 
   /**

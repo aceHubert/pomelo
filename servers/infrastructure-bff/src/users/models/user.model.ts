@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, PickType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { DateTimeISOResolver } from 'graphql-scalars';
 import { UserStatus } from '@ace-pomelo/shared/server';
 import { Meta } from '@/common/resolvers/models/meta.model';
@@ -9,7 +10,8 @@ export class User {
   /**
    * User id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**
@@ -45,19 +47,19 @@ export class User {
   /**
    * Status
    */
-  @Field((type) => UserStatus)
+  @Field(() => UserStatus)
   status!: UserStatus;
 
   /**
    * Latest update time
    */
-  @Field((type) => DateTimeISOResolver)
+  @Field(() => DateTimeISOResolver)
   updatedAt!: Date;
 
   /**
    * Creation time
    */
-  @Field((type) => DateTimeISOResolver)
+  @Field(() => DateTimeISOResolver)
   createdAt!: Date;
 }
 
@@ -75,7 +77,8 @@ export class UserMeta extends Meta {
   /**
    * User id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   userId!: number;
 }
 
@@ -84,7 +87,7 @@ export class SignInResult {
   /**
    * Verify success
    */
-  @Field((type) => Boolean)
+  @Field(() => Boolean)
   success!: boolean;
 
   /**

@@ -1,4 +1,5 @@
 import { Field, ArgsType, ID, Int } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 
 /**
  * 查询协议关系参数
@@ -8,7 +9,8 @@ export class TermTaxonomyByObjectIdArgs {
   /**
    * Object id, Post, Link, etc...
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   objectId!: number;
 
   /**
@@ -19,13 +21,14 @@ export class TermTaxonomyByObjectIdArgs {
   /**
    * Parent id, it will search for all if none value is provided, 0 is root parent id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   parentId?: number;
 
   /**
    * Group, it will search for all if none value is provided, 0 is default group
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   group?: number;
 
   /**

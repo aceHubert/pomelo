@@ -21,12 +21,12 @@ export class PagedMediaArgs extends PagedMediaArgsValidator {
   /**
    * Page offset
    */
-  @Field((type) => Int, { defaultValue: 0 })
+  @Field(() => Int, { defaultValue: 0 })
   offset?: number;
 
   /**
    * Page size
    */
-  @Field((type) => Int, { defaultValue: 20 })
+  @Field(() => Int, { defaultValue: 20 })
   limit?: number;
 }

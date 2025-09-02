@@ -10,6 +10,6 @@ export class OptionArgs extends OptionArgsValidator {
   /**
    * Is option load automatically in application start
    */
-  @Field((type) => OptionAutoload)
+  @Field(() => OptionAutoload)
   autoload?: OptionAutoload;
 }

@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { Field, ArgsType, Int, ID } from '@nestjs/graphql';
 import { PagedApiScopeArgsValidator } from './paged-api-scope-args.validator';
 
@@ -11,24 +12,25 @@ export class PagedApiScopeArgs extends PagedApiScopeArgsValidator {
   /**
    * Field name for searching by keyword, allowed options: "name", "displayName"
    */
-  @Field((type) => String, { defaultValue: 'name' })
+  @Field(() => String, { defaultValue: 'name' })
   keywordField?: 'name' | 'displayName';
 
   /**
    * Api resource id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   apiResourceId?: number;
 
   /**
    * Page offset
    */
-  @Field((type) => Int, { defaultValue: 0 })
+  @Field(() => Int, { defaultValue: 0 })
   offset?: number;
 
   /**
    * Page size
    */
-  @Field((type) => Int, { defaultValue: 20 })
+  @Field(() => Int, { defaultValue: 20 })
   limit?: number;
 }

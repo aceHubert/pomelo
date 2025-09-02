@@ -11,18 +11,18 @@ export class PagedApiResourceArgs extends PagedApiResourceArgsValidator {
   /**
    * Field name for searching by keyword, allowed options: "name", "displayName"
    */
-  @Field((type) => String, { defaultValue: 'name' })
+  @Field(() => String, { defaultValue: 'name' })
   keywordField?: 'name' | 'displayName';
 
   /**
    * Page offset, Default: 0
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   offset?: number;
 
   /**
    * Page size, Default: 20
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   limit?: number;
 }

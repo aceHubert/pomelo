@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, Int, PickType, OmitType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { ApiSecretModel, ApiSecretsModel } from '@/datasource';
 import { ApiResource } from './api-resource.model';
 
@@ -8,6 +9,7 @@ export class ApiSecret implements Omit<ApiSecretModel, 'apiResourceId'> {
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**

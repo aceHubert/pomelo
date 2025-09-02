@@ -17,6 +17,6 @@ export class NewOptionInput extends NewOptionValidator {
   /**
    * Is option load automatically in application start
    */
-  @Field((type) => OptionAutoload)
+  @Field(() => OptionAutoload)
   autoload?: OptionAutoload;
 }

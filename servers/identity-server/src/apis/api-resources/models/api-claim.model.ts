@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, PickType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { ApiClaimModel, ApiClaimsModel } from '@/datasource';
 import { ApiResource } from './api-resource.model';
 
@@ -8,6 +9,7 @@ export class ApiClaim implements Omit<ApiClaimModel, 'apiResourceId'> {
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**

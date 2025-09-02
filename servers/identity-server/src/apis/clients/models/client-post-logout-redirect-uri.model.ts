@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, PickType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { ClientPostLogoutRedirectUriModel, ClientPostLogoutRedirectUrisModel } from '@/datasource';
 import { Client } from './cleint.model';
 
@@ -8,6 +9,7 @@ export class ClientPostLogoutRedirectUri implements Omit<ClientPostLogoutRedirec
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**

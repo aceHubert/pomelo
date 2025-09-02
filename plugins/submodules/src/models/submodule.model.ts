@@ -56,13 +56,13 @@ export class DistInfo {
   /**
    * Number of files in the tarball
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   fileCount?: number;
 
   /**
    * Total size in bytes of the unpacked files in the tarball
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   unpackedSize?: number;
 }
 
@@ -81,13 +81,13 @@ export class ModuleConfig implements SubModuleConfig {
   /**
    * Extract styles
    */
-  @Field((type) => [String])
+  @Field(() => [String])
   styles?: string | string[];
 
   /**
    * Args schema
    */
-  @Field((type) => JSONObjectResolver)
+  @Field(() => JSONObjectResolver)
   args?: {};
 }
 
@@ -160,7 +160,7 @@ export class SubModuleManifestModel extends PickType(SubModuleModel, [
   /**
    * Sub-module configs
    */
-  @Field((type) => JSONResolver)
+  @Field(() => JSONResolver)
   configuration?: ModuleConfig | Record<string, ModuleConfig>;
 
   /**
@@ -197,7 +197,7 @@ export class PagedSubModuleModel {
   /**
    * Data total count
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   total!: number;
 }
 
@@ -226,7 +226,7 @@ export class ObsSubModuleManifestModel extends PickType(SubModuleModel, [
   /**
    * Sub-module configs
    */
-  @Field((type) => JSONObjectResolver)
+  @Field(() => JSONObjectResolver)
   configuration?: ModuleConfig | Record<string, ModuleConfig>;
 }
 
