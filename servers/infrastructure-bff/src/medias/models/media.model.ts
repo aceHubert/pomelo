@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType, OmitType, IntersectionType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { DateTimeISOResolver } from 'graphql-scalars';
 import { Meta } from '@/common/resolvers/models/meta.model';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
@@ -28,13 +29,13 @@ class FileData {
   /**
    * Image width
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   width?: number;
 
   /**
    * Image height
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   height?: number;
 }
 
@@ -46,37 +47,37 @@ class File {
   /**
    * Original file
    */
-  @Field((type) => FileData)
+  @Field(() => FileData)
   original!: FileData;
 
   /**
    * Thumbnail
    */
-  @Field((type) => ScaleImageFileData)
+  @Field(() => ScaleImageFileData)
   thumbnail?: ScaleImageFileData;
 
   /**
    * Scaled(2560*1440) image
    */
-  @Field((type) => ScaleImageFileData, {})
+  @Field(() => ScaleImageFileData, {})
   scaled?: ScaleImageFileData;
 
   /**
    * Large image
    */
-  @Field((type) => ScaleImageFileData)
+  @Field(() => ScaleImageFileData)
   large?: ScaleImageFileData;
 
   /**
    * Medium image
    */
-  @Field((type) => ScaleImageFileData)
+  @Field(() => ScaleImageFileData)
   medium?: ScaleImageFileData;
 
   /**
    * Medium-Large image
    */
-  @Field((type) => ScaleImageFileData)
+  @Field(() => ScaleImageFileData)
   mediumLarge?: ScaleImageFileData;
 }
 
@@ -85,7 +86,8 @@ export class Media extends IntersectionType(OmitType(File, ['original'] as const
   /**
    * Media id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**
@@ -106,7 +108,7 @@ export class Media extends IntersectionType(OmitType(File, ['original'] as const
   /**
    * Creation time
    */
-  @Field((type) => DateTimeISOResolver)
+  @Field(() => DateTimeISOResolver)
   createdAt!: Date;
 }
 
@@ -120,6 +122,7 @@ export class MediaMeta extends Meta {
   /**
    * Media Id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   mediaId!: number;
 }

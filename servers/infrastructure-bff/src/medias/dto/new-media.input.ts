@@ -7,25 +7,25 @@ export abstract class ImageCropOptions {
   /**
    * Left position
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   left!: number;
 
   /**
    * Top position
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   top!: number;
 
   /**
    * Scale width
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   width!: number;
 
   /**
    * Scale height
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   height!: number;
 }
 
@@ -39,7 +39,7 @@ export class FileUploadOptionsInput {
   /**
    * Image crop options
    */
-  @Field((type) => ImageCropOptions)
+  @Field(() => ImageCropOptions)
   crop?: ImageCropOptions;
 }
 

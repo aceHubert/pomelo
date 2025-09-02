@@ -1,4 +1,5 @@
 import { Field, ObjectType, ID, Int } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { Meta } from '@/common/resolvers/models/meta.model';
 
 @ObjectType({ description: 'Term taxonomy model' })
@@ -7,6 +8,7 @@ export class TermTaxonomy {
    * Term Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**
@@ -32,19 +34,20 @@ export class TermTaxonomy {
   /**
    * Parent taxonomy id (nested taxonomy)
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   parentId!: number;
 
   /**
    * Group
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   group!: number;
 
   /**
    * Count
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   count!: number;
 }
 
@@ -54,18 +57,20 @@ export class TermRelationship {
    * Object id, Post, Link, etc...
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   objectId!: number;
 
   /**
    * Term taxonomy id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   termTaxonomyId!: number;
 
   /**
    * Order
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   order!: number;
 }
 
@@ -74,6 +79,7 @@ export class TermTaxonomyMeta extends Meta {
   /**
    * Term Taxonomy Id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   termTaxonomyId!: number;
 }

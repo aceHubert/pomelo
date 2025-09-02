@@ -1,4 +1,5 @@
 import { Field, InputType, ID, Int } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { NewMetaInput } from '@/common/resolvers/dto/new-meta.input';
 import { NewTermTaxonomyValidator } from './new-term-taxonomy.validator';
 
@@ -27,19 +28,21 @@ export class NewTermTaxonomyInput extends NewTermTaxonomyValidator {
   /**
    * Parent(taxonomy) id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   parentId?: number;
 
   /**
    * Group
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   group?: number;
 
   /**
    * Object id (it will add the relationship with currect term if provide a value)
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => (value ? parseInt(value, 10) : null))
   objectId?: number;
 
   /**

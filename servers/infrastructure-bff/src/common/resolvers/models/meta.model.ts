@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 
 /**
  * 元数据实体模型
@@ -8,7 +9,8 @@ export abstract class Meta {
   /**
    * Meta Id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**

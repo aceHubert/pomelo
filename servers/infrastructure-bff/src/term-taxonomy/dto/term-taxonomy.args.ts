@@ -1,4 +1,5 @@
 import { Field, ArgsType, ID, Int, OmitType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { TermTaxonomyArgsValidator } from './term-taxonomy-args.validator';
 
 @ArgsType()
@@ -16,13 +17,14 @@ export class TermTaxonomyArgs extends TermTaxonomyArgsValidator {
   /**
    * Parent id, it will search for all if none value is provided, 0 is root parent id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   parentId?: number;
 
   /**
    * Group, it will search for all if none value is provided, 0 is default group
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   group?: number;
 }
 

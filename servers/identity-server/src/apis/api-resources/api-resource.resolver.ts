@@ -80,7 +80,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.Claims)
   @Query(() => ApiClaims, { nullable: true, description: 'Get apiScope claims.' })
   apiClaims(
-    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }) apiResourceId: number,
+    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) apiResourceId: number,
     @Fields() fields: ResolveTree,
   ): Promise<ApiClaims | undefined> {
     return this.apiResourceDataSource.getClaims(
@@ -92,7 +92,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.CreateClaim)
   @Mutation((returns) => ApiClaim, { nullable: true, description: 'Create a new api claim.' })
   createApiClaim(
-    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }) apiResourceId: number,
+    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) apiResourceId: number,
     @Args('model', { type: () => NewApiClaimInput }) input: NewApiClaimInput,
   ): Promise<ApiClaim | undefined> {
     return this.apiResourceDataSource.createClaim(apiResourceId, input);
@@ -158,7 +158,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.ScopeClaims)
   @Query(() => ApiScopeClaims, { nullable: true, description: 'Get api scope claims.' })
   apiScopeClaims(
-    @Args('apiScopeId', { type: () => ID, description: 'Api scope id' }) apiScopeId: number,
+    @Args('apiScopeId', { type: () => ID, description: 'Api scope id' }, ParseIntPipe) apiScopeId: number,
     @Fields() fields: ResolveTree,
   ): Promise<ApiScopeClaims | undefined> {
     return this.apiResourceDataSource.getScopeClaims(
@@ -170,7 +170,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.CreateScopeClaim)
   @Mutation((returns) => ApiScopeClaim, { nullable: true, description: 'Create a new api scope claim.' })
   createApiScopeClaim(
-    @Args('apiScopeId', { type: () => ID, description: 'Api scope id' }) apiScopeId: number,
+    @Args('apiScopeId', { type: () => ID, description: 'Api scope id' }, ParseIntPipe) apiScopeId: number,
     @Args('model', { type: () => NewApiScopeClaimInput }) input: NewApiScopeClaimInput,
   ): Promise<ApiScopeClaim | undefined> {
     return this.apiResourceDataSource.createScopeClaim(apiScopeId, input);
@@ -187,7 +187,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.Secrets)
   @Query(() => ApiSecrets, { nullable: true, description: 'Get api resource secrets.' })
   apiSecrets(
-    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }) apiResourceId: number,
+    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) apiResourceId: number,
     @Fields() fields: ResolveTree,
   ): Promise<ApiSecrets | undefined> {
     return this.apiResourceDataSource
@@ -201,7 +201,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.CreateSecret)
   @Mutation((returns) => ApiSecret, { nullable: true, description: 'Create a new api resource secret.' })
   createApiSecret(
-    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }) apiResourceId: number,
+    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) apiResourceId: number,
     @Args('model', { type: () => NewApiSecretInput }) input: NewApiSecretInput,
   ): Promise<ApiSecret | undefined> {
     const randomSecret = random(32).toBase64();
@@ -228,7 +228,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.Properties)
   @Query(() => ApiProperties, { nullable: true, description: 'Get api scope properties.' })
   apiProperties(
-    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }) apiResourceId: number,
+    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) apiResourceId: number,
     @Fields() fields: ResolveTree,
   ): Promise<ApiProperties | undefined> {
     return this.apiResourceDataSource.getProperties(
@@ -240,7 +240,7 @@ export class ApiResourceResolver extends BaseResolver {
   @RamAuthorized(ApiResourceAction.CreateProperty)
   @Mutation((returns) => ApiProperty, { nullable: true, description: 'Create a new api scope property.' })
   createApiProperty(
-    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }) apiResourceId: number,
+    @Args('apiResourceId', { type: () => ID, description: 'Api resource id' }, ParseIntPipe) apiResourceId: number,
     @Args('model', { type: () => NewApiPropertyInput }) input: NewApiPropertyInput,
   ): Promise<ApiProperty | undefined> {
     return this.apiResourceDataSource.createProperty(apiResourceId, input);

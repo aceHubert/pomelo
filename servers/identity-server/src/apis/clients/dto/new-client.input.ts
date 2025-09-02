@@ -8,7 +8,7 @@ export class NewClientInput extends NewClientValidator {
    * Application type,
    * allows options: "web", "native"
    */
-  @Field((type) => String)
+  @Field(() => String)
   applicationType?: 'web' | 'native';
 
   /**
@@ -35,7 +35,7 @@ export class NewClientInput extends NewClientValidator {
    * IdToken signed response alg,
    * allowed options: "PS256", "PS384", "PS512", "ES256", "ES256K", "ES384", "ES512", "EdDSA", "RS256", "RS384", "RS512", "HS256", "HS384", "HS512", "none"
    */
-  @Field((type) => String)
+  @Field(() => String)
   idTokenSignedResponseAlg?: SigningAlgorithmWithNone;
 
   /**
@@ -72,70 +72,70 @@ export class NewClientInput extends NewClientValidator {
    * Subject type,
    * allowed options: "pairwise", "public"
    */
-  @Field((type) => String)
+  @Field(() => String)
   subjectType?: SubjectTypes;
 
   /**
    * Token endpoint auth method,
    * allowed options: 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth',        'self_signed_tls_client_auth', 'none'
    */
-  @Field((type) => String)
+  @Field(() => String)
   tokenEndpointAuthMethod?: ClientAuthMethod;
 
   /**
    * IdToken lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   idTokenLifetime?: number;
 
   /**
    * AccessToken format,
    * allowed options: "jwt", "opaque"
    */
-  @Field((type) => String)
+  @Field(() => String)
   accessTokenFormat?: TokenFormat;
 
   /**
    * AccessToken lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   accessTokenLifetime?: number;
 
   /**
    * RefreshToken expiration type,
    * allowed options: "absolute", "sliding"
    */
-  @Field((type) => String)
+  @Field(() => String)
   refreshTokenExpiration?: 'absolute' | 'sliding';
 
   /**
    * RefreshToken lifetime in seconds in case of "absolute" expiration type
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   refreshTokenAbsoluteLifetime?: number;
 
   /**
    * RefreshToken lifetime in seconds in case of "sliding" expiration type
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   refreshTokenSlidingLifetime?: number;
 
   /**
    * Authorization code lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   authorizationCodeLifetime?: number;
 
   /**
    * Device code lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   deviceCodeLifetime?: number;
 
   /**
    * Backchannel authentication request lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   backchannelAuthenticationRequestLifetime?: number;
 
   /**

@@ -1,4 +1,5 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { OptionAutoload } from '@ace-pomelo/shared/server';
 
 @ObjectType({ description: 'Option model' })
@@ -7,6 +8,7 @@ export class Option {
    * Option id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**
@@ -22,6 +24,6 @@ export class Option {
   /**
    * Is option load automatically in application start
    */
-  @Field((type) => OptionAutoload)
+  @Field(() => OptionAutoload)
   autoload!: OptionAutoload;
 }

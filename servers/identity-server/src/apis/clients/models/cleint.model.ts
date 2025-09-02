@@ -8,7 +8,7 @@ export class Client implements Omit<ClientModel, 'id'> {
   /**
    * Application type
    */
-  @Field((type) => String)
+  @Field(() => String)
   applicationType?: 'web' | 'native';
 
   /**
@@ -29,13 +29,13 @@ export class Client implements Omit<ClientModel, 'id'> {
   /**
    * Default max age
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   defaultMaxAge?: number;
 
   /**
    * IdToken signed response alg
    */
-  @Field((type) => String)
+  @Field(() => String)
   idTokenSignedResponseAlg?: SigningAlgorithmWithNone;
 
   /**
@@ -71,67 +71,67 @@ export class Client implements Omit<ClientModel, 'id'> {
   /**
    * Subject type
    */
-  @Field((type) => String)
+  @Field(() => String)
   subjectType?: SubjectTypes;
 
   /**
    * Token endpoint auth method
    */
-  @Field((type) => String)
+  @Field(() => String)
   tokenEndpointAuthMethod?: ClientAuthMethod;
 
   /**
    * IdToken lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   idTokenLifetime?: number;
 
   /**
    * AccessToken format
    */
-  @Field((type) => String)
+  @Field(() => String)
   accessTokenFormat?: TokenFormat;
 
   /**
    * AccessToken lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   accessTokenLifetime?: number;
 
   /**
    * RefreshToken expiration type
    */
-  @Field((type) => String)
+  @Field(() => String)
   refreshTokenExpiration?: 'absolute' | 'sliding';
 
   /**
    * RefreshToken lifetime in seconds in case of "absolute" expiration type
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   refreshTokenAbsoluteLifetime?: number;
 
   /**
    * RefreshToken lifetime in seconds in case of "sliding" expiration type
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   refreshTokenSlidingLifetime?: number;
 
   /**
    * AuthorizationCode lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   authorizationCodeLifetime?: number;
 
   /**
    * DeviceCode lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   deviceCodeLifetime?: number;
 
   /**
    * BackchannelAuthenticationRequest lifetime in seconds
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   backchannelAuthenticationRequestLifetime?: number;
 
   /**

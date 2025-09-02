@@ -78,7 +78,8 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.Claims)
   @Query(() => IdentityClaims, { nullable: true, description: 'Get identity resource claims.' })
   identityClaims(
-    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }) identityResourceId: number,
+    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }, ParseIntPipe)
+    identityResourceId: number,
     @Fields() fields: ResolveTree,
   ): Promise<IdentityClaims | undefined> {
     return this.identityResourceDataSource.getClaims(
@@ -90,7 +91,8 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.CreateClaim)
   @Mutation((returns) => IdentityClaim, { nullable: true, description: 'Create a new identity claim.' })
   createIdentityClaim(
-    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }) identityResourceId: number,
+    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }, ParseIntPipe)
+    identityResourceId: number,
     @Args('model', { type: () => NewIdentityClaimInput }) input: NewIdentityClaimInput,
   ): Promise<IdentityClaim | undefined> {
     return this.identityResourceDataSource.createClaim(identityResourceId, input);
@@ -107,7 +109,8 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.Properties)
   @Query(() => IdentityProperties, { nullable: true, description: 'Get identity resource properties.' })
   identityProperties(
-    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }) identityResourceId: number,
+    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }, ParseIntPipe)
+    identityResourceId: number,
     @Fields() fields: ResolveTree,
   ): Promise<IdentityProperties | undefined> {
     return this.identityResourceDataSource.getProperties(
@@ -119,7 +122,8 @@ export class IdentityResourceResolver extends BaseResolver {
   @RamAuthorized(IdentityResourceAction.CreateProperty)
   @Mutation((returns) => IdentityProperty, { nullable: true, description: 'Create a new identity resource property.' })
   createIdentityProperty(
-    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }) identityResourceId: number,
+    @Args('identityResourceId', { type: () => ID, description: 'Identity resource id' }, ParseIntPipe)
+    identityResourceId: number,
     @Args('model', { type: () => NewIdentityPropertyInput }) input: NewIdentityPropertyInput,
   ): Promise<IdentityProperty | undefined> {
     return this.identityResourceDataSource.createProperty(identityResourceId, input);

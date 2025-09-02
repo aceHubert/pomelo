@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, Int, PickType, OmitType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { ClientSecretModel } from '@/datasource';
 import { Client } from './cleint.model';
 
@@ -8,6 +9,7 @@ export class ClientSecret implements Omit<ClientSecretModel, 'clientId'> {
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**

@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { ApiScopeModel } from '@/datasource';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
@@ -8,12 +9,14 @@ export class ApiScope implements ApiScopeModel {
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**
    * Api resource id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   apiResourceId!: number;
 
   /**

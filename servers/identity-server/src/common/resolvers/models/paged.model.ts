@@ -5,10 +5,10 @@ import { GraphQLScalarType } from 'graphql';
 // export function PagedResponse<IItem>(TItemClass: ClassType<IItem>) {
 //   @ObjectType(`Paged${TItemClass.name}`)
 //   class PagedClass {
-//     @Field((type) => [TItemClass])
+//     @Field(() => [TItemClass])
 //     rows!: IItem[];
 
-//     @Field((type) => Int)
+//     @Field(() => Int)
 //     total!: number;
 //   }
 //   return PagedClass;
@@ -26,13 +26,13 @@ export function PagedResponse<TItemsFieldValue>(
     /**
      * Paged data items
      */
-    @Field((type) => [itemsFieldValue])
+    @Field(() => [itemsFieldValue])
     rows!: TItemsFieldValue[];
 
     /**
      * Date total count
      */
-    @Field((type) => Int)
+    @Field(() => Int)
     total!: number;
   }
   return PagedClass;
@@ -43,6 +43,6 @@ export abstract class Count {
   /**
    * Count
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   count!: number;
 }

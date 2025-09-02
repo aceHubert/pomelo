@@ -10,7 +10,7 @@ export class UpdateUserInput extends PartialType(
   /**
    * User status
    */
-  @Field((type) => UserStatus)
+  @Field(() => UserStatus)
   @IsOptional()
   @IsEnum(UserStatus)
   status?: UserStatus;
@@ -32,7 +32,7 @@ export class UpdateUserInput extends PartialType(
   /**
    * User Role
    */
-  @Field((type) => UserRole)
+  @Field(() => UserRole)
   @IsOptional()
   @IsEnum(UserRole)
   capabilities?: UserRole;

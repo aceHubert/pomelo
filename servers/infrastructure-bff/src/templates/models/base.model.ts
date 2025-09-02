@@ -1,4 +1,5 @@
 import { Field, ObjectType, ID, Int, OmitType, PickType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { DateTimeISOResolver } from 'graphql-scalars';
 import { TemplateStatus, TemplateCommentStatus } from '@ace-pomelo/shared/server';
 // import { FieldAuthorized, UserRole } from '@ace-pomelo/nestjs-authorization';
@@ -10,7 +11,8 @@ export class Template {
   /**
    * Template Id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**
@@ -37,14 +39,15 @@ export class Template {
   /**
    * Author id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   author!: number;
 
   // @FieldAuthorized(UserRole.Administrator)
   /**
    * Status
    */
-  @Field((type) => TemplateStatus)
+  @Field(() => TemplateStatus)
   status!: TemplateStatus;
 
   /**
@@ -55,25 +58,25 @@ export class Template {
   /**
    * Comment status
    */
-  @Field((type) => TemplateCommentStatus)
+  @Field(() => TemplateCommentStatus)
   commentStatus!: TemplateCommentStatus;
 
   /**
    * Comment count
    */
-  @Field((type) => Int)
+  @Field(() => Int)
   commentCount!: number;
 
   /**
    * Latest update time
    */
-  @Field((type) => DateTimeISOResolver)
+  @Field(() => DateTimeISOResolver)
   updatedAt!: Date;
 
   /**
    * Creation time
    */
-  @Field((type) => DateTimeISOResolver)
+  @Field(() => DateTimeISOResolver)
   createdAt!: Date;
 }
 
@@ -82,7 +85,8 @@ export class TemplateMeta extends Meta {
   /**
    * Template Id
    */
-  @Field((type) => ID)
+  @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   templateId!: number;
 }
 
@@ -104,7 +108,7 @@ export class TemplateStatusCount extends Count {
   /**
    * Template status
    */
-  @Field((type) => TemplateStatus, {})
+  @Field(() => TemplateStatus, {})
   status!: TemplateStatus;
 }
 

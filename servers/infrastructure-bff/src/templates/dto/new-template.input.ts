@@ -28,7 +28,7 @@ export class NewTemplateInput extends NewTemplateValidator {
   /**
    * Status
    */
-  @Field((type) => TemplateStatus)
+  @Field(() => TemplateStatus)
   status?: TemplateStatus;
 
   /**
@@ -39,7 +39,7 @@ export class NewTemplateInput extends NewTemplateValidator {
   /**
    * Comment status
    */
-  @Field((type) => TemplateCommentStatus)
+  @Field(() => TemplateCommentStatus)
   commentStatus?: TemplateCommentStatus;
 
   /**

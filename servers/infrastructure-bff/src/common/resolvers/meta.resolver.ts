@@ -195,10 +195,14 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Get ${_descriptionName} metas.`,
     })
     getMetas(
-      @Args(`${_modelName}Id`, {
-        type: () => ID,
-        description: `${_descriptionName} Id`,
-      })
+      @Args(
+        `${_modelName}Id`,
+        {
+          type: () => ID,
+          description: `${_descriptionName} Id`,
+        },
+        ParseIntPipe,
+      )
       modelId: number,
       @Args('metaKeys', {
         type: () => [String!],
@@ -239,10 +243,14 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Create the bulk of ${_descriptionName} metas.`,
     })
     createMetas(
-      @Args(`${_modelName}id`, {
-        type: () => ID,
-        description: `${_descriptionName} id`,
-      })
+      @Args(
+        `${_modelName}id`,
+        {
+          type: () => ID,
+          description: `${_descriptionName} id`,
+        },
+        ParseIntPipe,
+      )
       modelId: number,
       @Args('metas', { type: () => [NewMetaInput!] }) models: NewMetaInput[],
     ) {
@@ -339,10 +347,14 @@ export function createMetaResolver<MetaReturnType, NewMetaInputType>(
       description: `Delete ${_descriptionName} meta by meta key.`,
     })
     async deleteMetaByKey(
-      @Args(`${_modelName}Id`, {
-        type: () => ID,
-        description: `${_descriptionName} Id`,
-      })
+      @Args(
+        `${_modelName}Id`,
+        {
+          type: () => ID,
+          description: `${_descriptionName} Id`,
+        },
+        ParseIntPipe,
+      )
       modelId: number,
       @Args('metaKey', { description: 'Meta key' }) metaKey: string,
     ): Promise<void> {

@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { ApiResourceModel } from '@/datasource';
 import { PagedResponse } from '@/common/resolvers/models/paged.model';
 
@@ -8,6 +9,7 @@ export class ApiResource implements ApiResourceModel {
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**

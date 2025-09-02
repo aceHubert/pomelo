@@ -1,4 +1,5 @@
 import { ObjectType, Field, ID, PickType } from '@nestjs/graphql';
+import { Transform } from 'class-transformer';
 import { IdentityPropertyModel, IdentityPropertiesModel } from '@/datasource';
 import { IdentityResource } from './identity-resource.model';
 
@@ -8,6 +9,7 @@ export class IdentityProperty implements Omit<IdentityPropertyModel, 'identityRe
    * Id
    */
   @Field(() => ID)
+  @Transform(({ value }) => parseInt(value, 10))
   id!: number;
 
   /**
