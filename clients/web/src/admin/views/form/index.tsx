@@ -43,7 +43,7 @@ export default defineComponent({
     const templateMixin = useTemplateMixin();
     const formApi = useFormApi();
 
-    const currentUserId = ref<string>();
+    const currentUserId = ref<number>();
 
     const formTemplates = reactive({
       loading: false,
@@ -68,7 +68,7 @@ export default defineComponent({
       // 加载数据前确保用户 id 已存在
       if (!currentUserId.value) {
         const user = await userManager.getUser();
-        currentUserId.value = user?.profile.sub;
+        user && (currentUserId.value = Number(user.profile.sub));
         if (user?.profile.role) {
           const role = userMixin.getRole(user.profile.role);
           hasPermission = role.hasPermission.bind(undefined);
@@ -128,7 +128,7 @@ export default defineComponent({
               return {
                 ...item,
                 actionCapability,
-                isSelfContent: currentUserId.value === String(item.author?.id),
+                isSelfContent: currentUserId.value === item.author?.id,
               };
             }),
             total: forms.total,

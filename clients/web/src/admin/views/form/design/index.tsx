@@ -77,7 +77,7 @@ export default defineComponent({
   name: 'FormDesign',
   layout: 'blank',
   props: {
-    id: { type: String },
+    id: Number,
   },
   head() {
     return {
@@ -151,14 +151,14 @@ export default defineComponent({
 
     const formData = reactive<
       Pick<FormTemplateModel, 'title' | 'content' | 'status'> & {
-        id?: string;
+        id?: number;
         submitAction?: string;
         submitSuccessRedirect?: string;
         submitSuccessTips?: string;
         featureImage?: string;
       }
     >({
-      id: props.id,
+      id: props.id ? Number(props.id) : undefined,
       title: '',
       content: '',
       status: TemplateStatus.Draft,
@@ -232,7 +232,7 @@ export default defineComponent({
         })
         .then(({ form }) => {
           formData.id = form.id;
-          router.replace({ name: 'form-edit', params: { id: form.id } });
+          router.replace({ name: 'form-edit', params: { id: String(form.id) } });
           return {
             ...form,
             title: '',

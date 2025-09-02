@@ -12,7 +12,7 @@ import { useApiResourceApi } from '@/admin/fetch';
 import type { ApiSecretsModel } from '@/admin/fetch/api-resource';
 
 type ApiSecretProps = {
-  apiResourceId: string;
+  apiResourceId: number;
 };
 
 export default defineComponent({
@@ -24,7 +24,7 @@ export default defineComponent({
   },
   props: {
     apiResourceId: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -35,7 +35,7 @@ export default defineComponent({
 
     const apiResourceName = ref('');
 
-    const $secretsRes = createResource((apiResourceId: string) => {
+    const $secretsRes = createResource((apiResourceId: number) => {
       return apiResourceApi
         .getSecrets({
           variables: {
@@ -54,7 +54,7 @@ export default defineComponent({
     $secretsRes.read(props.apiResourceId);
 
     const deleting = ref(false);
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: number) => {
       Modal.confirm({
         title: i18n.tv('page_api_secrets.delete_confirm.title', '确认'),
         content: i18n.tv('page_api_secrets.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

@@ -80,7 +80,7 @@ export default defineComponent({
     }
   },
   props: {
-    id: String,
+    id: Number,
   },
   setup(props) {
     const router = useRouter();
@@ -115,14 +115,14 @@ export default defineComponent({
 
     const postData = reactive<
       Pick<PostTemplateModel, 'title' | 'excerpt' | 'status'> & {
-        id?: string;
+        id?: number;
         content?: any;
         featureImage?: string;
         allowComment?: boolean;
         templatePageType?: TemplatePageType;
       }
     >({
-      id: props.id,
+      id: props.id ? Number(props.id) : undefined,
       title: '',
       excerpt: '',
       content: '',
@@ -197,7 +197,7 @@ export default defineComponent({
         })
         .then(({ post }) => {
           postData.id = post.id;
-          router.replace({ name: 'post-edit', params: { id: post.id } });
+          router.replace({ name: 'post-edit', params: { id: String(post.id) } });
           return {
             ...post,
             title: '',

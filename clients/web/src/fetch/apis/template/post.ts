@@ -16,7 +16,7 @@ export enum TemplatePageType {
 }
 
 export interface PagedPostTemplateArgs extends Omit<PagedTemplateArgs, 'type'> {
-  tagId?: string;
+  tagId?: number;
 }
 
 export interface PostTemplateModel
@@ -198,7 +198,7 @@ export const usePostApi = defineRegistGraphql('template_post', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ post: PostTemplateModel | null }, { id: string; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ post: PostTemplateModel | null }, { id: number; metaKeys?: string[] }>,
     // 创建文章
     create: gql`
       mutation createPost($newPostTemplate: NewPostTemplateInput! = { title: "", content: "" }) {
@@ -252,7 +252,7 @@ export const usePostApi = defineRegistGraphql('template_post', {
       }
     ` as TypedMutationDocumentNode<
       { result: null; featureImageResult: null; templateResult: null },
-      { id: string; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
+      { id: number; updatePost: UpdatePostTemplateInput; featureImage?: string; template?: TemplatePageType }
     >,
   },
 });

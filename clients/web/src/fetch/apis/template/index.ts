@@ -29,22 +29,22 @@ export enum TemplateCommentStatus {
 export interface PagedTemplateArgs extends PagedArgs {
   keyword?: string;
   type: string;
-  author?: string;
+  author?: number;
   status?: TemplateStatus;
   date?: string;
-  categoryId?: string;
+  categoryId?: number;
   queryStatusCounts?: boolean;
   querySelfCounts?: boolean;
 }
 
 export interface TemplateModel {
-  id: string;
+  id: number;
   title: string;
   name: string;
   excerpt: string;
   content: string;
   author?: {
-    id: string;
+    id: number;
     displayName: string;
   };
   status: TemplateStatus;
@@ -94,14 +94,14 @@ export interface UpdateTemplateInput
   extends Partial<Pick<NewTemplateInput, 'name' | 'title' | 'excerpt' | 'content' | 'status'>> {}
 
 export interface TemplateMetaModel {
-  id: string;
-  templateId: string;
+  id: number;
+  templateId: number;
   key: string;
   value: string;
 }
 
 export interface NewTemplateMetaInput {
-  templateId: string;
+  templateId: number;
   metaKey: string;
   metaValue: string;
 }
@@ -219,7 +219,7 @@ export const useTemplateApi = defineRegistGraphql('template', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: string; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ template?: TemplateModel }, { id: number; metaKeys?: string[] }>,
     // 按状态分组数量
     getCountByStatus: gql`
       query getCountByStatus($type: String!) {
@@ -305,34 +305,34 @@ export const useTemplateApi = defineRegistGraphql('template', {
       mutation updateStatus($id: ID!, $status: TemplateStatus!) {
         result: updateTemplateStatus(id: $id, status: $status)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string; status: TemplateStatus }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number; status: TemplateStatus }>,
     bulkUpdateStatus: gql`
       mutation bulkUpdateStatus($ids: [ID!]!, $status: TemplateStatus!) {
         result: bulkUpdateTemplateStatus(ids: $ids, status: $status)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { ids: string[]; status: TemplateStatus }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { ids: number[]; status: TemplateStatus }>,
     // 重置模版(必须是trush状态)
     restore: gql`
       mutation restore($id: ID!) {
         result: restoreTemplate(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
     bulkRestore: gql`
       mutation bulkRestore($ids: [ID!]!) {
         result: bulkRestoreTemplate(ids: $ids)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { ids: string[] }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { ids: number[] }>,
     // 删除模版(必须是trush状态)
     delete: gql`
       mutation delete($id: ID!) {
         result: deleteTemplate(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
     bulkDelete: gql`
       mutation bulkDelete($ids: [ID!]!) {
         result: bulkDeleteTemplate(ids: $ids)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { ids: string[] }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { ids: number[] }>,
     // 创建模版 meta
     createMeta: gql`
       mutation createTemplateMeta($newMeta: NewTemplateMetaInput!) {
@@ -345,7 +345,7 @@ export const useTemplateApi = defineRegistGraphql('template', {
       }
     ` as TypedMutationDocumentNode<
       { meta: TemplateMetaModel },
-      { newMeta: { templateId: string; metaKey: string; metaValue: string } }
+      { newMeta: { templateId: number; metaKey: string; metaValue: string } }
     >,
     updateMetaByKey: gql`
       mutation updateTemplateMetaByKey(
@@ -363,25 +363,25 @@ export const useTemplateApi = defineRegistGraphql('template', {
       }
     ` as TypedMutationDocumentNode<
       { result: null },
-      { templateId: string; metaKey: string; metaValue: string; createIfNotExists?: boolean }
+      { templateId: number; metaKey: string; metaValue: string; createIfNotExists?: boolean }
     >,
     updateMeta: gql`
       mutation updateTemplateMeta($id: ID!, $metaValue: String!) {
         result: updateTemplateMeta(id: $id, metaValue: $metaValue)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string; metaValue: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number; metaValue: string }>,
     // 删除模版 meta
     deleteMetaByKey: gql`
       mutation deleteTemplateMetaByKey($templateId: ID!, $key: String!) {
         result: deleteTemplateMetaByKey(templateId: $templateId, metaKey: $key)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { templateId: string; key: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { templateId: number; key: string }>,
     // 删除模版 meta
     deleteMeta: gql`
       mutation deleteTemplateMeta($id: ID!) {
         result: deleteTemplateMeta(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
   },
 });
 

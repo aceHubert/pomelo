@@ -1,4 +1,4 @@
-import { lowerCase } from 'lodash-es';
+import { lowerCase, has } from 'lodash-es';
 import moment from 'moment';
 import { defineComponent, ref, reactive, computed, watch } from '@vue/composition-api';
 import { useRoute } from 'vue2-helpers/vue-router';
@@ -36,7 +36,7 @@ export default defineComponent({
     const templateApi = useTemplateApi();
     const templateMixin = useTemplateMixin();
 
-    const currentUserId = ref<string>();
+    const currentUserId = ref<number>();
 
     // 从 URI 获取搜索参数
     const searchQuery = computed<Omit<PagedTemplateArgs, 'offset' | 'limit' | 'queryStatusCounts' | 'querySelfCounts'>>(
@@ -44,7 +44,7 @@ export default defineComponent({
         return {
           ...templateMixin.searchQuery,
           type: TemplateType,
-          author: (route.query[RouteQueryKey.IsSelf] as string) === 'true' ? currentUserId.value : void 0,
+          author: has(route.query, RouteQueryKey.IsSelf) ? currentUserId.value : void 0,
         };
       },
     );
@@ -62,7 +62,7 @@ export default defineComponent({
       // 加载数据前确保用户 id 已存在
       if (!currentUserId.value) {
         const user = await userManager.getUser();
-        currentUserId.value = user?.profile.sub;
+        user && (currentUserId.value = Number(user.profile.sub));
       }
 
       return templateApi
@@ -133,7 +133,7 @@ export default defineComponent({
       const renderActions = (record: PagedTemplateItem & { deleting?: boolean; restoring?: boolean }) => {
         return record.status !== TemplateStatus.Trash
           ? [
-              <router-link to={{ name: 'data-scope-edit', params: { id: record.id } }}>
+              <router-link to={{ name: 'data-scope-edit', params: { id: String(record.id) } }}>
                 {i18n.tv('common.btn_text.edit', '编辑')}
               </router-link>,
               <a
@@ -206,7 +206,7 @@ export default defineComponent({
           customRender: (_: any, record: PagedTemplateItem) => (
             <div class={classes.title}>
               <router-link
-                to={{ name: 'data-scope-edit', params: { id: record.id } }}
+                to={{ name: 'data-scope-edit', params: { id: String(record.id) } }}
                 class={classes.routerLink}
                 target="preview-route"
               >

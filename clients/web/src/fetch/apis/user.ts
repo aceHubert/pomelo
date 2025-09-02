@@ -9,7 +9,7 @@ export enum UserStatus {
 }
 
 export interface UserModel {
-  id: string;
+  id: number;
   niceName: string;
   displayName: string;
   mobile: string;
@@ -34,7 +34,7 @@ export const useUserApi = defineRegistGraphql('user', {
           updatedAt
         }
       }
-    ` as TypedQueryDocumentNode<{ user: UserModel | null }, { id: string }>,
+    ` as TypedQueryDocumentNode<{ user: UserModel | null }, { id: number }>,
     getMetas: gql`
       query getUserMetas($userId: ID!, $keys: [String!]!) {
         metas: userMetas(userId: $userId, metaKeys: $keys) {
@@ -45,12 +45,12 @@ export const useUserApi = defineRegistGraphql('user', {
       }
     ` as TypedQueryDocumentNode<
       { metas: { id: number; key: string; value: string }[] },
-      { userId: string; keys: string[] }
+      { userId: number; keys: string[] }
     >,
     updateMetaByKey: gql`
       mutation updateUserMetaByKey($userId: ID!, $key: String!, $value: String!) {
         result: updateUserMetaByKey(userId: $userId, metaKey: $key, metaValue: $value)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { userId: string; key: string; value: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { userId: number; key: string; value: string }>,
   },
 });

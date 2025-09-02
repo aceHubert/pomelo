@@ -108,12 +108,12 @@ module.exports = defineConfig({
             '/action/basic': {
               target: proxyTarget('http://localhost:5002'),
               changeOrigin: true,
-              pathRewrite: {'^/action/basic' : ''}
+              pathRewrite: { '^/action/basic': '' },
             },
             '/action/identity': {
               target: proxyTarget('http://localhost:5003'),
               changeOrigin: true,
-              pathRewrite: {'^/action/identity' : ''}
+              pathRewrite: { '^/action/identity': '' },
             },
           }
         : {},

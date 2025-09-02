@@ -8,7 +8,7 @@ export const basicRoutes: Array<RouteConfig> = [
     name: 'form',
     component: () => import(/* webpackChunkName: "web-common" */ '@/views/form/index'),
     props: (route) => ({
-      id: route.params.id,
+      id: Number(route.params.id),
     }),
   },
   {
@@ -17,7 +17,7 @@ export const basicRoutes: Array<RouteConfig> = [
     name: 'post',
     component: () => import(/* webpackChunkName: "web-common" */ '@/views/post/index'),
     props: (route) => ({
-      id: route.params.id,
+      id: Number(route.params.id),
     }),
   },
   {
@@ -26,7 +26,7 @@ export const basicRoutes: Array<RouteConfig> = [
     name: 'page',
     component: () => import(/* webpackChunkName: "web-common" */ '@/views/page/index'),
     props: (route) => ({
-      id: route.params.id,
+      id: Number(route.params.id),
     }),
   },
 ];

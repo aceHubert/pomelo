@@ -6,7 +6,7 @@ import type { TypedQueryDocumentNode, TypedMutationDocumentNode } from '@ace-fet
 import type { PagedArgs, Paged } from '@/fetch/apis/types';
 
 export interface ApiResourceModel {
-  id: string;
+  id: number;
   name: string;
   displayName?: string;
   description?: string;
@@ -35,7 +35,7 @@ export interface NewApiResourceInput {
 export interface UpdateApiResourceInput extends Partial<NewApiResourceInput> {}
 
 export interface ApiClaimModel {
-  id: string;
+  id: number;
   type: string;
 }
 
@@ -48,8 +48,8 @@ export interface NewApiClaimInput {
 }
 
 export interface ApiScopeModel {
-  id: string;
-  apiResourceId: string;
+  id: number;
+  apiResourceId: number;
   name: string;
   displayName?: string;
   description?: string;
@@ -61,7 +61,7 @@ export interface ApiScopeModel {
 export interface PagedApiScopeArgs extends PagedArgs {
   keyword?: string;
   keywordField?: string;
-  apiResourceId?: string;
+  apiResourceId?: number;
 }
 
 export interface PagedApiScopeModel extends Paged<Omit<ApiScopeModel, 'apiResourceId'>> {}
@@ -78,7 +78,7 @@ export interface NewApiScopeInput {
 export interface UpdateApiScopeInput extends Partial<NewApiScopeInput> {}
 
 export interface ApiScopeClaimModel {
-  id: string;
+  id: number;
   type: string;
 }
 
@@ -91,7 +91,7 @@ export interface NewApiScopeClaimInput {
 }
 
 export interface ApiSecretModel {
-  id: string;
+  id: number;
   type: string;
   value: string;
   expiresAt?: number;
@@ -110,7 +110,7 @@ export interface NewApiSecretInput {
 }
 
 export interface ApiPropertyModel {
-  id: string;
+  id: number;
   key: string;
   value: string;
 }
@@ -157,7 +157,7 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
           createdAt
         }
       }
-    ` as TypedQueryDocumentNode<{ apiResource: ApiResourceModel | null }, { id: string }>,
+    ` as TypedQueryDocumentNode<{ apiResource: ApiResourceModel | null }, { id: number }>,
     getBasicInfo: gql`
       query getApiResource($id: ID!) {
         apiResource(id: $id) {
@@ -170,7 +170,7 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
       }
     ` as TypedQueryDocumentNode<
       { apiResource: Pick<ApiResourceModel, 'id' | 'name' | 'displayName' | 'enabled' | 'createdAt'> | null },
-      { id: string }
+      { id: number }
     >,
     create: gql`
       mutation createApiResource($model: NewApiResourceInput!) {
@@ -191,7 +191,7 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
       mutation updateApiResource($id: ID!, $model: UpdateApiResourceInput!) {
         result: updateApiResource(id: $id, model: $model)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string; model: UpdateApiResourceInput }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number; model: UpdateApiResourceInput }>,
     getClaims: gql`
       query getApiClaims($apiResourceId: ID!) {
         apiClaims(apiResourceId: $apiResourceId) {
@@ -204,7 +204,7 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiClaims: ApiClaimsModel | null }, { apiResourceId: string }>,
+    ` as TypedQueryDocumentNode<{ apiClaims: ApiClaimsModel | null }, { apiResourceId: number }>,
     createClaim: gql`
       mutation createApiClaim($apiResourceId: ID!, $model: NewApiClaimInput!) {
         claim: createApiClaim(apiResourceId: $apiResourceId, model: $model) {
@@ -212,12 +212,12 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
           type
         }
       }
-    ` as TypedMutationDocumentNode<{ claim: ApiClaimModel }, { apiResourceId: string; model: NewApiClaimInput }>,
+    ` as TypedMutationDocumentNode<{ claim: ApiClaimModel }, { apiResourceId: number; model: NewApiClaimInput }>,
     deleteClaim: gql`
       mutation deleteApiClaim($id: ID!) {
         result: deleteApiClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
     getPagedScope: gql`
       query getApiScopes($keyword: String, $keywordField: String, $apiResourceId: ID, $offset: Int, $limit: Int) {
         apiScopes(
@@ -254,18 +254,18 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
       }
     ` as TypedMutationDocumentNode<
       { scope: Omit<ApiScopeModel, 'apiResourceId'> },
-      { apiResourceId: string; model: NewApiScopeInput }
+      { apiResourceId: number; model: NewApiScopeInput }
     >,
     updateScope: gql`
       mutation updateApiScope($id: ID!, $model: UpdateApiScopeInput!) {
         result: updateApiScope(id: $id, model: $model)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string; model: UpdateApiScopeInput }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number; model: UpdateApiScopeInput }>,
     deleteScope: gql`
       mutation deleteApiScope($id: ID!) {
         result: deleteApiScope(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
     getScopeClaims: gql`
       query getApiScopeClaims($apiScopeId: ID!) {
         apiScopeClaims(apiScopeId: $apiScopeId) {
@@ -279,7 +279,7 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiScopeClaims: ApiScopeClaimsModel | null }, { apiScopeId: string }>,
+    ` as TypedQueryDocumentNode<{ apiScopeClaims: ApiScopeClaimsModel | null }, { apiScopeId: number }>,
     createScopeClaim: gql`
       mutation createApiScopeClaim($apiScopeId: ID!, $model: NewApiScopeClaimInput!) {
         scopeClaim: createApiScopeClaim(apiScopeId: $apiScopeId, model: $model) {
@@ -289,13 +289,13 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
       }
     ` as TypedMutationDocumentNode<
       { scopeClaim: ApiScopeClaimModel },
-      { apiScopeId: string; model: NewApiScopeClaimInput }
+      { apiScopeId: number; model: NewApiScopeClaimInput }
     >,
     deleteScopeClaim: gql`
       mutation deleteApiScopeClaim($id: ID!) {
         result: deleteApiScopeClaim(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
     getSecrets: gql`
       query getApiSecrets($apiResourceId: ID!) {
         apiSecrets(apiResourceId: $apiResourceId) {
@@ -311,7 +311,7 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiSecrets: ApiSecretsModel | null }, { apiResourceId: string }>,
+    ` as TypedQueryDocumentNode<{ apiSecrets: ApiSecretsModel | null }, { apiResourceId: number }>,
     createSecret: gql`
       mutation createApiSecret($apiResourceId: ID!, $model: NewApiSecretInput!) {
         apiSecret: createApiSecret(apiResourceId: $apiResourceId, model: $model) {
@@ -342,7 +342,7 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ apiProperties: ApiPropertiesModel | null }, { apiResourceId: string }>,
+    ` as TypedQueryDocumentNode<{ apiProperties: ApiPropertiesModel | null }, { apiResourceId: number }>,
     createProperty: gql`
       mutation createApiProperty($apiResourceId: ID!, $model: NewApiPropertyInput!) {
         property: createApiProperty(apiResourceId: $apiResourceId, model: $model) {
@@ -353,13 +353,13 @@ export const useApiResourceApi = defineRegistGraphql('api-resource', {
       }
     ` as TypedMutationDocumentNode<
       { property: ApiPropertyModel },
-      { apiResourceId: string; model: NewApiPropertyInput }
+      { apiResourceId: number; model: NewApiPropertyInput }
     >,
     deleteProperty: gql`
       mutation deleteApiProperty($id: ID!) {
         result: deleteApiProperty(id: $id)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { id: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { id: number }>,
   },
   clientOptions: {
     link: identityLink,

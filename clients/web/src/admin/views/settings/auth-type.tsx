@@ -12,7 +12,7 @@ export default defineComponent({
     const userManager = useUserManager();
     const basicApi = useBasicApi();
     const deviceMixin = useDeviceMixin();
-    const optionId = ref<string>();
+    const optionId = ref<number>();
     const authType = ref<AuthType>();
     const loading = ref(false);
 

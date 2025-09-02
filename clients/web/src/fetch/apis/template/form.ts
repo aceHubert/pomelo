@@ -88,7 +88,7 @@ export const useFormApi = defineRegistGraphql('template_form', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ form: FormTemplateModel | null }, { id: string; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ form: FormTemplateModel | null }, { id: number; metaKeys?: string[] }>,
     // 创建表单
     create: gql`
       mutation createForm($newFormTemplate: NewFormTemplateInput! = {}) {
@@ -156,7 +156,7 @@ export const useFormApi = defineRegistGraphql('template_form', {
         featureImageResult: null;
       },
       {
-        id: string;
+        id: number;
         updateForm: UpdateFormTemplateInput;
         submitAction?: string;
         submitSuccessRedirect?: string;

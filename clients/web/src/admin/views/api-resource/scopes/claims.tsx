@@ -14,7 +14,7 @@ import type { ApiScopeClaimsModel } from '@/admin/fetch/api-resource';
 
 type ApiScopeClaimProps = {
   form: WrappedFormUtils;
-  apiScopeId: string;
+  apiScopeId: number;
 };
 
 export default Form.create({})(
@@ -27,7 +27,7 @@ export default Form.create({})(
     },
     props: {
       apiScopeId: {
-        type: String,
+        type: Number,
         required: true,
       },
     },
@@ -65,9 +65,9 @@ export default Form.create({})(
           ].filter(Boolean) as Column[],
       );
 
-      const apiResourceId = ref<string>();
+      const apiResourceId = ref<number>();
       const apiScopeName = ref<string>();
-      const $scopeClaimsRes = createResource((apiScopeId: string) => {
+      const $scopeClaimsRes = createResource((apiScopeId: number) => {
         return apiResourceApi
           .getScopeClaims({
             variables: { apiScopeId },
@@ -111,7 +111,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: string) => {
+      const handleDelete = (id: number) => {
         Modal.confirm({
           title: i18n.tv('page_api_scope_claims.delete_confirm.title', '确认'),
           content: i18n.tv('page_api_scope_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),
@@ -164,7 +164,7 @@ export default Form.create({})(
                         return route
                           ? {
                               ...item,
-                              path: router.resolve({ params: { id: apiResourceId.value } }, route).href,
+                              path: router.resolve({ params: { id: String(apiResourceId.value) } }, route).href,
                             }
                           : item;
                       }

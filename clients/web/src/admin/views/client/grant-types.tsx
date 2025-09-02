@@ -152,7 +152,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: string) => {
+      const handleDelete = (id: number) => {
         Modal.confirm({
           title: i18n.tv('page_client_grant_types.delete_confirm.title', '确认'),
           content: i18n.tv('page_client_grant_types.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

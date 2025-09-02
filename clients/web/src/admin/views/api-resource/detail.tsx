@@ -16,7 +16,7 @@ export default defineComponent({
   },
   props: {
     id: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -27,7 +27,7 @@ export default defineComponent({
 
     const isEditModalVisable = ref(false);
 
-    const $detailRes = createResource((id: string) => {
+    const $detailRes = createResource((id: number) => {
       return apiResourceApi
         .get({
           variables: { id },
@@ -79,7 +79,7 @@ export default defineComponent({
       apiResourceApi
         .update({
           variables: {
-            id: props.id,
+            id: $detailRes.$result!.id,
             model: {
               [field]: checked,
             },

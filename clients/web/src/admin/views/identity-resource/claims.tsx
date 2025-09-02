@@ -14,7 +14,7 @@ import type { IdentityClaimsModel } from '@/admin/fetch/identity-resource';
 
 type IdentityClaimProps = {
   form: WrappedFormUtils;
-  identityResourceId: string;
+  identityResourceId: number;
 };
 
 export default Form.create({})(
@@ -67,7 +67,7 @@ export default Form.create({})(
 
       const identityResourceName = ref('');
       const identityResourceNonEditable = ref(true);
-      const $claimsRes = createResource((identityResourceId: string) => {
+      const $claimsRes = createResource((identityResourceId: number) => {
         return identityResourceApi
           .getClaims({
             variables: { identityResourceId },
@@ -112,7 +112,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: string) => {
+      const handleDelete = (id: number) => {
         Modal.confirm({
           title: i18n.tv('page_identity_resource_claims.delete_confirm.title', '确认'),
           content: i18n.tv('page_identity_resource_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

@@ -15,7 +15,7 @@ import type { Column, DataSourceFn } from 'antdv-layout-pro/components/async-tab
 import type { PagedApiScopeArgs, PagedApiScopeModel } from '@/admin/fetch/api-resource';
 
 type ApiScopeProps = {
-  apiResourceId: string;
+  apiResourceId: number;
 };
 
 export default defineComponent({
@@ -27,7 +27,7 @@ export default defineComponent({
   },
   props: {
     apiResourceId: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -175,7 +175,7 @@ export default defineComponent({
       ].filter(Boolean) as Column[];
     });
 
-    const $apiResourceRes = createResource((apiResourceId: string) =>
+    const $apiResourceRes = createResource((apiResourceId: number) =>
       apiResourceApi
         .getBasicInfo({
           variables: { id: apiResourceId },
@@ -254,7 +254,7 @@ export default defineComponent({
     };
 
     const deleting = ref(false);
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: number) => {
       Modal.confirm({
         title: i18n.tv('page_api_scopes.delete_confirm.title', '确认'),
         content: i18n.tv('page_api_scopes.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

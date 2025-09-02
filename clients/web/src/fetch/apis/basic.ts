@@ -9,7 +9,7 @@ export enum OptionAutoload {
 }
 
 export interface OptionModel {
-  id: string;
+  id: number;
   name: string;
   value: string;
   autoload: OptionAutoload;
@@ -56,7 +56,7 @@ export const useBasicApi = defineRegistGraphql('basic', {
           autoload
         }
       }
-    ` as TypedQueryDocumentNode<{ option: OptionModel | null }, { id: string }>,
+    ` as TypedQueryDocumentNode<{ option: OptionModel | null }, { id: number }>,
     // 根据name获取Option
     getOptionByName: gql`
       query getOptionByName($name: String!) {
@@ -90,7 +90,7 @@ export const useBasicApi = defineRegistGraphql('basic', {
       mutation updateOption($id: ID!, $model: UpdateOptionInput!) {
         updateOption(id: $id, model: $model)
       }
-    ` as TypedQueryDocumentNode<{ updateOption: void }, { id: string; model: UpdateOptionModel }>,
+    ` as TypedQueryDocumentNode<{ updateOption: void }, { id: number; model: UpdateOptionModel }>,
     // 清除配置缓存
     clearOptionCache: gql`
       mutation clearOptionCache {
@@ -101,7 +101,7 @@ export const useBasicApi = defineRegistGraphql('basic', {
       mutation deleteOption($id: ID!) {
         deleteOption(id: $id)
       }
-    ` as TypedQueryDocumentNode<{ deleteOption: void }, { id: string }>,
+    ` as TypedQueryDocumentNode<{ deleteOption: void }, { id: number }>,
     // 消息订阅
     onMessage: gql`
       subscription OnMessage {

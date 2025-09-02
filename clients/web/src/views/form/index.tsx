@@ -32,7 +32,7 @@ export default defineComponent({
   },
   props: {
     id: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -44,7 +44,7 @@ export default defineComponent({
     const formApi = useFormApi();
 
     // from /f/:id
-    const formRes = createResource(async (id: string) => {
+    const formRes = createResource(async (id: number) => {
       const { form } = await formApi.get({
         variables: {
           id,

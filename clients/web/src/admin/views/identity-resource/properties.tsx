@@ -14,7 +14,7 @@ import type { Column } from 'ant-design-vue/types/table/column';
 import type { IdentityPropertiesModel } from '@/admin/fetch/identity-resource';
 
 type IdentityPropertyProps = {
-  identityResourceId: string;
+  identityResourceId: number;
 };
 
 export default defineComponent({
@@ -26,7 +26,7 @@ export default defineComponent({
   },
   props: {
     identityResourceId: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -71,7 +71,7 @@ export default defineComponent({
     );
 
     const identityResourceName = ref('');
-    const $propertiesRes = createResource((identityResourceId: string) => {
+    const $propertiesRes = createResource((identityResourceId: number) => {
       return identityResourceApi
         .getProperties({
           variables: { identityResourceId },
@@ -115,7 +115,7 @@ export default defineComponent({
     };
 
     const deleting = ref(false);
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: number) => {
       Modal.confirm({
         title: i18n.tv('page_identity_resource_properties.delete_confirm.title', '提示'),
         content: i18n.tv(

@@ -15,7 +15,7 @@ import type { ApiSecretModel } from '@/admin/fetch/api-resource';
 
 type ApiSecretGenerateProps = {
   form: WrappedFormUtils;
-  apiResourceId: string;
+  apiResourceId: number;
 };
 
 const getPresetTypeOptions = (
@@ -74,7 +74,7 @@ export default Form.create({})(
     },
     props: {
       apiResourceId: {
-        type: String,
+        type: Number,
         required: true,
       },
     },
@@ -114,7 +114,7 @@ export default Form.create({})(
           : {};
       });
 
-      const $apiResourceRes = createResource((apiResourceId: string) =>
+      const $apiResourceRes = createResource((apiResourceId: number) =>
         apiResourceApi
           .getBasicInfo({
             variables: { id: apiResourceId },

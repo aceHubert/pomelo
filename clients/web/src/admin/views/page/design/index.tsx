@@ -79,7 +79,7 @@ export default defineComponent({
   name: 'PageDesign',
   layout: 'blank',
   props: {
-    id: String,
+    id: Number,
   },
   head() {
     return {
@@ -155,12 +155,12 @@ export default defineComponent({
 
     const pageData = reactive<
       Pick<PageTemplateModel, 'title' | 'name' | 'content' | 'status'> & {
-        id?: string;
+        id?: number;
         featureImage?: string;
         allowComment?: boolean;
       }
     >({
-      id: props.id,
+      id: props.id ? Number(props.id) : undefined,
       name: '',
       title: '',
       content: '',
@@ -235,7 +235,7 @@ export default defineComponent({
         })
         .then(({ page }) => {
           pageData.id = page.id;
-          router.replace({ name: 'page-edit', params: { id: page.id } });
+          router.replace({ name: 'page-edit', params: { id: String(page.id) } });
           return {
             ...page,
             title: '',
