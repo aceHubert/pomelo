@@ -38,7 +38,7 @@ export default defineComponent({
     });
 
     const drawerVisible = ref(false);
-    const $mediaRes = createResource((id: string) =>
+    const $mediaRes = createResource((id: number) =>
       resApi
         .get({
           variables: { id },

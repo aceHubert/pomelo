@@ -44,7 +44,7 @@ export interface PagedMediaArgs extends PagedArgs {
 }
 
 export interface Media extends Omit<File, 'original'>, FileData {
-  id: string;
+  id: number;
   originalFileName: string;
   extension: string;
   mimeType: string;
@@ -189,7 +189,7 @@ export const useResApi = defineRegistGraphql('resource', {
           }
         }
       }
-    ` as TypedMutationDocumentNode<{ image: Media }, { id: string; options: ImageCropOptions }>,
+    ` as TypedMutationDocumentNode<{ image: Media }, { id: number; options: ImageCropOptions }>,
     getPaged: gql`
       query getMedias($offset: Int, $limit: Int, $keyword: String, $extensions: [String!], $mimeTypes: [String!]) {
         medias: medias(
@@ -288,7 +288,7 @@ export const useResApi = defineRegistGraphql('resource', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ media: Media | null }, { id: string }>,
+    ` as TypedQueryDocumentNode<{ media: Media | null }, { id: number }>,
     getObsUploadSignedUrl: gql`
       query gethwCloudObsUploadSignedUrl(
         $bucket: String!

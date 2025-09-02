@@ -14,7 +14,7 @@ import type { ApiClaimsModel } from '@/admin/fetch/api-resource';
 
 type ApiClaimProps = {
   form: WrappedFormUtils;
-  apiResourceId: string;
+  apiResourceId: number;
 };
 
 export default Form.create({})(
@@ -27,7 +27,7 @@ export default Form.create({})(
     },
     props: {
       apiResourceId: {
-        type: String,
+        type: Number,
         required: true,
       },
     },
@@ -67,7 +67,7 @@ export default Form.create({})(
 
       const apiResourceName = ref('');
       const apiResourceNonEditable = ref(true);
-      const $claimsRes = createResource((apiResourceId: string) => {
+      const $claimsRes = createResource((apiResourceId: number) => {
         return apiResourceApi
           .getClaims({
             variables: {
@@ -113,7 +113,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: string) => {
+      const handleDelete = (id: number) => {
         Modal.confirm({
           title: i18n.tv('page_api_resource_claims.delete_confirm.title', '确认'),
           content: i18n.tv('page_api_resource_claims.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

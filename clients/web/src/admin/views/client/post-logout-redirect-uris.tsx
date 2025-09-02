@@ -110,7 +110,7 @@ export default Form.create({})(
       };
 
       const deleting = ref(false);
-      const handleDelete = (id: string) => {
+      const handleDelete = (id: number) => {
         Modal.confirm({
           title: i18n.tv('page_client_post_logout_redirect_uris.delete_confirm.title', '提示'),
           content: i18n.tv(

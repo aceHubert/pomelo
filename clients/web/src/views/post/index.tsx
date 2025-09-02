@@ -38,7 +38,7 @@ export default defineComponent({
   },
   props: {
     id: {
-      type: String,
+      type: Number,
       required: true,
     },
   },
@@ -49,7 +49,7 @@ export default defineComponent({
     const postApi = usePostApi();
 
     // post /p/:id
-    const postRes = createResource(async (id: string) => {
+    const postRes = createResource(async (id: number) => {
       const { post } = await postApi.get({
         variables: {
           id,

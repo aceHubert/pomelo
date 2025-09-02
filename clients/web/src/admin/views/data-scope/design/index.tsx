@@ -16,7 +16,7 @@ import type { WrappedFormUtils } from 'ant-design-vue/types/form/form';
 import type { ClauseValue } from '../components/clause-form';
 
 type DataScopeDesignProps = {
-  id?: string;
+  id?: number;
   form: WrappedFormUtils;
 };
 
@@ -29,7 +29,7 @@ export default Form.create({})(
       };
     },
     props: {
-      id: { type: String },
+      id: Number,
     },
     setup(props: DataScopeDesignProps, { refs }) {
       const router = useRouter();
@@ -102,7 +102,7 @@ export default Form.create({})(
                 });
             } else {
               designerMixin
-                .update(Number(props.id!), {
+                .update(props.id!, {
                   ...values,
                   content,
                   status,

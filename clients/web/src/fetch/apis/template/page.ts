@@ -108,7 +108,7 @@ export const usePageApi = defineRegistGraphql('template_page', {
           }
         }
       }
-    ` as TypedQueryDocumentNode<{ page: PageTemplateModel | null }, { id: string; metaKeys?: string[] }>,
+    ` as TypedQueryDocumentNode<{ page: PageTemplateModel | null }, { id: number; metaKeys?: string[] }>,
     // 通过别名获取页面
     getByName: gql`
       query getPage($name: String, $metaKeys: [String!]) {
@@ -172,7 +172,7 @@ export const usePageApi = defineRegistGraphql('template_page', {
       }
     ` as TypedMutationDocumentNode<
       { result: null; featureImageResult: null },
-      { id: string; updatePage: UpdatePageTemplateInput; featureImage?: string }
+      { id: number; updatePage: UpdatePageTemplateInput; featureImage?: string }
     >,
   },
 });

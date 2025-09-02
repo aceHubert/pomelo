@@ -14,7 +14,7 @@ import type { Column } from 'antdv-layout-pro/components/async-table/AsyncTable'
 import type { ApiPropertiesModel } from '@/admin/fetch/api-resource';
 
 type ApiPropertyProps = {
-  apiResourceId: string;
+  apiResourceId: number;
 };
 
 export default defineComponent({
@@ -118,7 +118,7 @@ export default defineComponent({
     };
 
     const deleting = ref(false);
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: number) => {
       Modal.confirm({
         title: i18n.tv('page_api_properties.delete_confirm.title', '提示'),
         content: i18n.tv('page_api_properties.delete_confirm.content', '此操作将永久删除该记录, 是否继续?'),

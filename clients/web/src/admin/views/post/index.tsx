@@ -45,7 +45,7 @@ export default defineComponent({
     const templateMixin = useTemplateMixin();
     const postApi = usePostApi();
 
-    const currentUserId = ref<string>();
+    const currentUserId = ref<number>();
 
     const postTemplates = reactive({
       loading: false,
@@ -63,8 +63,8 @@ export default defineComponent({
         ...templateMixin.searchQuery,
         author: has(route.query, RouteQueryKey.Self) ? currentUserId.value : void 0,
         date: (route.query[RouteQueryKey.Date] as string) || void 0,
-        categoryId: (route.query[RouteQueryKey.CategoryId] as string) || void 0,
-        tagId: (route.query[RouteQueryKey.TagId] as string) || void 0,
+        categoryId: has(route.query, RouteQueryKey.CategoryId) ? Number(route.query[RouteQueryKey.CategoryId]) : void 0,
+        tagId: has(route.query, RouteQueryKey.TagId) ? Number(route.query[RouteQueryKey.TagId]) : void 0,
       };
     });
 
@@ -74,7 +74,7 @@ export default defineComponent({
       // 加载数据前确保用户 id 已存在
       if (!currentUserId.value) {
         const user = await userManager.getUser();
-        currentUserId.value = user?.profile.sub;
+        user && (currentUserId.value = Number(user.profile.sub));
         if (user?.profile.role) {
           const role = userMixin.getRole(user.profile.role);
           hasPermission = role.hasPermission.bind(undefined);
@@ -134,7 +134,7 @@ export default defineComponent({
               return {
                 ...item,
                 actionCapability,
-                isSelfContent: currentUserId.value === String(item.author?.id),
+                isSelfContent: currentUserId.value === item.author?.id,
               };
             }),
             total: posts.total,

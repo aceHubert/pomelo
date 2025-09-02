@@ -38,7 +38,7 @@ export default defineComponent({
     };
   },
   props: {
-    id: String,
+    id: Number,
   },
   setup(props) {
     const i18n = useI18n();
@@ -47,7 +47,7 @@ export default defineComponent({
     const deviceType = useDeviceType();
     const pageApi = usePageApi();
 
-    const pageRes = createResource(async ({ id, name }: { id?: string; name?: string }) => {
+    const pageRes = createResource(async ({ id, name }: { id?: number; name?: string }) => {
       const page = id
         ? await pageApi // from /p/:id
             .get({

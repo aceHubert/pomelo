@@ -9,19 +9,19 @@ export enum PresetTaxonomy {
 }
 
 export type TermTaxonomyModel = {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   taxonomy: PresetTaxonomy | string;
   description: string;
-  parentId: string;
+  parentId: number;
   group: number;
   count: number;
 };
 
 export type TermRelationshipModel = {
-  objectId: string;
-  termTaxonomyId: string;
+  objectId: number;
+  termTaxonomyId: number;
   order: number;
 };
 
@@ -30,14 +30,14 @@ export type NewTermTaxonomyInput = {
   slug?: string;
   taxonomy: string;
   description: string;
-  parentId?: string;
+  parentId?: number;
   group?: number;
   objectId?: number;
 };
 
 export type NewTermRelationshipInput = {
-  objectId: string;
-  termTaxonomyId: string;
+  objectId: number;
+  termTaxonomyId: number;
   order?: number;
 };
 
@@ -93,8 +93,8 @@ export const useTermTaxonomyApi = defineRegistGraphql('term-taxonomy', {
       | {
           keyword?: string;
           group?: number;
-          parentId?: string;
-          objectId: string;
+          parentId?: number;
+          objectId: number;
           includeDefault?: boolean;
           withMine?: true;
         }
@@ -117,7 +117,7 @@ export const useTermTaxonomyApi = defineRegistGraphql('term-taxonomy', {
       }
     ` as TypedQueryDocumentNode<
       { tags: Omit<TermTaxonomyModel, 'taxonomy'>[]; myTags?: Pick<TermTaxonomyModel, 'id' | 'name'>[] },
-      { keyword?: string; group?: number } | { keyword?: string; group?: number; objectId: string; withMine: true }
+      { keyword?: string; group?: number } | { keyword?: string; group?: number; objectId: number; withMine: true }
     >,
     create: gql`
       mutation createTerm($model: NewTermTaxonomyInput!) {
@@ -146,6 +146,6 @@ export const useTermTaxonomyApi = defineRegistGraphql('term-taxonomy', {
       mutation deleteRelationship($objectId: ID!, $termTaxonomyId: ID!) {
         result: deleteTermRelationship(objectId: $objectId, termTaxonomyId: $termTaxonomyId)
       }
-    ` as TypedMutationDocumentNode<{ result: null }, { objectId: string; termTaxonomyId: string }>,
+    ` as TypedMutationDocumentNode<{ result: null }, { objectId: number; termTaxonomyId: number }>,
   },
 });
