@@ -147,3 +147,55 @@ The project uses custom Formily builds located in `.submodules/`:
 ### Branch Strategy
 - Main development branch: `master`
 - Current working branch: `fix/id-type`
+
+### Import Ordering
+This project follows the ESLint `import/order` rule specification. Import statements should be organized in the following order:
+
+1. **Built-in** (Node.js built-in modules like `path`, `fs`)
+2. **External** (third-party packages from node_modules)
+3. **Internal** (project-specific modules using `@/` alias)
+4. **Parent** (relative imports with `../`)
+5. **Sibling** (relative imports from same directory)
+6. **Index** (imports from `./index`)
+7. **Object** (imports with side-effects like CSS/Less files)
+8. **Type-only** (TypeScript type imports)
+
+The project is configured with specific path groups:
+- `@/**`, `@admin/**`, `@initialize/**` - Treated as internal imports
+- `*.+(less|scss|sass)` - Treated as object imports (styles)
+
+Example:
+```typescript
+// Built-in
+import * as path from 'path';
+import * as fs from 'fs';
+
+// External
+import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
+
+// Internal (with @/ alias)
+import { AppController } from '@/app.controller';
+import { AppService } from '@/app.service';
+import { DataSource } from '@/datasource';
+
+// Parent
+import { ParentModule } from '../parent/parent.module';
+
+// Sibling
+import { SiblingComponent } from './sibling.component';
+
+// Index
+import { IndexService } from './index';
+
+// Object (side-effect imports)
+import './styles.less';
+import '@/assets/theme.scss';
+
+// Type-only imports
+import type { Context } from 'graphql-ws';
+import type { ResolveTree } from 'graphql-parse-resolve-info';
+```
+
+Use `@/` alias for absolute imports from the project root. The rule is configured to warn on unassigned imports and follows the group order specified above.
