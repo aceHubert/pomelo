@@ -1,12 +1,13 @@
 import { PickType, PartialType } from '@nestjs/mapped-types';
-import { IsArray, IsBoolean, IsInt, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsOptional, IsPositive, IsString, Min } from 'class-validator';
 
 export class ListTermTaxonomyQueryPayload {
   @IsString()
   taxonomy!: string;
 
   @IsOptional()
-  @IsPositive()
+  @IsInt()
+  @Min(0)
   parentId?: number;
 
   @IsOptional()
@@ -31,11 +32,13 @@ export class ListTermTaxonomyByObjectIdPayload {
   taxonomy!: string;
 
   @IsOptional()
-  @IsPositive()
+  @IsInt()
+  @Min(0)
   parentId?: number;
 
   @IsOptional()
-  @IsPositive()
+  @IsInt()
+  @Min(0)
   group?: number;
 
   @IsOptional()
@@ -57,10 +60,12 @@ export class NewTermTaxonomyPayload {
   @IsString()
   description!: string;
 
-  @IsPositive()
+  @IsInt()
+  @Min(0)
   parentId!: number;
 
-  @IsPositive()
+  @IsInt()
+  @Min(0)
   group!: number;
 
   @IsOptional()
