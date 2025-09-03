@@ -1,14 +1,3 @@
-# vim: set shiftwidth=2 tabstop=2 softtabstop=-1 expandtab:
-
-# >  cat > .env.docker.local
-#   BUILD_TAG=0.0.1
-#   BUILD_IGNORE=true
-#   DEBUG=true
-#   ENV_FILE=.env.local
-
-# > mkdir release
-# > docker compose --env-file .env.docker.local up --build --force-recreate  -d
-
 # version: '3.1'
 
 services:

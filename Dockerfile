@@ -24,14 +24,14 @@ WORKDIR /app
 # 添加ARG参数，可在docker build时通过 --build-arg BUILD_OPTION="xxx" 传入代码编译命令
 # true: 不编译代码，直接使用缓存；false: 编译代码
 ARG BUILD_IGNORE="false"
-# 编译选项 yarn ${BUILD_OPTION}
-ARG BUILD_OPTION="build:prod"
+# 编译选项 ${BUILD_OPTION}
+ARG BUILD_OPTION="yarn build"
 
 # build projects
 RUN if [ "$BUILD_IGNORE" = "true" ]; then \
         set -x ; echo "Build ignored!"; \
     else \
-        set -ex && pwd && ls && yarn install --mode=skip-build && yarn ${BUILD_OPTION} && ls; \
+        set -ex && pwd && ls && yarn install --mode=skip-build && ${BUILD_OPTION} && ls; \
     fi
 
 # install runtime files
