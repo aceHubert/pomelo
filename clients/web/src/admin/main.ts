@@ -98,10 +98,14 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
         popup: true,
         // redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
       })
-      .then(userManager.getUser)
+      .then(() => userManager.getUser())
       .then((user) => {
-        // 未退出当前用户
-        !user && next('/');
+        // 已退出当前用户, 跳转首页
+        if (!user) {
+          next(false);
+          // Error: Redirected when going from "/" to "/signout" via a navigation guard.
+          router.replace('/');
+        }
       });
   } else if (to.meta?.anonymous === true) {
     next();
