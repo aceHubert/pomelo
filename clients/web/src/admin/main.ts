@@ -12,8 +12,6 @@ import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
 import { pinia } from '@/store';
-import { AuthTypeOptionName } from '@/constants';
-import { AuthType } from '@/types';
 import { errorRef, SharedError } from '@/shared';
 import * as plugins from '@/plugins';
 
@@ -120,7 +118,7 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
           })
           .then(next)
           .catch(() => {
-            errorRef.value = new SharedError(i18n.tv('unauthorized.message', '授权失败, 请重试') as string, 404);
+            errorRef.value = new SharedError(i18n.tv('unauthorized.message', '授权失败, 请重试') as string, 401);
             next();
           });
       } else {
@@ -142,10 +140,6 @@ function clearModals(this: Vue) {
 
 createApp().then(({ app, router }) => {
   const _app = new Vue(app);
-
-  // Set auth type
-  const authType = _app.$config[AuthTypeOptionName] as AuthType;
-  authType && Object.values(AuthType).includes(authType) && Authoriztion.setType(authType);
 
   router.beforeEach(authMiddleware.bind(_app));
   router.afterEach(clearModals.bind(_app));

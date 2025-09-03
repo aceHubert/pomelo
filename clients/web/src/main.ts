@@ -11,8 +11,6 @@ import { graphqlFetch } from './fetch/graphql';
 import { i18n } from './i18n';
 import { router } from './router';
 import { pinia } from './store';
-import { AuthTypeOptionName } from './constants';
-import { AuthType } from './types';
 import * as plugins from './plugins';
 import App from './App';
 import './assets/styles/index.less';
@@ -126,10 +124,6 @@ function clearModals(this: Vue) {
 
 createApp().then(({ app }) => {
   const _app = new Vue(app);
-
-  // Set auth type
-  const authType = _app.$config[AuthTypeOptionName] as AuthType;
-  authType && Object.values(AuthType).includes(authType) && Authoriztion.setType(authType);
 
   router.beforeEach(authMiddleware.bind(_app));
   router.afterEach(clearModals.bind(_app));

@@ -1,5 +1,4 @@
 import { getEnv } from '@ace-util/core';
-import { AuthType } from '@/types';
 import { LocalUserManagerCreator } from './local';
 import { OidcUserManagerCreator } from './openid-connect';
 
@@ -8,9 +7,19 @@ import type _Vue from 'vue';
 import type { UserManager as OidcUserManagerType, UserManagerSettings as OidcUserManngerSetions } from 'oidc-client-ts';
 import type { UserManager } from './user-manager';
 
+export enum AuthType {
+  Oidc = 'OIDC',
+  Local = 'LOCAL',
+}
+
+let authType = (process.env.VUE_APP_AUTH_TYPE as AuthType) || AuthType.Local;
+
+if (!Object.values(AuthType).includes(authType)) {
+  authType = AuthType.Local;
+}
+
 export class Authoriztion {
   private static instance: Authoriztion;
-  type: AuthType;
   userManager: UserManager & Partial<Pick<OidcUserManagerType, 'signinSilent' | 'storeUser'>>;
 
   constructor(type: AuthType.Oidc, options: ConstructorParameters<typeof OidcUserManagerCreator>[0]);
@@ -19,7 +28,6 @@ export class Authoriztion {
     type: AuthType,
     options: ConstructorParameters<typeof LocalUserManagerCreator | typeof OidcUserManagerCreator>[0],
   ) {
-    this.type = type;
     if (type === AuthType.Oidc) {
       const userManager = new OidcUserManagerCreator(options as OidcUserManngerSetions);
 
@@ -32,30 +40,34 @@ export class Authoriztion {
     }
   }
 
-  static setType = (type: AuthType) => {
-    if (this.instance?.type === type) return this;
+  static get authType() {
+    return authType;
+  }
 
-    this.instance =
-      type === AuthType.Oidc
-        ? new Authoriztion(AuthType.Oidc, getEnv<OidcUserManngerSetions>('oidc', {} as any, window._ENV))
-        : new Authoriztion(AuthType.Local, {});
-    return this;
-  };
-
-  static getInstance(defaultType: AuthType = AuthType.Local) {
+  static getInstance() {
     if (!this.instance) {
-      this.setType(defaultType);
+      this.instance =
+        authType === AuthType.Oidc
+          ? new Authoriztion(AuthType.Oidc, getEnv<OidcUserManngerSetions>('oidc', {} as any, window._ENV))
+          : new Authoriztion(AuthType.Local, {});
     }
 
     return this.instance;
   }
 
-  static install(Vue: typeof _Vue, type: AuthType = AuthType.Local) {
-    const self = this.setType(type);
+  static install(Vue: typeof _Vue) {
+    const instance = this.getInstance();
 
-    Object.defineProperty(Vue.prototype, '$userManager', {
-      get() {
-        return self.getInstance().userManager;
+    Object.defineProperties(Vue.prototype, {
+      $userManager: {
+        get() {
+          return instance.userManager;
+        },
+      },
+      $authType: {
+        get() {
+          return authType;
+        },
       },
     });
   }
@@ -64,5 +76,6 @@ export class Authoriztion {
 declare module 'vue/types/vue' {
   interface Vue {
     readonly $userManager: UserManager & Partial<Pick<OidcUserManagerType, 'signinSilent' | 'storeUser'>>;
+    readonly $authType: AuthType;
   }
 }

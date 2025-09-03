@@ -21,13 +21,13 @@ export const basicRoutes: Array<RouteConfig> = [
   {
     name: 'category',
     path: '/categories',
-    component: () => import(/* webpackChunkName: "admin-posts" */ '../../views/category/index'),
+    component: () => import(/* webpackChunkName: "admin-taxonomies" */ '../../views/category/index'),
     props: (route) => ({ id: Number(route.params.id) }),
   },
   {
     name: 'tag',
     path: '/tags',
-    component: () => import(/* webpackChunkName: "admin-posts" */ '../../views/tag/index'),
+    component: () => import(/* webpackChunkName: "admin-taxonomies" */ '../../views/tag/index'),
     props: (route) => ({ id: Number(route.params.id) }),
   },
   {

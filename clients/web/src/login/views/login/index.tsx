@@ -3,13 +3,12 @@ import { defineComponent, onMounted, ref } from '@vue/composition-api';
 import { absoluteGo } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
 import { Form, Input, Button, Row, Col } from 'ant-design-vue';
+import { Authoriztion, AuthType } from '@/auth';
 import { setToken, removeToken } from '@/auth/local';
 import { message } from '@/components/antdv-helper';
-import { useI18n, useOptions } from '@/composables';
+import { useI18n } from '@/composables';
 import { useDeviceMixin } from '@/mixins/device';
 import { useLoginApi } from '@/login/fetch';
-import { AuthTypeOptionName } from '@/constants';
-import { AuthType } from '@/types';
 import classes from './index.module.less';
 
 // Types
@@ -28,7 +27,6 @@ export default Form.create({})(
       };
     },
     setup(props: SiteInitProps) {
-      const authType = useOptions<AuthType>(AuthTypeOptionName);
       const i18n = useI18n();
       const deviceMixin = useDeviceMixin();
       const route = useRoute();
@@ -39,7 +37,7 @@ export default Form.create({})(
         absoluteGo(redirect, true);
       };
 
-      if (authType.value && authType.value !== AuthType.Local) {
+      if (Authoriztion.authType !== AuthType.Local) {
         redirect();
         return;
       }

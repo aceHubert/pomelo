@@ -3,7 +3,7 @@ import { RouterChild } from '@/layouts/components';
 // Types
 import type { RouteConfig } from 'vue-router';
 
-export const identityRoutes: Array<RouteConfig> = [
+export const oidcRoutes: Array<RouteConfig> = [
   {
     path: '/clients',
     component: RouterChild,
@@ -11,66 +11,66 @@ export const identityRoutes: Array<RouteConfig> = [
       {
         name: 'clients',
         path: '',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/index'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/index'),
       },
       {
         name: 'client-detail',
         path: ':clientId',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/detail'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/detail'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-grant-types',
         path: ':clientId/grant-types',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/grant-types'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/grant-types'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-scopes',
         path: ':clientId/scopes',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/scopes'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/scopes'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-claims',
         path: ':clientId/claims',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/claims'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/claims'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-cors-origins',
         path: ':clientId/cors-origins',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/cors-origins'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/cors-origins'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-redirect-uris',
         path: ':clientId/redirect-uris',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/redirect-uris'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/redirect-uris'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-post-logout-redirect-uris',
         path: ':clientId/post-logout-redirect-uris',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/post-logout-redirect-uris'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/post-logout-redirect-uris'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-secrets',
         path: ':clientId/secrets',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/secrets/index'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/secrets/index'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-secrets-generate',
         path: ':clientId/secrets/generate',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/secrets/generate'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/secrets/generate'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
       {
         name: 'client-properties',
         path: ':clientId/properties',
-        component: () => import(/* webpackChunkName: "admin-clients" */ '../../views/client/properties'),
+        component: () => import(/* webpackChunkName: "admin-oidc" */ '../../views/client/properties'),
         props: (route) => ({ clientId: route.params.clientId }),
       },
     ],
@@ -181,29 +181,6 @@ export const identityRoutes: Array<RouteConfig> = [
         path: ':id/edit',
         component: () => import(/* webpackChunkName: "admin-data-scope" */ '../../views/data-scope/design/index'),
         props: (route) => ({ id: Number(route.params.id) }),
-      },
-    ],
-  },
-  {
-    path: '/submodules',
-    component: RouterChild,
-    children: [
-      {
-        name: 'submodules',
-        path: '',
-        component: () => import(/* webpackChunkName: "admin-sub-modules" */ '../../views/submodules/index'),
-        props: (route) => ({ name: route.query.search }),
-      },
-      {
-        name: 'submodules-details',
-        path: ':name',
-        component: () => import(/* webpackChunkName: "admin-sub-modules" */ '../../views/submodules/details'),
-        props: (route) => {
-          return {
-            name: route.params.name,
-            version: route.query.version,
-          };
-        },
       },
     ],
   },
