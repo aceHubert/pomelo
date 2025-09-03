@@ -150,7 +150,9 @@ export async function syncDatabase(app: INestApplication<any>) {
             redirectUris: webURL
               ? [`${webURL}/signin`, `${webURL}/signin.html`, `${webURL}/signin-silent`, `${webURL}/signin-silent.html`]
               : [],
-            postLogoutRedirectUris: webURL ? [webURL, `${webURL}/admin`] : [],
+            postLogoutRedirectUris: webURL
+              ? [webURL, `${webURL}/admin`, `${webURL}/signout`, `${webURL}/signout.html`]
+              : [],
             secrets: [
               {
                 type: 'SharedSecret',
