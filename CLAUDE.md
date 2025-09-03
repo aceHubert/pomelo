@@ -30,22 +30,22 @@ yarn start:server:infrastructure-bff
 
 ### Building
 ```bash
-# Build entire project for production
-yarn build:prod
-
-# Build for local development
-yarn build:local
 
 # Build only web client
 yarn build:web
+
+# Build web client with oidc mode
+yarn build:web:oidc
 
 # Build only servers
 yarn build:servers
 
 # Build specific server
-yarn build:identity-server
 yarn build:server:infrastructure-service
 yarn build:server:infrastructure-bff
+
+# Build identity server
+yarn build:identity-server
 ```
 
 ### Testing

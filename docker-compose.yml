@@ -5,7 +5,7 @@
 # BUILD_PLATFORM=linux/arm64/v8
 # BUILD_TAG=0.0.1
 # BUILD_IGNORE=true
-# BUILD_OPTION=build:local
+# BUILD_OPTION="cross-env ENV_JS=env/env.local.js BASE_URL=/ yarn build:web:oidc && yarn build:servers && yarn build:identity-server"
 # RUNTIME_ENV=production
 # SERVE_ENV=local
 # SERVE_APPS=''
