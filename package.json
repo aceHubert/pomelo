@@ -9,7 +9,7 @@
     "start:server:infrastructure-bff": "nest build infrastructure-bff --builder=webpack --watch",
     "start:identity-server": "yarn workspace @ace-pomelo/theme run build && concurrently --raw \"grunt --gruntfile ./servers/identity-server/Gruntfile.js dev\" \"nest build identity-server --builder=webpack --watch\"",
     "build:web": "yarn workspaces foreach -vtR --from '@ace-pomelo/web' run build",
-    "build:web:oidc": "yarn workspaces foreach -vtR --from '@ace-pomelo/web' run build:oidc",
+    "build:web:oidc": "cross-env VUE_APP_AUTH_TYPE=OIDC yarn workspaces foreach -vtR --from '@ace-pomelo/web' run build",
     "build:servers": "rimraf dist && concurrently \"npm:build:server:*\"",
     "build:server:infrastructure-service": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > ./servers/infrastructure-service/src/version.ts && nest build infrastructure-service --builder=webpack --config nest-cli.build.json",
     "build:server:infrastructure-bff": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > ./servers/infrastructure-bff/src/version.ts && nest build infrastructure-bff --builder=webpack --config nest-cli.build.json",
