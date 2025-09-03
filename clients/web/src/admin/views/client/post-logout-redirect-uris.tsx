@@ -136,12 +136,11 @@ export default Form.create({})(
                   return () => (deleting.value = false);
                 },
               })
-              .then(({ result }) => {
-                result &&
-                  $redirectUrisRes.$result!.splice(
-                    $redirectUrisRes.$result!.findIndex((item) => item.id === id),
-                    1,
-                  );
+              .then(() => {
+                $redirectUrisRes.$result!.splice(
+                  $redirectUrisRes.$result!.findIndex((item) => item.id === id),
+                  1,
+                );
               })
               .catch((err) => {
                 message.error(err.message);
