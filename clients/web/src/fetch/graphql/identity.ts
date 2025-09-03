@@ -26,7 +26,6 @@ export const identityLink = from([
   }),
   setHeaders(async () => {
     const instance = Authoriztion.getInstance(),
-      authType = instance.type,
       userManager = instance.userManager,
       authorization = await userManager
         .getUser()
@@ -36,7 +35,7 @@ export const identityLink = from([
         })
         .catch(() => '');
     const headers = {
-      apikey: `pomelo-${authType}`,
+      apikey: `pomelo-${Authoriztion.authType.toLowerCase()}`,
     };
 
     authorization && (headers['Authorization'] = authorization);
