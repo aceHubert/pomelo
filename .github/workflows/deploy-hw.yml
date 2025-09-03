@@ -79,9 +79,11 @@ jobs:
         variant:
           - name: "standard"
             build_commands: "yarn build:web && yarn build:servers"
+            serve_apps: "infrastructure-service,infrastructure-bff,static-content,web"
             tag_suffix: ""
           - name: "oidc"
             build_commands: "yarn build:web:oidc && yarn build:servers && yarn build:identity-server"
+            serve_apps: "infrastructure-service,infrastructure-bff,identity-server,static-content,web"
             tag_suffix: "-oidc"
     steps:
       - name: Checkout repository and submodules
@@ -124,6 +126,7 @@ jobs:
           docker buildx build --file Dockerfile --target deploy \
           --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ matrix.variant.tag_suffix }} \
           --build-arg BUILD_IGNORE=true \
+          --build-arg SERVE_APPS="${{ matrix.variant.serve_apps }}" \
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --label "variant=${{ matrix.variant.name }}" \
@@ -141,6 +144,7 @@ jobs:
           docker buildx build --file Dockerfile --target deploy \
           --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest${{ matrix.variant.tag_suffix }} \
           --build-arg BUILD_IGNORE=true \
+          --build-arg SERVE_APPS="${{ matrix.variant.serve_apps }}" \
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --label "variant=${{ matrix.variant.name }}" \
