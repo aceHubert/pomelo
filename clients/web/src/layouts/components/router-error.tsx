@@ -18,7 +18,7 @@ export default defineComponent({
       userManager
         .signin({
           noInteractive: true,
-          popup: true,
+          // popup: true,
         })
         .then(() => {
           window.location.reload();
@@ -29,7 +29,7 @@ export default defineComponent({
       <Card bordered={false} size="small">
         <Result status="error" title={`Error(${statusCode.value})`} subTitle={message.value}>
           <template slot="extra">
-            {statusCode.value === 404 && (
+            {statusCode.value === 401 && (
               <Button type="primary" rounded onClick={() => handleSignin()}>
                 {i18n.tv('unauthorized.signin_btn_text', '重新登录')}
               </Button>

@@ -35,7 +35,11 @@ export const basicLink = split(
   ),
   from([
     errorHandler({
-      unauthorize: () => Authoriztion.getInstance().userManager.signin({ noInteractive: true, popup: true }),
+      unauthorize: () =>
+        Authoriztion.getInstance().userManager.signin({
+          noInteractive: true,
+          // popup: true,
+        }),
       retry: async () => {
         const user = await Authoriztion.getInstance().userManager.signinSilent?.();
         if (user && !user.expired) {
