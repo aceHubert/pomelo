@@ -65,18 +65,18 @@
         descEl.innerHTML = msg;
 
         if (s <= 0) {
-          const window = window.opener || window.parent || window;
-          var url = localStorage.getItem(RedirectKey) || './';
-          localStorage.removeItem(RedirectKey);
-          if (history.replaceState) {
-            history.replaceState({}, document.title, url);
-            history.go(0);
+          const win = window.opener || window.parent || window;
+          var url = win.localStorage.getItem(RedirectKey) || './';
+          win.localStorage.removeItem(RedirectKey);
+          if (win.history.replaceState) {
+            win.history.replaceState({}, document.title, url);
+            win.history.go(0);
           } else {
-            location.replace(url);
+            win.location.replace(url);
           }
           return;
         }
-        setTimeout(closeWindowInSeconds.bind(null, s - 1), 1000);
+        setTimeout(redirectInSeconds.bind(null, s - 1), 1000);
       };
 
       homeBtn.addEventListener('click', redirectInSeconds.bind(null, 0));
