@@ -1,5 +1,5 @@
 import iterate from 'iterare';
-import { snakeCase } from 'lodash';
+import { snakeCase } from 'lodash-es';
 import { getMetadataStorage } from 'class-validator';
 import { ValidationError } from '@nestjs/common';
 import { I18nService, TranslateOptions, Path, I18nValidationError } from 'nestjs-i18n';

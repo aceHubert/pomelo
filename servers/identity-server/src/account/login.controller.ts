@@ -1,5 +1,5 @@
 import ejs from 'ejs';
-import { pickBy } from 'lodash';
+import { pickBy } from 'lodash-es';
 import { Request, Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
 import { Controller, Get, Post, Query, Body, Req, Res, HttpStatus } from '@nestjs/common';
@@ -59,8 +59,8 @@ export class LoginController extends BaseController {
       }); // loginPage.xxx or consentPage.x;
     }
 
-    let wrapper: string = '',
-      form: string = '';
+    let wrapper = '',
+      form = '';
 
     const appConfig = this.moduleRef['container'].applicationConfig;
     const primaryColor = clientProperties['primaryColor'] as string;
@@ -484,7 +484,6 @@ export class LoginController extends BaseController {
     @Body('accountId') accountId: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-    @I18n() i18n: I18nContext,
   ) {
     const interaction = await this.ensureInteraction(req, res, returnUrl);
     if (!interaction) return;

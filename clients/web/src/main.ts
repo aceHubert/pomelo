@@ -1,5 +1,5 @@
 /* eslint-disable import/order */
-import { once } from 'lodash';
+import { once } from 'lodash-es';
 import Vue, { type ComponentOptions } from 'vue';
 import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';

@@ -6537,12 +6537,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash-es@npm:^4.17.6":
-  version: 4.17.9
-  resolution: "@types/lodash-es@npm:4.17.9"
+"@types/lodash-es@npm:4.17.6":
+  version: 4.17.6
+  resolution: "@types/lodash-es@npm:4.17.6::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Flodash-es%2F-%2Flodash-es-4.17.6.tgz"
   dependencies:
     "@types/lodash": "*"
-  checksum: a2c7ab8da13892f89ab86b61dd9a0125c767b9db7b9bdaac7fd8508c9fa884bbb19a9760dbdc1e7e698e3322b7a8ba03daa80832371da32a8bd42da0920be838
+  checksum: 9bd239dd525086e278821949ce12fbdd4f100a060fed9323fc7ad5661113e1641f28a7ebab617230ed3474680d8f4de705c1928b48252bb684be6ec9eed715db
   languageName: node
   linkType: hard
 
@@ -6564,10 +6564,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:4.17.5":
-  version: 4.17.5
-  resolution: "@types/lodash@npm:4.17.5::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Flodash%2F-%2Flodash-4.17.5.tgz"
-  checksum: 3c9bb15772509f0ecb40428531863dbc3f064f2bf34bbccc2ce2b2923c69fb0868aec7e357b1d97fd0d7f7e435a014ea5c1adef8a64715529887179c97a5a823
+"@types/lodash@npm:*":
+  version: 4.17.20
+  resolution: "@types/lodash@npm:4.17.20::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Flodash%2F-%2Flodash-4.17.20.tgz"
+  checksum: dc7bb4653514dd91117a4c4cec2c37e2b5a163d7643445e4757d76a360fabe064422ec7a42dde7450c5e7e0e7e678d5e6eae6d2a919abcddf581d81e63e63839
   languageName: node
   linkType: hard
 
@@ -19951,7 +19951,7 @@ __metadata:
     "@types/express-ejs-layouts": ^2.5.3
     "@types/graphql-upload": ^15.0.2
     "@types/jest": 27.0.2
-    "@types/lodash": ^4.14.182
+    "@types/lodash-es": ^4.17.6
     "@types/md5": ^2.3.2
     "@types/multer": ^1.4.7
     "@types/node": ^16.0.0
@@ -20021,7 +20021,7 @@ __metadata:
     less-plugin-clean-css: ^1.5.1
     less-plugin-npm-import: ^2.1.0
     lint-staged: ^10.0.7
-    lodash: ^4.17.21
+    lodash-es: ^4.17.21
     lru-cache: ^10.0.0
     md5: ^2.3.0
     moment: ^2.29.4

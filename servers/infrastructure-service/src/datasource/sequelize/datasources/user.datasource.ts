@@ -1,4 +1,4 @@
-import { isUndefined } from 'lodash';
+import { isUndefined } from 'lodash-es';
 import { CountryCode } from 'libphonenumber-js';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { WhereOptions, Attributes, Op } from 'sequelize';

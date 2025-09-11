@@ -1,4 +1,4 @@
-import { lowerFirst, flattenDeep, groupBy } from 'lodash';
+import { lowerFirst, flattenDeep, groupBy } from 'lodash-es';
 import { Op } from 'sequelize';
 import { UserInputError, ValidationError, RuntimeError } from '@ace-pomelo/shared/server';
 import { Model } from '..';

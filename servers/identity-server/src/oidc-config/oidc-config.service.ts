@@ -1,7 +1,7 @@
 import * as url from 'url';
 import wildcard from 'wildcard';
 import psl from 'psl';
-import { get, omitBy, isNil } from 'lodash';
+import { get, omitBy, isNil } from 'lodash-es';
 import {
   FindAccount,
   KoaContextWithOIDC,

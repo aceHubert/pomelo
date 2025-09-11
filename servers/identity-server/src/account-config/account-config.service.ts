@@ -1,4 +1,4 @@
-import { snakeCase } from 'lodash';
+import { snakeCase } from 'lodash-es';
 import { CountryCode } from 'libphonenumber-js';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
