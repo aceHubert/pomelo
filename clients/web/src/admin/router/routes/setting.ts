@@ -11,17 +11,17 @@ export const settingRoutes: Array<RouteConfig> = [
       {
         name: 'data-scopes',
         path: '',
-        component: () => import(/* webpackChunkName: "admin-data-scope" */ '../../views/data-scope/index'),
+        component: () => import(/* webpackChunkName: "admin-data-scope-views" */ '../../views/data-scope/index'),
       },
       {
         name: 'data-scope-add',
         path: 'create',
-        component: () => import(/* webpackChunkName: "admin-data-scope" */ '../../views/data-scope/design/index'),
+        component: () => import(/* webpackChunkName: "admin-data-scope-views" */ '../../views/data-scope/design/index'),
       },
       {
         name: 'data-scope-edit',
         path: ':id/edit',
-        component: () => import(/* webpackChunkName: "admin-data-scope" */ '../../views/data-scope/design/index'),
+        component: () => import(/* webpackChunkName: "admin-data-scope-views" */ '../../views/data-scope/design/index'),
         props: (route) => ({ id: Number(route.params.id) }),
       },
     ],
@@ -33,7 +33,7 @@ export const settingRoutes: Array<RouteConfig> = [
       {
         name: 'cache-clear',
         path: 'cache-clear',
-        component: () => import(/* webpackChunkName: "admin-settings" */ '../../views/settings/cache-clear'),
+        component: () => import(/* webpackChunkName: "admin-settings-views" */ '../../views/settings/cache-clear'),
       },
     ],
   },

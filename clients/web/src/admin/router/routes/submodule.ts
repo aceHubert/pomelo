@@ -11,13 +11,13 @@ export const submoduleRoutes: Array<RouteConfig> = [
       {
         name: 'submodules',
         path: '',
-        component: () => import(/* webpackChunkName: "admin-submodules" */ '../../views/submodules/index'),
+        component: () => import(/* webpackChunkName: "admin-submodules-views" */ '../../views/submodules/index'),
         props: (route) => ({ name: route.query.search }),
       },
       {
         name: 'submodules-details',
         path: ':name',
-        component: () => import(/* webpackChunkName: "admin-submodules" */ '../../views/submodules/details'),
+        component: () => import(/* webpackChunkName: "admin-submodules-views" */ '../../views/submodules/details'),
         props: (route) => {
           return {
             name: route.params.name,

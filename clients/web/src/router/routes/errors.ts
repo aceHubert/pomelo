@@ -5,7 +5,7 @@ export const errorRoutes: Array<RouteConfig> = [
   {
     name: 'forbidden',
     path: '/forbidden',
-    component: () => import(/* webpackChunkName: "common" */ '@/views/error/forbidden'),
+    component: () => import(/* webpackChunkName: "common-views" */ '@/views/error/forbidden'),
     meta: {
       anonymous: true,
     },
