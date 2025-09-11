@@ -11,6 +11,6 @@ export const routes = [
   {
     path: '*',
     // dymanic page or handle error page inside component
-    component: () => import(/* webpackChunkName: "web-common" */ '@/views/page/index'),
+    component: () => import(/* webpackChunkName: "web-common-views" */ '@/views/page/index'),
   },
 ];
