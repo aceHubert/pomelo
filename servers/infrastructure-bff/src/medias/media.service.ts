@@ -3,7 +3,7 @@ import * as path from 'path';
 import { promisify } from 'util';
 import moment from 'moment';
 import Jimp from 'jimp';
-import { camelCase } from 'lodash';
+import { camelCase } from 'lodash-es';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {

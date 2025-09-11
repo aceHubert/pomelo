@@ -1,5 +1,5 @@
 import statuses from 'statuses';
-import { snakeCase } from 'lodash';
+import { snakeCase } from 'lodash-es';
 import { Request, Response } from 'express';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
 import { isObject } from '@nestjs/common/utils/shared.utils';

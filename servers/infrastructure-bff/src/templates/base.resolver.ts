@@ -1,5 +1,5 @@
 import DataLoader from 'dataloader';
-import { upperFirst } from 'lodash';
+import { upperFirst } from 'lodash-es';
 import { Inject, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID, Int } from '@nestjs/graphql';
