@@ -100,13 +100,13 @@ export default defineComponent({
     }, [() => props.page, () => props.pageSize, () => props.showSizeChanger]);
 
     useEffect(() => {
-      $mediasRes.read(localPagination.value.current!, localPagination.value.pageSize!, keyword.value);
-    }, [keyword, () => localPagination.value.current, () => localPagination.value.pageSize]);
+      refresh();
+    }, [() => localPagination.value.current, () => localPagination.value.pageSize]);
 
     useEffect(() => {
       keyword.value = '';
       $mediasRes.$result = void 0;
-      $mediasRes.read(1, localPagination.value.pageSize!);
+      refresh(true);
     }, [() => props.accept]);
 
     const addItem = (file: (Media & { uid?: string }) | UploadingMedia) => {
@@ -135,14 +135,19 @@ export default defineComponent({
       medias.rows.unshift(file);
     };
 
+    // 移除上传中的媒体文件
     const removeItem = (uid: string) => {
       const existsIndex = uploadingMedias.value.findIndex((item) => uid === item.uid);
       existsIndex >= 0 && uploadingMedias.value.splice(existsIndex, 1);
     };
 
+    /**
+     * 刷新媒体列表
+     * @param force 强制刷新会重置分页到第一页
+     */
     const refresh = (force = false) => {
       force && (localPagination.value = Object.assign({}, localPagination.value, { current: 1 }));
-      $mediasRes.read(localPagination.value.current!, localPagination.value.pageSize!);
+      $mediasRes.read(localPagination.value.current!, localPagination.value.pageSize!, keyword.value);
     };
 
     expose({
