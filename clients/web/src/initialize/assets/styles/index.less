@@ -5,8 +5,10 @@
 @import 'antdv-layout-pro/style/themes/default';
 
 body {
-  background: var(--body-background, #fff) url('@/assets/images/big_bg.png') no-repeat right bottom;
-  background-size: contain;
+  background: var(--body-background, #fff) url('@/initialize/assets/images/initialize_bg.svg') no-repeat center center;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 .app-content {
@@ -15,6 +17,7 @@ body {
     height: 100%;
     // transition: 0.3s;
     position: relative;
+    overflow: auto;
 
     &.content-width-fixed {
       max-width: 1200px;
@@ -38,11 +41,12 @@ body {
     .locale-item {
       padding: 0 8px;
       flex: 1;
+      color: #fff;
       cursor: pointer;
 
       &.selected {
         color: @var-primary;
-        cursor:not-allowed;
+        cursor: not-allowed;
       }
     }
 
@@ -67,4 +71,11 @@ body {
     bottom: 0;
     z-index: 1000;
   }
+}
+
+// Style Ant Design input and password fields with rounded corners
+.@{ant-prefix}-input,
+.@{ant-prefix}-select-selection {
+  border-radius: 99px !important;
+  transition: all 0.3s ease;
 }

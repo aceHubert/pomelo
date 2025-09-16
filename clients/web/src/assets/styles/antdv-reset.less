@@ -352,6 +352,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .btn-link() {
   .button-variant-other(@link-color, transparent, transparent, @link-hover-color, @link-active-color);
+  box-shadow: none;
   &:hover,
   &:focus,
   &:active {
@@ -3656,7 +3657,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   &:focus {
-    box-shadow: 0 0 0 2px @var-primary-5;
+    box-shadow: 0 0 @outline-blur-size @outline-width @var-primary-3;
   }
 
   &-checked {

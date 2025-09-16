@@ -98,6 +98,10 @@ export const useAppStore = defineStore(
         locale.value = newLocale;
         // 修改 i18n 的 locale
         newLocale !== i18n.locale && (i18n.locale = newLocale);
+        // 设置 root lang
+        if (typeof document !== 'undefined' && document.documentElement) {
+          document.documentElement.lang = newLocale;
+        }
       } else {
         warn(
           process.env.NODE_ENV === 'production',

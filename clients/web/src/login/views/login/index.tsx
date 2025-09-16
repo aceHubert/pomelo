@@ -1,13 +1,12 @@
 import sha256 from 'crypto-js/sha256';
 import { defineComponent, onMounted, ref } from '@vue/composition-api';
 import { absoluteGo } from '@ace-util/core';
-import { useRoute } from 'vue2-helpers/vue-router';
-import { Form, Input, Button, Row, Col } from 'ant-design-vue';
+import { useRoute, useRouter } from 'vue2-helpers/vue-router';
+import { Form, Input, Button, Row, Col, Checkbox } from 'ant-design-vue';
 import { Authoriztion, AuthType } from '@/auth';
 import { setToken, removeToken } from '@/auth/local';
 import { message } from '@/components/antdv-helper';
 import { useI18n } from '@/composables';
-import { useDeviceMixin } from '@/mixins/device';
 import { useLoginApi } from '@/login/fetch';
 import classes from './index.module.less';
 
@@ -28,9 +27,11 @@ export default Form.create({})(
     },
     setup(props: SiteInitProps) {
       const i18n = useI18n();
-      const deviceMixin = useDeviceMixin();
+      const router = useRouter();
       const route = useRoute();
       const loginApi = useLoginApi();
+
+      const remember = ref(false);
 
       const redirect = () => {
         const redirect = (route.query.returnUrl as string) || '/';
@@ -47,15 +48,15 @@ export default Form.create({})(
         e.preventDefault();
         e.stopPropagation();
 
-        props.form.validateFields((err, values) => {
+        props.form.validateFields((err, { password, username }) => {
           if (err) return;
 
           loginApi
             .signIn({
               variables: {
                 model: {
-                  ...values,
-                  password: sha256(values.password).toString(),
+                  username,
+                  password: sha256(password).toString(),
                 },
               },
               loading: () => {
@@ -65,7 +66,7 @@ export default Form.create({})(
             })
             .then(({ result }) => {
               if (result.success) {
-                setToken(result.accessToken, result.tokenType);
+                setToken(result.accessToken, result.tokenType, remember.value);
                 message.success({
                   content: i18n.tv('page_login.form.submit_success', '登录成功!') as string,
                   onClose: redirect,
@@ -89,11 +90,11 @@ export default Form.create({})(
           <p class={classes.title}>{i18n.tv('page_login.form.description', '登录 Pomelo 平台')}</p>
           <Form
             form={props.form}
-            labelCol={{ xs: 24, sm: 6 }}
-            wrapperCol={{ xs: 24, sm: 16 }}
+            wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}
+            hideRequiredMark
             onSubmit={handleSubmit.bind(this)}
           >
-            <Form.Item label={i18n.tv('page_login.form.username_label', '用户名')}>
+            <Form.Item>
               <Input
                 v-decorator={[
                   'username',
@@ -108,10 +109,11 @@ export default Form.create({})(
                 ]}
                 name="username"
                 size="large"
+                prefix={i18n.tv('page_login.form.username_label', '用户名：')}
                 placeholder={i18n.tv('page_login.form.username_placeholder', '请输入用户名')}
-              />
+              ></Input>
             </Form.Item>
-            <Form.Item label={i18n.tv('page_login.form.password_label', '密码')}>
+            <Form.Item>
               <Input.Password
                 v-decorator={[
                   'password',
@@ -130,25 +132,26 @@ export default Form.create({})(
                 ]}
                 name="password"
                 size="large"
+                prefix={i18n.tv('page_login.form.password_label', '密码：')}
                 placeholder={i18n.tv('page_login.form.password_placeholder', '请输入密码')}
-              />
+              ></Input.Password>
             </Form.Item>
-            <Row type="flex" class="mb-3">
-              <Col xs={24} sm={{ span: 16, offset: 6 }} class="pr-3">
-                <router-link to={{ name: 'password-forgot' }} class="float-right">
+            <Row type="flex" class="mb-4 px-3">
+              <Col xs={24} sm={{ span: 18, offset: 3 }} class="d-flex justify-content-space-between">
+                <Checkbox v-model={remember.value}>{i18n.tv('page_login.form.remember_me_label', '记住我?')}</Checkbox>
+                <router-link
+                  to={{
+                    name: 'password-forgot',
+                    query: { returnUrl: `${router.options.base}${route.fullPath.substring(1)}` },
+                  }}
+                  class="ml-auto"
+                >
                   {i18n.tv('page_login.form.forgot_password_label', '忘记密码?')}
                 </router-link>
               </Col>
             </Row>
-            <Form.Item wrapperCol={{ xs: 24, sm: { span: 16, offset: 6 } }}>
-              <Button
-                type="primary"
-                shape="round"
-                size="large"
-                htmlType="submit"
-                block={deviceMixin.isMobile}
-                loading={loading.value}
-              >
+            <Form.Item wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}>
+              <Button type="primary" shape="round" size="large" htmlType="submit" block loading={loading.value}>
                 {i18n.tv('page_login.form.submit_btn_text', '登录')}
               </Button>
             </Form.Item>

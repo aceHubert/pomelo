@@ -1,8 +1,7 @@
-import sha256 from 'crypto-js/sha256';
 import { defineComponent, ref } from '@vue/composition-api';
 import { absoluteGo } from '@ace-util/core';
 import { useRoute } from 'vue2-helpers/vue-router';
-import { Form, Input, Button } from 'ant-design-vue';
+import { Form, Input, Button, Space } from 'ant-design-vue';
 import { message } from '@/components/antdv-helper';
 import { useI18n } from '@/composables';
 import { useDeviceMixin } from '@/mixins/device';
@@ -43,29 +42,34 @@ export default Form.create({})(
         props.form.validateFields((err, values) => {
           if (err) return;
 
-          loginApi
-            .modifyPassword({
-              variables: {
-                model: {
-                  ...values,
-                  oldPwd: sha256(values.oldPwd).toString(),
-                  newPwd: sha256(values.newPwd).toString(),
-                },
-              },
-              loading: () => {
-                loading.value = true;
-                return () => (loading.value = false);
-              },
-            })
-            .then(() => {
-              message.success({
-                content: i18n.tv('page_password_forgot.form.submit_success', '登录成功!') as string,
-                onClose: redirect,
-              });
-            })
-            .catch((err) => {
-              message.error(err.message);
-            });
+          // TODO: 发送验证码
+          console.log(values);
+          message.warn('TODO: 发送验证码');
+          return;
+
+          // loginApi
+          //   .modifyPassword({
+          //     variables: {
+          //       model: {
+          //         ...values,
+          //         oldPwd: sha256(values.oldPwd).toString(),
+          //         newPwd: sha256(values.newPwd).toString(),
+          //       },
+          //     },
+          //     loading: () => {
+          //       loading.value = true;
+          //       return () => (loading.value = false);
+          //     },
+          //   })
+          //   .then(() => {
+          //     message.success({
+          //       content: i18n.tv('page_password_forgot.form.submit_success', '登录成功!') as string,
+          //       onClose: redirect,
+          //     });
+          //   })
+          //   .catch((err) => {
+          //     message.error(err.message);
+          //   });
         });
       };
 
@@ -74,11 +78,11 @@ export default Form.create({})(
           <p class={classes.title}>{i18n.tv('page_password_forgot.form.description', '忘记密码')}</p>
           <Form
             form={props.form}
-            labelCol={{ xs: 24, sm: 6 }}
-            wrapperCol={{ xs: 24, sm: 16 }}
+            wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}
+            hideRequiredMark
             onSubmit={handleSubmit.bind(this)}
           >
-            <Form.Item label={i18n.tv('page_password_forgot.form.username_label', '用户名')}>
+            <Form.Item>
               <Input
                 v-decorator={[
                   'username',
@@ -86,27 +90,33 @@ export default Form.create({})(
                     rules: [
                       {
                         required: true,
-                        message: i18n.tv('page_password_forgot.form.username_required', '请输入用户名'),
+                        message: i18n.tv('page_password_forgot.form.username_required', '请输入用户名/邮箱/手机号'),
                       },
                     ],
                   },
                 ]}
                 name="username"
                 size="large"
-                placeholder={i18n.tv('page_password_forgot.form.username_placeholder', '请输入用户名')}
+                prefix={i18n.tv('page_password_forgot.form.username_label', '用户名：')}
+                placeholder={i18n.tv('page_password_forgot.form.username_placeholder', '请输入用户名/邮箱/手机号')}
               />
             </Form.Item>
-            <Form.Item wrapperCol={{ xs: 24, sm: { span: 16, offset: 6 } }}>
-              <Button
-                type="primary"
-                shape="round"
-                size="large"
-                htmlType="submit"
-                block={deviceMixin.isMobile}
-                loading={loading.value}
-              >
-                {i18n.tv('page_password_forgot.form.submit_btn_text', '修改')}
-              </Button>
+            <Form.Item wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}>
+              <Space direction="vertical" class="d-block">
+                <Button type="primary" shape="round" size="large" htmlType="submit" block loading={loading.value}>
+                  {i18n.tv('page_password_forgot.form.submit_btn_text', '下一步')}
+                </Button>
+                <Button
+                  type="link"
+                  shape="round"
+                  size="large"
+                  block
+                  class="text--secondary hover:primary--text"
+                  onClick={redirect}
+                >
+                  {i18n.tv('page_password_forgot.form.cancel_btn_text', '取消')}
+                </Button>
+              </Space>
             </Form.Item>
           </Form>
         </div>

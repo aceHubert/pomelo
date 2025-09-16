@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="init-grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#36d1dc;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#5b86e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#667eea;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="init-grad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:0.9" />
+    </linearGradient>
+    <linearGradient id="init-grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#74b9ff;stop-opacity:0.7" />
+      <stop offset="100%" style="stop-color:#0984e3;stop-opacity:0.7" />
+    </linearGradient>
+    <linearGradient id="init-grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fd79a8;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#fdcb6e;stop-opacity:0.6" />
+    </linearGradient>
+    <filter id="blur1">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+    </filter>
+  </defs>
+  
+  <!-- Background base -->
+  <rect width="1920" height="1080" fill="url(#init-grad1)"/>
+  
+  <!-- Geometric shapes layer -->
+  <polygon points="0,0 480,320 960,0 1920,0 1920,480 1440,240 960,480 480,240 0,480" 
+           fill="url(#init-grad2)" opacity="0.4">
+    <animateTransform attributeName="transform" 
+                      type="translate" 
+                      dur="30s" 
+                      repeatCount="indefinite"
+                      values="0,0; 0,-20; 0,0"/>
+  </polygon>
+  
+  <!-- Wave pattern -->
+  <path d="M0,650 C320,550 640,700 960,600 C1280,500 1600,650 1920,550 L1920,1080 L0,1080 Z" 
+        fill="url(#init-grad3)" opacity="0.5">
+    <animate attributeName="d" 
+             dur="18s" 
+             repeatCount="indefinite"
+             values="M0,650 C320,550 640,700 960,600 C1280,500 1600,650 1920,550 L1920,1080 L0,1080 Z;
+                     M0,600 C320,600 640,650 960,650 C1280,550 1600,600 1920,600 L1920,1080 L0,1080 Z;
+                     M0,650 C320,550 640,700 960,600 C1280,500 1600,650 1920,550 L1920,1080 L0,1080 Z"/>
+  </path>
+  
+  <!-- Secondary wave -->
+  <path d="M0,800 C480,700 960,850 1440,750 C1680,700 1860,730 1920,715 L1920,1080 L0,1080 Z" 
+        fill="url(#init-grad4)" opacity="0.4">
+    <animate attributeName="d" 
+             dur="22s" 
+             repeatCount="indefinite"
+             values="M0,800 C480,700 960,850 1440,750 C1680,700 1860,730 1920,715 L1920,1080 L0,1080 Z;
+                     M0,750 C480,750 960,800 1440,800 C1680,750 1860,780 1920,765 L1920,1080 L0,1080 Z;
+                     M0,800 C480,700 960,850 1440,750 C1680,700 1860,730 1920,715 L1920,1080 L0,1080 Z"/>
+  </path>
+  
+  <!-- Decorative circles with different animation -->
+  <circle cx="300" cy="200" r="100" fill="white" opacity="0.08" filter="url(#blur1)">
+    <animate attributeName="r" 
+             dur="10s" 
+             repeatCount="indefinite"
+             values="100;120;100"/>
+    <animate attributeName="opacity" 
+             dur="10s" 
+             repeatCount="indefinite"
+             values="0.08;0.12;0.08"/>
+  </circle>
+  
+  <circle cx="1600" cy="300" r="80" fill="white" opacity="0.1" filter="url(#blur1)">
+    <animate attributeName="r" 
+             dur="8s" 
+             repeatCount="indefinite"
+             values="80;95;80"/>
+    <animate attributeName="opacity" 
+             dur="8s" 
+             repeatCount="indefinite"
+             values="0.1;0.15;0.1"/>
+  </circle>
+  
+  <circle cx="1200" cy="150" r="60" fill="white" opacity="0.06" filter="url(#blur1)">
+    <animate attributeName="r" 
+             dur="12s" 
+             repeatCount="indefinite"
+             values="60;75;60"/>
+    <animate attributeName="opacity" 
+             dur="12s" 
+             repeatCount="indefinite"
+             values="0.06;0.1;0.06"/>
+  </circle>
+  
+  <!-- Grid pattern overlay -->
+  <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+    <path d="M 100 0 L 0 0 0 100" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/>
+  </pattern>
+  <rect width="1920" height="1080" fill="url(#grid)" opacity="0.3"/>
+</svg>

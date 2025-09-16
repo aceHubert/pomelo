@@ -88,15 +88,15 @@
   "page_login": {
     "title": "Sign In",
     "form": {
-      "description": "Sign in to Pomelo",
-      "username_label": "UserName",
+      "description": "Sign In",
+      "username_label": "UserName:",
       "username_placeholder": "LoginName/Email/Mobile",
       "username_required": "UserName is required",
-      "password_label": "Password",
+      "password_label": "Password:",
       "password_placeholder": "Please enter the password",
       "password_required": "Password is required",
       "password_min_length": "Password must be at least {min} characters",
-      "remember_me_label": "Remember me",
+      "remember_me_label": "Remember me?",
       "forgot_password_label": "Forgot password?",
       "submit_btn_text": "Sign In",
       "submit_success": "Sign in success, redirecting..."
@@ -106,13 +106,13 @@
     "title": "Modify Password",
     "form": {
       "description": "Modify your password",
-      "username_label": "UserName",
-      "username_placeholder": "Please enter the username",
+      "username_label": "UserName:",
+      "username_placeholder": "LoginName/Email/Mobile",
       "username_required": "UserName is required",
-      "old_password_label": "Old Password",
+      "old_password_label": "Old Password:",
       "old_password_placeholder": "Please enter the old password",
       "old_password_required": "Old password is required",
-      "new_password_label": "New Password",
+      "new_password_label": "New Password:",
       "new_password_placeholder": "Please enter the new password",
       "new_password_required": "New password is required",
       "new_password_min_length": "New password must be at least {min} characters",
@@ -121,5 +121,16 @@
       "submit_success": "Sign in success, redirecting..."
     }
   },
-  "page_password_forgot": {}
+  "page_password_forgot": {
+    "title": "Forgot Password",
+    "form": {
+      "description": "Reset your password",
+      "username_label": "UserName:",
+      "username_placeholder": "UserName/Email/Mobile",
+      "username_required": "UserName is required",
+      "submit_btn_text": "Send Reset Link",
+      "cancel_btn_text": "@:common.btn_text.cancel",
+      "submit_success": "Password reset link sent to your email"
+    }
+  }
 }
