@@ -5,7 +5,6 @@ import { useRoute, useRouter } from 'vue2-helpers/vue-router';
 import { Form, Input, Button, Spin, Space } from 'ant-design-vue';
 import { message } from '@/components/antdv-helper';
 import { useI18n, useUserManager } from '@/composables';
-import { useDeviceMixin } from '@/mixins/device';
 import { useLoginApi } from '@/login/fetch';
 import classes from './modify.module.less';
 
@@ -26,7 +25,6 @@ export default Form.create({})(
     },
     setup(props: SiteInitProps) {
       const i18n = useI18n();
-      const deviceMixin = useDeviceMixin();
       const router = useRouter();
       const route = useRoute();
       const userManager = useUserManager();
@@ -94,11 +92,11 @@ export default Form.create({})(
           <p class={classes.title}>{i18n.tv('page_password_modify.form.description', '修改密码')}</p>
           <Form
             form={props.form}
-            labelCol={{ xs: 24, sm: 6 }}
-            wrapperCol={{ xs: 24, sm: 16 }}
+            wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}
+            hideRequiredMark
             onSubmit={handleSubmit.bind(this)}
           >
-            <Form.Item label={i18n.tv('page_password_modify.form.username_label', '用户名')}>
+            <Form.Item>
               <Input
                 v-decorator={[
                   'username',
@@ -115,10 +113,11 @@ export default Form.create({})(
                 name="username"
                 size="large"
                 readOnly={!!username.value}
+                prefix={i18n.tv('page_password_modify.form.username_label', '用户名：')}
                 placeholder={i18n.tv('page_password_modify.form.username_placeholder', '请输入用户名')}
               />
             </Form.Item>
-            <Form.Item label={i18n.tv('page_password_modify.form.old_password_label', '旧密码')}>
+            <Form.Item>
               <Input.Password
                 v-decorator={[
                   'oldPwd',
@@ -133,10 +132,11 @@ export default Form.create({})(
                 ]}
                 name="password"
                 size="large"
+                prefix={i18n.tv('page_password_modify.form.old_password_label', '旧密码：')}
                 placeholder={i18n.tv('page_password_modify.form.old_password_placeholder', '请输入旧密码')}
               />
             </Form.Item>
-            <Form.Item label={i18n.tv('page_password_modify.form.new_password_label', '新密码')}>
+            <Form.Item>
               <Input.Password
                 v-decorator={[
                   'newPwd',
@@ -157,25 +157,23 @@ export default Form.create({})(
                 ]}
                 name="password"
                 size="large"
+                prefix={i18n.tv('page_password_modify.form.new_password_label', '新密码：')}
                 placeholder={i18n.tv('page_password_modify.form.new_password_placeholder', '请输入新密码')}
               />
             </Form.Item>
-            <Form.Item wrapperCol={{ xs: 24, sm: { span: 16, offset: 6 } }}>
-              <Space
-                direction={deviceMixin.isMobile ? 'vertical' : 'horizontal'}
-                class={deviceMixin.isMobile ? 'd-block' : ''}
-              >
-                <Button
-                  type="primary"
-                  shape="round"
-                  size="large"
-                  htmlType="submit"
-                  block={deviceMixin.isMobile}
-                  loading={submiting.value}
-                >
+            <Form.Item wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}>
+              <Space direction="vertical" class="d-block">
+                <Button type="primary" shape="round" size="large" htmlType="submit" block loading={submiting.value}>
                   {i18n.tv('page_password_modify.form.submit_btn_text', '修改')}
                 </Button>
-                <Button type="default" shape="round" size="large" block={deviceMixin.isMobile} onClick={redirect}>
+                <Button
+                  type="link"
+                  shape="round"
+                  size="large"
+                  block
+                  class="text--secondary hover:primary--text"
+                  onClick={redirect}
+                >
                   {i18n.tv('page_password_modify.form.cancel_btn_text', '取消')}
                 </Button>
               </Space>

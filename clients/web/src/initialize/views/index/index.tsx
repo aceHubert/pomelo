@@ -5,7 +5,6 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { Form, Input, Select, Button } from 'ant-design-vue';
 import { message } from '@/components/antdv-helper';
 import { useI18n } from '@/composables';
-import { useDeviceMixin } from '@/mixins/device';
 import { useSiteInitApi } from '@/initialize/fetch';
 import classes from './index.module.less';
 
@@ -27,9 +26,10 @@ export default Form.create({})(
     },
     setup(props: SiteInitProps) {
       const i18n = useI18n();
-      const deviceMixin = useDeviceMixin();
       const route = useRoute();
       const siteInitApi = useSiteInitApi();
+
+      const localeSelectionFocused = ref(false);
 
       siteInitApi
         .check({
@@ -85,11 +85,11 @@ export default Form.create({})(
           <p class={classes.title}>{i18n.tv('page_site_init.form.description', '站点初始化')}</p>
           <Form
             form={props.form}
-            labelCol={{ xs: 24, sm: 8 }}
-            wrapperCol={{ xs: 24, sm: 16 }}
+            wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}
+            hideRequiredMark
             onSubmit={handleSubmit.bind(this)}
           >
-            <Form.Item label={i18n.tv('page_site_init.form.title_label', '标题')}>
+            <Form.Item>
               <Input
                 v-decorator={[
                   'title',
@@ -104,11 +104,12 @@ export default Form.create({})(
                   },
                 ]}
                 size="large"
+                prefix={i18n.tv('page_site_init.form.title_label', '站点标题：')}
                 placeholder={i18n.tv('page_site_init.form.title_placeholder', '请输入站点标题')}
               />
             </Form.Item>
-            <Form.Item label={i18n.tv('page_site_init.form.password_label', '管理员密码')}>
-              <Input
+            <Form.Item>
+              <Input.Password
                 v-decorator={[
                   'password',
                   {
@@ -128,10 +129,11 @@ export default Form.create({})(
                   },
                 ]}
                 size="large"
+                prefix={i18n.tv('page_site_init.form.password_label', '管理员密码：')}
                 placeholder={i18n.tv('page_site_init.form.password_placeholder', '请输入管理员密码')}
               />
             </Form.Item>
-            <Form.Item label={i18n.tv('page_site_init.form.email_label', '管理员邮箱')}>
+            <Form.Item>
               <Input
                 v-decorator={[
                   'email',
@@ -149,10 +151,11 @@ export default Form.create({})(
                   },
                 ]}
                 size="large"
+                prefix={i18n.tv('page_site_init.form.email_label', '管理员邮箱：')}
                 placeholder={i18n.tv('page_site_init.form.email_placeholder', '请输入管理员邮箱')}
               />
             </Form.Item>
-            <Form.Item label={i18n.tv('page_site_init.form.home_url_label', '主页地址')}>
+            <Form.Item>
               <Input
                 v-decorator={[
                   'homeUrl',
@@ -171,39 +174,42 @@ export default Form.create({})(
                   },
                 ]}
                 size="large"
+                prefix={i18n.tv('page_site_init.form.home_url_label', '主页地址：')}
                 placeholder={i18n.tv('page_site_init.form.home_url_placeholder', '请输入主页地址')}
               />
             </Form.Item>
-            <Form.Item label={i18n.tv('page_site_init.form.locale_label', '默认语言')}>
-              <Select
-                v-decorator={[
-                  'locale',
-                  {
-                    initialValue: 'en-US',
-                    rules: [
-                      {
-                        required: true,
-                        message: i18n.tv('page_site_init.form.locale_required', '请选择默认语言'),
-                      },
-                    ],
-                  },
-                ]}
-                size="large"
-                placeholder={i18n.tv('page_site_init.form.locale_placeholder', '请输入默认语言')}
-              >
-                <Select.Option value="en-US">English</Select.Option>
-                <Select.Option value="zh-CN">简体中文</Select.Option>
-              </Select>
+            <Form.Item>
+              <div class={['select-with-prefix', { 'select-with-prefix--focused': localeSelectionFocused.value }]}>
+                <span class="select-prefix">{i18n.tv('page_site_init.form.locale_label', '默认语言：')}</span>
+                <Select
+                  v-decorator={[
+                    'locale',
+                    {
+                      initialValue: 'en-US',
+                      rules: [
+                        {
+                          required: true,
+                          message: i18n.tv('page_site_init.form.locale_required', '请选择默认语言'),
+                        },
+                      ],
+                    },
+                  ]}
+                  size="large"
+                  placeholder={i18n.tv('page_site_init.form.locale_placeholder', '请输入默认语言')}
+                  onFocus={() => {
+                    localeSelectionFocused.value = true;
+                  }}
+                  onBlur={() => {
+                    localeSelectionFocused.value = false;
+                  }}
+                >
+                  <Select.Option value="en-US">English</Select.Option>
+                  <Select.Option value="zh-CN">简体中文</Select.Option>
+                </Select>
+              </div>
             </Form.Item>
-            <Form.Item wrapperCol={{ xs: 24, sm: { span: 16, offset: 8 } }}>
-              <Button
-                type="primary"
-                shape="round"
-                size="large"
-                htmlType="submit"
-                block={deviceMixin.isMobile}
-                loading={loading.value}
-              >
+            <Form.Item wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}>
+              <Button type="primary" shape="round" size="large" htmlType="submit" block loading={loading.value}>
                 {i18n.tv('page_site_init.form.submit_btn_text', '提交')}
               </Button>
             </Form.Item>

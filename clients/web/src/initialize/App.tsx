@@ -14,7 +14,7 @@ export default defineComponent({
     };
   },
   setup() {
-    const { siteTitle: title, theme, primaryColor, supportLanguages } = useAppStore();
+    const { siteTitle: title, theme, primaryColor, supportLanguages, setLocale } = useAppStore();
     const i18n = useI18n();
     const deviceMixin = useDeviceMixin();
 
@@ -31,6 +31,7 @@ export default defineComponent({
       primaryColor,
       supportLanguages,
       device: deviceMixin.device,
+      setLocale,
     };
   },
   render() {
@@ -51,7 +52,7 @@ export default defineComponent({
             {this.supportLanguages.map((lang) => (
               <li
                 class={['locale-item', { selected: lang.locale === this.$i18n.locale }]}
-                onClick={() => (this.$i18n.locale = lang.locale)}
+                onClick={() => this.setLocale(lang.locale)}
               >
                 {lang.shortName}
               </li>

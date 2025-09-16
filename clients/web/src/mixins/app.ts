@@ -155,7 +155,7 @@ export const useAppMixin = () => {
               })
               .then(({ result }) => {
                 // update user store locale
-                result && userManager.storeUser(new User({ ...user, profile: { ...user.profile, locale } }));
+                result && userManager.storeUser?.(new User({ ...user, profile: { ...user.profile, locale } as any }));
               });
         })
         .catch((err) => {
