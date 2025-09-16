@@ -181,7 +181,7 @@ const logger = new Logger('AppModule', { timestamp: true });
               y: jwk.y,
             })),
           }),
-          jwtExpiresIn: config.get('JWT_EXPIRES_IN'),
+          jwtExpiresIn: config.get('JWT_EXPIRES_IN', '1d'),
           jwtHeaderParameters: {
             alg: config.get('JWT_ALGORITHM', 'RS256'),
             typ: 'JWT',
