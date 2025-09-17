@@ -4,8 +4,7 @@ import { useRoute } from 'vue2-helpers/vue-router';
 import { Form, Input, Button, Space } from 'ant-design-vue';
 import { message } from '@/components/antdv-helper';
 import { useI18n } from '@/composables';
-import { useDeviceMixin } from '@/mixins/device';
-import { useLoginApi } from '@/login/fetch';
+// import { useLoginApi } from '@/login/fetch';
 import classes from './forgot.module.less';
 
 // Types
@@ -25,9 +24,8 @@ export default Form.create({})(
     },
     setup(props: SiteInitProps) {
       const i18n = useI18n();
-      const deviceMixin = useDeviceMixin();
       const route = useRoute();
-      const loginApi = useLoginApi();
+      // const loginApi = useLoginApi();
 
       const redirect = () => {
         const redirect = (route.query.returnUrl as string) || '/';
@@ -43,6 +41,7 @@ export default Form.create({})(
           if (err) return;
 
           // TODO: 发送验证码
+          // eslint-disable-next-line no-console
           console.log(values);
           message.warn('TODO: 发送验证码');
           return;
