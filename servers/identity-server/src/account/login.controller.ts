@@ -1,5 +1,5 @@
 import ejs from 'ejs';
-import { pickBy } from 'lodash-es';
+import { pickBy } from 'lodash';
 import { Request, Response } from 'express';
 import { ModuleRef } from '@nestjs/core';
 import { Controller, Get, Post, Query, Body, Req, Res, HttpStatus } from '@nestjs/common';

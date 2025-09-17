@@ -1,4 +1,4 @@
-import { words, capitalize } from 'lodash-es';
+import { words, capitalize } from 'lodash';
 import { ModelDefined, ModelStatic, ProjectionAlias, Dialect } from 'sequelize';
 import { Inject, Logger } from '@nestjs/common';
 import {

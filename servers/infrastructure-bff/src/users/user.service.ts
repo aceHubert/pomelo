@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { snakeCase } from 'lodash-es';
+import { snakeCase } from 'lodash';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AuthorizationService } from '@ace-pomelo/nestjs-pomelo-authorization';

@@ -1,4 +1,4 @@
-import { isUndefined } from 'lodash-es';
+import { isUndefined } from 'lodash';
 import { WhereOptions, Model, Attributes, Transaction, Op } from 'sequelize';
 import { Injectable } from '@nestjs/common';
 import { ValidationError } from '@ace-pomelo/shared/server';

@@ -1,5 +1,5 @@
 import path from 'path';
-import { upperFirst } from 'lodash-es';
+import { upperFirst } from 'lodash';
 import { UniqueConstraintError } from 'sequelize';
 import { Controller, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

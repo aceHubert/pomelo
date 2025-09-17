@@ -1,5 +1,5 @@
 import DataLoader from 'dataloader';
-import { camelCase, lowerCase, upperFirst } from 'lodash-es';
+import { camelCase, lowerCase, upperFirst } from 'lodash';
 import { Type, applyDecorators, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Resolver, ResolveField, Query, Mutation, Parent, Args, ID } from '@nestjs/graphql';

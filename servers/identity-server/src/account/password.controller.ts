@@ -1,7 +1,7 @@
 import url from 'url';
 import ejs from 'ejs';
 import { stringify } from 'qs';
-import { pickBy } from 'lodash-es';
+import { pickBy } from 'lodash';
 import { Request, Response } from 'express';
 import { isPhoneNumber } from 'class-validator';
 import { ModuleRef } from '@nestjs/core';

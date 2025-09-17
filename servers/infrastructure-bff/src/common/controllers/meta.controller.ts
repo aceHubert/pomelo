@@ -1,4 +1,4 @@
-import { lowerCase, upperFirst } from 'lodash-es';
+import { lowerCase, upperFirst } from 'lodash';
 import { Response } from 'express';
 import {
   Query,
