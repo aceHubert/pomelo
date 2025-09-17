@@ -1,5 +1,5 @@
 import path from 'path';
-import { merge } from 'lodash-es';
+import { merge } from 'lodash';
 // import typescript from 'rollup-plugin-typescript2'
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
