@@ -103,9 +103,9 @@ export class LocalUserManagerCreator extends UserManager {
   }
 
   getUser(): Promise<IUser | null> {
-    const { accessToken, tokenType } = getToken();
+    const accessToken = getToken();
     if (accessToken) {
-      const user = new User(accessToken, { tokenType, ...this.options });
+      const user = new User(accessToken.token, { tokenType: accessToken.type, ...this.options });
       return Promise.resolve(user);
     }
     return Promise.resolve(null);
