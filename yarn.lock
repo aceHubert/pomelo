@@ -12,48 +12,48 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-fetch/core@npm:^0.9.2":
-  version: 0.9.2
-  resolution: "@ace-fetch/core@npm:0.9.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fcore%2F-%2Fcore-0.9.2.tgz"
+"@ace-fetch/core@npm:^0.11.4":
+  version: 0.11.4
+  resolution: "@ace-fetch/core@npm:0.11.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fcore%2F-%2Fcore-0.11.4.tgz"
   dependencies:
-    "@ace-util/core": ^0.3.0
+    "@ace-util/core": ^0.7.0
     query-string: ^7.0.0
-  checksum: 16a8b34ff032900e3d462033872df53c3422e3eb1924c053e9ee8ddedc6dbffe56a62b93bb2df3124b78e776a7bac8d1365d124234881378f0a3bc60efbe3d29
+  checksum: 9433b80e8fef934b16ce9d6a8470cd9b4073a40a79ee6e8febfe8b23d0b16d9447b7f6c0311808cfd19df847d47f4c549fafab1b50478cc76d43012cf8117641
   languageName: node
   linkType: hard
 
-"@ace-fetch/graphql-vue@npm:^0.9.0":
-  version: 0.9.2
-  resolution: "@ace-fetch/graphql-vue@npm:0.9.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql-vue%2F-%2Fgraphql-vue-0.9.2.tgz"
+"@ace-fetch/graphql-vue@npm:^0.11.2":
+  version: 0.11.2
+  resolution: "@ace-fetch/graphql-vue@npm:0.11.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql-vue%2F-%2Fgraphql-vue-0.11.2.tgz"
   dependencies:
-    "@ace-fetch/graphql": ^0.9.1
-    "@ace-util/core": ^0.3.0
+    "@ace-fetch/graphql": ^0.11.2
+    "@ace-util/core": ^0.7.0
     graphql-tag: ^2.12.6
     vue-demi: ^*
-  checksum: ba2892339c235636ddc5e2a0e350a311d305d3ae264df55624a177621a8162c002551c2af235e70fc349cefec67c308efe698f39f3675d572f61308bc30d734d
+  checksum: a8d16d069d676878e3157ee1e383a912b2b9f87557989f8ca337a221e22c105d9fb93e8b4b69fd0320c8aa2cc32946612f66b19d3a4fa6981c75d0580ef97397
   languageName: node
   linkType: hard
 
-"@ace-fetch/graphql@npm:^0.9.1":
-  version: 0.9.1
-  resolution: "@ace-fetch/graphql@npm:0.9.1::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql%2F-%2Fgraphql-0.9.1.tgz"
+"@ace-fetch/graphql@npm:^0.11.2":
+  version: 0.11.2
+  resolution: "@ace-fetch/graphql@npm:0.11.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fgraphql%2F-%2Fgraphql-0.11.2.tgz"
   dependencies:
-    "@ace-util/core": ^0.3.0
+    "@ace-util/core": ^0.7.0
     ts-invariant: ^0.10.3
   peerDependencies:
     graphql: ^16.0.0
-  checksum: a28d3e3c47351bebfe0b321e25006b5b2be81b5bf3f5a2bfb9f093d589d72bac9697d0dc9b4803c0ba14a43c10913fc793fa4a87c3f4845352da4c448d185d5b
+  checksum: e38442817910036f98f7f6ec83de2be0b5b7d04e162aa7dd2b030776a168846dfe5d5f616bd70f36feafd02fff116a0fa419594a69afa401b07b37952ca140a6
   languageName: node
   linkType: hard
 
-"@ace-fetch/vue@npm:^0.9.0":
-  version: 0.9.2
-  resolution: "@ace-fetch/vue@npm:0.9.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fvue%2F-%2Fvue-0.9.2.tgz"
+"@ace-fetch/vue@npm:^0.11.4":
+  version: 0.11.4
+  resolution: "@ace-fetch/vue@npm:0.11.4::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-fetch%2Fvue%2F-%2Fvue-0.11.4.tgz"
   dependencies:
-    "@ace-fetch/core": ^0.9.2
-    "@ace-util/core": ^0.3.0
+    "@ace-fetch/core": ^0.11.4
+    "@ace-util/core": ^0.7.0
     vue-demi: ^*
-  checksum: e58f0942cfece3a0a2a6f1da392b6788841874610458ae43b9efc446c0d17194a9160ca1cf082ba0e3e4bbc98eacf92ef125d5673ed48f311fc8126b6ac45120
+  checksum: 8f3f8b467f205a13ae891f3774dc4bbb28170f396c73c799cb32bcc417abd1eb6cec0d2e541c09d10a869974f01a9746233376cf720e1cfeb699e78ec0bb96f0
   languageName: node
   linkType: hard
 
@@ -154,7 +154,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/shared@workspace:packages/pomelo-shared"
   dependencies:
-    "@ace-util/core": ^0.5.0
+    "@ace-util/core": ^0.7.2
     "@nestjs/common": ^10.0.0
     "@nestjs/config": ^3.2.3
     "@nestjs/core": ^10.0.0
@@ -208,12 +208,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/web@workspace:clients/web"
   dependencies:
-    "@ace-fetch/graphql-vue": ^0.9.0
-    "@ace-fetch/vue": ^0.9.0
+    "@ace-fetch/graphql-vue": ^0.11.2
+    "@ace-fetch/vue": ^0.11.4
     "@ace-pomelo/shared": "workspace:^"
     "@ace-pomelo/theme": "workspace:^"
-    "@ace-util/core": ^0.5.0
-    "@ace-util/injects": ^0.3.10
+    "@ace-util/core": ^0.7.2
+    "@ace-util/injects": ^0.3.15
     "@apollo/client": ^3.6.9
     "@ckeditor/ckeditor5-build-balloon": ^40.0.0
     "@ckeditor/ckeditor5-build-decoupled-document": ^40.0.0
@@ -299,22 +299,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-util/core@npm:^0.3.0":
-  version: 0.3.1
-  resolution: "@ace-util/core@npm:0.3.1"
-  dependencies:
-    lodash.get: ^4.4.2
-  checksum: d983bbb7d278ebc24238062835a32e89834ca839ba199ff9156a2cdf9b4619a707c768f7d1477899ddb1852d8aecaaad4b32273a37d3c259126d932fe93c5f54
-  languageName: node
-  linkType: hard
-
-"@ace-util/core@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@ace-util/core@npm:0.5.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-util%2Fcore%2F-%2Fcore-0.5.0.tgz"
+"@ace-util/core@npm:^0.7.0, @ace-util/core@npm:^0.7.2":
+  version: 0.7.2
+  resolution: "@ace-util/core@npm:0.7.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-util%2Fcore%2F-%2Fcore-0.7.2.tgz"
   dependencies:
     "@ace-util/enquire": ^0.1.0
     lodash.get: ^4.4.2
-  checksum: 7ff69c309ad779f2ba819411f7bd0ae129043b92a727c4867513dc8216882ad3bc0b5399348b8d742e391409cfb4b347ad28979d8d707c35ab425c9ade528307
+  checksum: 2a73320f24eb5fa0526fa71bc8b7928ca41c232a3057916c107de9c078319be65bb7c625a641302860887587e7c77bf79ed2b3ca7f2bcc19d7c4e14eef88e1e4
   languageName: node
   linkType: hard
 
@@ -325,13 +316,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-util/injects@npm:^0.3.10":
-  version: 0.3.10
-  resolution: "@ace-util/injects@npm:0.3.10::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-util%2Finjects%2F-%2Finjects-0.3.10.tgz"
+"@ace-util/injects@npm:^0.3.15":
+  version: 0.3.15
+  resolution: "@ace-util/injects@npm:0.3.15::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40ace-util%2Finjects%2F-%2Finjects-0.3.15.tgz"
   dependencies:
-    "@ace-util/core": ^0.5.0
+    "@ace-util/core": ^0.7.2
     warning: ^4.0.3
-  checksum: 33c8fbca40241cdf2ae206211a867327f676110878cbae35b0893d1ae41cd64fe3815effdd05fdb2c56ec8042532caa6d3594c76ddf70fea99e00adef47bd600
+  checksum: b78920a749cbc8c626cc64c153c3049069a3ca37a24dd4d5c21c0ea5e4a118f77b6b1833351b0b61a27821bb972bdd02c6f65d52eb7732f245fff16d89dcae41
   languageName: node
   linkType: hard
 
@@ -8258,7 +8249,7 @@ __metadata:
   resolution: "antdv-layout-pro@workspace:packages/antdv-layout-pro"
   dependencies:
     "@ace-pomelo/theme": ^0.1.0-alpha.2
-    "@ace-util/core": ^0.5.0
+    "@ace-util/core": ^0.7.2
     "@iconfu/svg-inject": ^1.2.3
     "@types/lodash.clonedeep": ^4.5.0
     "@types/lodash.debounce": ^4.0.7

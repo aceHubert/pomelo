@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@ace-pomelo/theme": "^0.1.0-alpha.2",
-    "@ace-util/core": "^0.5.0",
+    "@ace-util/core": "^0.7.2",
     "@iconfu/svg-inject": "^1.2.3",
     "jsoneditor": "^9.5.6",
     "lodash.clonedeep": "^4.5.0",
