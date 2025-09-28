@@ -1,8 +1,7 @@
 import { Injectable, Inject, Logger, NestMiddleware } from '@nestjs/common';
-import { JWTPayload } from 'jose';
 import { AuthorizationService } from './authroized.service';
 import { fromAuthHeaderAsBearerToken } from './utils/extract-jwt';
-import { AuthorizationOptions } from './interfaces/authorization-options.interface';
+import { AuthorizationOptions, RequestUser } from './interfaces/authorization-options.interface';
 import { AUTHORIZATION_OPTIONS } from './constants';
 
 @Injectable()
@@ -18,18 +17,18 @@ export class UserMiddleware implements NestMiddleware {
     try {
       const { tenantId, channelType } = this.authService.getMultitenantParamsFromRequest(req);
 
-      let userStr: string, payload: JWTPayload | undefined;
-      if ((userStr = req.headers[this.options.setUserinfoHeader!] as string)) {
-        // from apisix
-        payload = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
-        this.logger.debug(`User info from apisix: ${JSON.stringify(payload)}`);
+      let payload: RequestUser | undefined, userFactoryResult: { payload?: RequestUser } | undefined;
+      if ((userFactoryResult = this.options.userFactory?.(req))) {
+        payload = userFactoryResult.payload;
+        // from user factory
+        this.logger.debug(`User info from factory: ${JSON.stringify(payload)}`);
       } else {
         // from Authroization header
         const accessToken = fromAuthHeaderAsBearerToken(req);
         if (!accessToken) throw new Error('No bearer token found in request!');
 
         payload = await this.authService.verifyToken(accessToken);
-        this.logger.debug(`User info from header: ${JSON.stringify(payload)}`);
+        this.logger.debug(`User info from authroization header: ${JSON.stringify(payload)}`);
       }
 
       if (payload) {

@@ -186,6 +186,19 @@ const logger = new Logger('AppModule', { timestamp: true });
             alg: config.get('JWT_ALGORITHM', 'RS256'),
             typ: 'JWT',
           },
+          userFactory(req) {
+            let userStr: string;
+            if ((userStr = req.headers['x-userinfo'] as string)) {
+              // from apisix
+              try {
+                const payload = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
+                return { payload };
+              } catch {
+                return {};
+              }
+            }
+            return;
+          },
         };
       },
       inject: [ConfigService],

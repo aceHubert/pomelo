@@ -1,14 +1,12 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
-import { JWTHeaderParameters, JWTVerifyGetKey, KeyLike, PEMImportOptions } from 'jose';
+import { JWTHeaderParameters, JWTVerifyGetKey, KeyLike, PEMImportOptions, JWTPayload } from 'jose';
 import { ClientMetadata, HttpOptions } from 'openid-client';
 import { ChannelType } from './multitenant.interface';
 
 export type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
 export type XOR<T, U> = T | U extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
 
-export interface RequestUser {
-  [x: string]: unknown;
-}
+export interface RequestUser extends JWTPayload {}
 
 export type AuthorizationOptions = {
   /**
@@ -63,10 +61,10 @@ export type AuthorizationOptions = {
   httpOptions?: HttpOptions;
 
   /**
-   * apisix openid-connect
-   * https://apisix.apache.org/docs/apisix/plugins/openid-connect/
+   * factory to get user from request
+   * @example apisix openid-connect(https://apisix.apache.org/docs/apisix/plugins/openid-connect/)
    */
-  setUserinfoHeader?: string;
+  userFactory?: (req: any) => { payload?: RequestUser } | undefined;
 
   /**
    * Determines what property on `request`
