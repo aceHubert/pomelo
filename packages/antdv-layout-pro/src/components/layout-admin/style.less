@@ -32,7 +32,8 @@
       }
 
       .site-name {
-        margin: 0 0 0 12px;
+        margin-bottom: 0;
+        padding: 0 0 0 12px;
         font-weight: 600;
         font-size: 16px;
         line-height: inherit;
@@ -81,17 +82,22 @@
 
       .header-logo {
         height: 100%;
-        min-width: 186px;
+        width: 184px;
         vertical-align: top;
         overflow: hidden;
         white-space: nowrap;
         cursor: pointer;
 
         .is-mobile &{
-          min-width: initial;
+          width: initial;
+          display: flex;
         }
 
         .logo-content{
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+
           .site-logo,
           .site-name {
             color: @layout-admin-header-color-dark;
@@ -107,8 +113,12 @@
           }
 
           .site-name {
-            margin-right: 12px;
+            padding-right: 12px;
             vertical-align: top;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            word-break: break-all;
           }
         }
       }
