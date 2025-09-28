@@ -41,13 +41,14 @@ services:
       - mysql
       - redis
   apisix:
-    image: apache/apisix:${APISIX_IMAGE_TAG:-3.9.0-debian}
+    image: apache/apisix:${APISIX_IMAGE_TAG:-3.13.0-debian}
     container_name: pomelo-apisix
     restart: always
     environment:
       - APISIX_STAND_ALONE=true
     volumes:
-      - ${PWD}/conf/apisix.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ${PWD}/conf/apisix_standalone.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ${PWD}/conf/config_standalone.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ${PWD}/logs/apisix:/usr/local/apisix/logs
     privileged: true
     depends_on:
@@ -57,7 +58,7 @@ services:
       # - '9180:9180/tcp' # admin_control: true
       - '9080:9080/tcp'  # http
       # - '9091:9091/tcp'  # prometheus
-      # - '9443:9443/tcp'  # tls http/2
+      - '9443:9443/tcp'  # tls http/2
       # - '9092:9092/tcp' # enable_control: true
     networks:
       - default

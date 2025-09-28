@@ -78,11 +78,11 @@ jobs:
       matrix:
         variant:
           - name: "standard"
-            build_commands: "yarn build:web && yarn build:servers"
+            build_commands: "yarn build:web && yarn build:infrastructures"
             serve_apps: "infrastructure-service,infrastructure-bff,static-content,web"
             tag_suffix: ""
           - name: "oidc"
-            build_commands: "yarn build:web:oidc && yarn build:servers && yarn build:identity-server"
+            build_commands: "yarn build:web:oidc && yarn build:infrastructures && yarn build:identity-server"
             serve_apps: "infrastructure-service,infrastructure-bff,identity-server,static-content,web"
             tag_suffix: "-oidc"
     steps:
