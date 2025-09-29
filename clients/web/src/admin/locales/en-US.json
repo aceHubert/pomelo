@@ -1,7 +1,7 @@
 {
   "name": "English",
   "description": "English Language Pack",
-  "site_title": "Pomelo Admin",
+  "site_title": "Admin Management Platform",
   "common": {
     "btn_text": {
       "go_back": "Go back",

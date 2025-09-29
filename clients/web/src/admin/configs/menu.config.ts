@@ -156,7 +156,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
         icon: IconSettings,
         position: 'top',
         children:
-          Authoriztion.authType !== AuthType.Oidc
+          Authoriztion.authType === AuthType.Oidc
             ? [
                 {
                   key: 'clients',

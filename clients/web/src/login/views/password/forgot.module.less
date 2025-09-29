@@ -26,9 +26,10 @@
   }
 
   .title {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-size: 24px;
     font-weight: 600;
+    line-height: 2;
     text-align: center;
     color: @var-text-primary;
     letter-spacing: 0.5px;
@@ -47,17 +48,29 @@
         text-align: right;
       }
     }
+
+    :lang(zh-CN) {
+      .@{ant-prefix}-input {
+        padding-left: 80px !important;
+
+        &-prefix {
+          padding-right: 0;
+          width: 70px;
+        }
+      }
+    }
   }
 }
 
 @media screen and (min-width: 576px) {
   .container {
+    margin-top: 0;
+    padding: 50px 20px 20px;
     width: 500px;
     min-height: inherit;
-    padding: 50px 20px 20px;
     position: absolute;
     left: 50%;
-    top: 35%;
+    top: 40%;
     transform: translate(-50%, -50%);
 
     &::before {

@@ -1,12 +1,13 @@
 import sha256 from 'crypto-js/sha256';
 import { defineComponent, onMounted, ref } from '@vue/composition-api';
-import { absoluteGo } from '@ace-util/core';
+import { isAbsoluteUrl, absoluteGo } from '@ace-util/core';
 import { useRoute, useRouter } from 'vue2-helpers/vue-router';
 import { Form, Input, Button, Row, Col, Checkbox } from 'ant-design-vue';
+import { OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { Authoriztion, AuthType } from '@/auth';
 import { setToken, removeToken } from '@/auth/local';
 import { message } from '@/components/antdv-helper';
-import { useI18n } from '@/composables';
+import { useI18n, useOptions } from '@/composables';
 import { useLoginApi } from '@/login/fetch';
 import classes from './index.module.less';
 
@@ -29,13 +30,19 @@ export default Form.create({})(
       const i18n = useI18n();
       const router = useRouter();
       const route = useRoute();
+      const siteDescription = useOptions(OptionPresetKeys.BlogDescription);
+      const homeUrl = useOptions(OptionPresetKeys.Home);
       const loginApi = useLoginApi();
 
       const remember = ref(false);
 
       const redirect = () => {
-        const redirect = (route.query.returnUrl as string) || '/';
-        absoluteGo(redirect, true);
+        const redirect = (route.query.returnUrl as string) || homeUrl.value || '/';
+        if (isAbsoluteUrl(redirect)) {
+          absoluteGo(redirect, true);
+        } else {
+          router.push(redirect);
+        }
       };
 
       if (Authoriztion.authType !== AuthType.Local) {
@@ -69,6 +76,7 @@ export default Form.create({})(
                 setToken(result.accessToken, result.tokenType, remember.value);
                 message.success({
                   content: i18n.tv('page_login.form.submit_success', '登录成功!') as string,
+                  duration: 1,
                   onClose: redirect,
                 });
               } else {
@@ -86,8 +94,9 @@ export default Form.create({})(
       });
 
       return () => (
-        <div class={classes.container}>
-          <p class={classes.title}>{i18n.tv('page_login.form.description', '登录 Pomelo 平台')}</p>
+        <div class={[classes.container]}>
+          <p class={classes.title}>{i18n.tv('page_login.form.title', '登录')}</p>
+          <p class={classes.description}>{siteDescription.value}</p>
           <Form
             form={props.form}
             wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}
@@ -123,10 +132,10 @@ export default Form.create({})(
                         required: true,
                         message: i18n.tv('page_login.form.password_required', '请输入密码'),
                       },
-                      {
-                        min: 6,
-                        message: i18n.tv('page_login.form.password_min_length', '请输入6位以上密码', { min: 6 }),
-                      },
+                      // {
+                      //   min: 6,
+                      //   message: i18n.tv('page_login.form.password_min_length', '请输入6位以上密码', { min: 6 }),
+                      // },
                     ],
                   },
                 ]}
@@ -142,7 +151,7 @@ export default Form.create({})(
                 <router-link
                   to={{
                     name: 'password-forgot',
-                    query: { returnUrl: `${router.options.base}${route.fullPath.substring(1)}` },
+                    query: { returnUrl: route.fullPath },
                   }}
                   class="ml-auto"
                 >

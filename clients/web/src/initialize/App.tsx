@@ -14,7 +14,7 @@ export default defineComponent({
     };
   },
   setup() {
-    const { siteTitle: title, theme, primaryColor, supportLanguages, setLocale } = useAppStore();
+    const { siteTitle: title, supportLanguages, setLocale } = useAppStore();
     const i18n = useI18n();
     const deviceMixin = useDeviceMixin();
 
@@ -25,12 +25,19 @@ export default defineComponent({
       return title;
     });
 
+    const deviceType = computed(() => {
+      return deviceMixin.device;
+    });
+
+    const locale = computed(() => {
+      return i18n.locale;
+    });
+
     return {
       siteTitle,
-      theme,
-      primaryColor,
       supportLanguages,
-      device: deviceMixin.device,
+      deviceType,
+      locale,
       setLocale,
     };
   },
@@ -38,11 +45,11 @@ export default defineComponent({
     return (
       <ConfigProvider
         prefixCls={ANT_PREFIX_CLS}
-        primaryColor={this.primaryColor}
-        device={this.device}
+        primaryColor="#5b86e5"
+        device={this.deviceType}
         i18nRender={(...args: [string, string, Record<string, string>]) => this.$tv(...args) as string}
       >
-        <div class="app-content__wrapper content-width-fixed">
+        <div class="app-content__wrapper content-width-fixed" lang={this.locale}>
           <Spin
             class="app-content__loading"
             spinning={loadingRef.value}

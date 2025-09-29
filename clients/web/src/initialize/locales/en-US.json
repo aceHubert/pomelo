@@ -104,7 +104,7 @@
       "home_url_placeholder": "Please enter the home URL",
       "home_url_required": "Home URL is required",
       "home_url_invalid": "Please enter a valid URL",
-      "locale_label": "Site Language",
+      "locale_label": "Site Language:",
       "locale_placeholder": "Please select the site default language",
       "locale_required": "Site default language is required",
       "submit_btn_text": "Submit",

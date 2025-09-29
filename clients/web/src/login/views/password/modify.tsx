@@ -1,10 +1,11 @@
 import sha256 from 'crypto-js/sha256';
 import { defineComponent, ref } from '@vue/composition-api';
-import { absoluteGo } from '@ace-util/core';
+import { isAbsoluteUrl, absoluteGo } from '@ace-util/core';
 import { useRoute, useRouter } from 'vue2-helpers/vue-router';
 import { Form, Input, Button, Spin, Space } from 'ant-design-vue';
+import { OptionPresetKeys } from '@ace-pomelo/shared/client';
 import { message } from '@/components/antdv-helper';
-import { useI18n, useUserManager } from '@/composables';
+import { useI18n, useOptions, useUserManager } from '@/composables';
 import { useLoginApi } from '@/login/fetch';
 import classes from './modify.module.less';
 
@@ -28,6 +29,7 @@ export default Form.create({})(
       const router = useRouter();
       const route = useRoute();
       const userManager = useUserManager();
+      const homeUrl = useOptions(OptionPresetKeys.Home);
       const loginApi = useLoginApi();
 
       const loading = ref(true);
@@ -45,8 +47,12 @@ export default Form.create({})(
         });
 
       const redirect = () => {
-        const redirect = (route.query.returnUrl as string) || '/';
-        absoluteGo(redirect, true);
+        const redirect = (route.query.returnUrl as string) || homeUrl.value || '/';
+        if (isAbsoluteUrl(redirect)) {
+          absoluteGo(redirect, true);
+        } else {
+          router.push(redirect);
+        }
       };
 
       const handleSubmit = (e: Event) => {
@@ -72,7 +78,8 @@ export default Form.create({})(
             })
             .then(() => {
               message.success({
-                content: i18n.tv('page_password_modify.form.submit_success', '修改成功!') as string,
+                content: i18n.tv('page_password_modify.form.submit_success', '修改成功, 请重新登录!') as string,
+                duration: 1,
                 onClose: () => {
                   router.replace({
                     name: 'login',
@@ -89,7 +96,7 @@ export default Form.create({})(
 
       return () => (
         <Spin spinning={loading.value} class={classes.container}>
-          <p class={classes.title}>{i18n.tv('page_password_modify.form.description', '修改密码')}</p>
+          <p class={classes.title}>{i18n.tv('page_password_modify.form.title', '修改密码')}</p>
           <Form
             form={props.form}
             wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}
@@ -164,7 +171,7 @@ export default Form.create({})(
             <Form.Item wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}>
               <Space direction="vertical" class="d-block">
                 <Button type="primary" shape="round" size="large" htmlType="submit" block loading={submiting.value}>
-                  {i18n.tv('page_password_modify.form.submit_btn_text', '修改')}
+                  {i18n.tv('page_password_modify.form.submit_btn_text', '提交')}
                 </Button>
                 <Button
                   type="link"

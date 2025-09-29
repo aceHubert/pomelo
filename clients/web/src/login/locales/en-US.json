@@ -88,7 +88,7 @@
   "page_login": {
     "title": "Sign In",
     "form": {
-      "description": "Sign In",
+      "title": "Sign In",
       "username_label": "UserName:",
       "username_placeholder": "LoginName/Email/Mobile",
       "username_required": "UserName is required",
@@ -105,7 +105,7 @@
   "page_password_modify": {
     "title": "Modify Password",
     "form": {
-      "description": "Modify your password",
+      "title": "Modify your password",
       "username_label": "UserName:",
       "username_placeholder": "LoginName/Email/Mobile",
       "username_required": "UserName is required",
@@ -124,7 +124,7 @@
   "page_password_forgot": {
     "title": "Forgot Password",
     "form": {
-      "description": "Reset your password",
+      "title": "Reset your password",
       "username_label": "UserName:",
       "username_placeholder": "UserName/Email/Mobile",
       "username_required": "UserName is required",

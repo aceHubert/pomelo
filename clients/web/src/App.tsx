@@ -1,6 +1,7 @@
 import { defineComponent, ref, computed, watch, h } from '@vue/composition-api';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
-import { useI18n } from '@/composables';
+import { OptionPresetKeys } from '@ace-pomelo/shared/client';
+import { useI18n, useOptions } from '@/composables';
 import { sanitizeComponent } from '@/components';
 import { useAppStore } from '@/store';
 
@@ -13,13 +14,23 @@ export default defineComponent({
   name: 'App',
   head() {
     const siteTitle = this.siteTitle as string;
+    const siteDescription = this.siteDescription as string;
     return {
       title: '',
       titleTemplate: (title: string) => (title ? `${title} | ${siteTitle}` : siteTitle),
+      meta: [
+        {
+          name: 'description',
+          content: siteDescription,
+        },
+      ],
     };
   },
   setup() {
     const { siteTitle: title } = useAppStore();
+    const blogName = useOptions(OptionPresetKeys.BlogName);
+    const blogDescription = useOptions(OptionPresetKeys.BlogDescription);
+    const siteIcon = useOptions(OptionPresetKeys.SiteIcon);
     const router = useRouter();
     const route = useRoute();
     const i18n = useI18n();
@@ -32,7 +43,9 @@ export default defineComponent({
     });
 
     const siteTitle = computed(() => {
-      if (typeof title === 'function') {
+      if (blogName.value) {
+        return blogName.value;
+      } else if (typeof title === 'function') {
         return title((...args: Parameters<typeof i18n.tv>) => i18n.tv(...args) as string);
       }
       return title;
@@ -63,6 +76,8 @@ export default defineComponent({
 
     return {
       siteTitle,
+      siteDescription: blogDescription,
+      siteIcon,
       currentLayout,
       routerReady,
     };

@@ -1,7 +1,7 @@
 {
   "name": "简体中文",
   "description": "仅作为翻译英文使用，引用公共内容添加取 zh-CN_basic.json 文件中",
-  "site_title": "Pomelo 管理平台",
+  "site_title": "管理平台",
   "common": {
     "btn_text": {
       "ok": "是",

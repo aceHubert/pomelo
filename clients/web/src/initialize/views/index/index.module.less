@@ -35,9 +35,12 @@
   }
 
   :global {
+    @prefix-label-wdith: 125px;
+    @prefix-left-width: @prefix-label-wdith + 10px;
+
     .prefix-label {
       padding-right: 10px;
-      width: 110px;
+      width: @prefix-label-wdith;
       line-height: 1;
       color: @var-text-secondary;
       justify-content: flex-end;
@@ -46,7 +49,7 @@
     }
 
     .@{ant-prefix}-input {
-      padding-left: 120px !important;
+      padding-left: @prefix-left-width !important;
 
       &-prefix {
         .prefix-label();
@@ -54,7 +57,7 @@
     }
 
     .select-with-prefix {
-      padding-left: 120px;
+      padding-left: @prefix-left-width;
       background-color: #fff;
       border: 1px solid @border-color-base;
       display: flex;
@@ -100,14 +103,38 @@
         }
       }
     }
+
+    :lang(zh-CN) {
+      @prefix-label-wdith: 90px;
+      @prefix-left-width: @prefix-label-wdith + 10px;
+
+      .@{ant-prefix}-input {
+        padding-left: @prefix-left-width !important;
+
+        &-prefix {
+          padding-right: 0;
+          width: @prefix-label-wdith;
+        }
+      }
+
+      .select-with-prefix {
+        padding-left: @prefix-left-width;
+
+        .select-prefix {
+          padding-right: 0;
+          width: @prefix-label-wdith;
+        }
+      }
+    }
   }
 }
 
 @media screen and (min-width: 576px) {
   .container {
+    margin-top: 0;
+    padding: 50px 20px 20px;
     width: 500px;
     min-height: inherit;
-    padding: 50px 20px 20px;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -124,11 +151,5 @@
       font-size: 28px;
       font-weight: 700;
     }
-  }
-}
-
-@media (min-height: 768px) {
-  .container {
-    top: 40%;
   }
 }

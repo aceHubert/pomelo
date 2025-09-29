@@ -37,6 +37,8 @@ export default defineComponent({
     const route = useRoute();
     const i18n = useI18n();
     const homeUrl = useOptions(OptionPresetKeys.Home);
+    const siteUrl = useOptions(OptionPresetKeys.SiteUrl);
+    const siteIcon = useOptions(OptionPresetKeys.SiteIcon);
     const appMixin = useAppMixin();
     const deviceMixin = useDeviceMixin();
     const locationMixin = useLocationMixin();
@@ -46,6 +48,14 @@ export default defineComponent({
     const currentUser = ref<{ name: string; photo?: string }>();
     const menus = ref<MenuConfig[]>([]);
     const settingDrawerVisible = ref(false);
+
+    const siteLogo = computed(() => {
+      if (siteIcon.value) {
+        return siteUrl.value + siteIcon.value;
+      } else {
+        return appMixin.siteLogo;
+      }
+    });
 
     // const serializeMenu = (menus: MenuModel[], parent?: MenuConfig): MenuConfig[] => {
     //   return menus.map((menu) => {
@@ -97,7 +107,8 @@ export default defineComponent({
 
     // load menus from server
     // if (process.env.NODE_ENV === 'production' || process.env.VUE_APP_USE_REMOTE_MENU === 'true') {
-    //   const clientId = getEnv<string>('oidc.client_id', '', window._ENV);
+    // if (Authoriztion.authType === AuthType.Oidc) {
+    //   const clientId = (Authoriztion.getInstance().options as OidcUserManngerSetions).client_id;
     //   userApi
     //     .getMenus({
     //       data: {
@@ -120,6 +131,9 @@ export default defineComponent({
     //           },
     //         ]);
     //     });
+    // } else {
+    //   menus.value = getDefaultMenus();
+    // }
     // } else {
     menus.value = getDefaultMenus();
     // }
@@ -246,7 +260,7 @@ export default defineComponent({
           <div>
             <LayoutAdmin
               class={classes.layoutWrapper}
-              logo={appMixin.siteLogo}
+              logo={siteLogo.value}
               title={appMixin.siteTitle}
               menus={menus.value}
               layoutType={appMixin.layout.type}
