@@ -162,42 +162,50 @@ const logger = new Logger('AppModule', { timestamp: true });
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => {
-        const privateKey = config.get('PRIVATE_KEY');
+        const publicKey = config.get('JWT_PUBLIC_KEY');
+        const privateKey = config.get('JWT_PRIVATE_KEY');
         const { keys } = await getJWKS([privateKey].filter(Boolean) as string[]);
         return {
           signingKey: await getSigningKey(privateKey),
-          verifyingKey: createLocalJWKSet({
-            keys: keys.map((jwk) => ({
-              kty: jwk.kty,
-              use: jwk.use,
-              key_ops: jwk.key_ops ? [...jwk.key_ops] : undefined,
-              kid: jwk.kid,
-              alg: jwk.alg,
-              crv: jwk.crv,
-              e: jwk.e,
-              n: jwk.n,
-              x: jwk.x,
-              x5c: jwk.x5c ? [...jwk.x5c] : undefined,
-              y: jwk.y,
-            })),
-          }),
+          verifyingKey:
+            publicKey ||
+            createLocalJWKSet({
+              keys: keys.map((jwk) => ({
+                kty: jwk.kty,
+                use: jwk.use,
+                key_ops: jwk.key_ops ? [...jwk.key_ops] : undefined,
+                kid: jwk.kid,
+                alg: jwk.alg,
+                crv: jwk.crv,
+                e: jwk.e,
+                n: jwk.n,
+                x: jwk.x,
+                x5c: jwk.x5c ? [...jwk.x5c] : undefined,
+                y: jwk.y,
+              })),
+            }),
           jwtExpiresIn: config.get('JWT_EXPIRES_IN', '1d'),
           jwtHeaderParameters: {
             alg: config.get('JWT_ALGORITHM', 'RS256'),
             typ: 'JWT',
           },
           userFactory(req) {
-            let userStr: string;
-            if ((userStr = req.headers['x-userinfo'] as string)) {
-              // from apisix
-              try {
-                const payload = JSON.parse(Buffer.from(userStr, 'base64').toString('utf-8'));
-                return { payload };
-              } catch {
-                return {};
+            try {
+              const userStrFromHeader = req.headers['x-userinfo'] as string;
+              if (userStrFromHeader) {
+                // from apisix
+                try {
+                  const payload = JSON.parse(Buffer.from(userStrFromHeader, 'base64').toString('utf-8'));
+                  return { payload };
+                } catch {
+                  return {};
+                }
               }
+
+              return;
+            } catch (err) {
+              return;
             }
-            return;
           },
         };
       },
