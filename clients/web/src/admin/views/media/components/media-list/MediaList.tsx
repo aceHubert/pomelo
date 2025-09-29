@@ -90,6 +90,15 @@ export default defineComponent({
       hideOnSinglePage: true,
     });
 
+    /**
+     * 刷新媒体列表
+     * @param force 强制刷新会重置分页到第一页
+     */
+    const refresh = (force = false) => {
+      force && (localPagination.value = Object.assign({}, localPagination.value, { current: 1 }));
+      $mediasRes.read(localPagination.value.current!, localPagination.value.pageSize!, keyword.value);
+    };
+
     useEffect(() => {
       localPagination.value = {
         ...localPagination.value,
@@ -139,15 +148,6 @@ export default defineComponent({
     const removeItem = (uid: string) => {
       const existsIndex = uploadingMedias.value.findIndex((item) => uid === item.uid);
       existsIndex >= 0 && uploadingMedias.value.splice(existsIndex, 1);
-    };
-
-    /**
-     * 刷新媒体列表
-     * @param force 强制刷新会重置分页到第一页
-     */
-    const refresh = (force = false) => {
-      force && (localPagination.value = Object.assign({}, localPagination.value, { current: 1 }));
-      $mediasRes.read(localPagination.value.current!, localPagination.value.pageSize!, keyword.value);
     };
 
     expose({
