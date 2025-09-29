@@ -5,8 +5,12 @@ import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 import { createHttpUploadLink, createWebsocketLink, setHeaders, errorHandler } from './utils/links';
 
-const graphqhBase = getEnv('basicGraphqlBase', `${window.location.origin}/graphql`, window._ENV);
-const graphqlSubscriptionBase = getEnv('graphqlSubscriptionBase', graphqhBase.replace(/^http/, 'ws'), window._ENV);
+const graphqhBase = getEnv('basicGraphqlBase', '/graphql', window._ENV);
+const graphqlSubscriptionBase = getEnv(
+  'graphqlSubscriptionBase',
+  (/^https?/.test(graphqhBase) ? graphqhBase : location.origin + graphqhBase).replace(/^http/, 'ws'),
+  window._ENV,
+);
 
 /**
  * Infrastructure graphql links with upload fetch and websocket
@@ -17,7 +21,8 @@ export const basicLink = split(
     return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
   },
   createWebsocketLink(
-    graphqlSubscriptionBase + (graphqlSubscriptionBase.indexOf('?') >= 0 ? '&' : '?') + 'key=pomelo-local',
+    graphqlSubscriptionBase +
+      `${graphqlSubscriptionBase.indexOf('?') >= 0 ? '&' : '?'}key=pomelo-${Authoriztion.authType.toLowerCase()}`,
     {
       connectionParams: async () => {
         const userManager = Authoriztion.getInstance().userManager,
@@ -41,10 +46,18 @@ export const basicLink = split(
           // popup: true,
         }),
       retry: async () => {
-        const user = await Authoriztion.getInstance().userManager.signinSilent?.();
-        if (user && !user.expired) {
+        const token = await Authoriztion.getInstance()
+          .userManager.signinSilent?.()
+          .then((user) => {
+            if (!user || user.expired) return '';
+
+            return [user.token_type, user.access_token].filter(Boolean).join(' ');
+          })
+          .catch(() => '');
+
+        if (token) {
           return {
-            Authorization: `Bearer ${user.access_token}`,
+            Authorization: token,
           };
         } else {
           throw new Error('Unauthorization, user not found!');
@@ -57,10 +70,11 @@ export const basicLink = split(
     setHeaders(async () => {
       const instance = Authoriztion.getInstance(),
         userManager = instance.userManager,
-        authorization = await userManager
+        token = await userManager
           .getUser()
           .then((user) => {
             if (!user || user.expired) return '';
+
             return [user.token_type, user.access_token].filter(Boolean).join(' ');
           })
           .catch(() => '');
@@ -68,7 +82,7 @@ export const basicLink = split(
         apikey: `pomelo-${Authoriztion.authType.toLowerCase()}`,
       };
 
-      authorization && (headers['Authorization'] = authorization);
+      token && (headers['Authorization'] = token);
       i18n.locale && (headers['x-custom-locale'] = i18n.locale);
 
       return headers;

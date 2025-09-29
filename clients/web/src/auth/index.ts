@@ -20,7 +20,8 @@ if (!Object.values(AuthType).includes(authType)) {
 
 export class Authoriztion {
   private static instance: Authoriztion;
-  userManager: UserManager & Partial<Pick<OidcUserManagerType, 'signinSilent' | 'storeUser'>>;
+  readonly userManager: UserManager & Partial<Pick<OidcUserManagerType, 'signinSilent' | 'storeUser'>>;
+  readonly options: ConstructorParameters<typeof LocalUserManagerCreator | typeof OidcUserManagerCreator>[0];
 
   constructor(type: AuthType.Oidc, options: ConstructorParameters<typeof OidcUserManagerCreator>[0]);
   constructor(type: AuthType.Local, options: ConstructorParameters<typeof LocalUserManagerCreator>[0]);
@@ -28,6 +29,7 @@ export class Authoriztion {
     type: AuthType,
     options: ConstructorParameters<typeof LocalUserManagerCreator | typeof OidcUserManagerCreator>[0],
   ) {
+    this.options = options;
     if (type === AuthType.Oidc) {
       const userManager = new OidcUserManagerCreator(options as OidcUserManngerSetions);
 

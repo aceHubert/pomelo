@@ -126,11 +126,13 @@ export class LocalUserManagerCreator extends UserManager {
   }
 
   signin(args: ISigninArgs = {}): Promise<void> {
-    const { noInteractive, redirect_uri = '/' } = args;
+    const { noInteractive, redirect_uri = location.href } = args;
+    const redirectUri = /https?:\/\//.test(redirect_uri) ? redirect_uri : `${location.origin}${redirect_uri}`;
+
     if (noInteractive) {
       return new Promise<void>((resolve) => {
         setTimeout(() => {
-          absoluteGo(`${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirect_uri)}`);
+          absoluteGo(`${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirectUri)}`);
           resolve();
         }, 0);
       });
@@ -151,10 +153,12 @@ export class LocalUserManagerCreator extends UserManager {
     }
   }
   signout(args: ISignoutArgs = {}): Promise<void> {
-    const { redirect_uri = '/' } = args;
+    const { redirect_uri = location.href } = args;
+    const redirectUri = /https?:\/\//.test(redirect_uri) ? redirect_uri : `${location.origin}${redirect_uri}`;
+
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        window.location.href = `${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirect_uri)}`;
+        window.location.href = `${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirectUri)}`;
         resolve();
       }, 0);
     });

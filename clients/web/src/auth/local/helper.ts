@@ -16,7 +16,7 @@ export function getToken() {
   };
 }
 
-export function setToken(token: string, type = 'Baerer', remember = false) {
+export function setToken(token: string, type = '', remember = false) {
   if (remember) {
     storage.set(ACCESS_TOKEN_KEY, { token, type });
   } else {

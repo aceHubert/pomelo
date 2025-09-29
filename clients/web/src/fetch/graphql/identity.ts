@@ -4,17 +4,29 @@ import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 import { createHttpLink, setHeaders, errorHandler } from './utils/links';
 
-const graphqlBase = getEnv('identityGraphqlBase', `${window.location.origin}/graphql`, window._ENV);
+const graphqlBase = getEnv('identityGraphqlBase', '/graphql', window._ENV);
 
 //  Identity graphql link
 export const identityLink = from([
   errorHandler({
-    unauthorize: () => Authoriztion.getInstance().userManager.signin(),
+    unauthorize: () =>
+      Authoriztion.getInstance().userManager.signin({
+        noInteractive: true,
+        // popup: true,
+      }),
     retry: async () => {
-      const user = await Authoriztion.getInstance().userManager.signinSilent?.();
-      if (user && !user.expired) {
+      const token = await Authoriztion.getInstance()
+        .userManager.signinSilent?.()
+        .then((user) => {
+          if (!user || user.expired) return '';
+
+          return [user.token_type, user.access_token].filter(Boolean).join(' ');
+        })
+        .catch(() => '');
+
+      if (token) {
         return {
-          Authorization: `Bearer ${user.access_token}`,
+          Authorization: token,
         };
       } else {
         throw new Error('Unauthorization, user not found!');
@@ -27,10 +39,11 @@ export const identityLink = from([
   setHeaders(async () => {
     const instance = Authoriztion.getInstance(),
       userManager = instance.userManager,
-      authorization = await userManager
+      token = await userManager
         .getUser()
         .then((user) => {
           if (!user || user.expired) return '';
+
           return [user.token_type, user.access_token].filter(Boolean).join(' ');
         })
         .catch(() => '');
@@ -38,7 +51,7 @@ export const identityLink = from([
       apikey: `pomelo-${Authoriztion.authType.toLowerCase()}`,
     };
 
-    authorization && (headers['Authorization'] = authorization);
+    token && (headers['Authorization'] = token);
     i18n.locale && (headers['x-custom-locale'] = i18n.locale);
 
     return headers;

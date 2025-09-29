@@ -92,9 +92,9 @@ const promiseToObservable = <T>(promise: () => Promise<T>, reject?: (error: Erro
  * @param options.initialize to initialize site
  */
 export const errorHandler = (options: {
-  unauthorize: () => Promise<void>;
+  unauthorize: () => void | PromiseLike<void>;
   retry?: () => Promise<Record<string, any>>;
-  initialize?: () => Promise<void> | void;
+  initialize?: () => void | PromiseLike<void>;
 }) =>
   onError(({ networkError, graphQLErrors, operation, forward }) => {
     // 重试登录，refresh token 重新获取 access token，如果再不成功则退出重新登录

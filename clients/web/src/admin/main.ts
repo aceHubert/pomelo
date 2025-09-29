@@ -94,7 +94,7 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
     userManager
       .signout({
         // popup: true,
-        // redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
+        redirect_uri: (router.options.base ?? '/').replace(/\/$/, ''),
       })
       .then(() => userManager.getUser())
       .then((user) => {
@@ -114,7 +114,6 @@ function authMiddleware(this: Vue, to: Route, from: Route, next: Next) {
           .signin({
             noInteractive: true,
             // popup: true,
-            redirect_uri: `${router.options.base ?? '/'}${to.fullPath.slice(1)}`,
           })
           .then(next)
           .catch(() => {

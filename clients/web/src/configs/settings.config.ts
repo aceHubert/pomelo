@@ -36,8 +36,7 @@ export const defaultSettings: {
 } = {
   // pwa: false,
   // iconfontUrl: '',
-  title: (i18nRender: (key: string, fallback: string, args?: any) => string) =>
-    i18nRender('site_title', 'Pomelo Admin'),
+  title: (i18nRender: (key: string, fallback: string, args?: any) => string) => i18nRender('site_title', 'Pomelo'),
   logo: `${process.env.BASE_URL}static/img/logo.png`,
   layout: {
     type: LayoutType.MixedMenu,

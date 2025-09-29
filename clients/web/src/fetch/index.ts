@@ -24,11 +24,15 @@ axiosInstance.interceptors.request.use(async ({ params, headers, ...context }) =
     userManager = Authoriztion.getInstance().userManager,
     token = await userManager
       .getUser()
-      .then((user) => user?.access_token)
+      .then((user) => {
+        if (!user || user.expired) return '';
+
+        return [user.token_type, user.access_token].filter(Boolean).join(' ');
+      })
       .catch(() => '');
 
   if (SUPPORTS_CORS) {
-    token && headers.set('Authorization', `Bearer ${token}`);
+    token && headers.set('Authorization', token);
     locale && headers.set('x-custom-locale', locale);
     return {
       params,
@@ -59,14 +63,22 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
         .signinSilent()
         .then((user) => {
           if (user) {
-            const headers = {
-              ...error.config?.headers,
-              Authorization: `Bearer ${user.access_token}`,
-            };
-            return axiosInstance({ ...error.config, headers });
+            return [user.token_type, user.access_token].filter(Boolean).join(' ');
           } else {
             throw new Error('No user found!');
           }
+        })
+        .then((token) => {
+          const config = { ...error.config };
+          if (SUPPORTS_CORS && config.headers) {
+            config.headers.set('Authorization', token);
+          } else {
+            config.params = {
+              ...config.params,
+              token,
+            };
+          }
+          return axiosInstance(config);
         })
         .catch(() => {
           userManager.signin();
@@ -132,9 +144,8 @@ apiFetch.use(
               error.message || 'System error!',
               (axios.isAxiosError(error) ? error.response?.status : (error as any).code) || 500,
             );
-      return new Promise(() => {
-        // stop next
-      });
+      // stop next
+      return new Promise(() => {});
     },
   }),
 );
