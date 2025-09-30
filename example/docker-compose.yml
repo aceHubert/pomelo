@@ -112,7 +112,7 @@ services:
         max-size: "100m"
         max-file: "3"
     volumes:
-      - ${PWD}/conf/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${PWD}/conf/nginx.conf:/etc/nginx/conf.d/default.conf
       - ${PWD}/logs/nginx:/var/log/nginx
     ports:
       - "8080:80"

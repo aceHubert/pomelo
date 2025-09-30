@@ -183,6 +183,7 @@ jobs:
             cp -rf /tmp/pomelo-${{ github.run_id }}/example/* .
             find . -name ".git*" -type f -delete
             find . -name ".keep" -type f -delete
+            find . -type d -exec chmod 775 {} \;
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}-oidc" > .env.${{ github.run_id }}
             echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
             docker compose -f docker-compose-standard.yml --env-file .env.${{ github.run_id }} up --force-recreate -d
