@@ -26,7 +26,7 @@ services:
       - ${PWD}/themes:/app/content/themes
       - ${PWD}/logs:/app/logs
     privileged: true
-    ports:
+    # ports:
       # - 3000:3000 # infrastructure microservice
       # - 3001:3001 # infrastructure server
       # - 3002:3002 # bff
@@ -54,7 +54,7 @@ services:
     depends_on:
       - server
     ##network_mode: host
-    ports:
+    # ports:
       # - '9180:9180/tcp' # admin_control: true
       # - '9080:9080/tcp'  # http
       # - '9091:9091/tcp'  # prometheus
