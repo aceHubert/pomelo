@@ -1,0 +1,16 @@
+!/logs
+
+/logs/apisix/*
+!/logs/apisix/.keep
+
+/logs/nginx/*
+!/logs/nginx/.keep
+
+/uploads/*
+!/uploads/.keep
+
+/themes/*
+!/themes/.keep
+
+/plugins/*
+!/plugins/.keep

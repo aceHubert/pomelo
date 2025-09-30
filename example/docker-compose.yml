@@ -96,10 +96,30 @@ services:
     ##network_mode: host
     ports:
       # - '9180:9180/tcp' # admin_control: true
-      - '9080:9080/tcp'  # http
+      - "9080:9080/tcp" # http
       # - '9091:9091/tcp'  # prometheus
-      - '9443:9443/tcp'  # tls http/2
+      - "9443:9443/tcp" # tls http/2
       # - '9092:9092/tcp' # enable_control: true
+    networks:
+      - default
+  proxy:
+    image: nginx:${NGINX_IMAGE_TAG:-alpine}
+    container_name: pomelo-proxy
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    volumes:
+      - ${PWD}/conf/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${PWD}/logs/nginx:/var/log/nginx
+    ports:
+      - "8080:80"
+      - "8443:443"
+    depends_on:
+      - server
+      - apisix
     networks:
       - default
 networks:
