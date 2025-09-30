@@ -167,8 +167,8 @@ jobs:
           username: ${{ secrets.HW_SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建
           key: ${{ secrets.HW_SSH_KEY }} # 服务器密码；需要去仓库的 settings/secrets/actions 去创建
           port: ${{ secrets.HW_SSH_PORT }} # 服务器端口，默认22；需要去仓库的 settings/secrets/actions 去创建
-          source: 'example/*,!.keep,!README.md,!.git*' # 本地文件路径
-          target: ${{ vars.PROJECT_DIR }} # 服务器文件夹路径
+          source: 'example/*' # 本地文件路径
+          target: '/tmp/pomelo-${{ github.run_id }}' # 服务器文件夹路径
           overwrite: true
       - name: Deploy
         uses: appleboy/ssh-action@v1
@@ -180,6 +180,9 @@ jobs:
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
+            cp -rf /tmp/pomelo-${{ github.run_id }}/example/* .
+            find . -name ".git*" -type f -delete
+            find . -name ".keep" -type f -delete
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}-oidc" > .env.${{ github.run_id }}
             echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
             docker compose -f docker-compose-standard.yml --env-file .env.${{ github.run_id }} up --force-recreate -d
