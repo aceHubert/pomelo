@@ -47,8 +47,8 @@ services:
     environment:
       - APISIX_STAND_ALONE=true
     volumes:
-      - ${PWD}/conf/apisix_standalone.yaml:/usr/local/apisix/conf/apisix.yaml:ro
-      - ${PWD}/conf/config_standalone.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ${PWD}/conf/apisix-standalone.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ${PWD}/conf/config-standalone.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ${PWD}/logs/apisix:/usr/local/apisix/logs
     privileged: true
     depends_on:

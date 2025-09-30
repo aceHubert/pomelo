@@ -22,7 +22,7 @@ export const basicLink = split(
   },
   createWebsocketLink(
     graphqlSubscriptionBase +
-      `${graphqlSubscriptionBase.indexOf('?') >= 0 ? '&' : '?'}key=pomelo-${Authoriztion.authType.toLowerCase()}`,
+      `${graphqlSubscriptionBase.indexOf('?') >= 0 ? '&' : '?'}apikey=pomelo-${Authoriztion.authType.toLowerCase()}`,
     {
       connectionParams: async () => {
         const userManager = Authoriztion.getInstance().userManager,

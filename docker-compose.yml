@@ -82,13 +82,13 @@ services:
         target: /usr/local/apisix/conf/apisix.yaml
         volume:
           nocopy: true
-          subpath: apisix_standalone.yaml
+          subpath: apisix-standalone.yaml
       - type: volume
         source: conf
         target: /usr/local/apisix/conf/config.yaml
         volume:
           nocopy: true
-          subpath: config_standalone.yaml
+          subpath: config-standalone.yaml
       - ${PWD}/logs/apisix:/usr/local/apisix/logs
     privileged: true
     depends_on:
