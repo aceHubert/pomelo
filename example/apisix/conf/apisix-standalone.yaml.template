@@ -7,14 +7,13 @@ consumers:
         # set client metadata
         client_id: 75a9c633-cfde-4954-b35c-9344ed9b781a
         client_secret: ${APISIX_CLIENT_SECRET}
-        discovery: http://${DOMAIN}/identity/oauth2/.well-known/openid-configuration
+        discovery: ${ORIGIN}/identity/oauth2/.well-known/openid-configuration
         unauth_action: pass
-        bearer_only: true
         use_jwks: true
         claim_validator:
           issuer:
             valid_issuers:
-              - https://${DOMAIN}/identity/oauth2
+              - ${ORIGIN}/identity/oauth2
   - username: pomelo_local
     plugins:
       key-auth:
@@ -32,13 +31,14 @@ routes:
       - OPTIONS
       - CONNECT
     plugins:
+      cors:
+        allow_origins: "${ORIGIN}"
       key-auth:
         _meta:
           disable: false
         header: apikey
         query: apikey
         hide_credentials: true
-      cors:
       proxy-rewrite:
         regex_uri:
           - ^/action/basic(/?)(.*)
@@ -74,6 +74,7 @@ routes:
       - CONNECT
     plugins:
       cors:
+        allow_origins: "${ORIGIN}"
       proxy-rewrite:
         regex_uri:
           - ^/action/identity(/?)(.*)
