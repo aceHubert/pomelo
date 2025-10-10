@@ -181,7 +181,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Process template files with envsubst
+      - name: Process template files
         run: |
           # Remove redis and mysql directories
           rm -rf example/redis example/mysql
@@ -229,7 +229,7 @@ jobs:
             chmod 777 ./apisix || true
             # Process env file
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}-oidc" > .env.${{ github.run_id }}
-            echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
+            echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_CONTAINER_NAME=redis-default-7.2\nMYSQL_CONTAINER_NAME=mysql-default-5.7\nMYSQL_USER=${{secrets.MYSQL_USER}}\nMYSQL_PASSWORD=${{secrets.MYSQL_PASSWORD}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
             # Up docker compose
             docker compose -f docker-compose-standard.yml --env-file .env.${{ github.run_id }} up --force-recreate -d
             # Remove unused images
