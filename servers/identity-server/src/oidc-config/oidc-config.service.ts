@@ -521,7 +521,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         return;
       },
       renderError: async (ctx, out, err) => {
-        this.logger.error('oidc renderError, Error: ${err}');
+        this.logger.error(`oidc renderError, Error: ${err.message}`, err.stack);
 
         const i18n = getI18nFromContext(ctx);
         const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
