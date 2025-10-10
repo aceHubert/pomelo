@@ -116,7 +116,7 @@ jobs:
       name: 'production'
     steps:
       - name: Deploy
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }} # 服务器ip地址 ; 需要去仓库的 settings/secrets/actions 去创建
           username: ${{ secrets.SSH_USERNAME }} # 服务器用户名称；需要去仓库的 settings/secrets/actions 去创建

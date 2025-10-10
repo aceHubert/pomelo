@@ -157,9 +157,44 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: 'production'
+    env:
+      # APISIX configuration
+      APISIX_SERVER_PORT: ${{ vars.APISIX_SERVER_PORT || '9080' }}
+      APISIX_CLIENT_SECRET: ${{ secrets.APISIX_CLIENT_SECRET }}
+      DOMAIN: ${{ vars.DOMAIN }}
+      # NGINX configuration
+      NGINX_WORKER_PROCESSES: ${{ vars.NGINX_WORKER_PROCESSES || 'auto' }}
+      NGINX_KEEPALIVE_TIMEOUT: ${{ vars.NGINX_KEEPALIVE_TIMEOUT || '65' }}
+      NGINX_CLIENT_MAX_BODY_SIZE: ${{ vars.NGINX_CLIENT_MAX_BODY_SIZE || '100M' }}
+      NGINX_PROXY_READ_TIMEOUT: ${{ vars.NGINX_PROXY_READ_TIMEOUT || '3600s' }}
+      NGINX_PROXY_SEND_TIMEOUT: ${{ vars.NGINX_PROXY_SEND_TIMEOUT || '3600s' }}
+      NGINX_PROXY_CONNECT_TIMEOUT: ${{ vars.NGINX_PROXY_CONNECT_TIMEOUT || '3600s' }}
+      NGINX_PROXY_REDIRECT: ${{ vars.NGINX_PROXY_REDIRECT || 'off' }}
+      NGINX_PORT: ${{ vars.NGINX_PORT || '80' }}
+      NGINX_SERVER_NAME: ${{ vars.NGINX_SERVER_NAME || '_' }}
+      APISIX_SERVER_HOST: ${{ vars.APISIX_SERVER_HOST || 'pomelo-apisix' }}
+      POMERO_SERVER_HOST: ${{ vars.POMERO_SERVER_HOST || 'pomelo-server' }}
+      POMERO_BFF_SERVER_PORT: ${{ vars.POMERO_BFF_SERVER_PORT || '3002' }}
+      POMERO_IDENTITY_SERVER_PORT: ${{ vars.POMERO_IDENTITY_SERVER_PORT || '3003' }}
+      POMERO_STATIC_CONTENT_PORT: ${{ vars.POMERO_STATIC_CONTENT_PORT || '3004' }}
+      POMERO_WEB_PORT: ${{ vars.POMERO_WEB_PORT || '3000' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: Process template files with envsubst
+        run: |
+          # Install gettext-base for envsubst if not available
+          which envsubst || (sudo apt-get update && sudo apt-get install -y gettext-base)
+
+          # Process all .template files
+          find example -name "*.template" | while read template_file; do
+            output_file="${template_file%.template}"
+            echo "Processing $template_file -> $output_file"
+            envsubst < "$template_file" > "$output_file"
+          done
+
+          # Remove .keep files
+          find example -name ".keep" -type f -delete
       - name: Copy files to server
         uses: appleboy/scp-action@v1
         with:
@@ -180,12 +215,18 @@ jobs:
           script: | # 发布镜像并删除之前的镜像
             whoami
             cd ${{ vars.PROJECT_DIR }}
+            # Copy files
             cp -rf /tmp/pomelo-${{ github.run_id }}/example/* .
-            find . -name ".git*" -type f -delete
-            find . -name ".keep" -type f -delete
+            # Change permissions
             find . -type d -exec chmod 775 {} \;
+            chmod 777 ./apisix || true
+            # Process env file
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}-oidc" > .env.${{ github.run_id }}
             echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=https://${{vars.DOMAIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
+            # Up docker compose
             docker compose -f docker-compose-standard.yml --env-file .env.${{ github.run_id }} up --force-recreate -d
+            # Remove unused images
             docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}-oidc) | xargs --no-run-if-empty docker rmi
+            # Remove env file and temp files
             rm -f .env.${{ github.run_id }}
+            # rm -rf /tmp/pomelo-${{ github.run_id }}

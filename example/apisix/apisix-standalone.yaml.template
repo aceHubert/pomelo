@@ -5,11 +5,16 @@ consumers:
         key: pomelo-oidc
       openid-connect:
         # set client metadata
-        # client_id: CLIENT_ID
-        # client_secret: CLIENT_SECRET
-        discovery: http://pomelo-server:3003/identity/oauth2/.well-known/openid-configuration
+        client_id: 75a9c633-cfde-4954-b35c-9344ed9b781a
+        client_secret: ${APISIX_CLIENT_SECRET}
+        discovery: http://${DOMAIN}/identity/oauth2/.well-known/openid-configuration
         unauth_action: pass
+        bearer_only: true
         use_jwks: true
+        claim_validator:
+          issuer:
+            valid_issuers:
+              - https://${DOMAIN}/identity/oauth2
   - username: pomelo_local
     plugins:
       key-auth:
@@ -31,8 +36,8 @@ routes:
         _meta:
           disable: false
         header: apikey
+        query: apikey
         hide_credentials: true
-        query: key
       cors:
       proxy-rewrite:
         regex_uri:
@@ -40,8 +45,8 @@ routes:
           - /$2
     upstream:
       nodes:
-        - host: pomelo-server
-          port: 3002
+        - host: ${POMERO_SERVER_HOST}
+          port: ${POMERO_BFF_SERVER_PORT}
           weight: 1
       timeout:
         connect: 60
@@ -75,8 +80,8 @@ routes:
           - /identity/$2
     upstream:
       nodes:
-        - host: pomelo-server
-          port: 3003
+        - host: ${POMERO_SERVER_HOST}
+          port: ${POMERO_IDENTITY_SERVER_PORT}
           weight: 1
       timeout:
         connect: 6

@@ -36,7 +36,7 @@ kill_timeout = "5s"
   # auto_extend_size_threshold = 0
 
 # [http_service]
-#   internal_port = 3001
+#   internal_port = 9001
 #   force_https = true
 #   auto_stop_machines = true
 #   auto_start_machines = true
@@ -44,14 +44,14 @@ kill_timeout = "5s"
 #   processes = ["app"]
 
 [[services]]
-  internal_port = 3001
+  internal_port = 9001
   protocol = "tcp"
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
   processes = ["app"]
   [[services.ports]]
-    port = 3001
+    port = 9001
     handlers = ["http"]
     force_https = true
 
@@ -80,14 +80,26 @@ kill_timeout = "5s"
     force_https = true
 
 [[services]]
-  internal_port = 3011
+  internal_port = 3004
   protocol = "tcp"
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
   processes = ["app"]
   [[services.ports]]
-    port = 3011
+    port = 3004
+    handlers = ["http"]
+    force_https = true
+
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [[services.ports]]
+    port = 3000
     handlers = ["http"]
     force_https = true
 

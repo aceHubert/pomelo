@@ -19,9 +19,45 @@
 # version: '3.1'
 
 services:
+  database:
+    image: mysql:5.7
+    restart: always
+    container_name: pomelo-mysql
+    volumes:
+      - ${PWD}/mysql/conf.d:/etc/mysql/conf.d
+      - ${PWD}/mysql/data:/var/lib/mysql
+      - ${PWD}/mysql:/logs
+    privileged: true
+    # ports:
+    #   - "3336:3306"
+    #   - "127.0.0.1:3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD:
+      MYSQL_DATABASE: ${DATABASE_NAME:-po_template}
+      MYSQL_USER: ${DATABASE_USER:-pomelo}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+  redis:
+    # Adjust the build context to your needs targetting the created Dockerfile
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    image: redis:7.2-alpine
+    restart: always
+    container_name: pomelo-redis
+    # Run the init script
+    command: sh -c "./init.sh"
+    # command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    privileged: true
+    # ports:
+    #   - "16379:6379"
+    #   - "127.0.0.1:6379:6379"
+    volumes:
+      - ${PWD}/redis/conf.d:/usr/local/etc/redis
+      - ${PWD}/redis/data:/data
   server:
     build:
-      context: ${BUILD_CONTEXT:-.}
+      context: ../
       dockerfile: Dockerfile
       args:
         BUILD_PLATFORM: ${BUILD_PLATFORM:-linux/amd64}
@@ -37,16 +73,16 @@ services:
       target: deploy
       tags:
         - pomelo:${BUILD_TAG:-latest}
-    image: pomelo
+    image: pomelo:latest
     container_name: pomelo-server
     restart: always
     environment:
       - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
       - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
       - ORIGIN=${ORIGIN:-https://example.com}
-      - REDIS_URL=${REDIS_URL:-redis://host:port/db}
-      - INFRASTRUCTURE_DATABASE_CONNECTION=${INFRASTRUCTURE_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
-      - IDENTITY_DATABASE_CONNECTION=${IDENTITY_DATABASE_CONNECTION:-mysql://user:password@host:port/database}
+      - REDIS_URL=redis://127.0.0.1:6379/0
+      - INFRASTRUCTURE_DATABASE_CONNECTION=mysql://${DATABASE_USER:-pomelo}:${DATABASE_PASSWORD}@127.0.0.1:3306/${DATABASE_NAME:-po_template}
+      - IDENTITY_DATABASE_CONNECTION=mysql://${DATABASE_USER:-pomelo}:${DATABASE_PASSWORD}@127.0.0.1:3306/${IDENTITY_DATABASE_NAME:-po_identity}
       - TABLE_PREFIX=${TABLE_PREFIX:-po_}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
@@ -56,55 +92,41 @@ services:
       - ${PWD}/themes:/app/content/themes
       - ${PWD}/logs:/app/logs
     privileged: true
+    depends_on:
+      - database
+      - redis
     # ports:
-      # - 3000:3000 # infrastructure microservice
-      # - 3001:3001 # infrastructure server
-      # - 3002:3002 # bff
-      # - 3003:3003 # identity server
-      # - 3004:3004 # static content
-      # - 3011:3011 # web
-    external_links:
-      - ${MYSQL_CONTAINER_NAME:-mysql-default-5.7}:mysql
-      - ${REDIS_CONTAINER_NAME:-redis-default-6.2}:redis
+    # - 3000:3000 # web
+    # - 3002:3002 # bff server
+    # - 3003:3003 # identity server
+    # - 3004:3004 # static content
     networks:
       - default
-      - mysql
-      - redis
   apisix:
-    image: apache/apisix:${APISIX_IMAGE_TAG:-3.13.0-debian}
+    image: apache/apisix:3.13.0-debian
     container_name: pomelo-apisix
     restart: always
     environment:
       - APISIX_STAND_ALONE=true
     volumes:
-      - type: volume
-        source: conf
-        target: /usr/local/apisix/conf/apisix.yaml
-        volume:
-          nocopy: true
-          subpath: apisix-standalone.yaml
-      - type: volume
-        source: conf
-        target: /usr/local/apisix/conf/config.yaml
-        volume:
-          nocopy: true
-          subpath: config-standalone.yaml
-      - ${PWD}/logs/apisix:/usr/local/apisix/logs
+      - ${PWD}/apisix/apisix-standalone.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ${PWD}/apisix/config-standalone.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ${PWD}/apisix:/usr/local/apisix/logs
     privileged: true
     depends_on:
       - server
     ##network_mode: host
     # ports:
-      # - '9180:9180/tcp' # admin_control: true
-      # - "9080:9080/tcp" # http
-      # - '9091:9091/tcp'  # prometheus
-      # - "9443:9443/tcp" # tls http/2
-      # - '9092:9092/tcp' # enable_control: true
+    # - '9180:9180/tcp' # admin_control: true
+    # - "9080:9080/tcp" # http
+    # - '9091:9091/tcp'  # prometheus
+    # - "9443:9443/tcp" # tls http/2
+    # - '9092:9092/tcp' # enable_control: true
     networks:
       - default
-  proxy:
-    image: nginx:${NGINX_IMAGE_TAG:-alpine}
-    container_name: pomelo-proxy
+  nginx:
+    image: nginx:alpine
+    container_name: pomelo-nginx
     restart: always
     logging:
       driver: "json-file"
@@ -112,8 +134,9 @@ services:
         max-size: "100m"
         max-file: "3"
     volumes:
-      - ${PWD}/conf/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ${PWD}/logs/nginx:/var/log/nginx
+      - ${PWD}/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ${PWD}/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - ${PWD}/nginx:/var/log/nginx
     ports:
       - "8080:80"
       - "8443:443"
@@ -122,19 +145,12 @@ services:
       - apisix
     networks:
       - default
-networks:
-  mysql:
-    name: ${MYSQL_NETWORK_NAME:-mysql_default}
-    external: true
-  redis:
-    name: ${REDIS_NETWORK_NAME:-redis_default}
-    external: true
-volumes:
-  conf:
-    name: pomelo-conf
-    external: true
-    # driver: local
-    # driver_opts:
-    #   type: none
-    #   device: ${PWD}/${CONF_DIR:-CONF}
-    #   o: bind
+# volumes:
+#   conf:
+#     name: pomelo-conf
+#     external: true
+# driver: local
+# driver_opts:
+#   type: none
+#   device: ${PWD}/${CONF_DIR:-CONF}
+#   o: bind

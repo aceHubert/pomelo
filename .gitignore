@@ -145,3 +145,15 @@ db.lock
 # docker-compose
 /release
 /.cache
+
+# example
+!example/logs
+
+example/uploads/*
+!example/uploads/.keep
+
+example/themes/*
+!example/themes/.keep
+
+example/plugins/*
+!example/plugins/.keep

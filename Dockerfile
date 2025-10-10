@@ -7,7 +7,7 @@
 # 构建镜像
 # docker buildx build -t hubert007/pomelo:0.0.3 -t hubert007/pomelo:latest --target deploy --cache-from hubert007/pomelo:latest --build-arg BUILD_IGNORE=true --platform linux/amd64,linux/arm64 --push .
 # 运行容器
-# docker run -it -d -p -p 3001:3001 -p 3002:3002 -p 3003:3003 -p 3004:3004 -p 3011:3011 --name pomelo-server --rm hubert007/pomelo:0.0.2
+# docker run -it -d -p -p 3000:30001 -p 3002:3002 -p 3003:3003 -p 3004:3004 --name pomelo-server --rm hubert007/pomelo:0.0.2
 # docker network connect --link mysql-default-5.7:mysql mysql_default pomelo-server
 # docker network connect --link redis-default-6.2:redis redis_default pomelo-server
 
@@ -69,7 +69,7 @@ RUN npm install -g pm2
 #   npm config set registry https://registry.npm.taobao.org && \
 #   npm install -g pm2
 
-EXPOSE 3001-3004 3011
+EXPOSE 3001-3004
 CMD if [ "$SERVE_APPS" = "" ]; then \
       pm2-runtime start ecosystem.config.js --env $SERVE_ENV; \
     else \

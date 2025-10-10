@@ -1,0 +1,51 @@
+# Please do not directly edit this file. Instead, modify the .env variables related to NGINX configuration.
+
+
+ upstream pomelo_apisix_proxy {
+        server ${APISIX_SERVER_HOST}:${APISIX_SERVER_PORT};
+ }
+
+ upstream pomelo_identity_server {
+        server ${POMERO_SERVER_HOST}:${POMERO_IDENTITY_SERVER_PORT};
+ }
+
+ upstream pomelo_static_content {
+        server ${POMERO_SERVER_HOST}:${POMERO_STATIC_CONTENT_PORT};
+ }
+
+ upstream pomelo_web {
+        server ${POMERO_SERVER_HOST}:${POMERO_WEB_PORT};
+ }
+
+ server {        
+        listen ${NGINX_PORT};
+        server_name ${NGINX_SERVER_NAME};
+
+        location / {
+          rewrite ^/(admin|login|initialize)(.*) /$1.html break;
+
+          proxy_pass http://pomelo_web;
+          include proxy.conf;
+        }
+
+        location /action/ {
+          proxy_pass http://pomelo_apisix_proxy;
+          include proxy.conf;
+        }
+
+        location ~* /(uploads|languages|themes|plugins)/(.*) {
+          proxy_pass http://pomelo_static_content/$1/$2$is_args$args;
+          include proxy.conf;
+        }
+
+        location /identity/ {
+          proxy_pass http://pomelo_identity_server;
+          include proxy.conf;
+        }
+
+        # common error page config
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }

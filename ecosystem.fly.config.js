@@ -6,8 +6,8 @@ module.exports = {
       script: 'node dist/main.js',
       autorestart: true,
       env_production: {
-        PORT: 3001,
-        TCP_PORT: 3000,
+        PORT: 9000,
+        TCP_PORT: 9001,
       },
     },
     {
@@ -17,7 +17,7 @@ module.exports = {
       autorestart: true,
       env_production: {
         PORT: 3002,
-        INFRASTRUCTURE_SERVICE_PORT: 3000,
+        INFRASTRUCTURE_SERVICE_PORT: 9001,
       },
     },
     {
@@ -28,8 +28,8 @@ module.exports = {
       env_production: {
         PORT: 3003,
         OIDC_PATH: '/oauth2',
-        INFRASTRUCTURE_SERVICE_PORT: 3000,
-        WEB_URL: 'https://pomelo-client.fly.dev:3011',
+        INFRASTRUCTURE_SERVICE_PORT: 9001,
+        WEB_URL: 'https://pomelo-client.fly.dev:3000',
       },
     },
     {
@@ -47,7 +47,7 @@ module.exports = {
       script: 'serve',
       env_production: {
         PM2_SERVE_PATH: '.',
-        PM2_SERVE_PORT: 3011,
+        PM2_SERVE_PORT: 3000,
         PM2_SERVE_SPA: 'true',
         PM2_SERVE_HOMEPAGE: '/index.html',
       },
