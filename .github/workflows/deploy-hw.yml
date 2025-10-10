@@ -183,18 +183,25 @@ jobs:
         uses: actions/checkout@v3
       - name: Process template files with envsubst
         run: |
+          # Remove redis and mysql directories
+          rm -rf example/redis example/mysql
+
+          # Remove .keep files
+          find example -name ".keep" -type f -delete
+
           # Install gettext-base for envsubst if not available
           which envsubst || (sudo apt-get update && sudo apt-get install -y gettext-base)
 
           # Process all .template files
+          env_vars=$(printenv | cut -d= -f1 | sed 's/^/$/g' | paste -sd, -)
           find example -name "*.template" | while read template_file; do
             output_file="${template_file%.template}"
             echo "Processing $template_file -> $output_file"
-            envsubst < "$template_file" > "$output_file"
+            envsubst "$env_vars" < "$template_file" > "$output_file"
           done
 
-          # Remove .keep files
-          find example -name ".keep" -type f -delete
+          # Remove .template files
+          find example -name "*.template" -type f -delete
       - name: Copy files to server
         uses: appleboy/scp-action@v1
         with:

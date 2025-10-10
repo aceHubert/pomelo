@@ -53,7 +53,7 @@ services:
     #   - "16379:6379"
     #   - "127.0.0.1:6379:6379"
     volumes:
-      - ${PWD}/redis/conf.d:/usr/local/etc/redis
+      - ${PWD}/redis/conf:/usr/local/etc/redis
       - ${PWD}/redis/data:/data
   server:
     build:
@@ -86,7 +86,7 @@ services:
       - TABLE_PREFIX=${TABLE_PREFIX:-po_}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
-      - conf:/app/conf
+      - ${PWD}/conf:/app/conf
       - ${PWD}/uploads:/app/content/uploads
       - ${PWD}/plugins:/app/content/plugins
       - ${PWD}/themes:/app/content/themes
@@ -109,8 +109,8 @@ services:
     environment:
       - APISIX_STAND_ALONE=true
     volumes:
-      - ${PWD}/apisix/apisix-standalone.yaml:/usr/local/apisix/conf/apisix.yaml:ro
-      - ${PWD}/apisix/config-standalone.yaml:/usr/local/apisix/conf/config.yaml:ro
+      - ${PWD}/apisix/conf/apisix-standalone.yaml:/usr/local/apisix/conf/apisix.yaml:ro
+      - ${PWD}/apisix/conf/config-standalone.yaml:/usr/local/apisix/conf/config.yaml:ro
       - ${PWD}/apisix:/usr/local/apisix/logs
     privileged: true
     depends_on:
