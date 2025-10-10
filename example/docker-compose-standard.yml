@@ -14,9 +14,9 @@ services:
       - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
       - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
       - ORIGIN=${ORIGIN:-https://example.com}
-      - REDIS_URL=redis://redis:6379/0
-      - INFRASTRUCTURE_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:3306/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
-      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:3306/${IDENTITY_DATABASE_NAME:-po_identity}
+      - REDIS_URL=redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:${REDIS_PORT:-6379}/${REDIS_DB:-0}
+      - INFRASTRUCTURE_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:${MYSQL_PORT:-3306}/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
+      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:${MYSQL_PORT:-3306}/${IDENTITY_DATABASE_NAME:-po_identity}
       - TABLE_PREFIX=${TABLE_PREFIX:-po_}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
