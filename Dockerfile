@@ -7,7 +7,7 @@
 # 构建镜像
 # docker buildx build -t hubert007/pomelo:0.0.3 -t hubert007/pomelo:latest --target deploy --cache-from hubert007/pomelo:latest --build-arg BUILD_IGNORE=true --platform linux/amd64,linux/arm64 --push .
 # 运行容器
-# docker run -it -d -p -p 3000:30001 -p 3002:3002 -p 3003:3003 -p 3004:3004 --name pomelo-server --rm hubert007/pomelo:0.0.2
+# docker run -it -d -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 --name pomelo-server --rm hubert007/pomelo:0.0.2
 # docker network connect --link mysql-default-5.7:mysql mysql_default pomelo-server
 # docker network connect --link redis-default-6.2:redis redis_default pomelo-server
 
@@ -39,7 +39,7 @@ FROM base AS runtime
 COPY --from=builder /app/clients/web/dist /app/clients/web/
 COPY --from=builder /app/dist/servers /app/servers/
 COPY --from=builder /app/.yarn /app/.yarn/
-COPY --from=builder /app/package*.json /app/ecosystem.config.js /app/.yarnrc.yml /app/yarn.lock /app/
+COPY --from=builder /app/package*.json /app/ecosystem*.config.js /app/.yarnrc.yml /app/yarn.lock /app/
 
 WORKDIR /app
 # 安装 Nodejs 运行时文件
@@ -48,20 +48,20 @@ RUN yarn workspaces focus --production --all
 
 # copy runtime files
 FROM base AS deploy
-COPY --from=runtime /app/servers /app/clients /app/ecosystem.config.js /app/
-COPY --from=runtime /app/node_modules /app/node_modules/
-
 # NODE_ENV 环境
 ARG RUNTIME_ENV="production"
 # PM2 环境, https://pm2.keymetrics.io/docs/usage/application-declaration/
-ARG SERVE_ENV="production"
-# 运行指定应用
-ARG SERVE_APPS=""
+ARG SERVE_PM2_ENV="production"
+# PM2 配置文件
+ARG SERVE_PM2_CONFIG="ecosystem.config.js"
+COPY --from=runtime /app/servers /app/clients /app/
+COPY --from=runtime /app/node_modules /app/node_modules/
+COPY --from=runtime /app/${SERVE_PM2_CONFIG} /app/ecosystem.config.js
+
 
 WORKDIR /app
 ENV NODE_ENV=${RUNTIME_ENV}
-ENV SERVE_ENV=${SERVE_ENV}
-ENV SERVE_APPS=${SERVE_APPS}
+ENV SERVE_PM2_ENV=${SERVE_PM2_ENV}
 
 RUN npm install -g pm2
 # RUN set -ex && \
@@ -69,9 +69,5 @@ RUN npm install -g pm2
 #   npm config set registry https://registry.npm.taobao.org && \
 #   npm install -g pm2
 
-EXPOSE 3001-3004
-CMD if [ "$SERVE_APPS" = "" ]; then \
-      pm2-runtime start ecosystem.config.js --env $SERVE_ENV; \
-    else \
-      pm2-runtime start ecosystem.config.js --only "$SERVE_APPS" --env $SERVE_ENV; \
-    fi
+EXPOSE 3000 3001 3002 3003
+CMD pm2-runtime start ecosystem.config.js --env $SERVE_PM2_ENV

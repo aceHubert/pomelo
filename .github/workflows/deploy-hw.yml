@@ -79,11 +79,11 @@ jobs:
         variant:
           - name: "standard"
             build_commands: "yarn build:web && yarn build:infrastructures"
-            serve_apps: "infrastructure-service,infrastructure-bff,static-content,web"
+            pm2_config: "ecosystem.config.js"
             tag_suffix: ""
           - name: "oidc"
             build_commands: "yarn build:web:oidc && yarn build:infrastructures && yarn build:identity-server"
-            serve_apps: "infrastructure-service,infrastructure-bff,identity-server,static-content,web"
+            pm2_config: "ecosystem.oidc.config.js"
             tag_suffix: "-oidc"
     steps:
       - name: Checkout repository and submodules
@@ -126,7 +126,7 @@ jobs:
           docker buildx build --file Dockerfile --target deploy \
           --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ matrix.variant.tag_suffix }} \
           --build-arg BUILD_IGNORE=true \
-          --build-arg SERVE_APPS="${{ matrix.variant.serve_apps }}" \
+          --build-arg SERVE_PM2_CONFIG="${{ matrix.variant.pm2_config }}" \
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --label "variant=${{ matrix.variant.name }}" \
@@ -144,7 +144,7 @@ jobs:
           docker buildx build --file Dockerfile --target deploy \
           --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest${{ matrix.variant.tag_suffix }} \
           --build-arg BUILD_IGNORE=true \
-          --build-arg SERVE_APPS="${{ matrix.variant.serve_apps }}" \
+          --build-arg SERVE_PM2_CONFIG="${{ matrix.variant.pm2_config }}" \
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --label "variant=${{ matrix.variant.name }}" \
@@ -160,10 +160,10 @@ jobs:
     env:
       ORIGIN: ${{ vars.ORIGIN }}
       POMERO_SERVER_HOST: ${{ vars.POMERO_SERVER_HOST || 'pomelo-server' }}
-      POMERO_BFF_SERVER_PORT: ${{ vars.POMERO_BFF_SERVER_PORT || '3002' }}
-      POMERO_IDENTITY_SERVER_PORT: ${{ vars.POMERO_IDENTITY_SERVER_PORT || '3003' }}
-      POMERO_STATIC_CONTENT_PORT: ${{ vars.POMERO_STATIC_CONTENT_PORT || '3004' }}
       POMERO_WEB_PORT: ${{ vars.POMERO_WEB_PORT || '3000' }}
+      POMERO_IDENTITY_SERVER_PORT: ${{ vars.POMERO_IDENTITY_SERVER_PORT || '3001' }}
+      POMERO_BFF_SERVER_PORT: ${{ vars.POMERO_BFF_SERVER_PORT || '3002' }}
+      POMERO_STATIC_CONTENT_PORT: ${{ vars.POMERO_STATIC_CONTENT_PORT || '3003' }}
       # APISIX configuration
       APISIX_SERVER_HOST: ${{ vars.APISIX_SERVER_HOST || 'pomelo-apisix' }}
       APISIX_SERVER_PORT: ${{ vars.APISIX_SERVER_PORT || '9080' }}

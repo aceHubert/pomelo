@@ -11,6 +11,18 @@ module.exports = {
       },
     },
     {
+      name: 'identity-server',
+      cwd: 'identity-server',
+      script: 'node dist/main.js',
+      autorestart: true,
+      env_production: {
+        PORT: 3001,
+        GLOBAL_PREFIX_URI: '/identity',
+        OIDC_PATH: '/oauth2',
+        INFRASTRUCTURE_SERVICE_PORT: 9001,
+      },
+    },
+    {
       name: 'infrastructure-bff',
       cwd: 'infrastructure-bff',
       script: 'node dist/main.js',

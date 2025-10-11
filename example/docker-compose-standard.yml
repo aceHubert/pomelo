@@ -28,9 +28,9 @@ services:
     privileged: true
     # ports:
       # - 3000:3000 # web
+      # - 3001:3001 # identity server
       # - 3002:3002 # bff server
-      # - 3003:3003 # identity server
-      # - 3004:3004 # static content
+      # - 3003:3003 # static content
     external_links:
       - ${MYSQL_CONTAINER_NAME:-mysql}:mysql
       - ${REDIS_CONTAINER_NAME:-redis}:redis
