@@ -1,10 +1,11 @@
 import { from } from '@apollo/client/core';
-import { getEnv, absoluteGo } from '@ace-util/core';
+import { absoluteGo } from '@ace-util/core';
+import { envConfig } from '@/configs/env';
 import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 import { createHttpLink, setHeaders, errorHandler } from './utils/links';
 
-const graphqlBase = getEnv('identityGraphqlBase', '/graphql', window._ENV);
+const graphqlBase = envConfig.basicGraphqlBase;
 
 //  Identity graphql link
 export const identityLink = from([

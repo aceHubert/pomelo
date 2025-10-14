@@ -1,16 +1,15 @@
 import { split, from } from '@apollo/client/core';
 import { getMainDefinition } from '@apollo/client/utilities';
-import { getEnv, absoluteGo } from '@ace-util/core';
+import { absoluteGo } from '@ace-util/core';
+import { envConfig } from '@/configs/env';
 import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 import { createHttpUploadLink, createWebsocketLink, setHeaders, errorHandler } from './utils/links';
 
-const graphqhBase = getEnv('basicGraphqlBase', '/graphql', window._ENV);
-const graphqlSubscriptionBase = getEnv(
-  'graphqlSubscriptionBase',
-  (/^https?/.test(graphqhBase) ? graphqhBase : location.origin + graphqhBase).replace(/^http/, 'ws'),
-  window._ENV,
-);
+const graphqhBase = envConfig.basicGraphqlBase;
+const graphqlSubscriptionBase =
+  envConfig.graphqlSubscriptionBase ||
+  (/^https?/.test(graphqhBase) ? graphqhBase : location.origin + graphqhBase).replace(/^http/, 'ws');
 
 /**
  * Infrastructure graphql links with upload fetch and websocket

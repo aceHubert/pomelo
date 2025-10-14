@@ -1,4 +1,4 @@
-import { getEnv } from '@ace-util/core';
+import { envConfig } from '@/configs/env';
 import { LocalUserManagerCreator } from './local';
 import { OidcUserManagerCreator } from './openid-connect';
 
@@ -50,7 +50,7 @@ export class Authoriztion {
     if (!this.instance) {
       this.instance =
         authType === AuthType.Oidc
-          ? new Authoriztion(AuthType.Oidc, getEnv<OidcUserManngerSetions>('oidc', {} as any, window._ENV))
+          ? new Authoriztion(AuthType.Oidc, envConfig.getOidcSettings())
           : new Authoriztion(AuthType.Local, {});
     }
 

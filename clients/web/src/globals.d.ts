@@ -1,11 +1,6 @@
 /* eslint-disable no-var */
 
 declare global {
-  // Global variables on window, e.g. window._ENV
-  // must declare with var
-  // env inject
-  var _ENV: Record<string, any>;
-
   /**
    * short alias for Record<string, T>
    */

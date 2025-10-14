@@ -2,11 +2,8 @@ import { UserManager } from 'oidc-client-ts';
 import { envConfig } from '@/configs/env';
 import './index.less';
 
-// Get the OIDC settings from environment configuration
-const settings = envConfig.getOidcSettings(process.env.BASE_URL);
-
 // Initialize OIDC UserManager
-const userManager = new UserManager(settings);
+const userManager = new UserManager(envConfig.getOidcSettings());
 
 // DOM elements
 const msgEl = document.getElementById('msg') as HTMLElement;
