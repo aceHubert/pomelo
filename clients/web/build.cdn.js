@@ -4,13 +4,10 @@
  */
 
 const fs = require('fs');
+const _ = require('lodash');
 
-const cdnConfig = {
-  // publicPath: '//unpkg.com',
-  publicPath: '//cdn.jsdmirror.com/npm',
-  links: [
-    // {path: 'xxx.css', prefetch: true}
-  ],
+const vueCdnConfig = {
+  links: [],
   scripts: [
     {
       // 通过 packageName 从 node_modules 获取版本并拼接上registey path
@@ -62,24 +59,17 @@ const cdnConfig = {
       variableName: 'Pinia',
       path: '/dist/pinia.iife.prod.js',
     },
-    {
-      packageName: 'oidc-client-ts',
-      variableName: 'oidc',
-      path: '/dist/browser/oidc-client-ts.min.js',
-      onerror: 'onOidcFallback && onOidcFallback()',
-    },
+  ],
+};
+
+const requestCdnConfig = {
+  links: [],
+  scripts: [
     {
       packageName: 'axios',
       variableName: 'axios',
       path: '/dist/axios.min.js',
     },
-    {
-      packageName: 'moment',
-      variableName: 'moment',
-      path: '/min/moment.min.js',
-    },
-    { packageName: 'moment', path: '/locale/zh-cn.js' },
-    { packageName: 'moment', path: '/locale/en-gb.js' },
     {
       packageName: '@ace-fetch/core',
       variableName: ['AceFetch', 'Core'],
@@ -90,6 +80,78 @@ const cdnConfig = {
       variableName: ['AceFetch', 'Vue'],
       path: '/dist/index.umd.production.js',
     },
+    {
+      packageName: '@ace-fetch/graphql',
+      variableName: ['AceFetch', 'Core'],
+      path: '/dist/index.umd.production.js',
+    },
+    {
+      packageName: '@ace-fetch/graphql-vue',
+      variableName: ['AceFetch', 'Vue'],
+      path: '/dist/index.umd.production.js',
+    },
+  ],
+};
+
+const momentCdnConfig = {
+  links: [],
+  scripts: [
+    {
+      packageName: 'moment',
+      variableName: 'moment',
+      path: '/min/moment.min.js',
+    },
+    { packageName: 'moment', path: '/locale/zh-cn.js' },
+    { packageName: 'moment', path: '/locale/en-gb.js' },
+  ],
+};
+
+const editorCdnConfig = {
+  links: [],
+  scripts: [
+    {
+      packageName: 'jsoneditor',
+      variableName: 'JSONEditor',
+      path: '/dist/jsoneditor.min.js',
+    },
+    {
+      packageName: 'mavon-editor',
+      variableName: 'MavonEditor',
+      path: '/dist/mavon-editor.min.js',
+    },
+  ],
+};
+
+const svgInjectCdnConfig = {
+  links: [],
+  scripts: [
+    {
+      packageName: '@iconfu/svg-inject',
+      variableName: 'SVGInject',
+      path: '/dist/svg-inject.min.js',
+    },
+  ],
+};
+
+const oidcCdnConfig = {
+  scripts: [
+    {
+      packageName: 'oidc-client-ts',
+      variableName: 'oidc',
+      path: '/dist/browser/oidc-client-ts.min.js',
+      // 兼容异常处理
+      onerror: 'onOidcFallback && onOidcFallback()',
+    },
+  ],
+};
+
+const cdnBaseConfig = {
+  // publicPath: '//unpkg.com',
+  publicPath: 'https://cdn.jsdmirror.com/npm',
+  links: [
+    // {path: 'xxx.css', prefetch: true}
+  ],
+  scripts: [
     // 打开必须调用，不然会阻止 vue-router hook
     // {
     //   packageName: '@vue-async/module-loader',
@@ -102,11 +164,6 @@ const cdnConfig = {
     //   variableName: ['VueAsync', 'ResourceManager'],
     //   path: '/dist/resource-manager.umd.production.js',
     // },
-    {
-      packageName: '@iconfu/svg-inject',
-      variableName: 'SVGInject',
-      path: '/dist/svg-inject.min.js',
-    },
   ],
 };
 
@@ -136,8 +193,8 @@ function getPath(path, packageName = '', version = '') {
     : path;
 }
 
-function getCdnConfig(config = cdnConfig) {
-  const { publicPath = '/', links = [], scripts = [] } = config;
+function getCdnConfig(...config) {
+  const { publicPath = '/', links = [], scripts = [] } = _.mergeWith({}, cdnBaseConfig, ...config);
 
   return {
     publicPath,
@@ -229,11 +286,15 @@ function getCdnConfig(config = cdnConfig) {
       },
       [],
     ),
-    append: {
-      links: [],
-      scripts: [],
-    },
   };
 }
 
-module.exports = getCdnConfig;
+module.exports = {
+  vueCdnConfig,
+  requestCdnConfig,
+  momentCdnConfig,
+  editorCdnConfig,
+  svgInjectCdnConfig,
+  oidcCdnConfig,
+  getCdnConfig,
+};

@@ -1,0 +1,81 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 10vw;
+}
+
+/* prettier-ignore */
+html body {
+  margin-right: auto;
+  margin-left: auto;
+  min-width: 320Px;
+}
+strong {
+  font-weight: bold;
+}
+/* prettier-ignore */
+body {
+  border-width: 45Px;
+  color: @text-color;
+  background-color: @body-background;
+  font-size: 0.3733333333rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: @var-primary;
+
+  &:hover,
+  &:active {
+    color: @var-primary-7;
+  }
+}
+
+/* prettier-ignore */
+@media screen and (max-width: 320Px) {
+  html {
+    font-size: 32Px;
+  }
+}
+
+/* prettier-ignore */
+@media screen and (min-width: 540px) {
+  html {
+    font-size: 54Px;
+  }
+}
+
+/* prettier-ignore */
+@media screen and (min-width: 1200Px) {
+  html {
+    font-size: 16Px;
+  }
+
+  body{
+    font-size: 14Px;
+  }
+}
+
+#msg {
+  margin-top: 100px;
+  color: @text-color;
+}
+
+#desc {
+  margin-top: 10px;
+  font-size: 12px;
+  color: @text-color-secondary;
+}
+
+#home {
+  margin-top: 50px;
+  display: none;
+}

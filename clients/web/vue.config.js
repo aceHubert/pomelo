@@ -8,7 +8,15 @@ const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
 const terser = require('terser');
 const CKEditorWebpackPlugin = require('@ckeditor/ckeditor5-dev-webpack-plugin');
 const { styles } = require('@ckeditor/ckeditor5-dev-utils');
-const getCdnConfig = require('./build.cdn');
+const {
+  getCdnConfig,
+  vueCdnConfig,
+  oidcCdnConfig,
+  requestCdnConfig,
+  momentCdnConfig,
+  editorCdnConfig,
+  svgInjectCdnConfig,
+} = require('./build.cdn');
 
 const getEnv = (key, defaultValue) => process.env[key] ?? defaultValue;
 const isEnv = (env) => process.env.NODE_ENV === env;
@@ -23,13 +31,18 @@ const isHttps = getEnv('HTTPS') === 'true';
 const proxyTarget = (to) => (isMock ? `http://${getEnv('MOCK_HOST', 'localhost')}:${getEnv('MOCK_PORT', 3001)}` : to);
 
 // env file
-const envJs = (isProxy ? 'env/env.dev.proxy.js' : getEnv('ENV_JS')) || 'env/env.js';
+const envJs = getEnv('ENV_JS') || 'env';
+// auth type
+const authType = getEnv('VUE_APP_AUTH_TYPE', 'LOCAL');
 // deploy on windows iis
 const webConfigFile = getEnv('WEBCONFIG_FILE');
 // public path
 const publicPath = getEnv('BASE_URL', '/');
 // assets path
 const assetsPath = 'static';
+
+console.log('\x1b[34m%s\x1b[0m', `You are using @/configs/${envJs}.ts`);
+console.log('\x1b[34m%s\x1b[0m', `You are building for "${authType}" auth type`);
 
 module.exports = defineConfig({
   publicPath,
@@ -122,6 +135,7 @@ module.exports = defineConfig({
     main: {
       entry: 'src/main.ts',
       filename: 'index.html',
+      inject: 'body',
       chunks: [
         'chunk-vendors',
         'chunk-common',
@@ -131,7 +145,6 @@ module.exports = defineConfig({
         'chunk-vant',
         'chunk-formily-vant',
         'chunk-portal-vant',
-        'chunk-openid-connect',
         'runtime',
         'main',
       ],
@@ -140,6 +153,7 @@ module.exports = defineConfig({
       entry: 'src/admin/main.ts',
       template: 'public/index.html',
       filename: 'admin.html',
+      inject: 'body',
       chunks: [
         'chunk-vendors',
         'chunk-common',
@@ -152,23 +166,46 @@ module.exports = defineConfig({
         'chunk-formily-vant',
         'chunk-portal-vant',
         'chunk-ckeditor5',
-        'chunk-openid-connect',
         'runtime',
         'admin',
       ],
-    },
-    login: {
-      entry: 'src/login/main.ts',
-      template: 'public/index.html',
-      filename: 'login.html',
-      chunks: ['chunk-vendors', 'chunk-common', 'chunk-antdv', 'runtime', 'login'],
     },
     initialize: {
       entry: 'src/initialize/main.ts',
       template: 'public/index.html',
       filename: 'initialize.html',
+      inject: 'body',
       chunks: ['chunk-vendors', 'chunk-common', 'chunk-antdv', 'runtime', 'initialize'],
     },
+    ...(authType === 'LOCAL'
+      ? {
+          login: {
+            entry: 'src/login/main.ts',
+            template: 'public/index.html',
+            filename: 'login.html',
+            inject: 'body',
+          },
+        }
+      : {
+          signin: {
+            entry: 'signin/main.ts',
+            template: 'signin/index.html',
+            filename: 'signin.html',
+            inject: 'body',
+          },
+          'signin-silent': {
+            entry: 'signin-silent/main.ts',
+            template: 'signin-silent/index.html',
+            filename: 'signin-silent.html',
+            inject: 'body',
+          },
+          signout: {
+            entry: 'signout/main.ts',
+            template: 'signout/index.html',
+            filename: 'signout.html',
+            inject: 'body',
+          },
+        }),
   },
   transpileDependencies: [
     '@ace-fetch/*',
@@ -301,12 +338,6 @@ module.exports = defineConfig({
             test: /[\\/]node_modules[\\/]_?@ckeditor[\\/]ckeditor5(.*)/, // in order to adapt to cnpm
             chunks: 'all',
           },
-          'openid-connect': {
-            name: 'openid-connect', // split portal vant into a single package
-            priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
-            test: /[\\/]node_modules[\\/]_?oidc-client-ts(.*)|[\\/]src[\\/]_?auth(.*)/, // in order to adapt to cnpm
-            chunks: 'all',
-          },
           vendors: {
             name: 'chunk-vendors',
             test: /[\\/]node_modules[\\/]/,
@@ -412,6 +443,13 @@ module.exports = defineConfig({
       },
     };
 
+    // Environment configuration replacement
+    config.plugins.push(
+      new NormalModuleReplacementPlugin(/[\\/]configs[\\/]env$/, (result) => {
+        result.request = result.request.replace(/configs[\\/]env$/, `configs/${envJs}`);
+      }),
+    );
+
     // ckeditor5
     config.plugins.push(
       new CKEditorWebpackPlugin({
@@ -427,61 +465,50 @@ module.exports = defineConfig({
 
     if (process.env.NODE_ENV !== 'test') {
       // copy static files.
-      config.plugins.push(
-        new CopyWebpackPlugin({
-          patterns: [
-            {
-              from: envJs,
-              to: path.join(assetsPath, 'js/env.js'),
-              transform: async (content) =>
-                (
-                  await terser.minify(content.toString(), {
-                    compress: {
-                      global_defs: {
-                        'process.env.NODE_ENV': process.env.NODE_ENV,
-                        'process.env.BASE_URL': publicPath,
-                      },
-                    },
-                  })
-                ).code,
-            },
-            webConfigFile && {
-              from: webConfigFile,
-              to: 'web.config',
-            },
-          ].filter(Boolean),
-        }),
-      );
-
-      // inject to index.html.
-      config.plugins.push(
-        new HtmlWebpackTagsPlugin({
-          tags: [path.join(assetsPath, 'js/env.js')],
-          hash: (path, hash) => path + '?' + hash,
-          append: false,
-        }),
-      );
-
-      if (isProd) {
-        // compress html/js/css files.
+      webConfigFile &&
         config.plugins.push(
-          new CompressionPlugin({
-            test: /\.js$|\.html$|.\css/,
-            threshold: 10240,
-            deleteOriginalAssets: false,
+          new CopyWebpackPlugin({
+            patterns: [
+              {
+                from: webConfigFile,
+                to: 'web.config',
+              },
+            ].filter(Boolean),
           }),
         );
 
+      if (isProd) {
         // use cdn in production
-        const cdnConfig = getCdnConfig();
+        const [vueCdn, oidcCdn, requestCdn, momentCdn, editorCdn, svgInjectCdn] = [
+          vueCdnConfig,
+          oidcCdnConfig,
+          requestCdnConfig,
+          momentCdnConfig,
+          editorCdnConfig,
+          svgInjectCdnConfig,
+        ].map((cdnConfig) => getCdnConfig(cdnConfig));
 
         config.externals = {
           ...config.externals,
-          ...cdnConfig.externals,
+          ...vueCdn.externals,
+          ...oidcCdn.externals,
+          ...requestCdn.externals,
+          ...momentCdn.externals,
+          ...editorCdn.externals,
+          ...svgInjectCdn.externals,
         };
 
         // ignore external css files
-        const resourceRegExp = new RegExp(`(${Object.keys(cdnConfig.externals).join('|')})\\/[\\w\\W]+\\.css$`);
+        const resourceRegExp = new RegExp(
+          `(${Object.keys({
+            ...vueCdn.externals,
+            ...oidcCdn.externals,
+            ...requestCdn.externals,
+            ...momentCdn.externals,
+            ...editorCdn.externals,
+            ...svgInjectCdn.externals,
+          }).join('|')})\\/[\\w\\W]+\\.css$`,
+        );
         config.plugins.push(
           new NormalModuleReplacementPlugin(resourceRegExp, (result) => {
             result.request = result.request.replace(
@@ -494,19 +521,72 @@ module.exports = defineConfig({
         // inject cdn resources to index.html.
         config.plugins.push(
           new HtmlWebpackTagsPlugin({
-            links: cdnConfig.links,
-            scripts: cdnConfig.scripts,
-            publicPath: cdnConfig.publicPath,
+            links: vueCdn.links,
+            scripts: vueCdn.scripts,
+            publicPath: vueCdn.publicPath,
+            files: ['index.html', 'admin.html', 'login.html', 'initialize.html'],
             append: false,
           }),
         );
 
         config.plugins.push(
           new HtmlWebpackTagsPlugin({
-            links: cdnConfig.append.links,
-            scripts: cdnConfig.append.scripts,
-            publicPath: cdnConfig.publicPath,
-            append: true,
+            links: requestCdn.links,
+            scripts: requestCdn.scripts,
+            publicPath: requestCdn.publicPath,
+            files: ['index.html', 'admin.html', 'login.html', 'initialize.html'],
+            append: false,
+          }),
+        );
+
+        config.plugins.push(
+          new HtmlWebpackTagsPlugin({
+            links: momentCdn.links,
+            scripts: momentCdn.scripts,
+            publicPath: momentCdn.publicPath,
+            files: ['index.html', 'admin.html', 'login.html', 'initialize.html'],
+            append: false,
+          }),
+        );
+
+        if (authType === 'OIDC') {
+          config.plugins.push(
+            new HtmlWebpackTagsPlugin({
+              links: oidcCdn.links,
+              scripts: oidcCdn.scripts,
+              publicPath: oidcCdn.publicPath,
+              files: ['index.html', 'admin.html', 'signin.html', 'signin-silent.html', 'signout.html'],
+              append: false,
+            }),
+          );
+        }
+
+        config.plugins.push(
+          new HtmlWebpackTagsPlugin({
+            links: editorCdn.links,
+            scripts: editorCdn.scripts,
+            publicPath: editorCdn.publicPath,
+            files: ['admin.html'],
+            append: false,
+          }),
+        );
+
+        config.plugins.push(
+          new HtmlWebpackTagsPlugin({
+            links: svgInjectCdn.links,
+            scripts: svgInjectCdn.scripts,
+            publicPath: svgInjectCdn.publicPath,
+            files: ['admin.html'],
+            append: false,
+          }),
+        );
+
+        // compress html/js/css files.
+        config.plugins.push(
+          new CompressionPlugin({
+            test: /\.js$|\.html$|.\css/,
+            threshold: 10240,
+            deleteOriginalAssets: false,
           }),
         );
       }

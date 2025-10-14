@@ -7,14 +7,20 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
   </head>
   <body>
-    <script src="/static/js/oidc-client-ts.min.js"></script>
-    <script src="/static/js/env.js"></script>
+    <noscript>
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please
+        enable it to continue.</strong
+      >
+    </noscript>
+
     <script>
-      const settings = window._ENV ? window._ENV.oidc || {} : {};
-      new oidc.UserManager(settings).signinSilentCallback();
+      window.onOidcFallback = function () {
+        document.write('<script src="<%= BASE_URL %>static/js/oidc-client-ts.min.js"><\/script>');
+      };
     </script>
   </body>
 </html>

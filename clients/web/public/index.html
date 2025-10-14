@@ -149,5 +149,11 @@
         }
       </style>
     </div>
+
+    <script>
+      window.onOidcFallback = function () {
+        document.write('<script src="<%= BASE_URL %>static/js/oidc-client-ts.min.js"><\/script>');
+      };
+    </script>
   </body>
 </html>

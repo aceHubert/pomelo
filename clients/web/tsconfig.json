@@ -11,12 +11,5 @@
     "noImplicitAny": false,
     "baseUrl": "."
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/admin/**/*.ts",
-    "src/admin/**/*.tsx",
-    "src/initialize/**/*.ts",
-    "src/initialize/**/*.tsx"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "signin/**/*.ts", "signin-silent/**/*.ts", "signout/**/*.ts"]
 }
