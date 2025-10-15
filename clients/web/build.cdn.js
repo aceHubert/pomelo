@@ -82,12 +82,12 @@ const requestCdnConfig = {
     },
     {
       packageName: '@ace-fetch/graphql',
-      variableName: ['AceFetch', 'Core'],
+      variableName: ['AceFetch', 'Graphql'],
       path: '/dist/index.umd.production.js',
     },
     {
       packageName: '@ace-fetch/graphql-vue',
-      variableName: ['AceFetch', 'Vue'],
+      variableName: ['AceFetch', 'GraphqlVue'],
       path: '/dist/index.umd.production.js',
     },
   ],
