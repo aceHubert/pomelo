@@ -7,9 +7,14 @@ import { i18n } from '@/i18n';
 import { createHttpUploadLink, createWebsocketLink, setHeaders, errorHandler } from './utils/links';
 
 const graphqhBase = envConfig.basicGraphqlBase;
-const graphqlSubscriptionBase =
+let graphqlSubscriptionBase =
   envConfig.graphqlSubscriptionBase ||
   (/^https?/.test(graphqhBase) ? graphqhBase : location.origin + graphqhBase).replace(/^http/, 'ws');
+
+// add key for apisix key-auth
+// TODO: apisix 不支持websocket, 服务端没有配置oidc的验证但 private key 使用的同一个，暂时使用 local 验证token
+graphqlSubscriptionBase += `${graphqlSubscriptionBase.indexOf('?') >= 0 ? '&' : '?'}apikey=pomelo-local`;
+// }apikey=pomelo-${Authoriztion.authType.toLowerCase()}`;
 
 /**
  * Infrastructure graphql links with upload fetch and websocket
@@ -19,24 +24,20 @@ export const basicLink = split(
     const definition = getMainDefinition(query);
     return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
   },
-  createWebsocketLink(
-    graphqlSubscriptionBase +
-      `${graphqlSubscriptionBase.indexOf('?') >= 0 ? '&' : '?'}apikey=pomelo-${Authoriztion.authType.toLowerCase()}`,
-    {
-      connectionParams: async () => {
-        const userManager = Authoriztion.getInstance().userManager,
-          token = await userManager
-            .getUser()
-            .then((user) => user?.access_token)
-            .catch(() => '');
+  createWebsocketLink(graphqlSubscriptionBase, {
+    connectionParams: async () => {
+      const userManager = Authoriztion.getInstance().userManager,
+        token = await userManager
+          .getUser()
+          .then((user) => user?.access_token)
+          .catch(() => '');
 
-        return {
-          token,
-          lang: i18n.locale,
-        };
-      },
+      return {
+        token,
+        lang: i18n.locale,
+      };
     },
-  ),
+  }),
   from([
     errorHandler({
       unauthorize: () =>
