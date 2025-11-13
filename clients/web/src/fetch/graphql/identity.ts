@@ -5,7 +5,7 @@ import { Authoriztion } from '@/auth';
 import { i18n } from '@/i18n';
 import { createHttpLink, setHeaders, errorHandler } from './utils/links';
 
-const graphqlBase = envConfig.basicGraphqlBase;
+const graphqlBase = envConfig.identityGraphqlBase;
 
 //  Identity graphql link
 export const identityLink = from([

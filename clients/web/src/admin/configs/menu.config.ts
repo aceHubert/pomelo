@@ -16,6 +16,194 @@ import IconScope from '@admin/assets/icons/scope.svg?inline';
 // Types
 import type { MenuConfig } from 'antdv-layout-pro/types';
 
+const getOidcMenus = (): MenuConfig[] => {
+  if (Authoriztion.authType === AuthType.Oidc) {
+    return [
+      {
+        key: 'access_control',
+        title: (i18nRender) => i18nRender('menu.access_control', '访问控制'),
+        path: '/clients',
+        icon: IconSettings,
+        position: 'top',
+        children: [
+          {
+            key: 'clients',
+            title: (i18nRender) => i18nRender('menu.clients.list', '客户端'),
+            path: '/clients',
+            icon: IconSettings,
+            position: 'side',
+            children: [
+              {
+                key: 'client-details',
+                title: (i18nRender) => i18nRender('menu.clients.details', '客户端详情'),
+                path: '/clients/:clientId',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-grant-types',
+                title: (i18nRender) => i18nRender('menu.clients.grant_types', '授权模式'),
+                path: '/clients/:clientId/grant-types',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-scopes',
+                title: (i18nRender) => i18nRender('menu.clients.scopes', '授权范围'),
+                path: '/clients/:clientId/scopes',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-claims',
+                title: (i18nRender) => i18nRender('menu.clients.claims', '声明'),
+                path: '/clients/:clientId/claims',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-cors-origin',
+                title: (i18nRender) => i18nRender('menu.clients.cors_origins', '跨域'),
+                path: '/clients/:clientId/cors-origins',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-redirect-uris',
+                title: (i18nRender) => i18nRender('menu.clients.redirect_uris', '登入回跳地址'),
+                path: '/clients/:clientId/redirect-uris',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-post-logout-redirect-uris',
+                title: (i18nRender) => i18nRender('menu.clients.post_logout_redirect_uris', '登出回跳地址'),
+                path: '/clients/:clientId/post-logout-redirect-uris',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-secrets',
+                title: (i18nRender) => i18nRender('menu.clients.secrets', '密匙'),
+                path: '/clients/:clientId/secrets',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'client-secrets-generate',
+                title: (i18nRender) => i18nRender('menu.clients.secrets_generate', '生成密匙'),
+                path: '/clients/:clientId/secrets/generate',
+                icon: IconDetails,
+                position: 'sub',
+                display: false,
+              },
+              {
+                key: 'client-properties',
+                title: (i18nRender) => i18nRender('menu.clients.properties', '自定义属性'),
+                path: '/clients/:clientId/properties',
+                icon: IconDetails,
+                position: 'sub',
+              },
+            ],
+          },
+          {
+            key: 'api-resources',
+            title: (i18nRender) => i18nRender('menu.api_resources.list', 'API资源'),
+            path: '/api-resources',
+            icon: IconSettings,
+            position: 'side',
+            children: [
+              {
+                key: 'api-resources-details',
+                title: (i18nRender) => i18nRender('menu.api_resources.details', '资源详情'),
+                path: '/api-resources/:id',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'api-scopes',
+                title: (i18nRender) => i18nRender('menu.api_resources.scopes', '授权范围'),
+                path: '/api-resources/:id/scopes',
+                icon: IconDetails,
+                position: 'sub',
+                children: [
+                  {
+                    key: 'api-scope-claims',
+                    title: (i18nRender) => i18nRender('menu.api_resources.scope_claims', '授权范围声明'),
+                    path: '/api-scopes/:scopeId/claims',
+                    icon: IconDetails,
+                    position: 'sub',
+                  },
+                ],
+              },
+              {
+                key: 'api-claims',
+                title: (i18nRender) => i18nRender('menu.api_resources.claims', '声明'),
+                path: '/api-resources/:id/claims',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'api-secrets',
+                title: (i18nRender) => i18nRender('menu.api_resources.secrets', '密匙'),
+                path: '/api-resources/:id/secrets',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'api-secrets-generate',
+                title: (i18nRender) => i18nRender('menu.api_resources.secrets_generate', '生成密匙'),
+                path: '/api-resources/:id/secrets/generate',
+                icon: IconDetails,
+                position: 'sub',
+                display: false,
+              },
+              {
+                key: 'api-properties',
+                title: (i18nRender) => i18nRender('menu.api_resources.properties', '自定义属性'),
+                path: '/api-resources/:id/properties',
+                icon: IconDetails,
+                position: 'sub',
+              },
+            ],
+          },
+          {
+            key: 'identity-resources',
+            title: (i18nRender) => i18nRender('menu.identity_resources.list', 'Identity资源'),
+            path: '/identity-resources',
+            icon: IconSettings,
+            position: 'side',
+            children: [
+              {
+                key: 'identity-resource-details',
+                title: (i18nRender) => i18nRender('menu.identity_resources.details', '资源详情'),
+                path: '/identity-resources/:id',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'identity-claims',
+                title: (i18nRender) => i18nRender('menu.identity_resources.claims', '声明'),
+                path: '/identity-resources/:id/claims',
+                icon: IconDetails,
+                position: 'sub',
+              },
+              {
+                key: 'identity-properties',
+                title: (i18nRender) => i18nRender('menu.identity_resources.properties', '自定义属性'),
+                path: '/identity-resources/:id/properties',
+                icon: IconDetails,
+                position: 'sub',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+  }
+  return [];
+};
+
 export const getDefaultMenus = (): MenuConfig[] => [
   {
     key: 'dashboard',
@@ -149,189 +337,7 @@ export const getDefaultMenus = (): MenuConfig[] => [
     icon: IconSettings,
     position: 'top',
     children: [
-      {
-        key: 'access_control',
-        title: (i18nRender) => i18nRender('menu.access_control', '访问控制'),
-        path: '/clients',
-        icon: IconSettings,
-        position: 'top',
-        children:
-          Authoriztion.authType === AuthType.Oidc
-            ? [
-                {
-                  key: 'clients',
-                  title: (i18nRender) => i18nRender('menu.clients.list', '客户端'),
-                  path: '/clients',
-                  icon: IconSettings,
-                  position: 'side',
-                  children: [
-                    {
-                      key: 'client-details',
-                      title: (i18nRender) => i18nRender('menu.clients.details', '客户端详情'),
-                      path: '/clients/:clientId',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-grant-types',
-                      title: (i18nRender) => i18nRender('menu.clients.grant_types', '授权模式'),
-                      path: '/clients/:clientId/grant-types',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-scopes',
-                      title: (i18nRender) => i18nRender('menu.clients.scopes', '授权范围'),
-                      path: '/clients/:clientId/scopes',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-claims',
-                      title: (i18nRender) => i18nRender('menu.clients.claims', '声明'),
-                      path: '/clients/:clientId/claims',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-cors-origin',
-                      title: (i18nRender) => i18nRender('menu.clients.cors_origins', '跨域'),
-                      path: '/clients/:clientId/cors-origins',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-redirect-uris',
-                      title: (i18nRender) => i18nRender('menu.clients.redirect_uris', '登入回跳地址'),
-                      path: '/clients/:clientId/redirect-uris',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-post-logout-redirect-uris',
-                      title: (i18nRender) => i18nRender('menu.clients.post_logout_redirect_uris', '登出回跳地址'),
-                      path: '/clients/:clientId/post-logout-redirect-uris',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-secrets',
-                      title: (i18nRender) => i18nRender('menu.clients.secrets', '密匙'),
-                      path: '/clients/:clientId/secrets',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'client-secrets-generate',
-                      title: (i18nRender) => i18nRender('menu.clients.secrets_generate', '生成密匙'),
-                      path: '/clients/:clientId/secrets/generate',
-                      icon: IconDetails,
-                      position: 'sub',
-                      display: false,
-                    },
-                    {
-                      key: 'client-properties',
-                      title: (i18nRender) => i18nRender('menu.clients.properties', '自定义属性'),
-                      path: '/clients/:clientId/properties',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                  ],
-                },
-                {
-                  key: 'api-resources',
-                  title: (i18nRender) => i18nRender('menu.api_resources.list', 'API资源'),
-                  path: '/api-resources',
-                  icon: IconSettings,
-                  position: 'side',
-                  children: [
-                    {
-                      key: 'api-resources-details',
-                      title: (i18nRender) => i18nRender('menu.api_resources.details', '资源详情'),
-                      path: '/api-resources/:id',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'api-scopes',
-                      title: (i18nRender) => i18nRender('menu.api_resources.scopes', '授权范围'),
-                      path: '/api-resources/:id/scopes',
-                      icon: IconDetails,
-                      position: 'sub',
-                      children: [
-                        {
-                          key: 'api-scope-claims',
-                          title: (i18nRender) => i18nRender('menu.api_resources.scope_claims', '授权范围声明'),
-                          path: '/api-scopes/:scopeId/claims',
-                          icon: IconDetails,
-                          position: 'sub',
-                        },
-                      ],
-                    },
-                    {
-                      key: 'api-claims',
-                      title: (i18nRender) => i18nRender('menu.api_resources.claims', '声明'),
-                      path: '/api-resources/:id/claims',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'api-secrets',
-                      title: (i18nRender) => i18nRender('menu.api_resources.secrets', '密匙'),
-                      path: '/api-resources/:id/secrets',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'api-secrets-generate',
-                      title: (i18nRender) => i18nRender('menu.api_resources.secrets_generate', '生成密匙'),
-                      path: '/api-resources/:id/secrets/generate',
-                      icon: IconDetails,
-                      position: 'sub',
-                      display: false,
-                    },
-                    {
-                      key: 'api-properties',
-                      title: (i18nRender) => i18nRender('menu.api_resources.properties', '自定义属性'),
-                      path: '/api-resources/:id/properties',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                  ],
-                },
-                {
-                  key: 'identity-resources',
-                  title: (i18nRender) => i18nRender('menu.identity_resources.list', 'Identity资源'),
-                  path: '/identity-resources',
-                  icon: IconSettings,
-                  position: 'side',
-                  children: [
-                    {
-                      key: 'identity-resource-details',
-                      title: (i18nRender) => i18nRender('menu.identity_resources.details', '资源详情'),
-                      path: '/identity-resources/:id',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'identity-claims',
-                      title: (i18nRender) => i18nRender('menu.identity_resources.claims', '声明'),
-                      path: '/identity-resources/:id/claims',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                    {
-                      key: 'identity-properties',
-                      title: (i18nRender) => i18nRender('menu.identity_resources.properties', '自定义属性'),
-                      path: '/identity-resources/:id/properties',
-                      icon: IconDetails,
-                      position: 'sub',
-                    },
-                  ],
-                },
-              ]
-            : [],
-      },
+      ...getOidcMenus(),
       {
         key: 'system-setting',
         title: (i18nRender) => i18nRender('menu.system_setting', '系统设置'),

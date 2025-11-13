@@ -111,7 +111,7 @@ export const usePageApi = defineRegistGraphql('template_page', {
     ` as TypedQueryDocumentNode<{ page: PageTemplateModel | null }, { id: number; metaKeys?: string[] }>,
     // 通过别名获取页面
     getByName: gql`
-      query getPage($name: String, $metaKeys: [String!]) {
+      query getPageByName($name: String, $metaKeys: [String!]) {
         page: pageTemplateByName(name: $name) {
           id
           name
