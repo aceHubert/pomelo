@@ -467,7 +467,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (taxonomyId) {
         include.push({
           model: TermRelationships,
-          as: 'TermRelationships',
+          as: 'TemplateTermRelationships',
           include: [
             {
               model: TermTaxonomy,
@@ -484,20 +484,20 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           (await this.getOption(OptionPresetKeys.DefaultCategory)) === String(taxonomyId)
         ) {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: {
+            [`$TemplateTermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: {
               [Op.or]: [taxonomyId, { [Op.is]: null }],
             },
           });
         } else {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: taxonomyId,
-            [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
+            [`$TemplateTermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: taxonomyId,
+            [`$TemplateTermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
           });
         }
       } else if (taxonomyName) {
         include.push({
           model: TermRelationships,
-          as: 'TermRelationships',
+          as: 'TemplateTermRelationships',
           attributes: [],
           include: [
             {
@@ -510,8 +510,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
 
         andWhere.push({
-          [`$TermRelationships.TermTaxonomy.${this.field('name', TermTaxonomy)}$`]: taxonomyName,
-          [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
+          [`$TemplateTermRelationships.TermTaxonomy.${this.field('name', TermTaxonomy)}$`]: taxonomyName,
+          [`$TemplateTermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
         });
       }
     }
@@ -950,7 +950,7 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
       if (taxonomyId) {
         include.push({
           model: TermRelationships,
-          as: 'TermRelationships',
+          as: 'TemplateTermRelationships',
           attributes: [],
           include: [
             {
@@ -968,20 +968,20 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
           (await this.getOption(OptionPresetKeys.DefaultCategory)) === String(taxonomyId)
         ) {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: {
+            [`$TemplateTermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: {
               [Op.or]: [taxonomyId, { [Op.is]: null }],
             },
           });
         } else {
           andWhere.push({
-            [`$TermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: taxonomyId,
-            [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
+            [`$TemplateTermRelationships.TermTaxonomy.${this.field('id', TermTaxonomy)}$`]: taxonomyId,
+            [`$TemplateTermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
           });
         }
       } else if (taxonomyName) {
         include.push({
           model: TermRelationships,
-          as: 'TermRelationships',
+          as: 'TemplateTermRelationships',
           attributes: [],
           include: [
             {
@@ -994,8 +994,8 @@ export class TemplateDataSource extends MetaDataSource<TemplateMetaModel, NewTem
         });
 
         andWhere.push({
-          [`$TermRelationships.TermTaxonomy.${this.field('name', TermTaxonomy)}$`]: taxonomyName,
-          [`$TermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
+          [`$TemplateTermRelationships.TermTaxonomy.${this.field('name', TermTaxonomy)}$`]: taxonomyName,
+          [`$TemplateTermRelationships.TermTaxonomy.${this.field('taxonomy', TermTaxonomy)}$`]: taxonomyType,
         });
       }
     }
