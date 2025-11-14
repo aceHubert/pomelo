@@ -16,9 +16,21 @@ http {
     include       /etc/nginx/mime.types;
     default_type  application/octet-stream;
 
-    log_format main '>>>{"timestamp":"$time_iso8601", "time_local":"$time_local", "remote_user":"$remote_user", "hostname":"$hostname", "ip":"$http_x_forwarded_for", "client":"$remote_addr", "request_method":"$request_method", "scheme":"$scheme", "domain":"$http_host", "http_referer":"$http_referer", "request":"$request_uri", "authorization":"$http_Authorization", "body_bytes_sent":"$body_bytes_sent", "status":"$status", "request_time":"$request_time", "request_length":"$request_length", "upstreamtime":"$upstream_response_time", "upstream":"$upstream_addr", "upstream_response_time":"$upstream_response_time", "upstream_status":"$upstream_status", "http_user_agent":"$http_user_agent", "https":"$https", "server_protocol":"$server_protocol", "http_origin":"$http_origin", "ssl_protocol":"$ssl_protocol"}';
+    # Map date for daily log files
+    map $time_iso8601 $log_date {
+        ~^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2}) $year$month$day;
+    }
 
-    access_log  /var/log/nginx/access.log  main;
+    # WebSocket support - map upgrade header
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
+    log_format main '>>>{"timestamp":"$time_iso8601", "time_local":"$time_local", "remote_user":"$remote_user", "hostname":"$hostname", "ip":"$http_x_forwarded_for", "client":"$remote_addr", "request_method":"$request_method", "scheme":"$scheme", "domain":"$http_host", "http_referer":"$http_referer", "request":"$request_uri", "authorization":"$http_Authorization", "body_bytes_sent":"$body_bytes_sent", "status":"$status", "request_time":"$request_time", "request_length":"$request_length", "upstreamtime":"$upstream_response_time", "upstream":"$upstream_addr", "upstream_response_time":"$upstream_response_time", "upstream_status":"$upstream_status", "http_user_agent":"$http_user_agent", "http_upgrade":"$http_upgrade", "connection_upgrade":"$connection_upgrade", "https":"$https", "server_protocol":"$server_protocol", "http_origin":"$http_origin", "ssl_protocol":"$ssl_protocol"}';
+
+    # Daily log files: access-YYYYMMDD.log
+    access_log  /var/log/nginx/access-$log_date.log  main;
 
     sendfile        on;
     #tcp_nopush     on;

@@ -25,3 +25,29 @@ proxy_read_timeout ${NGINX_PROXY_READ_TIMEOUT};
 proxy_send_timeout ${NGINX_PROXY_SEND_TIMEOUT};
 proxy_connect_timeout ${NGINX_PROXY_CONNECT_TIMEOUT};
 proxy_redirect ${NGINX_PROXY_REDIRECT};
+
+
+# WebSocket support - conditionally set headers only for WebSocket upgrade requests
+set $ws_upgrade_header "";
+set $ws_connection_header "";
+set $ws_protocol_header "";
+set $ws_extensions_header "";
+set $ws_key_header "";
+set $ws_version_header "";
+
+if ($http_upgrade = "websocket") {
+set $ws_upgrade_header $http_upgrade;
+set $ws_connection_header "upgrade";
+set $ws_protocol_header $http_sec_websocket_protocol;
+set $ws_extensions_header $http_sec_websocket_extensions;
+set $ws_key_header $http_sec_websocket_key;
+set $ws_version_header $http_sec_websocket_version;
+}
+
+proxy_http_version 1.1;
+proxy_set_header Upgrade $ws_upgrade_header;
+proxy_set_header Connection $ws_connection_header;
+proxy_set_header Sec-WebSocket-Protocol $ws_protocol_header;
+proxy_set_header Sec-WebSocket-Extensions $ws_extensions_header;
+proxy_set_header Sec-WebSocket-Key $ws_key_header;
+proxy_set_header Sec-WebSocket-Version $ws_version_header;
