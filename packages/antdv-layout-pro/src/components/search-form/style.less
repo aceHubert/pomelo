@@ -4,26 +4,10 @@
 @search-from-prefix-cls: ~'@{ant-prefix}-search-form';
 
 .@{search-from-prefix-cls}{
-  &-wrapper{
-    position: relative;
-    .clearfix();
-
-    @media screen and (max-width: 576px) {
-      display: flex;
-      flex-direction: column-reverse;
-    }
-  }
-
-  &-sub {
-    margin: 8px 0 0;
-    padding: 0;
-    position: absolute;
-    z-index: 1;
-
-    @media screen and (max-width: 576px) {
-      margin: 0 0 8px;
-      position: static;
-    }
+  position: relative;
+  
+  &-sub, &-sub-slot {
+    line-height: 2.75em;
 
     &__item {
       display: inline-block;
@@ -43,37 +27,30 @@
     }
   }
 
-  &-sub__slot {
-    line-height: 40px;
-    position: absolute;
-    z-index: 1;
-    order: 1; // 正序
+  &__input-item {
+    float: right;
 
     @media screen and (max-width: 576px) {
-      position: static;
+      & {
+        float: initial;
+      }
     }
   }
 
-  &-content {
+  &__action-row {
+    flex-wrap: nowrap;
+
     @media screen and (max-width: 576px) {
-      .@{search-from-prefix-cls}-sub-slot + & {
-        margin-bottom: 4px !important;
+      flex-wrap: wrap;
+
+      .@{ant-prefix}-col {
+        flex-basis: 100% !important;
       }
     }
+  }
 
-    &__input-item {
-      float: right;
-
-      @media screen and (max-width: 576px) {
-        & {
-          float: initial;
-        }
-      }
-    }
-
-   &__filter-right, &__count-item {
-      float: right;
-      text-align: right;
-    }
+  &__action-right, &__count-item {
+    float: right;
+    text-align: right;
   }
 }

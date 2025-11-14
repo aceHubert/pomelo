@@ -1,4 +1,4 @@
-import { defineComponent, ref, reactive, watch, nextTick, PropType } from 'vue-demi';
+import { defineComponent, ref, reactive, computed, watch, nextTick, PropType } from 'vue-demi';
 import { isNavigationFailure, NavigationFailureType } from 'vue-router';
 import { useRouter, useRoute } from 'vue2-helpers/vue-router';
 import { Button, Col, Row, Divider, Form, Input, Select, Popover, Tooltip, Space } from 'ant-design-vue';
@@ -51,6 +51,10 @@ export type SearchFromProps = {
   bulkAcitonOptions?: BulkAcitonOption[];
   /** apply 按纽 loading 状态 */
   bulkApplying?: boolean;
+  /** 第一行右侧宽度，默认：22opx */
+  rowOneRightWidth?: number;
+  /** 第二行右侧宽度，默认：100px */
+  rowTwoRightWidth?: number;
   /** dataSource 行数（显示在表格的右上角）, 当 >0 时显示批量操作, 当scopedSlots.filterRight 有设置时，右上角行数不显示 */
   rowCount?: number;
   /** 作为 i18n key 前缀(末尾不用加.),  [i18nKeyPrefix].term_form.btn_text */
@@ -81,12 +85,21 @@ export default defineComponent({
     bulkAcitonOptions: Array,
     bulkApplying: Boolean,
     rowCount: Number,
+    rowOneRightWidth: { type: [Number, String], default: 220 },
+    rowTwoRightWidth: { type: [Number, String], default: 100 },
     i18nKeyPrefix: { type: String, default: 'components.search_form' },
   },
   setup(props: SearchFromProps, { emit, slots }) {
     const router = useRouter();
     const route = useRoute();
     const configProvider = useConfigProvider();
+
+    const rowOneRightWidth = computed(() => {
+      return typeof props.rowOneRightWidth === 'number' ? `${props.rowOneRightWidth}px` : props.rowOneRightWidth!;
+    });
+    const rowTwoRightWidth = computed(() => {
+      return typeof props.rowTwoRightWidth === 'number' ? `${props.rowTwoRightWidth}px` : props.rowTwoRightWidth!;
+    });
 
     const localKeyword = reactive<{
       value: string;
@@ -212,131 +225,131 @@ export default defineComponent({
       const prefixCls = getPrefixCls('search-form', customizePrefixCls);
 
       return (
-        <div class={`${prefixCls}-wrapper`}>
-          {props.statusOptions?.length ? (
-            <ul class={`${prefixCls}-sub`}>
-              {props.statusOptions.map((option, index) =>
-                option.keepStatusShown || props.keepStatusShown || option.count > 0 ? (
-                  <li class={`${prefixCls}-sub__item`}>
-                    {index !== 0 ? <Divider type="vertical" /> : null}
-                    <Tooltip title={option.tooltip || option.label}>
-                      <router-link
-                        to={getStatusUrl(option)}
-                        class={`${prefixCls}-sub__item-link`}
-                        activeClass=""
-                        exactActiveClass="active"
-                        exact
-                        replace
-                      >
-                        {option.label}
-                        {option.count > 0 ? <span>({option.count})</span> : null}
-                      </router-link>
-                    </Tooltip>
-                  </li>
-                ) : null,
-              )}
-            </ul>
-          ) : slots.sub ? (
-            <div class={`${prefixCls}-sub__slot`}>{slots.sub()}</div>
-          ) : null}
-          <Form layout="inline" size="small" class={`${prefixCls}-content`}>
-            <Row>
-              <Col md={{ span: 16, offset: 8 }} sm={24}>
-                <Form.Item class={`${prefixCls}-content__input-item`}>
-                  <Space>
-                    <Input.Search
-                      vModel={localKeyword.value}
-                      placeholder={
-                        props.keywordPlaceholder ||
-                        configProvider.i18nRender(`${props.i18nKeyPrefix}.keyword_placeholder`, 'Search')
-                      }
-                      onSearch={() => handleSearch()}
-                      scopedSlots={{
-                        addonBefore: () =>
-                          props.keywordTypeOptions?.length ? (
-                            <Select
-                              vModel={localKeyword.type}
-                              options={props.keywordTypeOptions}
-                              style="width:90px;"
-                            ></Select>
-                          ) : null,
-                      }}
-                    />
-                    {slots.search ? (
-                      <Popover
-                        placement="bottomRight"
-                        scopedSlots={{
-                          content: () => (
-                            <Form layout="inline" size="small" class={`${prefixCls}-popover-search-form`}>
-                              {slots.search!()}
-                            </Form>
-                          ),
-                        }}
-                      >
-                        <Button icon="filter" />
-                      </Popover>
-                    ) : null}
-                  </Space>
-                </Form.Item>
-              </Col>
-            </Row>
-            {props.bulkAcitonOptions?.length || props.rowCount || slots.filter || slots.filterRight ? (
-              <Row class={`${prefixCls}-content__filter-row`} type="flex" justify="space-between" align="bottom">
-                <Col md={16} xs={24}>
-                  <Space size="middle" style="flex-wrap: wrap;">
-                    {props.rowCount && props.rowCount > 0 && props.bulkAcitonOptions?.length ? (
-                      <Form.Item>
-                        <Space>
+        <Form layout="inline" size="small" class={prefixCls}>
+          <Row class={`${prefixCls}__filter-row`} type="flex" gutter={8} justify="space-between" align="middle">
+            <Col flex="auto">
+              {props.statusOptions?.length ? (
+                <ul class={`${prefixCls}-sub`}>
+                  {props.statusOptions.map((option, index) =>
+                    option.keepStatusShown || props.keepStatusShown || option.count > 0 ? (
+                      <li class={`${prefixCls}-sub__item`}>
+                        {index !== 0 ? <Divider type="vertical" /> : null}
+                        <Tooltip title={option.tooltip || option.label}>
+                          <router-link
+                            to={getStatusUrl(option)}
+                            class={`${prefixCls}-sub__item-link`}
+                            activeClass=""
+                            exactActiveClass="active"
+                            exact
+                            replace
+                          >
+                            {option.label}
+                            {option.count > 0 ? <span>({option.count})</span> : null}
+                          </router-link>
+                        </Tooltip>
+                      </li>
+                    ) : null,
+                  )}
+                </ul>
+              ) : slots.sub ? (
+                <div class={`${prefixCls}-sub-slot`}>{slots.sub()}</div>
+              ) : null}
+            </Col>
+            <Col flex={rowOneRightWidth.value}>
+              <Form.Item class={`${prefixCls}__input-item`}>
+                <Space>
+                  <Input.Search
+                    vModel={localKeyword.value}
+                    placeholder={
+                      props.keywordPlaceholder ||
+                      configProvider.i18nRender(`${props.i18nKeyPrefix}.keyword_placeholder`, 'Search')
+                    }
+                    onSearch={() => handleSearch()}
+                    scopedSlots={{
+                      addonBefore: () =>
+                        props.keywordTypeOptions?.length ? (
                           <Select
-                            vModel={bulkAciton.value}
-                            placeholder={configProvider.i18nRender(
-                              `${props.i18nKeyPrefix}.bulk_action_placeholder`,
-                              'Bulk actions',
-                            )}
-                            style="min-width:120px;"
-                          >
-                            {props.bulkAcitonOptions.map((option) => (
-                              <Select.Option value={option.value}>{option.label}</Select.Option>
-                            ))}
-                          </Select>
-                          <Button
-                            ghost
-                            type="primary"
-                            loading={props.bulkApplying}
-                            title={configProvider.i18nRender(`${props.i18nKeyPrefix}.bulk_apply_btn_tips`, 'Apply')}
-                            onClick={() => handleBulkAction()}
-                          >
-                            {configProvider.i18nRender(`${props.i18nKeyPrefix}.bulk_apply_btn_text`, 'Apply')}
-                          </Button>
-                        </Space>
-                      </Form.Item>
-                    ) : null}
+                            vModel={localKeyword.type}
+                            options={props.keywordTypeOptions}
+                            style="width:90px;"
+                          ></Select>
+                        ) : null,
+                    }}
+                  />
+                  {slots.search ? (
+                    <Popover
+                      placement="bottomRight"
+                      scopedSlots={{
+                        content: () => (
+                          <Form layout="inline" size="small" class={`${prefixCls}-popover-search-form`}>
+                            {slots.search!()}
+                          </Form>
+                        ),
+                      }}
+                    >
+                      <Button icon="filter" />
+                    </Popover>
+                  ) : null}
+                </Space>
+              </Form.Item>
+            </Col>
+          </Row>
+          {props.bulkAcitonOptions?.length || props.rowCount || slots.filter || slots.filterRight ? (
+            <Row class={`${prefixCls}__action-row`} type="flex" gutter={8} justify="space-between" align="bottom">
+              <Col flex="auto">
+                <Space size="middle" style="flex-wrap: wrap;">
+                  {props.rowCount && props.rowCount > 0 && props.bulkAcitonOptions?.length ? (
                     <Form.Item>
-                      <Space>{slots.filter ? slots.filter() : null}</Space>
-                    </Form.Item>
-                  </Space>
-                </Col>
-                <Col md={8} xs={24}>
-                  {slots.filterRight ? (
-                    <Form.Item class={`${prefixCls}-content__filter-right`}>
-                      <Space size="middle" style="flex-wrap: wrap;">
-                        {slots.filterRight()}
+                      <Space>
+                        <Select
+                          vModel={bulkAciton.value}
+                          placeholder={configProvider.i18nRender(
+                            `${props.i18nKeyPrefix}.bulk_action_placeholder`,
+                            'Bulk actions',
+                          )}
+                          style="min-width:120px;"
+                        >
+                          {props.bulkAcitonOptions.map((option) => (
+                            <Select.Option value={option.value}>{option.label}</Select.Option>
+                          ))}
+                        </Select>
+                        <Button
+                          ghost
+                          type="primary"
+                          loading={props.bulkApplying}
+                          title={configProvider.i18nRender(`${props.i18nKeyPrefix}.bulk_apply_btn_tips`, 'Apply')}
+                          onClick={() => handleBulkAction()}
+                        >
+                          {configProvider.i18nRender(`${props.i18nKeyPrefix}.bulk_apply_btn_text`, 'Apply')}
+                        </Button>
                       </Space>
                     </Form.Item>
-                  ) : props.rowCount ? (
-                    <Form.Item class={`${prefixCls}-content__count-item`}>
-                      <span>
-                        {configProvider.i18nRender(`${props.i18nKeyPrefix}.row_count`, `${props.rowCount} Row(s)`, {
-                          count: props.rowCount,
-                        })}
-                      </span>
-                    </Form.Item>
                   ) : null}
-                </Col>
-              </Row>
-            ) : null}
-          </Form>
-        </div>
+                  <Form.Item>
+                    <Space>{slots.filter ? slots.filter() : null}</Space>
+                  </Form.Item>
+                </Space>
+              </Col>
+              <Col flex={rowTwoRightWidth.value}>
+                {slots.filterRight ? (
+                  <Form.Item class={`${prefixCls}__action-right`}>
+                    <Space size="middle" style="flex-wrap: wrap;">
+                      {slots.filterRight()}
+                    </Space>
+                  </Form.Item>
+                ) : props.rowCount ? (
+                  <Form.Item class={`${prefixCls}__count-item`}>
+                    <span>
+                      {configProvider.i18nRender(`${props.i18nKeyPrefix}.row_count`, `${props.rowCount} Row(s)`, {
+                        count: props.rowCount,
+                      })}
+                    </span>
+                  </Form.Item>
+                ) : null}
+              </Col>
+            </Row>
+          ) : null}
+        </Form>
       );
     };
   },
