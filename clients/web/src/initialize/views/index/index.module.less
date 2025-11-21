@@ -20,7 +20,6 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(to top, @var-primary-2 0%, #fff 30%, #fff 100%);
     opacity: 0.9;
     z-index: -1;
   }
@@ -59,13 +58,17 @@
     .select-with-prefix {
       padding-left: @prefix-left-width;
       background-color: #fff;
-      border: 1px solid @border-color-base;
+      border: 1px solid @var-border-base;
       display: flex;
       align-items: center;
       border-radius: 99px;
       transition: all 0.3s;
       position: relative;
       z-index: 1;
+
+      :global(.theme-dark) & {
+        background-color: transparent;
+      }
 
       &:hover {
         border-color: @var-primary;
@@ -145,6 +148,10 @@
       background: var(--component-background, @component-background);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       opacity: 0.8;
+
+      :global(.theme-dark) & {
+        box-shadow: 0 -5px 30px rgba(255, 255, 255, 0.3);
+      }
     }
 
     .title {
