@@ -35,6 +35,14 @@
             transform: rotate(360deg);
           }
         }
+        @keyframes color-cycle {
+          0% {
+            filter: hue-rotate(0deg);
+          }
+          100% {
+            filter: hue-rotate(360deg);
+          }
+        }
         .ldio-rlj86k08kl div {
           box-sizing: border-box !important;
         }
@@ -131,6 +139,7 @@
           transform: translateZ(0) scale(1);
           backface-visibility: hidden;
           transform-origin: 0 0; /* see note above */
+          animation: color-cycle 5s linear infinite;
         }
         .ldio-rlj86k08kl div {
           box-sizing: content-box;
