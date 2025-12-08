@@ -7,13 +7,13 @@ consumers:
         # set client metadata
         client_id: 75a9c633-cfde-4954-b35c-9344ed9b781a
         client_secret: ${APISIX_CLIENT_SECRET}
-        discovery: ${ORIGIN}/identity/oauth2/.well-known/openid-configuration
+        discovery: ${ORIGIN}/connect/oauth2/.well-known/openid-configuration
         unauth_action: pass
         use_jwks: true
         claim_validator:
           issuer:
             valid_issuers:
-              - ${ORIGIN}/identity/oauth2
+              - ${ORIGIN}/connect/oauth2
   - username: pomelo_local
     plugins:
       key-auth:
@@ -78,7 +78,7 @@ routes:
       proxy-rewrite:
         regex_uri:
           - ^/action/identity(/?)(.*)
-          - /identity/$2
+          - /connect/$2
     upstream:
       nodes:
         - host: ${POMERO_SERVER_HOST}
