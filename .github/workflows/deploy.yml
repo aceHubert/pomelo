@@ -1,9 +1,10 @@
 # debug locally
 # act -W ./.github/workflows/deploy.yml --secret-file ./.github/.secrets --var-file ./.github/.vars -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest
 
-name: Deploy-HWCloud
+name: Deploy
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
   push: # push 到主分支自动 发布
