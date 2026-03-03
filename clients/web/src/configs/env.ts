@@ -17,7 +17,7 @@ export const envConfig: EnvConfig = {
   basicGraphqlBase: '/action/basic/graphql',
   identityGraphqlBase: '/action/identity/graphql',
   getOidcSettings: () => ({
-    authority: origin + '/identity/oauth2',
+    authority: origin + '/connect/oauth2',
     client_id: clientId,
     redirect_uri: baseUrl + 'signin.html',
     post_logout_redirect_uri: baseUrl.replace(/\/$/, ''),

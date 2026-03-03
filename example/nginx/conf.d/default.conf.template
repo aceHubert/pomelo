@@ -17,7 +17,7 @@
         server ${POMERO_SERVER_HOST}:${POMERO_WEB_PORT};
  }
 
- server {        
+ server {
         listen ${NGINX_PORT};
         server_name ${NGINX_SERVER_NAME};
 
@@ -38,7 +38,7 @@
           include proxy.conf;
         }
 
-        location /identity/ {
+        location /connect/ {
           proxy_pass http://pomelo_identity_server;
           include proxy.conf;
         }
