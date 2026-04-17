@@ -5,8 +5,8 @@ import { Resolver, Context, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { VoidResolver } from 'graphql-scalars';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
-import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
+import { Authorized, Anonymous } from '@ace-nestjs/authorization';
+import { RamAuthorized } from '@ace-nestjs/ram-authorization';
 import {
   Fields,
   User,

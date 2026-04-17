@@ -1,17 +1,26 @@
 import { Module, DynamicModule, Provider } from '@nestjs/common';
+
 import { RAMEvaluateMethods } from './core/RAMEvaluateMethods';
+import { RAMAuthorizationEvaluator } from './core/RAMAuthorizationEvaluator';
+import { RamResourceQueryHelper } from './helpers/ram-resource-query.helper';
 import {
   RamAuthorizationOptions,
   RamAuthorizationAsyncOptions,
   RamAuthorizationOptionsFactory,
 } from './interfaces/ram-authorization-options.interface';
-import { RAM_AUTHORIZATION_OPTIONS } from './constants';
+import { RAM_AUTHORIZATION_OPTIONS, RAM_POLICY_PROVIDERS } from './constants';
+import { JwtClaimsPolicyProvider } from './providers/jwt-claims-policy.provider';
+import { CompositePolicyProvider } from './providers/composite-policy.provider';
+import { RamResourceFilterInterceptor } from './interceptors/ram-resource-filter.interceptor';
+import { DEFAULT_RESOURCE_PREFIX } from './utils/resource-matcher';
 
 const DefaultRamAuthorizationOptions: Partial<RamAuthorizationOptions> = {
   policyName: 'RAMAuthorizationPolicy',
   ramClaimTypeName: 'ram',
   evaluateMethod: RAMEvaluateMethods.Statement,
   userProperty: 'user',
+  allowWhenNoPolicies: false,
+  resourcePrefix: DEFAULT_RESOURCE_PREFIX,
 };
 
 @Module({})
@@ -28,8 +37,23 @@ export class RamAuthorizationModule {
           provide: RAM_AUTHORIZATION_OPTIONS,
           useValue: options,
         },
+        {
+          provide: RAM_POLICY_PROVIDERS,
+          useFactory: () => [new JwtClaimsPolicyProvider(options.ramClaimTypeName)],
+        },
+        CompositePolicyProvider,
+        RAMAuthorizationEvaluator,
+        RamResourceFilterInterceptor,
+        RamResourceQueryHelper,
       ],
-      exports: [RAM_AUTHORIZATION_OPTIONS],
+      exports: [
+        RAM_AUTHORIZATION_OPTIONS,
+        RAM_POLICY_PROVIDERS,
+        CompositePolicyProvider,
+        RAMAuthorizationEvaluator,
+        RamResourceFilterInterceptor,
+        RamResourceQueryHelper,
+      ],
     };
   }
 
@@ -38,8 +62,28 @@ export class RamAuthorizationModule {
       module: RamAuthorizationModule,
       global: options.isGlobal,
       imports: options.imports || [],
-      providers: [...this.createAsyncProviders(options)],
-      exports: [RAM_AUTHORIZATION_OPTIONS],
+      providers: [
+        ...this.createAsyncProviders(options),
+        {
+          provide: RAM_POLICY_PROVIDERS,
+          useFactory: (ramOptions: RamAuthorizationOptions) => [
+            new JwtClaimsPolicyProvider(ramOptions.ramClaimTypeName),
+          ],
+          inject: [RAM_AUTHORIZATION_OPTIONS],
+        },
+        CompositePolicyProvider,
+        RAMAuthorizationEvaluator,
+        RamResourceFilterInterceptor,
+        RamResourceQueryHelper,
+      ],
+      exports: [
+        RAM_AUTHORIZATION_OPTIONS,
+        RAM_POLICY_PROVIDERS,
+        CompositePolicyProvider,
+        RAMAuthorizationEvaluator,
+        RamResourceFilterInterceptor,
+        RamResourceQueryHelper,
+      ],
     };
   }
 

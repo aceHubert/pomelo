@@ -2,7 +2,7 @@ import moment from 'moment';
 import { snakeCase } from 'lodash';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { AuthorizationService } from '@ace-pomelo/nestjs-pomelo-authorization';
+import { AuthorizationService } from '@ace-nestjs/authorization';
 import { INFRASTRUCTURE_SERVICE, UserMetaPresetKeys, UserPattern } from '@ace-pomelo/shared/server';
 import { UserOptions } from './interfaces/user-options.interface';
 import { UserModel } from './interfaces/user-model.interface';

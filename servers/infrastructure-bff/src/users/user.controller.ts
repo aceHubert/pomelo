@@ -21,8 +21,8 @@ import {
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { Authorized, Anonymous } from '@ace-pomelo/nestjs-authorization';
-import { RamAuthorized } from '@ace-pomelo/nestjs-ram-authorization';
+import { Authorized, Anonymous } from '@ace-nestjs/authorization';
+import { RamAuthorized } from '@ace-nestjs/ram-authorization';
 import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,

@@ -57,9 +57,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ace-pomelo/nestjs-authorization@workspace:packages/pomelo-authorization":
+"@ace-nestjs/authorization@workspace:packages/nestjs-authorization":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/nestjs-authorization@workspace:packages/pomelo-authorization"
+  resolution: "@ace-nestjs/authorization@workspace:packages/nestjs-authorization"
   dependencies:
     "@nestjs/common": ^10.0.0
     "@nestjs/core": ^10.0.0
@@ -84,9 +84,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/nestjs-log4js@workspace:packages/pomelo-log4js":
+"@ace-nestjs/log4js@workspace:packages/nestjs-log4js":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/nestjs-log4js@workspace:packages/pomelo-log4js"
+  resolution: "@ace-nestjs/log4js@workspace:packages/nestjs-log4js"
   dependencies:
     "@nestjs/common": ^10.0.0
     "@nestjs/core": ^10.0.0
@@ -97,9 +97,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-pomelo/nestjs-ram-authorization@workspace:packages/pomelo-ram-authorization":
+"@ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization":
   version: 0.0.0-use.local
-  resolution: "@ace-pomelo/nestjs-ram-authorization@workspace:packages/pomelo-ram-authorization"
+  resolution: "@ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization"
   dependencies:
     "@nestjs/common": ^10.0.0
     "@nestjs/core": ^10.0.0

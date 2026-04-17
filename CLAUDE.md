@@ -107,9 +107,43 @@ yarn build:submodules:formily-vant
   - Form builder using Formily components
 
 ### Shared Packages
-- **packages/pomelo-authorization/**: Authentication and authorization utilities
-- **packages/pomelo-shared/**: Shared types and utilities
-- **packages/pomelo-theme/**: Theme and UI components
+
+#### Backend Packages
+- **packages/nestjs-authorization/**: JWT-based authentication and authorization utilities for NestJS
+  - Package: `@ace-nestjs/authorization`
+  - Provides decorators, guards, and middleware for JWT token validation
+  - User context management and role-based access control
+
+- **packages/nestjs-log4js/**: Log4js integration module for NestJS
+  - Package: `@ace-nestjs/log4js`
+  - Centralized logging configuration and service
+  - Supports multiple appenders and log levels
+
+- **packages/nestjs-oidc/**: OpenID Connect client module for NestJS
+  - Package: `nestjs-oidc`
+  - OIDC authentication flow implementation
+  - Integration with identity providers
+
+- **packages/nestjs-ram-authorization/**: Resource Access Management (RAM) authorization for NestJS
+  - Package: `@ace-nestjs/ram-authorization`
+  - Fine-grained permission control system
+  - Resource-based access policies
+
+#### Frontend Packages
+- **packages/antdv-layout-pro/**: Professional layout components for Ant Design Vue
+  - Package: `antdv-layout-pro`
+  - Pro-level admin layout with sidebar, header, and content areas
+  - Menu management and routing integration
+
+- **packages/pomelo-shared/**: Shared types, utilities, and constants
+  - Package: `@ace-pomelo/shared`
+  - Common TypeScript types and interfaces
+  - Utility functions used across frontend and backend
+
+- **packages/pomelo-theme/**: Theme system and UI styling
+  - Package: `@ace-pomelo/theme`
+  - Centralized theme configuration
+  - CSS variables and style utilities
 
 ### Key Technologies
 - **Backend**: NestJS, TypeScript, GraphQL, Sequelize ORM, OpenID Connect

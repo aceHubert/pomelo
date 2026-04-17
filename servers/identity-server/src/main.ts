@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
-import { Log4jsService } from '@ace-pomelo/nestjs-log4js';
+import { Log4jsService } from '@ace-nestjs/log4js';
 import { bootstrap, normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared/server';
 import { ApisModule } from './apis/apis.module';
 import { AppModule } from './app.module';
@@ -62,7 +62,7 @@ bootstrap<NestExpressApplication>(AppModule, {
       .setBaseViewsDir(join(__dirname, '../', 'views'))
       .setLocal('title', 'Pomelo Identity Server')
       .setLocal('baseURL', `${globalPrefix}/`)
-      .setLocal('cdnPrefix', '//cdn.jsdmirror.com/npm/')
+      .setLocal('cdnPrefix', 'https://cdn.jsdmirror.com/npm/')
       .set('view engine', 'ejs')
       .set('layout', 'layouts/default')
       .set('layout extractScripts', true)
