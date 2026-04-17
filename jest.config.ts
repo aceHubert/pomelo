@@ -46,5 +46,15 @@ export default async (): Promise<Config.InitialOptions> => ({
       },
       testEnvironment: 'node',
     },
+    {
+      displayName: 'nest-ram-authorization',
+      moduleFileExtensions: [...defaults.moduleFileExtensions, 'ts', 'tsx'],
+      rootDir: 'packages/nest-ram-authorization',
+      testRegex: '.*\\.spec\\.ts$',
+      transform: {
+        '^.+\\.(t|j)s$': 'ts-jest',
+      },
+      testEnvironment: 'node',
+    },
   ],
 });

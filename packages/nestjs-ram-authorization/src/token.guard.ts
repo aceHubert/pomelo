@@ -8,9 +8,14 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { loadPackage } from '@nestjs/common/utils/load-package.util';
+
 import { RamAuthorizationOptions } from './interfaces/ram-authorization-options.interface';
+import { RamResourceContext } from './interfaces/ram-resource-context.interface';
 import { getContextObject } from './utils/get-context-object';
-import { RAM_AUTHORIZATION_OPTIONS, RAM_AUTHORIZATION_ACTION_KEY } from './constants';
+import { RAM_AUTHORIZATION_OPTIONS, RAM_AUTHORIZATION_ACTION_KEY, RAM_RESOURCE_CONTEXT_KEY } from './constants';
+import { CompositePolicyProvider } from './providers/composite-policy.provider';
+import { RAMAuthorizationEvaluator } from './core/RAMAuthorizationEvaluator';
+import { RAMAuthorizeContext } from './core/RAMAuthorizeContext';
 
 /**
  * 是否有用户授权策略
@@ -20,6 +25,8 @@ export class TokenGuard implements CanActivate {
   constructor(
     @Inject(RAM_AUTHORIZATION_OPTIONS) private readonly options: RamAuthorizationOptions,
     private readonly reflector: Reflector,
+    private readonly policyProvider: CompositePolicyProvider,
+    private readonly evaluator: RAMAuthorizationEvaluator,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -33,11 +40,16 @@ export class TokenGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    const resourceContext = this.reflector.getAllAndOverride<RamResourceContext>(RAM_RESOURCE_CONTEXT_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     const user = ctx[this.options.userProperty!] as Record<string, any> | undefined;
     if (!user) {
       // 没有的提供 token, return 401
       throw new UnauthorizedException("Access denied, You don't have permission for this action!");
-    } else if (action && !this.hasRamPermission(user, action)) {
+    } else if (action && !(await this.hasRamPermission(user, action, resourceContext))) {
       // false return 403
       throw new ForbiddenException("Access denied, You don't have capability for this action!");
     }
@@ -58,7 +70,7 @@ export class TokenGuard implements CanActivate {
       // @FieldRamAuthorized
       const fieldAction = this.resolveGraphqlOutputFieldsAction(info);
       for (const field in fieldAction) {
-        if (!user || !this.hasRamPermission(user, fieldAction[field])) {
+        if (!user || !(await this.hasRamPermission(user, fieldAction[field]))) {
           // false return 403
           throw new UnauthorizedException(`Access denied, You don't capability for field "${field}"!)`);
         }
@@ -128,20 +140,31 @@ export class TokenGuard implements CanActivate {
   /**
    * 判断用户策略是否在提供的策略内
    * @param user 用户
-   * @param rams 策略
-   * @returns
+   * @param action Action 名称
+   * @param resourceContext 资源上下文（可选）
+   * @returns 是否有权限
    */
-  private hasRamPermission(user: Record<string, any>, action: string): boolean {
-    // TODO: RAM 策略判断
-    console.log('ram check', user.ramsClaim, action);
-    return true;
-    // const hasRam = (userRamsClaim: string[]): boolean => {
-    //   // TODO: RAM 策略判断
-    //   // rams.some((ram) => userRams.includes(ram))
-    //   console.log('ram check', userRamsClaim, action);
-    //   return true;
-    // };
-    // const userRamsClaim = user.ramsClaim as string[] | undefined;
-    // return Boolean(userRamsClaim?.length && hasRam(userRamsClaim));
+  private async hasRamPermission(
+    user: Record<string, any>,
+    action: string,
+    resourceContext?: RamResourceContext,
+  ): Promise<boolean> {
+    const policies = await this.policyProvider.getAllPolicies(user, this.options.serviceName);
+
+    // 如果没有策略，根据配置决定是否允许
+    if (policies.length === 0) {
+      return this.options.allowWhenNoPolicies ?? false;
+    }
+
+    const authContext = new RAMAuthorizeContext(
+      this.options.serviceName,
+      action,
+      policies,
+      resourceContext?.resourceType,
+      resourceContext?.resourceId,
+      this.options.resourcePrefix,
+    );
+
+    return this.evaluator.evaluateAsync(authContext);
   }
 }

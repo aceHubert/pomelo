@@ -176,31 +176,31 @@
         "tsConfigPath": "packages/nestjs-oidc/tsconfig.json"
       }
     },
-    "pomelo-authorization": {
+    "nest-authorization": {
       "type": "library",
-      "root": "packages/pomelo-authorization",
+      "root": "packages/nest-authorization",
       "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-authorization",
+      "sourceRoot": "packages/nest-authorization",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-authorization/tsconfig.json"
+        "tsConfigPath": "packages/nest-authorization/tsconfig.json"
       }
     },
-    "pomelo-ram-authorization": {
+    "nest-ram-authorization": {
       "type": "library",
-      "root": "packages/pomelo-ram-authorization",
+      "root": "packages/nest-ram-authorization",
       "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-ram-authorization",
+      "sourceRoot": "packages/nest-ram-authorization",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-ram-authorization/tsconfig.json"
+        "tsConfigPath": "packages/nest-ram-authorization/tsconfig.json"
       }
     },
-    "pomelo-log4js": {
+    "nest-log4js": {
       "type": "library",
-      "root": "packages/pomelo-log4js",
+      "root": "packages/nest-log4js",
       "entryFile": "src/index",
-      "sourceRoot": "packages/pomelo-log4js",
+      "sourceRoot": "packages/nest-log4js",
       "compilerOptions": {
-        "tsConfigPath": "packages/pomelo-log4js/tsconfig.json"
+        "tsConfigPath": "packages/nest-log4js/tsconfig.json"
       }
     },
     "pomelo-shared": {

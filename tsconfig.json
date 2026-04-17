@@ -83,11 +83,11 @@
       "@ace-pomelo/theme-*": ["../themes/*/src", "../../themes/*/src"],
       "@ace-pomelo/shared/client": ["../../packages/pomelo-shared/src/client"],
       "@ace-pomelo/shared/server": ["../../packages/pomelo-shared/src/server"],
-      "@ace-pomelo/nestjs-*": [
+      "@ace-nestjs/*": [
         "../packages/*/src",
         "../../packages/*/src",
-        "../packages/pomelo-*/src",
-        "../../packages/pomelo-*/src"
+        "../packages/nestjs-*/src",
+        "../../packages/nestjs-*/src"
       ],
       "@ace-pomelo/*": [
         "../packages/*/src",

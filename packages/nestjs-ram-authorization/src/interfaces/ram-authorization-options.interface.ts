@@ -1,4 +1,5 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
+
 import { RAMEvaluateMethods } from '../core/RAMEvaluateMethods';
 
 export interface RamAuthorizationOptions {
@@ -32,6 +33,20 @@ export interface RamAuthorizationOptions {
    * is global module
    */
   isGlobal?: boolean;
+
+  /**
+   * Allow access when no policies are found for the user.
+   * @default false
+   */
+  allowWhenNoPolicies?: boolean;
+
+  /**
+   * Resource URN prefix (pomelo 的首字母缩写).
+   * @example 'po' -> 'po:service:resource/id'
+   * @example '' or undefined -> 'service:resource/id'
+   * @default 'po'
+   */
+  resourcePrefix?: string;
 }
 
 export interface RamAuthorizationOptionsFactory {

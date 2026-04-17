@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { Log4jsService } from '@ace-pomelo/nestjs-log4js';
+import { Log4jsService } from '@ace-nestjs/log4js';
 import { bootstrap, normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/shared/server';
 import { AppModule } from './app.module';
 import { version } from './version';

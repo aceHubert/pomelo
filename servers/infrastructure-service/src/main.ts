@@ -2,7 +2,7 @@ import { Logger, RequestMethod } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
-import { Log4jsService } from '@ace-pomelo/nestjs-log4js';
+import { Log4jsService } from '@ace-nestjs/log4js';
 import { bootstrap, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { I18nServerTcp } from './common/utils/i18n-server-tcp.util';
 import { AppModule } from './app.module';
