@@ -25,7 +25,7 @@ import {
   CookieResolver,
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
-import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
+import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4js';
 import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
 import {
   AuthorizationModule,
@@ -33,8 +33,8 @@ import {
   createLocalJWKSet,
   getJWKS,
   getSigningKey,
-} from '@ace-pomelo/nestjs-authorization';
-import { RamAuthorizationModule } from '@ace-pomelo/nestjs-ram-authorization';
+} from '@ace-nestjs/authorization';
+import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';

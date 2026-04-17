@@ -1,4 +1,4 @@
-import { IRAMActionDefine } from '@ace-pomelo/nestjs-ram-authorization';
+import { IRAMActionDefine } from '@ace-nestjs/ram-authorization';
 
 export class TermTaxonomyAction implements IRAMActionDefine {
   static readonly CategoryList = 'taxonomy.category.list';

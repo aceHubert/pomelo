@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { TerminusModule } from '@nestjs/terminus';
 import { I18nModule, I18nService, I18nValidationPipe } from 'nestjs-i18n';
-import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-pomelo/nestjs-log4js';
+import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4js';
 import { configuration } from '@ace-pomelo/shared/server';
 import { InfrastructureDatasourceModule } from '@/datasource/datasource.module';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
