@@ -85,7 +85,7 @@ export class OptionController extends BaseController {
     if (result === undefined) {
       res.status(HttpStatus.NO_CONTENT);
     } else if (!canAccessOptionPresetKey(result.optionName, requestUser)) {
-      throw new ForbiddenError(`Not accessiable for option "${result.optionName}"`);
+      throw new ForbiddenError(`Not accessible for option "${result.optionName}"`);
     }
     return this.success({
       data: result,
@@ -278,7 +278,7 @@ export class OptionController extends BaseController {
 
   private assertOptionAccessible(optionName: string, requestUser?: RequestUser) {
     if (!canAccessOptionPresetKey(optionName, requestUser)) {
-      throw new ForbiddenError(`Not accessiable for option "${optionName}"`);
+      throw new ForbiddenError(`Not accessible for option "${optionName}"`);
     }
   }
 }

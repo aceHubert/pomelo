@@ -43,7 +43,7 @@ export class OptionResolver extends BaseResolver {
       .lastValue()
       .then((option) => {
         if (option && !canAccessOptionPresetKey(option.optionName, requestUser)) {
-          throw new ForbiddenError(`Not accessiable for option "${option.optionName}"`);
+          throw new ForbiddenError(`Not accessible for option "${option.optionName}"`);
         }
 
         return option;
@@ -156,7 +156,7 @@ export class OptionResolver extends BaseResolver {
 
   private assertOptionAccessible(optionName: string, requestUser?: RequestUser) {
     if (!canAccessOptionPresetKey(optionName, requestUser)) {
-      throw new ForbiddenError(`Not accessiable for option "${optionName}"`);
+      throw new ForbiddenError(`Not accessible for option "${optionName}"`);
     }
   }
 }
