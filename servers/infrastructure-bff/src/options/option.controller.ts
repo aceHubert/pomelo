@@ -25,11 +25,13 @@ import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   RequestUser,
+  ForbiddenError,
   INFRASTRUCTURE_SERVICE,
   OptionPattern,
 } from '@ace-pomelo/shared/server';
 import { OptionAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
+import { canAccessOptionPresetKey, filterAccessibleOptionNames, filterAccessibleOptionValues } from './option-access';
 import { OptionQueryDto } from './dto/option-query.dto';
 import { NewOptionDto } from './dto/new-option.dto';
 import { UpdateOptionDto } from './dto/update-option.dto';
@@ -52,10 +54,10 @@ export class OptionController extends BaseController {
     description: 'Option values(key/value)',
     type: () => createResponseSuccessType({ data: {} }, 'AutoloadOptionsModelsSuccessResp'),
   })
-  async getAutoloadOptions() {
+  async getAutoloadOptions(@User() requestUser?: RequestUser) {
     const result = await this.basicService.send<Record<string, string>>(OptionPattern.GetAutoloads, {}).lastValue();
     return this.success({
-      data: result,
+      data: filterAccessibleOptionValues(result, requestUser),
     });
   }
 
@@ -69,7 +71,11 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
   })
   @ApiNoContentResponse({ description: 'Option not found' })
-  async get(@Param('id', ParseIntPipe) id: number, @Res({ passthrough: true }) res: Response) {
+  async get(
+    @Param('id', ParseIntPipe) id: number,
+    @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
+  ) {
     const result = await this.basicService
       .send<OptionResp | undefined>(OptionPattern.Get, {
         id,
@@ -78,6 +84,8 @@ export class OptionController extends BaseController {
       .lastValue();
     if (result === undefined) {
       res.status(HttpStatus.NO_CONTENT);
+    } else if (!canAccessOptionPresetKey(result.optionName, requestUser)) {
+      throw new ForbiddenError(`Not accessiable for option "${result.optionName}"`);
     }
     return this.success({
       data: result,
@@ -94,7 +102,13 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
   })
   @ApiNoContentResponse({ description: 'Option not found' })
-  async getByName(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
+  async getByName(
+    @Param('name') name: string,
+    @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
+  ) {
+    this.assertOptionAccessible(name, requestUser);
+
     const result = await this.basicService
       .send<OptionResp | undefined>(OptionPattern.GetByName, {
         optionName: name,
@@ -123,7 +137,13 @@ export class OptionController extends BaseController {
       ),
   })
   @ApiNoContentResponse({ description: 'Option not found' })
-  async getValue(@Param('name') name: string, @Res({ passthrough: true }) res: Response) {
+  async getValue(
+    @Param('name') name: string,
+    @Res({ passthrough: true }) res: Response,
+    @User() requestUser?: RequestUser,
+  ) {
+    this.assertOptionAccessible(name, requestUser);
+
     const value = await this.basicService
       .send<string | undefined>(OptionPattern.GetValue, {
         optionName: name,
@@ -147,7 +167,7 @@ export class OptionController extends BaseController {
     description: 'Option models',
     type: () => createResponseSuccessType({ data: [OptionResp] }, 'OptionModelsSuccessResp'),
   })
-  async getList(@Query(ParseQueryPipe) query: OptionQueryDto) {
+  async getList(@Query(ParseQueryPipe) query: OptionQueryDto, @User() requestUser: RequestUser) {
     const result = await this.basicService
       .send<OptionResp[]>(OptionPattern.GetList, {
         query,
@@ -155,7 +175,7 @@ export class OptionController extends BaseController {
       })
       .lastValue();
     return this.success({
-      data: result,
+      data: filterAccessibleOptionNames(result, requestUser),
     });
   }
 
@@ -253,6 +273,12 @@ export class OptionController extends BaseController {
     } catch (e: any) {
       this.logger.error(e);
       return this.faild(e.message);
+    }
+  }
+
+  private assertOptionAccessible(optionName: string, requestUser?: RequestUser) {
+    if (!canAccessOptionPresetKey(optionName, requestUser)) {
+      throw new ForbiddenError(`Not accessiable for option "${optionName}"`);
     }
   }
 }

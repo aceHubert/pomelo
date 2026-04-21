@@ -5,9 +5,17 @@ import { ResolveTree } from 'graphql-parse-resolve-info';
 import { JSONObjectResolver, VoidResolver } from 'graphql-scalars';
 import { Authorized, Anonymous } from '@ace-nestjs/authorization';
 import { RamAuthorized } from '@ace-nestjs/ram-authorization';
-import { User, Fields, RequestUser, INFRASTRUCTURE_SERVICE, OptionPattern } from '@ace-pomelo/shared/server';
+import {
+  User,
+  Fields,
+  RequestUser,
+  ForbiddenError,
+  INFRASTRUCTURE_SERVICE,
+  OptionPattern,
+} from '@ace-pomelo/shared/server';
 import { OptionAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
+import { canAccessOptionPresetKey, filterAccessibleOptionNames, filterAccessibleOptionValues } from './option-access';
 import { NewOptionInput } from './dto/new-option.input';
 import { OptionArgs } from './dto/option.args';
 import { UpdateOptionInput } from './dto/update-option.input';
@@ -25,18 +33,32 @@ export class OptionResolver extends BaseResolver {
   option(
     @Args('id', { type: () => ID }, ParseIntPipe) id: number,
     @Fields() fields: ResolveTree,
+    @User() requestUser?: RequestUser,
   ): Promise<Option | undefined> {
     return this.basicService
       .send<Option | undefined>(OptionPattern.Get, {
         id,
         fields: this.getFieldNames(fields.fieldsByTypeName.Option),
       })
-      .lastValue();
+      .lastValue()
+      .then((option) => {
+        if (option && !canAccessOptionPresetKey(option.optionName, requestUser)) {
+          throw new ForbiddenError(`Not accessiable for option "${option.optionName}"`);
+        }
+
+        return option;
+      });
   }
 
   @Anonymous()
   @Query((returns) => Option, { nullable: true, description: 'Get option by name.' })
-  optionByName(@Args('name') name: string, @Fields() fields: ResolveTree): Promise<Option | undefined> {
+  optionByName(
+    @Args('name') name: string,
+    @Fields() fields: ResolveTree,
+    @User() requestUser?: RequestUser,
+  ): Promise<Option | undefined> {
+    this.assertOptionAccessible(name, requestUser);
+
     return this.basicService
       .send<Option | undefined>(OptionPattern.GetByName, {
         optionName: name,
@@ -47,7 +69,9 @@ export class OptionResolver extends BaseResolver {
 
   @Anonymous()
   @Query((returns) => String, { nullable: true, description: 'Get option value by name.' })
-  optionValue(@Args('name') name: string): Promise<string | undefined> {
+  optionValue(@Args('name') name: string, @User() requestUser?: RequestUser): Promise<string | undefined> {
+    this.assertOptionAccessible(name, requestUser);
+
     return this.basicService
       .send<string | undefined>(OptionPattern.GetValue, {
         optionName: name,
@@ -57,19 +81,27 @@ export class OptionResolver extends BaseResolver {
 
   @Anonymous()
   @Query((returns) => JSONObjectResolver, { description: 'Get autoload options(key/value), cache by memory.' })
-  autoloadOptions(): Promise<Record<string, string>> {
-    return this.basicService.send<Record<string, string>>(OptionPattern.GetAutoloads, {}).lastValue();
+  autoloadOptions(@User() requestUser?: RequestUser): Promise<Record<string, string>> {
+    return this.basicService
+      .send<Record<string, string>>(OptionPattern.GetAutoloads, {})
+      .lastValue()
+      .then((options) => filterAccessibleOptionValues(options, requestUser));
   }
 
   @RamAuthorized(OptionAction.List)
   @Query((returns) => [Option], { description: 'Get options.' })
-  options(@Args() args: OptionArgs, @Fields() fields: ResolveTree): Promise<Option[]> {
+  options(
+    @Args() args: OptionArgs,
+    @Fields() fields: ResolveTree,
+    @User() requestUser: RequestUser,
+  ): Promise<Option[]> {
     return this.basicService
       .send<Option[]>(OptionPattern.GetList, {
         query: args,
         fields: this.getFieldNames(fields.fieldsByTypeName.Option),
       })
-      .lastValue();
+      .lastValue()
+      .then((options) => filterAccessibleOptionNames(options, requestUser));
   }
 
   @RamAuthorized(OptionAction.Update)
@@ -120,5 +152,11 @@ export class OptionResolver extends BaseResolver {
         requestUserId: Number(requestUser.sub),
       })
       .lastValue();
+  }
+
+  private assertOptionAccessible(optionName: string, requestUser?: RequestUser) {
+    if (!canAccessOptionPresetKey(optionName, requestUser)) {
+      throw new ForbiddenError(`Not accessiable for option "${optionName}"`);
+    }
   }
 }
