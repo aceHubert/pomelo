@@ -44,6 +44,7 @@ import { OptionModule } from './options/option.module';
 import { TermTaxonomyModule } from './term-taxonomy/term-taxonomy.module';
 import { TemplateModule } from './templates/template.module';
 import { UserModule } from './users/user.module';
+import { AppCacheModule } from './cache/cache.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -60,6 +61,7 @@ const logger = new Logger('AppModule', { timestamp: true });
   imports: [
     HttpModule,
     TerminusModule,
+    AppCacheModule,
     ConfigModule.forRoot({
       isGlobal: true,
       expandVariables: true,

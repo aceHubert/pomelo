@@ -61,11 +61,6 @@ export class OptionController {
     return this.optionDataSource.update(id, model, requestUserId);
   }
 
-  @MessagePattern(OptionPattern.Reset)
-  reset(): void {
-    return this.optionDataSource.reset();
-  }
-
   @MessagePattern(OptionPattern.Delete)
   delete(
     @Payload('id', ParseIntPipe) id: number,

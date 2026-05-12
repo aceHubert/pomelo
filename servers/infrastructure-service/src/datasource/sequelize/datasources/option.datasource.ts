@@ -172,21 +172,7 @@ export class OptionDataSource extends BaseDataSource {
 
     await Options.update(model, {
       where: { id },
-    }).then(([count]) => {
-      if (count > 0) {
-        // 删除缓存
-        Options.findByPk(id, { attributes: ['optionName'] }).then((option) => {
-          this.datasourceService.optionsCache.del(option!.optionName);
-        });
-      }
     });
-  }
-
-  /**
-   * 清除 Options 缓存
-   */
-  reset(): void {
-    super.resetOptions();
   }
 
   /**
@@ -199,13 +185,6 @@ export class OptionDataSource extends BaseDataSource {
 
     await Options.destroy({
       where: { id },
-    }).then((count) => {
-      if (count > 0) {
-        // 删除缓存
-        Options.findByPk(id, { attributes: ['optionName'] }).then((option) => {
-          this.datasourceService.optionsCache.del(option!.optionName);
-        });
-      }
     });
   }
 }
