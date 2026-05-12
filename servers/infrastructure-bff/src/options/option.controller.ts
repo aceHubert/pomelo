@@ -1,20 +1,6 @@
 import { Response } from 'express';
-import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
-import {
-  Inject,
-  Controller,
-  Query,
-  Param,
-  Body,
-  Get,
-  Post,
-  Put,
-  Delete,
-  ParseIntPipe,
-  Res,
-  HttpStatus,
-} from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ApiTags, ApiOkResponse, ApiNoContentResponse } from '@nestjs/swagger';
+import { Controller, Query, Param, Body, Get, Put, ParseIntPipe, Res, HttpStatus } from '@nestjs/common';
 import { Authorized, Anonymous } from '@ace-nestjs/authorization';
 import { RamAuthorized } from '@ace-nestjs/ram-authorization';
 import {
@@ -25,23 +11,20 @@ import {
   ParseQueryPipe,
   ValidatePayloadExistsPipe,
   RequestUser,
-  ForbiddenError,
-  INFRASTRUCTURE_SERVICE,
-  OptionPattern,
+  UserRole,
 } from '@ace-pomelo/shared/server';
 import { OptionAction } from '@/common/actions';
 import { BaseController } from '@/common/controllers/base.controller';
-import { canAccessOptionPresetKey, filterAccessibleOptionNames, filterAccessibleOptionValues } from './option-access';
 import { OptionQueryDto } from './dto/option-query.dto';
-import { NewOptionDto } from './dto/new-option.dto';
 import { UpdateOptionDto } from './dto/update-option.dto';
-import { OptionResp } from './resp/option.resp';
+import { OptionService } from './option.service';
+import { OptionResp, OptionValueResp } from './resp/option.resp';
 
 @ApiTags('options')
 @Authorized()
 @Controller('api/options')
 export class OptionController extends BaseController {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) private readonly basicService: ClientProxy) {
+  constructor(private readonly optionService: OptionService) {
     super();
   }
 
@@ -55,9 +38,8 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: {} }, 'AutoloadOptionsModelsSuccessResp'),
   })
   async getAutoloadOptions(@User() requestUser?: RequestUser) {
-    const result = await this.basicService.send<Record<string, string>>(OptionPattern.GetAutoloads, {}).lastValue();
     return this.success({
-      data: filterAccessibleOptionValues(result, requestUser),
+      data: await this.optionService.getAutoloadValues(this.getRequestUserRole(requestUser)),
     });
   }
 
@@ -68,7 +50,7 @@ export class OptionController extends BaseController {
   @Anonymous()
   @ApiOkResponse({
     description: 'Option model',
-    type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
+    type: () => createResponseSuccessType({ data: OptionValueResp }, 'OptionModelSuccessResp'),
   })
   @ApiNoContentResponse({ description: 'Option not found' })
   async get(
@@ -76,16 +58,13 @@ export class OptionController extends BaseController {
     @Res({ passthrough: true }) res: Response,
     @User() requestUser?: RequestUser,
   ) {
-    const result = await this.basicService
-      .send<OptionResp | undefined>(OptionPattern.Get, {
-        id,
-        fields: ['id', 'optionName', 'optionValue', 'autoload'],
-      })
-      .lastValue();
+    const result = await this.optionService.getById(
+      id,
+      ['optionName', 'optionValue'],
+      this.getRequestUserRole(requestUser),
+    );
     if (result === undefined) {
       res.status(HttpStatus.NO_CONTENT);
-    } else if (!canAccessOptionPresetKey(result.optionName, requestUser)) {
-      throw new ForbiddenError(`Not accessible for option "${result.optionName}"`);
     }
     return this.success({
       data: result,
@@ -99,25 +78,14 @@ export class OptionController extends BaseController {
   @Anonymous()
   @ApiOkResponse({
     description: 'Option model',
-    type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
+    type: () => createResponseSuccessType({ data: OptionValueResp }, 'OptionModelSuccessResp'),
   })
-  @ApiNoContentResponse({ description: 'Option not found' })
-  async getByName(
-    @Param('name') name: string,
-    @Res({ passthrough: true }) res: Response,
-    @User() requestUser?: RequestUser,
-  ) {
-    this.assertOptionAccessible(name, requestUser);
-
-    const result = await this.basicService
-      .send<OptionResp | undefined>(OptionPattern.GetByName, {
-        optionName: name,
-        fields: ['id', 'optionName', 'optionValue', 'autoload'],
-      })
-      .lastValue();
-    if (result === undefined) {
-      res.status(HttpStatus.NO_CONTENT);
-    }
+  async getByName(@Param('name') name: string, @User() requestUser?: RequestUser) {
+    const result = await this.optionService.getOption(
+      name,
+      ['optionName', 'optionValue'],
+      this.getRequestUserRole(requestUser),
+    );
     return this.success({
       data: result,
     });
@@ -136,22 +104,8 @@ export class OptionController extends BaseController {
         'OptionValueSuccessResp',
       ),
   })
-  @ApiNoContentResponse({ description: 'Option not found' })
-  async getValue(
-    @Param('name') name: string,
-    @Res({ passthrough: true }) res: Response,
-    @User() requestUser?: RequestUser,
-  ) {
-    this.assertOptionAccessible(name, requestUser);
-
-    const value = await this.basicService
-      .send<string | undefined>(OptionPattern.GetValue, {
-        optionName: name,
-      })
-      .lastValue();
-    if (value === undefined) {
-      res.status(HttpStatus.NO_CONTENT);
-    }
+  async getValue(@Param('name') name: string, @User() requestUser?: RequestUser) {
+    const value = await this.optionService.getValue(name, this.getRequestUserRole(requestUser));
     return this.success({
       data: value,
     });
@@ -168,63 +122,19 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({ data: [OptionResp] }, 'OptionModelsSuccessResp'),
   })
   async getList(@Query(ParseQueryPipe) query: OptionQueryDto, @User() requestUser: RequestUser) {
-    const result = await this.basicService
-      .send<OptionResp[]>(OptionPattern.GetList, {
+    return this.success({
+      data: await this.optionService.getList<OptionResp>(
         query,
-        fields: ['id', 'optionName', 'optionValue', 'autoload'],
-      })
-      .lastValue();
-    return this.success({
-      data: filterAccessibleOptionNames(result, requestUser),
+        ['id', 'optionName', 'optionValue'],
+        this.getRequestUserRole(requestUser),
+      ),
     });
   }
 
   /**
-   * Clear option cache from momery.
+   * Update preset option.
    */
-  @Post('/cache/clear')
-  @RamAuthorized(OptionAction.Update)
-  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
-    description: 'no data content',
-    type: () => createResponseSuccessType({}, 'ClearOptionCacheModelSuccessResp'),
-  })
-  async clearCache() {
-    try {
-      await this.basicService.send<void>(OptionPattern.Reset, {}).lastValue();
-      return this.success();
-    } catch (e: any) {
-      this.logger.error(e);
-      return this.faild(e.message);
-    }
-  }
-
-  /**
-   * Create a new option.
-   */
-  @Post()
-  @RamAuthorized(OptionAction.Create)
-  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiCreatedResponse({
-    description: 'Option model',
-    type: () => createResponseSuccessType({ data: OptionResp }, 'OptionModelSuccessResp'),
-  })
-  async create(@Body() input: NewOptionDto, @User() requestUser: RequestUser) {
-    const result = await this.basicService
-      .send<OptionResp>(OptionPattern.Create, {
-        ...input,
-        requestUserId: Number(requestUser.sub),
-      })
-      .lastValue();
-    return this.success({
-      data: result,
-    });
-  }
-
-  /**
-   * Update option.
-   */
-  @Put(':id')
+  @Put(':name')
   @RamAuthorized(OptionAction.Update)
   @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
   @ApiOkResponse({
@@ -232,18 +142,17 @@ export class OptionController extends BaseController {
     type: () => createResponseSuccessType({}, 'UpdateOptionModelSuccessResp'),
   })
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('name') name: string,
     @Body(ValidatePayloadExistsPipe) input: UpdateOptionDto,
     @User() requestUser: RequestUser,
   ) {
     try {
-      await this.basicService
-        .send<void>(OptionPattern.Update, {
-          ...input,
-          id,
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
+      await this.optionService.updateOption(
+        name,
+        input.optionValue,
+        this.getRequestUserRole(requestUser),
+        Number(requestUser.sub),
+      );
       return this.success();
     } catch (e: any) {
       this.logger.error(e);
@@ -251,34 +160,9 @@ export class OptionController extends BaseController {
     }
   }
 
-  /**
-   * Delete option permanently.
-   */
-  @Delete(':id')
-  @RamAuthorized(OptionAction.Delete)
-  @ApiAuthCreate('bearer', [HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN])
-  @ApiOkResponse({
-    description: 'Option model',
-    type: () => createResponseSuccessType({}, 'DeleteOptionModelSuccessResp'),
-  })
-  async delete(@Param('id', ParseIntPipe) id: number, @User() requestUser: RequestUser) {
-    try {
-      await this.basicService
-        .send<void>(OptionPattern.Delete, {
-          id,
-          requestUserId: Number(requestUser.sub),
-        })
-        .lastValue();
-      return this.success();
-    } catch (e: any) {
-      this.logger.error(e);
-      return this.faild(e.message);
-    }
-  }
+  private getRequestUserRole(requestUser?: RequestUser): UserRole {
+    const role = requestUser?.role ?? requestUser?.capabilities;
 
-  private assertOptionAccessible(optionName: string, requestUser?: RequestUser) {
-    if (!canAccessOptionPresetKey(optionName, requestUser)) {
-      throw new ForbiddenError(`Not accessible for option "${optionName}"`);
-    }
+    return Object.values(UserRole).includes(role) ? role : UserRole.None;
   }
 }

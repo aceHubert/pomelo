@@ -1,5 +1,5 @@
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
-import { OptionAutoload } from '@ace-pomelo/shared/server';
+import { OptionPresetKeys } from '@ace-pomelo/shared/server';
 
 export class OptionResp {
   /**
@@ -19,15 +19,36 @@ export class OptionResp {
    */
   @ApiResponseProperty()
   optionValue!: string;
+}
+
+export class OptionValueResp {
+  /**
+   * Option preset key
+   */
+  @ApiProperty({ enum: OptionPresetKeys })
+  key!: OptionPresetKeys;
 
   /**
-   * Is option load automatically in application start
+   * Option value
    */
-  @ApiProperty({
-    enum: OptionAutoload,
-    readOnly: true,
-    description: 'Is option load automatically in application start',
-  })
-  // @ApiResponseProperty()
-  autoload!: OptionAutoload;
+  @ApiResponseProperty()
+  value?: string;
+
+  /**
+   * Is option value set
+   */
+  @ApiResponseProperty()
+  isSet!: boolean;
+
+  /**
+   * Is default value used
+   */
+  @ApiResponseProperty()
+  useDefault!: boolean;
+
+  /**
+   * Option value message
+   */
+  @ApiResponseProperty()
+  message?: string;
 }

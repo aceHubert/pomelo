@@ -45,7 +45,6 @@ export class OptionPattern {
   static readonly NameExists = { cmd: 'option.name.exists' };
   static readonly Create = { cmd: 'option.create' };
   static readonly Update = { cmd: 'option.update' };
-  static readonly Reset = { cmd: 'option.reset' };
   static readonly Delete = { cmd: 'option.delete' };
 }
 

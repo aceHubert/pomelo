@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Transform } from 'class-transformer';
-import { OptionAutoload } from '@ace-pomelo/shared/server';
+import { OptionPresetKeys } from '@ace-pomelo/shared/server';
 
 @ObjectType({ description: 'Option model' })
 export class Option {
@@ -20,10 +20,37 @@ export class Option {
    * Option value
    */
   optionValue!: string;
+}
+
+@ObjectType({ description: 'Option value model' })
+export class OptionValue {
+  /**
+   * Option preset key
+   */
+  @Field(() => String)
+  key!: OptionPresetKeys;
 
   /**
-   * Is option load automatically in application start
+   * Option value
    */
-  @Field(() => OptionAutoload)
-  autoload!: OptionAutoload;
+  @Field(() => String, { nullable: true })
+  value?: string;
+
+  /**
+   * Is option value set
+   */
+  @Field(() => Boolean)
+  isSet!: boolean;
+
+  /**
+   * Is default value used
+   */
+  @Field(() => Boolean)
+  useDefault!: boolean;
+
+  /**
+   * Option value message
+   */
+  @Field(() => String, { nullable: true })
+  message?: string;
 }

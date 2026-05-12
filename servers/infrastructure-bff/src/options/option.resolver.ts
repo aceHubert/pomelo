@@ -1,91 +1,63 @@
-import { Inject, ParseIntPipe } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ParseIntPipe } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { ResolveTree } from 'graphql-parse-resolve-info';
 import { JSONObjectResolver, VoidResolver } from 'graphql-scalars';
 import { Authorized, Anonymous } from '@ace-nestjs/authorization';
 import { RamAuthorized } from '@ace-nestjs/ram-authorization';
-import {
-  User,
-  Fields,
-  RequestUser,
-  ForbiddenError,
-  INFRASTRUCTURE_SERVICE,
-  OptionPattern,
-} from '@ace-pomelo/shared/server';
+import { User, Fields, RequestUser, UserRole } from '@ace-pomelo/shared/server';
 import { OptionAction } from '@/common/actions';
 import { BaseResolver } from '@/common/resolvers/base.resolver';
-import { canAccessOptionPresetKey, filterAccessibleOptionNames, filterAccessibleOptionValues } from './option-access';
-import { NewOptionInput } from './dto/new-option.input';
 import { OptionArgs } from './dto/option.args';
 import { UpdateOptionInput } from './dto/update-option.input';
-import { Option } from './models/option.model';
+import { Option, OptionValue } from './models/option.model';
+import { OptionService } from './option.service';
 
 @Authorized()
 @Resolver(() => Option)
 export class OptionResolver extends BaseResolver {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) private readonly basicService: ClientProxy) {
+  constructor(private readonly optionService: OptionService) {
     super();
   }
 
   @Anonymous()
-  @Query((returns) => Option, { nullable: true, description: 'Get option.' })
+  @Query((returns) => OptionValue, { nullable: true, description: 'Get option.' })
   option(
     @Args('id', { type: () => ID }, ParseIntPipe) id: number,
-    @Fields() fields: ResolveTree,
+    @Fields() _fields: ResolveTree,
     @User() requestUser?: RequestUser,
-  ): Promise<Option | undefined> {
-    return this.basicService
-      .send<Option | undefined>(OptionPattern.Get, {
-        id,
-        fields: this.getFieldNames(fields.fieldsByTypeName.Option),
-      })
-      .lastValue()
-      .then((option) => {
-        if (option && !canAccessOptionPresetKey(option.optionName, requestUser)) {
-          throw new ForbiddenError(`Not accessible for option "${option.optionName}"`);
-        }
-
-        return option;
-      });
+  ): Promise<OptionValue | undefined> {
+    return this.optionService.getById(id, ['optionName', 'optionValue'], this.getRequestUserRole(requestUser));
   }
 
   @Anonymous()
-  @Query((returns) => Option, { nullable: true, description: 'Get option by name.' })
+  @Query((returns) => OptionValue, { description: 'Get option by name.' })
   optionByName(
     @Args('name') name: string,
-    @Fields() fields: ResolveTree,
+    @Fields() _fields: ResolveTree,
     @User() requestUser?: RequestUser,
-  ): Promise<Option | undefined> {
-    this.assertOptionAccessible(name, requestUser);
-
-    return this.basicService
-      .send<Option | undefined>(OptionPattern.GetByName, {
-        optionName: name,
-        fields: this.getFieldNames(fields.fieldsByTypeName.Option),
-      })
-      .lastValue();
+  ): Promise<OptionValue> {
+    return this.optionService.getOption(name, ['optionName', 'optionValue'], this.getRequestUserRole(requestUser));
   }
 
   @Anonymous()
   @Query((returns) => String, { nullable: true, description: 'Get option value by name.' })
   optionValue(@Args('name') name: string, @User() requestUser?: RequestUser): Promise<string | undefined> {
-    this.assertOptionAccessible(name, requestUser);
-
-    return this.basicService
-      .send<string | undefined>(OptionPattern.GetValue, {
-        optionName: name,
-      })
-      .lastValue();
+    return this.optionService.getValue(name, this.getRequestUserRole(requestUser));
   }
 
   @Anonymous()
   @Query((returns) => JSONObjectResolver, { description: 'Get autoload options(key/value), cache by memory.' })
   autoloadOptions(@User() requestUser?: RequestUser): Promise<Record<string, string>> {
-    return this.basicService
-      .send<Record<string, string>>(OptionPattern.GetAutoloads, {})
-      .lastValue()
-      .then((options) => filterAccessibleOptionValues(options, requestUser));
+    return this.optionService.getAutoloadValues(this.getRequestUserRole(requestUser));
+  }
+
+  @Anonymous()
+  @Query((returns) => JSONObjectResolver, { description: 'Get basic option values by names.' })
+  basicOptions(
+    @Args('names', { type: () => [String], description: 'Option names' }) names: string[],
+    @User() requestUser?: RequestUser,
+  ): Promise<Record<string, string>> {
+    return this.optionService.getBasicValues(names, this.getRequestUserRole(requestUser));
   }
 
   @RamAuthorized(OptionAction.List)
@@ -95,68 +67,37 @@ export class OptionResolver extends BaseResolver {
     @Fields() fields: ResolveTree,
     @User() requestUser: RequestUser,
   ): Promise<Option[]> {
-    return this.basicService
-      .send<Option[]>(OptionPattern.GetList, {
-        query: args,
-        fields: this.getFieldNames(fields.fieldsByTypeName.Option),
-      })
-      .lastValue()
-      .then((options) => filterAccessibleOptionNames(options, requestUser));
+    return this.optionService.getList<Option>(
+      args,
+      this.getFieldNames(fields.fieldsByTypeName.Option),
+      this.getRequestUserRole(requestUser),
+    );
   }
 
   @RamAuthorized(OptionAction.Update)
   @Mutation((returns) => VoidResolver, { nullable: true, description: 'Clear option cache from momery.' })
   clearOptionCache(): Promise<void> {
-    return this.basicService.send<void>(OptionPattern.Reset, {}).lastValue();
-  }
-
-  @RamAuthorized(OptionAction.Create)
-  @Mutation((returns) => Option, { description: 'Create a new option.' })
-  createOption(
-    @Args('model', { type: () => NewOptionInput }) model: NewOptionInput,
-    @User() requestUser: RequestUser,
-  ): Promise<Option> {
-    return this.basicService
-      .send<Option>(OptionPattern.Create, {
-        ...model,
-        requestUserId: Number(requestUser.sub),
-      })
-      .lastValue();
+    return this.optionService.resetCache();
   }
 
   @RamAuthorized(OptionAction.Update)
-  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update option.' })
+  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Update preset option.' })
   updateOption(
-    @Args('id', { type: () => ID, description: 'Option id' }, ParseIntPipe) id: number,
+    @Args('name', { description: 'Option name' }) name: string,
     @Args('model') model: UpdateOptionInput,
     @User() requestUser: RequestUser,
   ): Promise<void> {
-    return this.basicService
-      .send<void>(OptionPattern.Update, {
-        ...model,
-        id,
-        requestUserId: Number(requestUser.sub),
-      })
-      .lastValue();
+    return this.optionService.updateOption(
+      name,
+      model.optionValue,
+      this.getRequestUserRole(requestUser),
+      Number(requestUser.sub),
+    );
   }
 
-  @RamAuthorized(OptionAction.Delete)
-  @Mutation((returns) => VoidResolver, { nullable: true, description: 'Delete option permanently.' })
-  deleteOption(
-    @Args('id', { type: () => ID, description: 'Option id' }, ParseIntPipe) id: number,
-    @User() requestUser: RequestUser,
-  ): Promise<void> {
-    return this.basicService
-      .send<void>(OptionPattern.Delete, {
-        id,
-        requestUserId: Number(requestUser.sub),
-      })
-      .lastValue();
-  }
+  private getRequestUserRole(requestUser?: RequestUser): UserRole {
+    const role = requestUser?.role ?? requestUser?.capabilities;
 
-  private assertOptionAccessible(optionName: string, requestUser?: RequestUser) {
-    if (!canAccessOptionPresetKey(optionName, requestUser)) {
-      throw new ForbiddenError(`Not accessible for option "${optionName}"`);
-    }
+    return Object.values(UserRole).includes(role) ? role : UserRole.None;
   }
 }

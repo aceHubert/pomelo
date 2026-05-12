@@ -153,40 +153,25 @@ export abstract class BaseDataSource {
   }
 
   /**
-   * 获取 option value (优先从缓存中取)
+   * 获取 option value
    * @param optionName optionName（优先返回带有tablePrefix的value）
    */
   protected async getOption<T extends string = string>(optionName: string): Promise<T | undefined> {
-    // 从缓存中取值
-    let value = await this.datasourceService.optionsCache.get<string>(optionName);
-    // 如果缓存中没有，从数据库查询
-    if (value === null) {
-      const options = await Options.findAll({
-        attributes: ['optionName', 'optionValue'],
-        where: {
-          optionName: [optionName, `${this.tablePrefix}${optionName}`],
-        },
-      });
+    const options = await Options.findAll({
+      attributes: ['optionName', 'optionValue'],
+      where: {
+        optionName: [optionName, `${this.tablePrefix}${optionName}`],
+      },
+    });
 
-      // 先找带有当前table前缀的参数
-      value = options.find((option) => option.optionName === `${this.tablePrefix}${optionName}`)?.optionValue ?? null;
+    // 先找带有当前 table 前缀的参数
+    let value = options.find((option) => option.optionName === `${this.tablePrefix}${optionName}`)?.optionValue;
 
-      // 如果没有，找不带前缀的参数
-      if (value === null) {
-        value = options.find((option) => option.optionName === optionName)?.optionValue ?? null;
-      }
-
-      // 缓存
-      value !== null && this.datasourceService.optionsCache.set(optionName, value);
+    // 如果没有，找不带前缀的参数
+    if (value === undefined) {
+      value = options.find((option) => option.optionName === optionName)?.optionValue;
     }
 
-    return value === null ? undefined : (value as T);
-  }
-
-  /**
-   * 修改 Options 时重置缓存，下次重新加载
-   */
-  protected resetOptions() {
-    this.datasourceService.optionsCache.clear();
+    return value as T | undefined;
   }
 }
