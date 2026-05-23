@@ -86,6 +86,16 @@
           {
             "include": "web.config",
             "outDir": "dist/servers/identity-server/"
+          },
+          {
+            "include": "../content",
+            "exclude": "../content/uploads/**/*",
+            "outDir": "dist/servers/content"
+          },
+          {
+            "include": "../conf",
+            "exclude": "../conf/{*.backup.*,*.local.*,db.lock}",
+            "outDir": "dist/servers/conf"
           }
         ],
         "plugins": [
@@ -124,6 +134,16 @@
           {
             "include": "web.config",
             "outDir": "dist/servers/identity-server/"
+          },
+          {
+            "include": "../content",
+            "exclude": "../content/uploads/**/*",
+            "outDir": "dist/servers/content"
+          },
+          {
+            "include": "../conf",
+            "exclude": "../conf/{*.backup.*,*.local.*,db.lock}",
+            "outDir": "dist/servers/conf"
           }
         ],
         "plugins": [

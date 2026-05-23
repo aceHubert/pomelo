@@ -1,0 +1,5 @@
+export const RUNTIME_EXTENSION_CONTEXT = Symbol('RUNTIME_EXTENSION_CONTEXT');
+
+export const RUNTIME_EXTENSION_MANIFEST_FILE = 'manifest.json';
+
+export const RUNTIME_EXTENSION_DEFAULT_SERVER_ENTRY = 'server/index.js';

@@ -10,3 +10,9 @@
 //     expect(wrapper.text()).toMatch(msg);
 //   });
 // });
+
+describe('unit test bootstrap', () => {
+  it('runs tests', () => {
+    expect(true).toBe(true);
+  });
+});

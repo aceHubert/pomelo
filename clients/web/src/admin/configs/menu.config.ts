@@ -408,6 +408,13 @@ export const getDefaultMenus = (): MenuConfig[] => [
             icon: 'sync',
             position: 'side',
           },
+          {
+            key: 'runtime-extensions',
+            title: (i18nRender) => i18nRender('menu.runtime_extensions', '扩展管理'),
+            path: '/settings/extensions',
+            icon: 'appstore',
+            position: 'side',
+          },
         ],
       },
     ],

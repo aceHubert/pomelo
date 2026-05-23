@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import multer from 'multer';
 import { APP_PIPE, APP_FILTER, ModuleRef } from '@nestjs/core';
-import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
+import { DynamicModule, Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule } from '@nestjs/microservices';
@@ -45,6 +45,7 @@ import { TermTaxonomyModule } from './term-taxonomy/term-taxonomy.module';
 import { TemplateModule } from './templates/template.module';
 import { UserModule } from './users/user.module';
 import { AppCacheModule } from './cache/cache.module';
+import { RuntimeExtensionContext, RuntimeExtensionModule } from './runtime-extensions';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -383,6 +384,13 @@ const logger = new Logger('AppModule', { timestamp: true });
   ],
 })
 export class AppModule implements NestModule {
+  static register(runtimeExtensionContext: RuntimeExtensionContext): DynamicModule {
+    return {
+      module: AppModule,
+      imports: [RuntimeExtensionModule.register(runtimeExtensionContext), ...runtimeExtensionContext.pluginModules],
+    };
+  }
+
   constructor(private readonly moduleRef: ModuleRef, private readonly configService: ConfigService) {}
 
   configure(consumer: MiddlewareConsumer) {

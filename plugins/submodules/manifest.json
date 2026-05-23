@@ -1,0 +1,18 @@
+{
+  "id": "submodules",
+  "type": "plugin",
+  "name": "Submodules",
+  "version": "0.1.0-alpha.0",
+  "description": "前端子模块资源发现与代理插件。",
+  "server": {
+    "entry": "lib/index.js",
+    "export": "SubModuleModule",
+    "factory": "forRoot",
+    "options": {
+      "keywords": ["pomelo"],
+      "registry": "https://registry.npmjs.org",
+      "mirrors": [],
+      "cached": false
+    }
+  }
+}

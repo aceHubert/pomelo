@@ -1,0 +1,17 @@
+{
+  "id": "obs",
+  "type": "plugin",
+  "name": "OBS Connect",
+  "version": "0.1.0-alpha.0",
+  "description": "华为云 OBS 文件服务插件。",
+  "server": {
+    "entry": "lib/index.js",
+    "export": "FileModule",
+    "factory": "forRoot",
+    "options": {
+      "accessKey": "",
+      "secretKey": "",
+      "endpoint": ""
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "controller-test",
+  "type": "plugin",
+  "name": "Controller Test Plugin",
+  "version": "1.0.0",
+  "description": "用于验证运行时插件 Controller 能被 BFF 注册和访问的测试插件。",
+  "server": {
+    "entry": "server/index.js",
+    "export": "ControllerTestPluginModule"
+  }
+}
