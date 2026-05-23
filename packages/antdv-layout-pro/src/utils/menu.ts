@@ -139,7 +139,7 @@ export function createFlatMenus(menus: MenuConfigWithRedirect[], flatMenus: Menu
 /**
  * Match closest path
  */
-export function matchNoRegistPageParentPath(path: string, paths: string[]) {
+function matchNoRegistPageParentPath(path: string, paths: string[]) {
   // 找出可能的父路径集合
   const pathArr = paths
     .filter((v) => path.startsWith(v))
@@ -153,6 +153,73 @@ export function matchNoRegistPageParentPath(path: string, paths: string[]) {
   if (!pathArr[0]) return '';
 
   return pathArr[0].path;
+}
+
+/**
+ * 解析 query 字符串为键值对
+ */
+function parseQuery(queryString: string): Record<string, string> {
+  if (!queryString) return {};
+  const params: Record<string, string> = {};
+  queryString.split('&').forEach((pair) => {
+    const [key, value] = pair.split('=');
+    if (key) {
+      params[decodeURIComponent(key)] = value ? decodeURIComponent(value) : '';
+    }
+  });
+  return params;
+}
+
+/**
+ * 计算两个 query 对象的匹配个数
+ */
+function countQueryMatches(sourceQuery: Record<string, string>, targetQuery: Record<string, string>): number {
+  let count = 0;
+  for (const key in targetQuery) {
+    if (key in sourceQuery && sourceQuery[key] === targetQuery[key]) {
+      count++;
+    }
+  }
+  return count;
+}
+
+/**
+ * 匹配已注册的路径
+ * 查找所有匹配的路径，根据 query 参数匹配个数排序，返回匹配最多的一个
+ */
+export function matchRegistPath(path: string, pathMap: MenuPathMap): string {
+  const [pathname, queryString] = path.split('?');
+  const sourceQuery = parseQuery(queryString);
+
+  // 查找所有匹配的路径（通过正则或别名）
+  const matches: Array<{ path: string; queryMatchCount: number }> = [];
+
+  for (const [registPath, config] of pathMap.entries()) {
+    const { regex, alias, aliasRegexs } = config;
+    const [, registQueryString] = registPath.split('?');
+    const registQuery = parseQuery(registQueryString);
+
+    // 检查是否匹配
+    const isMatched =
+      regex.test(pathname) || // path without query is matched by regex
+      alias?.includes(path) || // full path is equal to alias
+      alias?.includes(pathname) || // path without query is equal to alias
+      aliasRegexs?.some((aliasRegex) => aliasRegex.test(pathname)); // path without query is matched by alias regex
+
+    if (isMatched) {
+      const queryMatchCount = countQueryMatches(sourceQuery, registQuery);
+      matches.push({ path: registPath, queryMatchCount });
+    }
+  }
+
+  // 如果有匹配项，按 query 匹配个数降序排序，返回匹配最多的
+  if (matches.length > 0) {
+    matches.sort((a, b) => b.queryMatchCount - a.queryMatchCount);
+    return matches[0].path;
+  }
+
+  // 没有匹配项，返回未注册路径的父路径
+  return matchNoRegistPageParentPath(path, [...pathMap.keys()]);
 }
 
 /**
