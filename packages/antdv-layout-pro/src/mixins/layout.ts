@@ -9,7 +9,7 @@ import {
   createMenuPathMap,
   createFlatMenus,
   createBreadcrumbList,
-  matchNoRegistPageParentPath,
+  matchRegistPath,
 } from '../utils';
 
 // Types
@@ -175,20 +175,12 @@ export const useLayoutMixin = () => {
   };
 
   const getMatchedPath = (path: string) => {
-    const pathWithoutQuery = path.split('?')[0];
+    const [pathname] = path.split('?');
     return menuPathMap.value.has(path) // full path is equal to menu path
       ? path
-      : menuPathMap.value.get(pathWithoutQuery) // path without query is equal to menu path
-      ? pathWithoutQuery
-      : [...menuPathMap.value.entries()].find(
-          ([_, { regex, alias, aliasRegexs }]) =>
-            regex.test(pathWithoutQuery) || // path without query is matched by regex
-            alias?.includes(path) || // full path is equal to alias
-            alias?.includes(pathWithoutQuery) || // path without query is equal to alias
-            aliasRegexs?.some(
-              (regex) => regex.test(path.split('?')[0]), // path without query is matched by alias regex
-            ),
-        )?.[0] || matchNoRegistPageParentPath(path, [...menuPathMap.value.keys()]);
+      : menuPathMap.value.get(pathname) // path without query is equal to menu path
+      ? pathname
+      : matchRegistPath(path, menuPathMap.value);
   };
 
   const getTopMenuKey = (matched: MenuConfigWithRedirect) => {
@@ -207,9 +199,10 @@ export const useLayoutMixin = () => {
    * 默认监听当前路由 path 变化
    */
   const setPath = (path: string, immediately = true) => {
-    const matchedPath = getMatchedPath(path);
+    const [pathWithoutHash] = path.split('#'); // 排除 hash
+    const matchedPath = getMatchedPath(pathWithoutHash);
     if (immediately) {
-      cachedPath = path;
+      cachedPath = pathWithoutHash;
       if (currentMatchPath.value === matchedPath) {
         // 恢复 topMenu 选中状态
         const currentMatched = menuPathMap.value.get(matchedPath);
@@ -217,7 +210,7 @@ export const useLayoutMixin = () => {
 
         setTopCurrMenuKey(getTopMenuKey(currentMatched));
       } else {
-        currentMatchPath.value = getMatchedPath(path);
+        currentMatchPath.value = getMatchedPath(pathWithoutHash);
       }
     } else {
       // 选中 topMenu，待选择 siderMenu
