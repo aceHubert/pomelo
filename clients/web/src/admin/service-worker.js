@@ -55,7 +55,7 @@ workbox.routing.registerRoute(
 workbox.routing.registerRoute(({ request }) => request.method === 'GET', new workbox.strategies.NetworkFirst());
 // 如果有资源在其他域名上，比如cdn、oss等，这里做单独处理，需要支持跨域
 workbox.routing.registerRoute(
-  /^https:\/\/cdn\.acehubert\.com\/.*\.(jpe?g|png|gif|svg)/,
+  /^https:\/\/cdn\.acehubert\.top\/.*\.(jpe?g|png|gif|svg)/,
   new workbox.strategies.StaleWhileRevalidate({
     cacheName: 'cdn-images',
     plugins: [
