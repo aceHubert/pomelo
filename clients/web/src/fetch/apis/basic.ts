@@ -19,6 +19,68 @@ export interface NewOptionModel extends Omit<OptionModel, 'id'> {}
 
 export interface UpdateOptionModel extends Partial<NewOptionModel> {}
 
+export interface RuntimeExtensionFailure {
+  id: string;
+  type?: string;
+  phase: string;
+  reason: string;
+  directoryPath?: string;
+  entryPath?: string;
+}
+
+export interface RuntimeExtensionStateItem {
+  id: string;
+  type: 'plugin' | 'theme';
+  name: string;
+  version?: string;
+  description?: string;
+  installed: boolean;
+  configured: boolean;
+  loaded: boolean;
+  uninstallPending: boolean;
+  activeTheme: boolean;
+  hasServerModule: boolean;
+  directoryPath?: string;
+  failedReason?: string;
+}
+
+export interface SystemHeartbeat {
+  bootId: string;
+  startedAt: string;
+  ready: boolean;
+  activePluginsHash: string;
+  loadedPlugins: string[];
+  failedPlugins: RuntimeExtensionFailure[];
+}
+
+export interface RuntimeExtensionState extends SystemHeartbeat {
+  contentPath: string;
+  activePlugins: string[];
+  uninstallPlugins: string[];
+  template?: string;
+  stylesheet?: string;
+  plugins: RuntimeExtensionStateItem[];
+  themes: RuntimeExtensionStateItem[];
+  optionsReadError?: string;
+}
+
+export interface UpdateRuntimePluginsModel {
+  activePlugins?: string[];
+  uninstallPlugins?: string[];
+}
+
+export interface UpdateRuntimePluginsPayload {
+  restartRequired: boolean;
+  state: RuntimeExtensionState;
+}
+
+export interface RestartRuntimePayload {
+  accepted: boolean;
+  bootId: string;
+  scheduledAt: string;
+  delayMs: number;
+}
+
 export type Message =
   // event message
   // | { eventName: string }
@@ -97,6 +159,151 @@ export const useBasicApi = defineRegistGraphql('basic', {
         clearOptionCache
       }
     ` as TypedQueryDocumentNode<{ clearOptionCache: void }>,
+    getSystemHeartbeat: gql`
+      query getSystemHeartbeat {
+        heartbeat: systemHeartbeat {
+          bootId
+          startedAt
+          ready
+          activePluginsHash
+          loadedPlugins
+          failedPlugins {
+            id
+            type
+            phase
+            reason
+            directoryPath
+            entryPath
+          }
+        }
+      }
+    ` as TypedQueryDocumentNode<{ heartbeat: SystemHeartbeat }>,
+    getRuntimeExtensions: gql`
+      query getRuntimeExtensions {
+        runtimeExtensions {
+          bootId
+          startedAt
+          ready
+          contentPath
+          activePluginsHash
+          activePlugins
+          uninstallPlugins
+          template
+          stylesheet
+          loadedPlugins
+          optionsReadError
+          failedPlugins {
+            id
+            type
+            phase
+            reason
+            directoryPath
+            entryPath
+          }
+          plugins {
+            id
+            type
+            name
+            version
+            description
+            installed
+            configured
+            loaded
+            uninstallPending
+            activeTheme
+            hasServerModule
+            directoryPath
+            failedReason
+          }
+          themes {
+            id
+            type
+            name
+            version
+            description
+            installed
+            configured
+            loaded
+            uninstallPending
+            activeTheme
+            hasServerModule
+            directoryPath
+            failedReason
+          }
+        }
+      }
+    ` as TypedQueryDocumentNode<{ runtimeExtensions: RuntimeExtensionState }>,
+    updateRuntimePlugins: gql`
+      mutation updateRuntimePlugins($model: UpdateRuntimePluginsInput!) {
+        updateRuntimePlugins(model: $model) {
+          restartRequired
+          state {
+            bootId
+            startedAt
+            ready
+            contentPath
+            activePluginsHash
+            activePlugins
+            uninstallPlugins
+            template
+            stylesheet
+            loadedPlugins
+            optionsReadError
+            failedPlugins {
+              id
+              type
+              phase
+              reason
+              directoryPath
+              entryPath
+            }
+            plugins {
+              id
+              type
+              name
+              version
+              description
+              installed
+              configured
+              loaded
+              uninstallPending
+              activeTheme
+              hasServerModule
+              directoryPath
+              failedReason
+            }
+            themes {
+              id
+              type
+              name
+              version
+              description
+              installed
+              configured
+              loaded
+              uninstallPending
+              activeTheme
+              hasServerModule
+              directoryPath
+              failedReason
+            }
+          }
+        }
+      }
+    ` as TypedQueryDocumentNode<
+      { updateRuntimePlugins: UpdateRuntimePluginsPayload },
+      { model: UpdateRuntimePluginsModel }
+    >,
+    restartSystem: gql`
+      mutation restartSystem {
+        restartSystem {
+          accepted
+          bootId
+          scheduledAt
+          delayMs
+        }
+      }
+    ` as TypedQueryDocumentNode<{ restartSystem: RestartRuntimePayload }>,
     deleteOption: gql`
       mutation deleteOption($id: ID!) {
         deleteOption(id: $id)

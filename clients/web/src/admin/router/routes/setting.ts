@@ -35,6 +35,11 @@ export const settingRoutes: Array<RouteConfig> = [
         path: 'cache-clear',
         component: () => import(/* webpackChunkName: "admin-settings-views" */ '../../views/settings/cache-clear'),
       },
+      {
+        name: 'runtime-extensions',
+        path: 'extensions',
+        component: () => import(/* webpackChunkName: "admin-settings-views" */ '../../views/settings/extensions'),
+      },
     ],
   },
 ];

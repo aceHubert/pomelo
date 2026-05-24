@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigModule } from '@nestjs/config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { of } from 'rxjs';
+import { TokenGuard } from '@ace-nestjs/authorization';
+import { TokenGuard as RamTokenGuard } from '@ace-nestjs/ram-authorization';
 import { INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import '@/common/extends/observable.extend';
 import { PostTemplateController } from './post.controller';
 // import { TemplateService } from './template.service';
 
@@ -11,34 +13,31 @@ describe('TemplateController', () => {
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({}),
-        ClientsModule.registerAsync({
-          isGlobal: true,
-          clients: [
-            {
-              name: INFRASTRUCTURE_SERVICE,
-              useFactory: () => ({
-                transport: Transport.TCP,
-                options: {
-                  host: 'localhost',
-                  port: 5002,
-                },
-              }),
-            },
-          ],
-        }),
-      ],
       controllers: [PostTemplateController],
-      // providers: [TemplateService],
-    }).compile();
+      providers: [
+        {
+          provide: INFRASTRUCTURE_SERVICE,
+          useValue: {
+            send: jest.fn(() => of([])),
+          },
+        },
+      ],
+    })
+      .overrideGuard(TokenGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RamTokenGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
-    postTemplateController = app.get<PostTemplateController>(PostTemplateController);
+    postTemplateController = await app.resolve<PostTemplateController>(PostTemplateController);
   });
 
   describe('getHello', () => {
-    it('should return "Hello World!"', () => {
-      expect(postTemplateController.getOptions({})).toHaveLength(0);
+    it('should return empty options', async () => {
+      await expect(postTemplateController.getOptions({} as any)).resolves.toEqual({
+        success: true,
+        data: [],
+      });
     });
   });
 });
