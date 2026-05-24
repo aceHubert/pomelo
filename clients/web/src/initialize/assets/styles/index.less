@@ -1,15 +1,16 @@
-@import '@ace-pomelo/theme/lib/index';
 @import '@ace-pomelo/theme/lib/themes/default';
+@import (reference) '@ace-pomelo/theme/lib/mixins/set-color';
 @import '@ace-pomelo/theme/lib/core/colors';
-@import 'antdv-layout-pro/style/component-reset';
-@import 'antdv-layout-pro/style/themes/default';
+@import '../../../../../../packages/antdv-layout-pro/src/style/component-reset.less';
+@import '../../../../../../packages/antdv-layout-pro/src/style/themes/default.less';
 
 // Dark theme
 .theme-dark {
   @import (reference, multiple) '@ace-pomelo/theme/lib/themes/dark';
+  @import (reference) '@ace-pomelo/theme/lib/mixins/set-color';
   @import (multiple) '@ace-pomelo/theme/lib/core/colors';
-  @import (multiple) 'antdv-layout-pro/style/component-reset';
-  @import (reference, multiple) 'antdv-layout-pro/style/themes/dark';
+  @import (multiple) '../../../../../../packages/antdv-layout-pro/src/style/component-reset.less';
+  @import (reference, multiple) '../../../../../../packages/antdv-layout-pro/src/style/themes/dark.less';
   @import (reference) '../../../assets/styles/variables';
 }
 
@@ -86,12 +87,9 @@ body {
 
     .locale-item + .locale-item {
       position: relative;
-
-      &:before {
-        .setLeftLine(@var-text-secondary);
-        top: 4px;
-        bottom: 4px;
-      }
+      margin-left: 8px;
+      padding-left: 9px;
+      border-left: 1px solid var(--text-secondary, @text-color-secondary);
     }
   }
 

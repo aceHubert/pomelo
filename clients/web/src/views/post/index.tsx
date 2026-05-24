@@ -142,9 +142,9 @@ export default defineComponent({
       return $loading ? (
         <div>
           <SkeletonLoader style={{ width: '100%', height: deviceMixin.isDesktop ? '300px' : '200px' }} />
-          <div class={['mx-auto', { 'px-4': !deviceMixin.isDesktop }]} style="width: 1180px; max-width: 100%;">
+          <div class={['tw-mx-auto', { 'tw-px-4': !deviceMixin.isDesktop }]} style="width: 1180px; max-width: 100%;">
             <SkeletonLoader
-              class="mx-auto"
+              class="tw-mx-auto"
               style={{
                 width: '260px',
                 height: deviceMixin.isDesktop ? '40px' : '32px',

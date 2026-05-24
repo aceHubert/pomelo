@@ -50,12 +50,14 @@
     left: 50%;
     top: 40%;
     transform: translate(-50%, -50%);
+    border-radius: 16px;
 
     &::before {
       content: '';
-      background-color: #fff;
-      box-shadow: @box-shadow-base;
-      opacity: 0.8;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.24);
       position: absolute;
       top: 0;
       left: 0;
@@ -67,5 +69,12 @@
 
   .locale-btns {
     top: 25px;
+  }
+}
+
+@media (prefers-color-scheme: dark) and (min-width: 576px) {
+  .wrapper::before {
+    background: rgba(0, 0, 0, 0.42);
+    box-shadow: 0 -5px 30px rgba(255, 255, 255, 0.12);
   }
 }

@@ -1,4 +1,67 @@
-@import '@ace-pomelo/theme/lib/themes/index';
+@primary-color: #fa541c;
+@primary-1: #fff2ed;
+@primary-2: #ffd8bf;
+@primary-3: #ffbb96;
+@primary-5: #ff7a45;
+@primary-7: #d4380d;
 
-@root-entry-name: default;
-@primary-color: #FA541C;
+@success-color: #1abd80;
+@warning-color: #fda900;
+@error-color: #f82024;
+@info-color: #0477f7;
+
+@light-body-background: #fff;
+@light-component-background: #fff;
+@light-text-primary: rgba(0, 0, 0, 0.85);
+@light-text-secondary: rgba(0, 0, 0, 0.45);
+@light-text-inverse: #fff;
+@light-border-color-base: #d9d9d9;
+@light-border-color-split: #f0f0f0;
+@light-shadow-1-down: 0 12px 40px rgba(15, 23, 42, 0.16);
+@light-shadow-1-up: 0 -12px 40px rgba(15, 23, 42, 0.12);
+@light-grey-3: #d9d9d9;
+@light-success-soft: #e8fff6;
+@light-error-soft: #fff0f0;
+
+@dark-body-background: #070707;
+@dark-component-background: #141414;
+@dark-text-primary: rgba(255, 255, 255, 0.92);
+@dark-text-secondary: rgba(255, 255, 255, 0.65);
+@dark-text-inverse: #070707;
+@dark-border-color-base: #434343;
+@dark-border-color-split: #303030;
+@dark-shadow-1-down: 0 16px 48px rgba(0, 0, 0, 0.48);
+@dark-shadow-1-up: 0 -16px 48px rgba(0, 0, 0, 0.42);
+@dark-grey-3: #303030;
+@dark-success-soft: rgba(26, 189, 128, 0.14);
+@dark-error-soft: rgba(248, 32, 36, 0.14);
+
+@var-primary: var(--theme-primary, @primary-color);
+@var-primary-1: var(--theme-primary-1, @primary-1);
+@var-primary-2: var(--theme-primary-2, @primary-2);
+@var-primary-3: var(--theme-primary-3, @primary-3);
+@var-primary-5: var(--theme-primary-5, @primary-5);
+@var-primary-7: var(--theme-primary-7, @primary-7);
+
+@var-text-primary: var(--text-primary, @light-text-primary);
+@var-text-secondary: var(--text-secondary, @light-text-secondary);
+@var-text-inverse: var(--text-inverse, @light-text-inverse);
+@var-border-base: var(--color-border-base, @light-border-color-base);
+@var-border-split: var(--color-border-split, @light-border-color-split);
+@var-component-background: var(--component-background, @light-component-background);
+@var-body-background: var(--body-background, @light-body-background);
+@var-shadow-1-down: var(--shadow-1-down, @light-shadow-1-down);
+@var-shadow-1-up: var(--shadow-1-up, @light-shadow-1-up);
+@var-grey-3: var(--theme-grey-3, @light-grey-3);
+@var-success-soft: var(--color-success-soft, @light-success-soft);
+@var-error-soft: var(--color-error-soft, @light-error-soft);
+
+@border-color-base: @var-border-base;
+@border-color-split: @var-border-split;
+@component-background: @var-component-background;
+@body-background: @var-body-background;
+@text-color: @var-text-primary;
+@text-color-secondary: @var-text-secondary;
+@text-color-inverse: @var-text-inverse;
+@box-shadow-base: @var-shadow-1-down;
+@grey-3: @var-grey-3;

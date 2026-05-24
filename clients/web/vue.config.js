@@ -602,6 +602,8 @@ module.exports = defineConfig({
       postcss: {
         postcssOptions: {
           plugins: [
+            'tailwindcss',
+            'autoprefixer',
             [
               'postcss-pxtorem',
               {

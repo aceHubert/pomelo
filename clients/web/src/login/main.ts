@@ -14,6 +14,7 @@ import * as plugins from '@/plugins';
 // Local
 import { router } from './router/index';
 import App from './App';
+import '@/assets/styles/tailwind.css';
 import './assets/styles/index.less';
 
 // Locales

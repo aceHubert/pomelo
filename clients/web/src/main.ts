@@ -13,8 +13,9 @@ import { router } from './router';
 import { pinia } from './store';
 import * as plugins from './plugins';
 import App from './App';
+import './assets/styles/tailwind.css';
 import './assets/styles/index.less';
-import '@ace-pomelo/theme/lib/index.less';
+import './assets/styles/theme-tokens.less';
 
 // Locales
 import zhCN from './locales/zh-CN_basic.json';

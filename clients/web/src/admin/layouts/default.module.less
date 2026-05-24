@@ -1,12 +1,12 @@
-@import '@ace-pomelo/theme/lib/mixins/index';
-
 .layout-wrapper {
   :global {
     .@{ant-prefix}-breadcrumb-link {
       max-width: 200px;
       display: inline-block;
       vertical-align: middle;
-      .textOverflow();
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
   }
 }
