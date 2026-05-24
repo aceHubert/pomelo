@@ -7,7 +7,7 @@
     "start:infrastructures": "concurrently \"npm:start:infrastructure-*\"",
     "start:infrastructure-service": "nest build infrastructure-service --builder=webpack --watch",
     "start:infrastructure-bff": "nest build infrastructure-bff --builder=webpack --watch",
-    "start:identity-server": "yarn workspace @ace-pomelo/theme run build && concurrently --raw \"grunt --gruntfile ./servers/identity-server/Gruntfile.js dev\" \"nest build identity-server --builder=webpack --watch\"",
+    "start:identity-server": "concurrently --raw \"grunt --gruntfile ./servers/identity-server/Gruntfile.js dev\" \"nest build identity-server --builder=webpack --watch\"",
     "build:web": "yarn workspaces foreach -vtR --from '@ace-pomelo/web' run build",
     "build:web:oidc": "cross-env VUE_APP_AUTH_TYPE=OIDC yarn workspaces foreach -vtR --from '@ace-pomelo/web' run build",
     "build:infrastructures": "rimraf dist && concurrently \"npm:build:infrastructure-*\"",

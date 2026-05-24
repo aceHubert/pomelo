@@ -1,5 +1,3 @@
-@import '@ace-pomelo/theme/lib/mixins/index.less';
-
 .container {
   margin: auto;
   width: 1200px;
@@ -32,13 +30,8 @@
     li + li {
       padding-left: 10px;
       position: relative;
-      border-left: none !important;
-
-      &:before {
-        .setLeftLine(@border-color-base);
-        top: 4px;
-        bottom: 4px;
-      }
+      margin-left: 10px;
+      border-left: 1px solid @border-color-base;
     }
   }
 }

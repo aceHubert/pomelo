@@ -12,6 +12,7 @@ import { pinia } from '@/store';
 // Local
 import { router } from './router';
 import App from './App';
+import '@/assets/styles/tailwind.css';
 import './assets/styles/index.less';
 
 // Locales

@@ -2,6 +2,10 @@
 
 :root {
   --bs-body-font-size: 14px;
+  --bs-body-color: @var-text-primary;
+  --bs-body-bg: @var-body-background;
+  --bs-border-color: @var-border-base;
+  --bs-secondary-color: @var-text-secondary;
   --bs-primary: @var-primary;
 }
 
@@ -26,4 +30,26 @@
 .form-check-input:checked {
   background-color: @var-primary;
   border-color: @var-primary;
+}
+
+.btn-light {
+  --bs-btn-color: @var-text-primary;
+  --bs-btn-bg: @var-component-background;
+  --bs-btn-border-color: @var-border-base;
+  --bs-btn-hover-color: @var-text-primary;
+  --bs-btn-hover-bg: @var-grey-3;
+  --bs-btn-hover-border-color: @var-border-base;
+}
+
+.toast {
+  --bs-toast-bg: @var-component-background;
+  --bs-toast-color: @var-text-primary;
+  --bs-toast-border-color: @var-border-base;
+}
+
+.popover {
+  --bs-popover-bg: @var-component-background;
+  --bs-popover-border-color: @var-border-base;
+  --bs-popover-body-color: @var-text-primary;
+  --bs-popover-header-color: @var-text-primary;
 }

@@ -1,5 +1,3 @@
-@import '@ace-pomelo/theme/lib/mixins/index.less';
-
 .container {
   padding-bottom: 100px;
 }
@@ -39,14 +37,8 @@
       span + span {
         padding-left: 12px;
         position: relative;
-        border-left: none !important;
-
-        &:before {
-          .setLeftLine();
-          left: 6px;
-          top: 3px;
-          bottom: 3px;
-        }
+        margin-left: 12px;
+        border-left: 1px solid var(--color-border-base, @border-color-base);
       }
     }
 

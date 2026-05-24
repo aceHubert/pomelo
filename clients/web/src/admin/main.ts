@@ -19,6 +19,7 @@ import * as plugins from '@/plugins';
 import { router } from './router';
 import App from './App';
 import './registerServiceWorker';
+import '@/assets/styles/tailwind.css';
 import './assets/styles/index.less';
 
 // Locales

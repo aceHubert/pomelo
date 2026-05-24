@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Identity Theme Preview</title>
+    <link rel="stylesheet" href="../../dist/servers/identity-server/public/style/index.css" />
+    <link rel="stylesheet" href="../../dist/servers/identity-server/public/style/bootstrap-theme.css" />
+    <link rel="stylesheet" href="../../dist/servers/identity-server/public/style/container.css" />
+    <link rel="stylesheet" href="../../dist/servers/identity-server/public/style/login.css" />
+    <link rel="stylesheet" href="../../dist/servers/identity-server/public/style/password.css" />
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+        padding: 32px;
+        display: grid;
+        gap: 32px;
+        background:
+          radial-gradient(circle at top left, rgba(250, 84, 28, 0.12), transparent 28%),
+          radial-gradient(circle at top right, rgba(4, 119, 247, 0.1), transparent 24%),
+          #f3f4f6;
+      }
+
+      .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(320px, 1fr));
+        gap: 24px;
+      }
+
+      .preview-card {
+        position: relative;
+        min-height: 720px;
+        overflow: hidden;
+        border-radius: 24px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
+      }
+
+      .preview-card > .label {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        z-index: 10;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.75);
+        color: #fff;
+        font: 600 12px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        letter-spacing: 0.04em;
+      }
+
+      .preview-stage {
+        position: relative;
+        min-height: 720px;
+        overflow: hidden;
+      }
+
+      .preview-stage > #app {
+        min-height: 720px;
+      }
+
+      .preview-dark {
+        --text-primary: rgba(255, 255, 255, 0.92);
+        --text-secondary: rgba(255, 255, 255, 0.65);
+        --text-inverse: #070707;
+        --color-border-base: #434343;
+        --color-border-split: #303030;
+        --component-background: #141414;
+        --body-background: #070707;
+        --shadow-1-down: 0 16px 48px rgba(0, 0, 0, 0.48);
+        --shadow-1-up: 0 -16px 48px rgba(0, 0, 0, 0.42);
+        --theme-grey-3: #303030;
+        --color-success-soft: rgba(26, 189, 128, 0.14);
+        --color-error-soft: rgba(248, 32, 36, 0.14);
+        background:
+          radial-gradient(circle at top, rgba(250, 84, 28, 0.2), transparent 26%),
+          linear-gradient(180deg, rgba(7, 7, 7, 0.96), rgba(7, 7, 7, 1));
+      }
+
+      .preview-light {
+        background:
+          radial-gradient(circle at top, rgba(250, 84, 28, 0.12), transparent 24%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 1));
+      }
+
+      .preview-dark .wrapper::before {
+        background: rgba(0, 0, 0, 0.42);
+        box-shadow: 0 -5px 30px rgba(255, 255, 255, 0.12);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-grid">
+      <section class="preview-card preview-light">
+        <span class="label">LIGHT</span>
+        <div class="preview-stage">
+          <div id="app">
+            <div class="locale-btns">
+              <button class="btn btn-sm btn-disabled">ZH</button>
+              <span class="divider"></span>
+              <button class="btn btn-sm">EN</button>
+            </div>
+            <div class="wrapper">
+              <h1 class="title">Sign In</h1>
+              <p class="text--secondary">to <strong>pomelo.local</strong></p>
+              <form id="login-form">
+                <div class="row mb-3">
+                  <div class="col-sm-12">
+                    <input class="form-control" type="text" placeholder="Username" />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-12" style="position: relative">
+                    <input class="form-control password has-value" type="password" placeholder="Password" />
+                    <span class="toggle-password eye"></span>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-12 d-flex gap-2">
+                    <button class="btn btn-primary w-100" type="button">Continue</button>
+                    <button class="btn btn-light w-100" type="button">Cancel</button>
+                  </div>
+                </div>
+              </form>
+              <p class="success--text">Success text preview</p>
+              <p class="error--text">Error text preview</p>
+              <div class="toast green lighten-5 show" style="position: static">
+                <div class="d-flex">
+                  <div class="toast-body">Preview toast content</div>
+                  <button class="btn-close me-2 m-auto" type="button"></button>
+                </div>
+              </div>
+            </div>
+            <footer id="footer">
+              <div class="links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+              </div>
+              <div class="copyright">Pomelo Identity Server</div>
+            </footer>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-card preview-dark">
+        <span class="label">DARK</span>
+        <div class="preview-stage">
+          <div id="app">
+            <div class="locale-btns">
+              <button class="btn btn-sm btn-disabled">ZH</button>
+              <span class="divider"></span>
+              <button class="btn btn-sm">EN</button>
+            </div>
+            <div class="wrapper">
+              <h1 class="title">Reset Password</h1>
+              <p class="text--secondary">Previewing dark token overrides</p>
+              <form id="password-reset-form">
+                <div class="row mb-3">
+                  <div class="col-sm-12">
+                    <input class="form-control" type="text" placeholder="Verification Code" />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-12" style="position: relative">
+                    <input class="form-control password has-value" type="password" placeholder="New Password" />
+                    <span class="toggle-password eye slash"></span>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-sm-12 d-flex gap-2">
+                    <button class="btn btn-primary w-100" type="button">Reset</button>
+                    <button class="btn btn-light w-100" type="button">Back</button>
+                  </div>
+                </div>
+              </form>
+              <div class="toast red lighten-5 show" style="position: static">
+                <div class="d-flex">
+                  <div class="toast-body">Preview error feedback</div>
+                  <button class="btn-close me-2 m-auto" type="button"></button>
+                </div>
+              </div>
+            </div>
+            <footer id="footer">
+              <div class="links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+              </div>
+              <div class="copyright">Pomelo Identity Server</div>
+            </footer>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
