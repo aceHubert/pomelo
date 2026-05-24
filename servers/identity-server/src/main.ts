@@ -11,7 +11,7 @@ import { bootstrap, normalizeRoutePath, stripForegoingSlash } from '@ace-pomelo/
 import { ApisModule } from './apis/apis.module';
 import { AppModule } from './app.module';
 import { version } from './version';
-import { syncDatabase } from './db.sync';
+import { IdentityMigrationService } from './migration.service';
 
 declare const module: any;
 const logger = new Logger('Main', { timestamp: true });
@@ -30,8 +30,7 @@ bootstrap<NestExpressApplication>(AppModule, {
     // log4js
     app.useLogger(app.get(Log4jsService));
 
-    // sync database
-    await syncDatabase(app);
+    await app.get(IdentityMigrationService).sync(process.argv.includes('--sync'));
 
     const host = configService.get<string>('server.host');
     const port = configService.get<number>('server.port');

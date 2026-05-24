@@ -3,6 +3,8 @@ export enum OptionPresetKeys {
   SiteUrl = 'siteurl',
   /** web URL 地址 */
   Home = 'home',
+  /** Web 运行时 OIDC 配置 */
+  AuthOidc = 'auth-oidc',
   /** 博客名称 */
   BlogName = 'blogname',
   /** 博客描述 */

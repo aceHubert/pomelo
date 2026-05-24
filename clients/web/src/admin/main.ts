@@ -7,6 +7,7 @@ import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
 import { Authoriztion } from '@/auth';
+import { getAuthOidcOption, loadAutoloadOptions } from '@/auth/runtime-options';
 import { Modal } from '@/components';
 import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
@@ -29,7 +30,6 @@ import enUS from './locales/en-US.json';
 Vue.config.productionTip = false;
 Vue.use(VueCompositionApi);
 Vue.use(ResourceManagerVuePlugin, { mode: 'visible' });
-Vue.use(Authoriztion);
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {
@@ -138,34 +138,41 @@ function clearModals(this: Vue) {
   Modal.destroyAll();
 }
 
-createApp().then(({ app, router }) => {
-  const _app = new Vue(app);
+loadAutoloadOptions()
+  .then((options) => {
+    Authoriztion.configure(getAuthOidcOption(options));
+    Vue.use(Authoriztion);
 
-  router.beforeEach(authMiddleware.bind(_app));
-  router.afterEach(clearModals.bind(_app));
-  router.isReady().then(() => {
-    authMiddleware.call(_app, router.currentRoute, router.currentRoute, (path) => {
-      // If not redirected
-      if (!path || typeof path === 'function') {
-        typeof path === 'function' && path.call(null, _app);
-        _app.$mount('#app');
-        return;
-      }
+    return createApp();
+  })
+  .then(({ app, router }) => {
+    const _app = new Vue(app);
 
-      // Add a one-time afterEach hook to
-      // mount the app wait for redirect and route gets resolved
-      const unregisterHook = router.afterEach(() => {
-        unregisterHook();
-        _app.$mount('#app');
-      });
-
-      // Push the path and let route to be resolved
-      router[path.replace ? 'replace' : 'push'](path, undefined, (err) => {
-        if (err) {
-          // eslint-disable-next-line no-console
-          console.error(err);
+    router.beforeEach(authMiddleware.bind(_app));
+    router.afterEach(clearModals.bind(_app));
+    router.isReady().then(() => {
+      authMiddleware.call(_app, router.currentRoute, router.currentRoute, (path) => {
+        // If not redirected
+        if (!path || typeof path === 'function') {
+          typeof path === 'function' && path.call(null, _app);
+          _app.$mount('#app');
+          return;
         }
+
+        // Add a one-time afterEach hook to
+        // mount the app wait for redirect and route gets resolved
+        const unregisterHook = router.afterEach(() => {
+          unregisterHook();
+          _app.$mount('#app');
+        });
+
+        // Push the path and let route to be resolved
+        router[path.replace ? 'replace' : 'push'](path, undefined, (err) => {
+          if (err) {
+            // eslint-disable-next-line no-console
+            console.error(err);
+          }
+        });
       });
     });
   });
-});

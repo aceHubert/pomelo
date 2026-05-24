@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import { APP_PIPE, APP_FILTER, HttpAdapterHost } from '@nestjs/core';
 import { Logger, Module, NestModule, RequestMethod, OnModuleInit, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientsModule } from '@nestjs/microservices';
 import { HttpModule } from '@nestjs/axios';
 import { TerminusModule } from '@nestjs/terminus';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -22,21 +21,20 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4js';
-import { configuration, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
 import { AuthorizationModule, getJWKS, createLocalJWKSet } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
-import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
+import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { IdentityDatasourceModule } from './datasource/datasource.module';
 import { ApisModule } from './apis/apis.module';
 import { AccountProviderModule } from './account-provider/account-provider.module';
-import { AccountConfigService } from './account-config/account-config.service';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { IdentityMigrationService } from './migration.service';
 
 // extends
 import './common/extends/i18n.extend';
@@ -128,23 +126,6 @@ const logger = new Logger('AppModule', { timestamp: true });
       ],
       inject: [ConfigService],
     }),
-    ClientsModule.registerAsync({
-      isGlobal: true,
-      clients: [
-        {
-          name: INFRASTRUCTURE_SERVICE,
-          useFactory: (config: ConfigService) => ({
-            customClass: ErrorHandlerClientTCP,
-            options: {
-              host: config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
-              port: config.getOrThrow('INFRASTRUCTURE_SERVICE_PORT'),
-              serializer: new I18nSerializer(),
-            },
-          }),
-          inject: [ConfigService],
-        },
-      ],
-    }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       useFactory: (config: ConfigService) => {
@@ -225,7 +206,6 @@ const logger = new Logger('AppModule', { timestamp: true });
     ApisModule,
     AccountProviderModule.forRootAsync({
       isGlobal: true,
-      useClass: AccountConfigService,
     }),
     AccountModule.forRootAsync({
       useFactory: (storageOptions: StorageOptions) => ({
@@ -267,6 +247,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       provide: APP_FILTER,
       useClass: AllExceptionFilter,
     },
+    IdentityMigrationService,
   ],
 })
 export class AppModule implements NestModule, OnModuleInit {

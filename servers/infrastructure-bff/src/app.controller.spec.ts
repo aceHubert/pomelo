@@ -12,24 +12,10 @@ describe('AppController', () => {
       controllers: [AppController],
       providers: [
         AppService,
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn(),
-          },
-        },
-        {
-          provide: HealthCheckService,
-          useValue: {},
-        },
-        {
-          provide: HttpHealthIndicator,
-          useValue: {},
-        },
-        {
-          provide: MicroserviceHealthIndicator,
-          useValue: {},
-        },
+        { provide: ConfigService, useValue: { get: jest.fn() } },
+        { provide: HealthCheckService, useValue: { check: jest.fn() } },
+        { provide: HttpHealthIndicator, useValue: { pingCheck: jest.fn() } },
+        { provide: MicroserviceHealthIndicator, useValue: { pingCheck: jest.fn() } },
       ],
     }).compile();
 

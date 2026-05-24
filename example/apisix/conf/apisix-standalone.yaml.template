@@ -81,7 +81,7 @@ routes:
           - /connect/$2
     upstream:
       nodes:
-        - host: ${POMERO_SERVER_HOST}
+        - host: ${POMERO_IDENTITY_SERVER_HOST}
           port: ${POMERO_IDENTITY_SERVER_PORT}
           weight: 1
       timeout:

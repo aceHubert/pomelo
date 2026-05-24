@@ -1,12 +1,9 @@
-import path from 'path';
 import { upperFirst } from 'lodash';
-import { UniqueConstraintError } from 'sequelize';
 import { Controller, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   md5,
-  FileEnv,
   UserStatus,
   UserRole,
   OptionAutoload,
@@ -17,8 +14,7 @@ import {
 } from '@ace-pomelo/shared/server';
 import { IgnoreDbCheckInterceptor } from '@/common/interceptors/db-check.interceptor';
 import { getDefaultUserRoles } from '@/common/utils/user.util';
-import { version } from '../version';
-import { name, InfrastructureDatasourceService, UserDataSource } from '../datasource';
+import { InfrastructureDatasourceService, UserDataSource } from '../datasource';
 import { SiteInitPayload } from './payload/site-init.payload';
 
 @IgnoreDbCheckInterceptor()
@@ -26,16 +22,12 @@ import { SiteInitPayload } from './payload/site-init.payload';
 export class SiteInitController {
   private logger = new Logger(SiteInitController.name, { timestamp: true });
   private readonly adminName = 'admin';
-  private readonly fileEnv: FileEnv;
 
   constructor(
     private readonly datasourceService: InfrastructureDatasourceService,
     private readonly userDataSource: UserDataSource,
     readonly config: ConfigService,
-  ) {
-    const lockfile = path.join(config.get<string>('configPath')!, config.get<string>('DBLOCK_FILE', 'db.lock'));
-    this.fileEnv = FileEnv.getInstance(lockfile);
-  }
+  ) {}
 
   private checkAdminExists() {
     return this.userDataSource.isLoginNameExists(this.adminName);
@@ -43,16 +35,11 @@ export class SiteInitController {
 
   @MessagePattern(SiteInitPattern.IsRequired)
   async isRequired() {
-    if (this.fileEnv.getEnv(name) === 'PENDING') {
-      if (await this.checkAdminExists()) {
-        this.fileEnv.setEnv(name, version);
-        this.logger.debug('Datas already initialized!');
-        return false;
-      } else {
-        return true;
-      }
+    if (await this.checkAdminExists()) {
+      this.logger.debug('Datas already initialized!');
+      return false;
     }
-    return false;
+    return true;
   }
 
   /**
@@ -194,16 +181,10 @@ export class SiteInitController {
             },
           ],
         });
-        this.fileEnv.setEnv(name, version);
         this.logger.debug('Initialize datas successful!');
         // TODO: Add client redirect uris
       } catch (err) {
-        if (err instanceof UniqueConstraintError) {
-          this.fileEnv.setEnv(name, version);
-          this.logger.debug('Datas already initialized!');
-        } else {
-          throw err;
-        }
+        throw err;
       }
     } else {
       this.logger.debug('Datas lready initialized!');

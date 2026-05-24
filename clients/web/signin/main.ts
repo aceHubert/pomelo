@@ -1,9 +1,6 @@
 import { UserManager } from 'oidc-client-ts';
-import { envConfig } from '@/configs/env';
+import { prepareOidcSettings } from '@/auth/runtime-options';
 import './index.less';
-
-// Initialize OIDC UserManager
-const userManager = new UserManager(envConfig.getOidcSettings());
 
 // DOM elements
 const msgEl = document.getElementById('msg') as HTMLElement;
@@ -46,9 +43,8 @@ if (homeBtn) {
   homeBtn.addEventListener('click', () => redirectInSeconds(0));
 }
 
-// Handle signin callback
-userManager
-  .signinCallback()
+prepareOidcSettings()
+  .then((settings) => new UserManager(settings).signinCallback())
   .then((user) => {
     if (!user) {
       if (msgEl) {

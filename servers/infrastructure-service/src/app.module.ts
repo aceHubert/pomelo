@@ -22,6 +22,7 @@ import { TermTaxonomyController } from './controllers/term-taxonomy.controller';
 import { UserController } from './controllers/user.constroller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { InfrastructureMigrationService } from './migration.service';
 
 // extends
 // eslint-disable-next-line import/order
@@ -154,6 +155,7 @@ import '@/common/extends/i18n.extend';
       provide: APP_FILTER,
       useClass: AllExceptionFilter,
     },
+    InfrastructureMigrationService,
   ],
 })
 export class AppModule {}

@@ -12,11 +12,7 @@ export enum AuthType {
   Local = 'LOCAL',
 }
 
-let authType = (process.env.VUE_APP_AUTH_TYPE as AuthType) || AuthType.Local;
-
-if (!Object.values(AuthType).includes(authType)) {
-  authType = AuthType.Local;
-}
+let authType = AuthType.Local;
 
 export class Authoriztion {
   private static instance: Authoriztion;
@@ -44,6 +40,13 @@ export class Authoriztion {
 
   static get authType() {
     return authType;
+  }
+
+  static configure(authOidc?: unknown) {
+    const oidcSettings = envConfig.resolveOidcSettings(authOidc);
+    authType = oidcSettings ? AuthType.Oidc : AuthType.Local;
+    envConfig.setOidcSettings(oidcSettings);
+    this.instance = undefined as any;
   }
 
   static getInstance() {

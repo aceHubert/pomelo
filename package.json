@@ -9,7 +9,6 @@
     "start:infrastructure-bff": "nest build infrastructure-bff --builder=webpack --watch",
     "start:identity-server": "concurrently --raw \"grunt --gruntfile ./servers/identity-server/Gruntfile.js dev\" \"nest build identity-server --builder=webpack --watch\"",
     "build:web": "yarn workspaces foreach -vtR --from '@ace-pomelo/web' run build",
-    "build:web:oidc": "cross-env VUE_APP_AUTH_TYPE=OIDC yarn workspaces foreach -vtR --from '@ace-pomelo/web' run build",
     "build:infrastructures": "rimraf dist && concurrently \"npm:build:infrastructure-*\"",
     "build:infrastructure-service": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > ./servers/infrastructure-service/src/version.ts && nest build infrastructure-service --builder=webpack --config nest-cli.build.json",
     "build:infrastructure-bff": "node -p \"'export const version = ' + JSON.stringify(require('./package.json').version) + ';'\" > ./servers/infrastructure-bff/src/version.ts && nest build infrastructure-bff --builder=webpack --config nest-cli.build.json",
@@ -89,6 +88,7 @@
     "sequelize": "^6.30.0",
     "statuses": "^2.0.1",
     "tedious": "^15.1.0",
+    "umzug": "^3.8.2",
     "wildcard": "^2.0.1"
   },
   "devDependencies": {

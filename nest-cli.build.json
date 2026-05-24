@@ -40,13 +40,17 @@
             "outDir": "dist/servers/identity-server/"
           },
           {
+            "include": "sqls",
+            "outDir": "dist/servers/identity-server/"
+          },
+          {
             "include": "../content",
             "exclude": "../content/uploads/**/*",
             "outDir": "dist/servers/content"
           },
           {
             "include": "../conf",
-            "exclude": "../conf/{*.backup.*,*.local.*,db.lock}",
+            "exclude": "../conf/{*.backup.*,*.local.*}",
             "outDir": "dist/servers/conf"
           }
         ],
@@ -88,13 +92,17 @@
             "outDir": "dist/servers/identity-server/"
           },
           {
+            "include": "sqls",
+            "outDir": "dist/servers/infrastructure-service/"
+          },
+          {
             "include": "../content",
             "exclude": "../content/uploads/**/*",
             "outDir": "dist/servers/content"
           },
           {
             "include": "../conf",
-            "exclude": "../conf/{*.backup.*,*.local.*,db.lock}",
+            "exclude": "../conf/{*.backup.*,*.local.*}",
             "outDir": "dist/servers/conf"
           }
         ],

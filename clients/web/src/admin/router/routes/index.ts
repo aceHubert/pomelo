@@ -1,4 +1,3 @@
-import { Authoriztion, AuthType } from '@/auth';
 import { errorRoutes } from '@/router/routes/errors';
 import { fallbackRoute } from '@/router/routes/fallback';
 import { basicRoutes } from './basic';
@@ -10,7 +9,7 @@ export const routes = [
   ...basicRoutes,
   ...settingRoutes,
   ...submoduleRoutes,
-  ...(Authoriztion.authType === AuthType.Oidc ? oidcRoutes : []),
+  ...oidcRoutes,
   ...errorRoutes,
   {
     name: 'signout',

@@ -28,6 +28,7 @@ env:
   REGISTRY_MIRROR: ghcr.nju.edu.cn
   BUILD_PLATFORM: linux/amd64,linux/arm64
   IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+  OIDC_IMAGE_REPOSITORY: $(echo ${{ github.repository }}-oidc | tr '[:upper:]' '[:lower:]')
   IMAGE_DEPLOY_TAG: $(echo ${{ github.run_id }} | tr '[:upper:]' '[:lower:]')
 
 permissions:
@@ -80,12 +81,12 @@ jobs:
         variant:
           - name: "standard"
             build_commands: "yarn build:web && yarn build:infrastructures"
-            pm2_config: "ecosystem.config.js"
-            tag_suffix: ""
+            dockerfile: "Dockerfile"
+            serve_pm2_config: "ecosystem.config.js"
           - name: "oidc"
-            build_commands: "yarn build:web:oidc && yarn build:infrastructures && yarn build:identity-server"
-            pm2_config: "ecosystem.oidc.config.js"
-            tag_suffix: "-oidc"
+            build_commands: "yarn build:identity-server"
+            dockerfile: "Dockerfile.oidc"
+            serve_pm2_config: ""
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v3
@@ -123,16 +124,27 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Build deploy image (${{ matrix.variant.name }})
         if: github.event_name != 'release'
+        env:
+          DOCKERFILE: ${{ matrix.variant.dockerfile }}
+          SERVE_PM2_CONFIG: ${{ matrix.variant.serve_pm2_config }}
         run: | # 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker buildx build --file Dockerfile --target deploy \
-          --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ matrix.variant.tag_suffix }} \
+          build_args=()
+          image_repository="${{ env.IMAGE_REPOSITORY }}"
+          if [ -n "$SERVE_PM2_CONFIG" ]; then
+            build_args+=(--build-arg "SERVE_PM2_CONFIG=$SERVE_PM2_CONFIG")
+          fi
+          if [ "${{ matrix.variant.name }}" = "oidc" ]; then
+            image_repository="${{ env.OIDC_IMAGE_REPOSITORY }}"
+          fi
+          docker buildx build --file "$DOCKERFILE" --target deploy \
+          --cache-from ${{ env.REGISTRY }}/$image_repository:alpha \
           --build-arg BUILD_IGNORE=true \
-          --build-arg SERVE_PM2_CONFIG="${{ matrix.variant.pm2_config }}" \
+          "${build_args[@]}" \
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --label "variant=${{ matrix.variant.name }}" \
-          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha${{ matrix.variant.tag_suffix }} \
-          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}${{ matrix.variant.tag_suffix }} \
+          --tag ${{ env.REGISTRY }}/$image_repository:alpha \
+          --tag ${{ env.REGISTRY }}/$image_repository:${{ env.IMAGE_DEPLOY_TAG }} \
           --platform ${{env.BUILD_PLATFORM}} --push .
       - name: Get release version
         if: github.event_name == 'release'
@@ -141,16 +153,27 @@ jobs:
           echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Build release image (${{ matrix.variant.name }})
         if: github.event_name == 'release'
+        env:
+          DOCKERFILE: ${{ matrix.variant.dockerfile }}
+          SERVE_PM2_CONFIG: ${{ matrix.variant.serve_pm2_config }}
         run: | # 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker buildx build --file Dockerfile --target deploy \
-          --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest${{ matrix.variant.tag_suffix }} \
+          build_args=()
+          image_repository="${{ env.IMAGE_REPOSITORY }}"
+          if [ -n "$SERVE_PM2_CONFIG" ]; then
+            build_args+=(--build-arg "SERVE_PM2_CONFIG=$SERVE_PM2_CONFIG")
+          fi
+          if [ "${{ matrix.variant.name }}" = "oidc" ]; then
+            image_repository="${{ env.OIDC_IMAGE_REPOSITORY }}"
+          fi
+          docker buildx build --file "$DOCKERFILE" --target deploy \
+          --cache-from ${{ env.REGISTRY }}/$image_repository:latest \
           --build-arg BUILD_IGNORE=true \
-          --build-arg SERVE_PM2_CONFIG="${{ matrix.variant.pm2_config }}" \
+          "${build_args[@]}" \
           --label "build-id=${{ github.run_id }}" \
           --label "build-user=${{ github.actor }}" \
           --label "variant=${{ matrix.variant.name }}" \
-          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest${{ matrix.variant.tag_suffix }} \
-          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.get_version.outputs.VERSION }}${{ matrix.variant.tag_suffix }} \
+          --tag ${{ env.REGISTRY }}/$image_repository:latest \
+          --tag ${{ env.REGISTRY }}/$image_repository:${{ steps.get_version.outputs.VERSION }} \
           --platform ${{env.BUILD_PLATFORM}} --push .
   deploy:
     if: github.event_name != 'release'
@@ -161,8 +184,9 @@ jobs:
     env:
       ORIGIN: ${{ vars.ORIGIN }}
       POMERO_SERVER_HOST: ${{ vars.POMERO_SERVER_HOST || 'pomelo-server' }}
-      POMERO_WEB_PORT: ${{ vars.POMERO_WEB_PORT || '3000' }}
-      POMERO_IDENTITY_SERVER_PORT: ${{ vars.POMERO_IDENTITY_SERVER_PORT || '3001' }}
+      POMERO_IDENTITY_SERVER_HOST: ${{ vars.POMERO_IDENTITY_SERVER_HOST || 'pomelo-identity-server' }}
+      POMERO_WEB_PORT: ${{ vars.POMERO_WEB_PORT || '80' }}
+      POMERO_IDENTITY_SERVER_PORT: ${{ vars.POMERO_IDENTITY_SERVER_PORT || '3000' }}
       POMERO_BFF_SERVER_PORT: ${{ vars.POMERO_BFF_SERVER_PORT || '3002' }}
       POMERO_STATIC_CONTENT_PORT: ${{ vars.POMERO_STATIC_CONTENT_PORT || '3003' }}
       # APISIX configuration
@@ -229,12 +253,18 @@ jobs:
             find . -type d -exec chmod 775 {} \;
             chmod 777 ./apisix || true
             # Process env file
-            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}-oidc" > .env.${{ github.run_id }}
+            echo "IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}" > .env.${{ github.run_id }}
+            echo "OIDC_IMAGE_REPOSITORY=${{ env.REGISTRY_MIRROR }}/${{ env.OIDC_IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}" >> .env.${{ github.run_id }}
             echo -e "ORIGIN=${{vars.ORIGIN}}\nREDIS_CONTAINER_NAME=redis-default-7.2\nMYSQL_CONTAINER_NAME=mysql-default-5.7\nREDIS_USER=${{secrets.REDIS_USER}}\nREDIS_PASSWORD=${{secrets.REDIS_PASSWORD}}\nMYSQL_USER=${{secrets.MYSQL_USER}}\nMYSQL_PASSWORD=${{secrets.MYSQL_PASSWORD}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}\nSWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true" >> .env.${{ github.run_id }}
             # Up docker compose
             docker compose -f docker-compose-standard.yml --env-file .env.${{ github.run_id }} up --force-recreate -d
             # Remove unused images
-            docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }}-oidc) | xargs --no-run-if-empty docker rmi
+            standard_image_id=$(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }})
+            oidc_image_id=$(docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.OIDC_IMAGE_REPOSITORY }}:${{ env.IMAGE_DEPLOY_TAG }})
+            keep_file=$(mktemp)
+            printf "%s\n%s\n" "$standard_image_id" "$oidc_image_id" | sed '/^$/d' > "$keep_file"
+            { docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.IMAGE_REPOSITORY }}; docker images -q ${{ env.REGISTRY_MIRROR }}/${{ env.OIDC_IMAGE_REPOSITORY }}; } | sort -u | grep -vxF -f "$keep_file" | xargs --no-run-if-empty docker rmi
+            rm -f "$keep_file"
             # Remove env file and temp files
             rm -f .env.${{ github.run_id }}
             rm -rf /tmp/pomelo-${{ github.run_id }}

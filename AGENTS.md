@@ -15,7 +15,7 @@
   - `yarn start:infrastructure-bff`
   - `yarn start:identity-server`
 - Build all: `yarn build:infrastructures` and `yarn build:web`.
-- Build all with oidc: `yarn build:infrastructures` and `yarn build:identity-server` and `yarn build:web:oidc`.
+- Build all with oidc: `yarn build:infrastructures` and `yarn build:identity-server` and `yarn build:web`.
 - Tests: `yarn test` | watch `yarn test:watch` | coverage `yarn test:cov`.
 - Lint/format: `yarn lint` | fix `yarn lint:fix` | `yarn prettier:all`.
 - Optional local stack: `docker-compose up -d` (see `docker-compose.yml`).
@@ -43,4 +43,4 @@
 
 ## Security & Configuration
 - Never commit secrets. Start from `.env.sample` and create local overrides (e.g., `.env.docker.local`).
-- Prefer env‑driven config for servers; review `nest-cli*.json` and `ecosystem*.config.js` when deploying.
+- Prefer env‑driven config for servers; review `nest-cli*.json` and Docker runtime config when deploying.

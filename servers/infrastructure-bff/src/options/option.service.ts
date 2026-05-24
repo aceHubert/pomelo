@@ -55,6 +55,7 @@ export class OptionService {
 
     switch (access) {
       case 'public-read':
+      case 'public-read-admin-write':
         return true;
       case 'authenticated-read':
         return role !== UserRole.None;
@@ -71,6 +72,11 @@ export class OptionService {
       case 'public-read':
       case 'authenticated-read':
         throw new ForbiddenError(`Option "${optionName}" is readonly`);
+      case 'public-read-admin-write':
+        if (role !== UserRole.Administrator) {
+          throw new ForbiddenError(`Not writable for option "${optionName}"`);
+        }
+        break;
       case 'admin-read-write':
       case 'secret-write-only':
         if (role !== UserRole.Administrator) {

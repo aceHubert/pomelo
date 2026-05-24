@@ -23,6 +23,7 @@ env:
   REGISTRY: ghcr.io
   BUILD_PLATFORM: linux/amd64,linux/arm64
   IMAGE_REPOSITORY: $(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+  OIDC_IMAGE_REPOSITORY: $(echo ${{ github.repository }}-oidc | tr '[:upper:]' '[:lower:]')
   IMAGE_TAG: $(echo alpha-${{ github.run_id }} | tr '[:upper:]' '[:lower:]')
 
 permissions:
@@ -98,7 +99,7 @@ jobs:
           path: .submodules
           key: ${{ runner.os }}-submodules-${{ hashFiles('.submodules/**/yarn.lock') }}
       - name: Build
-        run: yarn build:web:oidc && yarn build:infrastructures && yarn build:identity-server
+        run: yarn build:web && yarn build:infrastructures && yarn build:identity-server
       - name: List dist dir
         run: ls dist
       - name: Set up QEMU
@@ -108,7 +109,8 @@ jobs:
       - name: Build image
         run:
           | # 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/aceHubert?tab=packages 查看
-          docker buildx build --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-deploy --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-deploy --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }} --platform ${{env.BUILD_PLATFORM}} --push .
+          docker buildx build --file Dockerfile --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-deploy --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --label "variant=standard" --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:alpha-deploy --tag ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }} --platform ${{env.BUILD_PLATFORM}} --push .
+          docker buildx build --file Dockerfile.oidc --target deploy --cache-from ${{ env.REGISTRY }}/${{ env.OIDC_IMAGE_REPOSITORY }}:alpha-deploy --build-arg BUILD_IGNORE=true --build-arg BUILDKIT_INLINE_CACHE=1 --label "build-id=${{ github.run_id }}" --label "build-user=${{ github.actor }}" --label "variant=oidc" --tag ${{ env.REGISTRY }}/${{ env.OIDC_IMAGE_REPOSITORY }}:alpha-deploy --tag ${{ env.REGISTRY }}/${{ env.OIDC_IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }} --platform ${{env.BUILD_PLATFORM}} --push .
   ssh-deploy:
     needs: docker-build
     runs-on: ubuntu-latest
@@ -126,11 +128,15 @@ jobs:
             whoami
             cd ${{ vars.PROJECT_DIR }}
             echo "IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}" > .env.${{ github.run_id }}
+            echo "OIDC_IMAGE_REPOSITORY=${{ env.REGISTRY }}/${{ env.OIDC_IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}" >> .env.${{ github.run_id }}
             echo -e "SWAGGER_DEBUG=true\nGRAPHQL_DEBUG=true\nORIGIN=${{vars.ORIGIN}}\nREDIS_URL=${{secrets.REDIS_URL}}\nINFRASTRUCTURE_DATABASE_CONNECTION=${{secrets.INFRASTRUCTURE_DATABASE_CONNECTION}}\nIDENTITY_DATABASE_CONNECTION=${{secrets.IDENTITY_DATABASE_CONNECTION}}\nLOG_LEVEL=${{vars.LOG_LEVEL}}" >> .env.${{ github.run_id }}
             echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin https://${{ env.REGISTRY }}
             docker compose --env-file .env.${{ github.run_id }} up --force-recreate -d
-            docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }} | grep -v $(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }}) | xargs --no-run-if-empty docker rmi
+            standard_image_id=$(docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }})
+            oidc_image_id=$(docker images -q ${{ env.REGISTRY }}/${{ env.OIDC_IMAGE_REPOSITORY }}:${{ env.IMAGE_TAG }})
+            keep_file=$(mktemp)
+            printf "%s\n%s\n" "$standard_image_id" "$oidc_image_id" | sed '/^$/d' > "$keep_file"
+            { docker images -q ${{ env.REGISTRY }}/${{ env.IMAGE_REPOSITORY }}; docker images -q ${{ env.REGISTRY }}/${{ env.OIDC_IMAGE_REPOSITORY }}; } | sort -u | grep -vxF -f "$keep_file" | xargs --no-run-if-empty docker rmi
+            rm -f "$keep_file"
             docker logout https://${{ env.REGISTRY }}
             rm -f .env.${{ github.run_id }}
-            docker cp pomelo-server:/app/nginx.conf ${{ vars.NGINX_CONF_DIR }}/pomelo.conf
-            docker exec ${{ vars.NGINX_CONTAINER_NAME }} nginx -s reload

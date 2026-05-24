@@ -7,7 +7,7 @@
 # 构建镜像
 # docker buildx build -t hubert007/pomelo:0.0.3 -t hubert007/pomelo:latest --target deploy --cache-from hubert007/pomelo:latest --build-arg BUILD_IGNORE=true --platform linux/amd64,linux/arm64 --push .
 # 运行容器
-# docker run -it -d -p 3000:3000 -p 3001:3001 -p 3002:3002 -p 3003:3003 --name pomelo-server --rm hubert007/pomelo:0.0.2
+# docker run -it -d -p 8080:80 -p 3000:3000 -p 3001:3001 -p 3002:3002 --name pomelo-server --rm hubert007/pomelo:0.0.2
 # docker network connect --link mysql-default-5.7:mysql mysql_default pomelo-server
 # docker network connect --link redis-default-6.2:redis redis_default pomelo-server
 
@@ -57,17 +57,26 @@ ARG SERVE_PM2_CONFIG="ecosystem.config.js"
 COPY --from=runtime /app/servers /app/clients /app/
 COPY --from=runtime /app/node_modules /app/node_modules/
 COPY --from=runtime /app/${SERVE_PM2_CONFIG} /app/ecosystem.config.js
+COPY example/nginx /app/nginx/
+COPY example/scripts/start-nginx.sh /app/scripts/start-nginx.sh
 
 
 WORKDIR /app
 ENV NODE_ENV=${RUNTIME_ENV}
 ENV SERVE_PM2_ENV=${SERVE_PM2_ENV}
+ENV NGINX_PORT=80
+ENV NGINX_WORKER_PROCESSES=auto
+ENV NGINX_KEEPALIVE_TIMEOUT=65
+ENV NGINX_CLIENT_MAX_BODY_SIZE=100M
 
-RUN npm install -g pm2
+RUN apk add --no-cache nginx gettext && \
+    npm install -g pm2 && \
+    chmod +x /app/scripts/start-nginx.sh && \
+    mkdir -p /run/nginx /var/log/nginx /var/lib/nginx/tmp /etc/nginx/conf.d
 # RUN set -ex && \
 #   sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
 #   npm config set registry https://registry.npm.taobao.org && \
 #   npm install -g pm2
 
-EXPOSE 3000 3001 3002 3003
+EXPOSE 80 3000 3001 3002
 CMD pm2-runtime start ecosystem.config.js --env $SERVE_PM2_ENV
