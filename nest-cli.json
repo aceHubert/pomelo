@@ -41,6 +41,11 @@
             "watchAssets": true
           },
           {
+            "include": "sqls",
+            "outDir": "dist/servers/identity-server/",
+            "watchAssets": true
+          },
+          {
             "include": "../content",
             "exclude": "uploads/**/*",
             "outDir": "dist/servers/content",
@@ -84,6 +89,11 @@
         "assets": [
           {
             "include": ".env?(.*)",
+            "outDir": "dist/servers/infrastructure-service/",
+            "watchAssets": true
+          },
+          {
+            "include": "sqls",
             "outDir": "dist/servers/infrastructure-service/",
             "watchAssets": true
           },

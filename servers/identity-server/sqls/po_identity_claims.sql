@@ -1,0 +1,16 @@
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('1','sub');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','role');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','login_name');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','display_name');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','nice_name');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','nick_name');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','avatar');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','gender');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','locale');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','timezone');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','url');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','updated_at');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('3','phone_number');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('3','phone_number_verified');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('4','email');
+INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('4','email_verified');

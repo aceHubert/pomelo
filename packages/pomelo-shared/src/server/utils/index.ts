@@ -6,6 +6,7 @@ export * from './json-safely-parse.util';
 export * from './crypto.util';
 export * from './path.util';
 export * from './swagger-type.util';
+export * from './umzug-sequelize-storage.util';
 export * from './uuid.util';
 export * from './bootstrap.util';
 export * from './configuration.util';

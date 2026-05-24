@@ -42,7 +42,7 @@ export class AppController {
         transport: Transport.TCP,
         options: {
           host: this.config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
-          port: this.config.get('INFRASTRUCTURE_SERVICE_PORT', 3000),
+          port: this.config.get('INFRASTRUCTURE_SERVICE_PORT', 3001),
         },
       }),
     );

@@ -3,11 +3,13 @@ module.exports = {
     {
       name: 'infrastructure-service',
       cwd: 'infrastructure-service',
-      script: 'node dist/main.js',
+      script: 'dist/main.js',
+      interpreter: 'node',
+      args: '--sync',
       autorestart: true,
       env_production: {
-        PORT: 9000,
-        TCP_PORT: 9001,
+        PORT: 3000,
+        TCP_PORT: 3001,
       },
     },
     {
@@ -17,27 +19,17 @@ module.exports = {
       autorestart: true,
       env_production: {
         PORT: 3002,
-        INFRASTRUCTURE_SERVICE_PORT: 9001,
+        INFRASTRUCTURE_SERVICE_PORT: 3001,
       },
     },
     {
-      name: 'static-content',
-      cwd: 'content',
-      script: 'serve',
+      name: 'nginx',
+      cwd: '.',
+      script: './scripts/start-nginx.sh',
+      interpreter: '/bin/sh',
+      autorestart: true,
       env_production: {
-        PM2_SERVE_PATH: '.',
-        PM2_SERVE_PORT: 3003,
-      },
-    },
-    {
-      name: 'web',
-      cwd: 'web',
-      script: 'serve',
-      env_production: {
-        PM2_SERVE_PATH: '.',
-        PM2_SERVE_PORT: 3000,
-        PM2_SERVE_SPA: 'true',
-        PM2_SERVE_HOMEPAGE: '/index.html',
+        NGINX_PORT: 80,
       },
     },
   ],

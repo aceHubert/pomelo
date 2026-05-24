@@ -5,10 +5,11 @@
 # BUILD_PLATFORM=linux/arm64/v8
 # BUILD_TAG=0.0.1
 # BUILD_IGNORE=true
-# BUILD_OPTION="cross-env ENV_JS=env/env.local.js BASE_URL=/ yarn build:web:oidc && yarn build:infrastructures && yarn build:identity-server"
+# BUILD_OPTION="cross-env ENV_JS=env/env.local.js BASE_URL=/ yarn build:web && yarn build:infrastructures"
+# OIDC_BUILD_OPTION="yarn build:identity-server"
 # RUNTIME_ENV=production
-# SERVE_ENV=local
-# SERVE_APPS=''
+# SERVE_PM2_ENV=local
+# SERVE_PM2_CONFIG=ecosystem.config.js
 
 # // Build
 # > docker compose --env-file .env.docker.local build
@@ -62,10 +63,10 @@ services:
       args:
         BUILD_PLATFORM: ${BUILD_PLATFORM:-linux/amd64}
         BUILD_IGNORE: ${BUILD_IGNORE:-false} # ignore exectuing build in Dockerfile
-        BUILD_OPTION: ${BUILD_OPTION:-build} # scripts in package.json
+        BUILD_OPTION: ${BUILD_OPTION:-yarn build:web && yarn build:infrastructures} # build command
         RUNTIME_ENV: ${RUNTIME_ENV:-production} # runtime env, production | development
-        SERVE_ENV: ${SERVE_ENV:-production} # env in ecosystem.config.js, production | fly
-        SERVE_APPS: ${SERVE_APPS} # apps in ecosystem.config.js, run all apps if empty
+        SERVE_PM2_ENV: ${SERVE_PM2_ENV:-production} # env in ecosystem.config.js
+        SERVE_PM2_CONFIG: ${SERVE_PM2_CONFIG:-ecosystem.config.js} # pm2 config file
         BUILDKIT_INLINE_CACHE: true
         BUILDKIT_CONTEXT_KEEP_GIT_DIR: true
       cache_from:
@@ -79,10 +80,8 @@ services:
     environment:
       - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
       - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
-      - ORIGIN=${ORIGIN:-https://example.com}
-      - REDIS_URL=redis://${REDIS_USER}:${REDIS_PASSWORD}@127.0.0.1:${REDIS_PORT:-6379}/${REDIS_DB:-0}
-      - INFRASTRUCTURE_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@127.0.0.1:${MYSQL_PORT:-3306}/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
-      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@127.0.0.1:${MYSQL_PORT:-3306}/${IDENTITY_DATABASE_NAME:-po_identity}
+      - REDIS_URL=redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:${REDIS_PORT:-6379}/${REDIS_DB:-0}
+      - INFRASTRUCTURE_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@database:${MYSQL_PORT:-3306}/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
       - TABLE_PREFIX=${TABLE_PREFIX:-po_}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
@@ -95,11 +94,45 @@ services:
     depends_on:
       - database
       - redis
-    # ports:
-    # - 3000:3000 # web
-    # - 3001:3001 # identity server
-    # - 3002:3002 # bff server
-    # - 3003:3003 # static content
+    ports:
+      - "${POMERO_WEB_HOST_PORT:-10080}:80" # web
+      - "${POMERO_INFRASTRUCTURE_SERVICE_HOST_PORT:-13000}:3000" # infrastructure service http
+      - "${POMERO_INFRASTRUCTURE_SERVICE_TCP_HOST_PORT:-13001}:3001" # infrastructure service tcp
+      - "${POMERO_BFF_SERVER_HOST_PORT:-13002}:3002" # bff server
+    networks:
+      - default
+  identity-server:
+    build:
+      context: ../
+      dockerfile: Dockerfile.oidc
+      args:
+        BUILD_PLATFORM: ${BUILD_PLATFORM:-linux/amd64}
+        BUILD_IGNORE: ${OIDC_BUILD_IGNORE:-false}
+        BUILD_OPTION: ${OIDC_BUILD_OPTION:-yarn build:identity-server}
+        RUNTIME_ENV: ${RUNTIME_ENV:-production}
+        BUILDKIT_INLINE_CACHE: true
+        BUILDKIT_CONTEXT_KEEP_GIT_DIR: true
+      cache_from:
+        - pomelo-oidc:latest
+      target: deploy
+      tags:
+        - pomelo-oidc:${BUILD_TAG:-latest}
+    image: pomelo-oidc:latest
+    container_name: pomelo-identity-server
+    restart: always
+    environment:
+      - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
+      - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
+      - ACCOUNT_PROVIDER=${ACCOUNT_PROVIDER:-direct-db}
+      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@database:${MYSQL_PORT:-3306}/${IDENTITY_DATABASE_NAME:-po_template}
+      - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ${PWD}/conf:/app/conf
+      - ${PWD}/logs:/app/logs
+    privileged: true
+    depends_on:
+      - database
     networks:
       - default
   apisix:
@@ -115,6 +148,7 @@ services:
     privileged: true
     depends_on:
       - server
+      - identity-server
     ##network_mode: host
     # ports:
     # - '9180:9180/tcp' # admin_control: true
@@ -122,28 +156,6 @@ services:
     # - '9091:9091/tcp'  # prometheus
     # - "9443:9443/tcp" # tls http/2
     # - '9092:9092/tcp' # enable_control: true
-    networks:
-      - default
-  nginx:
-    image: nginx:alpine
-    container_name: pomelo-nginx
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "100m"
-        max-file: "3"
-    volumes:
-      - ${PWD}/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ${PWD}/nginx/proxy.conf:/etc/nginx/proxy.conf
-      - ${PWD}/nginx/conf.d:/etc/nginx/conf.d
-      - ${PWD}/nginx:/var/log/nginx
-    ports:
-      - "8080:80"
-      - "8443:443"
-    depends_on:
-      - server
-      - apisix
     networks:
       - default
 # volumes:

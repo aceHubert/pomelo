@@ -5,6 +5,7 @@ import 'custom-event-polyfill';
 import Vue, { type ComponentOptions } from 'vue';
 import VueCompositionApi from '@vue/composition-api';
 import { Authoriztion } from '@/auth';
+import { getAuthOidcOption, loadAutoloadOptions } from '@/auth/runtime-options';
 import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
@@ -22,7 +23,6 @@ import enUS from './locales/en-US.json';
 
 Vue.config.productionTip = false;
 Vue.use(VueCompositionApi);
-Vue.use(Authoriztion);
 
 async function createApp() {
   const app: ComponentOptions<Vue> = {
@@ -83,8 +83,15 @@ async function createApp() {
   return context;
 }
 
-createApp().then(({ app }) => {
-  const _app = new Vue(app);
+loadAutoloadOptions()
+  .then((options) => {
+    Authoriztion.configure(getAuthOidcOption(options));
+    Vue.use(Authoriztion);
 
-  _app.$mount('#app');
-});
+    return createApp();
+  })
+  .then(({ app }) => {
+    const _app = new Vue(app);
+
+    _app.$mount('#app');
+  });

@@ -1,0 +1,3 @@
+INSERT INTO `po_client_secrets` (`client_id`, `description`, `expires_at`, `type`, `value`, `created_at`) VALUES ('1',NULL,NULL,'SharedSecret','55c02a1df42f8baa4c26f83aabee9d04a2369051df8b4cd1d8da589640723207','2024-10-10 07:01:55');
+INSERT INTO `po_client_secrets` (`client_id`, `description`, `expires_at`, `type`, `value`, `created_at`) VALUES ('2',NULL,NULL,'SharedSecret','4c2a29bf6b66c4174a121de5e62fb33a25cf123bdb01b9c96c8bbfa53a68b9b2','2024-10-10 07:01:55');
+INSERT INTO `po_client_secrets` (`client_id`, `description`, `expires_at`, `type`, `value`, `created_at`) VALUES ('3',NULL,NULL,'SharedSecret','ea7441ccb965e5b91752bd78adee6e7d32dfb8d93dfe65e15c5c4f02824d5e0b','2024-10-10 07:01:55');

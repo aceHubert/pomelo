@@ -4,10 +4,16 @@ import { OptionPresetKeys } from '@ace-pomelo/shared/server';
  * Option 访问等级。
  * public-read: 任何人可读。
  * authenticated-read: 登录用户可读。
+ * public-read-admin-write: 任何人可读，管理员可写。
  * admin-read-write: 管理员可读写。
  * secret-write-only: 管理员只能写入，读取接口不返回明文。
  */
-export type OptionAccessLevel = 'public-read' | 'authenticated-read' | 'admin-read-write' | 'secret-write-only';
+export type OptionAccessLevel =
+  | 'public-read'
+  | 'public-read-admin-write'
+  | 'authenticated-read'
+  | 'admin-read-write'
+  | 'secret-write-only';
 
 export interface OptionDefinition {
   key: OptionPresetKeys;
@@ -24,6 +30,12 @@ export const OPTION_DEFINITIONS: OptionDefinition[] = [
   // public-read
   { key: OptionPresetKeys.SiteUrl, access: 'public-read', description: '静态资源 base URL 地址' },
   { key: OptionPresetKeys.Home, access: 'public-read', description: 'Web URL 地址' },
+  {
+    key: OptionPresetKeys.AuthOidc,
+    access: 'public-read-admin-write',
+    defaultValue: '',
+    description: 'Web 运行时 OIDC 配置',
+  },
   { key: OptionPresetKeys.BlogName, access: 'public-read', description: '博客名称' },
   {
     key: OptionPresetKeys.BlogDescription,

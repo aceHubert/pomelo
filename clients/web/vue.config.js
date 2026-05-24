@@ -32,8 +32,6 @@ const proxyTarget = (to) => (isMock ? `http://${getEnv('MOCK_HOST', 'localhost')
 
 // env file
 const envJs = getEnv('ENV_JS') || 'env';
-// auth type
-const authType = getEnv('VUE_APP_AUTH_TYPE', 'LOCAL');
 // deploy on windows iis
 const webConfigFile = getEnv('WEBCONFIG_FILE');
 // public path
@@ -42,7 +40,6 @@ const publicPath = getEnv('BASE_URL', '/');
 const assetsPath = 'static';
 
 console.log('\x1b[34m%s\x1b[0m', `You are using @/configs/${envJs}.ts`);
-console.log('\x1b[34m%s\x1b[0m', `You are building for "${authType}" auth type`);
 
 module.exports = defineConfig({
   publicPath,
@@ -177,35 +174,30 @@ module.exports = defineConfig({
       inject: 'body',
       chunks: ['chunk-vendors', 'chunk-common', 'chunk-antdv', 'runtime', 'initialize'],
     },
-    ...(authType === 'LOCAL'
-      ? {
-          login: {
-            entry: 'src/login/main.ts',
-            template: 'public/index.html',
-            filename: 'login.html',
-            inject: 'body',
-          },
-        }
-      : {
-          signin: {
-            entry: 'signin/main.ts',
-            template: 'signin/index.html',
-            filename: 'signin.html',
-            inject: 'body',
-          },
-          'signin-silent': {
-            entry: 'signin-silent/main.ts',
-            template: 'signin-silent/index.html',
-            filename: 'signin-silent.html',
-            inject: 'body',
-          },
-          signout: {
-            entry: 'signout/main.ts',
-            template: 'signout/index.html',
-            filename: 'signout.html',
-            inject: 'body',
-          },
-        }),
+    login: {
+      entry: 'src/login/main.ts',
+      template: 'public/index.html',
+      filename: 'login.html',
+      inject: 'body',
+    },
+    signin: {
+      entry: 'signin/main.ts',
+      template: 'signin/index.html',
+      filename: 'signin.html',
+      inject: 'body',
+    },
+    'signin-silent': {
+      entry: 'signin-silent/main.ts',
+      template: 'signin-silent/index.html',
+      filename: 'signin-silent.html',
+      inject: 'body',
+    },
+    signout: {
+      entry: 'signout/main.ts',
+      template: 'signout/index.html',
+      filename: 'signout.html',
+      inject: 'body',
+    },
   },
   transpileDependencies: [
     '@ace-fetch/*',
@@ -549,17 +541,15 @@ module.exports = defineConfig({
           }),
         );
 
-        if (authType === 'OIDC') {
-          config.plugins.push(
-            new HtmlWebpackTagsPlugin({
-              links: oidcCdn.links,
-              scripts: oidcCdn.scripts,
-              publicPath: oidcCdn.publicPath,
-              files: ['index.html', 'admin.html', 'signin.html', 'signin-silent.html', 'signout.html'],
-              append: false,
-            }),
-          );
-        }
+        config.plugins.push(
+          new HtmlWebpackTagsPlugin({
+            links: oidcCdn.links,
+            scripts: oidcCdn.scripts,
+            publicPath: oidcCdn.publicPath,
+            files: ['index.html', 'admin.html', 'login.html', 'signin.html', 'signin-silent.html', 'signout.html'],
+            append: false,
+          }),
+        );
 
         config.plugins.push(
           new HtmlWebpackTagsPlugin({

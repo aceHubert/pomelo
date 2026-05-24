@@ -1,9 +1,6 @@
 import { UserManager } from 'oidc-client-ts';
-import { envConfig } from '@/configs/env';
+import { prepareOidcSettings } from '@/auth/runtime-options';
 import './index.less';
-
-// Initialize OIDC UserManager
-const userManager = new UserManager(envConfig.getOidcSettings());
 
 // Update message element
 const msgEl = document.getElementById('msg');
@@ -12,12 +9,14 @@ if (msgEl) {
 }
 
 // Handle signout callback
-userManager.signoutCallback().catch((error) => {
-  if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.error('Signout callback error:', error);
-  }
-  if (msgEl) {
-    msgEl.innerText = 'Signout error: ' + error.message;
-  }
-});
+prepareOidcSettings()
+  .then((settings) => new UserManager(settings).signoutCallback())
+  .catch((error) => {
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Signout callback error:', error);
+    }
+    if (msgEl) {
+      msgEl.innerText = 'Signout error: ' + error.message;
+    }
+  });

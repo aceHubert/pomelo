@@ -11,13 +11,10 @@ import {
   OptionPattern,
 } from '@ace-pomelo/shared/server';
 
-import {
-  AccountProviderOptionsFactory,
-  AccountClaims,
-} from '../account-provider/interfaces/account-provider-options.interface';
+import { AccountProviderOptionsFactory, AccountClaims } from './interfaces/account-provider-options.interface';
 
 @Injectable()
-export class AccountConfigService implements AccountProviderOptionsFactory {
+export class AccountGrcpService implements AccountProviderOptionsFactory {
   constructor(@Inject(INFRASTRUCTURE_SERVICE) private basicService: ClientProxy) {}
 
   createAccountProviderOptions() {

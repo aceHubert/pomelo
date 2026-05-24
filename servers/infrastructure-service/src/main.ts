@@ -6,7 +6,7 @@ import { Log4jsService } from '@ace-nestjs/log4js';
 import { bootstrap, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { I18nServerTcp } from './common/utils/i18n-server-tcp.util';
 import { AppModule } from './app.module';
-import { syncDatabase } from './db.sync';
+import { InfrastructureMigrationService } from './migration.service';
 import { version } from './version';
 
 declare const module: any;
@@ -20,8 +20,7 @@ bootstrap(AppModule, {
     // log4js
     app.useLogger(app.get(Log4jsService));
 
-    // sync database
-    await syncDatabase(app);
+    await app.get(InfrastructureMigrationService).sync(process.argv.includes('--sync'));
     const host = configService.get<string>('server.host');
     const port = configService.get<number>('server.port');
     const tcpHost = configService.get<string>('server.tcpHost');

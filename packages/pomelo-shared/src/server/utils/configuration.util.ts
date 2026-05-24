@@ -45,10 +45,6 @@ export interface ConfigObject {
      */
     tcpPort?: number | string;
     /**
-     * server origin
-     */
-    origin?: string;
-    /**
      * global prefix uri
      */
     globalPrefixUri?: string;
@@ -166,7 +162,6 @@ export const configuration = (): ConfigFactory<ConfigObject> => () => {
       port: Number(process.env.PORT || 3000),
       tcpHost: process.env.TCP_HOST,
       tcpPort: process.env.TCP_PORT,
-      origin: process.env.ORIGIN,
       globalPrefixUri: process.env.GLOBAL_PREFIX_URI,
       cors:
         process.env.CORS === 'true' || process.env.CORS_ORIGIN
