@@ -1,12 +1,10 @@
-# infrastructure-service 恢复 SQL
+# infrastructure-service 初始化 SQL
 
-这些 SQL 是人工 review / 恢复现有数据使用的导出文件，服务启动和 Umzug 不会自动执行。
+这些 SQL 只用于人工初始化或历史库兼容，不会被 Umzug 或服务启动流程自动执行。
 
-review 流程要求：
+## migration meta 表手动兼容
 
-1. 先删除本地相关业务表和 migration meta 表。
-2. 分别使用 `identity-server --sync` 和 `infrastructure-service --sync` 验证结构可重建。
-3. 通过 Web 初始化 `admin` / `Aa123456`，并确认账号验证通过。
-4. 再人工执行导出的恢复 SQL。
-5. 恢复时明确跳过 `po_users.sql` 和 `po_usermeta.sql`。
-6. `po_options.sql` 已调整为 `REPLACE INTO`，用于覆盖 Web 初始化阶段已写入的同名 option，避免恢复时因唯一键冲突中断。
+- 全新环境不要执行 `migration_meta.sql`，应使用服务启动参数 `--sync` 正常创建表。
+- 历史库已有全部表但缺少 `sequelize_meta` 时，可以人工执行 `migration_meta.sql`。
+- 执行前必须确认业务表结构与当前模型一致，否则后续迁移状态会失真。
+- 执行后再使用 `--sync` 启动服务，Umzug 会跳过已记录的建表 migrations。

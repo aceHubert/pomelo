@@ -4,9 +4,9 @@ import { DocumentBuilder } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { Log4jsService } from '@ace-nestjs/log4js';
 import { bootstrap, normalizeRoutePath } from '@ace-pomelo/shared/server';
+import { InfrastructureMigrationService } from '@/datasource';
 import { I18nServerTcp } from './common/utils/i18n-server-tcp.util';
 import { AppModule } from './app.module';
-import { InfrastructureMigrationService } from './migration.service';
 import { version } from './version';
 
 declare const module: any;

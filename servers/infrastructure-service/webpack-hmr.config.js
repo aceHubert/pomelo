@@ -23,6 +23,7 @@ module.exports = function (options) {
         name: options.output.filename,
         autoRestart: true,
         nodeArgs: ['--inspect=0.0.0.0:9229'],
+        args: ['--sync'],
       }),
     ],
   };

@@ -8,7 +8,7 @@ import { TerminusModule } from '@nestjs/terminus';
 import { I18nModule, I18nService, I18nValidationPipe } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4js';
 import { configuration } from '@ace-pomelo/shared/server';
-import { InfrastructureDatasourceModule } from '@/datasource/datasource.module';
+import { InfrastructureDatasourceModule, InfrastructureMigrationService } from '@/datasource';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { DbCheckInterceptor } from './common/interceptors/db-check.interceptor';
 import { I18nTcpResolver } from './common/utils/i18n-server-tcp.util';
@@ -22,7 +22,6 @@ import { TermTaxonomyController } from './controllers/term-taxonomy.controller';
 import { UserController } from './controllers/user.constroller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { InfrastructureMigrationService } from './migration.service';
 
 // extends
 // eslint-disable-next-line import/order
@@ -113,7 +112,7 @@ import '@/common/extends/i18n.extend';
                 collate: config.get('INFRASTRUCTURE_DATABASE_COLLATE', ''),
               },
             },
-        tablePrefix: config.get('TABLE_PREFIX'),
+        tablePrefix: config.get('INFRASTRUCTURE_DATABASE_TABLE_PREFIX'),
         translate: (key, fallback, args) =>
           i18n.translate(key, {
             defaultValue: fallback,
