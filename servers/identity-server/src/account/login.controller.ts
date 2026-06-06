@@ -9,7 +9,7 @@ import { KoaContextWithOIDC } from 'oidc-provider';
 import { OidcService } from 'nest-oidc-provider';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
-import { getLoginTemplate, getConsentTemplate, getSelectAccountTemplate } from '@/common/templates';
+import { getLoginTemplate, getConsentTemplate, getSelectAccountTemplate, getActionBtns } from '@/common/templates';
 import { IdentityResourceDataSource } from '@/datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { LoginDto } from './dto/login.dto';
@@ -79,8 +79,8 @@ export class LoginController extends BaseController {
       wrapper =
         customWrapperTemplate ||
         `<div class="wrapper-placeholder">
-            <%- locales %>
-            <div class="wrapper">
+            <%- actionBtns %>
+            <div class="wrapper liquid-glass liquid-glass-card">
               <h1 class="title">${i18n.tv('identity-server.login.wrapper.title', 'Sign In')}</h1>
               ${
                 params.redirect_uri
@@ -100,7 +100,7 @@ export class LoginController extends BaseController {
               <div class="row">
                 <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
                   <div class="d-sm-inline-block gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary w-100" form="login-form">
+                    <button type="submit" class="btn btn-primary w-100 min-w-[120px]" form="login-form">
                       ${i18n.tv('identity-server.login.wrapper.submit_btn_text', 'Sign In')}
                     </button>
                   </div>
@@ -121,7 +121,7 @@ export class LoginController extends BaseController {
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
             <input
               type="text"
-              class="form-control"
+              class="form-control liquid-glass-form-control"
               id="username"
               name="username"
               placeholder="${i18n.tv('identity-server.login.form.username_placeholder', 'Login Name/Email/Phone')}"
@@ -146,7 +146,7 @@ export class LoginController extends BaseController {
             <div style="position: relative">
               <input
                 type="password"
-                class="form-control password"
+                class="form-control liquid-glass-form-control password"
                 id="password"
                 name="password"
                 placeholder="${i18n.tv('identity-server.login.form.password_placeholder', 'Password')}"
@@ -168,7 +168,7 @@ export class LoginController extends BaseController {
           </div>
         </div>
         <div class="row mb-3">
-          <div class="d-flex ${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
+          <div class="d-flex justify-content-between ${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" value="on" id="remember" name="remember" />
               <label class="form-check-label" for="remember">
@@ -218,14 +218,14 @@ export class LoginController extends BaseController {
       wrapper =
         customWrapperTemplate ||
         `<div class="wrapper-placeholder">
-        <%- locales %>
-        <div class="wrapper">
+        <%- actionBtns %>
+        <div class="wrapper liquid-glass liquid-glass-card">
           <div class="mb-2 pb-2 border-bottom">
             <h1 class="title">${i18n.tv('identity-server.select_account.wrapper.title', 'Select account')}</h1>
           </div>
           <%- form %>
           <div class="text-end mt-4">
-            <button type="submit" class="btn btn-primary" form="select-account-confirm-form">${i18n.tv(
+            <button type="submit" class="btn btn-primary min-w-[120px]" form="select-account-confirm-form">${i18n.tv(
               'identity-server.select_account.wrapper.confirm_btn_text',
               'Confirm',
             )}</button>
@@ -273,8 +273,8 @@ export class LoginController extends BaseController {
       wrapper =
         customWrapperTemplate ||
         `<div class="wrapper-placeholder">
-          <%- locales %>
-          <div class="wrapper">
+          <%- actionBtns %>
+          <div class="wrapper liquid-glass liquid-glass-card">
             <div class="mb-2 pb-2 border-bottom">
               <h1 class="title">${i18n.tv('identity-server.consent.wrapper.title', 'Confirm')}</h1>
               ${
@@ -303,11 +303,11 @@ export class LoginController extends BaseController {
             )}</p>
             <%- form %>
             <div class="text-end mt-4">
-              <button type="submit" class="btn btn-light" form="consent-abort-form">${i18n.tv(
+              <button type="submit" class="btn btn-light min-w-[120px]" form="consent-abort-form">${i18n.tv(
                 'identity-server.consent.wrapper.abort_btn_text',
                 'Abort',
               )}</button>
-              <button type="submit" class="btn btn-primary" form="consent-confirm-form">${i18n.tv(
+              <button type="submit" class="btn btn-primary min-w-[120px]" form="consent-confirm-form">${i18n.tv(
                 'identity-server.consent.wrapper.continue_btn_text',
                 'Continue',
               )}</button>
@@ -341,7 +341,7 @@ export class LoginController extends BaseController {
       primaryStyleVars: primaryColor ? renderPrimaryStyle(primaryColor) : '',
       content: ejs.render(wrapper, {
         form,
-        locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
+        actionBtns: getActionBtns(req.url, i18n.service.resolveLanguage(i18n.lang)),
         tv: i18n.tv.bind(i18n),
         clientId: client?.clientId,
         clientName: client?.clientName,

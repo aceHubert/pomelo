@@ -33,10 +33,10 @@ export class SecurityController extends BaseController {
         if (accessToken) {
           accountId = accessToken.accountId;
         } else {
-          const JWT = require('oidc-provider/lib/helpers/jwt');
-          const instance = require('oidc-provider/lib/helpers/weak_cache');
+          const JWT = await eval('import("oidc-provider/lib/helpers/jwt.js")');
+          const { default: weakCache } = await eval('import("oidc-provider/lib/helpers/weak_cache.js")');
           try {
-            const { payload } = await JWT.verify(accessTokenValue, instance(ctx.oidc.provider).keystore);
+            const { payload } = await JWT.verify(accessTokenValue, weakCache(ctx.oidc.provider).keystore);
             accountId = payload.sub;
           } catch (e) {
             this.logger.warn(e);

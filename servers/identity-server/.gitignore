@@ -1,4 +1,3 @@
 /public/js/*.min.js
 /public/js/*.min.js.map
-/public/style/*
-!/public/style/*.less
+/public/style/**/*.css

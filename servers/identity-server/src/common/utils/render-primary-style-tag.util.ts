@@ -114,29 +114,36 @@ export function renderPrimaryStyle(colorInput: tinycolor.ColorInput, isDark = fa
   const base = tinycolor(colorInput);
   if (!base.isValid()) return '';
 
-  let colors: Record<string, string> = {};
   const shadowColor = base.clone().setAlpha(0.3).toString();
-  if (!isDark) {
-    colors = {
-      base: base.toHexString(),
-      'primary-1': colorPalette(base, 1),
-      'primary-2': colorPalette(base, 2),
-      'primary-3': colorPalette(base, 3),
-      'primary-4': colorPalette(base, 4),
-      'primary-5': colorPalette(base, 5),
-      'primary-6': base.toHexString(),
-      'primary-7': colorPalette(base, 7),
-      'primary-8': colorPalette(base, 8),
-      'primary-9': colorPalette(base, 9),
-      'primary-10': colorPalette(base, 10),
-      'shadow-color': shadowColor,
-    };
-  } else {
+  const randomValue = Math.random();
+  const renderVars = (colors: Record<string, string>) =>
+    Object.keys(colors)
+      .map((key) => (key === 'base' ? `  --theme-primary: ${colors[key]};` : `  --theme-${key}: ${colors[key]};`))
+      .concat([`  --theme-random: ${randomValue};`])
+      .join('\n');
+  const getColors = (dark: boolean) => {
+    if (!dark) {
+      return {
+        base: base.toHexString(),
+        'primary-1': colorPalette(base, 1),
+        'primary-2': colorPalette(base, 2),
+        'primary-3': colorPalette(base, 3),
+        'primary-4': colorPalette(base, 4),
+        'primary-5': colorPalette(base, 5),
+        'primary-6': base.toHexString(),
+        'primary-7': colorPalette(base, 7),
+        'primary-8': colorPalette(base, 8),
+        'primary-9': colorPalette(base, 9),
+        'primary-10': colorPalette(base, 10),
+        'shadow-color': shadowColor,
+      };
+    }
+
     const mixColor = '#141414';
     const mix = (color: tinycolor.ColorInput, weight: number) =>
       tinycolor.lessMix(color, mixColor, weight).toHexString();
 
-    colors = {
+    return {
       base: base.toHexString(),
       'primary-1': mix(colorPalette(base, 8), 15),
       'primary-2': mix(colorPalette(base, 7), 25),
@@ -150,12 +157,26 @@ export function renderPrimaryStyle(colorInput: tinycolor.ColorInput, isDark = fa
       'primary-10': mix(colorPalette(base, 2), 98),
       'shadow-color': shadowColor,
     };
+  };
+
+  if (isDark) {
+    return `<style>\n:root {\n${renderVars(getColors(true))}\n}\n</style>`;
   }
 
-  return `<style>\n:root {\n${Object.keys(colors)
-    .map((key) => (key === 'base' ? `  --theme-primary: ${colors[key]};` : `  --theme-${key}: ${colors[key]};`))
-    .concat([`  --theme-random: ${Math.random()};`])
-    .join('\n')}\n}\n</style>`;
+  return `<style>
+            :root,
+            :root[data-theme='light'] {
+              ${renderVars(getColors(false))}
+            }
+            @media (prefers-color-scheme: dark) {
+              :root:not([data-theme='light']) {
+                ${renderVars(getColors(true))}
+              }
+            }
+            :root[data-theme='dark'] {
+              ${renderVars(getColors(true))}
+            }
+        </style>`;
 }
 
 declare module 'tinycolor2' {

@@ -2,11 +2,11 @@ import { Inject, Injectable, Logger, OnApplicationShutdown } from '@nestjs/commo
 import { CountryCode } from 'libphonenumber-js';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { Op, WhereOptions } from 'sequelize';
-import { OptionPresetKeys, UserStatus, ValidationError } from '@ace-pomelo/shared/server';
+import { UserStatus, ValidationError } from '@ace-pomelo/shared/server';
 import { Sequelize, SequelizeOptions } from '../datasource/sequelize/sequelize';
 import { USER_DATASOURCE_OPTIONS } from './constants';
 import { UserDatasourceOptions } from './interfaces/user-datasource-options.interface';
-import { Options, UserAttributes, UserMeta, UserMetaAttributes, Users } from './entities';
+import { UserAttributes, UserMeta, UserMetaAttributes, Users } from './entities';
 
 @Injectable()
 export class UserDatasourceService implements OnApplicationShutdown {
@@ -15,7 +15,7 @@ export class UserDatasourceService implements OnApplicationShutdown {
 
   constructor(@Inject(USER_DATASOURCE_OPTIONS) private readonly options: UserDatasourceOptions) {
     const sequelizeOptions: SequelizeOptions = {
-      models: [Options, Users, UserMeta],
+      models: [Users, UserMeta],
       tablePrefix: options.tablePrefix,
       logging: false,
       define: {
@@ -62,22 +62,6 @@ export class UserDatasourceService implements OnApplicationShutdown {
         metaKey: this.withTablePrefixedKeys(metaKeys),
       },
     }).then((metas) => metas.map((meta) => meta.toJSON() as UserMetaAttributes));
-  }
-
-  async getOption<T = string>(optionName: string): Promise<T | undefined> {
-    const names = this.withTablePrefixedKeys([optionName]);
-    const options = await Options.findAll({
-      attributes: ['optionName', 'optionValue'],
-      where: {
-        optionName: names,
-      },
-    });
-
-    const prefixedName = `${this.tablePrefix}${optionName}`;
-    const option =
-      options.find((option) => option.optionName === prefixedName) ||
-      options.find((option) => option.optionName === optionName);
-    return option?.optionValue as T | undefined;
   }
 
   async verifyUser(username: string, password: string) {
@@ -130,7 +114,7 @@ export class UserDatasourceService implements OnApplicationShutdown {
   }
 
   async getPhoneRegionCode() {
-    return this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
+    return this.options.phoneRegionCode;
   }
 
   private async findUserByUsername(username: string) {

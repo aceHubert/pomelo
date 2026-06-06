@@ -1,3 +1,5 @@
+export * from './action.template';
+
 import { LoginForm as LoginForm07 } from './login-form-07.template';
 import { LoginForm as LoginForm20 } from './login-form-20.template';
 

@@ -9,13 +9,15 @@
 <script>
   var locales = {
     passwordInvalid: '<%= tv("login.form.password_invalid", "Please input password(6-16 characters)!", i18nLang) %>',
-    userPolicyInvalid:
-      '<%= tv("login.form.user_policy_check_required", "Please read and agree to the User Privacy Agreement!", i18nLang) %>',
+    userPolicyInvalid: '<%= tv("login.form.user_policy_check_required", "Please read and agree to the User Privacy Agreement!", i18nLang) %>',
   };
 </script>
 <% if (process.env.NODE_ENV === 'production') { %>
 <script src="<%= baseURL %>js/login.min.js"></script>
+<script src="<%= baseURL %>js/gemini-2-0-gradient.min.js"></script>
+<script src="<%= baseURL %>js/particles.min.js"></script>
 <%} else { %>
 <script src="<%= baseURL %>js/login.js"></script>
+<script src="<%= baseURL %>js/gemini-2-0-gradient.js"></script>
 <% } %>
 <%- contentFor('title') %> <%= tv('identity-server.login.page_title', 'Sign In', i18nLang) %>

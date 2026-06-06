@@ -1,39 +1,84 @@
 @import '_variables.less';
 
-:root {
+.theme-light-vars() {
+  --theme-primary: @primary-color;
+  --theme-primary-1: @primary-1;
+  --theme-primary-2: @primary-2;
+  --theme-primary-3: @primary-3;
+  --theme-primary-4: @primary-4;
+  --theme-primary-5: @primary-5;
+  --theme-primary-6: @primary-6;
+  --theme-primary-7: @primary-7;
+  --theme-primary-8: @primary-8;
+  --theme-primary-9: @primary-9;
+  --theme-primary-10: @primary-10;
   --text-primary: @light-text-primary;
   --text-secondary: @light-text-secondary;
+  --text-disabled: @light-text-disabled;
   --text-inverse: @light-text-inverse;
   --color-border-base: @light-border-color-base;
   --color-border-split: @light-border-color-split;
   --component-background: @light-component-background;
+  --component-background-soft: @light-component-background-soft;
   --body-background: @light-body-background;
   --shadow-1-down: @light-shadow-1-down;
   --shadow-1-up: @light-shadow-1-up;
-  --theme-grey-3: @light-grey-3;
+  --shadow-2: @light-shadow-2;
   --color-success-soft: @light-success-soft;
+  --color-warning-soft: @light-warning-soft;
   --color-error-soft: @light-error-soft;
+  --color-info-soft: @light-info-soft;
   --color-success: @success-color;
   --color-warning: @warning-color;
   --color-error: @error-color;
   --color-info: @info-color;
 }
 
+.theme-dark-vars() {
+  --theme-primary-1: @dark-primary-1;
+  --theme-primary-2: @dark-primary-2;
+  --theme-primary-3: @dark-primary-3;
+  --theme-primary-4: @dark-primary-4;
+  --theme-primary-5: @dark-primary-5;
+  --theme-primary-6: @dark-primary-6;
+  --theme-primary-7: @dark-primary-7;
+  --theme-primary-8: @dark-primary-8;
+  --theme-primary-9: @dark-primary-9;
+  --theme-primary-10: @dark-primary-10;
+  --text-primary: @dark-text-primary;
+  --text-secondary: @dark-text-secondary;
+  --text-disabled: @dark-text-disabled;
+  --text-inverse: @dark-text-inverse;
+  --color-border-base: @dark-border-color-base;
+  --color-border-split: @dark-border-color-split;
+  --component-background: @dark-component-background;
+  --component-background-soft: @dark-component-background-soft;
+  --body-background: @dark-body-background;
+  --shadow-1-down: @dark-shadow-1-down;
+  --shadow-1-up: @dark-shadow-1-up;
+  --shadow-2: @dark-shadow-2;
+  --color-success-soft: @dark-success-soft;
+  --color-warning-soft: @dark-warning-soft;
+  --color-error-soft: @dark-error-soft;
+  --color-info-soft: @dark-info-soft;
+  --color-success: @success-color;
+  --color-warning: @warning-color;
+  --color-error: @error-color;
+  --color-info: @info-color;
+}
+
+:root {
+  .theme-light-vars();
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
-    --text-primary: @dark-text-primary;
-    --text-secondary: @dark-text-secondary;
-    --text-inverse: @dark-text-inverse;
-    --color-border-base: @dark-border-color-base;
-    --color-border-split: @dark-border-color-split;
-    --component-background: @dark-component-background;
-    --body-background: @dark-body-background;
-    --shadow-1-down: @dark-shadow-1-down;
-    --shadow-1-up: @dark-shadow-1-up;
-    --theme-grey-3: @dark-grey-3;
-    --color-success-soft: @dark-success-soft;
-    --color-error-soft: @dark-error-soft;
+  :root:not([data-theme='light']) {
+    .theme-dark-vars();
   }
+}
+
+:root[data-theme='dark'] {
+  .theme-dark-vars();
 }
 
 html,
@@ -53,11 +98,11 @@ a {
 
   &:hover,
   &:focus {
-    color: @var-primary-5;
+    color: @var-primary-7;
   }
 
   &:active {
-    color: @var-primary-7;
+    color: @var-primary-9;
   }
 }
 
@@ -94,13 +139,21 @@ input::-ms-clear {
 }
 
 @media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-track {
+  :root:not([data-theme='light']) ::-webkit-scrollbar-track {
     background: fade(@dark-text-primary, 8%);
   }
 
-  ::-webkit-scrollbar-thumb {
+  :root:not([data-theme='light']) ::-webkit-scrollbar-thumb {
     background: fade(@dark-text-primary, 18%);
   }
+}
+
+:root[data-theme='dark'] ::-webkit-scrollbar-track {
+  background: fade(@dark-text-primary, 8%);
+}
+
+:root[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: fade(@dark-text-primary, 18%);
 }
 
 .text--secondary {

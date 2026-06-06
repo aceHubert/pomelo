@@ -2,20 +2,13 @@ import { snakeCase } from 'lodash';
 import { CountryCode } from 'libphonenumber-js';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import {
-  md5,
-  INFRASTRUCTURE_SERVICE,
-  UserPattern,
-  UserMetaPresetKeys,
-  OptionPresetKeys,
-  OptionPattern,
-} from '@ace-pomelo/shared/server';
-
+import { md5, UserPattern, UserMetaPresetKeys, OptionPresetKeys, OptionPattern } from '@ace-pomelo/shared/server';
 import { AccountProviderOptionsFactory, AccountClaims } from './interfaces/account-provider-options.interface';
+import { USER_MICROSERVICE_SERVICE } from './constants';
 
 @Injectable()
 export class AccountGrcpService implements AccountProviderOptionsFactory {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) private basicService: ClientProxy) {}
+  constructor(@Inject(USER_MICROSERVICE_SERVICE) private basicService: ClientProxy) {}
 
   createAccountProviderOptions() {
     return {

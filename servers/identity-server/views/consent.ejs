@@ -5,4 +5,10 @@
 <% } %>
 <%- primaryStyleVars %>
 <div id="app"><%- content %> <%- include('partials/footer') %></div>
+<% if (process.env.NODE_ENV === 'production') { %>
+<script src="<%= baseURL %>js/gemini-2-0-gradient.min.js"></script>
+<script src="<%= baseURL %>js/particles.min.js"></script>
+<%} else { %>
+<script src="<%= baseURL %>js/gemini-2-0-gradient.js"></script>
+<% } %>
 <%- contentFor('title') %> <%= tv('identity-server.consent.page_title', 'Sign In Confirm', i18nLang) %>

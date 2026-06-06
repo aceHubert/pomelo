@@ -36,15 +36,17 @@ export class AppController {
   async healthCheck(): Promise<HealthCheckResult> {
     const indicatorFunctions: HealthIndicatorFunction[] = [];
 
-    indicatorFunctions.push(() =>
-      this.microservice.pingCheck('infrastructure-service', {
-        transport: Transport.TCP,
-        options: {
-          host: this.config.get('INFRASTRUCTURE_SERVICE_HOST', ''),
-          port: this.config.get('INFRASTRUCTURE_SERVICE_PORT', 3001),
-        },
-      }),
-    );
+    if (this.config.get('ACCOUNT_PROVIDER') === 'microservice') {
+      indicatorFunctions.push(() =>
+        this.microservice.pingCheck('user-microservice', {
+          transport: Transport.TCP,
+          options: {
+            host: this.config.get('USER_MICROSERVICE_HOST', ''),
+            port: this.config.get('USER_MICROSERVICE_PORT', 3001),
+          },
+        }),
+      );
+    }
 
     let redisUrl: string | undefined;
     if ((redisUrl = this.config.get('REDIS_URL'))) {

@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 
-const bannerShown = sessionStorage.getItem('__BANNER_SHOWN__') === '1';
+let bannerShown = false;
+try {
+  bannerShown = sessionStorage.getItem('__BANNER_SHOWN__') === '1';
+} catch (error) {
+  // sessionStorage 不可用时只跳过持久化标记。
+}
 !bannerShown &&
   console.log(
     `%c ________  ________  _____ ______   _______   ___       ________
@@ -20,7 +25,104 @@ const bannerShown = sessionStorage.getItem('__BANNER_SHOWN__') === '1';
     'color:#D0FD00',
     'color:#93FF00',
   );
-sessionStorage.setItem('__BANNER_SHOWN__', '1');
+try {
+  sessionStorage.setItem('__BANNER_SHOWN__', '1');
+} catch (error) {
+  // sessionStorage 不可用时允许脚本继续执行。
+}
+
+(function () {
+  const THEME_STORAGE_KEY = '__POMELO_THEME__';
+  const THEME_MODES = ['system', 'dark', 'light'];
+  const THEME_LABELS = {
+    system: '系统主题',
+    dark: '暗色主题',
+    light: '亮色主题',
+  };
+  const NEXT_THEME_LABELS = {
+    system: '切换到暗色主题',
+    dark: '切换到亮色主题',
+    light: '切换到系统主题',
+  };
+
+  function normalizeThemeMode(mode) {
+    return THEME_MODES.indexOf(mode) >= 0 ? mode : 'system';
+  }
+
+  function getStoredThemeMode() {
+    try {
+      return normalizeThemeMode(localStorage.getItem(THEME_STORAGE_KEY));
+    } catch (error) {
+      return 'system';
+    }
+  }
+
+  function saveThemeMode(mode) {
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, mode);
+    } catch (error) {
+      // localStorage 不可用时只在当前页面生效。
+    }
+  }
+
+  function findThemeButton(target) {
+    if (!target) return null;
+    if (target.closest) return target.closest('[data-theme-toggle]');
+
+    for (let el = target; el && el !== document; el = el.parentNode) {
+      if (el.getAttribute && el.getAttribute('data-theme-toggle') !== null) {
+        return el;
+      }
+    }
+    return null;
+  }
+
+  function renderThemeButtons(mode) {
+    const buttons = document.querySelectorAll('[data-theme-toggle]');
+    buttons.forEach((button) => {
+      let icon = button.querySelector('.action-icon');
+      if (!icon) {
+        icon = document.createElement('span');
+        icon.setAttribute('aria-hidden', 'true');
+        button.appendChild(icon);
+      }
+      icon.className = `action-icon action-icon--theme-${mode}`;
+      button.setAttribute('data-theme-mode', mode);
+      button.setAttribute('aria-label', `${THEME_LABELS[mode]}，${NEXT_THEME_LABELS[mode]}`);
+      button.setAttribute('title', THEME_LABELS[mode]);
+    });
+  }
+
+  function applyThemeMode(mode) {
+    const normalizedMode = normalizeThemeMode(mode);
+    document.documentElement.setAttribute('data-theme', normalizedMode);
+    renderThemeButtons(normalizedMode);
+    return normalizedMode;
+  }
+
+  function initThemeToggle() {
+    applyThemeMode(getStoredThemeMode());
+    document.addEventListener('click', (event) => {
+      const button = findThemeButton(event.target);
+      if (!button) return;
+
+      event.preventDefault();
+
+      const currentMode = normalizeThemeMode(document.documentElement.getAttribute('data-theme'));
+      const nextMode = THEME_MODES[(THEME_MODES.indexOf(currentMode) + 1) % THEME_MODES.length];
+      saveThemeMode(nextMode);
+      applyThemeMode(nextMode);
+    });
+  }
+
+  applyThemeMode(getStoredThemeMode());
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+  } else {
+    initThemeToggle();
+  }
+})();
 
 /**
  * 末尾添加 "/"

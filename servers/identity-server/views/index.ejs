@@ -8,15 +8,17 @@
     <title><%= tv('identity-server.index.page_title', 'Home', i18nLang) %></title>
     <% if (process.env.NODE_ENV === 'production') { %>
     <link rel="stylesheet" href="<%= baseURL %>style/index.min.css" />
+    <link rel="stylesheet" href="<%= baseURL %>style/liquid-glass.min.css" />
     <link rel="stylesheet" href="<%= baseURL %>style/container.min.css" />
     <% } else { %>
     <link rel="stylesheet" href="<%= baseURL %>style/index.css" />
+    <link rel="stylesheet" href="<%= baseURL %>style/liquid-glass.css" />
     <link rel="stylesheet" href="<%= baseURL %>style/container.css" />
     <% } %>
   </head>
   <body>
     <div class="container">
-      <div class="wrapper">
+      <div class="wrapper liquid-glass liquid-glass-card">
         <h1 class="title">Pomelo Identity Server</h1>
         <p class="description">
           This is an <a href="https://openid.net/specs/openid-connect-core-1_0.html" target="_blank"">OpenID Connect</a> and <a href="https://auth0.com/docs" target="_blank">OAuth 2.0</a> service for
@@ -24,5 +26,12 @@
         </p>
       </div>
     </div>
+    <% if (process.env.NODE_ENV === 'production') { %>
+    <script src="<%= baseURL %>js/gemini-2-0-gradient.min.js"></script>
+    <script src="<%= baseURL %>js/liquid-glass.min.js"></script>
+    <% } else { %>
+    <script src="<%= baseURL %>js/gemini-2-0-gradient.js"></script>
+    <script src="<%= baseURL %>js/liquid-glass.js"></script>
+    <% } %>
   </body>
 </html>

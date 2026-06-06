@@ -1,5 +1,5 @@
-import { Injectable, Inject, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { SyncOptions, CreationAttributes } from 'sequelize';
+import { Injectable, Inject, OnApplicationShutdown } from '@nestjs/common';
+import { CreationAttributes } from 'sequelize';
 import { IdentityDatasourceOptions } from './interfaces/identity-datasource-options.interface';
 import { DataInitArgs } from './interfaces/data-init-args.interface';
 import { Sequelize, SequelizeOptions } from './sequelize/sequelize';
@@ -27,7 +27,6 @@ import { IDENTITY_DATASOURCE_OPTIONS } from './constants';
 
 @Injectable()
 export class IdentityDatasourceService implements OnApplicationShutdown {
-  private readonly logger = new Logger(Sequelize.name, { timestamp: true });
   sequelize: Readonly<Sequelize>;
 
   constructor(@Inject(IDENTITY_DATASOURCE_OPTIONS) private readonly options: IdentityDatasourceOptions) {
@@ -82,41 +81,6 @@ export class IdentityDatasourceService implements OnApplicationShutdown {
 
   get translate() {
     return this.options.translate || ((key, fallback) => fallback);
-  }
-
-  /**
-   * 初始化数据库
-   * @author Hubert
-   * @since 2022-05-01
-   * @version 0.0.1
-   * @param options 初始化参数
-   * @returns true: 生成数据库成功；false: 跳过数据库生成(when 条件不满足) 否则抛出 Error
-   */
-  async syncDB(
-    options?: SyncOptions & { when?: boolean | ((sequelize: Readonly<Sequelize>) => Promise<boolean>) },
-  ): Promise<boolean> {
-    try {
-      await this.sequelize.authenticate();
-    } catch (err: any) {
-      this.logger.error(`Unable to connect to the database, Error: ${err.message}`);
-      throw err;
-    }
-
-    try {
-      // eslint-disable-next-line prefer-const
-      let { when = true, ...syncOptions } = options || {};
-      if (typeof when === 'function') {
-        when = await when.call(null, this.sequelize);
-      }
-      if (when) {
-        await this.sequelize.sync(syncOptions);
-        return true;
-      }
-      return false;
-    } catch (err: any) {
-      this.logger.error(`Unable to sync to the database, Error: ${err.message}`);
-      throw err;
-    }
   }
 
   /**

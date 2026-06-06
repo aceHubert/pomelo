@@ -1,13 +1,5 @@
-<script
-  src="<%= cdnPrefix %>promise-polyfill@8.3.0/dist/polyfill.min.js"
-  integrity="sha256-5VUVHmPEkupPBeztvK9Iis7P3xR9gU4ZILzvmwKJaKs="
-  crossorigin="anonymous"
-></script>
-<script
-  src="<%= cdnPrefix %>axios@1.6.7/dist/axios.min.js"
-  integrity="sha256-NDS2dZXGgHGCThQtB3zn4QXUCsQLFRZIltEeVAeNAhM="
-  crossorigin="anonymous"
-></script>
+<script src="<%= baseURL %>vendor/promise-polyfill/dist/polyfill.min.js"></script>
+<script src="<%= baseURL %>vendor/axios/dist/axios.min.js"></script>
 <script>
   var SUPPORTS_CORS = 'withCredentials' in new XMLHttpRequest();
   axios.defaults.withCredentials = SUPPORTS_CORS;

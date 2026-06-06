@@ -2,7 +2,7 @@ export const renderCheckSessionTemplate = ({
   pageTitle = 'Check Session IFrame',
   sessionName,
 }: {
-  globalPrefix: string;
+  assetsBaseURL: string;
   pageTitle?: string;
   sessionName: string;
 }) => {

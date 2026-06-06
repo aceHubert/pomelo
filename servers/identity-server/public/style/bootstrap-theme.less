@@ -7,24 +7,88 @@
   --bs-border-color: @var-border-base;
   --bs-secondary-color: @var-text-secondary;
   --bs-primary: @var-primary;
+  --bs-secondary-bg: @var-component-background;
+  --bs-tertiary-bg: @var-component-background;
+}
+
+.btn {
+  border-radius: 999px;
+}
+
+.min-w-\[120px\] {
+  min-width: 120px;
 }
 
 .btn-primary {
   --bs-btn-bg: @var-primary;
   --bs-btn-border-color: @var-primary;
-  --bs-btn-hover-bg: @var-primary-5;
-  --bs-btn-hover-border-color: @var-primary-5;
+  --bs-btn-hover-color: @var-text-inverse;
+  --bs-btn-hover-bg: @var-primary-7;
+  --bs-btn-hover-border-color: @var-primary-7;
   --bs-btn-focus-shadow-rgb: @var-primary;
-  --bs-btn-active-bg: @var-primary-7;
-  --bs-btn-active-border-color: @var-primary-7;
-  --bs-btn-disabled-bg: @var-primary;
-  --bs-btn-disabled-border-color: @var-primary;
+  --bs-btn-active-color: @var-text-inverse;
+  --bs-btn-active-bg: @var-primary-9;
+  --bs-btn-active-border-color: @var-primary-9;
+  --bs-btn-disabled-color: @var-text-inverse;
+  --bs-btn-disabled-bg: @var-grey-3;
+  --bs-btn-disabled-border-color: @var-grey-3;
 }
 
-.form-control:focus,
-.form-check-input:focus {
-  border-color: @var-primary-3;
-  box-shadow: 0 0 0 0.25rem @var-primary-1;
+.form-control:not(.liquid-glass-form-control),
+.form-select:not(.liquid-glass-form-select),
+.form-check-input {
+  &:focus,
+  &:focus-visible {
+    outline: none !important;
+    border-color: @var-primary-3;
+    box-shadow: none;
+  }
+}
+
+.form-control:not(.liquid-glass-form-control),
+.form-select:not(.liquid-glass-form-select) {
+  color: @var-text-primary !important;
+  background-color: @var-component-background !important;
+  border-color: @var-border-base;
+  caret-color: @var-text-primary;
+  color-scheme: light;
+
+  &:focus {
+    color: @var-text-primary !important;
+    background-color: @var-component-background !important;
+    caret-color: @var-text-primary;
+  }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: @var-text-primary;
+    caret-color: @var-text-primary;
+    box-shadow: 0 0 0 1000px @var-component-background inset;
+  }
+
+  &::placeholder {
+    color: currentColor !important;
+    opacity: 0.65;
+  }
+
+  &:disabled,
+  &[readonly] {
+    color: @var-text-secondary;
+    background-color: @var-grey-3;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .form-control:not(.liquid-glass-form-control),
+  :root:not([data-theme='light']) .form-select:not(.liquid-glass-form-select) {
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] .form-control:not(.liquid-glass-form-control),
+:root[data-theme='dark'] .form-select:not(.liquid-glass-form-select) {
+  color-scheme: dark;
 }
 
 .form-check-input:checked {

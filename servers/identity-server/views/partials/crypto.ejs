@@ -1,13 +1,5 @@
-<script
-  src="<%= cdnPrefix %>crypto-js@4.2.0/core.js"
-  integrity="sha256-Jji91yJEcvgBiQY21C3xbBRMpGyEIp7zCHGQ0h+TXa8="
-  crossorigin="anonymous"
-></script>
-<script
-  src="<%= cdnPrefix %>crypto-js@4.2.0/sha256.js"
-  integrity="sha256-2AdPI8vSeqbC8jG4va00u9jUnH5H/6DXzQeixNHTx5g="
-  crossorigin="anonymous"
-></script>
+<script src="<%= baseURL %>vendor/crypto-js/core.js"></script>
+<script src="<%= baseURL %>vendor/crypto-js/sha256.js"></script>
 <script>
   Object.defineProperties(String.prototype, {
     sha256: {

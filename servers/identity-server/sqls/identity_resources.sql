@@ -1,0 +1,5 @@
+-- 注意：表名中的 po_ 前缀需要人工替换。
+INSERT INTO `po_identity_resources` (`name`, `display_name`, `description`, `emphasize`, `required`, `show_in_discovery_document`, `non_editable`, `enabled`, `created_at`, `updated_at`) VALUES ('openid','Your account identifier',NULL,0,1,1,1,1,now(),now());
+INSERT INTO `po_identity_resources` (`name`, `display_name`, `description`, `emphasize`, `required`, `show_in_discovery_document`, `non_editable`, `enabled`, `created_at`, `updated_at`) VALUES ('profile','User profile','Your user profile information (first name, last name, etc.)',1,0,1,1,1,now(),now());
+INSERT INTO `po_identity_resources` (`name`, `display_name`, `description`, `emphasize`, `required`, `show_in_discovery_document`, `non_editable`, `enabled`, `created_at`, `updated_at`) VALUES ('phone','Your phone number',NULL,1,0,1,0,1,now(),now());
+INSERT INTO `po_identity_resources` (`name`, `display_name`, `description`, `emphasize`, `required`, `show_in_discovery_document`, `non_editable`, `enabled`, `created_at`, `updated_at`) VALUES ('email','Your email address',NULL,1,0,1,0,1,now(),now());

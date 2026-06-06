@@ -2,6 +2,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-babel');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   const lessOptions = {
     javascriptEnabled: true,
@@ -25,8 +26,12 @@ module.exports = function (grunt) {
           presets: ['@babel/preset-env'],
         },
         files: {
+          './public/js/gemini-2-0-gradient.min.js': './public/js/gemini-2-0-gradient.js',
+          './public/js/gemini-gradient.min.js': './public/js/gemini-gradient.js',
           './public/js/globals.min.js': './public/js/globals.js',
+          './public/js/liquid-glass.min.js': './public/js/liquid-glass.js',
           './public/js/login.min.js': './public/js/login.js',
+          './public/js/particles.min.js': './public/js/particles.js',
           './public/js/password.min.js': './public/js/password.js',
         },
       },
@@ -40,7 +45,10 @@ module.exports = function (grunt) {
           './public/style/bootstrap-theme.css': './public/style/bootstrap-theme.less',
           './public/style/container.css': './public/style/container.less',
           './public/style/index.css': './public/style/index.less',
+          './public/style/liquid-glass.css': './public/style/liquid-glass.less',
           './public/style/login.css': './public/style/login.less',
+          './public/style/logout.css': './public/style/logout.less',
+          './public/style/logout-success.css': './public/style/logout-success.less',
           './public/style/password.css': './public/style/password.less',
         },
       },
@@ -50,24 +58,42 @@ module.exports = function (grunt) {
           './public/style/bootstrap-theme.min.css': './public/style/bootstrap-theme.less',
           './public/style/container.min.css': './public/style/container.less',
           './public/style/index.min.css': './public/style/index.less',
+          './public/style/liquid-glass.min.css': './public/style/liquid-glass.less',
           './public/style/login.min.css': './public/style/login.less',
+          './public/style/logout.min.css': './public/style/logout.less',
+          './public/style/logout-success.min.css': './public/style/logout-success.less',
           './public/style/password.min.css': './public/style/password.less',
         },
+      },
+    },
+    // 当前用 nest build --watch + webpack + RunScriptWebpackPlugin 这条
+    // dev 链路不会长期保留 assets watcher。
+    // 所以需要用 grunt 来复制 assets 到 dist 目录。
+    copy: {
+      public: {
+        files: [
+          {
+            expand: true,
+            cwd: './public',
+            src: ['**/*', '!**/*.less'],
+            dest: '../../dist/servers/identity-server/public',
+          },
+        ],
       },
     },
     watch: {
       scripts: {
         files: ['./public/**/*.js', '!./public/**/*.min.js'],
-        tasks: ['babel'],
+        tasks: ['babel', 'copy:public'],
       },
       styles: {
         files: ['./public/**/*.less'],
-        tasks: ['less'],
+        tasks: ['less', 'copy:public'],
       },
     },
   });
 
   grunt.registerTask('default', ['babel', 'less']);
 
-  grunt.registerTask('dev', ['default', 'watch']);
+  grunt.registerTask('dev', ['default', 'copy:public', 'watch']);
 };

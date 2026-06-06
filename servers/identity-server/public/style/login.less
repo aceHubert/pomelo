@@ -2,11 +2,19 @@
 @import '_wrapper.less';
 @import '_form.less';
 
+body {
+  min-height: 100vh;
+  background-color: @var-body-background;
+  overflow: hidden; /* Prevent scrollbars if particles go out of bounds */
+}
+
 #app {
   min-height: 100vh;
-  // background: linear-gradient(153deg, #ffffff 0%, #f2f2f2 100%);
+  background-color: @var-body-background;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  position: relative;
+  z-index: 1;
 }

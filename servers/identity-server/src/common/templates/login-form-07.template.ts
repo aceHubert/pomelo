@@ -45,7 +45,7 @@ form .row:first-child {
   margin-bottom: 16px;
   position: relative;
 }
-.locale-btns{
+.action-btns{
   top: -4px;
   right: -4px;
 }
@@ -60,7 +60,7 @@ form .row:first-child {
   .title{
     position: static;
   }
-  .locale-btns{
+  .action-btns{
     top: 1rem;
     right: 1rem;
   }
@@ -153,7 +153,7 @@ form .row:first-child {
         <div class="row justify-content-center">
           <div class="col-md-8">
             <div class="title">
-              <%- locales %>
+              <%- actionBtns %>
               <h3><%= tv('identity-server.login.wrapper.title', 'Sign In') %></h3>
               <p class="mb-4"><%- tv('identity-server.login.wrapper.subtitle', 'to <strong>' + new URL(params.redirect_uri).host + '</strong>', {
                 args: {
@@ -162,7 +162,7 @@ form .row:first-child {
               }) %></p>
             </div>
             <%- form %>
-            <input type="submit" value="<%= tv('identity-server.login.wrapper.submit_btn_text', 'Sign In') %>" class="btn btn-primary submit" form="login-form">
+            <input type="submit" value="<%= tv('identity-server.login.wrapper.submit_btn_text', 'Sign In') %>" class="btn btn-primary submit min-w-[120px]" form="login-form">
           </div>
         </div>
       </div>

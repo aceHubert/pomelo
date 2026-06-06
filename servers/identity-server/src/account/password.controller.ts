@@ -12,7 +12,12 @@ import { OidcService } from 'nest-oidc-provider';
 import { random, normalizeRoutePath } from '@ace-pomelo/shared/server';
 import { BaseController } from '@/common/controllers/base.controller';
 import { renderPrimaryStyle } from '@/common/utils/render-primary-style-tag.util';
-import { getPasswordModifyTemplate, getPasswordForgotTemplate, getPasswordResetTemplate } from '@/common/templates';
+import {
+  getPasswordModifyTemplate,
+  getPasswordForgotTemplate,
+  getPasswordResetTemplate,
+  getActionBtns,
+} from '@/common/templates';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { AccountOptions } from './interfaces/account-options.interface';
 import { PasswordModifyDto, PasswordForgotDto, VerifyPhoneCodeDto, PasswordResetDto } from './dto/password.dto';
@@ -71,19 +76,19 @@ export class PasswordController extends BaseController {
     const wrapper =
       customWrapperTemplate ||
       `<div class="wrapper-placeholder">
-        <%- locales %>
-        <div class="wrapper">
+        <%- actionBtns %>
+        <div class="wrapper liquid-glass liquid-glass-card">
           <h1 class="title">${i18n.tv('identity-server.password.modify.wrapper.title', 'Modify password')}</h1>
           <%- form %>
           <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
               <div class="d-sm-inline-block gap-2 mt-2">
-                <button type="submit" class="btn btn-primary w-100" form="password-modify-form">
+                <button type="submit" class="btn btn-primary w-100 min-w-[120px]" form="password-modify-form">
                   ${i18n.tv('identity-server.password.modify.wrapper.submit_btn_text', 'Submit')}
                 </button>
               </div>
               <div class="d-sm-inline-block gap-2 mt-2">
-                <button id="cancle-btn" type="button" class="btn btn-light w-100">
+                <button id="cancle-btn" type="button" class="btn btn-light w-100 min-w-[120px]">
                   ${i18n.tv('identity-server.password.modify.wrapper.cancel_btn_text', 'Cancel')}
                 </button>
               </div>
@@ -111,7 +116,7 @@ export class PasswordController extends BaseController {
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
             <input
               type="text"
-              class="form-control"
+              class="form-control liquid-glass-form-control"
               id="username"
               name="username"
               placeholder="${i18n.tv(
@@ -139,7 +144,7 @@ export class PasswordController extends BaseController {
             <div style="position: relative">
               <input
                 type="password"
-                class="form-control password"
+                class="form-control liquid-glass-form-control password"
                 id="oldPassword"
                 name="oldPassword"
                 placeholder="${i18n.tv(
@@ -172,7 +177,7 @@ export class PasswordController extends BaseController {
             <div style="position: relative">
               <input
                 type="password"
-                class="form-control password"
+                class="form-control liquid-glass-form-control password"
                 id="newPassword"
                 name="newPassword"
                 placeholder="${i18n.tv(
@@ -208,7 +213,7 @@ export class PasswordController extends BaseController {
             <div style="position: relative">
               <input
                 type="password"
-                class="form-control password"
+                class="form-control liquid-glass-form-control password"
                 id="confirmPassword"
                 name="confirmPassword"
                 placeholder="${i18n.tv(
@@ -238,7 +243,7 @@ export class PasswordController extends BaseController {
       title: i18n.tv('identity-server.password.modify.page_title', 'Modify Password'),
       content: ejs.render(wrapper, {
         form,
-        locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
+        actionBtns: getActionBtns(req.url, i18n.service.resolveLanguage(i18n.lang)),
         tv: i18n.tv.bind(i18n),
         clientId: client?.clientId,
         clientName: client?.clientName,
@@ -331,19 +336,19 @@ export class PasswordController extends BaseController {
     const wrapper =
       customWrapperTemplate ||
       `<div class="wrapper-placeholder">
-        <%- locales %>
-        <div class="wrapper">
+        <%- actionBtns %>
+        <div class="wrapper liquid-glass liquid-glass-card">
           <h1 class="title">${i18n.tv('identity-server.password.forgot.wrapper.title', 'Find password')}</h1>
           <%- form %>
           <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
               <div class="d-sm-inline-block gap-2 mt-2">
-                <button type="submit" class="btn btn-primary w-100" form="password-forgot-form">
+                <button type="submit" class="btn btn-primary w-100 min-w-[120px]" form="password-forgot-form">
                   ${i18n.tv('identity-server.password.forgot.wrapper.submit_btn_text', 'Next')}
                 </button>
               </div>
               <div class="d-sm-inline-block gap-2 mt-2">
-                <button id="cancle-btn" type="button" class="btn btn-light w-100">
+                <button id="cancle-btn" type="button" class="btn btn-light w-100 min-w-[120px]">
                   ${i18n.tv('identity-server.password.forgot.wrapper.cancel_btn_text', 'Cancel')}
                 </button>
               </div>
@@ -364,7 +369,7 @@ export class PasswordController extends BaseController {
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
             <input
               type="text"
-              class="form-control"
+              class="form-control liquid-glass-form-control"
               id="username"
               name="username"
               placeholder="${i18n.tv(
@@ -387,7 +392,7 @@ export class PasswordController extends BaseController {
       title: i18n.tv('identity-server.password.forgot.page_title', 'Find Password'),
       content: ejs.render(wrapper, {
         form,
-        locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
+        actionBtns: getActionBtns(req.url, i18n.service.resolveLanguage(i18n.lang)),
         tv: i18n.tv.bind(i18n),
         clientId: client?.clientId,
         clientName: client?.clientName,
@@ -564,14 +569,14 @@ export class PasswordController extends BaseController {
     const wrapper =
       customWrapperTemplate ||
       `<div class="wrapper-placeholder">
-      <%- locales %>
-      <div class="wrapper">
+      <%- actionBtns %>
+      <div class="wrapper liquid-glass liquid-glass-card">
         <h1 class="title">${i18n.tv('identity-server.password.code_verify.wrapper.title', 'Code Verify')}</h1>
         <%- form %>
         <div class="row">
           <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
             <div class="d-sm-inline-block gap-2">
-              <button type="submit" class="btn btn-primary w-100" form="password-code-verify-form">
+              <button type="submit" class="btn btn-primary w-100 min-w-[120px]" form="password-code-verify-form">
                 ${i18n.tv('identity-server.password.code_verify.wrapper.submit_btn_text', 'Next')}
               </button>
             </div>
@@ -593,7 +598,7 @@ export class PasswordController extends BaseController {
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
             <input
               type="text"
-              class="form-control"
+              class="form-control liquid-glass-form-control"
               id="code"
               name="code"
               placeholder="${i18n.tv('identity-server.password.code_verify.form.code_placeholder', 'Input Code', {
@@ -641,7 +646,7 @@ export class PasswordController extends BaseController {
       title: i18n.tv('identity-server.password.verify_code.page_title', 'Verify Code'),
       content: ejs.render(wrapper, {
         form,
-        locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
+        actionBtns: getActionBtns(req.url, i18n.service.resolveLanguage(i18n.lang)),
         tv: i18n.tv.bind(i18n),
         clientId: client?.clientId,
         clientName: client?.clientName,
@@ -707,8 +712,8 @@ export class PasswordController extends BaseController {
 
     if (!stored) {
       const errorWrapper = `<div class="wrapper-placeholder">
-        <%- locales %>
-        <div class="wrapper">
+        <%- actionBtns %>
+        <div class="wrapper liquid-glass liquid-glass-card">
           <h1 class="title">${i18n.tv('identity-server.password.reset.wrapper.title', 'Reset password')}</h1>
           <div class="mt-8">
             <%- error %>
@@ -727,7 +732,7 @@ export class PasswordController extends BaseController {
               'The link is invalid!',
             )}</span>
           </p>`,
-          locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
+          actionBtns: getActionBtns(req.url, i18n.service.resolveLanguage(i18n.lang)),
           tv: i18n.tv.bind(i18n),
         }),
       });
@@ -765,14 +770,14 @@ export class PasswordController extends BaseController {
     const wrapper =
       customWrapperTemplate ||
       `<div class="wrapper-placeholder">
-        <%- locales %>
-        <div class="wrapper">
+        <%- actionBtns %>
+        <div class="wrapper liquid-glass liquid-glass-card">
           <h1 class="title">${i18n.tv('identity-server.password.reset.wrapper.title', 'Reset password')}</h1>
           <%- form %>
           <div class="row">
             <div class="${formLableDisplay ? 'col-sm-9 offset-sm-3' : ''}">
               <div class="d-sm-inline-block gap-2 mt-2">
-                <button type="submit" class="btn btn-primary w-100" form="password-reset-form">
+                <button type="submit" class="btn btn-primary w-100 min-w-[120px]" form="password-reset-form">
                   ${i18n.tv('identity-server.password.reset.wrapper.submit_btn_text', 'Reset')}
                 </button>
               </div>
@@ -795,7 +800,7 @@ export class PasswordController extends BaseController {
           <div style="position: relative">
             <input
               type="password"
-              class="form-control password"
+              class="form-control liquid-glass-form-control password"
               id="newPassword"
               name="newPassword"
               placeholder="${i18n.tv('identity-server.password.reset.form.new_password_placeholder', 'New Password')}"
@@ -828,7 +833,7 @@ export class PasswordController extends BaseController {
           <div style="position: relative">
             <input
               type="password"
-              class="form-control password"
+              class="form-control liquid-glass-form-control password"
               id="confirmPassword"
               name="confirmPassword"
               placeholder="${i18n.tv(
@@ -858,7 +863,7 @@ export class PasswordController extends BaseController {
       title: i18n.tv('identity-server.password.reset.page_title', 'Reset Password'),
       content: ejs.render(wrapper, {
         form,
-        locales: this.getLocaleBtns(req, i18n.service.resolveLanguage(i18n.lang)),
+        actionBtns: getActionBtns(req.url, i18n.service.resolveLanguage(i18n.lang)),
         tv: i18n.tv.bind(i18n),
         clientId: client?.clientId,
         clientName: client?.clientName,

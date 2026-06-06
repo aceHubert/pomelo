@@ -1,9 +1,11 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
+import { CountryCode } from 'libphonenumber-js';
 import { SequelizeOptions } from '../../datasource/sequelize/sequelize';
 
 export interface UserDatasourceOptions {
   connection: string | SequelizeOptions;
   tablePrefix?: string;
+  phoneRegionCode?: CountryCode;
   isGlobal?: boolean;
 }
 

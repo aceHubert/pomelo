@@ -60,12 +60,12 @@ body:after {
   font-size: 28px;
   color: #fff;
 }
-.locale-btns{
+.action-btns{
   top: 30px;
   right: 30px;
 }
 @media (max-width: 768px){
-  .locale-btns{
+  .action-btns{
     top: 1rem;
     right: 1rem;
   }
@@ -187,7 +187,7 @@ body:after {
 }
 </style>
 <section class="content">
-  <%- locales %>
+  <%- actionBtns %>
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-6 text-center mb-7">
@@ -203,7 +203,7 @@ body:after {
             },
           }) %></h3>
           <%- form %>
-          <button type="submit" class="btn btn-primary btn-lg submit px-3" form="login-form"><%= tv('identity-server.login.wrapper.submit_btn_text', 'Sign In') %></button>
+          <button type="submit" class="btn btn-primary btn-lg submit px-3 min-w-[120px]" form="login-form"><%= tv('identity-server.login.wrapper.submit_btn_text', 'Sign In') %></button>
         </div>
       </div>
     </div>

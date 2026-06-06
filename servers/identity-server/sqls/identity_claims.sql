@@ -1,3 +1,4 @@
+-- 注意：表名中的 po_ 前缀需要人工替换。
 INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('1','sub');
 INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','role');
 INSERT INTO `po_identity_claims` (`identity_resource_id`, `type`) VALUES ('2','login_name');

@@ -1,40 +1,67 @@
 import * as url from 'url';
+import { timingSafeEqual } from 'crypto';
 import wildcard from 'wildcard';
 import psl from 'psl';
 import { get, omitBy, isNil } from 'lodash';
 import {
-  FindAccount,
-  KoaContextWithOIDC,
-  CookiesSetOptions,
-  ClientMetadata,
-  ClientAuthMethod,
-  SigningAlgorithmWithNone,
-  Provider,
+  OidcConfiguration,
+  OidcModuleFactoryArgs,
+  OidcModuleOptions,
+  OidcModuleOptionsFactory,
   errors,
-} from 'oidc-provider';
-import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
+} from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { sha256, random, normalizeRoutePath } from '@ace-pomelo/shared/server';
+import { sha256, normalizeRoutePath, trailingSlash } from '@ace-pomelo/shared/server';
+import { getActionBtns } from '@/common/templates';
 import { ClientDataSource, IdentityResourceDataSource } from '../datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { getI18nFromContext } from './i18n.helper';
 import {
-  renderCheckSessionTemplate,
   renderLogoutSourceTempate,
+  renderSilentLogoutSourceTemplate,
   renderPostLogoutSuccessSourceTemplate,
   renderExceptionTemplate,
 } from './templates';
 import { policy } from './interaction_policy';
 import { OidcConfigAdapter } from './oidc-config.adapter';
 import { OidcConfigStorage } from './oidc-config.storage';
+import { OidcSessionMonitorExtension } from './oidc-session-monitor.extension';
 import { OidcConfigOptions } from './interfaces/oidc-config-options.interface';
 import { OIDC_CONFIG_OPTIONS } from './constants';
+
+import type {
+  FindAccount,
+  KoaContextWithOIDC,
+  CookiesSetOptions,
+  ClientMetadata,
+  ClientAuthMethod,
+  SigningAlgorithmWithNone,
+} from 'oidc-provider';
+
+function paddedBuffer(value: string, length: number) {
+  const buffer = Buffer.alloc(length, undefined, 'utf8');
+  buffer.write(value);
+  return buffer;
+}
+
+function constantEquals(a: string, b: string, minComp = 0) {
+  if (!Number.isSafeInteger(minComp)) {
+    throw new TypeError('minComp must be an Integer');
+  }
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    throw new TypeError('arguments must be strings');
+  }
+  const length = Math.max(a.length, b.length, minComp);
+  return timingSafeEqual(paddedBuffer(a, length), paddedBuffer(b, length));
+}
 
 @Injectable()
 export class OidcConfigService implements OidcModuleOptionsFactory {
   private logger = new Logger(OidcConfigService.name, { timestamp: true });
+  private routePrefix = '/connect';
+  private sessionMonitorExtension = new OidcSessionMonitorExtension();
 
   constructor(
     @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
@@ -49,6 +76,10 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     return normalizeRoutePath(appConfig?.getGlobalPrefix() ?? '');
   }
 
+  private get assetsBaseURL(): string {
+    return trailingSlash(this.globalPrefix);
+  }
+
   private get oidcPath(): string {
     return normalizeRoutePath(this.options.path ?? '/oidc');
   }
@@ -60,8 +91,8 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       path: this.oidcPath,
       oidc: await this.getConfiguration(),
       proxy: true,
-      factory: (issuer, config) => {
-        const provider = new Provider(issuer, config);
+      factory: ({ issuer, config, module }: OidcModuleFactoryArgs) => {
+        const provider = new module.Provider(issuer, config);
         // allow http,localhost in development mode
         if (this.options.debug) {
           // Allowing HTTP and/or localhost for implicit response type web clients
@@ -98,48 +129,29 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         };
         // Skip redirecting invalid request error to client
         // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_redirect.md
-        Object.defineProperty(errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
+        Object.defineProperty(module.errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
 
         // Update client secret comparison and multiple client secrets support
         // use SHA256 of input to compare with stored value
-        const constantEquals = require('oidc-provider/lib/helpers/constant_equals');
         provider.Client.prototype.compareClientSecret = function compareClientSecret(actual: string) {
           actual = sha256(actual, { enabledHmac: true }).toString();
           // TODO: multiple client secrets support
 
-          return constantEquals(this.clientSecret, actual, 1000);
+          return constantEquals(this.clientSecret ?? '', actual, 1000);
         };
 
-        // checksession endpoint
-        // @ts-expect-error no types
-        const sessionName = provider.cookieName('session');
-        const checkSessionRoute = '/connect/checksession';
-        const discoveryRoute = '/.well-known/openid-configuration';
         provider.use(async (ctx, next) => {
           // set issuer dynamically
           // @ts-expect-error readonly types
           provider.issuer = `${ctx.origin}${this.globalPrefix}${this.oidcPath}`;
 
-          if (ctx.method === 'GET' && ctx.path === checkSessionRoute) {
-            ctx.type = 'html';
-            ctx.status = 200;
-            ctx.body = renderCheckSessionTemplate({ globalPrefix: this.globalPrefix, sessionName });
-          }
           await next();
-
-          if (ctx.oidc?.route === 'discovery') {
-            ctx.body.check_session_iframe = ctx.oidc.urlFor('discovery').replace(discoveryRoute, checkSessionRoute);
-          }
         });
-
-        // checksession session_state
-        provider.on('authorization.success', async (ctx: KoaContextWithOIDC, response: Record<string, any>) => {
-          if (!response) return;
-
-          const sessionState = this.generateSessionStateValue(ctx);
-          if (sessionState) {
-            response.session_state = sessionState;
-          }
+        this.sessionMonitorExtension.install(provider, {
+          globalPrefix: this.globalPrefix,
+          oidcPath: this.oidcPath,
+          assetsBaseURL: this.assetsBaseURL,
+          checkSessionRoute: `${this.routePrefix}/checksession`,
         });
 
         // server error
@@ -244,17 +256,17 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         required: (ctx, client) => client.metadata()['require_pkce'] === true,
       },
       routes: {
-        authorization: '/connect/authorize',
-        backchannel_authentication: '/connect/backchannel',
-        code_verification: '/connect/device',
-        device_authorization: '/connect/deviceauthorize',
-        pushed_authorization_request: '/connect/request',
-        token: '/connect/token',
-        userinfo: '/connnect/userinfo',
-        registration: '/connect/clients',
-        end_session: '/connect/endsession',
-        introspection: '/connect/introspect',
-        revocation: '/connect/revocation',
+        authorization: `${this.routePrefix}/authorize`,
+        backchannel_authentication: `${this.routePrefix}/backchannel`,
+        code_verification: `${this.routePrefix}/device`,
+        device_authorization: `${this.routePrefix}/deviceauthorize`,
+        pushed_authorization_request: `${this.routePrefix}/request`,
+        token: `${this.routePrefix}/token`,
+        userinfo: `${this.routePrefix}/userinfo`,
+        registration: `${this.routePrefix}/clients`,
+        end_session: `${this.routePrefix}/endsession`,
+        introspection: `${this.routePrefix}/introspect`,
+        revocation: `${this.routePrefix}/revocation`,
       },
       interactions: {
         policy,
@@ -359,13 +371,19 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         },
         rpInitiatedLogout: {
           logoutSource: async (ctx, form) => {
+            if (ctx.oidc.params?.logout_hint === 'silent') {
+              ctx.type = 'html';
+              ctx.body = renderSilentLogoutSourceTemplate({ form });
+              return;
+            }
+
             const i18n = getI18nFromContext(ctx);
             const primaryColor = get(ctx.oidc.client?.metadata()['extra_properties'], 'primaryColor');
             // @param ctx - koa request context
             // @param form - form source (id="op.logoutForm") to be embedded in the page and submitted by
             //   the End-User
             ctx.body = renderLogoutSourceTempate({
-              globalPrefix: this.globalPrefix,
+              assetsBaseURL: this.assetsBaseURL,
               pageTitle: i18n.tv('identity-server.oidc.config.logout.confirm_page_title', `Logout Request`),
               content: {
                 title: i18n.tv(
@@ -380,6 +398,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
                 cancelBtnText: i18n.tv('identity-server.oidc.config.logout.cancel_btn_text', 'No, stay signed in'),
               },
               primaryColor,
+              actionBtns: getActionBtns(ctx.url, i18n.service.resolveLanguage(i18n.lang)),
             });
           },
           postLogoutSuccessSource: (ctx) => {
@@ -388,7 +407,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
             const { clientId, clientName } = ctx.oidc.client || {}; // client is defined if the user chose to stay logged in with the OP
             const display = clientName || clientId;
             ctx.body = renderPostLogoutSuccessSourceTemplate({
-              globalPrefix: this.globalPrefix,
+              assetsBaseURL: this.assetsBaseURL,
               pageTitle: i18n.tv('identity-server.oidc.config.logout.success_page_title', `Sign-out Success`),
               content: {
                 title: i18n.tv('identity-server.oidc.config.logout.success_title', 'Sign-out Success'),
@@ -403,6 +422,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
                   : i18n.tv('identity-server.oidc.config.logout.success_description', `Your sign-out was successful.`),
               },
               primaryColor,
+              actionBtns: getActionBtns(ctx.url, i18n.service.resolveLanguage(i18n.lang)),
             });
           },
         },
@@ -534,7 +554,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
         ctx.type = 'html';
         ctx.body = renderExceptionTemplate({
-          globalPrefix: this.globalPrefix,
+          assetsBaseURL: this.assetsBaseURL,
           pageTitle,
           content: {
             title,
@@ -797,23 +817,5 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
     } catch (err) {
       return false;
     }
-  }
-
-  private generateSessionStateValue(ctx: KoaContextWithOIDC) {
-    if (!ctx) return;
-    if (!ctx.oidc.requestParamScopes.has('openid')) return;
-
-    if (!ctx.oidc.session) return;
-
-    if (!ctx.oidc.client) return;
-    if (!ctx.oidc.params?.redirect_uri) return;
-
-    const sessionId = ctx.oidc.session.jti;
-    const clientId = ctx.oidc.client.clientId;
-    const { origin } = new url.URL(ctx.oidc.params.redirect_uri as string);
-    const salt = random(16).toString();
-    const hash = sha256(`${clientId}${origin}${sessionId}${salt}`).toBase64Url();
-
-    return `${hash}.${salt}`;
   }
 }

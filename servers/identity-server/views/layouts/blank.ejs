@@ -7,6 +7,16 @@
     <link rel="icon" type="image/x-icon" href="<%= baseURL %>favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="<%= baseURL %>favicon.ico" />
     <title><%- title %></title>
+    <script>
+      (function () {
+        var mode = 'system';
+        try {
+          mode = localStorage.getItem('__POMELO_THEME__') || mode;
+        } catch (error) {}
+        if (['system', 'dark', 'light'].indexOf(mode) < 0) mode = 'system';
+        document.documentElement.setAttribute('data-theme', mode);
+      })();
+    </script>
     <% if (process.env.NODE_ENV === 'production') { %>
     <link rel="stylesheet" href="<%= baseURL %>style/index.min.css" />
     <%} else { %>

@@ -1,3 +1,4 @@
+-- 注意：表名中的 po_ 前缀需要人工替换。
 INSERT INTO `po_client_scopes` (`client_id`, `scope`) VALUES ('1','openid');
 INSERT INTO `po_client_scopes` (`client_id`, `scope`) VALUES ('1','profile');
 INSERT INTO `po_client_scopes` (`client_id`, `scope`) VALUES ('1','offline_access');

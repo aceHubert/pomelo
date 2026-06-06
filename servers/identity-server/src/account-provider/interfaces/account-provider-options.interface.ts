@@ -80,11 +80,17 @@ export interface AccountProviderOptionsFactory {
     | Omit<AccountProviderOptions, 'isGlobal'>;
 }
 
+export type AccountProviderUse = 'database' | 'microservice';
+
 export interface AccountProviderAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
   /**
    * is global module
    */
   isGlobal?: boolean;
+  /**
+   * account provider implementation
+   */
+  providerUse: AccountProviderUse;
   useExisting?: Type<AccountProviderOptionsFactory>;
   useClass?: Type<AccountProviderOptionsFactory>;
   useFactory?: (

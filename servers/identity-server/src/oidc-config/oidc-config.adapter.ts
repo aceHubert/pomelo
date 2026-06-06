@@ -21,14 +21,14 @@ export class OidcConfigAdapter implements Adapter {
   }
 
   async consume(id: string): Promise<void> {
-    this.storage.consume(this.modelName, id);
+    await this.storage.consume(this.modelName, id);
   }
 
   async destroy(id: string): Promise<void> {
-    this.storage.destroy(this.modelName, id);
+    await this.storage.destroy(this.modelName, id);
   }
 
   async revokeByGrantId(grantId: string): Promise<void> {
-    this.storage.revokeByGrantId(grantId);
+    await this.storage.revokeByGrantId(grantId);
   }
 }

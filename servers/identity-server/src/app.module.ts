@@ -27,18 +27,33 @@ import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { IdentityDatasourceModule } from './datasource/datasource.module';
+import { IdentityMigrationService } from './datasource';
 import { ApisModule } from './apis/apis.module';
 import { AccountProviderModule } from './account-provider/account-provider.module';
+import { AccountProviderUse } from './account-provider/interfaces/account-provider-options.interface';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { IdentityMigrationService } from './migration.service';
 
 // extends
 import './common/extends/i18n.extend';
 import './common/extends/observable.extend';
+
+// Node 20+ 的动态 import 会返回 null-prototype module namespace。
+// nest-oidc-provider 会把它注册为 provider，@nestjs/graphql 扫描时需要 constructor。
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const oidcProviderEsmHelper = require('nest-oidc-provider/dist/helpers/esm.helper') as {
+  importOidcProvider: () => Promise<Record<string, unknown>>;
+};
+
+function patchOidcProviderImportHelper() {
+  const importOidcProvider = oidcProviderEsmHelper.importOidcProvider;
+  oidcProviderEsmHelper.importOidcProvider = async () => ({ ...(await importOidcProvider()) });
+}
+
+patchOidcProviderImportHelper();
 
 const logger = new Logger('AppModule', { timestamp: true });
 
@@ -194,7 +209,7 @@ const logger = new Logger('AppModule', { timestamp: true });
                 collate: config.get('IDENTITY_DATABASE_COLLATE', ''),
               },
             },
-        tablePrefix: config.get('TABLE_PREFIX'),
+        tablePrefix: config.get('IDENTITY_DATABASE_TABLE_PREFIX'),
         translate: (key, fallback, args) =>
           i18n?.translate(key, {
             defaultValue: fallback,
@@ -206,6 +221,7 @@ const logger = new Logger('AppModule', { timestamp: true });
     ApisModule,
     AccountProviderModule.forRootAsync({
       isGlobal: true,
+      providerUse: (process.env.ACCOUNT_PROVIDER || 'database') as AccountProviderUse,
     }),
     AccountModule.forRootAsync({
       useFactory: (storageOptions: StorageOptions) => ({

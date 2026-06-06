@@ -8,8 +8,11 @@ OIDC 专用镜像使用根目录 `Dockerfile.oidc` 构建，只运行 `identity-
 ```bash
 docker build -f Dockerfile.oidc -t pomelo-oidc .
 docker run --rm -p 3000:3000 \
-  -e ACCOUNT_PROVIDER=direct-db \
-  -e IDENTITY_DATABASE_CONNECTION=mysql://user:password@host:3306/po_template \
+  -e IDENTITY_DATABASE_CONNECTION=mysql://user:password@host:3306/po_identity \
+  -e IDENTITY_DATABASE_TABLE_PREFIX=po_ \
+  -e USER_DATABASE_CONNECTION=mysql://user:password@host:3306/po_template \
+  -e USER_DATABASE_TABLE_PREFIX=po_ \
+  -e ACCOUNT_PROVIDER=database \
   pomelo-oidc
 ```
 

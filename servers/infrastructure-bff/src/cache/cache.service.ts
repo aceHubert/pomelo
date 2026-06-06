@@ -2,7 +2,7 @@ import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createCache, KeyvAdapter } from 'cache-manager';
 import Redis from 'ioredis';
-import { Keyv } from 'keyv';
+import Keyv from 'keyv';
 import { MemoryCacheStore } from './memory.store';
 import { RedisCacheStore } from './redis.store';
 
