@@ -115,22 +115,24 @@ export class LoginController extends BaseController {
           formLableDisplay
             ? `<label for="username" class="col-sm-3 col-form-label">
                 ${i18n.tv('identity-server.login.form.username_label', 'Username')}
-              </label>`
+          </label>`
             : ''
         }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <input
-              type="text"
-              class="form-control liquid-glass-form-control"
-              id="username"
-              name="username"
-              placeholder="${i18n.tv('identity-server.login.form.username_placeholder', 'Login Name/Email/Phone')}"
-              ${!params.login_hint ? `autofocus="on"` : `value="${params.login_hint}"`}
-              required
-              maxlength="50"
-            />
-            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('identity-server.login.form.username_invalid', 'Please input username!')}
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                placeholder="${i18n.tv('identity-server.login.form.username_placeholder', 'Login Name/Email/Phone')}"
+                ${!params.login_hint ? `autofocus="on"` : `value="${params.login_hint}"`}
+                required
+                maxlength="50"
+              />
+              <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+                ${i18n.tv('identity-server.login.form.username_invalid', 'Please input username!')}
+              </div>
             </div>
           </div>
         </div>
@@ -143,10 +145,10 @@ export class LoginController extends BaseController {
              : ''
          }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <div style="position: relative">
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
               <input
                 type="password"
-                class="form-control liquid-glass-form-control password"
+                class="form-control password"
                 id="password"
                 name="password"
                 placeholder="${i18n.tv('identity-server.login.form.password_placeholder', 'Password')}"

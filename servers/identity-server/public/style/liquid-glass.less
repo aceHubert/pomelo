@@ -9,11 +9,6 @@
   border: 0;
   background-color: transparent;
 
-  > * {
-    position: relative;
-    z-index: 1;
-  }
-
   &::before,
   &::after {
     content: '';
@@ -89,81 +84,120 @@
   }
 }
 
-.liquid-glass-form-control,
-.liquid-glass-form-select {
+.liquid-glass-form-control-wrapper {
+  position: relative;
+  overflow: visible;
+  margin-bottom: 0;
   min-height: 44px;
-  padding: 0.625rem 1rem;
-  color: @var-text-primary !important;
-  background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.16),
-      rgba(255, 255, 255, 0.05) 58%,
-      rgba(255, 255, 255, 0.1)
-    ),
-    rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.38);
   border-radius: 999px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 -8px 22px inset rgba(0, 0, 0, 0.08),
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16), 0 -18px 40px inset rgba(0, 0, 0, 0.1),
     0 1px 2px inset rgba(255, 255, 255, 0.24);
-  caret-color: @var-text-primary;
-  transition: background-color 0.18s ease, border-color 0.18s ease;
+  transition: margin-bottom 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
 
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.42);
+  &::before {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0));
+    mix-blend-mode: screen;
+    opacity: 0.22;
   }
 
-  &:focus {
+  &::after {
+    padding: 1.5px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.42) 58%, rgba(255, 255, 255, 0));
+    box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.48) inset, 0 1px 3px rgba(255, 255, 255, 0.22) inset,
+      0 1px 4px rgba(0, 0, 0, 0.28);
+    opacity: 0.72;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .form-control {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.625rem 1rem;
     color: @var-text-primary !important;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.2),
-        rgba(255, 255, 255, 0.07) 58%,
-        rgba(255, 255, 255, 0.12)
-      ),
-      rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.56);
-    outline: none !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 -8px 22px inset rgba(0, 0, 0, 0.08),
-      0 1px 2px inset rgba(255, 255, 255, 0.24);
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    caret-color: @var-text-primary;
   }
 
-  &::placeholder {
+  .form-control:focus {
+    color: @var-text-primary !important;
+    background: transparent !important;
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .form-control::placeholder {
     color: @var-text-secondary !important;
     opacity: 0.72;
   }
 
-  &:disabled,
-  &[readonly] {
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.48);
+  }
+
+  &:focus-within {
+    border-color: rgba(255, 255, 255, 0.58);
+    box-shadow: 0 14px 42px rgba(0, 0, 0, 0.18), 0 -18px 42px inset rgba(0, 0, 0, 0.11),
+      0 1px 3px inset rgba(255, 255, 255, 0.32);
+  }
+
+  .form-control:disabled,
+  .form-control[readonly] {
     color: @var-text-secondary !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)), rgba(255, 255, 255, 0.04) !important;
-    border-color: rgba(255, 255, 255, 0.18);
+    background: transparent !important;
+  }
+
+  &:has(.form-control:disabled),
+  &:has(.form-control[readonly]) {
+    border-color: rgba(255, 255, 255, 0.14);
     box-shadow: 0 1px 2px inset rgba(255, 255, 255, 0.12);
     transform: none;
   }
 
   &.is-invalid,
-  .was-validated &:invalid {
+  &:has(.form-control.is-invalid),
+  .was-validated &:has(.form-control:invalid) {
+    margin-bottom: 1.5rem;
     border-color: fade(@error-color, 70%);
-    box-shadow: 0 0 0 2px fade(@error-color, 14%), 0 4px 12px rgba(0, 0, 0, 0.12), 0 -8px 22px inset rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 2px fade(@error-color, 14%), 0 12px 40px rgba(0, 0, 0, 0.16),
+      0 -18px 40px inset rgba(0, 0, 0, 0.1);
   }
 
   &.is-valid,
-  .was-validated &:valid {
+  &:has(.form-control.is-valid),
+  .was-validated &:has(.form-control:valid) {
     border-color: fade(@success-color, 58%);
   }
 
-  &:-webkit-autofill,
-  &:-webkit-autofill:hover,
-  &:-webkit-autofill:focus {
+  .form-control:-webkit-autofill,
+  .form-control:-webkit-autofill:hover,
+  .form-control:-webkit-autofill:focus {
     -webkit-text-fill-color: @var-text-primary;
     caret-color: @var-text-primary;
     transition: background-color 9999s ease-in-out 0s;
-    box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.08) inset, 0 4px 12px rgba(0, 0, 0, 0.12),
-      0 -8px 22px inset rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 1000px transparent inset !important;
   }
 }
 
-textarea.liquid-glass-form-control {
+.liquid-glass-form-control-wrapper > .invalid-feedback {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  left: 0;
+  z-index: 2;
+  width: auto;
+  margin-top: 0;
+}
+
+.liquid-glass-form-control-wrapper:has(textarea.form-control) {
   border-radius: 18px;
 }
 
@@ -175,6 +209,20 @@ textarea.liquid-glass-form-control {
   :root:not([data-theme='light']) .liquid-glass-button {
     background: rgba(12, 14, 20, 0.18);
   }
+
+  :root:not([data-theme='light']) .liquid-glass-form-control-wrapper {
+    background: rgba(12, 14, 20, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.32);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), 0 -12px 28px inset rgba(0, 0, 0, 0.16),
+      0 1px 2px inset rgba(255, 255, 255, 0.28), 0 0 0 1px inset rgba(255, 255, 255, 0.12),
+      0 1px 4px rgba(255, 255, 255, 0.12);
+  }
+
+  :root:not([data-theme='light']) .liquid-glass-form-control-wrapper .form-control {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
 }
 
 :root[data-theme='dark'] .liquid-glass-card {
@@ -183,4 +231,18 @@ textarea.liquid-glass-form-control {
 
 :root[data-theme='dark'] .liquid-glass-button {
   background: rgba(12, 14, 20, 0.18);
+}
+
+:root[data-theme='dark'] .liquid-glass-form-control-wrapper {
+  background: rgba(12, 14, 20, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22), 0 -12px 28px inset rgba(0, 0, 0, 0.16),
+    0 1px 2px inset rgba(255, 255, 255, 0.28), 0 0 0 1px inset rgba(255, 255, 255, 0.12),
+    0 1px 4px rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme='dark'] .liquid-glass-form-control-wrapper .form-control {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }

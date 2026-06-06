@@ -15,7 +15,7 @@ form {
 }
 
 .form-control.password {
-  padding-right: calc(1.5em + 0.75rem);
+  padding-right: calc(2em + 0.75rem);
 
   ~ .eye {
     display: none;
@@ -24,6 +24,7 @@ form {
     right: 0;
     height: 100%;
     padding-right: calc(1.5em + 0.75rem);
+    margin-right: 0.5em;
     background: url(../icon/eye.svg) no-repeat center center;
     background-repeat: no-repeat;
     background-position: right calc(0.375em + 0.1875rem) center;
@@ -72,6 +73,6 @@ form {
   }
 
   .was-validated &:valid ~ .form-check-label {
-    color: initial;
+    color: @var-text-primary;
   }
 }

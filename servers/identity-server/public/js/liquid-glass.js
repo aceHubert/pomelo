@@ -4,8 +4,7 @@
 (function () {
   'use strict';
 
-  var TARGET_SELECTOR =
-    '.liquid-glass, .liquid-glass-card, .liquid-glass-button, .liquid-glass-form-control, .liquid-glass-form-select';
+  var TARGET_SELECTOR = '.liquid-glass, .liquid-glass-card, .liquid-glass-button, .liquid-glass-form-control-wrapper';
   var FILTERED_CLASS = 'liquid-glass--ready';
   var PROFILES = {
     base: {
@@ -40,6 +39,17 @@
       edgeWidth: 0.12,
       mousePull: 0.16,
       radius: 0.72,
+    },
+    input: {
+      blur: 20,
+      contrast: 1,
+      brightness: 1,
+      saturation: 1.4,
+      displacementScale: 100,
+      chromaticAberration: 10,
+      edgeWidth: 0.18,
+      mousePull: 0.08,
+      radius: 0.64,
     },
   };
   var instances = [];
@@ -85,11 +95,10 @@
 
   function getProfile(element) {
     if (element.classList.contains('liquid-glass-card')) return PROFILES.card;
-    if (
-      element.classList.contains('liquid-glass-button') ||
-      element.classList.contains('liquid-glass-form-control') ||
-      element.classList.contains('liquid-glass-form-select')
-    ) {
+    if (element.classList.contains('liquid-glass-form-control-wrapper')) {
+      return PROFILES.input;
+    }
+    if (element.classList.contains('liquid-glass-button')) {
       return PROFILES.button;
     }
     return PROFILES.base;
@@ -361,9 +370,9 @@
     }
   }
 
+  initialize();
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initialize);
-  } else {
-    initialize();
   }
 })();

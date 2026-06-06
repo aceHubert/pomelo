@@ -34,8 +34,8 @@
   --bs-btn-disabled-border-color: @var-grey-3;
 }
 
-.form-control:not(.liquid-glass-form-control),
-.form-select:not(.liquid-glass-form-select),
+.form-control,
+.form-select,
 .form-check-input {
   &:focus,
   &:focus-visible {
@@ -45,8 +45,8 @@
   }
 }
 
-.form-control:not(.liquid-glass-form-control),
-.form-select:not(.liquid-glass-form-select) {
+.form-control,
+.form-select {
   color: @var-text-primary !important;
   background-color: @var-component-background !important;
   border-color: @var-border-base;
@@ -80,14 +80,14 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .form-control:not(.liquid-glass-form-control),
-  :root:not([data-theme='light']) .form-select:not(.liquid-glass-form-select) {
+  :root:not([data-theme='light']) .form-control,
+  :root:not([data-theme='light']) .form-select {
     color-scheme: dark;
   }
 }
 
-:root[data-theme='dark'] .form-control:not(.liquid-glass-form-control),
-:root[data-theme='dark'] .form-select:not(.liquid-glass-form-select) {
+:root[data-theme='dark'] .form-control,
+:root[data-theme='dark'] .form-select {
   color-scheme: dark;
 }
 
@@ -101,7 +101,7 @@
   --bs-btn-bg: @var-component-background;
   --bs-btn-border-color: @var-border-base;
   --bs-btn-hover-color: @var-text-primary;
-  --bs-btn-hover-bg: @var-grey-3;
+  --bs-btn-hover-bg: @var-component-background-soft;
   --bs-btn-hover-border-color: @var-border-base;
 }
 

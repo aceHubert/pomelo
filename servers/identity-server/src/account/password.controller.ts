@@ -114,21 +114,23 @@ export class PasswordController extends BaseController {
             : ''
         }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <input
-              type="text"
-              class="form-control liquid-glass-form-control"
-              id="username"
-              name="username"
-              placeholder="${i18n.tv(
-                'identity-server.password.modify.form.username_placeholder',
-                'Login Name/Email/Phone',
-              )}"
-              ${!loginName ? `autofocus="on"` : `value="${loginName}" readonly`}
-              required
-              maxlength="50"
-            />
-            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('identity-server.password.modify.form.username_invalid', 'Please input username!')}
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                placeholder="${i18n.tv(
+                  'identity-server.password.modify.form.username_placeholder',
+                  'Login Name/Email/Phone',
+                )}"
+                ${!loginName ? `autofocus="on"` : `value="${loginName}" readonly`}
+                required
+                maxlength="50"
+              />
+              <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+                ${i18n.tv('identity-server.password.modify.form.username_invalid', 'Please input username!')}
+              </div>
             </div>
           </div>
         </div>
@@ -141,10 +143,10 @@ export class PasswordController extends BaseController {
             : ''
         }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <div style="position: relative">
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
               <input
                 type="password"
-                class="form-control liquid-glass-form-control password"
+                class="form-control password"
                 id="oldPassword"
                 name="oldPassword"
                 placeholder="${i18n.tv(
@@ -174,10 +176,10 @@ export class PasswordController extends BaseController {
             : ''
         }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <div style="position: relative">
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
               <input
                 type="password"
-                class="form-control liquid-glass-form-control password"
+                class="form-control password"
                 id="newPassword"
                 name="newPassword"
                 placeholder="${i18n.tv(
@@ -210,10 +212,10 @@ export class PasswordController extends BaseController {
             : ''
         }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <div style="position: relative">
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
               <input
                 type="password"
-                class="form-control liquid-glass-form-control password"
+                class="form-control password"
                 id="confirmPassword"
                 name="confirmPassword"
                 placeholder="${i18n.tv(
@@ -367,21 +369,23 @@ export class PasswordController extends BaseController {
             : ''
         }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <input
-              type="text"
-              class="form-control liquid-glass-form-control"
-              id="username"
-              name="username"
-              placeholder="${i18n.tv(
-                'identity-server.password.forgot.form.username_placeholder',
-                'Login Name/Email/Mobild',
-              )}"
-              autofocus="on"
-              required
-              maxlength="50"
-            />
-            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('identity-server.password.forgot.form.username_invalid', 'Please input username!')}
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                name="username"
+                placeholder="${i18n.tv(
+                  'identity-server.password.forgot.form.username_placeholder',
+                  'Login Name/Email/Mobild',
+                )}"
+                autofocus="on"
+                required
+                maxlength="50"
+              />
+              <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+                ${i18n.tv('identity-server.password.forgot.form.username_invalid', 'Please input username!')}
+              </div>
             </div>
           </div>
         </div>
@@ -596,23 +600,25 @@ export class PasswordController extends BaseController {
             : ''
         }
           <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-            <input
-              type="text"
-              class="form-control liquid-glass-form-control"
-              id="code"
-              name="code"
-              placeholder="${i18n.tv('identity-server.password.code_verify.form.code_placeholder', 'Input Code', {
-                args: {
-                  length: codeLength,
-                },
-              })}"
-              autofocus="on"
-              required
-              maxlength="${codeLength}"
-              minlength="${codeLength}"
-            />
-            <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
-              ${i18n.tv('identity-server.password.code_verify.form.code_invalid', 'Please input correct code!')}
+            <div class="liquid-glass liquid-glass-form-control-wrapper">
+              <input
+                type="text"
+                class="form-control"
+                id="code"
+                name="code"
+                placeholder="${i18n.tv('identity-server.password.code_verify.form.code_placeholder', 'Input Code', {
+                  args: {
+                    length: codeLength,
+                  },
+                })}"
+                autofocus="on"
+                required
+                maxlength="${codeLength}"
+                minlength="${codeLength}"
+              />
+              <div class="invalid-${formValidateTooltip ? 'tooltip' : 'feedback'}">
+                ${i18n.tv('identity-server.password.code_verify.form.code_invalid', 'Please input correct code!')}
+              </div>
             </div>
             <div class="text--secondary">
               <small id="expiresIn"></small>
@@ -797,10 +803,10 @@ export class PasswordController extends BaseController {
           : ''
       }
         <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-          <div style="position: relative">
+          <div class="liquid-glass liquid-glass-form-control-wrapper">
             <input
               type="password"
-              class="form-control liquid-glass-form-control password"
+              class="form-control password"
               id="newPassword"
               name="newPassword"
               placeholder="${i18n.tv('identity-server.password.reset.form.new_password_placeholder', 'New Password')}"
@@ -830,10 +836,10 @@ export class PasswordController extends BaseController {
           : ''
       }
         <div class="${formLableDisplay ? 'col-sm-9' : ''}">
-          <div style="position: relative">
+          <div class="liquid-glass liquid-glass-form-control-wrapper">
             <input
               type="password"
-              class="form-control liquid-glass-form-control password"
+              class="form-control password"
               id="confirmPassword"
               name="confirmPassword"
               placeholder="${i18n.tv(
