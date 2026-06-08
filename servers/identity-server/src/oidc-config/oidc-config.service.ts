@@ -3,8 +3,12 @@ import { timingSafeEqual } from 'crypto';
 import wildcard from 'wildcard';
 import psl from 'psl';
 import { get, omitBy, isNil } from 'lodash';
-import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
-import { Provider } from 'oidc-provider';
+import {
+  OidcConfiguration,
+  OidcModuleFactoryArgs,
+  OidcModuleOptions,
+  OidcModuleOptionsFactory,
+} from 'nest-oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable, Inject, Logger } from '@nestjs/common';
@@ -32,7 +36,6 @@ import type {
   ClientMetadata,
   ClientAuthMethod,
   SigningAlgorithmWithNone,
-  Configuration,
 } from 'oidc-provider';
 
 type OidcProviderErrors = {
@@ -41,9 +44,23 @@ type OidcProviderErrors = {
   InvalidClient: new (description?: string, detail?: unknown) => Error;
 };
 
-// oidc-provider v7 没有公开导出这些错误类，validator 需要复用 provider 内置错误类型。
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const errors = require('oidc-provider/lib/helpers/errors') as OidcProviderErrors;
+let oidcProviderErrors: OidcProviderErrors | undefined;
+
+function getOidcProviderErrors() {
+  if (!oidcProviderErrors) {
+    // 延迟加载，避免 Jest 导入 service 时解析 oidc-provider 的 ESM 入口。
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    oidcProviderErrors = require('oidc-provider').errors as OidcProviderErrors;
+  }
+
+  return oidcProviderErrors;
+}
+
+const errors = new Proxy({} as OidcProviderErrors, {
+  get(_target, property: keyof OidcProviderErrors) {
+    return getOidcProviderErrors()[property];
+  },
+});
 
 function paddedBuffer(value: string, length: number) {
   const buffer = Buffer.alloc(length, undefined, 'utf8');
@@ -96,15 +113,16 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       path: this.oidcPath,
       oidc: await this.getConfiguration(),
       proxy: true,
-      factory: (issuer: string, config?: Configuration) => {
-        const provider = new Provider(issuer, config);
+      factory: ({ issuer, config, module }: OidcModuleFactoryArgs) => {
+        const provider = new module.Provider(issuer, config);
         // allow http,localhost in development mode
         if (this.options.debug) {
           // Allowing HTTP and/or localhost for implicit response type web clients
           // https://github.com/panva/node-oidc-provider/blob/v7.x/recipes/implicit_http_localhost.md
-          const clientSchema = (provider.Client as any).Schema.prototype;
-          const { invalidate: orig } = clientSchema;
-          clientSchema.invalidate = function invalidate(message: string, code: string) {
+          // @ts-expect-error no types
+          const { invalidate: orig } = provider.Client.Schema.prototype;
+          // @ts-expect-error no types
+          provider.Client.Schema.prototype.invalidate = function invalidate(message: string, code: string) {
             if (code === 'implicit-force-https' || code === 'implicit-forbid-localhost') {
               return;
             }

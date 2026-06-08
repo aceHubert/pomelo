@@ -1,8 +1,8 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ManagementAuthService } from './management-auth.service';
+import { ManagementAccountService } from './account.service';
 
-describe('ManagementAuthService', () => {
+describe('ManagementAccountService', () => {
   const createService = (options?: {
     verifyAccount?: jest.Mock;
     getClaims?: jest.Mock;
@@ -14,13 +14,11 @@ describe('ManagementAuthService', () => {
       options?.getClaims ?? jest.fn().mockResolvedValue({ role: 'administrator', super_administrator: '1' });
     const createToken = options?.createToken ?? jest.fn().mockResolvedValue('signed.jwt');
     const configService = {
-      get: jest.fn((key: string, fallback: string) =>
-        key === 'MANAGEMENT_JWT_EXPIRES_IN' ? options?.expiresIn : fallback,
-      ),
+      get: jest.fn((key: string, fallback: string) => (key === 'JWT_EXPIRES_IN' ? options?.expiresIn : fallback)),
     };
 
     return {
-      service: new ManagementAuthService(
+      service: new ManagementAccountService(
         { verifyAccount, getClaims } as any,
         { createToken } as any,
         configService as unknown as ConfigService,

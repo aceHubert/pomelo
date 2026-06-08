@@ -19,7 +19,7 @@ import { IdentityProperty, IdentityProperties } from './models/identity-property
 
 @Authorized()
 @Resolver(() => IdentityResource)
-export class IdentityResourceResolver extends BaseResolver {
+export class ManagementIdentityResourceResolver extends BaseResolver {
   constructor(private readonly identityResourceDataSource: IdentityResourceDataSource) {
     super();
   }

@@ -8,7 +8,7 @@ import LiquidGlass from '../../components/common/LiquidGlass';
 import { setManagementToken, clearManagementToken } from '../../services/auth/token';
 import { applyThemePreference, getStoredThemePreference } from '../../services/theme/theme';
 import { useI18n } from '../../services/i18n/i18n';
-import { MANAGEMENT_LOGIN } from '../../apis/operations';
+import { SIGNIN } from '../../apis/operations';
 import styles from './index.module.less';
 
 type LoginValues = {
@@ -30,7 +30,7 @@ function getThemeToggleMeta(theme: ReturnType<typeof getStoredThemePreference>, 
 
 export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   const { t } = useI18n();
-  const [login, { loading }] = useMutation(MANAGEMENT_LOGIN);
+  const [login, { loading }] = useMutation(SIGNIN);
   const [error, setError] = useState('');
   const [themePreference, setThemePreference] = useState(() => getStoredThemePreference());
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
 
     try {
       const result = await login({ variables: { input: values } });
-      const token = result.data?.managementLogin?.accessToken;
+      const token = result.data?.signin?.accessToken;
       if (!token) throw new Error('empty token');
 
       setManagementToken(token);

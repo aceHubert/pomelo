@@ -8,7 +8,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { Log4jsService } from '@ace-nestjs/log4js';
 import { bootstrap, normalizeRoutePath, stripForegoingSlash, trailingSlash } from '@ace-pomelo/shared/server';
-import { ApisModule } from './apis/apis.module';
+import { OpenApiModule } from './openapi/openapi.module';
 import { AppModule } from './app.module';
 import { IdentityMigrationService } from './datasource';
 import { version } from './version';
@@ -100,7 +100,7 @@ bootstrap<NestExpressApplication>(AppModule, {
                 .addTag('apiResources', 'Api Resources.')
                 .build(),
             documentOptions: {
-              include: [ApisModule],
+              include: [OpenApiModule],
             },
             // custom options
             useGlobalPrefix: true,

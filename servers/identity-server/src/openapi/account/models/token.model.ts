@@ -18,10 +18,10 @@ export class ManagementTokenResponse {
   tokenType!: 'Bearer';
 
   /**
-   * Expiration value configured by MANAGEMENT_JWT_EXPIRES_IN.
+   * Expiration value configured by JWT_EXPIRES_IN.
    */
   @Field(() => String)
-  @ApiProperty({ description: 'Expiration value configured by MANAGEMENT_JWT_EXPIRES_IN.' })
+  @ApiProperty({ description: 'Expiration value configured by JWT_EXPIRES_IN.' })
   expiresIn!: string | number;
 
   /**

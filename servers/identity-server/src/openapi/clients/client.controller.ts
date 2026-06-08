@@ -24,8 +24,8 @@ import {
   CLIENT_SCOPE_FIELDS,
   PROPERTY_FIELDS,
   SECRET_FIELDS,
-} from '@/apis/common/management-fields';
-import { normalizePagedQuery } from '@/apis/common/management-query';
+} from '@/openapi/common/management-fields';
+import { normalizePagedQuery } from '@/openapi/common/management-query';
 import { PagedClientArgs } from './dto/paged-client.args';
 import { NewClientInput } from './dto/new-client.input';
 import { UpdateClientInput } from './dto/update-client.input';
@@ -55,7 +55,7 @@ import { ClientProperty, ClientProperties } from './models/client-property.model
 @Controller('v0/management/clients')
 @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
 @ApiForbiddenResponse({ description: 'Forbidden.' })
-export class ClientController {
+export class ManagementClientController {
   constructor(private readonly clientDataSource: ClientDataSource) {}
 
   @Get()

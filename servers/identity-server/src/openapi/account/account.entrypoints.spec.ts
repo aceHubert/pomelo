@@ -1,7 +1,7 @@
-import { ManagementAuthController } from './management-auth.controller';
-import { ManagementAuthResolver } from './management-auth.resolver';
+import { ManagementAccountController } from './account.controller';
+import { ManagementAccountResolver } from './account.resolver';
 
-describe('managementLogin entrypoints', () => {
+describe('signin entrypoints', () => {
   it('GraphQL 与 OpenAPI 登录返回一致结构', async () => {
     const response = {
       accessToken: 'signed.jwt',
@@ -14,8 +14,8 @@ describe('managementLogin entrypoints', () => {
     } as any;
     const input = { username: 'root', password: 'secret' };
 
-    await expect(new ManagementAuthResolver(service).managementLogin(input)).resolves.toEqual(response);
-    await expect(new ManagementAuthController(service).login(input)).resolves.toEqual(response);
+    await expect(new ManagementAccountResolver(service).signin(input)).resolves.toEqual(response);
+    await expect(new ManagementAccountController(service).login(input)).resolves.toEqual(response);
     expect(service.login).toHaveBeenNthCalledWith(1, input);
     expect(service.login).toHaveBeenNthCalledWith(2, input);
   });

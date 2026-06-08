@@ -13,8 +13,8 @@ import { RamAuthorized } from '@ace-nestjs/ram-authorization';
 import { ApiAuthCreate, ValidatePayloadExistsPipe } from '@ace-pomelo/shared/server';
 import { IdentityResourceAction } from '@/common/actions';
 import { IdentityResourceDataSource } from '@/datasource';
-import { IDENTITY_RESOURCE_FIELDS, PROPERTY_FIELDS, TYPE_ONLY_CLAIM_FIELDS } from '@/apis/common/management-fields';
-import { normalizePagedQuery } from '@/apis/common/management-query';
+import { IDENTITY_RESOURCE_FIELDS, PROPERTY_FIELDS, TYPE_ONLY_CLAIM_FIELDS } from '@/openapi/common/management-fields';
+import { normalizePagedQuery } from '@/openapi/common/management-query';
 import { PagedIdentityResourceArgs } from './dto/paged-identity-resource.args';
 import { NewIdentityResourceInput } from './dto/new-identity-resource.input';
 import { UpdateIdentityResourceInput } from './dto/update-identity-resource.input';
@@ -29,7 +29,7 @@ import { IdentityProperty, IdentityProperties } from './models/identity-property
 @Controller('v0/management/identity-resources')
 @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
 @ApiForbiddenResponse({ description: 'Forbidden.' })
-export class IdentityResourceController {
+export class ManagementIdentityResourceController {
   constructor(private readonly identityResourceDataSource: IdentityResourceDataSource) {}
 
   @Get()

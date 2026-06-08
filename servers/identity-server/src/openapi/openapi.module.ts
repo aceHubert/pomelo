@@ -17,4 +17,4 @@ const services = require.context('./', true, /\.service\.ts$/);
     }),
   ],
 })
-export class ApisModule {}
+export class OpenApiModule {}

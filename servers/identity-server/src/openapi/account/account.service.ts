@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { AuthorizationService } from '@ace-nestjs/authorization';
 import { UserRole } from '@ace-pomelo/shared/server';
 import { AccountProviderService } from '@/account-provider/account-provider.service';
-import { ManagementLoginInput } from './dto/management-login.input';
-import { ManagementTokenResponse } from './models/management-token.model';
+import { ManagementLoginInput } from './dto/login.input';
+import { ManagementTokenResponse } from './models/token.model';
 
-const MANAGEMENT_POLICY_NAME = 'IdentityManagementFullAccess';
-const MANAGEMENT_AUTH_FAILED_MESSAGE = 'Authentication failed';
+const POLICY_NAME = 'IdentityManagementFullAccess';
+const AUTH_FAILED_MESSAGE = 'Authentication failed';
 
 @Injectable()
-export class ManagementAuthService {
+export class ManagementAccountService {
   constructor(
     private readonly accountProviderService: AccountProviderService,
     private readonly authorizationService: AuthorizationService,
@@ -22,10 +22,10 @@ export class ManagementAuthService {
     const claims = await this.accountProviderService.getClaims(Number(accountId));
 
     if (!this.isSuperAdministrator(claims.super_administrator) || !this.isAdministrator(claims)) {
-      throw new UnauthorizedException(MANAGEMENT_AUTH_FAILED_MESSAGE);
+      throw new UnauthorizedException(AUTH_FAILED_MESSAGE);
     }
 
-    const expiresIn = this.configService.get<string | number>('MANAGEMENT_JWT_EXPIRES_IN', '1h');
+    const expiresIn = this.configService.get<string | number>('JWT_EXPIRES_IN', '1h');
     const issuedAt = Math.floor(Date.now() / 1000);
     const accessToken = await this.authorizationService.createToken(
       {
@@ -33,7 +33,7 @@ export class ManagementAuthService {
         role: UserRole.Administrator,
         super_administrator: true,
         ram: {
-          PolicyName: MANAGEMENT_POLICY_NAME,
+          PolicyName: POLICY_NAME,
           Statements: [
             {
               Effect: 'Allow',
@@ -58,11 +58,11 @@ export class ManagementAuthService {
     try {
       const accountId = await this.accountProviderService.verifyAccount(username, password);
       if (!accountId) {
-        throw new UnauthorizedException(MANAGEMENT_AUTH_FAILED_MESSAGE);
+        throw new UnauthorizedException(AUTH_FAILED_MESSAGE);
       }
       return accountId;
     } catch {
-      throw new UnauthorizedException(MANAGEMENT_AUTH_FAILED_MESSAGE);
+      throw new UnauthorizedException(AUTH_FAILED_MESSAGE);
     }
   }
 

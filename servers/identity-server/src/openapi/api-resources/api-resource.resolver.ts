@@ -27,7 +27,7 @@ import { ApiProperty, ApiProperties } from './models/api-property.model';
 
 @Authorized()
 @Resolver(() => ApiResource)
-export class ApiResourceResolver extends BaseResolver {
+export class ManagementApiResourceResolver extends BaseResolver {
   constructor(private readonly apiResourceDataSource: ApiResourceDataSource) {
     super();
   }

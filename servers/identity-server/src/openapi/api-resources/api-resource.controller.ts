@@ -19,8 +19,8 @@ import {
   PROPERTY_FIELDS,
   SECRET_FIELDS,
   TYPE_ONLY_CLAIM_FIELDS,
-} from '@/apis/common/management-fields';
-import { normalizePagedQuery } from '@/apis/common/management-query';
+} from '@/openapi/common/management-fields';
+import { normalizePagedQuery } from '@/openapi/common/management-query';
 import { PagedApiResourceArgs } from './dto/paged-api-resource.args';
 import { PagedApiScopeArgs } from './dto/paged-api-scope.args';
 import { NewApiResourceInput } from './dto/new-api-resource.input';
@@ -43,7 +43,7 @@ import { ApiProperty, ApiProperties } from './models/api-property.model';
 @Controller('v0/management')
 @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
 @ApiForbiddenResponse({ description: 'Forbidden.' })
-export class ApiResourceController {
+export class ManagementApiResourceController {
   constructor(private readonly apiResourceDataSource: ApiResourceDataSource) {}
 
   @Get('api-resources')

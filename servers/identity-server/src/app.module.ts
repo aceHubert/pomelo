@@ -28,7 +28,7 @@ import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { IdentityDatasourceModule } from './datasource/datasource.module';
 import { IdentityMigrationService } from './datasource';
-import { ApisModule } from './apis/apis.module';
+import { OpenApiModule } from './openapi/openapi.module';
 import { AccountProviderModule } from './account-provider/account-provider.module';
 import { AccountProviderUse } from './account-provider/interfaces/account-provider-options.interface';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
@@ -172,7 +172,7 @@ const logger = new Logger('AppModule', { timestamp: true });
         const { keys } = await getJWKS([privateKey].filter(Boolean) as string[]);
         return {
           signingKey: await getSigningKey(privateKey),
-          jwtExpiresIn: config.get('MANAGEMENT_JWT_EXPIRES_IN', '1h'),
+          jwtExpiresIn: config.get('JWT_EXPIRES_IN', '1h'),
           verifyingKey:
             publicKey ||
             createLocalJWKSet({
@@ -225,7 +225,7 @@ const logger = new Logger('AppModule', { timestamp: true });
       }),
       inject: [ConfigService, I18nService],
     }),
-    ApisModule,
+    OpenApiModule,
     AccountProviderModule.forRootAsync({
       isGlobal: true,
       providerUse: (process.env.ACCOUNT_PROVIDER || 'database') as AccountProviderUse,

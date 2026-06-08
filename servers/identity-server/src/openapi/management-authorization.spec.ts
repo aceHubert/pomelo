@@ -4,7 +4,7 @@ import request from 'supertest';
 import { AuthorizationModule, AuthorizationService, getSigningKey, getVerifyingKey } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
 import { ClientDataSource } from '@/datasource';
-import { ClientController } from './clients/client.controller';
+import { ManagementClientController } from './clients/client.controller';
 
 describe('management REST authorization', () => {
   let app: INestApplication;
@@ -21,7 +21,7 @@ describe('management REST authorization', () => {
           serviceName: 'identity',
         }),
       ],
-      controllers: [ClientController],
+      controllers: [ManagementClientController],
       providers: [
         {
           provide: ClientDataSource,

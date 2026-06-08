@@ -34,7 +34,7 @@ import { ClientProperty, ClientProperties } from './models/client-property.model
 
 @Authorized()
 @Resolver(() => Client)
-export class ClientResolver extends BaseResolver {
+export class ManagementClientResolver extends BaseResolver {
   constructor(private readonly clientDataSource: ClientDataSource) {
     super();
   }

@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
-export const MANAGEMENT_LOGIN = gql`
-  mutation ManagementLogin($input: ManagementLoginInput!) {
-    managementLogin(input: $input) {
+export const SIGNIN = gql`
+  mutation Signin($input: ManagementLoginInput!) {
+    signin(input: $input) {
       accessToken
       tokenType
       expiresIn

@@ -3,11 +3,11 @@ import { Test } from '@nestjs/testing';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AuthorizationModule } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
-import { ManagementAuthController } from './auth/management-auth.controller';
-import { ManagementAuthService } from './auth/management-auth.service';
-import { ClientController } from './clients/client.controller';
-import { ApiResourceController } from './api-resources/api-resource.controller';
-import { IdentityResourceController } from './identity-resources/identity-resource.controller';
+import { ManagementAccountController } from './account/account.controller';
+import { ManagementAccountService } from './account/account.service';
+import { ManagementClientController } from './clients/client.controller';
+import { ManagementApiResourceController } from './api-resources/api-resource.controller';
+import { ManagementIdentityResourceController } from './identity-resources/identity-resource.controller';
 import { ClientDataSource, ApiResourceDataSource, IdentityResourceDataSource } from '@/datasource';
 
 describe('management OpenAPI document', () => {
@@ -19,9 +19,14 @@ describe('management OpenAPI document', () => {
         AuthorizationModule.forRoot({ disableMiddleware: true }),
         RamAuthorizationModule.forRoot({ serviceName: 'identity' }),
       ],
-      controllers: [ManagementAuthController, ClientController, ApiResourceController, IdentityResourceController],
+      controllers: [
+        ManagementAccountController,
+        ManagementClientController,
+        ManagementApiResourceController,
+        ManagementIdentityResourceController,
+      ],
       providers: [
-        { provide: ManagementAuthService, useValue: { login: jest.fn() } },
+        { provide: ManagementAccountService, useValue: { login: jest.fn() } },
         { provide: ClientDataSource, useValue: {} },
         { provide: ApiResourceDataSource, useValue: {} },
         { provide: IdentityResourceDataSource, useValue: {} },
