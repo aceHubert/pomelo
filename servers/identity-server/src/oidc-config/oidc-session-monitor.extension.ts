@@ -2,10 +2,7 @@ import * as url from 'url';
 import { sha256, random } from '@ace-pomelo/shared/server';
 import { renderCheckSessionTemplate } from './templates';
 
-import type { KoaContextWithOIDC } from 'oidc-provider';
-import type { OidcModuleFactoryArgs } from 'nest-oidc-provider';
-
-type OidcProvider = InstanceType<OidcModuleFactoryArgs['module']['Provider']>;
+import type { KoaContextWithOIDC, Provider } from 'oidc-provider';
 
 export interface OidcSessionMonitorExtensionOptions {
   globalPrefix: string;
@@ -21,7 +18,7 @@ export interface OidcSessionMonitorExtensionOptions {
  */
 export class OidcSessionMonitorExtension {
   install(
-    provider: OidcProvider,
+    provider: Provider,
     { globalPrefix, assetsBaseURL, oidcPath, checkSessionRoute }: OidcSessionMonitorExtensionOptions,
   ) {
     const sessionName = (provider as any).cookieName('session');

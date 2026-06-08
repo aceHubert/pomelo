@@ -1,0 +1,27 @@
+{
+  "name": "@ace-pomelo/identity-server-management",
+  "description": "Standalone identity-server management application.",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "@apollo/client": "^3.6.9",
+    "antd": "^5.27.6",
+    "graphql": "^16.9.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.30.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^4.5.3"
+  }
+}

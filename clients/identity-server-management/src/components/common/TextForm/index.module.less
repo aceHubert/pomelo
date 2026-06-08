@@ -1,0 +1,27 @@
+.inlineForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+}
+
+.control,
+:global(.ant-input-number).control {
+  width: 100%;
+}
+
+.actions,
+.error {
+  grid-column: auto;
+}
+
+@media (max-width: 640px) {
+  .inlineForm {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,78 @@
+.appShell {
+  min-height: 100vh;
+  background: @var-management-page-bg;
+}
+
+.sidebar {
+  border-right: 1px solid @var-management-panel-border;
+  background: @var-management-panel-bg !important;
+}
+
+.brand {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid @var-management-panel-border;
+  color: @var-management-heading;
+  font-weight: 800;
+}
+
+.brandMark {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid @var-management-glass-border;
+  border-radius: 8px;
+  color: @var-management-heading;
+  background: @var-management-brand-mark-bg;
+  box-shadow: @var-management-brand-mark-shadow;
+  font-weight: 800;
+}
+
+.sidebarMenu {
+  border-inline-end: 0 !important;
+  padding: 10px;
+
+  :global(.ant-menu-item) {
+    height: 38px;
+    margin-inline: 0;
+    border-radius: 6px;
+  }
+
+  :global(.ant-menu-item-selected) {
+    background: @var-management-sidebar-active-bg;
+  }
+}
+
+.workspaceShell {
+  min-width: 0;
+  background: @var-management-page-bg;
+}
+
+.topbar {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid @var-management-panel-border;
+  padding: 0 20px;
+  background: @var-management-panel-bg;
+  line-height: 1.35;
+}
+
+.topbarActions {
+  flex: 0 0 auto;
+}
+
+.workspace {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    padding: 0 14px;
+  }
+}

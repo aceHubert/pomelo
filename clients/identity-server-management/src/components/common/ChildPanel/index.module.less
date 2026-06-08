@@ -1,0 +1,17 @@
+.subPanel {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  border-color: @var-management-panel-subtle;
+  background: @var-management-panel-bg;
+
+  :global(.ant-card-head) {
+    min-height: 40px;
+    padding: 0 12px;
+    border-bottom-color: @var-management-panel-subtle;
+  }
+
+  :global(.ant-card-body) {
+    padding: 12px;
+  }
+}

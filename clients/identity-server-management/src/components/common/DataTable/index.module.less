@@ -1,0 +1,31 @@
+.table {
+  :global(.ant-table) {
+    color: @var-management-text;
+    background: @var-management-panel-bg;
+    font-size: 13px;
+  }
+
+  :global(.ant-table-thead > tr > th) {
+    color: @var-management-muted;
+    font-weight: 700;
+    background: @var-management-hover-bg;
+  }
+
+  :global(.ant-table-tbody > tr > td) {
+    border-bottom-color: @var-management-panel-subtle;
+  }
+
+  :global(.ant-table-tbody > tr:hover > td) {
+    background: @var-management-hover-bg;
+  }
+
+  :global(.ant-table-placeholder > td) {
+    background: @var-management-panel-bg;
+  }
+}
+
+.selected {
+  td {
+    background: @var-management-selected-bg !important;
+  }
+}
