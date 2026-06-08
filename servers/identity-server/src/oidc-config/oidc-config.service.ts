@@ -3,18 +3,12 @@ import { timingSafeEqual } from 'crypto';
 import wildcard from 'wildcard';
 import psl from 'psl';
 import { get, omitBy, isNil } from 'lodash';
-import {
-  OidcConfiguration,
-  OidcModuleFactoryArgs,
-  OidcModuleOptions,
-  OidcModuleOptionsFactory,
-  errors,
-} from 'nest-oidc-provider';
+import { OidcConfiguration, OidcModuleOptions, OidcModuleOptionsFactory } from 'nest-oidc-provider';
+import { Provider } from 'oidc-provider';
 import { default as sanitizeHtml } from 'sanitize-html';
 import { ModuleRef } from '@nestjs/core';
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import { sha256, normalizeRoutePath, trailingSlash } from '@ace-pomelo/shared/server';
-import { getActionBtns } from '@/common/templates';
 import { ClientDataSource, IdentityResourceDataSource } from '../datasource';
 import { AccountProviderService } from '../account-provider/account-provider.service';
 import { getI18nFromContext } from './i18n.helper';
@@ -38,7 +32,18 @@ import type {
   ClientMetadata,
   ClientAuthMethod,
   SigningAlgorithmWithNone,
+  Configuration,
 } from 'oidc-provider';
+
+type OidcProviderErrors = {
+  InvalidRequest: new (description: string, code?: number, detail?: unknown) => Error;
+  InvalidClientMetadata: new (description: string, detail?: unknown) => Error;
+  InvalidClient: new (description?: string, detail?: unknown) => Error;
+};
+
+// oidc-provider v7 没有公开导出这些错误类，validator 需要复用 provider 内置错误类型。
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const errors = require('oidc-provider/lib/helpers/errors') as OidcProviderErrors;
 
 function paddedBuffer(value: string, length: number) {
   const buffer = Buffer.alloc(length, undefined, 'utf8');
@@ -91,16 +96,15 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
       path: this.oidcPath,
       oidc: await this.getConfiguration(),
       proxy: true,
-      factory: ({ issuer, config, module }: OidcModuleFactoryArgs) => {
-        const provider = new module.Provider(issuer, config);
+      factory: (issuer: string, config?: Configuration) => {
+        const provider = new Provider(issuer, config);
         // allow http,localhost in development mode
         if (this.options.debug) {
           // Allowing HTTP and/or localhost for implicit response type web clients
           // https://github.com/panva/node-oidc-provider/blob/v7.x/recipes/implicit_http_localhost.md
-          // @ts-expect-error no types
-          const { invalidate: orig } = provider.Client.Schema.prototype;
-          // @ts-expect-error no types
-          provider.Client.Schema.prototype.invalidate = function invalidate(message: string, code: string) {
+          const clientSchema = (provider.Client as any).Schema.prototype;
+          const { invalidate: orig } = clientSchema;
+          clientSchema.invalidate = function invalidate(message: string, code: string) {
             if (code === 'implicit-force-https' || code === 'implicit-forbid-localhost') {
               return;
             }
@@ -120,7 +124,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
 
         const wildcardMatches = (redirectUri: string, wildcardUri: string) => !!wildcard(wildcardUri, redirectUri);
 
-        provider.Client.prototype.redirectUriAllowed = function wildcardRedirectUriAllowed(redirectUri) {
+        provider.Client.prototype.redirectUriAllowed = function wildcardRedirectUriAllowed(redirectUri: string) {
           const match = redirectUriAllowed.call(this, redirectUri);
           if (match) return match;
 
@@ -129,7 +133,7 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         };
         // Skip redirecting invalid request error to client
         // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_redirect.md
-        Object.defineProperty(module.errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
+        Object.defineProperty(errors.InvalidRequest.prototype, 'allow_redirect', { value: false });
 
         // Update client secret comparison and multiple client secrets support
         // use SHA256 of input to compare with stored value
@@ -140,10 +144,9 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           return constantEquals(this.clientSecret ?? '', actual, 1000);
         };
 
-        provider.use(async (ctx, next) => {
+        provider.use(async (ctx: KoaContextWithOIDC, next: () => Promise<void>) => {
           // set issuer dynamically
-          // @ts-expect-error readonly types
-          provider.issuer = `${ctx.origin}${this.globalPrefix}${this.oidcPath}`;
+          (provider as any).issuer = `${ctx.origin}${this.globalPrefix}${this.oidcPath}`;
 
           await next();
         });
@@ -398,7 +401,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
                 cancelBtnText: i18n.tv('identity-server.oidc.config.logout.cancel_btn_text', 'No, stay signed in'),
               },
               primaryColor,
-              actionBtns: getActionBtns(ctx.url, i18n.service.resolveLanguage(i18n.lang)),
             });
           },
           postLogoutSuccessSource: (ctx) => {
@@ -422,7 +424,6 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
                   : i18n.tv('identity-server.oidc.config.logout.success_description', `Your sign-out was successful.`),
               },
               primaryColor,
-              actionBtns: getActionBtns(ctx.url, i18n.service.resolveLanguage(i18n.lang)),
             });
           },
         },

@@ -21,7 +21,7 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4js';
-import { AuthorizationModule, getJWKS, createLocalJWKSet } from '@ace-nestjs/authorization';
+import { AuthorizationModule, getJWKS, getSigningKey, createLocalJWKSet } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
 import { configuration } from './common/utils/configuration.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
@@ -41,16 +41,21 @@ import { AppService } from './app.service';
 import './common/extends/i18n.extend';
 import './common/extends/observable.extend';
 
-// Node 20+ 的动态 import 会返回 null-prototype module namespace。
-// nest-oidc-provider 会把它注册为 provider，@nestjs/graphql 扫描时需要 constructor。
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const oidcProviderEsmHelper = require('nest-oidc-provider/dist/helpers/esm.helper') as {
-  importOidcProvider: () => Promise<Record<string, unknown>>;
-};
-
 function patchOidcProviderImportHelper() {
-  const importOidcProvider = oidcProviderEsmHelper.importOidcProvider;
-  oidcProviderEsmHelper.importOidcProvider = async () => ({ ...(await importOidcProvider()) });
+  try {
+    // nest-oidc-provider v2 在 Node 20+ 下动态 import 会返回 null-prototype namespace。
+    // v1 没有这个 helper，保持静默跳过以兼容当前锁定版本。
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const oidcProviderEsmHelper = require('nest-oidc-provider/dist/helpers/esm.helper') as {
+      importOidcProvider: () => Promise<Record<string, unknown>>;
+    };
+    const importOidcProvider = oidcProviderEsmHelper.importOidcProvider;
+    oidcProviderEsmHelper.importOidcProvider = async () => ({ ...(await importOidcProvider()) });
+  } catch (error: any) {
+    if (error?.code !== 'MODULE_NOT_FOUND') {
+      throw error;
+    }
+  }
 }
 
 patchOidcProviderImportHelper();
@@ -166,6 +171,8 @@ const logger = new Logger('AppModule', { timestamp: true });
         const privateKey = config.get('JWT_PRIVATE_KEY');
         const { keys } = await getJWKS([privateKey].filter(Boolean) as string[]);
         return {
+          signingKey: await getSigningKey(privateKey),
+          jwtExpiresIn: config.get('MANAGEMENT_JWT_EXPIRES_IN', '1h'),
           verifyingKey:
             publicKey ||
             createLocalJWKSet({

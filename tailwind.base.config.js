@@ -1,0 +1,46 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  corePlugins: {
+    preflight: false,
+  },
+  theme: {
+    extend: {
+      colors: {
+        primary: 'var(--theme-primary)',
+        'primary-1': 'var(--theme-primary-1)',
+        'primary-2': 'var(--theme-primary-2)',
+        'primary-3': 'var(--theme-primary-3)',
+        'primary-4': 'var(--theme-primary-4)',
+        'primary-5': 'var(--theme-primary-5)',
+        'primary-6': 'var(--theme-primary-6)',
+        'primary-7': 'var(--theme-primary-7)',
+        'primary-8': 'var(--theme-primary-8)',
+        'primary-9': 'var(--theme-primary-9)',
+        'primary-10': 'var(--theme-primary-10)',
+        success: 'var(--color-success)',
+        warning: 'var(--color-warning)',
+        error: 'var(--color-error)',
+        info: 'var(--color-info)',
+        'success-soft': 'var(--color-success-soft)',
+        'warning-soft': 'var(--color-warning-soft)',
+        'error-soft': 'var(--color-error-soft)',
+        'info-soft': 'var(--color-info-soft)',
+        surface: 'var(--component-background)',
+        'surface-soft': 'var(--component-background-soft)',
+        body: 'var(--body-background)',
+        border: 'var(--color-border-base)',
+        'border-split': 'var(--color-border-split)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-disabled': 'var(--text-disabled)',
+        'text-inverse': 'var(--text-inverse)',
+      },
+      boxShadow: {
+        token: 'var(--shadow-1-down)',
+        'token-up': 'var(--shadow-1-up)',
+        'token-2': 'var(--shadow-2)',
+      },
+    },
+  },
+  plugins: [],
+};
