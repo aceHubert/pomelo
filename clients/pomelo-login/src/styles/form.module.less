@@ -1,0 +1,77 @@
+.form {
+  display: grid;
+  gap: 10px;
+  color: var(--management-text);
+
+  :global(.ant-form-item) {
+    margin-bottom: 4px;
+  }
+
+  :global(.ant-form-item-label > label) {
+    color: var(--management-muted);
+    font-size: 12px;
+  }
+
+  :global(.ant-input),
+  :global(.ant-input-affix-wrapper) {
+    min-height: 46px;
+    border-color: var(--auth-glass-border);
+    background: var(--auth-glass-control-bg);
+    box-shadow: var(--auth-glass-control-shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  :global(.ant-input-affix-wrapper .ant-input) {
+    min-height: auto;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  :global(.ant-input:focus),
+  :global(.ant-input-focused),
+  :global(.ant-input-affix-wrapper:focus),
+  :global(.ant-input-affix-wrapper-focused) {
+    border-color: var(--theme-primary);
+    box-shadow: var(--auth-glass-control-focus-shadow);
+  }
+
+  :global(.ant-input-affix-wrapper .ant-input:focus) {
+    box-shadow: none;
+  }
+
+  :global(.ant-btn-lg) {
+    min-height: 46px;
+    font-weight: 700;
+  }
+
+  :global(.ant-checkbox-wrapper) {
+    color: var(--management-muted);
+  }
+}
+
+.helperRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 4px 0 8px;
+}
+
+.helperLink {
+  color: var(--theme-primary);
+  font-weight: 600;
+}
+
+.buttonStack {
+  display: grid;
+  gap: 10px;
+}
+
+.secondaryButton {
+  color: var(--management-muted) !important;
+}

@@ -1,5 +1,5 @@
 {
-  "name": "@ace-pomelo/web",
+  "name": "@ace-pomelo/web-main",
   "description": "Frontend project for pomelo.",
   "version": "0.1.0",
   "private": true,

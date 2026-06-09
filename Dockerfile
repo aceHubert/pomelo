@@ -37,6 +37,8 @@ RUN if [ "$BUILD_IGNORE" = "true" ]; then \
 # install runtime files
 FROM base AS runtime
 COPY --from=builder /app/clients/web/dist /app/clients/web/
+COPY --from=builder /app/clients/pomelo-initialize/dist /app/clients/initialize/
+COPY --from=builder /app/clients/pomelo-login/dist /app/clients/auth/
 COPY --from=builder /app/dist/servers/infrastructure-service /app/servers/infrastructure-service/
 COPY --from=builder /app/dist/servers/infrastructure-bff /app/servers/infrastructure-bff/
 COPY --from=builder /app/dist/servers/content /app/servers/content/
@@ -60,6 +62,8 @@ COPY --from=runtime /app/servers/infrastructure-service /app/infrastructure-serv
 COPY --from=runtime /app/servers/infrastructure-bff /app/infrastructure-bff/
 COPY --from=runtime /app/servers/content /app/content/
 COPY --from=runtime /app/clients/web /app/clients/web/
+COPY --from=runtime /app/clients/initialize /app/clients/initialize/
+COPY --from=runtime /app/clients/auth /app/clients/auth/
 COPY --from=runtime /app/node_modules /app/node_modules/
 COPY --from=runtime /app/${SERVE_PM2_CONFIG} /app/ecosystem.config.js
 COPY example/nginx /app/nginx/

@@ -1,0 +1,205 @@
+.shell {
+  position: relative;
+  z-index: 0;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  overflow: hidden;
+  padding: 24px;
+  background: @var-management-login-bg;
+
+  &::before {
+    position: absolute;
+    inset: -30% -16%;
+    content: '';
+    background: @var-management-login-aura;
+    filter: blur(24px);
+    transform: rotate(-5deg);
+  }
+
+  &::after {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    content: '';
+    background: linear-gradient(@var-management-login-grid 1px, transparent 1px),
+      linear-gradient(90deg, @var-management-login-grid 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.34), transparent 76%);
+  }
+}
+
+.gradientField {
+  position: absolute;
+  inset: 0;
+  background: @var-management-login-field;
+  opacity: @var-management-login-field-opacity;
+  mix-blend-mode: @var-management-login-field-blend;
+}
+
+.topActions {
+  position: fixed;
+  z-index: 3;
+  top: 24px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.actionGlass {
+  display: inline-flex;
+}
+
+.actionButton {
+  color: @var-management-heading;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 700;
+  text-shadow: none;
+
+  &:hover,
+  &:focus {
+    color: @var-primary !important;
+    background: transparent !important;
+  }
+}
+
+.panel {
+  z-index: 1;
+  width: ~'min(560px, calc(100vw - 48px))';
+
+  :global(.glass) {
+    width: 100%;
+  }
+}
+
+.panelContent {
+  position: relative;
+  width: 100%;
+  padding: 34px;
+  text-shadow: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: @var-management-text;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.brandMark {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid @var-management-glass-border;
+  border-radius: 10px;
+  color: @var-management-heading;
+  background: @var-management-brand-mark-bg;
+  box-shadow: @var-management-brand-mark-shadow;
+  font-weight: 800;
+}
+
+.title {
+  margin: 8px 0 10px;
+  color: @var-management-heading;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.description {
+  margin: 0 0 20px;
+  color: @var-management-muted;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+  color: @var-management-text;
+  font: 400 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  :global(.ant-form-item) {
+    margin-bottom: 6px;
+  }
+
+  :global(.ant-form-item-label > label) {
+    color: @var-management-muted;
+    font-size: 12px;
+  }
+
+  :global(.ant-input),
+  :global(.ant-input-affix-wrapper),
+  :global(.ant-select-selector) {
+    min-height: 46px;
+    border-color: @var-management-glass-border !important;
+    border-radius: 999px !important;
+    background: @var-management-glass-control-bg !important;
+    box-shadow: @var-management-glass-control-shadow;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  :global(.ant-input-affix-wrapper .ant-input) {
+    min-height: auto;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  :global(.ant-select-selector .ant-select-selection-placeholder) {
+    color: @var-management-control-placeholder;
+  }
+
+  :global(.ant-input:focus),
+  :global(.ant-input-focused),
+  :global(.ant-input-affix-wrapper:focus),
+  :global(.ant-input-affix-wrapper-focused),
+  :global(.ant-select-focused .ant-select-selector) {
+    border-color: rgba(64, 138, 113, 0.55) !important;
+    box-shadow: @var-management-glass-control-focus-shadow !important;
+  }
+
+  :global(.ant-btn-lg) {
+    min-height: 46px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+}
+
+.result {
+  :global(.ant-result-title) {
+    color: @var-management-heading;
+  }
+
+  :global(.ant-result-subtitle) {
+    color: @var-management-muted;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    padding: 16px;
+  }
+
+  .topActions {
+    top: 16px;
+    right: 16px;
+  }
+
+  .panelContent {
+    padding: 22px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+}

@@ -182,19 +182,6 @@ module.exports = defineConfig({
         'admin',
       ],
     },
-    initialize: {
-      entry: 'src/initialize/main.ts',
-      template: 'public/index.html',
-      filename: 'initialize.html',
-      inject: 'body',
-      chunks: ['chunk-vendors', 'chunk-common', 'chunk-antdv', 'runtime', 'initialize'],
-    },
-    login: {
-      entry: 'src/login/main.ts',
-      template: 'public/index.html',
-      filename: 'login.html',
-      inject: 'body',
-    },
     signin: {
       entry: 'signin/main.ts',
       template: 'signin/index.html',
@@ -382,7 +369,6 @@ module.exports = defineConfig({
         '@ant-design/icons': antdvIconPackagePath,
         // subpages
         '@admin': path.resolve(__dirname, 'src/admin'),
-        '@initialize': path.resolve(__dirname, 'src/initialize'),
         // ckeditor 多个 build editor 编译问题
         // https://ckeditor.com/docs/ckeditor5/latest/support/error-codes.html#error-ckeditor-duplicated-modules
         '@ckeditor/ckeditor5-build-balloon': path.resolve(__dirname, 'src/admin/components/ckeditor/balloon-editor.ts'),
@@ -530,7 +516,7 @@ module.exports = defineConfig({
             links: vueCdn.links,
             scripts: vueCdn.scripts,
             publicPath: vueCdn.publicPath,
-            files: ['index.html', 'admin.html', 'login.html', 'initialize.html'],
+            files: ['index.html', 'admin.html'],
             append: false,
           }),
         );
@@ -540,7 +526,7 @@ module.exports = defineConfig({
             links: requestCdn.links,
             scripts: requestCdn.scripts,
             publicPath: requestCdn.publicPath,
-            files: ['index.html', 'admin.html', 'login.html', 'initialize.html'],
+            files: ['index.html', 'admin.html'],
             append: false,
           }),
         );
@@ -550,7 +536,7 @@ module.exports = defineConfig({
             links: momentCdn.links,
             scripts: momentCdn.scripts,
             publicPath: momentCdn.publicPath,
-            files: ['index.html', 'admin.html', 'login.html', 'initialize.html'],
+            files: ['index.html', 'admin.html'],
             append: false,
           }),
         );
@@ -560,7 +546,7 @@ module.exports = defineConfig({
             links: oidcCdn.links,
             scripts: oidcCdn.scripts,
             publicPath: oidcCdn.publicPath,
-            files: ['index.html', 'admin.html', 'login.html', 'signin.html', 'signin-silent.html', 'signout.html'],
+            files: ['index.html', 'admin.html', 'signin.html', 'signin-silent.html', 'signout.html'],
             append: false,
           }),
         );
@@ -617,7 +603,7 @@ module.exports = defineConfig({
                 propList: ['*'],
                 mediaQuery: false,
                 exclude:
-                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|src\/admin|src\/login|src\/initialize|desktop.less|desktop.module.less/i,
+                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|src\/admin|desktop.less|desktop.module.less/i,
               },
             ],
           ],

@@ -3,6 +3,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { absoluteGo } from '@ace-util/core';
 import { envConfig } from '@/configs/env';
 import { Authoriztion } from '@/auth';
+import { getInitializeEntryUrl } from '@/auth/entry-urls';
 import { i18n } from '@/i18n';
 import { createHttpUploadLink, createWebsocketLink, setHeaders, errorHandler } from './utils/links';
 
@@ -64,7 +65,7 @@ export const basicLink = split(
         }
       },
       initialize: () => {
-        absoluteGo(process.env.BASE_URL + 'initialize');
+        absoluteGo(getInitializeEntryUrl());
       },
     }),
     setHeaders(async () => {
