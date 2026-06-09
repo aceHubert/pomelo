@@ -1,9 +1,12 @@
-import { jwtDecode, type JwtPayload } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { absoluteGo } from '@ace-util/core';
 import { Modal } from '@/components';
 import { i18n } from '@/i18n';
-import { UserManager, type IUser, type ISigninArgs, type ISignoutArgs } from '../user-manager';
+import { UserManager } from '../user-manager';
+import { getLoginEntryUrl, getPasswordModifyEntryUrl } from '../entry-urls';
 import { getToken, setToken, removeToken } from './helper';
+import type { JwtPayload } from 'jwt-decode';
+import type { IUser, ISigninArgs, ISignoutArgs } from '../user-manager';
 
 export interface UserManagerOptions {
   filterProtocolClaims?: boolean | string[];
@@ -119,7 +122,7 @@ export class LocalUserManagerCreator extends UserManager {
   modifyPassword(): Promise<void> {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        absoluteGo(`/login/password/modify?returnUrl=${encodeURIComponent(location.pathname)}`);
+        absoluteGo(getPasswordModifyEntryUrl(location.pathname));
         resolve();
       }, 0);
     });
@@ -132,7 +135,7 @@ export class LocalUserManagerCreator extends UserManager {
     if (noInteractive) {
       return new Promise<void>((resolve) => {
         setTimeout(() => {
-          absoluteGo(`${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirectUri)}`);
+          absoluteGo(getLoginEntryUrl(redirectUri));
           resolve();
         }, 0);
       });
@@ -158,7 +161,7 @@ export class LocalUserManagerCreator extends UserManager {
 
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        window.location.href = `${process.env.BASE_URL}login?returnUrl=${encodeURIComponent(redirectUri)}`;
+        window.location.href = getLoginEntryUrl(redirectUri);
         resolve();
       }, 0);
     });

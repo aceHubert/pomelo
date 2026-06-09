@@ -1,0 +1,41 @@
+.root {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid @var-management-glass-border;
+  background: @var-management-glass-bg;
+  box-shadow: @var-management-glass-shadow;
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  isolation: isolate;
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: @var-management-glass-surface;
+    opacity: 0.96;
+  }
+}
+
+.edge {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: @var-management-glass-edge;
+  opacity: 0.72;
+  mask: linear-gradient(#000, transparent 60%);
+  pointer-events: none;
+}
+
+.surface {
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 36%);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+}

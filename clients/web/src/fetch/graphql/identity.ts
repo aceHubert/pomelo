@@ -2,6 +2,7 @@ import { from } from '@apollo/client/core';
 import { absoluteGo } from '@ace-util/core';
 import { envConfig } from '@/configs/env';
 import { Authoriztion } from '@/auth';
+import { getInitializeEntryUrl } from '@/auth/entry-urls';
 import { i18n } from '@/i18n';
 import { createHttpLink, setHeaders, errorHandler } from './utils/links';
 
@@ -34,7 +35,7 @@ export const identityLink = from([
       }
     },
     initialize: () => {
-      absoluteGo(process.env.BASE_URL + 'initialize');
+      absoluteGo(getInitializeEntryUrl());
     },
   }),
   setHeaders(async () => {

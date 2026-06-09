@@ -6,6 +6,7 @@ import { createRetryPlugin, createLoadingPlugin, createCatchErrorPlugin } from '
 import { FetchVuePlugin, createFetch } from '@ace-fetch/vue';
 import { loadingRef, errorRef, SharedError } from '@/shared';
 import { Authoriztion } from '@/auth';
+import { getInitializeEntryUrl } from '@/auth/entry-urls';
 import { i18n } from '@/i18n';
 
 // Types
@@ -90,7 +91,7 @@ axiosInstance.interceptors.response.use(void 0, (error: AxiosError) => {
   const { data = {} } = error.response as { data: any };
 
   if (data.siteInitRequired) {
-    absoluteGo(process.env.BASE_URL + 'initialize');
+    absoluteGo(getInitializeEntryUrl());
   }
 
   const message = data.message ?? error.message;

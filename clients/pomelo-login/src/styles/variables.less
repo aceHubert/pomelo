@@ -1,0 +1,287 @@
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --theme-primary: #408a71;
+  --theme-primary-1: #f0f7f4;
+  --theme-primary-2: #dceee6;
+  --theme-primary-3: #c3e1d4;
+  --theme-primary-4: #9ecdb8;
+  --theme-primary-5: #78b99c;
+  --theme-primary-6: #408a71;
+  --theme-primary-7: #2f725b;
+  --theme-primary-8: #235c49;
+  --theme-primary-9: #194537;
+  --theme-primary-10: #112f27;
+
+  --gray-1: #fafafa;
+  --gray-2: #f5f5f5;
+  --gray-3: #eeeeee;
+  --gray-4: #d9d9d9;
+  --gray-5: #bdbdbd;
+  --gray-6: #8c8c8c;
+  --gray-7: #616161;
+  --gray-8: #525252;
+  --gray-9: #303030;
+  --gray-10: #212121;
+
+  --color-success: #1abd80;
+  --color-warning: #fda900;
+  --color-error: #f82024;
+  --color-danger: #f82024;
+  --color-info: #0477f7;
+  --color-success-soft: rgba(26, 189, 128, 0.12);
+  --color-warning-soft: rgba(253, 169, 0, 0.12);
+  --color-error-soft: rgba(248, 32, 36, 0.1);
+  --color-info-soft: rgba(4, 119, 247, 0.12);
+
+  --shadow-1-down: 3px 5px 10px rgba(15, 23, 42, 0.16);
+  --shadow-1-up: 3px -5px 10px rgba(15, 23, 42, 0.12);
+  --shadow-2: 0 20px 40px rgba(0, 0, 0, 0.3);
+
+  --body-background: #f7f7f2;
+  --component-background: #ffffff;
+  --component-background-soft: #efefea;
+  --color-border-base: #d8d8d0;
+  --color-border-split: #62625c;
+  --text-primary: #212121;
+  --text-secondary: #616161;
+  --text-disabled: #bdbdbd;
+  --text-inverse: #fafafa;
+
+  --management-page-bg: var(--body-background);
+  --management-panel-bg: var(--component-background);
+  --management-panel-border: var(--color-border-base);
+  --management-panel-subtle: var(--component-background-soft);
+  --management-text: var(--text-primary);
+  --management-heading: var(--text-primary);
+  --management-muted: var(--text-secondary);
+  --management-control-border: var(--color-border-base);
+  --management-control-bg: rgba(255, 255, 255, 0.5);
+  --management-control-placeholder: var(--text-secondary);
+  --management-control-focus-ring: rgba(64, 138, 113, 0.18);
+  --management-hover-bg: var(--component-background-soft);
+  --management-elevated-bg: var(--component-background);
+  --management-danger: var(--color-error);
+  --management-danger-bg: rgba(248, 32, 36, 0.1);
+  --management-danger-border: rgba(248, 32, 36, 0.36);
+  --management-selected-bg: rgba(64, 138, 113, 0.12);
+  --management-sidebar-active-bg: rgba(64, 138, 113, 0.14);
+  --management-scrollbar-thumb: rgba(33, 33, 33, 0.18);
+  --management-scrollbar-track: rgba(33, 33, 33, 0.06);
+
+  --auth-login-bg: radial-gradient(circle at 18% 16%, rgba(64, 138, 113, 0.24), transparent 32%),
+    radial-gradient(circle at 84% 28%, rgba(4, 119, 247, 0.12), transparent 30%),
+    radial-gradient(circle at 66% 82%, rgba(253, 169, 0, 0.12), transparent 34%),
+    linear-gradient(132deg, #f7f7f2 0%, #efefea 48%, #f2f6f2 100%);
+  --auth-login-aura: linear-gradient(128deg, transparent 0 18%, rgba(64, 138, 113, 0.2) 31%, transparent 47%),
+    linear-gradient(212deg, transparent 0 28%, rgba(4, 119, 247, 0.12) 44%, transparent 62%),
+    linear-gradient(320deg, rgba(253, 169, 0, 0.12) 0 22%, transparent 42%),
+    linear-gradient(36deg, transparent 0 52%, rgba(248, 32, 36, 0.08) 70%, transparent 86%);
+  --auth-login-grid: rgba(33, 33, 33, 0.06);
+  --auth-login-field: conic-gradient(
+      from 180deg at 52% 42%,
+      rgba(189, 201, 195, 0.72),
+      rgba(239, 239, 234, 0.78),
+      rgba(177, 189, 183, 0.68),
+      rgba(253, 169, 0, 0.12),
+      rgba(189, 201, 195, 0.72)
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.42));
+  --auth-login-field-opacity: 0.56;
+  --auth-login-field-blend: soft-light;
+  --auth-glass-bg: rgba(255, 255, 255, 0.1);
+  --auth-glass-border: rgba(255, 255, 255, 0.58);
+  --auth-glass-control-bg: rgba(255, 255, 255, 0.5);
+  --auth-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  --auth-glass-control-focus-shadow: 0 0 0 3px var(--management-control-focus-ring),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --auth-brand-mark-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.28));
+  --auth-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --auth-glass-shadow: 0 22px 55px rgba(43, 56, 92, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(67, 81, 119, 0.12);
+  --auth-glass-surface: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.44),
+      rgba(255, 255, 255, 0.12) 45%,
+      rgba(255, 255, 255, 0.28)
+    ),
+    linear-gradient(225deg, rgba(255, 255, 255, 0.28), rgba(64, 138, 113, 0.12) 42%, rgba(253, 169, 0, 0.08));
+  --auth-glass-edge: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(255, 255, 255, 0.16) 32%,
+    rgba(64, 138, 113, 0.34) 58%,
+    rgba(253, 169, 0, 0.16) 100%
+  );
+  --auth-button-primary-start: #5ea585;
+  --auth-button-primary-end: #408a71;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --body-background: #0d0d0d;
+    --component-background: #171717;
+    --component-background-soft: #222220;
+    --color-border-base: #32322f;
+    --color-border-split: #b8b8af;
+    --text-primary: #fafafa;
+    --text-secondary: #eeeeee;
+    --text-disabled: #bdbdbd;
+    --text-inverse: #fafafa;
+
+    --management-page-bg: var(--body-background);
+    --management-panel-bg: var(--component-background);
+    --management-panel-border: var(--color-border-base);
+    --management-panel-subtle: var(--component-background-soft);
+    --management-text: var(--text-primary);
+    --management-heading: var(--text-primary);
+    --management-muted: var(--text-secondary);
+    --management-control-border: var(--color-border-base);
+    --management-control-bg: rgba(23, 23, 23, 0.58);
+    --management-control-placeholder: var(--text-disabled);
+    --management-control-focus-ring: rgba(64, 138, 113, 0.28);
+    --management-hover-bg: var(--component-background-soft);
+    --management-elevated-bg: var(--component-background);
+    --management-danger: var(--color-error);
+    --management-danger-bg: rgba(248, 32, 36, 0.18);
+    --management-danger-border: rgba(248, 32, 36, 0.42);
+    --management-selected-bg: rgba(64, 138, 113, 0.28);
+    --management-sidebar-active-bg: rgba(64, 138, 113, 0.24);
+    --management-scrollbar-thumb: rgba(250, 250, 250, 0.18);
+    --management-scrollbar-track: rgba(250, 250, 250, 0.08);
+
+    --auth-login-bg: radial-gradient(circle at 24% 18%, rgba(64, 138, 113, 0.22), transparent 32%),
+      radial-gradient(circle at 72% 64%, rgba(4, 119, 247, 0.14), transparent 34%),
+      radial-gradient(circle at 82% 18%, rgba(253, 169, 0, 0.1), transparent 26%),
+      linear-gradient(130deg, #0d0d0d 0%, #171717 48%, #222220 100%);
+    --auth-login-aura: linear-gradient(
+        128deg,
+        transparent 0 18%,
+        rgba(64, 138, 113, 0.2) 31%,
+        transparent 47%
+      ),
+      linear-gradient(212deg, transparent 0 28%, rgba(4, 119, 247, 0.12) 44%, transparent 62%),
+      linear-gradient(320deg, rgba(253, 169, 0, 0.1) 0 22%, transparent 42%),
+      linear-gradient(36deg, transparent 0 52%, rgba(248, 32, 36, 0.08) 70%, transparent 86%);
+    --auth-login-grid: rgba(250, 250, 250, 0.08);
+    --auth-login-field: conic-gradient(
+        from 180deg at 52% 42%,
+        rgba(23, 29, 27, 0.9),
+        rgba(28, 42, 38, 0.84),
+        rgba(41, 75, 64, 0.68),
+        rgba(253, 169, 0, 0.08),
+        rgba(23, 29, 27, 0.9)
+      ),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(13, 13, 13, 0.36));
+    --auth-login-field-opacity: 0.64;
+    --auth-login-field-blend: screen;
+    --auth-glass-bg: rgba(13, 13, 13, 0.32);
+    --auth-glass-border: rgba(255, 255, 255, 0.22);
+    --auth-glass-control-bg: rgba(23, 23, 23, 0.58);
+    --auth-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    --auth-glass-control-focus-shadow: 0 0 0 3px var(--management-control-focus-ring),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    --auth-brand-mark-bg: linear-gradient(135deg, rgba(64, 138, 113, 0.24), rgba(23, 23, 23, 0.46));
+    --auth-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    --auth-glass-shadow: 0 22px 60px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.26),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    --auth-glass-surface: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.18),
+        rgba(255, 255, 255, 0.06) 45%,
+        rgba(255, 255, 255, 0.12)
+      ),
+      linear-gradient(225deg, rgba(64, 138, 113, 0.18), rgba(253, 169, 0, 0.08) 42%, rgba(4, 119, 247, 0.08));
+    --auth-glass-edge: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.42),
+      rgba(255, 255, 255, 0.08) 32%,
+      rgba(64, 138, 113, 0.32) 58%,
+      rgba(253, 169, 0, 0.14) 100%
+    );
+    --auth-button-primary-start: #5b9d80;
+    --auth-button-primary-end: #326a56;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --body-background: #0d0d0d;
+  --component-background: #171717;
+  --component-background-soft: #222220;
+  --color-border-base: #32322f;
+  --color-border-split: #b8b8af;
+  --text-primary: #fafafa;
+  --text-secondary: #eeeeee;
+  --text-disabled: #bdbdbd;
+  --text-inverse: #fafafa;
+
+  --management-page-bg: var(--body-background);
+  --management-panel-bg: var(--component-background);
+  --management-panel-border: var(--color-border-base);
+  --management-panel-subtle: var(--component-background-soft);
+  --management-text: var(--text-primary);
+  --management-heading: var(--text-primary);
+  --management-muted: var(--text-secondary);
+  --management-control-border: var(--color-border-base);
+  --management-control-bg: rgba(23, 23, 23, 0.58);
+  --management-control-placeholder: var(--text-disabled);
+  --management-control-focus-ring: rgba(64, 138, 113, 0.28);
+  --management-hover-bg: var(--component-background-soft);
+  --management-elevated-bg: var(--component-background);
+  --management-danger: var(--color-error);
+  --management-danger-bg: rgba(248, 32, 36, 0.18);
+  --management-danger-border: rgba(248, 32, 36, 0.42);
+  --management-selected-bg: rgba(64, 138, 113, 0.28);
+  --management-sidebar-active-bg: rgba(64, 138, 113, 0.24);
+  --management-scrollbar-thumb: rgba(250, 250, 250, 0.18);
+  --management-scrollbar-track: rgba(250, 250, 250, 0.08);
+
+  --auth-login-bg: radial-gradient(circle at 24% 18%, rgba(64, 138, 113, 0.22), transparent 32%),
+    radial-gradient(circle at 72% 64%, rgba(4, 119, 247, 0.14), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(253, 169, 0, 0.1), transparent 26%),
+    linear-gradient(130deg, #0d0d0d 0%, #171717 48%, #222220 100%);
+  --auth-login-aura: linear-gradient(128deg, transparent 0 18%, rgba(64, 138, 113, 0.2) 31%, transparent 47%),
+    linear-gradient(212deg, transparent 0 28%, rgba(4, 119, 247, 0.12) 44%, transparent 62%),
+    linear-gradient(320deg, rgba(253, 169, 0, 0.1) 0 22%, transparent 42%),
+    linear-gradient(36deg, transparent 0 52%, rgba(248, 32, 36, 0.08) 70%, transparent 86%);
+  --auth-login-grid: rgba(250, 250, 250, 0.08);
+  --auth-login-field: conic-gradient(
+      from 180deg at 52% 42%,
+      rgba(23, 29, 27, 0.9),
+      rgba(28, 42, 38, 0.84),
+      rgba(41, 75, 64, 0.68),
+      rgba(253, 169, 0, 0.08),
+      rgba(23, 29, 27, 0.9)
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(13, 13, 13, 0.36));
+  --auth-login-field-opacity: 0.64;
+  --auth-login-field-blend: screen;
+  --auth-glass-bg: rgba(13, 13, 13, 0.32);
+  --auth-glass-border: rgba(255, 255, 255, 0.22);
+  --auth-glass-control-bg: rgba(23, 23, 23, 0.58);
+  --auth-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --auth-glass-control-focus-shadow: 0 0 0 3px var(--management-control-focus-ring),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --auth-brand-mark-bg: linear-gradient(135deg, rgba(64, 138, 113, 0.24), rgba(23, 23, 23, 0.46));
+  --auth-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  --auth-glass-shadow: 0 22px 60px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  --auth-glass-surface: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.18),
+      rgba(255, 255, 255, 0.06) 45%,
+      rgba(255, 255, 255, 0.12)
+    ),
+    linear-gradient(225deg, rgba(64, 138, 113, 0.18), rgba(253, 169, 0, 0.08) 42%, rgba(4, 119, 247, 0.08));
+  --auth-glass-edge: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0.08) 32%,
+    rgba(64, 138, 113, 0.32) 58%,
+    rgba(253, 169, 0, 0.14) 100%
+  );
+  --auth-button-primary-start: #5b9d80;
+  --auth-button-primary-end: #326a56;
+}

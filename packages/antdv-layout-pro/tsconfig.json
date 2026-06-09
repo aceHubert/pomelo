@@ -6,7 +6,8 @@
     "jsx": "preserve",
     "noImplicitAny": false,
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["node"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }
