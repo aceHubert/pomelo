@@ -35,7 +35,7 @@ identity-server 当前已经提供 OIDC provider、GraphQL 管理 resolver、JWT
 
 2. **JWT 签发配置放在 identity-server 配置层**
 
-   `AuthorizationModule` 增加 `signingKey: privateKey` 和 `jwtExpiresIn: MANAGEMENT_JWT_EXPIRES_IN`。如果 `JWT_PRIVATE_KEY` 未配置，继续依赖包内现有默认私钥 warning 机制，不额外修改公共包或重复 warning。
+   `AuthorizationModule` 增加 `signingKey: privateKey` 和 `jwtExpiresIn: JWT_EXPIRES_IN`。如果 `JWT_PRIVATE_KEY` 未配置，继续依赖包内现有默认私钥 warning 机制，不额外修改公共包或重复 warning。
 
    备选方案是修改 `AuthorizationService` 让缺省 signingKey 时也可签发；该方案会扩大公共包行为变化，因此不采用。
 

@@ -1,7 +1,7 @@
 ## 1. JWT 签发配置
 
 - [x] 1.1 在 identity-server 的 `AuthorizationModule` 配置中传入 `signingKey`，来源保持为 `JWT_PRIVATE_KEY`
-- [x] 1.2 在 identity-server 配置中加入管理 JWT 过期时间，默认读取 `MANAGEMENT_JWT_EXPIRES_IN`
+- [x] 1.2 在 identity-server 配置中加入管理 JWT 过期时间，默认读取 `JWT_EXPIRES_IN`
 - [x] 1.3 确认未配置 `JWT_PRIVATE_KEY` 时继续使用包内现有默认私钥 warning 机制，不修改 `AuthorizationService`
 
 ## 2. 管理登录能力
