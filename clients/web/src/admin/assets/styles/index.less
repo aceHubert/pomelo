@@ -1,8 +1,11 @@
-@import (reference, multiple) '@ace-pomelo/theme/lib/themes/default';
-@import (reference) '@ace-pomelo/theme/lib/mixins/set-color';
-@import (multiple) '@ace-pomelo/theme/lib/core/colors';
-@import (multiple) '../../../../../../packages/antdv-layout-pro/src/style/component-reset.less';
-@import (reference, multiple) '../../../../../../packages/antdv-layout-pro/src/style/themes/default.less';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import (reference, multiple) 'antdv-layout-pro/style/themes/default';
+@import (reference) 'antdv-layout-pro/style/mixins/set-color';
+@import (multiple) 'antdv-layout-pro/style/colors';
+@import (multiple) 'antdv-layout-pro/style/component-reset';
 
 :root {
   // set ckeditor theme
@@ -48,11 +51,10 @@ html{
 
 // Dark theme
 .theme-dark {
-  @import (reference, multiple) '@ace-pomelo/theme/lib/themes/dark';
-  @import (reference) '@ace-pomelo/theme/lib/mixins/set-color';
-  @import (multiple) '@ace-pomelo/theme/lib/core/colors';
-  @import (multiple) '../../../../../../packages/antdv-layout-pro/src/style/component-reset.less';
-  @import (reference, multiple) '../../../../../../packages/antdv-layout-pro/src/style/themes/dark.less';
+  @import (reference, multiple) 'antdv-layout-pro/style/themes/dark';
+  @import (reference) 'antdv-layout-pro/style/mixins/set-color';
+  @import (multiple) 'antdv-layout-pro/style/colors';
+  @import (multiple) 'antdv-layout-pro/style/component-reset';
   @import (reference) '../../../assets/styles/variables';
 
   :root & {
@@ -115,5 +117,5 @@ html{
   border-color: var(--ck-color-base-border);
 }
 
-@import '../../../../../../packages/antdv-layout-pro/src/style/index.less';
+@import 'antdv-layout-pro/style/index';
 @import '../../components/index';

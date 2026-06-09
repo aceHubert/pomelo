@@ -146,7 +146,7 @@ export default Form.create({})(
               ></Input.Password>
             </Form.Item>
             <Row type="flex" class="mb-4 px-3">
-              <Col xs={24} sm={{ span: 18, offset: 3 }} class="d-flex justify-content-space-between">
+              <Col xs={24} sm={{ span: 18, offset: 3 }} class="flex justify-between">
                 <Checkbox v-model={remember.value}>{i18n.tv('page_login.form.remember_me_label', '记住我?')}</Checkbox>
                 <router-link
                   to={{

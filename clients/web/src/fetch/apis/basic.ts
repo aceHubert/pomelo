@@ -15,6 +15,14 @@ export interface OptionModel {
   autoload: OptionAutoload;
 }
 
+export interface OptionValueModel {
+  key: string;
+  value?: string | null;
+  isSet: boolean;
+  useDefault: boolean;
+  message?: string | null;
+}
+
 export interface NewOptionModel extends Omit<OptionModel, 'id'> {}
 
 export interface UpdateOptionModel extends Partial<NewOptionModel> {}
@@ -112,30 +120,32 @@ export const useBasicApi = defineRegistGraphql('basic', {
     getOption: gql`
       query getOption($id: ID!) {
         option(id: $id) {
-          id
-          name: optionName
-          value: optionValue
-          autoload
+          key
+          value
+          isSet
+          useDefault
+          message
         }
       }
-    ` as TypedQueryDocumentNode<{ option: OptionModel | null }, { id: number }>,
+    ` as TypedQueryDocumentNode<{ option: OptionValueModel | null }, { id: number }>,
     // 根据name获取Option
     getOptionByName: gql`
       query getOptionByName($name: String!) {
         option: optionByName(name: $name) {
-          id
-          name: optionName
-          value: optionValue
-          autoload
+          key
+          value
+          isSet
+          useDefault
+          message
         }
       }
-    ` as TypedQueryDocumentNode<{ option: OptionModel | null }, { name: string }>,
+    ` as TypedQueryDocumentNode<{ option: OptionValueModel }, { name: string }>,
     // 获取 optionName 的项
     getOptionValue: gql`
       query getOptionValue($name: String!) {
         value: optionValue(name: $name)
       }
-    ` as TypedQueryDocumentNode<{ value: string }, { name: string }>,
+    ` as TypedQueryDocumentNode<{ value?: string | null }, { name: string }>,
     // 创建配置选项
     createOption: gql`
       mutation createOption($model: NewOptionInput!) {

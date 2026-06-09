@@ -471,7 +471,7 @@ export const PropertyForm = Form.create({})(
                     title={presetPropertyKeyMap.value.get(props.form.getFieldValue('key'))?.description}
                     placement="bottomLeft"
                   >
-                    <Icon type="question-circle" class="ml-1 primary--text" />
+                    <Icon type="question-circle" class="ml-1 text-primary" />
                   </Tooltip>
                 )}
               </span>

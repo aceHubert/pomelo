@@ -3,6 +3,21 @@
 @setting-drawer-prefix-cls: ~'@{ant-prefix}-setting-drawer';
 
 .@{setting-drawer-prefix-cls} {
+  &__section {
+    margin-bottom: 24px;
+  }
+
+  &__section-extra {
+    margin-top: 24px;
+  }
+
+  &__list-item {
+    &--compact {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
   h3&__title {
     margin-bottom: 12px;
     color: @var-text-primary;

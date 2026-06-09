@@ -113,7 +113,7 @@ export default defineComponent({
               column={{ sm: 2, xs: 1 }}
               scopedSlots={{
                 title: () => (
-                  <div class="d-flex justify-content-space-between">
+                  <div class="flex justify-between">
                     <span>{i18n.tv('page_identity_resource_detail.basic_title', '基本信息')}</span>
                     <Space>
                       {!resource.nonEditable && resource.enabled && (

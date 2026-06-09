@@ -1,0 +1,86 @@
+@import 'mixins/set-color';
+
+:root & {
+  each(.text-vars(), {
+    --text-@{key}: @value;
+  })
+  each(.primary-vars(), {
+    --theme-@{key}: @value;
+  })
+  each(.gray-vars(), {
+    --@{key}: @value;
+  })
+  each(.operator-vars(), {
+    --color-@{key}: @value;
+  })
+  --color-border-base: @border-color-base;
+  --color-border-split: @border-color-split;
+  --color-border-inverse: @border-color-inverse;
+  --color-background-light: @background-color-light;
+  --color-background-base: @background-color-base;
+  --shadow-1-up: @shadow-1-up;
+  --shadow-1-down: @shadow-1-down;
+  --shadow-1-left: @shadow-1-left;
+  --shadow-1-right: @shadow-1-right;
+  --shadow-2: @shadow-2;
+  --component-background: @component-background;
+  --body-background: @body-background;
+}
+
+.primary-vars() {
+  primary: @primary-color;
+  primary-1: @primary-1;
+  primary-2: @primary-2;
+  primary-3: @primary-3;
+  primary-4: @primary-4;
+  primary-5: @primary-5;
+  primary-6: @primary-6;
+  primary-7: @primary-7;
+  primary-8: @primary-8;
+  primary-9: @primary-9;
+  primary-10: @primary-10;
+}
+
+// 灰度变量统一以 gray 命名，供 Tailwind 的 bg-gray-* 等工具类消费。
+.gray-vars() {
+  gray-1: @gray-1;
+  gray-2: @gray-2;
+  gray-3: @gray-3;
+  gray-4: @gray-4;
+  gray-5: @gray-5;
+  gray-6: @gray-6;
+  gray-7: @gray-7;
+  gray-8: @gray-8;
+  gray-9: @gray-9;
+  gray-10: @gray-10;
+}
+
+each(.primary-vars(), {
+  .set-var-color(@key, @value) !important;
+})
+
+.operator-vars() {
+  success: @success-color;
+  warning: @warning-color;
+  error: @error-color;
+  danger: @error-color;
+  info: @info-color;
+  disabled: @disabled-color;
+}
+
+each(.operator-vars(), {
+  .set-color(@key, @value, @modifier: true) !important;
+})
+
+.text-vars() {
+  primary: @text-color;
+  secondary: @text-color-secondary;
+  disabled: @text-color-disabled;
+  inverse: @text-color-inverse;
+}
+
+each(.text-vars(), {
+  .text--@{key} {
+    color: var(e('--text-@{key}'), @value) !important;
+  }
+})

@@ -1,61 +1,38 @@
 import { warn } from '@ace-util/core';
 import { envConfig } from '@/configs/env';
+import { getBootstrapOptionByName } from '@/fetch/bootstrap';
 
 export const AuthOidcOptionKey = 'auth-oidc';
 
-let autoloadOptions: Record<string, string> | undefined;
-let autoloadOptionsPromise: Promise<Record<string, string>> | undefined;
+let authOidcOption: string | undefined;
+let authOidcOptionLoaded = false;
+let authOidcOptionPromise: Promise<string | undefined> | undefined;
 
-export function setAutoloadOptions(options: Record<string, string>) {
-  autoloadOptions = options;
-}
-
-export function getAutoloadOptions() {
-  return autoloadOptions;
-}
-
-export function getAuthOidcOption(options: Record<string, string> = autoloadOptions || {}) {
-  return options[AuthOidcOptionKey];
-}
-
-export async function loadAutoloadOptions() {
-  if (autoloadOptions) {
-    return autoloadOptions;
+export async function loadAuthOidcOption() {
+  if (authOidcOptionLoaded) {
+    return authOidcOption;
   }
 
-  if (!autoloadOptionsPromise) {
-    autoloadOptionsPromise = fetch(envConfig.basicGraphqlBase, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
-        apikey: 'pomelo-local',
-      },
-      body: JSON.stringify({
-        query: `query getAutoloadOptions { options: autoloadOptions }`,
-      }),
-    })
-      .then(async (resp) => {
-        const data = await resp.json();
-        if (data.errors?.length) {
-          throw new Error(data.errors[0].message);
-        }
-        autoloadOptions = data.data?.options || {};
-        return autoloadOptions;
+  if (!authOidcOptionPromise) {
+    authOidcOptionPromise = getBootstrapOptionByName(AuthOidcOptionKey)
+      .then((option) => {
+        authOidcOption = option.value || undefined;
+        authOidcOptionLoaded = true;
+        return authOidcOption;
       })
       .catch((err: Error) => {
-        warn(false, `Options loaded error, ${err.message}`);
-        autoloadOptions = {};
-        return autoloadOptions;
+        warn(false, `Auth OIDC option loaded error, ${err.message}`);
+        authOidcOption = undefined;
+        authOidcOptionLoaded = true;
+        return authOidcOption;
       });
   }
 
-  return autoloadOptionsPromise;
+  return authOidcOptionPromise;
 }
 
 export async function prepareOidcSettings() {
-  const options = await loadAutoloadOptions();
-  const settings = envConfig.resolveOidcSettings(getAuthOidcOption(options));
+  const settings = envConfig.resolveOidcSettings(await loadAuthOidcOption());
   if (settings) {
     envConfig.setOidcSettings(settings);
   }

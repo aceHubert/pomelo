@@ -1,6 +1,6 @@
 import { defineComponent, ref, provide, inject, toRef } from 'vue-demi';
 import { Space } from 'ant-design-vue';
-import { useEffect } from '../../shared';
+import { useEffect, useConfigProvider } from '../../shared';
 import { isVueComponent } from '../../utils';
 import { Breadcrumb } from '../breadcrumb';
 
@@ -63,6 +63,8 @@ export const NestedBreadcrumb = defineComponent({
     },
   },
   setup(props, { slots }) {
+    const configProvider = useConfigProvider();
+    const prefixCls = configProvider.getPrefixCls('layout-admin');
     const injectBreadcrumb = inject(BreadcrumbProviderInjectKey, ref([]));
     const nestedContainer = inject(NestedBreadcrumbInjectKey, void 0);
 
@@ -122,7 +124,7 @@ export const NestedBreadcrumb = defineComponent({
         slots.default?.()
       ) : (
         <div class="breadcrumb-container">
-          <Space class="py-3">
+          <Space class={`${prefixCls}-breadcrumb__space`}>
             {slots.prefix?.()}
             <Breadcrumb items={currentBreadcrumbs.value}></Breadcrumb>
             {slots.suffix?.()}

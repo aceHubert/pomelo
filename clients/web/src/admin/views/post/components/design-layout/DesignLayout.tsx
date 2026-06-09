@@ -438,7 +438,7 @@ export default defineComponent({
                   )}
                   {slots.extraContent && (
                     <Popover placement="bottomRight">
-                      <Icon component={IconMore} class="font-size-xl" style="vertical-align: middle; cursor:pointer" />
+                      <Icon component={IconMore} class="text-lg" style="vertical-align: middle; cursor:pointer" />
                       <template slot="content">{slots.extraContent()}</template>
                     </Popover>
                   )}
@@ -503,7 +503,7 @@ export default defineComponent({
             headStyle={{ flex: 'none' }}
             bodyStyle={{ padding: '10px 0', flex: '1 1 auto', overflow: 'auto' }}
             style="border-radius:0; height:100%;"
-            class="d-flex flex-column"
+            class="flex flex-col"
           >
             <template slot="extra">
               <Icon type="close" onClick={() => (siderCollapsedRef.value = !siderCollapsedRef.value)}></Icon>

@@ -339,7 +339,7 @@ export default defineComponent({
                       )}
                       {collapsed && (
                         <LocaleDropdown
-                          // class={['d-block pt-4', { 'text-center': collaspsed }]}
+                          // class={['block pt-4', { 'text-center': collaspsed }]}
                           locale={i18n.locale}
                           supportLanguages={appMixin.supportLanguages}
                           placement="rightBottom"
@@ -374,7 +374,7 @@ export default defineComponent({
                                     onRead={handleMessageRead}
                                   ></MessageDropdown>
                                   <LocaleDropdown
-                                    // class={['d-block pt-4', { 'text-center': collapsed }]}
+                                    // class={['block pt-4', { 'text-center': collapsed }]}
                                     locale={i18n.locale}
                                     supportLanguages={appMixin.supportLanguages}
                                     placement="topRight"

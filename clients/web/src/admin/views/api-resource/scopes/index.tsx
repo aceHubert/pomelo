@@ -96,7 +96,7 @@ export default defineComponent({
         </router-link>,
         <a
           href="javascript:;"
-          class="info--text"
+          class="text-info"
           onClick={() => {
             editFormObj.value = record;
             nextTick(() => {
@@ -132,7 +132,7 @@ export default defineComponent({
           width: 120,
           dataIndex: 'displayName',
           customRender: (_: any, record: PagedApiScopeModel['rows'][0]) => (
-            <div class="text-ellipsis-l2" title={record.displayName}>
+            <div class="line-clamp-2" title={record.displayName}>
               {record.displayName || '-'}
             </div>
           ),
@@ -167,7 +167,7 @@ export default defineComponent({
           width: 300,
           dataIndex: 'description',
           customRender: (_: any, record: PagedApiScopeModel['rows'][0]) => (
-            <div class="text-ellipsis-l2" title={record.description}>
+            <div class="line-clamp-2" title={record.description}>
               {record.description || '-'}
             </div>
           ),

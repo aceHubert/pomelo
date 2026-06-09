@@ -151,7 +151,12 @@ export default defineComponent({
               ))}
           </div>
           {props.nameVisible && (
-            <div class={[`${prefixCls}-name__wrapper`, { 'pl-2': slots.name || props.name || slots.description }]}>
+            <div
+              class={[
+                `${prefixCls}-name__wrapper`,
+                { [`${prefixCls}-name__wrapper--with-content`]: slots.name || props.name || slots.description },
+              ]}
+            >
               {(slots.name || props.name) && (
                 <p class={`${prefixCls}__name`} title={slots.name?.() ?? props.name}>
                   {slots.name?.() ?? props.name}

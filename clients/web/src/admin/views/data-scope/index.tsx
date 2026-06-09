@@ -188,7 +188,7 @@ export default defineComponent({
                   })
                 }
               >
-                <a href="javascript:;" class="error--text" loading={record.deleting}>
+                <a href="javascript:;" class="text-error" loading={record.deleting}>
                   {' '}
                   {record.deleting && <Spin />}
                   {record.deleting

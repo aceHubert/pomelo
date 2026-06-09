@@ -196,7 +196,7 @@ export default Form.create({})(
                 column={{ md: 2, sm: 1, xs: 1 }}
                 scopedSlots={{
                   title: () => (
-                    <div class="d-flex justify-content-space-between">
+                    <div class="flex justify-between">
                       <span>{i18n.tv('page_client_detail.basic_title', '基本信息')}</span>
                       <Space>
                         {client.enabled && (
@@ -265,7 +265,7 @@ export default Form.create({})(
                 column={{ md: 2, sm: 1, xs: 1 }}
                 scopedSlots={{
                   title: () => (
-                    <div class="d-flex justify-content-space-between">
+                    <div class="flex justify-between">
                       <span>{i18n.tv('page_client_detail.authentication_title', '认证')}</span>
                     </div>
                   ),
@@ -496,7 +496,7 @@ export default Form.create({})(
                 column={{ md: 2, sm: 1, xs: 1 }}
                 scopedSlots={{
                   title: () => (
-                    <div class="d-flex justify-content-space-between">
+                    <div class="flex justify-between">
                       <span>{i18n.tv('page_client_detail.token_title', '令牌')}</span>
                     </div>
                   ),

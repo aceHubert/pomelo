@@ -39,7 +39,7 @@ export default defineComponent({
       <div class={classes.container}>
         <List>
           {props.posts.rows.map((item) => (
-            <div class={['d-flex bdr-b py-2', classes.item]} onClick={() => emit('itemClick', item)}>
+            <div class={['flex bdr-b py-2', classes.item]} onClick={() => emit('itemClick', item)}>
               <div class="flex-auto pr-2">
                 <p class={[classes.itemTitle]}>{item.title}</p>
                 <p class={[classes.itemDescription]}>{item.excerpt}</p>

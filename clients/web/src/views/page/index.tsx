@@ -161,7 +161,7 @@ export default defineComponent({
           <SkeletonLoader style={{ width: '100%', height: deviceType.isDesktop ? '300px' : '200px' }} />
           {deviceType.isDesktop ? (
             <div class="mx-auto" style="width: 1180px; max-width: 100%;">
-              <div class="d-flex flex-wrap justify-content-start mx-n3">
+              <div class="flex flex-wrap justify-start -mx-3">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <div style="flex: 0 0 20%; padding: 20px 12px">
                     <SkeletonLoader key={index} style="height: 100px; width: 100%; " />
@@ -171,7 +171,7 @@ export default defineComponent({
               <div class="mt-2">
                 <SkeletonLoader style=" height: 40px; width: 200px;" />
                 {Array.from({ length: 2 }).map((_, index) => (
-                  <div key={index} class="d-flex mt-6">
+                  <div key={index} class="flex mt-6">
                     <div class="flex-auto pr-4">
                       <SkeletonLoader style="height: 18px; width: 260px; margin-top: 10px;" />
                       <SkeletonLoader style="height: 18px; margin-top: 10px;" />
@@ -184,7 +184,7 @@ export default defineComponent({
             </div>
           ) : (
             <div class="px-4">
-              <div class="d-flex flex-wrap justify-content-start mx-n3">
+              <div class="flex flex-wrap justify-start -mx-3">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <div style="flex: 0 0 25%; padding: 10px 12px">
                     <SkeletonLoader key={index} type="circle" style="margin: auto; width: 100%; padding-top: 100%;" />
@@ -194,7 +194,7 @@ export default defineComponent({
               <div class="mt-2">
                 <SkeletonLoader style=" height: 32px; width: 100px;" />
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} class="d-flex mt-4">
+                  <div key={index} class="flex mt-4">
                     <div class="flex-auto pr-4">
                       <SkeletonLoader style="height: 14px; width: 50%; margin-top: 5px;" />
                       <SkeletonLoader style="height: 14px; margin-top: 5px;" />

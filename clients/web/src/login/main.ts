@@ -5,7 +5,7 @@ import 'custom-event-polyfill';
 import Vue, { type ComponentOptions } from 'vue';
 import VueCompositionApi from '@vue/composition-api';
 import { Authoriztion } from '@/auth';
-import { getAuthOidcOption, loadAutoloadOptions } from '@/auth/runtime-options';
+import { loadAuthOidcOption } from '@/auth/runtime-options';
 import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
 import { i18n } from '@/i18n';
@@ -15,7 +15,6 @@ import * as plugins from '@/plugins';
 // Local
 import { router } from './router/index';
 import App from './App';
-import '@/assets/styles/tailwind.css';
 import './assets/styles/index.less';
 
 // Locales
@@ -84,9 +83,9 @@ async function createApp() {
   return context;
 }
 
-loadAutoloadOptions()
-  .then((options) => {
-    Authoriztion.configure(getAuthOidcOption(options));
+loadAuthOidcOption()
+  .then((authOidc) => {
+    Authoriztion.configure(authOidc);
     Vue.use(Authoriztion);
 
     return createApp();

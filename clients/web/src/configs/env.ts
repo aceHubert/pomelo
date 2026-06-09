@@ -15,20 +15,21 @@ const baseUrl = origin + (process.env.BASE_URL || '/');
 const clientId = '3d136433-977f-40c7-8702-a0444a6b2a9f';
 let runtimeOidcSettings: UserManagerSettings | undefined;
 
-function getDefaultOidcSettings(): UserManagerSettings {
+export function getDefaultOidcSettings(): UserManagerSettings {
   return {
-    authority: origin + '/connect/oauth2',
+    authority: origin + '/oauth2',
     client_id: clientId,
     redirect_uri: baseUrl + 'signin.html',
     post_logout_redirect_uri: baseUrl.replace(/\/$/, ''),
-    accessTokenExpiringNotificationTime: 10,
+    accessTokenExpiringNotificationTimeInSeconds: 10,
     automaticSilentRenew: true,
     silent_redirect_uri: baseUrl + 'signin-silent.html',
     response_type: 'code',
     scope: 'openid profile offline_access',
-    revokeAccessTokenOnSignout: true,
+    revokeTokensOnSignout: true,
+    revokeTokenAdditionalContentTypes: ['text/plain'],
     redirectMethod: 'replace',
-    mergeClaims: true,
+    mergeClaimsStrategy: { array: 'replace' },
     monitorSession: true,
   };
 }

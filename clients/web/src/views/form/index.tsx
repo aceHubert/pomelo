@@ -171,7 +171,7 @@ export default defineComponent({
           <SkeletonLoader style={{ width: '100%', height: deviceType.isDesktop ? '300px' : '200px' }} />
           <div class={['mx-auto pt-2', { 'px-4': !deviceType.isDesktop }]} style="width: 1180px; max-width: 100%;">
             {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} class="d-flex mt-2">
+              <div key={index} class="flex mt-2">
                 <SkeletonLoader
                   class="flex-none"
                   style={{

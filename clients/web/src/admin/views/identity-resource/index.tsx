@@ -104,7 +104,7 @@ export default defineComponent({
               id: `${record.id}`,
             },
           }}
-          class="primary-7--text hover:primary-6--text active:primary-8--text"
+          class="text-primary-7 hover:text-primary-6 active:text-primary-8"
         >
           {i18n.tv('page_identity_resources.action_btn_text.claims', '声明')}
         </router-link>,
@@ -131,7 +131,7 @@ export default defineComponent({
           width: 200,
           dataIndex: 'displayName',
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => (
-            <div class="text-ellipsis-l2" title={record.displayName}>
+            <div class="line-clamp-2" title={record.displayName}>
               {record.displayName || '-'}
             </div>
           ),
@@ -166,7 +166,7 @@ export default defineComponent({
           width: 300,
           dataIndex: 'description',
           customRender: (_: any, record: PagedIdentityResourceModel['rows'][0]) => (
-            <div class="text-ellipsis-l2" title={record.description}>
+            <div class="line-clamp-2" title={record.description}>
               {record.description || '-'}
             </div>
           ),
@@ -180,7 +180,7 @@ export default defineComponent({
                 {record.enabled ? (
                   i18n.tv('page_identity_resources.updated_at', '最后修改于')
                 ) : (
-                  <span class="error--text">
+                  <span class="text-error">
                     <Icon type="minus-circle" class="mr-1" />
                     {i18n.tv('page_identity_resources.disabled_at', '禁用于')}
                   </span>

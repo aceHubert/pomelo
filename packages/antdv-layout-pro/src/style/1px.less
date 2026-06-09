@@ -1,0 +1,64 @@
+// 1px
+
+.bdr {
+  &-all,
+  &-t,
+  &-b,
+  &-tb,
+  &-l,
+  &-r {
+    position: relative;
+  }
+
+  &-all {
+    border: none !important;
+
+    &:before {
+      .setLine();
+    }
+  }
+
+  &-t {
+    border-top: none !important;
+
+    &:before {
+      .setTopLine();
+    }
+  }
+
+  &-b {
+    border-bottom: none !important;
+
+    &:after {
+      .setBottomLine();
+    }
+  }
+
+  &-tb {
+    border-top: none !important;
+    border-bottom: none !important;
+
+    &:before {
+      .setTopLine();
+    }
+    &:after {
+      .setBottomLine();
+    }
+  }
+
+  &-l {
+    border-left: none !important;
+
+    &:before {
+      .setLeftLine();
+    }
+  }
+
+  &-r {
+    border-right: none !important;
+
+    &:after {
+      .setRightLine();
+    }
+  }
+}

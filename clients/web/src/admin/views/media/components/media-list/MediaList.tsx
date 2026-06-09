@@ -180,7 +180,7 @@ export default defineComponent({
             <div class={`${prefixCls}-crop-results`}>
               <div class={`${prefixCls}-crop-results__wrapper`}>
                 <div class={`${prefixCls}-crop-results__coordinates`}>
-                  <p class="font-weight-bold mb-1">{i18n.tv('page_media.image_crop.result_title', '结果')}:</p>
+                  <p class="font-bold mb-1">{i18n.tv('page_media.image_crop.result_title', '结果')}:</p>
                   <p class="mb-1">{`${i18n.tv('page_media.image_crop.result_left', '左')}: ${
                     cropImage.coordinates.left
                   }`}</p>
@@ -306,7 +306,7 @@ export default defineComponent({
         content: () => (
           <div class="text-center">
             <img alt="example" style="max-width: 100%;" src={media.fullPath} />
-            <p class="mt-2 mb-0 text--secondary font-size-xs">{`${formatFileSize(media.fileSize ?? 0)}, ${
+            <p class="mt-2 mb-0 text--secondary text-[10px]">{`${formatFileSize(media.fileSize ?? 0)}, ${
               media.width ?? 0
             }px * ${media.height ?? 0}px`}</p>
           </div>
@@ -434,8 +434,8 @@ export default defineComponent({
                   }}
                 >
                   <div class={`${prefixCls}-new-file-add`}>
-                    <p class="primary--text">
-                      <Icon type="upload" class="font-size-lg--3x" />
+                    <p class="text-primary">
+                      <Icon type="upload" class="text-[48px]" />
                     </p>
                     <p class="mt-4 text--primary">{i18n.tv('page_media.upload_btn_text', '点击上传媒体文件')}</p>
                   </div>
@@ -448,7 +448,7 @@ export default defineComponent({
                   <div class={`${prefixCls}-item`}>
                     <Card hoverable size="small">
                       <img slot="cover" alt={`${media.filename}${media.extention ?? ''}`} src={media.path} />
-                      <p class="mb-0 text-ellipsis">{`${media.filename}${media.extention ?? ''}`}</p>
+                      <p class="mb-0 truncate">{`${media.filename}${media.extention ?? ''}`}</p>
                     </Card>
                     <div class={`${prefixCls}-item__prograss`}>
                       <Progress type="circle" percent={media.percent} width={80} />
@@ -462,7 +462,7 @@ export default defineComponent({
                         alt={`${media.originalFileName}${media.extension}`}
                         src={media.thumbnail?.fullPath ?? FileUnknownSvg}
                       />
-                      <p class="mb-0 text-ellipsis">{`${media.originalFileName}${media.extension}`}</p>
+                      <p class="mb-0 truncate">{`${media.originalFileName}${media.extension}`}</p>
                     </Card>
                     <Space class={`${prefixCls}-item__actions`} direction="vertical">
                       {media.thumbnail && (

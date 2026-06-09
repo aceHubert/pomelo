@@ -220,7 +220,7 @@ export default defineComponent({
               record.status === TemplateStatus.Pending &&
               !record.isSelfContent &&
               record.actionCapability.canPublish ? (
-                <router-link to={{ name: 'page-edit', params: { id: record.id } }} class="warning--text">
+                <router-link to={{ name: 'page-edit', params: { id: record.id } }} class="text-warning">
                   {i18n.tv('page_templates.btn_text.review', '审核')}
                 </router-link>
               ) : record.actionCapability.canEdit ? (
@@ -263,7 +263,7 @@ export default defineComponent({
                     : i18n.tv('page_templates.btn_text.move_to_trush', '放入回收站')}
                 </a>
               ) : null,
-              <a href={getViewUrl(record)} class="info--text" target="preview">
+              <a href={getViewUrl(record)} class="text-info" target="preview">
                 {record.status === TemplateStatus.Publish
                   ? i18n.tv('common.btn_text.view', '查看')
                   : i18n.tv('common.btn_text.preview', '预览')}
@@ -301,7 +301,7 @@ export default defineComponent({
                   })
                 }
               >
-                <a href="javascript:;" class="error--text">
+                <a href="javascript:;" class="text-error">
                   {record.deleting && <Spin />}
                   {record.deleting
                     ? i18n.tv('common.btn_text.in_operation', '操作中')
@@ -332,10 +332,10 @@ export default defineComponent({
             }
             return (
               <div class={classes.title}>
-                <p class="mb-0 d-flex">
+                <p class="mb-0 flex">
                   <a
                     href={getViewUrl(record)}
-                    class={[classes.titleLink, 'text-ellipsis']}
+                    class={[classes.titleLink, 'truncate']}
                     title={record.title}
                     style="flex: 0 1 auto;"
                     target="preview"
@@ -343,7 +343,7 @@ export default defineComponent({
                     {record.title}
                   </a>
                   {titleSuffixs.length > 0 && (
-                    <span class="warning--text font-weight-bold pl-1 flex-none">{`- ${titleSuffixs.join(', ')}`}</span>
+                    <span class="text-warning font-bold pl-1 flex-none">{`- ${titleSuffixs.join(', ')}`}</span>
                   )}
                 </p>
                 <Space class={['mt-1', classes.actions]}>{renderActions(record)}</Space>

@@ -169,7 +169,7 @@ export default Form.create({})(
               />
             </Form.Item>
             <Form.Item wrapperCol={{ xs: 24, sm: { span: 18, offset: 3 } }}>
-              <Space direction="vertical" class="d-block">
+              <Space direction="vertical" class="block">
                 <Button type="primary" shape="round" size="large" htmlType="submit" block loading={submiting.value}>
                   {i18n.tv('page_password_modify.form.submit_btn_text', '提交')}
                 </Button>

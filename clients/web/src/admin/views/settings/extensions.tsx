@@ -147,7 +147,7 @@ export default defineComponent({
     return () => (
       <Spin spinning={loading.value || restarting.value} tip={restarting.value ? '正在等待服务重启' : '加载中'}>
         <Card bordered={false} size={deviceMixin.isMobile ? 'small' : 'default'}>
-          <div class="d-flex justify-between align-center mb-4">
+          <div class="flex justify-between items-center mb-4">
             <div>
               <h2>扩展管理</h2>
               <p class="text--secondary mb-0">插件启用状态由 options 表保存，后端插件在 BFF 重启后进入 Nest IoC。</p>
@@ -213,7 +213,7 @@ export default defineComponent({
                     description={
                       <div>
                         <div>{plugin.description || '暂无描述'}</div>
-                        {plugin.failedReason ? <div class="text-danger mt-1">{plugin.failedReason}</div> : null}
+                        {plugin.failedReason ? <div class="danger--text mt-1">{plugin.failedReason}</div> : null}
                       </div>
                     }
                   />

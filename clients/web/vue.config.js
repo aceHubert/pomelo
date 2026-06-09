@@ -39,6 +39,21 @@ const publicPath = getEnv('BASE_URL', '/');
 // assets path
 const assetsPath = 'static';
 
+// @ant-design/icons 用 require.resolve 是为了拿到 ant-design-vue 自己依赖的图标包版本。
+// 当前项目里有两个版本：
+// - 根目录默认解析到：@ant-design/icons@5.6.1
+// - ant-design-vue@1.7.8 依赖的是：@ant-design/icons@2.1.1
+// ant-design-vue@1.x 需要旧结构，比如：
+// @ant-design/icons/lib/dist
+// @ant-design/icons/lib/outline/ArrowLeftOutline
+// 但 @ant-design/icons@5.x 没有这些路径。直接让 webpack 默认解析，就可能拿到根目录的 v5，导致构建报模块找不到。
+// TODO: 重构后移除
+const antdvIconPackagePath = path.dirname(
+  require.resolve('@ant-design/icons/package.json', {
+    paths: [path.dirname(require.resolve('ant-design-vue/package.json'))],
+  }),
+);
+
 console.log('\x1b[34m%s\x1b[0m', `You are using @/configs/${envJs}.ts`);
 
 module.exports = defineConfig({
@@ -364,6 +379,7 @@ module.exports = defineConfig({
         ...config.resolve.alias,
         // antdv icon 引用全部问题
         '@ant-design/icons/lib/dist$': path.resolve(__dirname, 'src/components/antdv-icons.js'),
+        '@ant-design/icons': antdvIconPackagePath,
         // subpages
         '@admin': path.resolve(__dirname, 'src/admin'),
         '@initialize': path.resolve(__dirname, 'src/initialize'),
@@ -378,8 +394,6 @@ module.exports = defineConfig({
         ...(!isProd
           ? {
               'antdv-layout-pro': path.resolve(__dirname, '../../packages/antdv-layout-pro/src'),
-              '@ace-pomelo/theme$': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
-              '@ace-pomelo/theme/lib': path.resolve(__dirname, '../../packages/pomelo-theme/src'),
               '@ace-pomelo/shared/client': path.resolve(__dirname, '../../packages/pomelo-shared/src/client'),
               '@formily/antdv$': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
               '@formily/antdv/esm': path.resolve(__dirname, '../../.submodules/formily-antdv/packages/components/src'),
@@ -603,7 +617,7 @@ module.exports = defineConfig({
                 propList: ['*'],
                 mediaQuery: false,
                 exclude:
-                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|node_modules\/@pomelo\/theme|packages\/pomelo-theme|src\/admin|src\/login|src\/initialize|desktop.less|desktop.module.less/i,
+                  /node_modules\/ant-design-vue|node_modules\/@formily\/antdv|.submodules\/formily-antdv|node_modules\/@formily\/portal-antdv|.submodules\/formily-portal-antdv|src\/admin|src\/login|src\/initialize|desktop.less|desktop.module.less/i,
               },
             ],
           ],

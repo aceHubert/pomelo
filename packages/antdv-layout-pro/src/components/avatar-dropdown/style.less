@@ -1,4 +1,4 @@
-@import '~@ace-pomelo/theme/lib/mixins/index';
+@import '../../style/mixins/index';
 @import '../../style/themes/index';
 
 @avatar-dropdown-prefix-cls: ~'@{ant-prefix}-avatar-dropdown';
@@ -26,6 +26,10 @@
     flex: 1 1 auto;
     min-width: 0;
     cursor: pointer;
+
+    &--with-content {
+      padding-left: 8px;
+    }
   }
 
   &__name {

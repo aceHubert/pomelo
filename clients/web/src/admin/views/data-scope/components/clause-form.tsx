@@ -837,7 +837,7 @@ export default defineComponent({
                       type="link"
                       size="small"
                       icon="plus"
-                      class="gray--text hover:primary--text"
+                      class="text--secondary hover:primary--text"
                       onClick={() => this.handleInsertClause(clause)}
                     ></Button>
                   </Tooltip>
@@ -852,7 +852,7 @@ export default defineComponent({
                       type="link"
                       size="small"
                       icon="close"
-                      class="gray--text hover:primary--text"
+                      class="text--secondary hover:primary--text"
                       onClick={() => this.handleRemoveClause(clause)}
                     ></Button>
                   </Tooltip>

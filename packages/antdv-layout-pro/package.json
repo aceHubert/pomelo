@@ -43,7 +43,6 @@
     "release:beta": "yarn version $(run -T semver $npm_package_version -i prerelease --preid beta ) && ../../scripts/remove-stableVersion.sh && yarn build && npm publish --tag beta"
   },
   "dependencies": {
-    "@ace-pomelo/theme": "^0.1.0-alpha.2",
     "@ace-util/core": "^0.7.2",
     "@iconfu/svg-inject": "^1.2.3",
     "jsoneditor": "^9.5.6",

@@ -464,7 +464,7 @@ export default defineComponent({
                   bordered={false}
                   activeKey="statusAndVisibility"
                   expand-icon-position="right"
-                  class="shades transparent"
+                  class="bg-transparent"
                 >
                   {settingsDisplayRef.value.includes(Settings.FixedLink) && (
                     <Collapse.Panel header={i18n.tv('page_templates.fixed_link_label', '固定链接')}>
@@ -490,7 +490,7 @@ export default defineComponent({
                         onSearch={debounce(designerMixin.handleCategorySearch, 800)}
                         onChange={designerMixin.handleCategoryChange(postData.id!).bind(this)}
                       ></TreeSelect>
-                      <router-link to={{ name: 'category' }} class="d-block mt-2">
+                      <router-link to={{ name: 'category' }} class="block mt-2">
                         {i18n.tv('page_templates.new_category_link_text', '新建分类')}
                       </router-link>
                     </Collapse.Panel>
@@ -537,7 +537,7 @@ export default defineComponent({
                           </div>
                         )}
                       </div>
-                      <p class="font-size-xs text--secondary">
+                      <p class="text-[10px] text--secondary">
                         {i18n.tv('page_templates.feature_image_tips', '推荐尺寸：1980x300(px)')}
                       </p>
                       <Modal
@@ -605,20 +605,18 @@ export default defineComponent({
             ),
             extraContent: () => (
               <div style="width: 220px">
-                <p class="font-weight-bold mb-2">{i18n.tv('page_templates.setting_header.designer', '设计器：')}</p>
+                <p class="font-bold mb-2">{i18n.tv('page_templates.setting_header.designer', '设计器：')}</p>
                 <Radio.Group vModel={schemaFrameworkRef.value}>
                   {schemaFrameworkOptions.value.map((option) => (
-                    <Radio value={option.value} class="d-block line-height-lg">
+                    <Radio value={option.value} class="block leading-[22px]">
                       {option.label}
                     </Radio>
                   ))}
                 </Radio.Group>
-                <p class="font-weight-bold mb-2 mt-3">
-                  {i18n.tv('page_templates.setting_header.display', '显示设置：')}
-                </p>
+                <p class="font-bold mb-2 mt-3">{i18n.tv('page_templates.setting_header.display', '显示设置：')}</p>
                 <Checkbox.Group vModel={settingsDisplayRef.value}>
                   {settingsDisplayOptions.value.map((option) => (
-                    <Checkbox value={option.value} class="d-block line-height-lg ml-0">
+                    <Checkbox value={option.value} class="block leading-[22px] ml-0">
                       {option.label}
                     </Checkbox>
                   ))}

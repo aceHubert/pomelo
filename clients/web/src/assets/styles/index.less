@@ -1,7 +1,18 @@
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import (reference, multiple) 'antdv-layout-pro/style/themes/default';
+@import (reference) 'antdv-layout-pro/style/mixins/set-color';
+@import (multiple) 'antdv-layout-pro/style/colors';
+
+.theme-dark {
+  @import (reference, multiple) 'antdv-layout-pro/style/themes/dark';
+  @import (multiple) 'antdv-layout-pro/style/colors';
+}
+
 @import 'reset';
-// import in main.js, can not get real file path in postcss-pxtorem exclude option
-// @import '~@ace-pomelo/theme/lib/index';
 
 // components
 @import '~@/components/index';

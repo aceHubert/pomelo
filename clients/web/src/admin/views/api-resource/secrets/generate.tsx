@@ -198,7 +198,7 @@ export default Form.create({})(
                       '密匙已生成，请妥善保管，一旦离开此页面，密匙将不可查看。',
                     )}
                   ></Alert>
-                  <p class="mt-2 px-4 py-2 gray lighten-4">
+                  <p class="mt-2 px-4 py-2 bg-gray-2">
                     {apiSecret.value.value}
                     <a
                       href="javascript:;"

@@ -506,7 +506,9 @@ export default defineComponent({
           const renderSiderContent = () => [
             <section
               class={[
-                `${prefixCls}-sider d-flex flex-column`,
+                `${prefixCls}-sider`,
+                `${prefixCls}__flex`,
+                `${prefixCls}__flex--column`,
                 {
                   [`${prefixCls}-sider--fixed`]: fixSiderbar,
                   [`${prefixCls}-sider--collapsed`]:
@@ -521,7 +523,7 @@ export default defineComponent({
             >
               {!hasHeader.value && (
                 <div
-                  class="sider-logo flex-none"
+                  class={`sider-logo ${prefixCls}__flex--none`}
                   style={{
                     minWidth: `${sideFullWidth.value}px`,
                     maxWidth: `${sideFullWidth.value}px`,
@@ -531,10 +533,15 @@ export default defineComponent({
                   {renderLogo()}
                 </div>
               )}
-              <div class="d-flex flex-auto" style="height: 0;">
+              <div class={[`${prefixCls}__flex`, `${prefixCls}__flex--auto`]} style="height: 0;">
                 {!hasHeader.value && hasTopMenu.value && (
                   <div
-                    class="top-in-sider d-flex flex-column flex-none"
+                    class={[
+                      'top-in-sider',
+                      `${prefixCls}__flex`,
+                      `${prefixCls}__flex--column`,
+                      `${prefixCls}__flex--none`,
+                    ]}
                     style={{
                       flex: `0 0 ${topMenuInSideWidth.value}px`,
                       minWidth: `${topMenuInSideWidth.value}px`,
@@ -543,7 +550,7 @@ export default defineComponent({
                     }}
                   >
                     {renderMenu(layoutMixin.topMenus, {
-                      classname: 'flex-auto',
+                      classname: `${prefixCls}__flex--auto`,
                       subMenuOpenDelay: 0.3,
                       mode: 'inline',
                       theme: configProvider.theme === Theme.RealLight ? 'light' : 'dark',
@@ -566,9 +573,9 @@ export default defineComponent({
                   collapsed={sideCollapsed.value}
                   collapsedWidth={sideCollapsedWidth.value}
                 >
-                  <div class="d-flex flex-column" style={{ height: '100%' }}>
+                  <div class={[`${prefixCls}__flex`, `${prefixCls}__flex--column`]} style={{ height: '100%' }}>
                     {renderMenu(layoutMixin.siderMenus, {
-                      classname: 'flex-auto',
+                      classname: `${prefixCls}__flex--auto`,
                       subMenuOpenDelay: 0.3,
                       mode: 'inline',
                       theme: configProvider.theme === Theme.Dark ? 'dark' : 'light',
@@ -781,7 +788,7 @@ export default defineComponent({
             `${prefixCls}__wrapper`,
             {
               'color-weak': props.colorWeak,
-              'flex-column': isMobile.value,
+              [`${prefixCls}__flex--column`]: isMobile.value,
             },
           ]}
           key="has-header"

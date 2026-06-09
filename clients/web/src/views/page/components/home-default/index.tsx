@@ -34,24 +34,24 @@ export const HomeDefault = defineComponent({
       const { $result: posts, $loading, $error } = $postRes;
 
       return $loading ? (
-        <div class="tw-px-4">
-          <div class="tw--mx-3 tw-flex tw-flex-wrap tw-justify-start">
+        <div class="px-4">
+          <div class="-mx-3 flex flex-wrap justify-start">
             {Array.from({ length: 8 }).map((_, index) => (
               <div style="flex: 0 0 25%; padding: 10px 12px">
                 <SkeletonLoader key={index} type="circle" style="margin: auto; width: 100%; padding-top: 100%;" />
               </div>
             ))}
           </div>
-          <div class="tw-mt-2">
+          <div class="mt-2">
             <SkeletonLoader style=" height: 32px; width: 100px;" />
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} class="tw-mt-4 tw-flex">
-                <div class="tw-flex-auto tw-pr-4">
+              <div key={index} class="mt-4 flex">
+                <div class="flex-auto pr-4">
                   <SkeletonLoader style="height: 14px; width: 50%; margin-top: 5px;" />
                   <SkeletonLoader style="height: 14px; margin-top: 5px;" />
                   <SkeletonLoader style="height: 14px; margin-top: 5px;" />
                 </div>
-                <SkeletonLoader class="tw-flex-none" style="height: 60px; width: 100px;" />
+                <SkeletonLoader class="flex-none" style="height: 60px; width: 100px;" />
               </div>
             ))}
           </div>

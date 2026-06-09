@@ -82,8 +82,8 @@ export default defineComponent({
               }
             }}
           >
-            <p class="primary--text">
-              <Icon type="upload" class="font-size-lg--3x" />
+            <p class="text-primary">
+              <Icon type="upload" class="text-[48px]" />
             </p>
             <p class="mt-4 text--primary">
               {i18n.tv('page_media.upload_dragger_btn_text', '点击或拖拽至此上传媒体文件')}
@@ -141,7 +141,7 @@ export default defineComponent({
                     {media.originalFileName + media.extension}
                   </Descriptions.Item>
                   <Descriptions.Item label={i18n.tv('page_media.mime_type', '媒体类型')}>
-                    <span class="text-ellipsis" title={media.mimeType}>
+                    <span class="truncate" title={media.mimeType}>
                       {media.mimeType}
                     </span>
                   </Descriptions.Item>

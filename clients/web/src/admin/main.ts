@@ -7,7 +7,7 @@ import { type Route, type NavigationGuardNext as Next } from 'vue-router';
 import VueCompositionApi from '@vue/composition-api';
 import ResourceManagerVuePlugin from '@vue-async/resource-manager';
 import { Authoriztion } from '@/auth';
-import { getAuthOidcOption, loadAutoloadOptions } from '@/auth/runtime-options';
+import { loadAuthOidcOption } from '@/auth/runtime-options';
 import { Modal } from '@/components';
 import { apiFetch } from '@/fetch';
 import { graphqlFetch } from '@/fetch/graphql';
@@ -20,7 +20,6 @@ import * as plugins from '@/plugins';
 import { router } from './router';
 import App from './App';
 import './registerServiceWorker';
-import '@/assets/styles/tailwind.css';
 import './assets/styles/index.less';
 
 // Locales
@@ -138,9 +137,9 @@ function clearModals(this: Vue) {
   Modal.destroyAll();
 }
 
-loadAutoloadOptions()
-  .then((options) => {
-    Authoriztion.configure(getAuthOidcOption(options));
+loadAuthOidcOption()
+  .then((authOidc) => {
+    Authoriztion.configure(authOidc);
     Vue.use(Authoriztion);
 
     return createApp();

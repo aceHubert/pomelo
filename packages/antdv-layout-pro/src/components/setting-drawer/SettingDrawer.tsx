@@ -214,12 +214,12 @@ export default defineComponent({
         placement="right"
         onClose={() => (visibleRef.value = false)}
       >
-        <div class="mb-6">
+        <div class={`${prefixCls}__section`}>
           <h3 class={`${prefixCls}__title`}>
             {configProvider.i18nRender(`${props.i18nKeyPrefix}.page_style.title`, 'Page Style')}
           </h3>
           <List split={false}>
-            <List.Item class="py-0">
+            <List.Item class={`${prefixCls}__list-item--compact`}>
               <Switch
                 slot="actions"
                 size="small"
@@ -273,7 +273,7 @@ export default defineComponent({
           )}
         </div>
 
-        <div class="mb-6">
+        <div class={`${prefixCls}__section`}>
           <h3 class={`${prefixCls}__title`}>
             {configProvider.i18nRender(`${props.i18nKeyPrefix}.primary_color.title`, 'Theme Color')}
           </h3>
@@ -289,7 +289,7 @@ export default defineComponent({
         </div>
         <Divider />
 
-        <div class="mb-6">
+        <div class={`${prefixCls}__section`}>
           <h3 class={`${prefixCls}__title`}>
             {configProvider.i18nRender(`${props.i18nKeyPrefix}.navigation_mode.title`, 'Navigation Mode')}
           </h3>
@@ -329,7 +329,7 @@ export default defineComponent({
               </div>
             </Tooltip>
           </div>
-          <div class="mt-6">
+          <div class={`${prefixCls}__section-extra`}>
             <List split={false}>
               <List.Item>
                 <Select
@@ -418,7 +418,7 @@ export default defineComponent({
           </div>
         </div>
         <Divider />
-        <div class="mb-6">
+        <div class={`${prefixCls}__section`}>
           <h3 class={`${prefixCls}__title`}>
             {configProvider.i18nRender(`${props.i18nKeyPrefix}.other_settings.title`, 'Other Settings')}
           </h3>

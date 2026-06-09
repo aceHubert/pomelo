@@ -1,4 +1,4 @@
-@import '~@ace-pomelo/theme/lib/mixins/index';
+@import '../../style/mixins/index';
 @import '../../style/themes/index';
 
 @layout-admin-prefix-cls: ~'@{ant-prefix}-layout-admin';
@@ -10,6 +10,22 @@
 @layout-admin-footer-height: 70px;
 
 .@{layout-admin-prefix-cls} {
+  &__flex {
+    display: flex;
+
+    &--column {
+      flex-direction: column;
+    }
+
+    &--auto {
+      flex: 1 1 auto;
+    }
+
+    &--none {
+      flex: none;
+    }
+  }
+
   &__wrapper {
     width: 100%;
     min-height: 100vh;
@@ -42,6 +58,11 @@
         vertical-align: middle;
       }
     }
+  }
+
+  &-breadcrumb__space {
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 
   &-header {
@@ -173,7 +194,7 @@
             margin-top: 0;
             border-bottom: 0;
           }
-        }menu
+        }
 
         & > .@{ant-prefix}-menu-item,
         & > .@{ant-prefix}-menu-submenu{

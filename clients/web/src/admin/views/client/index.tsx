@@ -88,7 +88,7 @@ export default Form.create({})(
                 clientId: `${record.clientId}`,
               },
             }}
-            class="primary-7--text hover:primary-6--text active:primary-8--text"
+            class="text-primary-7 hover:text-primary-6 active:text-primary-8"
           >
             {i18n.tv('page_clients.action_btn_text.grant_type', '授权模式')}
           </router-link>,
@@ -99,7 +99,7 @@ export default Form.create({})(
                 clientId: `${record.clientId}`,
               },
             }}
-            class="primary-8--text hover:primary-7--text active:primary-9--text"
+            class="text-primary-8 hover:text-primary-7 active:text-primary-9"
           >
             {i18n.tv('page_clients.action_btn_text.scopes', '授权范围')}
           </router-link>,
@@ -110,7 +110,7 @@ export default Form.create({})(
                 clientId: `${record.clientId}`,
               },
             }}
-            class="primary-9--text hover:primary-7--text active:primary-10--text"
+            class="text-primary-9 hover:text-primary-7 active:text-primary-10"
           >
             {i18n.tv('page_clients.action_btn_text.claims', '声明')}
           </router-link>,
@@ -151,7 +151,7 @@ export default Form.create({})(
                   {record.enabled ? (
                     i18n.tv('page_clients.updated_at', '最后修改于')
                   ) : (
-                    <span class="error--text">
+                    <span class="text-error">
                       <Icon type="minus-circle" class="mr-1" />
                       {i18n.tv('page_clients.disabled_at', '禁用于')}
                     </span>
