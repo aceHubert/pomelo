@@ -6,10 +6,52 @@
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "jsx": "preserve",
     "moduleResolution": "node",
+    "types": ["vite/client"],
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noImplicitAny": false,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@admin/*": ["src/admin/*"],
+      "@login/*": ["src/login/*"],
+      "@initialize/*": ["src/initialize/*"],
+      "@apollo/client": ["../../node_modules/@apollo/client/core/index.d.ts"],
+      "@formily/antdv": ["../../.submodules/formily-antdv/packages/components/src"],
+      "@formily/antdv/esm/*": ["../../.submodules/formily-antdv/packages/components/src/*"],
+      "@formily/antdv/lib/*": ["../../.submodules/formily-antdv/packages/components/src/*"],
+      "@formily/antdv-prototypes/esm/*": ["../../.submodules/formily-antdv/packages/prototypes/src/*"],
+      "@formily/antdv-prototypes/lib/*": ["../../.submodules/formily-antdv/packages/prototypes/src/*"],
+      "@formily/antdv-*": ["../../.submodules/formily-antdv/packages/*/src"],
+      "@formily/vant": ["../../.submodules/formily-vant/packages/components/src"],
+      "@formily/vant/esm/*": ["../../.submodules/formily-vant/packages/components/src/*"],
+      "@formily/vant/lib/*": ["../../.submodules/formily-vant/packages/components/src/*"],
+      "@formily/vant-prototypes/esm/*": ["../../.submodules/formily-vant/packages/prototypes/src/*"],
+      "@formily/vant-prototypes/lib/*": ["../../.submodules/formily-vant/packages/prototypes/src/*"],
+      "@formily/vant-*": ["../../.submodules/formily-vant/packages/*/src"],
+      "@formily-portal/antdv": ["../../.submodules/formily-portal-antdv/packages/components/src"],
+      "@formily-portal/antdv/esm/*": ["../../.submodules/formily-portal-antdv/packages/components/src/*"],
+      "@formily-portal/antdv/lib/*": ["../../.submodules/formily-portal-antdv/packages/components/src/*"],
+      "@formily-portal/antdv-*": ["../../.submodules/formily-portal-antdv/packages/*/src"],
+      "@formily-portal/vant": ["../../.submodules/formily-portal-vant/packages/components/src"],
+      "@formily-portal/vant/esm/*": ["../../.submodules/formily-portal-vant/packages/components/src/*"],
+      "@formily-portal/vant/lib/*": ["../../.submodules/formily-portal-vant/packages/components/src/*"],
+      "@formily-portal/vant-*": ["../../.submodules/formily-portal-vant/packages/*/src"],
+      "antdv-layout-pro": ["../../packages/antdv-layout-pro/src"],
+      "antdv-layout-pro/*": ["../../packages/antdv-layout-pro/src/*"],
+      "@ace-pomelo/plugin-*": ["../../plugins/*/src"],
+      "@ace-pomelo/theme-*": ["../../themes/*/src"],
+      "@ace-pomelo/shared/client": ["../../packages/pomelo-shared/src/client"],
+      "@ace-pomelo/shared/server": ["../../packages/pomelo-shared/src/server"],
+      "@ace-nestjs/*": [
+        "../../packages/*/src",
+        "../../packages/nestjs-*/src"
+      ],
+      "@ace-pomelo/*": [
+        "../../packages/*/src",
+        "../../packages/pomelo-*/src"
+      ]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "signin/**/*.ts", "signin-silent/**/*.ts", "signout/**/*.ts"]
 }

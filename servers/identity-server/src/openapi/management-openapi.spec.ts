@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -26,7 +27,7 @@ describe('management OpenAPI document', () => {
         ManagementIdentityResourceController,
       ],
       providers: [
-        { provide: ManagementAccountService, useValue: { login: jest.fn() } },
+        { provide: ManagementAccountService, useValue: { login: jest.fn(), getCurrentUser: jest.fn() } },
         { provide: ClientDataSource, useValue: {} },
         { provide: ApiResourceDataSource, useValue: {} },
         { provide: IdentityResourceDataSource, useValue: {} },

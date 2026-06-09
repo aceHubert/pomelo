@@ -1,12 +1,12 @@
 import { Alert, Button, Form, Input } from 'antd';
-import { DesktopOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { useMutation } from '@apollo/client';
+import sha256 from 'crypto-js/sha256';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { LanguageToggle } from '../../components/common/LanguageToggle';
+import { ThemeToggle } from '../../components/common/ThemeToggle';
 import LiquidGlass from '../../components/common/LiquidGlass';
 import { setManagementToken, clearManagementToken } from '../../services/auth/token';
-import { applyThemePreference, getStoredThemePreference } from '../../services/theme/theme';
 import { useI18n } from '../../services/i18n/i18n';
 import { SIGNIN } from '../../apis/operations';
 import styles from './index.module.less';
@@ -16,33 +16,23 @@ type LoginValues = {
   password: string;
 };
 
-function getNextThemePreference(theme: ReturnType<typeof getStoredThemePreference>) {
-  if (theme === 'system') return 'dark';
-  if (theme === 'dark') return 'light';
-  return 'system';
-}
-
-function getThemeToggleMeta(theme: ReturnType<typeof getStoredThemePreference>, t: ReturnType<typeof useI18n>['t']) {
-  if (theme === 'system') return { icon: <DesktopOutlined />, label: t('theme.systemToDark') };
-  if (theme === 'dark') return { icon: <MoonOutlined />, label: t('theme.darkToLight') };
-  return { icon: <SunOutlined />, label: t('theme.lightToSystem') };
+function sha256Hex(value: string): string {
+  return sha256(value).toString();
 }
 
 export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
   const { t } = useI18n();
   const [login, { loading }] = useMutation(SIGNIN);
   const [error, setError] = useState('');
-  const [themePreference, setThemePreference] = useState(() => getStoredThemePreference());
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/clients';
-  const themeToggleMeta = getThemeToggleMeta(themePreference, t);
 
   async function submit(values: LoginValues) {
     setError('');
 
     try {
-      const result = await login({ variables: { input: values } });
+      const result = await login({ variables: { input: { ...values, password: sha256Hex(values.password) } } });
       const token = result.data?.signin?.accessToken;
       if (!token) throw new Error('empty token');
 
@@ -53,12 +43,6 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
       clearManagementToken();
       setError(t('login.error'));
     }
-  }
-
-  function toggleTheme() {
-    const nextThemePreference = getNextThemePreference(themePreference);
-    applyThemePreference(nextThemePreference);
-    setThemePreference(nextThemePreference);
   }
 
   return (
@@ -94,16 +78,7 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
             elasticity={0.12}
             layout="inline"
           >
-            <Button
-              aria-label={themeToggleMeta.label}
-              className={styles.actionButton}
-              htmlType="button"
-              icon={themeToggleMeta.icon}
-              shape="circle"
-              title={themeToggleMeta.label}
-              type="text"
-              onClick={toggleTheme}
-            />
+            <ThemeToggle buttonClassName={styles.actionButton} shape="circle" type="text" />
           </LiquidGlass>
         </div>
       </div>
@@ -116,7 +91,7 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
         blurAmount={0.5}
         saturation={140}
         aberrationIntensity={2}
-        elasticity={0.12}
+        elasticity={0}
         glassSize={{ width: 'min(500px, calc(100vw - 48px))' }}
         style={{ position: 'fixed', top: '50%', left: '50%' }}
       >

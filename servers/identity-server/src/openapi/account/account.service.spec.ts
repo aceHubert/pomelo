@@ -1,30 +1,45 @@
+import { describe, expect, it, jest } from '@jest/globals';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ManagementAccountService } from './account.service';
 
 describe('ManagementAccountService', () => {
+  type MockFn = ReturnType<typeof jest.fn>;
+
+  const mockResolved = (value: unknown) => (jest.fn() as any).mockResolvedValue(value) as MockFn;
+
   const createService = (options?: {
-    verifyAccount?: jest.Mock;
-    getClaims?: jest.Mock;
-    createToken?: jest.Mock;
+    verifyAccount?: MockFn;
+    getClaims?: MockFn;
+    getAccount?: MockFn;
+    createToken?: MockFn;
     expiresIn?: string;
   }) => {
-    const verifyAccount = options?.verifyAccount ?? jest.fn().mockResolvedValue('1');
-    const getClaims =
-      options?.getClaims ?? jest.fn().mockResolvedValue({ role: 'administrator', super_administrator: '1' });
-    const createToken = options?.createToken ?? jest.fn().mockResolvedValue('signed.jwt');
+    const verifyAccount = options?.verifyAccount ?? mockResolved('1');
+    const getClaims = options?.getClaims ?? mockResolved({ role: 'administrator', super_administrator: '1' });
+    const getAccount =
+      options?.getAccount ??
+      mockResolved({
+        id: 1,
+        login_name: 'admin',
+        nice_name: 'Admin',
+        display_name: 'Administrator',
+        email: 'admin@example.com',
+      });
+    const createToken = options?.createToken ?? mockResolved('signed.jwt');
     const configService = {
       get: jest.fn((key: string, fallback: string) => (key === 'JWT_EXPIRES_IN' ? options?.expiresIn : fallback)),
     };
 
     return {
       service: new ManagementAccountService(
-        { verifyAccount, getClaims } as any,
+        { verifyAccount, getClaims, getAccount } as any,
         { createToken } as any,
         configService as unknown as ConfigService,
       ),
       verifyAccount,
       getClaims,
+      getAccount,
       createToken,
     };
   };
@@ -58,7 +73,7 @@ describe('ManagementAccountService', () => {
 
   it('拒绝非超级管理员并返回统一认证失败', async () => {
     const { service, createToken } = createService({
-      getClaims: jest.fn().mockResolvedValue({ role: 'administrator', super_administrator: '0' }),
+      getClaims: mockResolved({ role: 'administrator', super_administrator: '0' }),
     });
 
     await expect(service.login({ username: 'admin', password: 'secret' })).rejects.toThrow(UnauthorizedException);
@@ -70,7 +85,7 @@ describe('ManagementAccountService', () => {
 
   it('拒绝密码错误并避免暴露账号存在性', async () => {
     const { service, getClaims, createToken } = createService({
-      verifyAccount: jest.fn().mockResolvedValue(false),
+      verifyAccount: mockResolved(false),
     });
 
     await expect(service.login({ username: 'root', password: 'bad' })).rejects.toMatchObject({
@@ -78,5 +93,24 @@ describe('ManagementAccountService', () => {
     });
     expect(getClaims).not.toHaveBeenCalled();
     expect(createToken).not.toHaveBeenCalled();
+  });
+
+  it('通过账号 Provider 返回当前用户基础信息', async () => {
+    const { service, getAccount, getClaims } = createService({
+      getClaims: mockResolved({ avatar: '/uploads/avatar.png' }),
+    });
+
+    await expect(service.getCurrentUser('1')).resolves.toEqual({
+      id: 1,
+      loginName: 'admin',
+      niceName: 'Admin',
+      displayName: 'Administrator',
+      avatar: '/uploads/avatar.png',
+      email: 'admin@example.com',
+      mobile: undefined,
+      url: undefined,
+    });
+    expect(getAccount).toHaveBeenCalledWith({ id: 1 });
+    expect(getClaims).toHaveBeenCalledWith(1);
   });
 });

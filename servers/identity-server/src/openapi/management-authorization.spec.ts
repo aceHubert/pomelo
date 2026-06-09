@@ -1,9 +1,12 @@
+import { afterAll, beforeAll, describe, it, jest } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AuthorizationModule, AuthorizationService, getSigningKey, getVerifyingKey } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
 import { ClientDataSource } from '@/datasource';
+import { ManagementAccountService } from './account/account.service';
+import { ManagementAccountController } from './account/account.controller';
 import { ManagementClientController } from './clients/client.controller';
 
 describe('management REST authorization', () => {
@@ -21,12 +24,23 @@ describe('management REST authorization', () => {
           serviceName: 'identity',
         }),
       ],
-      controllers: [ManagementClientController],
+      controllers: [ManagementAccountController, ManagementClientController],
       providers: [
+        {
+          provide: ManagementAccountService,
+          useValue: {
+            getCurrentUser: (jest.fn() as any).mockResolvedValue({
+              id: 1,
+              loginName: 'admin',
+              niceName: 'Admin',
+              displayName: 'Admin',
+            }),
+          },
+        },
         {
           provide: ClientDataSource,
           useValue: {
-            getPaged: jest.fn().mockResolvedValue({ rows: [], total: 0 }),
+            getPaged: (jest.fn() as any).mockResolvedValue({ rows: [], total: 0 }),
           },
         },
       ],

@@ -1,20 +1,27 @@
-import { Module, Provider } from '@nestjs/common';
-
-const controllers = require.context('./', true, /\.controller\.ts$/);
-const resolvers = require.context('./', true, /\.resolver\.ts$/);
-const services = require.context('./', true, /\.service\.ts$/);
+import { Module } from '@nestjs/common';
+import { ManagementAccountController } from './account/account.controller';
+import { ManagementAccountResolver } from './account/account.resolver';
+import { ManagementAccountService } from './account/account.service';
+import { ManagementApiResourceController } from './api-resources/api-resource.controller';
+import { ManagementApiResourceResolver } from './api-resources/api-resource.resolver';
+import { ManagementClientController } from './clients/client.controller';
+import { ManagementClientResolver } from './clients/client.resolver';
+import { ManagementIdentityResourceController } from './identity-resources/identity-resource.controller';
+import { ManagementIdentityResourceResolver } from './identity-resources/identity-resource.resolver';
 
 @Module({
-  controllers: controllers.keys().flatMap((key) => {
-    return Object.values(controllers(key));
-  }),
+  controllers: [
+    ManagementAccountController,
+    ManagementApiResourceController,
+    ManagementClientController,
+    ManagementIdentityResourceController,
+  ],
   providers: [
-    ...services.keys().flatMap((key) => {
-      return Object.values(services(key)) as Provider[];
-    }),
-    ...resolvers.keys().flatMap((key) => {
-      return Object.values(resolvers(key)) as Provider[];
-    }),
+    ManagementAccountService,
+    ManagementAccountResolver,
+    ManagementApiResourceResolver,
+    ManagementClientResolver,
+    ManagementIdentityResourceResolver,
   ],
 })
 export class OpenApiModule {}

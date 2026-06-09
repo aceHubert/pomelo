@@ -29,8 +29,16 @@ export function createManagementApolloClient(onUnauthorized: () => void) {
     const statusCode = (networkError as any)?.statusCode || (networkError as any)?.status;
     const graphUnauthorized = Array.isArray(graphQLErrors)
       ? graphQLErrors.some((error) => {
-          const code = (error.extensions?.response as any)?.statusCode || error.extensions?.code;
-          return code === 401 || code === 403 || code === 'UNAUTHENTICATED' || code === 'FORBIDDEN';
+          const graphStatusCode = (error.extensions?.response as any)?.statusCode || error.extensions?.statusCode;
+          const graphCode = error.extensions?.code;
+
+          return (
+            graphStatusCode === 401 ||
+            graphStatusCode === 403 ||
+            graphCode === 'UNAUTHORIZED' ||
+            graphCode === 'UNAUTHENTICATED' ||
+            graphCode === 'FORBIDDEN'
+          );
         })
       : false;
 

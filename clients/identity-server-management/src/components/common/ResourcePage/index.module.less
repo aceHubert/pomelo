@@ -1,12 +1,31 @@
 .pageGrid {
+  display: grid;
+  grid-template-columns: minmax(420px, ~'min(38vw, 720px)') minmax(0, 1fr);
+  gap: 16px;
   width: 100%;
   margin: 0;
   padding: 16px;
 }
 
+.pageGridSingle {
+  grid-template-columns: minmax(0, 1fr);
+
+  .pageGridMain {
+    max-width: none;
+  }
+}
+
 .pageGridMain,
 .pageGridDetail {
   min-width: 0;
+}
+
+.pageGridMain {
+  max-width: 720px;
+}
+
+.pageGridDetail {
+  width: 100%;
 }
 
 .mainPanel,
@@ -49,12 +68,42 @@
   margin-bottom: 14px;
 }
 
+.detailSection {
+  display: grid;
+  gap: 10px;
+
+  h3:global(.ant-typography) {
+    margin: 0;
+    color: @var-management-heading;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+}
+
+.detailDescriptions {
+  :global(.ant-descriptions-item-label) {
+    width: 34%;
+    white-space: nowrap;
+  }
+
+  :global(.ant-descriptions-item-content) {
+    min-width: 0;
+    word-break: break-word;
+  }
+}
+
 @media (max-width: 992px) {
   .pageGrid {
     display: block;
   }
 
+  .pageGridMain {
+    width: 100%;
+    max-width: none;
+  }
+
   .pageGridDetail {
+    width: 100%;
     margin-top: 16px;
   }
 

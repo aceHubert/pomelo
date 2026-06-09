@@ -337,7 +337,6 @@ export const getDefaultMenus = (): MenuConfig[] => [
     icon: IconSettings,
     position: 'top',
     children: [
-      ...getOidcMenus(),
       {
         key: 'system-setting',
         title: (i18nRender) => i18nRender('menu.system_setting', '系统设置'),

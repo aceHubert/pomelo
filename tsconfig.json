@@ -54,35 +54,10 @@
     "paths": {
       /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
       "@/*": ["src/*"],
-      "@admin/*": ["src/admin/*"],
-      "@login/*": ["src/login/*"],
-      "@initialize/*": ["src/initialize/*"],
-      "@formily/antdv": ["../../.submodules/formily-antdv/packages/components/src"],
-      "@formily/antdv/esm/*": ["../../.submodules/formily-antdv/packages/components/src/*"],
-      "@formily/antdv/lib/*": ["../../.submodules/formily-antdv/packages/components/src/*"],
-      "@formily/antdv-prototypes/esm/*": ["../../.submodules/formily-antdv/packages/prototypes/src/*"],
-      "@formily/antdv-prototypes/lib/*": ["../../.submodules/formily-antdv/packages/prototypes/src/*"],
-      "@formily/antdv-*": ["../../.submodules/formily-antdv/packages/*/src"],
-      "@formily/vant": ["../../.submodules/formily-vant/packages/components/src"],
-      "@formily/vant/esm/*": ["../../.submodules/formily-vant/packages/components/src/*"],
-      "@formily/vant/lib/*": ["../../.submodules/formily-vant/packages/components/src/*"],
-      "@formily/vant-prototypes/esm/*": ["../../.submodules/formily-vant/packages/prototypes/src/*"],
-      "@formily/vant-prototypes/lib/*": ["../../.submodules/formily-vant/packages/prototypes/src/*"],
-      "@formily/vant-*": ["../../.submodules/formily-vant/packages/*/src"],
-      "@formily-portal/antdv": ["../../.submodules/formily-portal-antdv/packages/components/src"],
-      "@formily-portal/antdv/esm/*": ["../../.submodules/formily-portal-antdv/packages/components/src/*"],
-      "@formily-portal/antdv/lib/*": ["../../.submodules/formily-portal-antdv/packages/components/src/*"],
-      "@formily-portal/antdv-*": ["../../.submodules/formily-portal-antdv/packages/*/src"],
-      "@formily-portal/vant": ["../../.submodules/formily-portal-vant/packages/components/src"],
-      "@formily-portal/vant/esm/*": ["../../.submodules/formily-portal-vant/packages/components/src/*"],
-      "@formily-portal/vant/lib/*": ["../../.submodules/formily-portal-vant/packages/components/src/*"],
-      "@formily-portal/vant-*": ["../../.submodules/formily-portal-vant/packages/*/src"],
-      "antdv-layout-pro": ["../../packages/antdv-layout-pro/src"],
-      "antdv-layout-pro/*": ["../../packages/antdv-layout-pro/src/*"],
       "@ace-pomelo/plugin-*": ["../plugins/*/src", "../../plugins/*/src"],
       "@ace-pomelo/theme-*": ["../themes/*/src", "../../themes/*/src"],
-      "@ace-pomelo/shared/client": ["../../packages/pomelo-shared/src/client"],
-      "@ace-pomelo/shared/server": ["../../packages/pomelo-shared/src/server"],
+      "@ace-pomelo/shared/client": ["../packages/pomelo-shared/src/client", "../../packages/pomelo-shared/src/client"],
+      "@ace-pomelo/shared/server": ["../packages/pomelo-shared/src/server", "../../packages/pomelo-shared/src/server"],
       "@ace-nestjs/*": [
         "../packages/*/src",
         "../../packages/*/src",
@@ -98,7 +73,9 @@
     },
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                       /* List of folders to include type definitions from. */
-    // "types": [],                           /* Type declaration files to be included in compilation. */
+    "types": [
+      "node"
+    ] /* Type declaration files to be included in compilation. Browser/React subprojects opt in explicitly. */,
     "allowSyntheticDefaultImports": true /* Allow default imports from modules with no default export. This does not affect code emit, just typechecking. */,
     "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
     // "preserveSymlinks": true,              /* Do not resolve the real path of symlinks. */

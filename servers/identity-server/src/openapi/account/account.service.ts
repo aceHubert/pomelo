@@ -1,9 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthorizationService } from '@ace-nestjs/authorization';
 import { UserRole } from '@ace-pomelo/shared/server';
 import { AccountProviderService } from '@/account-provider/account-provider.service';
 import { ManagementLoginInput } from './dto/login.input';
+import { ManagementCurrentUser } from './models/user.model';
 import { ManagementTokenResponse } from './models/token.model';
 
 const POLICY_NAME = 'IdentityManagementFullAccess';
@@ -51,6 +52,30 @@ export class ManagementAccountService {
       tokenType: 'Bearer',
       expiresIn,
       issuedAt,
+    };
+  }
+
+  async getCurrentUser(accountId: string | number): Promise<ManagementCurrentUser> {
+    const [account, claims] = await Promise.all([
+      this.accountProviderService.getAccount({ id: Number(accountId) }),
+      this.accountProviderService.getClaims(Number(accountId)),
+    ]);
+
+    if (!account) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      id: Number(account.id),
+      loginName: String(account.login_name || account.preferred_username || account.id),
+      niceName: String(account.nice_name || account.nickname || account.display_name || account.login_name || ''),
+      displayName: String(
+        account.display_name || account.name || account.nice_name || account.login_name || account.id,
+      ),
+      avatar: (claims.avatar || account.picture) as string | undefined,
+      email: account.email,
+      mobile: account.phone_number,
+      url: (account.url || account.website) as string | undefined,
     };
   }
 

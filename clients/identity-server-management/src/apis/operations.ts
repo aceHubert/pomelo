@@ -11,6 +11,21 @@ export const SIGNIN = gql`
   }
 `;
 
+export const CURRENT_USER = gql`
+  query CurrentUser {
+    currentUser {
+      id
+      loginName
+      niceName
+      displayName
+      avatar
+      email
+      mobile
+      url
+    }
+  }
+`;
+
 export const CLIENTS = gql`
   query Clients($clientName: String, $offset: Int, $limit: Int) {
     clients(clientName: $clientName, offset: $offset, limit: $limit) {
@@ -23,6 +38,41 @@ export const CLIENTS = gql`
         createdAt
       }
       total
+    }
+  }
+`;
+
+export const CLIENT_DETAIL = gql`
+  query ClientDetail($clientId: String!) {
+    client(clientId: $clientId) {
+      applicationType
+      clientId
+      clientName
+      clientUri
+      defaultMaxAge
+      idTokenSignedResponseAlg
+      initiateLoginUri
+      jwksUri
+      logoUri
+      policyUri
+      requireAuthTime
+      sectorIdentifierUri
+      subjectType
+      tokenEndpointAuthMethod
+      idTokenLifetime
+      accessTokenFormat
+      accessTokenLifetime
+      refreshTokenExpiration
+      refreshTokenAbsoluteLifetime
+      refreshTokenSlidingLifetime
+      authorizationCodeLifetime
+      deviceCodeLifetime
+      backchannelAuthenticationRequestLifetime
+      requireConsent
+      requirePkce
+      enabled
+      updatedAt
+      createdAt
     }
   }
 `;
@@ -56,6 +106,21 @@ export const API_RESOURCES = gql`
         createdAt
       }
       total
+    }
+  }
+`;
+
+export const API_RESOURCE_DETAIL = gql`
+  query ApiResourceDetail($id: ID!) {
+    apiResource(id: $id) {
+      id
+      name
+      displayName
+      description
+      enabled
+      nonEditable
+      updatedAt
+      createdAt
     }
   }
 `;
@@ -96,6 +161,24 @@ export const IDENTITY_RESOURCES = gql`
         createdAt
       }
       total
+    }
+  }
+`;
+
+export const IDENTITY_RESOURCE_DETAIL = gql`
+  query IdentityResourceDetail($id: ID!) {
+    identityResource(id: $id) {
+      id
+      name
+      displayName
+      description
+      enabled
+      emphasize
+      required
+      showInDiscoveryDocument
+      nonEditable
+      updatedAt
+      createdAt
     }
   }
 `;
@@ -195,6 +278,14 @@ export const CLIENT_CHILD_OPERATIONS = {
         }
       }
     `,
+    createMany: gql`
+      mutation CreateClientGrantTypes($clientId: String!, $model: [NewClientGrantTypeInput!]!) {
+        createClientGrantTypes(clientId: $clientId, model: $model) {
+          id
+          grantType
+        }
+      }
+    `,
     remove: gql`
       mutation DeleteClientGrantType($id: ID!) {
         deleteClientGrantType(id: $id)
@@ -215,6 +306,14 @@ export const CLIENT_CHILD_OPERATIONS = {
     create: gql`
       mutation CreateClientScope($clientId: String!, $model: NewClientScopeInput!) {
         createClientScope(clientId: $clientId, model: $model) {
+          id
+          scope
+        }
+      }
+    `,
+    createMany: gql`
+      mutation CreateClientScopes($clientId: String!, $model: [NewClientScopeInput!]!) {
+        createClientScopes(clientId: $clientId, model: $model) {
           id
           scope
         }

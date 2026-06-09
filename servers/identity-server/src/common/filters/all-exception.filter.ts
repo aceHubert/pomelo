@@ -1,9 +1,13 @@
+import statuses from 'statuses';
+import { snakeCase } from 'lodash';
 import { Catch, HttpException, HttpStatus, ExceptionFilter, ArgumentsHost, Logger } from '@nestjs/common';
 import { isObject } from '@nestjs/common/utils/shared.utils';
+import { GqlContextType } from '@nestjs/graphql';
 import { I18nContext, I18nValidationException } from 'nestjs-i18n';
 import { BaseError as SequelizeBaseError } from 'sequelize';
 import { isHttpError } from 'http-errors';
 import { Request, Response } from 'express';
+import { GraphQLError } from 'graphql';
 import { isJsonRequest } from '../utils/is-json-request.util';
 import { formatI18nErrors, flattenValidationErrors } from '../utils/i18n-error.util';
 
@@ -17,7 +21,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     this.logger.error(...loggerArgs);
 
     const i18n = I18nContext.current(host);
-    switch (host.getType()) {
+    switch (host.getType<GqlContextType>()) {
       case 'http':
         const http = host.switchToHttp();
 
@@ -64,6 +68,22 @@ export class AllExceptionFilter implements ExceptionFilter {
             },
           );
         }
+      case 'graphql':
+        // 将非 ApolloError 转换成 ApolloError，避免用户输入错误被标记为 INTERNAL_SERVER_ERROR
+        if (!(exception instanceof GraphQLError)) {
+          const { message, ...restDescription } = this.getDescriptionFromError(exception, i18n);
+          const extensions: Record<string, any> = {
+            ...restDescription,
+            code: this.getGraphqlCodeFromError(exception),
+          };
+
+          return new GraphQLError(Array.isArray(message) ? message.join(', ') : message ?? exception.message, {
+            originalError: exception,
+            extensions,
+          });
+        }
+
+        return exception;
       default:
         // todo:其它情况
         return exception;
@@ -84,6 +104,22 @@ export class AllExceptionFilter implements ExceptionFilter {
       : isHttpError(exception)
       ? exception.statusCode // 如果是 http-errors 错误，直接获取 statusCode
       : (exception as { status?: number }).status ?? HttpStatus.INTERNAL_SERVER_ERROR; // 否则返回 500
+  }
+
+  /**
+   * 从 Error 获取 graphql 的 extensions.code
+   * @param exception Error
+   */
+  private getGraphqlCodeFromError(exception: Error | { status?: number }) {
+    return exception instanceof HttpException
+      ? getFromHttpStatus(exception.getStatus())
+      : isHttpError(exception)
+      ? getFromHttpStatus(exception.statusCode)
+      : getFromHttpStatus((exception as { status?: number }).status ?? HttpStatus.INTERNAL_SERVER_ERROR);
+
+    function getFromHttpStatus(status: number) {
+      return snakeCase(statuses(status)).toUpperCase();
+    }
   }
 
   /**

@@ -125,10 +125,12 @@ __metadata:
   dependencies:
     "@ant-design/icons": ^5.6.1
     "@apollo/client": ^3.6.9
+    "@types/crypto-js": ^4.2.2
     "@types/react": ^18.2.48
     "@types/react-dom": ^18.2.18
     "@vitejs/plugin-react": ^4.2.1
     antd: ^5.27.6
+    crypto-js: ^4.2.0
     graphql: ^16.9.0
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -6980,6 +6982,13 @@ __metadata:
     "@types/keygrip": "*"
     "@types/node": "*"
   checksum: 7945b0cfe370bf1f05a1f328c9eba55333dac1bb9d7efa3148b107c260ab924263546351f9fd168daa72948d195464d395319a24477995f9f887a3a99fbcb5b5
+  languageName: node
+  linkType: hard
+
+"@types/crypto-js@npm:^4.2.2":
+  version: 4.2.2
+  resolution: "@types/crypto-js@npm:4.2.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40types%2Fcrypto-js%2F-%2Fcrypto-js-4.2.2.tgz"
+  checksum: 727daa0d2db35f0abefbab865c23213b6ee6a270e27e177939bbe4b70d1e84c2202d9fac4ea84859c4b4d49a4ee50f948f601327a39b69ec013288018ba07ca5
   languageName: node
   linkType: hard
 

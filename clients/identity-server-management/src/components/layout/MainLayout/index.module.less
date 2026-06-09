@@ -8,15 +8,27 @@
   background: @var-management-panel-bg !important;
 }
 
+.sidebarMask {
+  display: none;
+}
+
 .brand {
   display: flex;
   height: 64px;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   padding: 14px 18px;
   border-bottom: 1px solid @var-management-panel-border;
   color: @var-management-heading;
   font-weight: 800;
+}
+
+.brandIdentity {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
 }
 
 .brandMark {
@@ -30,6 +42,12 @@
   background: @var-management-brand-mark-bg;
   box-shadow: @var-management-brand-mark-shadow;
   font-weight: 800;
+}
+
+.sidebarClose {
+  display: none;
+  flex: 0 0 auto;
+  color: @var-management-heading;
 }
 
 .sidebarMenu {
@@ -63,8 +81,78 @@
   line-height: 1.35;
 }
 
-.topbarActions {
+.topbarTitle {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebarToggle {
   flex: 0 0 auto;
+  color: @var-management-heading;
+}
+
+.topbarActions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+}
+
+.userTrigger {
+  display: inline-flex;
+  max-width: 172px;
+  height: 32px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 4px;
+  border: 1px solid @var-management-panel-border;
+  border-radius: 999px;
+  color: @var-management-heading;
+  background: transparent;
+  cursor: pointer;
+}
+
+.userTrigger:hover {
+  border-color: @var-primary;
+}
+
+.userAvatar {
+  flex: 0 0 auto;
+  color: @var-management-heading;
+  background: @var-management-brand-mark-bg;
+}
+
+.userName {
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userPopover {
+  :global(.ant-popover-arrow) {
+    display: none;
+  }
+
+  :global(.ant-popover-inner) {
+    padding: 0;
+    border: 1px solid @var-management-panel-border;
+    border-radius: 8px;
+    background: @var-management-elevated-bg;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
+  }
+
+  :global(.ant-popover-inner-content) {
+    padding: 0;
+  }
+}
+
+.userMenu {
+  min-width: 128px;
+  border-inline-end: 0 !important;
+  background: transparent;
 }
 
 .workspace {
@@ -75,4 +163,62 @@
   .topbar {
     padding: 0 14px;
   }
+
+  .userTrigger {
+    width: 32px;
+    padding: 0 2px;
+    justify-content: center;
+  }
+
+  .userName {
+    display: none;
+  }
+}
+
+@media (max-width: 992px) {
+  .sidebarToggleHiddenOnMobile {
+    display: none;
+  }
+
+  .sidebarClose {
+    display: inline-flex;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    z-index: 20;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    height: 100vh;
+    box-shadow: 18px 0 42px rgba(0, 0, 0, 0.26);
+  }
+
+  .sidebarMask {
+    position: fixed;
+    z-index: 19;
+    inset: 0;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: rgba(0, 0, 0, 0.36);
+    cursor: default;
+  }
+
+  .workspaceShell {
+    width: 100%;
+  }
+
+  .topbar {
+    position: sticky;
+    z-index: 18;
+    top: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    gap: 10px;
+  }
+
 }

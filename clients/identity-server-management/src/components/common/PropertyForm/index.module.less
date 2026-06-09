@@ -1,0 +1,26 @@
+.propertyForm {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) minmax(180px, 240px) auto;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 14px;
+
+  :global(.ant-form-item) {
+    margin-bottom: 0;
+  }
+}
+
+.control {
+  width: 100%;
+}
+
+.actions,
+.error {
+  grid-column: auto;
+}
+
+@media (max-width: 640px) {
+  .propertyForm {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,8 +1,27 @@
+.tableShell {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .table {
+  :global(.ant-spin-nested-loading),
+  :global(.ant-spin-container),
+  :global(.ant-table-container) {
+    min-width: 0;
+  }
+
   :global(.ant-table) {
+    width: 100%;
     color: @var-management-text;
     background: @var-management-panel-bg;
     font-size: 13px;
+  }
+
+  :global(.ant-table-content),
+  :global(.ant-table-body) {
+    overflow-x: auto !important;
   }
 
   :global(.ant-table-thead > tr > th) {

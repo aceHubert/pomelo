@@ -3,13 +3,11 @@ import { fallbackRoute } from '@/router/routes/fallback';
 import { basicRoutes } from './basic';
 import { settingRoutes } from './setting';
 import { submoduleRoutes } from './submodule';
-import { oidcRoutes } from './oidc';
 
 export const routes = [
   ...basicRoutes,
   ...settingRoutes,
   ...submoduleRoutes,
-  ...oidcRoutes,
   ...errorRoutes,
   {
     name: 'signout',
