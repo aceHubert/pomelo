@@ -4,7 +4,7 @@
 - Monorepo managed by Yarn workspaces (Node 16.20.2). Key folders:
   - `clients/web` — Vue 2 app (SPA) and assets.
   - `servers/` — NestJS services: `identity-server`, `infrastructure-bff`, `infrastructure-service`.
-  - `packages/` — Reusable libs (e.g., `antdv-layout-pro`, `pomelo-theme`, `pomelo-shared`).
+  - `packages/` — Reusable libs (e.g., `antdv-layout-pro`, `pomelo-shared`).
   - `scripts/` — repo tooling (prettier, builds), `themes/` — style assets, `dist/` — build output.
 
 ## Build, Test, and Development Commands
