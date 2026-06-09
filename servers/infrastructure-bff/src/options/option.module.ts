@@ -7,5 +7,6 @@ import './enums/registered.enum';
 @Module({
   controllers: [OptionController],
   providers: [OptionResolver, OptionService],
+  exports: [OptionService],
 })
 export class OptionModule {}
