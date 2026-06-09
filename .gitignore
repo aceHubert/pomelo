@@ -136,8 +136,8 @@ env.*.local.js
 *.local.*
 *.backup.*
 
-# database initialization lock file
-db.lock
+# worktree
+.worktree
 
 # act env files
 /.github/.*
@@ -157,3 +157,6 @@ example/themes/*
 
 example/plugins/*
 !example/plugins/.keep
+
+# antigravity
+.antigravitycli

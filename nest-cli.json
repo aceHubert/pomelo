@@ -31,6 +31,30 @@
             "watchAssets": true
           },
           {
+            "include": "../../node_modules/bootstrap/dist",
+            "outDir": "dist/servers/identity-server/public/vendor/bootstrap"
+          },
+          {
+            "include": "../../node_modules/jquery/dist",
+            "outDir": "dist/servers/identity-server/public/vendor/jquery"
+          },
+          {
+            "include": "../../node_modules/@popperjs/core/dist",
+            "outDir": "dist/servers/identity-server/public/vendor/@popperjs"
+          },
+          {
+            "include": "../../node_modules/promise-polyfill/dist",
+            "outDir": "dist/servers/identity-server/public/vendor/promise-polyfill"
+          },
+          {
+            "include": "../../node_modules/axios/dist",
+            "outDir": "dist/servers/identity-server/public/vendor/axios"
+          },
+          {
+            "include": "../../node_modules/crypto-js/{core,sha256}.js",
+            "outDir": "dist/servers/identity-server/public/vendor/crypto-js"
+          },
+          {
             "include": ".env?(.*)",
             "outDir": "dist/servers/identity-server/",
             "watchAssets": true
@@ -57,7 +81,6 @@
             "watchAssets": true
           }
         ],
-        "watchAssets": true,
         "plugins": [
           {
             "name": "@nestjs/swagger",
@@ -186,31 +209,31 @@
         "tsConfigPath": "packages/nestjs-oidc/tsconfig.json"
       }
     },
-    "nest-authorization": {
+    "nestjs-authorization": {
       "type": "library",
-      "root": "packages/nest-authorization",
+      "root": "packages/nestjs-authorization",
       "entryFile": "src/index",
-      "sourceRoot": "packages/nest-authorization",
+      "sourceRoot": "packages/nestjs-authorization",
       "compilerOptions": {
-        "tsConfigPath": "packages/nest-authorization/tsconfig.json"
+        "tsConfigPath": "packages/nestjs-authorization/tsconfig.json"
       }
     },
-    "nest-ram-authorization": {
+    "nestjs-ram-authorization": {
       "type": "library",
-      "root": "packages/nest-ram-authorization",
+      "root": "packages/nestjs-ram-authorization",
       "entryFile": "src/index",
-      "sourceRoot": "packages/nest-ram-authorization",
+      "sourceRoot": "packages/nestjs-ram-authorization",
       "compilerOptions": {
-        "tsConfigPath": "packages/nest-ram-authorization/tsconfig.json"
+        "tsConfigPath": "packages/nestjs-ram-authorization/tsconfig.json"
       }
     },
-    "nest-log4js": {
+    "nestjs-log4js": {
       "type": "library",
-      "root": "packages/nest-log4js",
+      "root": "packages/nestjs-log4js",
       "entryFile": "src/index",
-      "sourceRoot": "packages/nest-log4js",
+      "sourceRoot": "packages/nestjs-log4js",
       "compilerOptions": {
-        "tsConfigPath": "packages/nest-log4js/tsconfig.json"
+        "tsConfigPath": "packages/nestjs-log4js/tsconfig.json"
       }
     },
     "pomelo-shared": {

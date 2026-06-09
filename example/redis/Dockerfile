@@ -4,4 +4,4 @@ WORKDIR /redis
 
 COPY init.sh ./
 
-RUN chmod +x init.sh
+RUN apk add --no-cache gettext && chmod +x init.sh

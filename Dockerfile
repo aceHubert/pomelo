@@ -13,7 +13,7 @@
 
 # 添加ARG参数，可在docker build时通过 --build-arg BUILD_OPTION="xxx" --build-arg  BUILD_PLATFORM="xxx"传入代码编译命令
 # 容器 nodejs 版本
-ARG NODE_VERSION="16.14.0-alpine"
+ARG NODE_VERSION="20.19.4-alpine"
 
 FROM --platform=$BUILDPLATFORM node:${NODE_VERSION} AS base
 LABEL maintainer="yi.xiang@live.cn"
@@ -31,13 +31,15 @@ ARG BUILD_OPTION="yarn build"
 RUN if [ "$BUILD_IGNORE" = "true" ]; then \
         set -x ; echo "Build ignored!"; \
     else \
-        set -ex && pwd && ls && yarn install --mode=skip-build && ${BUILD_OPTION} && ls; \
+        set -ex && pwd && ls && yarn install --mode=skip-build && sh -c "$BUILD_OPTION" && ls; \
     fi
 
 # install runtime files
 FROM base AS runtime
 COPY --from=builder /app/clients/web/dist /app/clients/web/
-COPY --from=builder /app/dist/servers /app/servers/
+COPY --from=builder /app/dist/servers/infrastructure-service /app/servers/infrastructure-service/
+COPY --from=builder /app/dist/servers/infrastructure-bff /app/servers/infrastructure-bff/
+COPY --from=builder /app/dist/servers/content /app/servers/content/
 COPY --from=builder /app/.yarn /app/.yarn/
 COPY --from=builder /app/package*.json /app/ecosystem*.config.js /app/.yarnrc.yml /app/yarn.lock /app/
 
@@ -54,7 +56,10 @@ ARG RUNTIME_ENV="production"
 ARG SERVE_PM2_ENV="production"
 # PM2 配置文件
 ARG SERVE_PM2_CONFIG="ecosystem.config.js"
-COPY --from=runtime /app/servers /app/clients /app/
+COPY --from=runtime /app/servers/infrastructure-service /app/infrastructure-service/
+COPY --from=runtime /app/servers/infrastructure-bff /app/infrastructure-bff/
+COPY --from=runtime /app/servers/content /app/content/
+COPY --from=runtime /app/clients/web /app/clients/web/
 COPY --from=runtime /app/node_modules /app/node_modules/
 COPY --from=runtime /app/${SERVE_PM2_CONFIG} /app/ecosystem.config.js
 COPY example/nginx /app/nginx/

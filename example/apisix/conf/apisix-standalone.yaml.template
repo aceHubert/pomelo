@@ -5,15 +5,15 @@ consumers:
         key: pomelo-oidc
       openid-connect:
         # set client metadata
-        client_id: 75a9c633-cfde-4954-b35c-9344ed9b781a
+        client_id: ${APISIX_CLIENT_ID}
         client_secret: ${APISIX_CLIENT_SECRET}
-        discovery: ${ORIGIN}/connect/oauth2/.well-known/openid-configuration
+        discovery: ${AUTHORITY}/.well-known/openid-configuration
         unauth_action: pass
         use_jwks: true
         claim_validator:
           issuer:
             valid_issuers:
-              - ${ORIGIN}/connect/oauth2
+              - ${AUTHORITY}
   - username: pomelo_local
     plugins:
       key-auth:
@@ -32,7 +32,7 @@ routes:
       - CONNECT
     plugins:
       cors:
-        allow_origins: "${ORIGIN}"
+        allow_origins: "${AUTHORITY_ORIGIN}"
       key-auth:
         _meta:
           disable: false
@@ -74,11 +74,11 @@ routes:
       - CONNECT
     plugins:
       cors:
-        allow_origins: "${ORIGIN}"
+        allow_origins: "${AUTHORITY_ORIGIN}"
       proxy-rewrite:
         regex_uri:
           - ^/action/identity(/?)(.*)
-          - /connect/$2
+          - ${OIDC_PATH}/$2
     upstream:
       nodes:
         - host: ${POMERO_IDENTITY_SERVER_HOST}

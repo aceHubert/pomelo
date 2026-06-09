@@ -13,9 +13,8 @@ services:
     environment:
       - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
       - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
-      - REDIS_URL=redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:${REDIS_PORT:-6379}/${REDIS_DB:-0}
       - INFRASTRUCTURE_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:${MYSQL_PORT:-3306}/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
-      - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - INFRASTRUCTURE_DATABASE_TABLE_PREFIX=${INFRASTRUCTURE_DATABASE_TABLE_PREFIX:-po_}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       - ${PWD}/conf:/app/conf
@@ -31,11 +30,9 @@ services:
       - '${POMERO_BFF_SERVER_HOST_PORT:-13002}:3002' # bff server
     external_links:
       - ${MYSQL_CONTAINER_NAME:-mysql}:mysql
-      - ${REDIS_CONTAINER_NAME:-redis}:redis
     networks:
       - default
       - mysql
-      - redis
   identity-server:
     image: ${OIDC_IMAGE_REPOSITORY:-ghcr.io/acehubert/pomelo-oidc:latest}
     container_name: pomelo-identity-server
@@ -48,9 +45,15 @@ services:
     environment:
       - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
       - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
-      - ACCOUNT_PROVIDER=${ACCOUNT_PROVIDER:-direct-db}
-      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:${MYSQL_PORT:-3306}/${IDENTITY_DATABASE_NAME:-po_template}
-      - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - ACCOUNT_PROVIDER=${ACCOUNT_PROVIDER:-database}
+      - REDIS_URL=redis://${REDIS_USER:-default}:${REDIS_PASSWORD}@redis:${REDIS_PORT:-6379}/${REDIS_DB:-0}
+      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:${MYSQL_PORT:-3306}/${IDENTITY_DATABASE_NAME:-po_identity}
+      - IDENTITY_DATABASE_TABLE_PREFIX=${IDENTITY_DATABASE_TABLE_PREFIX:-po_}
+      - USER_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@mysql:${MYSQL_PORT:-3306}/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
+      - USER_DATABASE_TABLE_PREFIX=${INFRASTRUCTURE_DATABASE_TABLE_PREFIX:-po_}
+      - USER_MICROSERVICE_HOST=pomelo-server
+      - USER_MICROSERVICE_PORT=3001
+      - OIDC_PATH=${OIDC_PATH:-/oauth2}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       - ${PWD}/conf:/app/conf
@@ -58,9 +61,11 @@ services:
     privileged: true
     external_links:
       - ${MYSQL_CONTAINER_NAME:-mysql}:mysql
+      - ${REDIS_CONTAINER_NAME:-redis}:redis
     networks:
       - default
       - mysql
+      - redis
   apisix:
     image: apache/apisix:${APISIX_IMAGE_TAG:-3.13.0-debian}
     container_name: pomelo-apisix

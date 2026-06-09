@@ -35,9 +35,9 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_ROOT_PASSWORD:
-      MYSQL_DATABASE: ${DATABASE_NAME:-po_template}
-      MYSQL_USER: ${DATABASE_USER:-pomelo}
-      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${INFRASTRUCTURE_DATABASE_NAME:-po_template}
+      MYSQL_USER: ${MYSQL_USER:-pomelo}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
   redis:
     # Adjust the build context to your needs targetting the created Dockerfile
     build:
@@ -50,6 +50,14 @@ services:
     command: sh -c "./init.sh"
     # command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     privileged: true
+    environment:
+      - REDIS_USER=${REDIS_USER:-default}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_SENTINEL_PORT=${REDIS_SENTINEL_PORT:-26379}
+      - REDIS_SENTINEL_MASTER_NAME=${REDIS_SENTINEL_MASTER_NAME:-mymaster}
+      - REDIS_SENTINEL_MASTER_HOST=${REDIS_SENTINEL_MASTER_HOST:-127.0.0.1}
+      - REDIS_SENTINEL_QUORUM=${REDIS_SENTINEL_QUORUM:-2}
     # ports:
     #   - "16379:6379"
     #   - "127.0.0.1:6379:6379"
@@ -80,9 +88,8 @@ services:
     environment:
       - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
       - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
-      - REDIS_URL=redis://${REDIS_USER}:${REDIS_PASSWORD}@redis:${REDIS_PORT:-6379}/${REDIS_DB:-0}
       - INFRASTRUCTURE_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@database:${MYSQL_PORT:-3306}/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
-      - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - INFRASTRUCTURE_DATABASE_TABLE_PREFIX=${INFRASTRUCTURE_DATABASE_TABLE_PREFIX:-po_}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       - ${PWD}/conf:/app/conf
@@ -93,7 +100,6 @@ services:
     privileged: true
     depends_on:
       - database
-      - redis
     ports:
       - "${POMERO_WEB_HOST_PORT:-10080}:80" # web
       - "${POMERO_INFRASTRUCTURE_SERVICE_HOST_PORT:-13000}:3000" # infrastructure service http
@@ -123,9 +129,16 @@ services:
     environment:
       - SWAGGER_DEBUG=${SWAGGER_DEBUG:-false}
       - GRAPHQL_DEBUG=${GRAPHQL_DEBUG:-false}
-      - ACCOUNT_PROVIDER=${ACCOUNT_PROVIDER:-direct-db}
-      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@database:${MYSQL_PORT:-3306}/${IDENTITY_DATABASE_NAME:-po_template}
-      - TABLE_PREFIX=${TABLE_PREFIX:-po_}
+      - ACCOUNT_PROVIDER=${ACCOUNT_PROVIDER:-database}
+      - REDIS_URL=redis://${REDIS_USER:-default}:${REDIS_PASSWORD}@redis:${REDIS_PORT:-6379}/${REDIS_DB:-0}
+      - IDENTITY_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@database:${MYSQL_PORT:-3306}/${IDENTITY_DATABASE_NAME:-po_identity}
+      - IDENTITY_DATABASE_TABLE_PREFIX=${IDENTITY_DATABASE_TABLE_PREFIX:-po_}
+      - USER_DATABASE_CONNECTION=mysql://${MYSQL_USER:-pomelo}:${MYSQL_PASSWORD}@database:${MYSQL_PORT:-3306}/${INFRASTRUCTURE_DATABASE_NAME:-po_template}
+      - USER_DATABASE_TABLE_PREFIX=${INFRASTRUCTURE_DATABASE_TABLE_PREFIX:-po_}
+      - USER_MICROSERVICE_HOST=pomelo-server
+      - USER_MICROSERVICE_PORT=3001
+      - OIDC_PATH=${OIDC_PATH:-/oauth2}
+      - OIDC_DEBUG=${OIDC_DEBUG:-true}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       - ${PWD}/conf:/app/conf
@@ -133,6 +146,10 @@ services:
     privileged: true
     depends_on:
       - database
+      - redis
+      - server
+    ports:
+      - "${POMERO_IDENTITY_SERVER_HOST_PORT:-15003}:3000" # identity server http
     networks:
       - default
   apisix:
