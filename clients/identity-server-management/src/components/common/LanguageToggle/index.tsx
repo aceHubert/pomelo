@@ -1,10 +1,10 @@
 import { Button, Menu, Popover } from 'antd';
 import { CheckOutlined, TranslationOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
-import { useI18n } from '../../../services/i18n/i18n';
+import { useI18n } from '@/services/i18n/i18n';
 import styles from './index.module.less';
 import type { ButtonProps } from 'antd';
-import type { AppLocale } from '../../../services/i18n/i18n';
+import type { AppLocale } from '@/services/i18n/i18n';
 
 function joinClasses(...classes: Array<string | undefined>) {
   return classes.filter(Boolean).join(' ');

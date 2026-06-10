@@ -1,6 +1,6 @@
 import { Button, Popconfirm, Space, Table, Tag } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { useI18n } from '../../../services/i18n/i18n';
+import { useI18n } from '@/services/i18n/i18n';
 import styles from './index.module.less';
 import type { ColumnsType } from 'antd/es/table';
 

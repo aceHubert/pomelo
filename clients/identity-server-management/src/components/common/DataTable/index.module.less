@@ -14,8 +14,8 @@
 
   :global(.ant-table) {
     width: 100%;
-    color: @var-management-text;
-    background: @var-management-panel-bg;
+    color: @var-text-primary;
+    background: @var-component-background;
     font-size: 13px;
   }
 
@@ -25,26 +25,26 @@
   }
 
   :global(.ant-table-thead > tr > th) {
-    color: @var-management-muted;
+    color: @var-text-secondary;
     font-weight: 700;
-    background: @var-management-hover-bg;
+    background: @var-component-background-soft;
   }
 
   :global(.ant-table-tbody > tr > td) {
-    border-bottom-color: @var-management-panel-subtle;
+    border-bottom-color: @var-component-background-soft;
   }
 
   :global(.ant-table-tbody > tr:hover > td) {
-    background: @var-management-hover-bg;
+    background: @var-component-background-soft;
   }
 
   :global(.ant-table-placeholder > td) {
-    background: @var-management-panel-bg;
+    background: @var-component-background;
   }
 }
 
 .selected {
   td {
-    background: @var-management-selected-bg !important;
+    background: @var-selected-bg !important;
   }
 }

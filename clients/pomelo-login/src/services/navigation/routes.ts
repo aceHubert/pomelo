@@ -1,4 +1,4 @@
-import { AUTH_BASENAME, HOME_URL } from '../app/env';
+import { AUTH_BASENAME, HOME_URL } from '@/services/app/env';
 
 export const LOGIN_ROUTE = '/login';
 export const MODIFY_PASSWORD_ROUTE = '/password/modify';

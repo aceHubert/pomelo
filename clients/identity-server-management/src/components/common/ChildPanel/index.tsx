@@ -2,12 +2,12 @@ import { Alert, Button, Card, Modal, Space, Spin, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@apollo/client';
 import { useState } from 'react';
-import { DataTable } from '../DataTable';
-import { PropertyForm } from '../PropertyForm';
-import { TextForm } from '../TextForm';
-import { useI18n } from '../../../services/i18n/i18n';
+import { DataTable } from '@/components/common/DataTable';
+import { PropertyForm } from '@/components/common/PropertyForm';
+import { TextForm } from '@/components/common/TextForm';
+import { useI18n } from '@/services/i18n/i18n';
 import styles from './index.module.less';
-import type { ChildPanelConfig } from '../../../types';
+import type { ChildPanelConfig } from '@/types';
 
 function getPath(source: any, path: string) {
   return path.split('.').reduce((current, key) => current?.[key], source);

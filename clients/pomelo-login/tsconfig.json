@@ -6,6 +6,7 @@
     "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "jsx": "react-jsx",
     "moduleResolution": "Node",
+    "baseUrl": ".",
     "allowJs": false,
     "strict": true,
     "noUnusedLocals": false,

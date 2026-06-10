@@ -31,10 +31,10 @@
 .mainPanel,
 .detailPanel {
   min-width: 0;
-  border: 1px solid @var-management-panel-border;
+  border: 1px solid @var-border-color-base;
   border-radius: 8px;
   padding: 16px;
-  background: @var-management-panel-bg;
+  background: @var-component-background;
 }
 
 .detailPanel {
@@ -57,7 +57,7 @@
   }
 
   h2:global(.ant-typography) {
-    color: @var-management-heading;
+    color: @var-text-primary;
     font-size: 18px;
     line-height: 1.25;
   }
@@ -74,7 +74,7 @@
 
   h3:global(.ant-typography) {
     margin: 0;
-    color: @var-management-heading;
+    color: @var-text-primary;
     font-size: 15px;
     line-height: 1.3;
   }

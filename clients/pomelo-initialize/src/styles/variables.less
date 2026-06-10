@@ -1,33 +1,9 @@
+@import './color/colors';
+
 @primary-color: #408a71;
-@primary-1: #eef7f3;
-@primary-2: #d6ebe2;
-@primary-3: #b0d7c6;
-@primary-4: #88c2a9;
-@primary-5: #63ad8d;
-@primary-6: #408a71;
-@primary-7: #2f6c59;
-@primary-8: #204f42;
-@primary-9: #14332c;
-@primary-10: #0b1c19;
-
-@success-color: #1abd80;
-@warning-color: #fda900;
-@error-color: #f82024;
-@info-color: #0477f7;
-
-@gray-1: #fafafa;
-@gray-2: #f5f5f0;
-@gray-3: #eeeeea;
-@gray-4: #d9d9d3;
-@gray-5: #bdbdb5;
-@gray-6: #96968f;
-@gray-7: #75756f;
-@gray-8: #61615b;
-@gray-9: #40403c;
-@gray-10: #212121;
 
 @light-body-background: #f7f7f2;
-@light-component-background: #ffffff;
+@light-component-background: #fff;
 @light-component-background-soft: #efefea;
 @light-text-primary: @gray-10;
 @light-text-secondary: @gray-8;
@@ -35,9 +11,9 @@
 @light-text-inverse: @gray-1;
 @light-border-color-base: #d8d8d0;
 @light-border-color-split: #62625c;
-@light-shadow-1-down: 3px 5px 10px rgba(15, 23, 42, 0.16);
-@light-shadow-1-up: 3px -5px 10px rgba(15, 23, 42, 0.12);
-@light-shadow-2: 0 20px 40px rgba(0, 0, 0, 0.3);
+@light-shadow-1-down: 3px 5px 10px fade(#0f172a, 16%);
+@light-shadow-1-up: 3px -5px 10px fade(#0f172a, 12%);
+@light-shadow-2: 0 20px 40px fade(#000, 30%);
 @light-success-soft: fade(@success-color, 10%);
 @light-warning-soft: fade(@warning-color, 10%);
 @light-error-soft: fade(@error-color, 10%);
@@ -46,124 +22,125 @@
 @dark-body-background: #0d0d0d;
 @dark-component-background: #171717;
 @dark-component-background-soft: #222220;
+@dark-primary-1: mix(color(~`colorPalette('@{primary-color}', 8) `), @dark-component-background, 15%);
+@dark-primary-2: mix(color(~`colorPalette('@{primary-color}', 7) `), @dark-component-background, 25%);
+@dark-primary-3: mix(@primary-color, @dark-component-background, 30%);
+@dark-primary-4: mix(@primary-color, @dark-component-background, 45%);
+@dark-primary-5: mix(@primary-color, @dark-component-background, 65%);
+@dark-primary-6: @primary-color;
+@dark-primary-7: mix(color(~`colorPalette('@{primary-color}', 5) `), @dark-component-background, 90%);
+@dark-primary-8: mix(color(~`colorPalette('@{primary-color}', 4) `), @dark-component-background, 95%);
+@dark-primary-9: mix(color(~`colorPalette('@{primary-color}', 3) `), @dark-component-background, 97%);
+@dark-primary-10: mix(color(~`colorPalette('@{primary-color}', 2) `), @dark-component-background, 98%);
 @dark-text-primary: @gray-1;
 @dark-text-secondary: @gray-3;
 @dark-text-disabled: @gray-5;
 @dark-text-inverse: @gray-1;
 @dark-border-color-base: #32322f;
 @dark-border-color-split: #b8b8af;
-@dark-shadow-1-down: 3px 5px 10px rgba(255, 255, 255, 0.16);
-@dark-shadow-1-up: 3px -5px 10px rgba(255, 255, 255, 0.12);
-@dark-shadow-2: 0 -5px 30px rgba(255, 255, 255, 0.3);
+@dark-shadow-1-down: 3px 5px 10px fade(#fff, 16%);
+@dark-shadow-1-up: 3px -5px 10px fade(#fff, 12%);
+@dark-shadow-2: 0 -5px 30px fade(#fff, 30%);
 @dark-success-soft: fade(@success-color, 18%);
 @dark-warning-soft: fade(@warning-color, 18%);
 @dark-error-soft: fade(@error-color, 18%);
 @dark-info-soft: fade(@info-color, 18%);
 
-@light-management-control-bg: #ffffff;
-@light-management-control-placeholder: @light-text-secondary;
-@light-management-control-focus-ring: fade(@primary-color, 18%);
-@light-management-selected-bg: fade(@primary-color, 12%);
-@light-management-danger-border: fade(@error-color, 36%);
-@light-management-scrollbar-thumb: rgba(33, 33, 33, 0.18);
-@light-management-scrollbar-track: rgba(33, 33, 33, 0.06);
-@light-management-login-bg: radial-gradient(circle at 18% 16%, fade(@primary-color, 24%), transparent 32%),
+@light-control-bg: @light-component-background;
+@light-control-placeholder: @light-text-secondary;
+@light-control-focus-ring: fade(@primary-color, 18%);
+@light-selected-bg: fade(@primary-color, 12%);
+@light-scrollbar-thumb: fade(@light-text-primary, 18%);
+@light-scrollbar-track: fade(@light-text-primary, 6%);
+@light-login-bg: radial-gradient(circle at 18% 16%, fade(@primary-color, 24%), transparent 32%),
   radial-gradient(circle at 84% 28%, fade(@info-color, 12%), transparent 30%),
   radial-gradient(circle at 66% 82%, fade(@warning-color, 12%), transparent 34%),
-  linear-gradient(132deg, @light-body-background 0%, @light-component-background-soft 48%, #f2f6f2 100%);
-@light-management-login-aura: linear-gradient(128deg, transparent 0 18%, fade(@primary-color, 20%) 31%, transparent 47%),
+  linear-gradient(
+    132deg,
+    @light-body-background 0%,
+    @light-component-background-soft 48%,
+    mix(@primary-color, @light-body-background, 4%) 100%
+  );
+@light-login-aura: linear-gradient(128deg, transparent 0 18%, fade(@primary-color, 20%) 31%, transparent 47%),
   linear-gradient(212deg, transparent 0 28%, fade(@info-color, 12%) 44%, transparent 62%),
   linear-gradient(320deg, fade(@warning-color, 12%) 0 22%, transparent 42%),
   linear-gradient(36deg, transparent 0 52%, fade(@error-color, 8%) 70%, transparent 86%);
-@light-management-login-grid: rgba(33, 33, 33, 0.06);
-@light-management-login-field: conic-gradient(
+@light-login-grid: fade(@light-text-primary, 6%);
+@light-login-field: conic-gradient(
     from 180deg at 52% 42%,
-    rgba(189, 201, 195, 0.72),
-    rgba(239, 239, 234, 0.78),
-    rgba(177, 189, 183, 0.68),
+    fade(mix(@primary-color, @light-component-background-soft, 22%), 72%),
+    fade(@light-component-background-soft, 78%),
+    fade(mix(@primary-color, @light-component-background-soft, 18%), 68%),
     fade(@warning-color, 12%),
-    rgba(189, 201, 195, 0.72)
+    fade(mix(@primary-color, @light-component-background-soft, 22%), 72%)
   ),
-  linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.42));
-@light-management-login-field-opacity: 0.56;
-@light-management-login-field-blend: soft-light;
-@light-management-glass-bg: rgba(255, 255, 255, 0.1);
-@light-management-glass-border: rgba(255, 255, 255, 0.58);
-@light-management-glass-control-bg: rgba(255, 255, 255, 0.5);
-@light-management-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
-@light-management-glass-control-focus-shadow: 0 0 0 3px @light-management-control-focus-ring,
-  inset 0 1px 0 rgba(255, 255, 255, 0.7);
-@light-management-brand-mark-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.28));
-@light-management-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-@light-management-glass-button-hover-border: rgba(255, 255, 255, 0.78);
-@light-management-glass-button-hover-shadow: 0 18px 42px rgba(38, 70, 120, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.82);
-@light-management-glass-shadow: 0 22px 55px rgba(43, 56, 92, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.72),
-  inset 0 -1px 0 rgba(67, 81, 119, 0.12);
-@light-management-glass-surface: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.44),
-    rgba(255, 255, 255, 0.12) 45%,
-    rgba(255, 255, 255, 0.28)
-  ),
-  linear-gradient(225deg, rgba(255, 255, 255, 0.28), fade(@primary-color, 12%) 42%, fade(@warning-color, 8%));
-@light-management-glass-edge: linear-gradient(
+  linear-gradient(180deg, fade(#fff, 14%), fade(#fff, 42%));
+@light-login-field-opacity: 0.56;
+@light-login-field-blend: soft-light;
+@light-glass-bg: fade(#fff, 10%);
+@light-glass-border: fade(#fff, 58%);
+@light-glass-control-bg: fade(#fff, 50%);
+@light-glass-control-shadow: inset 0 1px 0 fade(#fff, 62%);
+@light-glass-control-focus-shadow: 0 0 0 3px @light-control-focus-ring, inset 0 1px 0 fade(#fff, 70%);
+@light-brand-mark-bg: linear-gradient(135deg, fade(#fff, 72%), fade(#fff, 28%));
+@light-brand-mark-shadow: inset 0 1px 0 fade(#fff, 70%);
+@light-glass-shadow: 0 22px 55px fade(mix(@primary-color, #2b385c, 16%), 18%), inset 0 1px 0 fade(#fff, 72%),
+  inset 0 -1px 0 fade(#435177, 12%);
+@light-glass-surface: linear-gradient(135deg, fade(#fff, 44%), fade(#fff, 12%) 45%, fade(#fff, 28%)),
+  linear-gradient(225deg, fade(#fff, 28%), fade(@primary-color, 12%) 42%, fade(@warning-color, 8%));
+@light-glass-edge: linear-gradient(
   135deg,
-  rgba(255, 255, 255, 0.92),
-  rgba(255, 255, 255, 0.16) 32%,
+  fade(#fff, 92%),
+  fade(#fff, 16%) 32%,
   fade(@primary-color, 34%) 58%,
   fade(@warning-color, 16%) 100%
 );
 
-@dark-management-control-bg: @dark-component-background;
-@dark-management-control-placeholder: @dark-text-disabled;
-@dark-management-control-focus-ring: fade(@primary-color, 28%);
-@dark-management-selected-bg: fade(@primary-color, 28%);
-@dark-management-danger-border: fade(@error-color, 42%);
-@dark-management-scrollbar-thumb: rgba(250, 250, 250, 0.18);
-@dark-management-scrollbar-track: rgba(250, 250, 250, 0.08);
-@dark-management-login-bg: radial-gradient(circle at 24% 18%, fade(@primary-color, 22%), transparent 32%),
+@dark-control-bg: @dark-component-background;
+@dark-control-placeholder: @dark-text-disabled;
+@dark-control-focus-ring: fade(@primary-color, 28%);
+@dark-selected-bg: fade(@primary-color, 28%);
+@dark-scrollbar-thumb: fade(@dark-text-primary, 18%);
+@dark-scrollbar-track: fade(@dark-text-primary, 8%);
+@dark-login-bg: radial-gradient(circle at 24% 18%, fade(@primary-color, 22%), transparent 32%),
   radial-gradient(circle at 72% 64%, fade(@info-color, 14%), transparent 34%),
   radial-gradient(circle at 82% 18%, fade(@warning-color, 10%), transparent 26%),
-  linear-gradient(130deg, @dark-body-background 0%, @dark-component-background 48%, @dark-component-background-soft 100%);
-@dark-management-login-aura: linear-gradient(128deg, transparent 0 18%, fade(@primary-color, 20%) 31%, transparent 47%),
+  linear-gradient(
+    130deg,
+    @dark-body-background 0%,
+    @dark-component-background 48%,
+    @dark-component-background-soft 100%
+  );
+@dark-login-aura: linear-gradient(128deg, transparent 0 18%, fade(@primary-color, 20%) 31%, transparent 47%),
   linear-gradient(212deg, transparent 0 28%, fade(@info-color, 12%) 44%, transparent 62%),
   linear-gradient(320deg, fade(@warning-color, 10%) 0 22%, transparent 42%),
   linear-gradient(36deg, transparent 0 52%, fade(@error-color, 8%) 70%, transparent 86%);
-@dark-management-login-grid: rgba(250, 250, 250, 0.08);
-@dark-management-login-field: conic-gradient(
+@dark-login-grid: fade(@dark-text-primary, 8%);
+@dark-login-field: conic-gradient(
     from 180deg at 52% 42%,
-    rgba(23, 29, 27, 0.9),
-    rgba(28, 42, 38, 0.84),
-    rgba(41, 75, 64, 0.68),
+    fade(mix(@primary-color, @dark-component-background, 8%), 90%),
+    fade(mix(@primary-color, @dark-component-background, 16%), 84%),
+    fade(mix(@primary-color, @dark-component-background, 32%), 68%),
     fade(@warning-color, 8%),
-    rgba(23, 29, 27, 0.9)
+    fade(mix(@primary-color, @dark-component-background, 8%), 90%)
   ),
-  linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(13, 13, 13, 0.36));
-@dark-management-login-field-opacity: 0.64;
-@dark-management-login-field-blend: screen;
-@dark-management-glass-bg: rgba(13, 13, 13, 0.32);
-@dark-management-glass-border: rgba(255, 255, 255, 0.22);
-@dark-management-glass-control-bg: rgba(23, 23, 23, 0.58);
-@dark-management-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-@dark-management-glass-control-focus-shadow: 0 0 0 3px @dark-management-control-focus-ring,
-  inset 0 1px 0 rgba(255, 255, 255, 0.18);
-@dark-management-brand-mark-bg: linear-gradient(135deg, fade(@primary-color, 24%), rgba(23, 23, 23, 0.46));
-@dark-management-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
-@dark-management-glass-button-hover-border: rgba(86, 137, 118, 0.56);
-@dark-management-glass-button-hover-shadow: 0 18px 44px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.24);
-@dark-management-glass-shadow: 0 22px 60px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.26),
-  inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-@dark-management-glass-surface: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.18),
-    rgba(255, 255, 255, 0.06) 45%,
-    rgba(255, 255, 255, 0.12)
-  ),
+  linear-gradient(180deg, fade(#fff, 6%), fade(#0d0d0d, 36%));
+@dark-login-field-opacity: 0.64;
+@dark-login-field-blend: screen;
+@dark-glass-bg: fade(@dark-body-background, 32%);
+@dark-glass-border: fade(#fff, 22%);
+@dark-glass-control-bg: fade(@dark-component-background, 58%);
+@dark-glass-control-shadow: inset 0 1px 0 fade(#fff, 12%);
+@dark-glass-control-focus-shadow: 0 0 0 3px @dark-control-focus-ring, inset 0 1px 0 fade(#fff, 18%);
+@dark-brand-mark-bg: linear-gradient(135deg, fade(@primary-color, 24%), fade(@dark-component-background, 46%));
+@dark-brand-mark-shadow: inset 0 1px 0 fade(#fff, 22%);
+@dark-glass-shadow: 0 22px 60px fade(#000, 34%), inset 0 1px 0 fade(#fff, 26%), inset 0 -1px 0 fade(#fff, 10%);
+@dark-glass-surface: linear-gradient(135deg, fade(#fff, 18%), fade(#fff, 6%) 45%, fade(#fff, 12%)),
   linear-gradient(225deg, fade(@primary-color, 18%), fade(@warning-color, 8%) 42%, fade(@info-color, 8%));
-@dark-management-glass-edge: linear-gradient(
+@dark-glass-edge: linear-gradient(
   135deg,
-  rgba(255, 255, 255, 0.42),
-  rgba(255, 255, 255, 0.08) 32%,
+  fade(#fff, 42%),
+  fade(#fff, 8%) 32%,
   fade(@primary-color, 32%) 58%,
   fade(@warning-color, 14%) 100%
 );
@@ -172,17 +149,8 @@
   --color-success: @success-color;
   --color-warning: @warning-color;
   --color-error: @error-color;
+  --color-danger: @error-color;
   --color-info: @info-color;
-  --management-page-bg: var(--body-background);
-  --management-panel-bg: var(--component-background);
-  --management-panel-border: var(--color-border-base);
-  --management-panel-subtle: var(--component-background-soft);
-  --management-text: var(--text-primary);
-  --management-heading: var(--text-primary);
-  --management-muted: var(--text-secondary);
-  --management-control-border: var(--color-border-base);
-  --management-hover-bg: var(--component-background-soft);
-  --management-elevated-bg: var(--component-background);
 }
 
 .theme-vars(@mode: light) when (@mode = light) {
@@ -200,6 +168,8 @@
   --theme-primary-8: @primary-8;
   --theme-primary-9: @primary-9;
   --theme-primary-10: @primary-10;
+  --theme-primary-shadow: fade(@primary-color, 24%);
+  --theme-primary-shadow-hover: fade(@primary-color, 28%);
   --gray-1: @gray-1;
   --gray-2: @gray-2;
   --gray-3: @gray-3;
@@ -213,8 +183,8 @@
   --body-background: @light-body-background;
   --component-background: @light-component-background;
   --component-background-soft: @light-component-background-soft;
-  --color-border-base: @light-border-color-base;
-  --color-border-split: @light-border-color-split;
+  --border-color-base: @light-border-color-base;
+  --border-color-split: @light-border-color-split;
   --text-primary: @light-text-primary;
   --text-secondary: @light-text-secondary;
   --text-disabled: @light-text-disabled;
@@ -226,31 +196,28 @@
   --color-warning-soft: @light-warning-soft;
   --color-error-soft: @light-error-soft;
   --color-info-soft: @light-info-soft;
-  --management-control-bg: @light-management-control-bg;
-  --management-control-placeholder: @light-management-control-placeholder;
-  --management-control-focus-ring: @light-management-control-focus-ring;
-  --management-selected-bg: @light-management-selected-bg;
-  --management-danger-border: @light-management-danger-border;
-  --management-scrollbar-thumb: @light-management-scrollbar-thumb;
-  --management-scrollbar-track: @light-management-scrollbar-track;
-  --management-login-bg: @light-management-login-bg;
-  --management-login-aura: @light-management-login-aura;
-  --management-login-grid: @light-management-login-grid;
-  --management-login-field: @light-management-login-field;
-  --management-login-field-opacity: @light-management-login-field-opacity;
-  --management-login-field-blend: @light-management-login-field-blend;
-  --management-glass-bg: @light-management-glass-bg;
-  --management-glass-border: @light-management-glass-border;
-  --management-glass-control-bg: @light-management-glass-control-bg;
-  --management-glass-control-shadow: @light-management-glass-control-shadow;
-  --management-glass-control-focus-shadow: @light-management-glass-control-focus-shadow;
-  --management-brand-mark-bg: @light-management-brand-mark-bg;
-  --management-brand-mark-shadow: @light-management-brand-mark-shadow;
-  --management-glass-button-hover-border: @light-management-glass-button-hover-border;
-  --management-glass-button-hover-shadow: @light-management-glass-button-hover-shadow;
-  --management-glass-shadow: @light-management-glass-shadow;
-  --management-glass-surface: @light-management-glass-surface;
-  --management-glass-edge: @light-management-glass-edge;
+  --initialize-control-bg: @light-control-bg;
+  --initialize-control-placeholder: @light-control-placeholder;
+  --initialize-control-focus-ring: @light-control-focus-ring;
+  --initialize-selected-bg: @light-selected-bg;
+  --initialize-scrollbar-thumb: @light-scrollbar-thumb;
+  --initialize-scrollbar-track: @light-scrollbar-track;
+  --initialize-login-bg: @light-login-bg;
+  --initialize-login-aura: @light-login-aura;
+  --initialize-login-grid: @light-login-grid;
+  --initialize-login-field: @light-login-field;
+  --initialize-login-field-opacity: @light-login-field-opacity;
+  --initialize-login-field-blend: @light-login-field-blend;
+  --initialize-glass-bg: @light-glass-bg;
+  --initialize-glass-border: @light-glass-border;
+  --initialize-glass-control-bg: @light-glass-control-bg;
+  --initialize-glass-control-shadow: @light-glass-control-shadow;
+  --initialize-glass-control-focus-shadow: @light-glass-control-focus-shadow;
+  --initialize-brand-mark-bg: @light-brand-mark-bg;
+  --initialize-brand-mark-shadow: @light-brand-mark-shadow;
+  --initialize-glass-shadow: @light-glass-shadow;
+  --initialize-glass-surface: @light-glass-surface;
+  --initialize-glass-edge: @light-glass-edge;
 }
 
 .theme-vars(@mode) when (@mode = dark) {
@@ -258,16 +225,18 @@
 
   color-scheme: dark;
   --theme-primary: @primary-color;
-  --theme-primary-1: @primary-1;
-  --theme-primary-2: @primary-2;
-  --theme-primary-3: @primary-3;
-  --theme-primary-4: @primary-4;
-  --theme-primary-5: @primary-5;
-  --theme-primary-6: @primary-6;
-  --theme-primary-7: @primary-7;
-  --theme-primary-8: @primary-8;
-  --theme-primary-9: @primary-9;
-  --theme-primary-10: @primary-10;
+  --theme-primary-1: @dark-primary-1;
+  --theme-primary-2: @dark-primary-2;
+  --theme-primary-3: @dark-primary-3;
+  --theme-primary-4: @dark-primary-4;
+  --theme-primary-5: @dark-primary-5;
+  --theme-primary-6: @dark-primary-6;
+  --theme-primary-7: @dark-primary-7;
+  --theme-primary-8: @dark-primary-8;
+  --theme-primary-9: @dark-primary-9;
+  --theme-primary-10: @dark-primary-10;
+  --theme-primary-shadow: fade(@primary-color, 24%);
+  --theme-primary-shadow-hover: fade(@primary-color, 28%);
   --gray-1: @gray-1;
   --gray-2: @gray-2;
   --gray-3: @gray-3;
@@ -281,8 +250,8 @@
   --body-background: @dark-body-background;
   --component-background: @dark-component-background;
   --component-background-soft: @dark-component-background-soft;
-  --color-border-base: @dark-border-color-base;
-  --color-border-split: @dark-border-color-split;
+  --border-color-base: @dark-border-color-base;
+  --border-color-split: @dark-border-color-split;
   --text-primary: @dark-text-primary;
   --text-secondary: @dark-text-secondary;
   --text-disabled: @dark-text-disabled;
@@ -294,31 +263,28 @@
   --color-warning-soft: @dark-warning-soft;
   --color-error-soft: @dark-error-soft;
   --color-info-soft: @dark-info-soft;
-  --management-control-bg: @dark-management-control-bg;
-  --management-control-placeholder: @dark-management-control-placeholder;
-  --management-control-focus-ring: @dark-management-control-focus-ring;
-  --management-selected-bg: @dark-management-selected-bg;
-  --management-danger-border: @dark-management-danger-border;
-  --management-scrollbar-thumb: @dark-management-scrollbar-thumb;
-  --management-scrollbar-track: @dark-management-scrollbar-track;
-  --management-login-bg: @dark-management-login-bg;
-  --management-login-aura: @dark-management-login-aura;
-  --management-login-grid: @dark-management-login-grid;
-  --management-login-field: @dark-management-login-field;
-  --management-login-field-opacity: @dark-management-login-field-opacity;
-  --management-login-field-blend: @dark-management-login-field-blend;
-  --management-glass-bg: @dark-management-glass-bg;
-  --management-glass-border: @dark-management-glass-border;
-  --management-glass-control-bg: @dark-management-glass-control-bg;
-  --management-glass-control-shadow: @dark-management-glass-control-shadow;
-  --management-glass-control-focus-shadow: @dark-management-glass-control-focus-shadow;
-  --management-brand-mark-bg: @dark-management-brand-mark-bg;
-  --management-brand-mark-shadow: @dark-management-brand-mark-shadow;
-  --management-glass-button-hover-border: @dark-management-glass-button-hover-border;
-  --management-glass-button-hover-shadow: @dark-management-glass-button-hover-shadow;
-  --management-glass-shadow: @dark-management-glass-shadow;
-  --management-glass-surface: @dark-management-glass-surface;
-  --management-glass-edge: @dark-management-glass-edge;
+  --initialize-control-bg: @dark-control-bg;
+  --initialize-control-placeholder: @dark-control-placeholder;
+  --initialize-control-focus-ring: @dark-control-focus-ring;
+  --initialize-selected-bg: @dark-selected-bg;
+  --initialize-scrollbar-thumb: @dark-scrollbar-thumb;
+  --initialize-scrollbar-track: @dark-scrollbar-track;
+  --initialize-login-bg: @dark-login-bg;
+  --initialize-login-aura: @dark-login-aura;
+  --initialize-login-grid: @dark-login-grid;
+  --initialize-login-field: @dark-login-field;
+  --initialize-login-field-opacity: @dark-login-field-opacity;
+  --initialize-login-field-blend: @dark-login-field-blend;
+  --initialize-glass-bg: @dark-glass-bg;
+  --initialize-glass-border: @dark-glass-border;
+  --initialize-glass-control-bg: @dark-glass-control-bg;
+  --initialize-glass-control-shadow: @dark-glass-control-shadow;
+  --initialize-glass-control-focus-shadow: @dark-glass-control-focus-shadow;
+  --initialize-brand-mark-bg: @dark-brand-mark-bg;
+  --initialize-brand-mark-shadow: @dark-brand-mark-shadow;
+  --initialize-glass-shadow: @dark-glass-shadow;
+  --initialize-glass-surface: @dark-glass-surface;
+  --initialize-glass-edge: @dark-glass-edge;
 }
 
 @var-primary: var(--theme-primary, @primary-color);
@@ -343,8 +309,8 @@
 @var-body-background: var(--body-background, @light-body-background);
 @var-component-background: var(--component-background, @light-component-background);
 @var-component-background-soft: var(--component-background-soft, @light-component-background-soft);
-@var-border-base: var(--color-border-base, @light-border-color-base);
-@var-border-split: var(--color-border-split, @light-border-color-split);
+@var-border-color-base: var(--border-color-base, @light-border-color-base);
+@var-border-color-split: var(--border-color-split, @light-border-color-split);
 @var-text-primary: var(--text-primary, @light-text-primary);
 @var-text-secondary: var(--text-secondary, @light-text-secondary);
 @var-text-disabled: var(--text-disabled, @light-text-disabled);
@@ -352,56 +318,25 @@
 @var-shadow-1-down: var(--shadow-1-down, @light-shadow-1-down);
 @var-shadow-1-up: var(--shadow-1-up, @light-shadow-1-up);
 @var-shadow-2: var(--shadow-2, @light-shadow-2);
-@var-management-page-bg: var(--management-page-bg, @var-body-background);
-@var-management-panel-bg: var(--management-panel-bg, @var-component-background);
-@var-management-panel-border: var(--management-panel-border, @var-border-base);
-@var-management-panel-subtle: var(--management-panel-subtle, @var-component-background-soft);
-@var-management-text: var(--management-text, @var-text-primary);
-@var-management-heading: var(--management-heading, @var-text-primary);
-@var-management-muted: var(--management-muted, @var-text-secondary);
-@var-management-control-bg: var(--management-control-bg, @light-management-control-bg);
-@var-management-control-border: var(--management-control-border, @var-border-base);
-@var-management-control-placeholder: var(--management-control-placeholder, @var-text-secondary);
-@var-management-control-focus-ring: var(--management-control-focus-ring, @light-management-control-focus-ring);
-@var-management-hover-bg: var(--management-hover-bg, @var-component-background-soft);
-@var-management-elevated-bg: var(--management-elevated-bg, @var-component-background);
-@var-management-danger-border: var(--management-danger-border, @light-management-danger-border);
-@var-management-scrollbar-thumb: var(--management-scrollbar-thumb, @light-management-scrollbar-thumb);
-@var-management-scrollbar-track: var(--management-scrollbar-track, @light-management-scrollbar-track);
-@var-management-login-bg: var(--management-login-bg, @light-management-login-bg);
-@var-management-login-aura: var(--management-login-aura, @light-management-login-aura);
-@var-management-login-grid: var(--management-login-grid, @light-management-login-grid);
-@var-management-login-field: var(--management-login-field, @light-management-login-field);
-@var-management-login-field-opacity: var(--management-login-field-opacity, @light-management-login-field-opacity);
-@var-management-login-field-blend: var(--management-login-field-blend, @light-management-login-field-blend);
-@var-management-glass-bg: var(--management-glass-bg, @light-management-glass-bg);
-@var-management-glass-border: var(--management-glass-border, @light-management-glass-border);
-@var-management-glass-control-bg: var(--management-glass-control-bg, @light-management-glass-control-bg);
-@var-management-glass-control-shadow: var(--management-glass-control-shadow, @light-management-glass-control-shadow);
-@var-management-glass-control-focus-shadow: var(
-  --management-glass-control-focus-shadow,
-  @light-management-glass-control-focus-shadow
-);
-@var-management-brand-mark-bg: var(--management-brand-mark-bg, @light-management-brand-mark-bg);
-@var-management-brand-mark-shadow: var(--management-brand-mark-shadow, @light-management-brand-mark-shadow);
-@var-management-glass-button-hover-border: var(
-  --management-glass-button-hover-border,
-  @light-management-glass-button-hover-border
-);
-@var-management-glass-button-hover-shadow: var(
-  --management-glass-button-hover-shadow,
-  @light-management-glass-button-hover-shadow
-);
-@var-management-glass-shadow: var(--management-glass-shadow, @light-management-glass-shadow);
-@var-management-glass-surface: var(--management-glass-surface, @light-management-glass-surface);
-@var-management-glass-edge: var(--management-glass-edge, @light-management-glass-edge);
-@border-color-base: @var-border-base;
-@border-color-split: @var-border-split;
-@component-background: @var-component-background;
-@component-background-soft: @var-component-background-soft;
-@body-background: @var-body-background;
-@text-color: @var-text-primary;
-@text-color-secondary: @var-text-secondary;
-@text-color-disabled: @var-text-disabled;
-@text-color-inverse: @var-text-inverse;
-@box-shadow-base: @var-shadow-1-down;
+@var-control-bg: var(--initialize-control-bg, @light-control-bg);
+@var-control-placeholder: var(--initialize-control-placeholder, @var-text-secondary);
+@var-control-focus-ring: var(--initialize-control-focus-ring, @light-control-focus-ring);
+@var-selected-bg: var(--initialize-selected-bg, @light-selected-bg);
+@var-scrollbar-thumb: var(--initialize-scrollbar-thumb, @light-scrollbar-thumb);
+@var-scrollbar-track: var(--initialize-scrollbar-track, @light-scrollbar-track);
+@var-login-bg: var(--initialize-login-bg, @light-login-bg);
+@var-login-aura: var(--initialize-login-aura, @light-login-aura);
+@var-login-grid: var(--initialize-login-grid, @light-login-grid);
+@var-login-field: var(--initialize-login-field, @light-login-field);
+@var-login-field-opacity: var(--initialize-login-field-opacity, @light-login-field-opacity);
+@var-login-field-blend: var(--initialize-login-field-blend, @light-login-field-blend);
+@var-glass-bg: var(--initialize-glass-bg, @light-glass-bg);
+@var-glass-border: var(--initialize-glass-border, @light-glass-border);
+@var-glass-control-bg: var(--initialize-glass-control-bg, @light-glass-control-bg);
+@var-glass-control-shadow: var(--initialize-glass-control-shadow, @light-glass-control-shadow);
+@var-glass-control-focus-shadow: var(--initialize-glass-control-focus-shadow, @light-glass-control-focus-shadow);
+@var-brand-mark-bg: var(--initialize-brand-mark-bg, @light-brand-mark-bg);
+@var-brand-mark-shadow: var(--initialize-brand-mark-shadow, @light-brand-mark-shadow);
+@var-glass-shadow: var(--initialize-glass-shadow, @light-glass-shadow);
+@var-glass-surface: var(--initialize-glass-surface, @light-glass-surface);
+@var-glass-edge: var(--initialize-glass-edge, @light-glass-edge);

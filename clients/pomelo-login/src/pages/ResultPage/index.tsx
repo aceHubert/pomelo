@@ -1,12 +1,12 @@
 import { Button, Result } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { AuthShell } from '../../components/auth/AuthShell';
-import { APP_TITLE, HOME_URL } from '../../services/app/env';
-import { useI18n } from '../../services/i18n/i18n';
-import { LOGIN_ROUTE, redirectTo } from '../../services/navigation/routes';
+import { AuthShell } from '@/components/auth/AuthShell';
+import { APP_TITLE, HOME_URL } from '@/services/app/env';
+import { useI18n } from '@/services/i18n/i18n';
+import { LOGIN_ROUTE, redirectTo } from '@/services/navigation/routes';
 import styles from './index.module.less';
-import type { MissingReturnUrlScene } from '../../services/navigation/routes';
+import type { MissingReturnUrlScene } from '@/services/navigation/routes';
 
 function isMissingReturnUrlScene(value: string | null): value is MissingReturnUrlScene {
   return value === 'login-success' || value === 'modify-cancel' || value === 'forgot-cancel';

@@ -2,7 +2,7 @@ import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache, from } from '@ap
 import { onError } from '@apollo/client/link/error';
 import { setContext } from '@apollo/client/link/context';
 import { PropsWithChildren } from 'react';
-import { clearManagementToken, getManagementToken } from '../auth/token';
+import { clearManagementToken, getManagementToken } from '@/services/auth/token';
 
 const DEFAULT_GRAPHQL_URI = '/graphql';
 

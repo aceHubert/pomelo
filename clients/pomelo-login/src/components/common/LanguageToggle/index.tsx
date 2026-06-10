@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import { TranslationOutlined } from '@ant-design/icons';
-import { getNextLocale, useI18n } from '../../../services/i18n/i18n';
+import { getNextLocale, useI18n } from '@/services/i18n/i18n';
 import type { ButtonProps } from 'antd';
 
 function joinClasses(...classNames: Array<string | undefined>) {

@@ -1,14 +1,14 @@
 import { Button } from 'antd';
 import { DesktopOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
-import { BRAND_NAME } from '../../../services/app/env';
-import { applyThemePreference, getStoredThemePreference } from '../../../services/theme/theme';
-import { useI18n } from '../../../services/i18n/i18n';
-import { LanguageToggle } from '../../common/LanguageToggle';
-import LiquidGlass from '../../common/LiquidGlass';
+import { BRAND_NAME } from '@/services/app/env';
+import { applyThemePreference, getStoredThemePreference } from '@/services/theme/theme';
+import { useI18n } from '@/services/i18n/i18n';
+import { LanguageToggle } from '@/components/common/LanguageToggle';
+import LiquidGlass from '@/components/common/LiquidGlass';
 import styles from './index.module.less';
 import type { PropsWithChildren } from 'react';
-import type { ThemePreference } from '../../../services/theme/theme';
+import type { ThemePreference } from '@/services/theme/theme';
 
 function getNextThemePreference(theme: ThemePreference): ThemePreference {
   if (theme === 'system') return 'dark';
@@ -42,7 +42,7 @@ export function AuthShell({
 
   return (
     <main className={styles.shell}>
-      <div className={styles.gradientField} aria-hidden="true" />
+      <div className={styles['gradient-field']} aria-hidden="true" />
       <div className={styles.topActions}>
         <div className={styles.actionSlot}>
           <LiquidGlass className={styles.actionGlass} padding="0" overLight={false} cornerRadius={999} layout="inline">

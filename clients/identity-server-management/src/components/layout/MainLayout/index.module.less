@@ -1,11 +1,11 @@
 .appShell {
   min-height: 100vh;
-  background: @var-management-page-bg;
+  background: @var-body-background;
 }
 
 .sidebar {
-  border-right: 1px solid @var-management-panel-border;
-  background: @var-management-panel-bg !important;
+  border-right: 1px solid @var-border-color-base;
+  background: @var-component-background !important;
 }
 
 .sidebarMask {
@@ -19,8 +19,8 @@
   justify-content: space-between;
   gap: 10px;
   padding: 14px 18px;
-  border-bottom: 1px solid @var-management-panel-border;
-  color: @var-management-heading;
+  border-bottom: 1px solid @var-border-color-base;
+  color: @var-text-primary;
   font-weight: 800;
 }
 
@@ -36,18 +36,18 @@
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid @var-management-glass-border;
+  border: 1px solid @var-glass-border;
   border-radius: 8px;
-  color: @var-management-heading;
-  background: @var-management-brand-mark-bg;
-  box-shadow: @var-management-brand-mark-shadow;
+  color: @var-text-primary;
+  background: @var-brand-mark-bg;
+  box-shadow: @var-brand-mark-shadow;
   font-weight: 800;
 }
 
 .sidebarClose {
   display: none;
   flex: 0 0 auto;
-  color: @var-management-heading;
+  color: @var-text-primary;
 }
 
 .sidebarMenu {
@@ -61,13 +61,13 @@
   }
 
   :global(.ant-menu-item-selected) {
-    background: @var-management-sidebar-active-bg;
+    background: @var-sidebar-active-bg;
   }
 }
 
 .workspaceShell {
   min-width: 0;
-  background: @var-management-page-bg;
+  background: @var-body-background;
 }
 
 .topbar {
@@ -75,9 +75,9 @@
   height: 64px;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid @var-management-panel-border;
+  border-bottom: 1px solid @var-border-color-base;
   padding: 0 20px;
-  background: @var-management-panel-bg;
+  background: @var-component-background;
   line-height: 1.35;
 }
 
@@ -90,7 +90,7 @@
 
 .sidebarToggle {
   flex: 0 0 auto;
-  color: @var-management-heading;
+  color: @var-text-primary;
 }
 
 .topbarActions {
@@ -106,9 +106,9 @@
   align-items: center;
   gap: 8px;
   padding: 0 12px 0 4px;
-  border: 1px solid @var-management-panel-border;
+  border: 1px solid @var-border-color-base;
   border-radius: 999px;
-  color: @var-management-heading;
+  color: @var-text-primary;
   background: transparent;
   cursor: pointer;
 }
@@ -119,8 +119,8 @@
 
 .userAvatar {
   flex: 0 0 auto;
-  color: @var-management-heading;
-  background: @var-management-brand-mark-bg;
+  color: @var-text-primary;
+  background: @var-brand-mark-bg;
 }
 
 .userName {
@@ -138,9 +138,9 @@
 
   :global(.ant-popover-inner) {
     padding: 0;
-    border: 1px solid @var-management-panel-border;
+    border: 1px solid @var-border-color-base;
     border-radius: 8px;
-    background: @var-management-elevated-bg;
+    background: @var-component-background;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14);
   }
 
@@ -220,5 +220,4 @@
   .topbar {
     gap: 10px;
   }
-
 }

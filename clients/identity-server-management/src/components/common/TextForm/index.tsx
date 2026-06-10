@@ -1,8 +1,8 @@
 import { Alert, Button, Checkbox, DatePicker, Form, Input, InputNumber, Select } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
-import { useI18n } from '../../../services/i18n/i18n';
+import { useI18n } from '@/services/i18n/i18n';
 import styles from './index.module.less';
-import type { FieldConfig } from '../../../types';
+import type { FieldConfig } from '@/types';
 import type { Rule } from 'antd/es/form';
 
 function buildInitialValues(fields: FieldConfig[]) {

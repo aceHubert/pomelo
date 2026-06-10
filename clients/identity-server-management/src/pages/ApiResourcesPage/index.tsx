@@ -1,8 +1,8 @@
 import { Button, Descriptions, Modal, Space, Switch, Tag } from 'antd';
 import { useState } from 'react';
-import { ChildPanel } from '../../components/common/ChildPanel';
-import { ResourcePage } from '../../components/common/ResourcePage';
-import { TextForm } from '../../components/common/TextForm';
+import { ChildPanel } from '@/components/common/ChildPanel';
+import { ResourcePage } from '@/components/common/ResourcePage';
+import { TextForm } from '@/components/common/TextForm';
 import {
   API_CHILD_OPERATIONS,
   API_RESOURCE_DETAIL,
@@ -10,10 +10,10 @@ import {
   CREATE_API_RESOURCE,
   DELETE_API_RESOURCE,
   UPDATE_API_RESOURCE,
-} from '../../apis/operations';
-import { useI18n } from '../../services/i18n/i18n';
-import type { ChildPanelConfig } from '../../types';
-import type { FieldConfig } from '../../types';
+} from '@/apis/operations';
+import { useI18n } from '@/services/i18n/i18n';
+import type { ChildPanelConfig } from '@/types';
+import type { FieldConfig } from '@/types';
 
 const secretTypeOptions = [
   { label: 'SharedSecret', value: 'SharedSecret' },

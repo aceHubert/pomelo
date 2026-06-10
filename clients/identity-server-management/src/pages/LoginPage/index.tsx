@@ -3,12 +3,12 @@ import { useMutation } from '@apollo/client';
 import sha256 from 'crypto-js/sha256';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LanguageToggle } from '../../components/common/LanguageToggle';
-import { ThemeToggle } from '../../components/common/ThemeToggle';
-import LiquidGlass from '../../components/common/LiquidGlass';
-import { setManagementToken, clearManagementToken } from '../../services/auth/token';
-import { useI18n } from '../../services/i18n/i18n';
-import { SIGNIN } from '../../apis/operations';
+import { LanguageToggle } from '@/components/common/LanguageToggle';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
+import LiquidGlass from '@/components/common/LiquidGlass';
+import { setManagementToken, clearManagementToken } from '@/services/auth/token';
+import { useI18n } from '@/services/i18n/i18n';
+import { SIGNIN } from '@/apis/operations';
 import styles from './index.module.less';
 
 type LoginValues = {
@@ -47,7 +47,7 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
 
   return (
     <main className={styles.shell}>
-      <div className={styles.gradientField} aria-hidden="true" />
+      <div className={styles['gradient-field']} aria-hidden="true" />
       <div className={styles.topActions}>
         <div className={styles.actionSlot}>
           <LiquidGlass

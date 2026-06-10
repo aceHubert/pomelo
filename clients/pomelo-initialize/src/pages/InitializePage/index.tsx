@@ -106,7 +106,7 @@ export function InitializePage() {
 
   return (
     <main className={`${styles.shell} min-h-screen`}>
-      <div className={styles.gradientField} aria-hidden="true" />
+      <div className={styles['gradient-field']} aria-hidden="true" />
       <div className={styles.topActions}>
         <LiquidGlass className={styles.actionGlass} cornerRadius={999} padding="0 6px">
           <LanguageToggle className={styles.actionButton} />

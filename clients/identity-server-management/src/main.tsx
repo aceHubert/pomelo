@@ -1,13 +1,11 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ConfigProvider, theme as antdTheme } from 'antd';
 import { createRoot } from 'react-dom/client';
-import { useEffect, useMemo, useState } from 'react';
 import { App } from './App';
 import { createManagementApolloClient, ManagementApolloProvider } from './services/graphql/apollo';
 import { getManagementToken } from './services/auth/token';
 import { applyStoredThemePreference, getResolvedThemeMode } from './services/theme/theme';
 import { I18nProvider, useI18n } from './services/i18n/i18n';
-import 'antd/dist/reset.css';
 import './styles/global.less';
 
 applyStoredThemePreference();

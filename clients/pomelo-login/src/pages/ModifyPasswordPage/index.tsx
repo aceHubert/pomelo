@@ -6,16 +6,15 @@ import {
   UPDATE_USER_PASSWORD,
   type UpdateUserPasswordMutationData,
   type UpdateUserPasswordMutationVariables,
-} from '../../apis/operations';
-import { AuthShell } from '../../components/auth/AuthShell';
-import { APP_TITLE } from '../../services/app/env';
-import { sha256Hex } from '../../services/auth/hash';
-import { getStoredLoginName } from '../../services/auth/jwt';
-import { clearStoredAuthToken } from '../../services/auth/token';
-import { formatError } from '../../services/graphql/errors';
-import { useI18n } from '../../services/i18n/i18n';
-import { LOGIN_ROUTE, redirectTo, resolveReturnTarget } from '../../services/navigation/routes';
-import formStyles from '../../styles/form.module.less';
+} from '@/apis/operations';
+import { AuthShell } from '@/components/auth/AuthShell';
+import { APP_TITLE } from '@/services/app/env';
+import { sha256Hex } from '@/services/auth/hash';
+import { getStoredLoginName } from '@/services/auth/jwt';
+import { clearStoredAuthToken } from '@/services/auth/token';
+import { formatError } from '@/services/graphql/errors';
+import { useI18n } from '@/services/i18n/i18n';
+import { LOGIN_ROUTE, redirectTo, resolveReturnTarget } from '@/services/navigation/routes';
 
 type ModifyPasswordFormValues = {
   username: string;
@@ -69,7 +68,7 @@ export function ModifyPasswordPage() {
   return (
     <AuthShell title={t('modify.title')} subtitle={t('modify.subtitle')}>
       <Form<ModifyPasswordFormValues>
-        className={formStyles.form}
+        className="auth-form"
         layout="vertical"
         requiredMark={false}
         initialValues={{ username: initialUsername }}
@@ -109,7 +108,7 @@ export function ModifyPasswordPage() {
           <Input.Password autoComplete="new-password" placeholder={t('modify.newPasswordPlaceholder')} size="large" />
         </Form.Item>
         {submitError ? <Alert message={submitError} type="error" showIcon /> : null}
-        <div className={formStyles.buttonStack}>
+        <div className="auth-button-stack">
           <Button block type="primary" htmlType="submit" loading={loading} shape="round" size="large">
             {t('modify.submit')}
           </Button>
@@ -119,7 +118,7 @@ export function ModifyPasswordPage() {
             htmlType="button"
             shape="round"
             size="large"
-            className={formStyles.secondaryButton}
+            className="auth-secondary-button"
             onClick={() => redirectTo(resolveReturnTarget(location.search, 'modify-cancel'))}
           >
             {t('common.cancel')}

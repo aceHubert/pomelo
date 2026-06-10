@@ -3,10 +3,10 @@
   width: var(--glass-width, auto);
   min-height: var(--glass-height, auto);
   overflow: hidden;
-  border: 1px solid var(--auth-glass-border);
+  border: 1px solid @var-glass-border;
   border-radius: var(--glass-radius, 18px);
-  background: var(--auth-glass-bg);
-  box-shadow: var(--auth-glass-shadow);
+  background: @var-glass-bg;
+  box-shadow: @var-glass-shadow;
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
 
@@ -19,11 +19,11 @@
   }
 
   &::before {
-    background: var(--auth-glass-surface);
+    background: @var-glass-surface;
   }
 
   &::after {
-    background: var(--auth-glass-edge);
+    background: @var-glass-edge;
     opacity: 0.9;
     mix-blend-mode: screen;
   }

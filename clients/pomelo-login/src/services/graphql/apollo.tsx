@@ -1,9 +1,9 @@
 import { ApolloClient, ApolloError, ApolloProvider, HttpLink, InMemoryCache, from } from '@apollo/client';
 import { onError } from '@apollo/client/link/error';
 import { setContext } from '@apollo/client/link/context';
-import { resolveGraphqlUri } from '../app/env';
-import { clearStoredAuthToken, getAuthorizationHeader } from '../auth/token';
-import { getStoredLocale } from '../i18n/i18n';
+import { resolveGraphqlUri } from '@/services/app/env';
+import { clearStoredAuthToken, getAuthorizationHeader } from '@/services/auth/token';
+import { getStoredLocale } from '@/services/i18n/i18n';
 import { formatError } from './errors';
 import type { PropsWithChildren } from 'react';
 

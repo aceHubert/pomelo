@@ -1,9 +1,9 @@
 import { Alert, AutoComplete, Button, ColorPicker, Form, Input, Select, Tooltip } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { useEffect, useMemo, useState } from 'react';
-import { useI18n } from '../../../services/i18n/i18n';
+import { useI18n } from '@/services/i18n/i18n';
 import styles from './index.module.less';
-import type { PropertyPreset, PropertyPresetGroup } from '../../../types';
+import type { PropertyPreset, PropertyPresetGroup } from '@/types';
 
 type PropertyFormValues = {
   key: string;

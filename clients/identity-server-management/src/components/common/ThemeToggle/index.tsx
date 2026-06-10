@@ -1,10 +1,10 @@
 import { Button } from 'antd';
 import { DesktopOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { useState } from 'react';
-import { applyThemePreference, getStoredThemePreference } from '../../../services/theme/theme';
-import { useI18n } from '../../../services/i18n/i18n';
+import { applyThemePreference, getStoredThemePreference } from '@/services/theme/theme';
+import { useI18n } from '@/services/i18n/i18n';
 import type { ButtonProps } from 'antd';
-import type { ThemePreference } from '../../../services/theme/theme';
+import type { ThemePreference } from '@/services/theme/theme';
 
 function getNextThemePreference(theme: ThemePreference): ThemePreference {
   if (theme === 'system') return 'dark';

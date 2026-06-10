@@ -1,3 +1,5 @@
+@import (inline) 'antd/dist/reset.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -29,8 +31,8 @@ body,
 
 body {
   margin: 0;
-  color: @var-management-text;
-  background: @var-management-page-bg;
+  color: @var-text-primary;
+  background: @var-body-background;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   letter-spacing: 0;
 }
@@ -45,7 +47,7 @@ a {
 }
 
 * {
-  scrollbar-color: @var-management-scrollbar-thumb @var-management-scrollbar-track;
+  scrollbar-color: @var-scrollbar-thumb @var-scrollbar-track;
 }
 
 *::-webkit-scrollbar {
@@ -54,13 +56,13 @@ a {
 }
 
 *::-webkit-scrollbar-track {
-  background: @var-management-scrollbar-track;
+  background: @var-scrollbar-track;
 }
 
 *::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
   border-radius: 999px;
-  background: @var-management-scrollbar-thumb;
+  background: @var-scrollbar-thumb;
   background-clip: padding-box;
 }
 
@@ -68,26 +70,26 @@ a {
 .ant-layout-header,
 .ant-layout-sider,
 .ant-menu {
-  color: @var-management-text;
-  background: @var-management-panel-bg;
+  color: @var-text-primary;
+  background: @var-component-background;
 }
 
 .ant-menu-item,
 .ant-menu-item a,
 .ant-menu-submenu-title {
-  color: @var-management-text;
+  color: @var-text-primary;
 }
 
 .ant-menu-item:not(.ant-menu-item-selected):hover,
 .ant-menu-submenu-title:hover {
-  color: @var-management-heading;
-  background: @var-management-hover-bg;
+  color: @var-text-primary;
+  background: @var-component-background-soft;
 }
 
 .ant-menu-light .ant-menu-item-selected,
 .ant-menu-light > .ant-menu .ant-menu-item-selected {
   color: @var-primary;
-  background: @var-management-sidebar-active-bg;
+  background: @var-sidebar-active-bg;
 }
 
 .ant-input,
@@ -95,15 +97,15 @@ a {
 .ant-input-number,
 .ant-select-selector,
 .ant-picker {
-  color: @var-management-text;
-  border-color: @var-management-control-border;
-  background: @var-management-control-bg;
+  color: @var-text-primary;
+  border-color: @var-border-color-base;
+  background: @var-control-bg;
 }
 
 .ant-input::placeholder,
 .ant-input-affix-wrapper input::placeholder,
 .ant-input-number-input::placeholder {
-  color: @var-management-control-placeholder;
+  color: @var-control-placeholder;
 }
 
 .ant-input:hover,
@@ -121,7 +123,7 @@ a {
 .ant-input-number-focused,
 .ant-picker-focused {
   border-color: @var-primary;
-  box-shadow: 0 0 0 3px @var-management-control-focus-ring;
+  box-shadow: 0 0 0 3px @var-control-focus-ring;
 }
 
 .ant-input-number-handler-wrap,
@@ -129,90 +131,90 @@ a {
 .ant-dropdown-menu,
 .ant-modal-content,
 .ant-modal-header {
-  color: @var-management-text;
-  border-color: @var-management-panel-border;
-  background: @var-management-elevated-bg;
+  color: @var-text-primary;
+  border-color: @var-border-color-base;
+  background: @var-component-background;
 }
 
 .ant-select-item-option,
 .ant-dropdown-menu-item {
-  color: @var-management-text;
+  color: @var-text-primary;
 }
 
 .ant-select-item-option-active:not(.ant-select-item-option-disabled),
 .ant-dropdown-menu-item:hover {
-  background: @var-management-hover-bg;
+  background: @var-component-background-soft;
 }
 
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
   color: @var-primary;
-  background: @var-management-selected-bg;
+  background: @var-selected-bg;
 }
 
 .ant-btn-default {
-  color: @var-management-text;
-  border-color: @var-management-control-border;
-  background: @var-management-panel-bg;
+  color: @var-text-primary;
+  border-color: @var-border-color-base;
+  background: @var-component-background;
 }
 
 .ant-btn-default:not(:disabled):hover {
   color: @var-primary;
   border-color: @var-primary;
-  background: @var-management-hover-bg;
+  background: @var-component-background-soft;
 }
 
 .ant-btn-dangerous {
-  color: @var-management-danger;
-  border-color: @var-management-danger-border;
-  background: @var-management-danger-bg;
+  color: @var-error;
+  border-color: @var-error-border;
+  background: @var-error-soft;
 }
 
 .ant-typography,
 .ant-card,
 .ant-table-wrapper {
-  color: @var-management-text;
+  color: @var-text-primary;
 }
 
 .ant-typography-secondary,
 .ant-typography.ant-typography-secondary {
-  color: @var-management-muted !important;
+  color: @var-text-secondary !important;
 }
 
 .ant-card {
-  border-color: @var-management-panel-border;
-  background: @var-management-panel-bg;
+  border-color: @var-border-color-base;
+  background: @var-component-background;
 }
 
 .ant-card-head,
 .ant-table-thead > tr > th,
 .ant-table-tbody > tr > td {
-  border-color: @var-management-panel-subtle;
+  border-color: @var-component-background-soft;
 }
 
 .ant-table,
 .ant-table-cell-fix-left,
 .ant-table-cell-fix-right {
-  color: @var-management-text;
-  background: @var-management-panel-bg;
+  color: @var-text-primary;
+  background: @var-component-background;
 }
 
 .ant-table-thead > tr > th {
-  color: @var-management-muted;
-  background: @var-management-hover-bg;
+  color: @var-text-secondary;
+  background: @var-component-background-soft;
 }
 
 .ant-table-tbody > tr:hover > td,
 .ant-table-placeholder > td {
-  background: @var-management-hover-bg;
+  background: @var-component-background-soft;
 }
 
 .ant-empty-description,
 .ant-form-item-label > label {
-  color: @var-management-muted;
+  color: @var-text-secondary;
 }
 
 .ant-alert-error {
-  color: @var-management-danger;
-  border-color: @var-management-danger-border;
-  background: @var-management-danger-bg;
+  color: @var-error;
+  border-color: @var-error-border;
+  background: @var-error-soft;
 }

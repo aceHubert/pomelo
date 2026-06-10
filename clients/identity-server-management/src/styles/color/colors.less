@@ -1,5 +1,6 @@
 @import 'colorPalette';
 
+@primary-color: #1668dc;
 @primary-base: @primary-color;
 @primary-1: color(~`colorPalette('@{primary-base}', 1) `);
 @primary-2: color(~`colorPalette('@{primary-base}', 2) `);
@@ -12,6 +13,11 @@
 @primary-9: color(~`colorPalette('@{primary-base}', 9) `);
 @primary-10: color(~`colorPalette('@{primary-base}', 10) `);
 
+@success-color: #1abd80;
+@warning-color: #fda900;
+@error-color: #f82024;
+@info-color: #0477f7;
+
 @gray-base: #9e9e9e;
 @gray-1: mix(#fff, @gray-base, 95%);
 @gray-2: mix(#fff, @gray-base, 90%);
@@ -23,4 +29,3 @@
 @gray-8: mix(#000, @gray-base, 38.6%);
 @gray-9: mix(#000, @gray-base, 58.2%);
 @gray-10: mix(#000, @gray-base, 79%);
-

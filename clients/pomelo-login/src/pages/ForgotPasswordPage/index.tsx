@@ -1,11 +1,10 @@
 import { App as AntdApp, Button, Form, Input } from 'antd';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { AuthShell } from '../../components/auth/AuthShell';
-import { APP_TITLE } from '../../services/app/env';
-import { useI18n } from '../../services/i18n/i18n';
-import { redirectTo, resolveReturnTarget } from '../../services/navigation/routes';
-import formStyles from '../../styles/form.module.less';
+import { AuthShell } from '@/components/auth/AuthShell';
+import { APP_TITLE } from '@/services/app/env';
+import { useI18n } from '@/services/i18n/i18n';
+import { redirectTo, resolveReturnTarget } from '@/services/navigation/routes';
 
 type ForgotPasswordFormValues = {
   username: string;
@@ -28,7 +27,7 @@ export function ForgotPasswordPage() {
   return (
     <AuthShell title={t('forgot.title')} subtitle={t('forgot.subtitle')}>
       <Form<ForgotPasswordFormValues>
-        className={formStyles.form}
+        className="auth-form"
         layout="vertical"
         requiredMark={false}
         onFinish={handleSubmit}
@@ -40,7 +39,7 @@ export function ForgotPasswordPage() {
         >
           <Input autoComplete="username" placeholder={t('forgot.usernamePlaceholder')} size="large" />
         </Form.Item>
-        <div className={formStyles.buttonStack}>
+        <div className="auth-button-stack">
           <Button block type="primary" htmlType="submit" shape="round" size="large">
             {t('forgot.submit')}
           </Button>
@@ -50,7 +49,7 @@ export function ForgotPasswordPage() {
             htmlType="button"
             shape="round"
             size="large"
-            className={formStyles.secondaryButton}
+            className="auth-secondary-button"
             onClick={() => redirectTo(resolveReturnTarget(location.search, 'forgot-cancel'))}
           >
             {t('common.cancel')}

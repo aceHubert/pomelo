@@ -3,12 +3,12 @@ import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } fr
 import { useQuery } from '@apollo/client';
 import { useCallback, useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LanguageToggle } from '../../common/LanguageToggle';
-import { ThemeToggle } from '../../common/ThemeToggle';
-import { clearManagementToken } from '../../../services/auth/token';
-import { useI18n } from '../../../services/i18n/i18n';
-import { MainRoutes } from '../../../router/MainRoutes';
-import { CURRENT_USER } from '../../../apis/operations';
+import { LanguageToggle } from '@/components/common/LanguageToggle';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { clearManagementToken } from '@/services/auth/token';
+import { useI18n } from '@/services/i18n/i18n';
+import { MainRoutes } from '@/router/MainRoutes';
+import { CURRENT_USER } from '@/apis/operations';
 import styles from './index.module.less';
 
 type ManagementCurrentUser = {

@@ -1,287 +1,348 @@
-:root,
-:root[data-theme='light'] {
+@import './color/colors';
+
+@primary-color: #408a71;
+
+@light-body-background: #f7f7f2;
+@light-component-background: #fff;
+@light-component-background-soft: #efefea;
+@light-text-primary: @gray-10;
+@light-text-secondary: @gray-8;
+@light-text-disabled: @gray-5;
+@light-text-inverse: @gray-1;
+@light-border-color-base: #d8d8d0;
+@light-border-color-split: #62625c;
+@light-shadow-1-down: 3px 5px 10px fade(#0f172a, 16%);
+@light-shadow-1-up: 3px -5px 10px fade(#0f172a, 12%);
+@light-shadow-2: 0 20px 40px fade(#000, 30%);
+@light-success-soft: fade(@success-color, 10%);
+@light-warning-soft: fade(@warning-color, 10%);
+@light-error-soft: fade(@error-color, 10%);
+@light-info-soft: fade(@info-color, 10%);
+
+@dark-body-background: #0d0d0d;
+@dark-component-background: #171717;
+@dark-component-background-soft: #222220;
+@dark-primary-1: mix(color(~`colorPalette('@{primary-color}', 8) `), @dark-component-background, 15%);
+@dark-primary-2: mix(color(~`colorPalette('@{primary-color}', 7) `), @dark-component-background, 25%);
+@dark-primary-3: mix(@primary-color, @dark-component-background, 30%);
+@dark-primary-4: mix(@primary-color, @dark-component-background, 45%);
+@dark-primary-5: mix(@primary-color, @dark-component-background, 65%);
+@dark-primary-6: @primary-color;
+@dark-primary-7: mix(color(~`colorPalette('@{primary-color}', 5) `), @dark-component-background, 90%);
+@dark-primary-8: mix(color(~`colorPalette('@{primary-color}', 4) `), @dark-component-background, 95%);
+@dark-primary-9: mix(color(~`colorPalette('@{primary-color}', 3) `), @dark-component-background, 97%);
+@dark-primary-10: mix(color(~`colorPalette('@{primary-color}', 2) `), @dark-component-background, 98%);
+@dark-text-primary: @gray-1;
+@dark-text-secondary: @gray-3;
+@dark-text-disabled: @gray-5;
+@dark-text-inverse: @gray-1;
+@dark-border-color-base: #32322f;
+@dark-border-color-split: #b8b8af;
+@dark-shadow-1-down: 3px 5px 10px fade(#fff, 16%);
+@dark-shadow-1-up: 3px -5px 10px fade(#fff, 12%);
+@dark-shadow-2: 0 -5px 30px fade(#fff, 30%);
+@dark-success-soft: fade(@success-color, 18%);
+@dark-warning-soft: fade(@warning-color, 18%);
+@dark-error-soft: fade(@error-color, 18%);
+@dark-info-soft: fade(@info-color, 18%);
+
+@light-control-bg: fade(#fff, 50%);
+@light-control-placeholder: @light-text-secondary;
+@light-control-focus-ring: fade(@primary-color, 18%);
+@light-danger-border: fade(@error-color, 36%);
+@light-scrollbar-thumb: fade(@light-text-primary, 18%);
+@light-scrollbar-track: fade(@light-text-primary, 6%);
+@light-login-bg: radial-gradient(circle at 18% 16%, fade(@primary-color, 24%), transparent 32%),
+  radial-gradient(circle at 84% 28%, fade(@info-color, 12%), transparent 30%),
+  radial-gradient(circle at 66% 82%, fade(@warning-color, 12%), transparent 34%),
+  linear-gradient(
+    132deg,
+    @light-body-background 0%,
+    @light-component-background-soft 48%,
+    mix(@primary-color, @light-body-background, 4%) 100%
+  );
+@light-login-aura: linear-gradient(128deg, transparent 0 18%, fade(@primary-color, 20%) 31%, transparent 47%),
+  linear-gradient(212deg, transparent 0 28%, fade(@info-color, 12%) 44%, transparent 62%),
+  linear-gradient(320deg, fade(@warning-color, 12%) 0 22%, transparent 42%),
+  linear-gradient(36deg, transparent 0 52%, fade(@error-color, 8%) 70%, transparent 86%);
+@light-login-grid: fade(@light-text-primary, 6%);
+@light-login-field: conic-gradient(
+    from 180deg at 52% 42%,
+    fade(mix(@primary-color, @light-component-background-soft, 22%), 72%),
+    fade(@light-component-background-soft, 78%),
+    fade(mix(@primary-color, @light-component-background-soft, 18%), 68%),
+    fade(@warning-color, 12%),
+    fade(mix(@primary-color, @light-component-background-soft, 22%), 72%)
+  ),
+  linear-gradient(180deg, fade(#fff, 14%), fade(#fff, 42%));
+@light-login-field-opacity: 0.56;
+@light-login-field-blend: soft-light;
+@light-glass-bg: fade(#fff, 10%);
+@light-glass-border: fade(#fff, 58%);
+@light-glass-control-bg: fade(#fff, 50%);
+@light-glass-control-shadow: inset 0 1px 0 fade(#fff, 62%);
+@light-glass-control-focus-shadow: 0 0 0 3px @light-control-focus-ring, inset 0 1px 0 fade(#fff, 70%);
+@light-brand-mark-bg: linear-gradient(135deg, fade(#fff, 72%), fade(#fff, 28%));
+@light-brand-mark-shadow: inset 0 1px 0 fade(#fff, 70%);
+@light-glass-shadow: 0 22px 55px fade(mix(@primary-color, #2b385c, 16%), 18%), inset 0 1px 0 fade(#fff, 72%),
+  inset 0 -1px 0 fade(#435177, 12%);
+@light-glass-surface: linear-gradient(135deg, fade(#fff, 44%), fade(#fff, 12%) 45%, fade(#fff, 28%)),
+  linear-gradient(225deg, fade(#fff, 28%), fade(@primary-color, 12%) 42%, fade(@warning-color, 8%));
+@light-glass-edge: linear-gradient(
+  135deg,
+  fade(#fff, 92%),
+  fade(#fff, 16%) 32%,
+  fade(@primary-color, 34%) 58%,
+  fade(@warning-color, 16%) 100%
+);
+
+@dark-control-bg: fade(@dark-component-background, 58%);
+@dark-control-placeholder: @dark-text-disabled;
+@dark-control-focus-ring: fade(@primary-color, 28%);
+@dark-danger-border: fade(@error-color, 42%);
+@dark-scrollbar-thumb: fade(@dark-text-primary, 18%);
+@dark-scrollbar-track: fade(@dark-text-primary, 8%);
+@dark-login-bg: radial-gradient(circle at 24% 18%, fade(@primary-color, 22%), transparent 32%),
+  radial-gradient(circle at 72% 64%, fade(@info-color, 14%), transparent 34%),
+  radial-gradient(circle at 82% 18%, fade(@warning-color, 10%), transparent 26%),
+  linear-gradient(
+    130deg,
+    @dark-body-background 0%,
+    @dark-component-background 48%,
+    @dark-component-background-soft 100%
+  );
+@dark-login-aura: linear-gradient(128deg, transparent 0 18%, fade(@primary-color, 20%) 31%, transparent 47%),
+  linear-gradient(212deg, transparent 0 28%, fade(@info-color, 12%) 44%, transparent 62%),
+  linear-gradient(320deg, fade(@warning-color, 10%) 0 22%, transparent 42%),
+  linear-gradient(36deg, transparent 0 52%, fade(@error-color, 8%) 70%, transparent 86%);
+@dark-login-grid: fade(@dark-text-primary, 8%);
+@dark-login-field: conic-gradient(
+    from 180deg at 52% 42%,
+    fade(mix(@primary-color, @dark-component-background, 8%), 90%),
+    fade(mix(@primary-color, @dark-component-background, 16%), 84%),
+    fade(mix(@primary-color, @dark-component-background, 32%), 68%),
+    fade(@warning-color, 8%),
+    fade(mix(@primary-color, @dark-component-background, 8%), 90%)
+  ),
+  linear-gradient(180deg, fade(#fff, 6%), fade(#0d0d0d, 36%));
+@dark-login-field-opacity: 0.64;
+@dark-login-field-blend: screen;
+@dark-glass-bg: fade(@dark-body-background, 32%);
+@dark-glass-border: fade(#fff, 22%);
+@dark-glass-control-bg: fade(@dark-component-background, 58%);
+@dark-glass-control-shadow: inset 0 1px 0 fade(#fff, 12%);
+@dark-glass-control-focus-shadow: 0 0 0 3px @dark-control-focus-ring, inset 0 1px 0 fade(#fff, 18%);
+@dark-brand-mark-bg: linear-gradient(135deg, fade(@primary-color, 24%), fade(@dark-component-background, 46%));
+@dark-brand-mark-shadow: inset 0 1px 0 fade(#fff, 22%);
+@dark-glass-shadow: 0 22px 60px fade(#000, 34%), inset 0 1px 0 fade(#fff, 26%), inset 0 -1px 0 fade(#fff, 10%);
+@dark-glass-surface: linear-gradient(135deg, fade(#fff, 18%), fade(#fff, 6%) 45%, fade(#fff, 12%)),
+  linear-gradient(225deg, fade(@primary-color, 18%), fade(@warning-color, 8%) 42%, fade(@info-color, 8%));
+@dark-glass-edge: linear-gradient(
+  135deg,
+  fade(#fff, 42%),
+  fade(#fff, 8%) 32%,
+  fade(@primary-color, 32%) 58%,
+  fade(@warning-color, 14%) 100%
+);
+
+.theme-common-vars() {
+  --color-success: @success-color;
+  --color-warning: @warning-color;
+  --color-error: @error-color;
+  --color-danger: @error-color;
+  --color-info: @info-color;
+}
+
+.theme-vars(@mode: light) when (@mode = light) {
+  .theme-common-vars();
+
   color-scheme: light;
-  --theme-primary: #408a71;
-  --theme-primary-1: #f0f7f4;
-  --theme-primary-2: #dceee6;
-  --theme-primary-3: #c3e1d4;
-  --theme-primary-4: #9ecdb8;
-  --theme-primary-5: #78b99c;
-  --theme-primary-6: #408a71;
-  --theme-primary-7: #2f725b;
-  --theme-primary-8: #235c49;
-  --theme-primary-9: #194537;
-  --theme-primary-10: #112f27;
-
-  --gray-1: #fafafa;
-  --gray-2: #f5f5f5;
-  --gray-3: #eeeeee;
-  --gray-4: #d9d9d9;
-  --gray-5: #bdbdbd;
-  --gray-6: #8c8c8c;
-  --gray-7: #616161;
-  --gray-8: #525252;
-  --gray-9: #303030;
-  --gray-10: #212121;
-
-  --color-success: #1abd80;
-  --color-warning: #fda900;
-  --color-error: #f82024;
-  --color-danger: #f82024;
-  --color-info: #0477f7;
-  --color-success-soft: rgba(26, 189, 128, 0.12);
-  --color-warning-soft: rgba(253, 169, 0, 0.12);
-  --color-error-soft: rgba(248, 32, 36, 0.1);
-  --color-info-soft: rgba(4, 119, 247, 0.12);
-
-  --shadow-1-down: 3px 5px 10px rgba(15, 23, 42, 0.16);
-  --shadow-1-up: 3px -5px 10px rgba(15, 23, 42, 0.12);
-  --shadow-2: 0 20px 40px rgba(0, 0, 0, 0.3);
-
-  --body-background: #f7f7f2;
-  --component-background: #ffffff;
-  --component-background-soft: #efefea;
-  --color-border-base: #d8d8d0;
-  --color-border-split: #62625c;
-  --text-primary: #212121;
-  --text-secondary: #616161;
-  --text-disabled: #bdbdbd;
-  --text-inverse: #fafafa;
-
-  --management-page-bg: var(--body-background);
-  --management-panel-bg: var(--component-background);
-  --management-panel-border: var(--color-border-base);
-  --management-panel-subtle: var(--component-background-soft);
-  --management-text: var(--text-primary);
-  --management-heading: var(--text-primary);
-  --management-muted: var(--text-secondary);
-  --management-control-border: var(--color-border-base);
-  --management-control-bg: rgba(255, 255, 255, 0.5);
-  --management-control-placeholder: var(--text-secondary);
-  --management-control-focus-ring: rgba(64, 138, 113, 0.18);
-  --management-hover-bg: var(--component-background-soft);
-  --management-elevated-bg: var(--component-background);
-  --management-danger: var(--color-error);
-  --management-danger-bg: rgba(248, 32, 36, 0.1);
-  --management-danger-border: rgba(248, 32, 36, 0.36);
-  --management-selected-bg: rgba(64, 138, 113, 0.12);
-  --management-sidebar-active-bg: rgba(64, 138, 113, 0.14);
-  --management-scrollbar-thumb: rgba(33, 33, 33, 0.18);
-  --management-scrollbar-track: rgba(33, 33, 33, 0.06);
-
-  --auth-login-bg: radial-gradient(circle at 18% 16%, rgba(64, 138, 113, 0.24), transparent 32%),
-    radial-gradient(circle at 84% 28%, rgba(4, 119, 247, 0.12), transparent 30%),
-    radial-gradient(circle at 66% 82%, rgba(253, 169, 0, 0.12), transparent 34%),
-    linear-gradient(132deg, #f7f7f2 0%, #efefea 48%, #f2f6f2 100%);
-  --auth-login-aura: linear-gradient(128deg, transparent 0 18%, rgba(64, 138, 113, 0.2) 31%, transparent 47%),
-    linear-gradient(212deg, transparent 0 28%, rgba(4, 119, 247, 0.12) 44%, transparent 62%),
-    linear-gradient(320deg, rgba(253, 169, 0, 0.12) 0 22%, transparent 42%),
-    linear-gradient(36deg, transparent 0 52%, rgba(248, 32, 36, 0.08) 70%, transparent 86%);
-  --auth-login-grid: rgba(33, 33, 33, 0.06);
-  --auth-login-field: conic-gradient(
-      from 180deg at 52% 42%,
-      rgba(189, 201, 195, 0.72),
-      rgba(239, 239, 234, 0.78),
-      rgba(177, 189, 183, 0.68),
-      rgba(253, 169, 0, 0.12),
-      rgba(189, 201, 195, 0.72)
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.42));
-  --auth-login-field-opacity: 0.56;
-  --auth-login-field-blend: soft-light;
-  --auth-glass-bg: rgba(255, 255, 255, 0.1);
-  --auth-glass-border: rgba(255, 255, 255, 0.58);
-  --auth-glass-control-bg: rgba(255, 255, 255, 0.5);
-  --auth-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
-  --auth-glass-control-focus-shadow: 0 0 0 3px var(--management-control-focus-ring),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --auth-brand-mark-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.28));
-  --auth-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --auth-glass-shadow: 0 22px 55px rgba(43, 56, 92, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.72),
-    inset 0 -1px 0 rgba(67, 81, 119, 0.12);
-  --auth-glass-surface: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.44),
-      rgba(255, 255, 255, 0.12) 45%,
-      rgba(255, 255, 255, 0.28)
-    ),
-    linear-gradient(225deg, rgba(255, 255, 255, 0.28), rgba(64, 138, 113, 0.12) 42%, rgba(253, 169, 0, 0.08));
-  --auth-glass-edge: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.92),
-    rgba(255, 255, 255, 0.16) 32%,
-    rgba(64, 138, 113, 0.34) 58%,
-    rgba(253, 169, 0, 0.16) 100%
-  );
-  --auth-button-primary-start: #5ea585;
-  --auth-button-primary-end: #408a71;
+  --theme-primary: @primary-color;
+  --theme-primary-1: @primary-1;
+  --theme-primary-2: @primary-2;
+  --theme-primary-3: @primary-3;
+  --theme-primary-4: @primary-4;
+  --theme-primary-5: @primary-5;
+  --theme-primary-6: @primary-6;
+  --theme-primary-7: @primary-7;
+  --theme-primary-8: @primary-8;
+  --theme-primary-9: @primary-9;
+  --theme-primary-10: @primary-10;
+  --gray-1: @gray-1;
+  --gray-2: @gray-2;
+  --gray-3: @gray-3;
+  --gray-4: @gray-4;
+  --gray-5: @gray-5;
+  --gray-6: @gray-6;
+  --gray-7: @gray-7;
+  --gray-8: @gray-8;
+  --gray-9: @gray-9;
+  --gray-10: @gray-10;
+  --body-background: @light-body-background;
+  --component-background: @light-component-background;
+  --component-background-soft: @light-component-background-soft;
+  --border-color-base: @light-border-color-base;
+  --border-color-split: @light-border-color-split;
+  --text-primary: @light-text-primary;
+  --text-secondary: @light-text-secondary;
+  --text-disabled: @light-text-disabled;
+  --text-inverse: @light-text-inverse;
+  --shadow-1-down: @light-shadow-1-down;
+  --shadow-1-up: @light-shadow-1-up;
+  --shadow-2: @light-shadow-2;
+  --color-success-soft: @light-success-soft;
+  --color-warning-soft: @light-warning-soft;
+  --color-error-soft: @light-error-soft;
+  --color-info-soft: @light-info-soft;
+  --auth-control-bg: @light-control-bg;
+  --auth-control-placeholder: @light-control-placeholder;
+  --auth-control-focus-ring: @light-control-focus-ring;
+  --auth-danger-border: @light-danger-border;
+  --auth-scrollbar-thumb: @light-scrollbar-thumb;
+  --auth-scrollbar-track: @light-scrollbar-track;
+  --auth-login-bg: @light-login-bg;
+  --auth-login-aura: @light-login-aura;
+  --auth-login-grid: @light-login-grid;
+  --auth-login-field: @light-login-field;
+  --auth-login-field-opacity: @light-login-field-opacity;
+  --auth-login-field-blend: @light-login-field-blend;
+  --auth-glass-bg: @light-glass-bg;
+  --auth-glass-border: @light-glass-border;
+  --auth-glass-control-bg: @light-glass-control-bg;
+  --auth-glass-control-shadow: @light-glass-control-shadow;
+  --auth-glass-control-focus-shadow: @light-glass-control-focus-shadow;
+  --auth-brand-mark-bg: @light-brand-mark-bg;
+  --auth-brand-mark-shadow: @light-brand-mark-shadow;
+  --auth-glass-shadow: @light-glass-shadow;
+  --auth-glass-surface: @light-glass-surface;
+  --auth-glass-edge: @light-glass-edge;
+  --auth-button-primary-start: @primary-5;
+  --auth-button-primary-end: @primary-color;
+  --auth-button-primary-shadow: 0 18px 42px fade(mix(@primary-color, #2b385c, 16%), 18%);
+  --auth-button-primary-shadow-hover: 0 22px 48px fade(mix(@primary-color, #2b385c, 16%), 24%);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-    --body-background: #0d0d0d;
-    --component-background: #171717;
-    --component-background-soft: #222220;
-    --color-border-base: #32322f;
-    --color-border-split: #b8b8af;
-    --text-primary: #fafafa;
-    --text-secondary: #eeeeee;
-    --text-disabled: #bdbdbd;
-    --text-inverse: #fafafa;
+.theme-vars(@mode) when (@mode = dark) {
+  .theme-common-vars();
 
-    --management-page-bg: var(--body-background);
-    --management-panel-bg: var(--component-background);
-    --management-panel-border: var(--color-border-base);
-    --management-panel-subtle: var(--component-background-soft);
-    --management-text: var(--text-primary);
-    --management-heading: var(--text-primary);
-    --management-muted: var(--text-secondary);
-    --management-control-border: var(--color-border-base);
-    --management-control-bg: rgba(23, 23, 23, 0.58);
-    --management-control-placeholder: var(--text-disabled);
-    --management-control-focus-ring: rgba(64, 138, 113, 0.28);
-    --management-hover-bg: var(--component-background-soft);
-    --management-elevated-bg: var(--component-background);
-    --management-danger: var(--color-error);
-    --management-danger-bg: rgba(248, 32, 36, 0.18);
-    --management-danger-border: rgba(248, 32, 36, 0.42);
-    --management-selected-bg: rgba(64, 138, 113, 0.28);
-    --management-sidebar-active-bg: rgba(64, 138, 113, 0.24);
-    --management-scrollbar-thumb: rgba(250, 250, 250, 0.18);
-    --management-scrollbar-track: rgba(250, 250, 250, 0.08);
-
-    --auth-login-bg: radial-gradient(circle at 24% 18%, rgba(64, 138, 113, 0.22), transparent 32%),
-      radial-gradient(circle at 72% 64%, rgba(4, 119, 247, 0.14), transparent 34%),
-      radial-gradient(circle at 82% 18%, rgba(253, 169, 0, 0.1), transparent 26%),
-      linear-gradient(130deg, #0d0d0d 0%, #171717 48%, #222220 100%);
-    --auth-login-aura: linear-gradient(
-        128deg,
-        transparent 0 18%,
-        rgba(64, 138, 113, 0.2) 31%,
-        transparent 47%
-      ),
-      linear-gradient(212deg, transparent 0 28%, rgba(4, 119, 247, 0.12) 44%, transparent 62%),
-      linear-gradient(320deg, rgba(253, 169, 0, 0.1) 0 22%, transparent 42%),
-      linear-gradient(36deg, transparent 0 52%, rgba(248, 32, 36, 0.08) 70%, transparent 86%);
-    --auth-login-grid: rgba(250, 250, 250, 0.08);
-    --auth-login-field: conic-gradient(
-        from 180deg at 52% 42%,
-        rgba(23, 29, 27, 0.9),
-        rgba(28, 42, 38, 0.84),
-        rgba(41, 75, 64, 0.68),
-        rgba(253, 169, 0, 0.08),
-        rgba(23, 29, 27, 0.9)
-      ),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(13, 13, 13, 0.36));
-    --auth-login-field-opacity: 0.64;
-    --auth-login-field-blend: screen;
-    --auth-glass-bg: rgba(13, 13, 13, 0.32);
-    --auth-glass-border: rgba(255, 255, 255, 0.22);
-    --auth-glass-control-bg: rgba(23, 23, 23, 0.58);
-    --auth-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    --auth-glass-control-focus-shadow: 0 0 0 3px var(--management-control-focus-ring),
-      inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    --auth-brand-mark-bg: linear-gradient(135deg, rgba(64, 138, 113, 0.24), rgba(23, 23, 23, 0.46));
-    --auth-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
-    --auth-glass-shadow: 0 22px 60px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.26),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-    --auth-glass-surface: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.18),
-        rgba(255, 255, 255, 0.06) 45%,
-        rgba(255, 255, 255, 0.12)
-      ),
-      linear-gradient(225deg, rgba(64, 138, 113, 0.18), rgba(253, 169, 0, 0.08) 42%, rgba(4, 119, 247, 0.08));
-    --auth-glass-edge: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.42),
-      rgba(255, 255, 255, 0.08) 32%,
-      rgba(64, 138, 113, 0.32) 58%,
-      rgba(253, 169, 0, 0.14) 100%
-    );
-    --auth-button-primary-start: #5b9d80;
-    --auth-button-primary-end: #326a56;
-  }
-}
-
-:root[data-theme='dark'] {
   color-scheme: dark;
-  --body-background: #0d0d0d;
-  --component-background: #171717;
-  --component-background-soft: #222220;
-  --color-border-base: #32322f;
-  --color-border-split: #b8b8af;
-  --text-primary: #fafafa;
-  --text-secondary: #eeeeee;
-  --text-disabled: #bdbdbd;
-  --text-inverse: #fafafa;
-
-  --management-page-bg: var(--body-background);
-  --management-panel-bg: var(--component-background);
-  --management-panel-border: var(--color-border-base);
-  --management-panel-subtle: var(--component-background-soft);
-  --management-text: var(--text-primary);
-  --management-heading: var(--text-primary);
-  --management-muted: var(--text-secondary);
-  --management-control-border: var(--color-border-base);
-  --management-control-bg: rgba(23, 23, 23, 0.58);
-  --management-control-placeholder: var(--text-disabled);
-  --management-control-focus-ring: rgba(64, 138, 113, 0.28);
-  --management-hover-bg: var(--component-background-soft);
-  --management-elevated-bg: var(--component-background);
-  --management-danger: var(--color-error);
-  --management-danger-bg: rgba(248, 32, 36, 0.18);
-  --management-danger-border: rgba(248, 32, 36, 0.42);
-  --management-selected-bg: rgba(64, 138, 113, 0.28);
-  --management-sidebar-active-bg: rgba(64, 138, 113, 0.24);
-  --management-scrollbar-thumb: rgba(250, 250, 250, 0.18);
-  --management-scrollbar-track: rgba(250, 250, 250, 0.08);
-
-  --auth-login-bg: radial-gradient(circle at 24% 18%, rgba(64, 138, 113, 0.22), transparent 32%),
-    radial-gradient(circle at 72% 64%, rgba(4, 119, 247, 0.14), transparent 34%),
-    radial-gradient(circle at 82% 18%, rgba(253, 169, 0, 0.1), transparent 26%),
-    linear-gradient(130deg, #0d0d0d 0%, #171717 48%, #222220 100%);
-  --auth-login-aura: linear-gradient(128deg, transparent 0 18%, rgba(64, 138, 113, 0.2) 31%, transparent 47%),
-    linear-gradient(212deg, transparent 0 28%, rgba(4, 119, 247, 0.12) 44%, transparent 62%),
-    linear-gradient(320deg, rgba(253, 169, 0, 0.1) 0 22%, transparent 42%),
-    linear-gradient(36deg, transparent 0 52%, rgba(248, 32, 36, 0.08) 70%, transparent 86%);
-  --auth-login-grid: rgba(250, 250, 250, 0.08);
-  --auth-login-field: conic-gradient(
-      from 180deg at 52% 42%,
-      rgba(23, 29, 27, 0.9),
-      rgba(28, 42, 38, 0.84),
-      rgba(41, 75, 64, 0.68),
-      rgba(253, 169, 0, 0.08),
-      rgba(23, 29, 27, 0.9)
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(13, 13, 13, 0.36));
-  --auth-login-field-opacity: 0.64;
-  --auth-login-field-blend: screen;
-  --auth-glass-bg: rgba(13, 13, 13, 0.32);
-  --auth-glass-border: rgba(255, 255, 255, 0.22);
-  --auth-glass-control-bg: rgba(23, 23, 23, 0.58);
-  --auth-glass-control-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  --auth-glass-control-focus-shadow: 0 0 0 3px var(--management-control-focus-ring),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  --auth-brand-mark-bg: linear-gradient(135deg, rgba(64, 138, 113, 0.24), rgba(23, 23, 23, 0.46));
-  --auth-brand-mark-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  --auth-glass-shadow: 0 22px 60px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
-  --auth-glass-surface: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.18),
-      rgba(255, 255, 255, 0.06) 45%,
-      rgba(255, 255, 255, 0.12)
-    ),
-    linear-gradient(225deg, rgba(64, 138, 113, 0.18), rgba(253, 169, 0, 0.08) 42%, rgba(4, 119, 247, 0.08));
-  --auth-glass-edge: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.42),
-    rgba(255, 255, 255, 0.08) 32%,
-    rgba(64, 138, 113, 0.32) 58%,
-    rgba(253, 169, 0, 0.14) 100%
-  );
-  --auth-button-primary-start: #5b9d80;
-  --auth-button-primary-end: #326a56;
+  --theme-primary: @primary-color;
+  --theme-primary-1: @dark-primary-1;
+  --theme-primary-2: @dark-primary-2;
+  --theme-primary-3: @dark-primary-3;
+  --theme-primary-4: @dark-primary-4;
+  --theme-primary-5: @dark-primary-5;
+  --theme-primary-6: @dark-primary-6;
+  --theme-primary-7: @dark-primary-7;
+  --theme-primary-8: @dark-primary-8;
+  --theme-primary-9: @dark-primary-9;
+  --theme-primary-10: @dark-primary-10;
+  --gray-1: @gray-1;
+  --gray-2: @gray-2;
+  --gray-3: @gray-3;
+  --gray-4: @gray-4;
+  --gray-5: @gray-5;
+  --gray-6: @gray-6;
+  --gray-7: @gray-7;
+  --gray-8: @gray-8;
+  --gray-9: @gray-9;
+  --gray-10: @gray-10;
+  --body-background: @dark-body-background;
+  --component-background: @dark-component-background;
+  --component-background-soft: @dark-component-background-soft;
+  --border-color-base: @dark-border-color-base;
+  --border-color-split: @dark-border-color-split;
+  --text-primary: @dark-text-primary;
+  --text-secondary: @dark-text-secondary;
+  --text-disabled: @dark-text-disabled;
+  --text-inverse: @dark-text-inverse;
+  --shadow-1-down: @dark-shadow-1-down;
+  --shadow-1-up: @dark-shadow-1-up;
+  --shadow-2: @dark-shadow-2;
+  --color-success-soft: @dark-success-soft;
+  --color-warning-soft: @dark-warning-soft;
+  --color-error-soft: @dark-error-soft;
+  --color-info-soft: @dark-info-soft;
+  --auth-control-bg: @dark-control-bg;
+  --auth-control-placeholder: @dark-control-placeholder;
+  --auth-control-focus-ring: @dark-control-focus-ring;
+  --auth-danger-border: @dark-danger-border;
+  --auth-scrollbar-thumb: @dark-scrollbar-thumb;
+  --auth-scrollbar-track: @dark-scrollbar-track;
+  --auth-login-bg: @dark-login-bg;
+  --auth-login-aura: @dark-login-aura;
+  --auth-login-grid: @dark-login-grid;
+  --auth-login-field: @dark-login-field;
+  --auth-login-field-opacity: @dark-login-field-opacity;
+  --auth-login-field-blend: @dark-login-field-blend;
+  --auth-glass-bg: @dark-glass-bg;
+  --auth-glass-border: @dark-glass-border;
+  --auth-glass-control-bg: @dark-glass-control-bg;
+  --auth-glass-control-shadow: @dark-glass-control-shadow;
+  --auth-glass-control-focus-shadow: @dark-glass-control-focus-shadow;
+  --auth-brand-mark-bg: @dark-brand-mark-bg;
+  --auth-brand-mark-shadow: @dark-brand-mark-shadow;
+  --auth-glass-shadow: @dark-glass-shadow;
+  --auth-glass-surface: @dark-glass-surface;
+  --auth-glass-edge: @dark-glass-edge;
+  --auth-button-primary-start: @dark-primary-5;
+  --auth-button-primary-end: @dark-primary-6;
+  --auth-button-primary-shadow: 0 18px 42px fade(#000, 28%);
+  --auth-button-primary-shadow-hover: 0 22px 48px fade(#000, 34%);
 }
+
+@var-primary: var(--theme-primary, @primary-color);
+@var-primary-1: var(--theme-primary-1, @primary-1);
+@var-primary-2: var(--theme-primary-2, @primary-2);
+@var-primary-3: var(--theme-primary-3, @primary-3);
+@var-primary-4: var(--theme-primary-4, @primary-4);
+@var-primary-5: var(--theme-primary-5, @primary-5);
+@var-primary-6: var(--theme-primary-6, @primary-6);
+@var-primary-7: var(--theme-primary-7, @primary-7);
+@var-primary-8: var(--theme-primary-8, @primary-8);
+@var-primary-9: var(--theme-primary-9, @primary-9);
+@var-primary-10: var(--theme-primary-10, @primary-10);
+@var-success: var(--color-success, @success-color);
+@var-warning: var(--color-warning, @warning-color);
+@var-error: var(--color-error, @error-color);
+@var-info: var(--color-info, @info-color);
+@var-error-soft: var(--color-error-soft, @light-error-soft);
+@var-body-background: var(--body-background, @light-body-background);
+@var-component-background: var(--component-background, @light-component-background);
+@var-component-background-soft: var(--component-background-soft, @light-component-background-soft);
+@var-border-color-base: var(--border-color-base, @light-border-color-base);
+@var-border-color-split: var(--border-color-split, @light-border-color-split);
+@var-text-primary: var(--text-primary, @light-text-primary);
+@var-text-secondary: var(--text-secondary, @light-text-secondary);
+@var-text-disabled: var(--text-disabled, @light-text-disabled);
+@var-text-inverse: var(--text-inverse, @light-text-inverse);
+@var-shadow-1-down: var(--shadow-1-down, @light-shadow-1-down);
+@var-shadow-1-up: var(--shadow-1-up, @light-shadow-1-up);
+@var-shadow-2: var(--shadow-2, @light-shadow-2);
+@var-control-placeholder: var(--auth-control-placeholder, @light-control-placeholder);
+@var-danger-border: var(--auth-danger-border, @light-danger-border);
+@var-scrollbar-thumb: var(--auth-scrollbar-thumb, @light-scrollbar-thumb);
+@var-scrollbar-track: var(--auth-scrollbar-track, @light-scrollbar-track);
+@var-login-bg: var(--auth-login-bg, @light-login-bg);
+@var-login-aura: var(--auth-login-aura, @light-login-aura);
+@var-login-grid: var(--auth-login-grid, @light-login-grid);
+@var-login-field: var(--auth-login-field, @light-login-field);
+@var-login-field-opacity: var(--auth-login-field-opacity, @light-login-field-opacity);
+@var-login-field-blend: var(--auth-login-field-blend, @light-login-field-blend);
+@var-glass-bg: var(--auth-glass-bg, @light-glass-bg);
+@var-glass-border: var(--auth-glass-border, @light-glass-border);
+@var-glass-control-bg: var(--auth-glass-control-bg, @light-glass-control-bg);
+@var-glass-control-shadow: var(--auth-glass-control-shadow, @light-glass-control-shadow);
+@var-glass-control-focus-shadow: var(--auth-glass-control-focus-shadow, @light-glass-control-focus-shadow);
+@var-brand-mark-bg: var(--auth-brand-mark-bg, @light-brand-mark-bg);
+@var-brand-mark-shadow: var(--auth-brand-mark-shadow, @light-brand-mark-shadow);
+@var-glass-shadow: var(--auth-glass-shadow, @light-glass-shadow);
+@var-glass-surface: var(--auth-glass-surface, @light-glass-surface);
+@var-glass-edge: var(--auth-glass-edge, @light-glass-edge);
+@var-button-primary-start: var(--auth-button-primary-start, @primary-5);
+@var-button-primary-end: var(--auth-button-primary-end, @primary-color);
+@var-button-primary-shadow: var(--auth-button-primary-shadow, 0 18px 42px fade(mix(@primary-color, #2b385c, 16%), 18%));
+@var-button-primary-shadow-hover: var(
+  --auth-button-primary-shadow-hover,
+  0 22px 48px fade(mix(@primary-color, #2b385c, 16%), 24%)
+);

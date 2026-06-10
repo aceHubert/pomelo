@@ -7,9 +7,6 @@
     "jsx": "react-jsx",
     "moduleResolution": "Node",
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
     "allowJs": false,
     "strict": true,
     "noUnusedLocals": false,

@@ -2,22 +2,21 @@ import { Alert, App as AntdApp, Button, Checkbox, Form, Input } from 'antd';
 import { useMutation } from '@apollo/client';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { SIGN_IN } from '../../apis/operations';
-import { AuthShell } from '../../components/auth/AuthShell';
-import { APP_TITLE } from '../../services/app/env';
-import { sha256Hex } from '../../services/auth/hash';
-import { clearStoredAuthToken, setStoredAuthToken } from '../../services/auth/token';
-import { formatError } from '../../services/graphql/errors';
-import { useI18n } from '../../services/i18n/i18n';
+import { SIGN_IN } from '@/apis/operations';
+import { AuthShell } from '@/components/auth/AuthShell';
+import { APP_TITLE } from '@/services/app/env';
+import { sha256Hex } from '@/services/auth/hash';
+import { clearStoredAuthToken, setStoredAuthToken } from '@/services/auth/token';
+import { formatError } from '@/services/graphql/errors';
+import { useI18n } from '@/services/i18n/i18n';
 import {
   FORGOT_PASSWORD_ROUTE,
   getCurrentFullPath,
   redirectTo,
   resolveReturnTarget,
   toSearch,
-} from '../../services/navigation/routes';
-import formStyles from '../../styles/form.module.less';
-import type { SignInMutationData, SignInMutationVariables } from '../../apis/operations';
+} from '@/services/navigation/routes';
+import type { SignInMutationData, SignInMutationVariables } from '@/apis/operations';
 
 type LoginFormValues = {
   username: string;
@@ -77,7 +76,7 @@ export function LoginPage() {
 
   return (
     <AuthShell title={t('login.title')} subtitle={t('login.subtitle')}>
-      <Form<LoginFormValues> className={formStyles.form} layout="vertical" requiredMark={false} onFinish={handleSubmit}>
+      <Form<LoginFormValues> className="auth-form" layout="vertical" requiredMark={false} onFinish={handleSubmit}>
         <Form.Item
           name="username"
           label={t('login.username')}
@@ -92,14 +91,11 @@ export function LoginPage() {
         >
           <Input.Password autoComplete="current-password" placeholder={t('login.passwordPlaceholder')} size="large" />
         </Form.Item>
-        <div className={formStyles.helperRow}>
+        <div className="auth-helper-row">
           <Form.Item name="remember" valuePropName="checked" noStyle>
             <Checkbox>{t('login.rememberMe')}</Checkbox>
           </Form.Item>
-          <Link
-            className={formStyles.helperLink}
-            to={{ pathname: FORGOT_PASSWORD_ROUTE, search: forgotPasswordSearch }}
-          >
+          <Link className="auth-helper-link" to={{ pathname: FORGOT_PASSWORD_ROUTE, search: forgotPasswordSearch }}>
             {t('login.forgotPassword')}
           </Link>
         </div>

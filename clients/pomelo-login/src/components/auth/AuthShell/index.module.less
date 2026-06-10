@@ -6,13 +6,13 @@
   place-items: center;
   overflow: hidden;
   padding: 24px;
-  background: var(--auth-login-bg);
+  background: @var-login-bg;
 
   &::before {
     position: absolute;
     inset: -30% -16%;
     content: '';
-    background: var(--auth-login-aura);
+    background: @var-login-aura;
     filter: blur(24px);
     transform: rotate(-5deg);
   }
@@ -22,19 +22,19 @@
     z-index: -1;
     inset: 0;
     content: '';
-    background: linear-gradient(var(--auth-login-grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--auth-login-grid) 1px, transparent 1px);
+    background: linear-gradient(@var-login-grid 1px, transparent 1px),
+      linear-gradient(90deg, @var-login-grid 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.34), transparent 76%);
   }
 }
 
-.gradientField {
+.gradient-field {
   position: absolute;
   inset: 0;
-  background: var(--auth-login-field);
-  opacity: var(--auth-login-field-opacity);
-  mix-blend-mode: var(--auth-login-field-blend);
+  background: @var-login-field;
+  opacity: @var-login-field-opacity;
+  mix-blend-mode: @var-login-field-blend;
 }
 
 .panel {
@@ -71,7 +71,7 @@
 }
 
 .actionButton {
-  color: var(--management-heading);
+  color: @var-text-primary;
   background: transparent;
   font: inherit;
   font-size: 16px;
@@ -82,7 +82,7 @@
 
   &:hover,
   &:focus {
-    color: var(--theme-primary) !important;
+    color: @var-primary !important;
     background: transparent !important;
   }
 }
@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--management-text);
+  color: @var-text-primary;
   font-size: 13px;
   font-weight: 700;
 }
@@ -101,24 +101,24 @@
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid var(--auth-glass-border);
+  border: 1px solid @var-glass-border;
   border-radius: 8px;
-  color: var(--management-heading);
-  background: var(--auth-brand-mark-bg);
-  box-shadow: var(--auth-brand-mark-shadow);
+  color: @var-text-primary;
+  background: @var-brand-mark-bg;
+  box-shadow: @var-brand-mark-shadow;
   font-weight: 800;
 }
 
 .title {
   margin: 12px 0 8px;
-  color: var(--management-heading);
+  color: @var-text-primary;
   font-size: 30px;
   line-height: 1.1;
 }
 
 .subtitle {
   margin: 0 0 20px;
-  color: var(--management-muted);
+  color: @var-text-secondary;
   font-size: 14px;
   line-height: 1.6;
 }

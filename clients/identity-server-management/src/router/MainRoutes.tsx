@@ -1,7 +1,7 @@
 import { Navigate, useRoutes } from 'react-router-dom';
-import { ApiResourcesPage } from '../pages/ApiResourcesPage';
-import { ClientsPage } from '../pages/ClientsPage';
-import { IdentityResourcesPage } from '../pages/IdentityResourcesPage';
+import { ApiResourcesPage } from '@/pages/ApiResourcesPage';
+import { ClientsPage } from '@/pages/ClientsPage';
+import { IdentityResourcesPage } from '@/pages/IdentityResourcesPage';
 import type { Location } from 'react-router-dom';
 
 const mainRoutes = [

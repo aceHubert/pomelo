@@ -1,51 +1,36 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { App as AntdApp, ConfigProvider, theme as antdTheme } from 'antd';
 import { createRoot } from 'react-dom/client';
-import { useEffect, useMemo, useState } from 'react';
 import { App } from './App';
 import { InitializeApolloProvider, createInitializeApolloClient } from './services/graphql/apollo';
 import { I18nProvider, useI18n } from './services/i18n/i18n';
 import { getResolvedThemeMode, observeResolvedThemeMode } from './services/theme/theme';
-import 'antd/dist/reset.css';
 import './styles/global.less';
 
-const lightThemeTokens = {
-  colorPrimary: '#408a71',
-  colorSuccess: '#1abd80',
-  colorWarning: '#fda900',
-  colorError: '#f82024',
-  colorInfo: '#0477f7',
-  colorBgBase: '#f7f7f2',
-  colorBgContainer: '#ffffff',
-  colorBgElevated: '#ffffff',
-  colorBgLayout: '#f7f7f2',
-  colorBorder: '#d8d8d0',
-  colorBorderSecondary: '#efefea',
-  colorText: '#212121',
-  colorTextHeading: '#212121',
-  colorTextSecondary: '#616161',
-  colorTextDisabled: '#bdbdbd',
-  colorTextLightSolid: '#fafafa',
-};
+function readRootToken(name: string) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
 
-const darkThemeTokens = {
-  colorPrimary: '#408a71',
-  colorSuccess: '#1abd80',
-  colorWarning: '#fda900',
-  colorError: '#f82024',
-  colorInfo: '#0477f7',
-  colorBgBase: '#0d0d0d',
-  colorBgContainer: '#171717',
-  colorBgElevated: '#171717',
-  colorBgLayout: '#0d0d0d',
-  colorBorder: '#32322f',
-  colorBorderSecondary: '#222220',
-  colorText: '#fafafa',
-  colorTextHeading: '#fafafa',
-  colorTextSecondary: '#eeeeee',
-  colorTextDisabled: '#bdbdbd',
-  colorTextLightSolid: '#fafafa',
-};
+function resolveAntdThemeTokens() {
+  return {
+    colorPrimary: readRootToken('--theme-primary'),
+    colorSuccess: readRootToken('--color-success'),
+    colorWarning: readRootToken('--color-warning'),
+    colorError: readRootToken('--color-error'),
+    colorInfo: readRootToken('--color-info'),
+    colorBgBase: readRootToken('--body-background'),
+    colorBgContainer: readRootToken('--component-background'),
+    colorBgElevated: readRootToken('--component-background'),
+    colorBgLayout: readRootToken('--body-background'),
+    colorBorder: readRootToken('--border-color-base'),
+    colorBorderSecondary: readRootToken('--component-background-soft'),
+    colorText: readRootToken('--text-primary'),
+    colorTextHeading: readRootToken('--text-primary'),
+    colorTextSecondary: readRootToken('--text-secondary'),
+    colorTextDisabled: readRootToken('--text-disabled'),
+    colorTextLightSolid: readRootToken('--text-inverse'),
+  };
+}
 
 function Root() {
   const [themeMode, setThemeMode] = useState(() => getResolvedThemeMode());
@@ -60,14 +45,14 @@ function Root() {
       token: {
         borderRadius: 18,
         fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        ...(themeMode === 'dark' ? darkThemeTokens : lightThemeTokens),
+        ...resolveAntdThemeTokens(),
       },
       components: {
         Button: {
           controlHeightLG: 46,
           fontWeight: 700,
           defaultShadow: 'none',
-          primaryShadow: '0 18px 36px rgba(64, 138, 113, 0.24)',
+          primaryShadow: `0 18px 36px ${readRootToken('--theme-primary-shadow')}`,
         },
         Input: {
           controlHeightLG: 46,

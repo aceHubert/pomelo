@@ -1,11 +1,11 @@
 import { Button, Descriptions, Input, InputNumber, Modal, Radio, Space, Switch, Tag } from 'antd';
 import { useState } from 'react';
-import { ChildPanel } from '../../components/common/ChildPanel';
-import { ResourcePage } from '../../components/common/ResourcePage';
-import { TextForm } from '../../components/common/TextForm';
-import { CLIENT_CHILD_OPERATIONS, CLIENTS, CLIENT_DETAIL, CREATE_CLIENT, UPDATE_CLIENT } from '../../apis/operations';
-import { useI18n } from '../../services/i18n/i18n';
-import type { ChildPanelConfig } from '../../types';
+import { ChildPanel } from '@/components/common/ChildPanel';
+import { ResourcePage } from '@/components/common/ResourcePage';
+import { TextForm } from '@/components/common/TextForm';
+import { CLIENT_CHILD_OPERATIONS, CLIENTS, CLIENT_DETAIL, CREATE_CLIENT, UPDATE_CLIENT } from '@/apis/operations';
+import { useI18n } from '@/services/i18n/i18n';
+import type { ChildPanelConfig } from '@/types';
 
 const secretTypeOptions = [
   { label: 'SharedSecret', value: 'SharedSecret' },

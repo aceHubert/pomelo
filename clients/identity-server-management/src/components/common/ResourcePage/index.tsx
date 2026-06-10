@@ -2,12 +2,12 @@ import { Button, Descriptions, Input, Modal, Space, Spin, Tag, Typography } from
 import { PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@apollo/client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { DataTable } from '../DataTable';
-import { TextForm } from '../TextForm';
-import { useI18n } from '../../../services/i18n/i18n';
+import { DataTable } from '@/components/common/DataTable';
+import { TextForm } from '@/components/common/TextForm';
+import { useI18n } from '@/services/i18n/i18n';
 import styles from './index.module.less';
 import type { DocumentNode } from '@apollo/client';
-import type { FieldConfig } from '../../../types';
+import type { FieldConfig } from '@/types';
 
 function getPath(source: any, path: string) {
   return path.split('.').reduce((current, key) => current?.[key], source);

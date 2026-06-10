@@ -6,13 +6,13 @@
   place-items: center;
   overflow: hidden;
   padding: 24px;
-  background: @var-management-login-bg;
+  background: @var-login-bg;
 
   &::before {
     position: absolute;
     inset: -30% -16%;
     content: '';
-    background: @var-management-login-aura;
+    background: @var-login-aura;
     filter: blur(24px);
     transform: rotate(-5deg);
   }
@@ -22,19 +22,19 @@
     z-index: -1;
     inset: 0;
     content: '';
-    background: linear-gradient(@var-management-login-grid 1px, transparent 1px),
-      linear-gradient(90deg, @var-management-login-grid 1px, transparent 1px);
+    background: linear-gradient(@var-login-grid 1px, transparent 1px),
+      linear-gradient(90deg, @var-login-grid 1px, transparent 1px);
     background-size: 64px 64px;
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.34), transparent 76%);
   }
 }
 
-.gradientField {
+.gradient-field {
   position: absolute;
   inset: 0;
-  background: @var-management-login-field;
-  opacity: @var-management-login-field-opacity;
-  mix-blend-mode: @var-management-login-field-blend;
+  background: @var-login-field;
+  opacity: @var-login-field-opacity;
+  mix-blend-mode: @var-login-field-blend;
 }
 
 .panel {
@@ -62,7 +62,7 @@
   display: grid;
   width: 100%;
   gap: 10px;
-  color: @var-management-text;
+  color: @var-text-primary;
   font: 400 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   :global(.ant-form-item) {
@@ -70,17 +70,17 @@
   }
 
   :global(.ant-form-item-label > label) {
-    color: @var-management-muted;
+    color: @var-text-secondary;
     font-size: 12px;
   }
 
   :global(.ant-input),
   :global(.ant-input-affix-wrapper) {
     min-height: 44px;
-    border-color: @var-management-glass-border;
+    border-color: @var-glass-border;
     border-radius: 999px;
-    background: @var-management-glass-control-bg;
-    box-shadow: @var-management-glass-control-shadow;
+    background: @var-glass-control-bg;
+    box-shadow: @var-glass-control-shadow;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
@@ -100,7 +100,7 @@
   :global(.ant-input-affix-wrapper:focus),
   :global(.ant-input-affix-wrapper-focused) {
     border-color: rgba(70, 114, 255, 0.54);
-    box-shadow: @var-management-glass-control-focus-shadow;
+    box-shadow: @var-glass-control-focus-shadow;
   }
 
   :global(.ant-input-affix-wrapper .ant-input:focus) {
@@ -137,7 +137,7 @@
 }
 
 .actionButton {
-  color: @var-management-heading;
+  color: @var-text-primary;
   background: transparent;
   font: inherit;
   font-size: 16px;
@@ -157,7 +157,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: @var-management-text;
+  color: @var-text-primary;
   font-size: 13px;
   font-weight: 700;
 }
@@ -167,17 +167,17 @@
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid @var-management-glass-border;
+  border: 1px solid @var-glass-border;
   border-radius: 8px;
-  color: @var-management-heading;
-  background: @var-management-brand-mark-bg;
-  box-shadow: @var-management-brand-mark-shadow;
+  color: @var-text-primary;
+  background: @var-brand-mark-bg;
+  box-shadow: @var-brand-mark-shadow;
   font-weight: 800;
 }
 
 .title {
   margin: 4px 0 8px;
-  color: @var-management-heading;
+  color: @var-text-primary;
   font-size: 28px;
   line-height: 1.1;
 }

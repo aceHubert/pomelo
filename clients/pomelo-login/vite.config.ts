@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
@@ -58,6 +59,11 @@ export default defineConfig(({ mode }) => {
   return {
     base: mode === 'production' ? '/auth/' : '/',
     plugins: [react(), loginSingleFile()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
     server: {
       host: env.DEV_HOST || '0.0.0.0',
       port: parsePort(env.DEV_PORT),
@@ -74,6 +80,9 @@ export default defineConfig(({ mode }) => {
       preprocessorOptions: {
         less: {
           javascriptEnabled: true,
+          modifyVars: {
+            hack: 'true;@import "./src/styles/variables.less";',
+          },
         },
       },
     },
