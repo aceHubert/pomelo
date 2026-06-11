@@ -109,6 +109,12 @@ export class SignInResult {
   expiresAt?: number;
 
   /**
+   * Return URL when auth state carries it
+   */
+  @Field({ nullable: true })
+  returnUrl?: string;
+
+  /**
    * Faild message when success is false
    */
   @Field({ nullable: true })

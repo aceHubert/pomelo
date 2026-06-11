@@ -44,6 +44,7 @@ import { MetaModelResp } from '@/common/controllers/resp/meta-model.resp';
 import { UserService } from './user.service';
 import { NewUserDto } from './dto/new-user.dto';
 import { NewUserMetaDto } from './dto/new-user-meta.dto';
+import { RegisterInput } from './dto/register.input';
 import { UpdateUserDto, UpdateUserPasswordDto } from './dto/update-user.dto';
 import { PagedUserQueryDto } from './dto/user-query.dto';
 import { VerifyUserDto } from './dto/signin.dto';
@@ -319,6 +320,18 @@ export class UserController extends createMetaController('user', UserMetaModelRe
     }
   }
 
+  @Post('register')
+  @Anonymous()
+  @ApiOkResponse({
+    description: 'Register result',
+    type: () => createResponseSuccessType({ data: SignInResultResp }, 'RegisterSuccessResp'),
+  })
+  async register(@Body() input: RegisterInput, @Req() req: Request) {
+    return this.success({
+      data: await this.userService.register(input, this.getOrigin(req)),
+    });
+  }
+
   /**
    * Sign in
    */
@@ -351,5 +364,9 @@ export class UserController extends createMetaController('user', UserMetaModelRe
         message: i18n.tv('user.login.fail', 'Username or Password is incorrect!'),
       },
     });
+  }
+
+  private getOrigin(req: Request) {
+    return req.get('origin') || `${req.protocol}://${req.get('host')}`;
   }
 }

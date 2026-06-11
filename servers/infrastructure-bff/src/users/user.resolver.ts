@@ -22,11 +22,16 @@ import {
 import { UserAction } from '@/common/actions';
 import { createMetaResolver } from '@/common/resolvers/meta.resolver';
 import { UserService } from './user.service';
+import { SocialService } from './social.service';
 import { NewUserInput } from './dto/new-user.input';
 import { NewUserMetaInput } from './dto/new-user-meta.input';
+import { RegisterEmailCodeInput, RegisterInput } from './dto/register.input';
+import { SocialAuthCompleteInput, SocialAuthStartInput } from './dto/social-auth.input';
 import { UpdateUserInput, UpdateUserPasswordInput } from './dto/update-user.input';
 import { PagedUserArgs } from './dto/user.args';
 import { SignInInput } from './dto/signin.input';
+import { RegisterEmailCodeResult } from './models/register.model';
+import { SocialAuthStartResult } from './models/social-auth.model';
 import { User as UserModel, UserMeta, PagedUser, SignInResult } from './models/user.model';
 
 @Authorized()
@@ -48,7 +53,11 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
     return RamAuthorized(ramAction);
   },
 }) {
-  constructor(@Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy, private readonly userService: UserService) {
+  constructor(
+    @Inject(INFRASTRUCTURE_SERVICE) basicService: ClientProxy,
+    private readonly userService: UserService,
+    private readonly socialService: SocialService,
+  ) {
     super(basicService);
   }
 
@@ -188,6 +197,42 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   }
 
   @Anonymous()
+  @Mutation(() => RegisterEmailCodeResult, { description: 'Send register email code.' })
+  sendRegisterEmailCode(@Args('model') model: RegisterEmailCodeInput): Promise<RegisterEmailCodeResult> {
+    return this.userService.sendRegisterEmailCode(model);
+  }
+
+  @Anonymous()
+  @Query(() => Boolean, { description: 'Check whether a register username is available.' })
+  registerUsernameAvailable(@Args('username') username: string): Promise<boolean> {
+    return this.userService.isRegisterUsernameAvailable(username);
+  }
+
+  @Anonymous()
+  @Mutation(() => SignInResult, { description: 'Register local user.' })
+  register(@Args('model') model: RegisterInput, @Context('req') req: Request): Promise<SignInResult> {
+    return this.userService.register(model, this.getOrigin(req));
+  }
+
+  @Anonymous()
+  @Mutation(() => SocialAuthStartResult, { description: 'Start social auth.' })
+  startSocialAuth(
+    @Args('model') model: SocialAuthStartInput,
+    @Context('req') req: Request,
+  ): Promise<SocialAuthStartResult> {
+    return this.socialService.startSocialAuth(model, this.getOrigin(req));
+  }
+
+  @Anonymous()
+  @Mutation(() => SignInResult, { description: 'Complete social auth.' })
+  completeSocialAuth(
+    @Args('model') model: SocialAuthCompleteInput,
+    @Context('req') req: Request,
+  ): Promise<SignInResult> {
+    return this.socialService.completeSocialAuth(model, this.getOrigin(req));
+  }
+
+  @Anonymous()
   @Mutation((returns) => SignInResult, { description: 'Sign in.' })
   async signIn(
     @Args('model', { type: () => SignInInput }) model: SignInInput,
@@ -211,5 +256,9 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
       success: false,
       message: i18n.tv('user.login.fail', 'Username or Password is incorrect!'),
     };
+  }
+
+  private getOrigin(req?: Request) {
+    return req?.get('origin') || (req ? `${req.protocol}://${req.get('host')}` : undefined);
   }
 }

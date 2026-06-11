@@ -1,7 +1,6 @@
 import { Button } from 'antd';
 import { DesktopOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
-import { BRAND_NAME } from '@/services/app/env';
 import { applyThemePreference, getStoredThemePreference } from '@/services/theme/theme';
 import { useI18n } from '@/services/i18n/i18n';
 import { LanguageToggle } from '@/components/common/LanguageToggle';
@@ -27,8 +26,8 @@ export function AuthShell({
   subtitle,
   children,
 }: PropsWithChildren<{
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
 }>) {
   const { t } = useI18n();
   const [themePreference, setThemePreference] = useState(() => getStoredThemePreference());
@@ -69,15 +68,11 @@ export function AuthShell({
         padding="0"
         overLight={false}
         cornerRadius={20}
-        glassSize={{ width: 'min(520px, calc(100vw - 48px))' }}
+        glassSize={{ width: '100%' }}
       >
         <div className={styles.panelContent}>
-          <div className={styles.brand}>
-            <span className={styles.brandMark}>PA</span>
-            <span>{BRAND_NAME}</span>
-          </div>
-          <h1 className={styles.title}>{title}</h1>
-          <p className={styles.subtitle}>{subtitle}</p>
+          {title ? <h1 className={styles.title}>{title}</h1> : null}
+          {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
           {children}
         </div>
       </LiquidGlass>

@@ -16,7 +16,7 @@ import {
   ArrayNotEmpty,
   ValidateNested,
 } from 'class-validator';
-import { UserStatus, UserRole } from '@ace-pomelo/shared/server';
+import { AuthProvider, UserStatus, UserRole } from '@ace-pomelo/shared/server';
 import { PagedQueryPayload, RequestUserIdPayload } from './common.payload';
 import { NewMetaPayload } from './meta.payload';
 
@@ -109,6 +109,69 @@ export class NewUserPayload extends RequestUserIdPayload {
   @ValidateNested({ each: true })
   @Type(() => NewMetaPayload)
   metas?: NewMetaPayload[];
+}
+
+export class AuthProviderBindingPayload {
+  @IsEnum(AuthProvider)
+  provider!: AuthProvider;
+
+  @IsString()
+  @IsNotEmpty()
+  subject!: string;
+
+  profile?: Record<string, unknown>;
+}
+
+export class AuthCreateUserPayload {
+  loginName!: string;
+  loginPwd!: string;
+  niceName!: string;
+  displayName!: string;
+  mobile?: string;
+  email?: string;
+  url!: string;
+
+  @IsOptional()
+  @IsEnum(UserStatus)
+  status?: UserStatus;
+
+  firstName?: string;
+  lastName?: string;
+  avator?: string;
+  description?: string;
+
+  @IsOptional()
+  @IsHexColor()
+  adminColor?: string;
+
+  @IsOptional()
+  @IsLocale()
+  locale?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(Object.values(UserRole))
+  capabilities?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => NewMetaPayload)
+  metas?: NewMetaPayload[];
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AuthProviderBindingPayload)
+  providerBinding?: AuthProviderBindingPayload;
+}
+
+export class AuthProviderSubjectPayload {
+  @IsEnum(AuthProvider)
+  provider!: AuthProvider;
+
+  @IsString()
+  @IsNotEmpty()
+  subject!: string;
 }
 
 /**

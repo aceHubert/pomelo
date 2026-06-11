@@ -5,6 +5,24 @@ export enum OptionPresetKeys {
   Home = 'home',
   /** Web 运行时 OIDC 配置 */
   AuthOidc = 'auth-oidc',
+  /** 是否开启 pomelo-login 注册入口 */
+  AuthRegisterEnable = 'auth-register-enable',
+  /** 允许注册的邮箱后缀，逗号分隔 */
+  AuthRegisterEmailSuffixes = 'auth-register-email-suffixes',
+  /** 注册验证码邮件模板 */
+  AuthRegisterEmailTemplate = 'auth-register-email-template',
+  /** 是否开启 Google 第三方登录 */
+  AuthGoogleEnable = 'auth-google-enable',
+  /** Google 第三方登录 JSON 配置 */
+  AuthGoogle = 'auth-google',
+  /** 是否开启 GitHub 第三方登录 */
+  AuthGithubEnable = 'auth-github-enable',
+  /** GitHub 第三方登录 JSON 配置 */
+  AuthGithub = 'auth-github',
+  /** 是否开启 Linux.do 第三方登录 */
+  AuthLinuxDoEnable = 'auth-linuxdo-enable',
+  /** Linux.do 第三方登录 JSON 配置 */
+  AuthLinuxDo = 'auth-linuxdo',
   /** 博客名称 */
   BlogName = 'blogname',
   /** 博客描述 */
@@ -165,6 +183,49 @@ export enum UserMetaPresetKeys {
   /** 角色权限 */
   Capabilities = 'capabilities',
 }
+
+export enum AuthProvider {
+  Google = 'google',
+  Github = 'github',
+  LinuxDo = 'linuxdo',
+}
+
+export enum AuthUserMetaPresetKeys {
+  /** 第三方登录平台 */
+  Provider = '$auth_provider',
+  /** 第三方登录平台用户唯一标识 */
+  ProviderSubject = '$auth_provider_subject',
+  /** 第三方登录平台用户信息快照 */
+  ProviderProfile = '$auth_provider_profile',
+}
+
+export const REGISTER_EMAIL_CODE_SCENE = 'register-email-code';
+
+export const AUTH_REGISTER_EMAIL_TEMPLATE = {
+  subject: 'Pomelo 注册验证码',
+  text: '你正在注册 Pomelo 账号。验证码：{{code}}，有效期 {{expiresInMinutes}} 分钟。注册邮箱：{{email}}，站点：{{siteName}}。',
+  html: '<p>你正在注册 Pomelo 账号。</p><p>验证码：<strong>{{code}}</strong></p><p>有效期 {{expiresInMinutes}} 分钟。</p><p>注册邮箱：{{email}}</p><p>站点：{{siteName}}</p>',
+};
+
+export const AUTH_OPTION_DEFAULTS: ReadonlyArray<{
+  optionName: OptionPresetKeys;
+  optionValue: string;
+  autoload?: 'yes' | 'no';
+}> = [
+  { optionName: OptionPresetKeys.AuthRegisterEnable, optionValue: '0', autoload: 'yes' },
+  { optionName: OptionPresetKeys.AuthRegisterEmailSuffixes, optionValue: '', autoload: 'yes' },
+  {
+    optionName: OptionPresetKeys.AuthRegisterEmailTemplate,
+    optionValue: JSON.stringify(AUTH_REGISTER_EMAIL_TEMPLATE),
+    autoload: 'no',
+  },
+  { optionName: OptionPresetKeys.AuthGoogleEnable, optionValue: '0', autoload: 'yes' },
+  { optionName: OptionPresetKeys.AuthGoogle, optionValue: '{}', autoload: 'no' },
+  { optionName: OptionPresetKeys.AuthGithubEnable, optionValue: '0', autoload: 'yes' },
+  { optionName: OptionPresetKeys.AuthGithub, optionValue: '{}', autoload: 'no' },
+  { optionName: OptionPresetKeys.AuthLinuxDoEnable, optionValue: '0', autoload: 'yes' },
+  { optionName: OptionPresetKeys.AuthLinuxDo, optionValue: '{}', autoload: 'no' },
+];
 
 /**
  * 角色权限
