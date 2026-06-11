@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    base: mode === 'production' ? '/auth/' : '/',
+    base: env.BASE_URL,
     plugins: [react(), loginSingleFile()],
     resolve: {
       alias: {
