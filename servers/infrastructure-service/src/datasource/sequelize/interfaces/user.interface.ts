@@ -1,5 +1,5 @@
 import { Attributes, CreationAttributes } from 'sequelize';
-import { UserStatus } from '@ace-pomelo/shared/server';
+import { AuthProvider, UserStatus } from '@ace-pomelo/shared/server';
 import { Users } from '../entities';
 import { PagedArgs, Paged } from './paged.interface';
 import { MetaModel, NewMetaInput } from './meta.interface';
@@ -66,6 +66,16 @@ export interface NewUserInput extends CreationAttributes<Users> {
    * metaKey 不可以重复
    */
   metas?: NewMetaInput[];
+}
+
+export interface AuthProviderBindingInput {
+  provider: AuthProvider;
+  subject: string;
+  profile?: Record<string, unknown>;
+}
+
+export interface AuthCreateUserInput extends NewUserInput {
+  providerBinding?: AuthProviderBindingInput;
 }
 
 /**

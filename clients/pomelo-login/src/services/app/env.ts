@@ -1,5 +1,4 @@
 const DEFAULT_GRAPHQL_URI = '/action/basic/graphql';
-const DEFAULT_AUTH_BASE = '/auth';
 
 function normalizePath(value: string | undefined, fallback: string) {
   const trimmed = value?.trim();
@@ -9,9 +8,14 @@ function normalizePath(value: string | undefined, fallback: string) {
   return normalized.replace(/\/+$/, '') || fallback;
 }
 
+function normalizeViteBase(value: string | undefined) {
+  const normalized = normalizePath(value, '/');
+  return normalized === '/' ? '/' : normalized;
+}
+
 export const APP_TITLE = import.meta.env.VITE_APP_TITLE?.trim() || 'Pomelo Login';
-export const BRAND_NAME = import.meta.env.VITE_BRAND_NAME?.trim() || 'Pomelo Auth';
-export const AUTH_BASENAME = normalizePath(import.meta.env.VITE_AUTH_BASE, DEFAULT_AUTH_BASE);
+export const BRAND_NAME = import.meta.env.VITE_BRAND_NAME?.trim() || 'Pomelo';
+export const AUTH_BASENAME = normalizeViteBase(import.meta.env.BASE_URL);
 export const HOME_URL = import.meta.env.VITE_HOME_URL?.trim() || '/';
 
 export function resolveGraphqlUri() {

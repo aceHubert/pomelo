@@ -247,6 +247,25 @@ export class OptionService {
     return resolvedValue;
   }
 
+  async getRawValue(optionName: string): Promise<string | undefined> {
+    const definition = this.getDefinition(optionName);
+    const cacheKey = this.getCacheKey('raw-value', optionName);
+    const cached = await this.cacheService.get<string>(cacheKey);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const raw = await this.basicService
+      .send<string | undefined>(OptionPattern.GetValue, {
+        optionName,
+      })
+      .lastValue();
+    const value = raw ?? definition.defaultValue;
+
+    await this.cacheService.set(cacheKey, value, OPTION_CACHE_TTL);
+    return value;
+  }
+
   async getById(id: number, fields: string[], role: UserRole = UserRole.None): Promise<OptionValueResult | undefined> {
     const cacheKey = this.getCacheKey('id', id, fields, role);
     const cached = await this.cacheService.get<OptionValueResult>(cacheKey);

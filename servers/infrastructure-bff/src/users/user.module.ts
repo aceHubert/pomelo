@@ -1,7 +1,12 @@
 import { Module, DynamicModule, Provider } from '@nestjs/common';
+import { OptionModule } from '@/options/option.module';
+import { MailController } from './mail.controller';
+import { SocialController } from './social.controller';
 import { UserController } from './user.controller';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
+import { UserMailService } from './mail.service';
+import { SocialService } from './social.service';
 import { UserOptions, UserOptionsFactory, UserAsyncOptions } from './interfaces/user-options.interface';
 import { USER_OPTIONS } from './constants';
 import './enums/registered.enum';
@@ -13,16 +18,19 @@ export class UserModule {
     return {
       module: UserModule,
       global: isGlobal,
-      controllers: [UserController],
+      imports: [OptionModule],
+      controllers: [UserController, MailController, SocialController],
       providers: [
         {
           provide: USER_OPTIONS,
           useValue: restOptions,
         },
         UserService,
+        UserMailService,
+        SocialService,
         UserResolver,
       ],
-      exports: [UserService],
+      exports: [UserService, SocialService],
     };
   }
 
@@ -30,10 +38,10 @@ export class UserModule {
     return {
       module: UserModule,
       global: options.isGlobal,
-      imports: options.imports || [],
-      controllers: [UserController],
-      providers: [...this.createAsyncProviders(options), UserService, UserResolver],
-      exports: [UserService],
+      imports: [OptionModule, ...(options.imports || [])],
+      controllers: [UserController, MailController, SocialController],
+      providers: [...this.createAsyncProviders(options), UserService, UserMailService, SocialService, UserResolver],
+      exports: [UserService, SocialService],
     };
   }
 

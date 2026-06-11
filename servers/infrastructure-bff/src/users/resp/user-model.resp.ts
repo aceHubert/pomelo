@@ -114,6 +114,12 @@ export class SignInResultResp {
   expiresAt?: number;
 
   /**
+   * Return URL when auth state carries it
+   */
+  @ApiResponseProperty()
+  returnUrl?: string;
+
+  /**
    * Faild message when success is false
    */
   @ApiResponseProperty()

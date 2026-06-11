@@ -10,6 +10,7 @@ import { RedisCacheStore } from './redis.store';
 export class AppCacheService implements OnModuleDestroy {
   private readonly cache: ReturnType<typeof createCache>;
   private readonly storeType: 'memory' | 'redis';
+  private readonly redis?: Redis;
 
   constructor(private readonly configService: ConfigService) {
     const ttl = this.configService.get<number>('cache.localTtlMs') ?? 60_000;
@@ -22,6 +23,7 @@ export class AppCacheService implements OnModuleDestroy {
         maxRetriesPerRequest: 0,
         enableOfflineQueue: false,
       });
+      this.redis = redis;
 
       this.cache = createCache({
         stores: [new Keyv({ store: new KeyvAdapter(new RedisCacheStore(redis)) })],
@@ -60,7 +62,12 @@ export class AppCacheService implements OnModuleDestroy {
     await this.cache.set(key, value, ttl);
   }
 
+  async del(key: string): Promise<void> {
+    await this.cache.del(key);
+  }
+
   async onModuleDestroy(): Promise<void> {
     await (this.cache as { disconnect?: () => Promise<void> }).disconnect?.();
+    this.redis?.disconnect();
   }
 }

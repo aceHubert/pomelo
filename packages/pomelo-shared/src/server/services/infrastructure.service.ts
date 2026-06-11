@@ -104,6 +104,7 @@ export class TermTaxonomyPattern extends createMetaPattern('termTaxonomy') {
 
 export class UserPattern extends createMetaPattern('user') {
   static readonly Get = { cmd: 'user.get' };
+  static readonly GetByAuthProviderSubject = { cmd: 'user.auth.providerSubject.get' };
   static readonly GetEmail = { cmd: 'user.get.email' };
   static readonly GetMobile = { cmd: 'user.get.mobile' };
   static readonly GetCapabilities = { cmd: 'user.get.capabilities' };
@@ -116,6 +117,7 @@ export class UserPattern extends createMetaPattern('user') {
   static readonly MobileExists = { cmd: 'user.mobile.exists' };
   static readonly EmailExists = { cmd: 'user.email.exists' };
   static readonly Create = { cmd: 'user.create' };
+  static readonly AuthCreate = { cmd: 'user.auth.create' };
   static readonly Update = { cmd: 'user.update' };
   static readonly UpdateEmail = { cmd: 'user.update.email' };
   static readonly UpdateMobile = { cmd: 'user.update.mobile' };

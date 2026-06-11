@@ -105,6 +105,11 @@ export interface ConfigObject {
      */
     maxFiles?: number;
   };
+  cache?: {
+    redisUrl?: string;
+    localTtlMs?: number;
+    localMax?: number;
+  };
   [key: string]: any;
 }
 
@@ -194,6 +199,17 @@ export const configuration = (): ConfigFactory<ConfigObject> => () => {
       maxFiles:
         process.env.UPLOAD_MAX_FILES !== void 0 && !Number.isNaN(parseInt(process.env.UPLOAD_MAX_FILES))
           ? parseInt(process.env.UPLOAD_MAX_FILES, 10)
+          : void 0,
+    },
+    cache: {
+      redisUrl: process.env.REDIS_URL,
+      localTtlMs:
+        process.env.CACHE_LOCAL_TTL_MS !== void 0 && !Number.isNaN(parseInt(process.env.CACHE_LOCAL_TTL_MS))
+          ? parseInt(process.env.CACHE_LOCAL_TTL_MS, 10)
+          : void 0,
+      localMax:
+        process.env.CACHE_LOCAL_MAX !== void 0 && !Number.isNaN(parseInt(process.env.CACHE_LOCAL_MAX))
+          ? parseInt(process.env.CACHE_LOCAL_MAX, 10)
           : void 0,
     },
   };

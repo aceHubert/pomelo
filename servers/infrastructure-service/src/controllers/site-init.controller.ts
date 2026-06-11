@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   md5,
+  AUTH_OPTION_DEFAULTS,
   UserStatus,
   UserRole,
   OptionAutoload,
@@ -87,6 +88,11 @@ export class SiteInitController {
             { optionName: OptionPresetKeys.BlogCharset, optionValue: 'UTF-8' },
             { optionName: OptionPresetKeys.SiteIcon, optionValue: '' },
             { optionName: OptionPresetKeys.UsersCanRegister, optionValue: '0' },
+            ...AUTH_OPTION_DEFAULTS.map(({ optionName, optionValue, autoload }) => ({
+              optionName,
+              optionValue,
+              autoload,
+            })),
             { optionName: OptionPresetKeys.AdminEmail, optionValue: payload.email },
             {
               optionName: OptionPresetKeys.AdminEmialLifespan,

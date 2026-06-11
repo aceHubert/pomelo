@@ -1,5 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
-import { UserStatus, UserRole } from '@ace-pomelo/shared/server';
+import { AuthProvider, UserStatus, UserRole } from '@ace-pomelo/shared/server';
 
 registerEnumType(UserRole, {
   name: 'UserRole',
@@ -9,4 +9,9 @@ registerEnumType(UserRole, {
 registerEnumType(UserStatus, {
   name: 'UserStatus',
   description: 'User status',
+});
+
+registerEnumType(AuthProvider, {
+  name: 'AuthProvider',
+  description: 'Third-party auth provider',
 });

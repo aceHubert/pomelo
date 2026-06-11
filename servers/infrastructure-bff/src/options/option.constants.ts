@@ -1,4 +1,4 @@
-import { OptionPresetKeys } from '@ace-pomelo/shared/server';
+import { AUTH_REGISTER_EMAIL_TEMPLATE, OptionPresetKeys } from '@ace-pomelo/shared/server';
 
 /**
  * Option 访问等级。
@@ -36,6 +36,60 @@ export const OPTION_DEFINITIONS: OptionDefinition[] = [
     defaultValue: '',
     description: 'Web 运行时 OIDC 配置',
   },
+  {
+    key: OptionPresetKeys.AuthRegisterEnable,
+    access: 'public-read-admin-write',
+    defaultValue: '0',
+    description: '是否开启 pomelo-login 注册入口',
+  },
+  {
+    key: OptionPresetKeys.AuthRegisterEmailSuffixes,
+    access: 'public-read-admin-write',
+    defaultValue: '',
+    description: '允许注册的邮箱后缀，逗号分隔',
+  },
+  {
+    key: OptionPresetKeys.AuthRegisterEmailTemplate,
+    access: 'admin-read-write',
+    defaultValue: JSON.stringify(AUTH_REGISTER_EMAIL_TEMPLATE),
+    description: '注册验证码邮件模板 JSON',
+  },
+  {
+    key: OptionPresetKeys.AuthGoogleEnable,
+    access: 'public-read-admin-write',
+    defaultValue: '0',
+    description: '是否开启 Google 第三方登录',
+  },
+  {
+    key: OptionPresetKeys.AuthGoogle,
+    access: 'secret-write-only',
+    defaultValue: '{}',
+    description: 'Google 第三方登录 JSON 配置',
+  },
+  {
+    key: OptionPresetKeys.AuthGithubEnable,
+    access: 'public-read-admin-write',
+    defaultValue: '0',
+    description: '是否开启 GitHub 第三方登录',
+  },
+  {
+    key: OptionPresetKeys.AuthGithub,
+    access: 'secret-write-only',
+    defaultValue: '{}',
+    description: 'GitHub 第三方登录 JSON 配置',
+  },
+  {
+    key: OptionPresetKeys.AuthLinuxDoEnable,
+    access: 'public-read-admin-write',
+    defaultValue: '0',
+    description: '是否开启 Linux.do 第三方登录',
+  },
+  {
+    key: OptionPresetKeys.AuthLinuxDo,
+    access: 'secret-write-only',
+    defaultValue: '{}',
+    description: 'Linux.do 第三方登录 JSON 配置',
+  },
   { key: OptionPresetKeys.BlogName, access: 'public-read', description: '博客名称' },
   {
     key: OptionPresetKeys.BlogDescription,
@@ -72,6 +126,7 @@ export const OPTION_DEFINITIONS: OptionDefinition[] = [
     key: OptionPresetKeys.MailServerPort,
     access: 'admin-read-write',
     defaultValue: '110',
+    requiredForMail: true,
     description: '邮箱服务器端口',
   },
   {

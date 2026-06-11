@@ -8,6 +8,8 @@ import {
   ValidationError,
   UserStatus,
   UserCapability,
+  AuthUserMetaPresetKeys,
+  AuthProvider,
   UserMetaPresetKeys,
   OptionPresetKeys,
 } from '@ace-pomelo/shared/server';
@@ -19,6 +21,7 @@ import {
   PagedUserArgs,
   PagedUserModel,
   NewUserInput,
+  AuthCreateUserInput,
   NewUserMetaInput,
   UpdateUserInput,
 } from '../interfaces/user.interface';
@@ -370,20 +373,7 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
     }).then((count) => count > 0);
   }
 
-  /**
-   * 添加用户，loginName, mobile, emaile 要求必须是唯一，否则会抛出 ValidationError
-   * @author Hubert
-   * @since 2020-10-01
-   * @version 0.0.1
-   * @access capabilities: [CreateUsers]
-   * @param model 添加实体模型
-   * @param fields 返回的字段
-   * @param requestUserId 请求的用户Id
-   */
-  async create(model: NewUserInput, requestUserId: number): Promise<UserModel> {
-    // 是否有创建用户权限
-    await this.hasCapability(UserCapability.CreateUsers, requestUserId);
-
+  private async assertUniqueUserFields(model: NewUserInput): Promise<void> {
     if (model.loginName && (await this.isLoginNameExists(model.loginName))) {
       throw new ValidationError(
         this.translate(
@@ -410,6 +400,10 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
         ),
       );
     }
+  }
+
+  private async createUserRecord(model: NewUserInput): Promise<UserModel> {
+    await this.assertUniqueUserFields(model);
 
     const t = await this.datasourceService.sequelize.transaction();
     try {
@@ -469,7 +463,6 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
           metaValue: model.capabilities,
         },
       ];
-      // 添加元数据
       if (model.metas) {
         metaCreationModels = metaCreationModels.concat(
           model.metas.map((meta) => ({
@@ -491,6 +484,74 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
       await t.rollback();
       throw err;
     }
+  }
+
+  async getByAuthProviderSubject(provider: AuthProvider, subject: string): Promise<UserModel | undefined> {
+    const binding = await UserMeta.findOne({
+      attributes: ['userId'],
+      where: {
+        metaKey: AuthUserMetaPresetKeys.ProviderSubject,
+        metaValue: `${provider}:${subject}`,
+      },
+    });
+
+    if (!binding) {
+      return;
+    }
+
+    return this.getFieldsValue(binding.userId, [
+      'loginName',
+      'niceName',
+      'displayName',
+      'mobile',
+      'email',
+      'url',
+      'status',
+      'updatedAt',
+      'createdAt',
+    ]);
+  }
+
+  async createForAuth(model: AuthCreateUserInput): Promise<UserModel> {
+    const { providerBinding, metas = [], ...userModel } = model;
+    const bindingMetas = providerBinding
+      ? [
+          {
+            metaKey: AuthUserMetaPresetKeys.Provider,
+            metaValue: providerBinding.provider,
+          },
+          {
+            metaKey: AuthUserMetaPresetKeys.ProviderSubject,
+            metaValue: `${providerBinding.provider}:${providerBinding.subject}`,
+          },
+          {
+            metaKey: AuthUserMetaPresetKeys.ProviderProfile,
+            metaValue: JSON.stringify(providerBinding.profile ?? {}),
+          },
+        ]
+      : [];
+
+    return this.createUserRecord({
+      ...userModel,
+      metas: [...metas, ...bindingMetas],
+    });
+  }
+
+  /**
+   * 添加用户，loginName, mobile, emaile 要求必须是唯一，否则会抛出 ValidationError
+   * @author Hubert
+   * @since 2020-10-01
+   * @version 0.0.1
+   * @access capabilities: [CreateUsers]
+   * @param model 添加实体模型
+   * @param fields 返回的字段
+   * @param requestUserId 请求的用户Id
+   */
+  async create(model: NewUserInput, requestUserId: number): Promise<UserModel> {
+    // 是否有创建用户权限
+    await this.hasCapability(UserCapability.CreateUsers, requestUserId);
+
+    return this.createUserRecord(model);
   }
 
   /**
@@ -835,6 +896,10 @@ export class UserDataSource extends MetaDataSource<UserMetaModel, NewUserMetaInp
    * @param password 登录密码
    */
   async verifyUser(username: string, password: string): Promise<false | UserModel> {
+    if (!password) {
+      return false;
+    }
+
     const region = await this.getOption<CountryCode>(OptionPresetKeys.DefaultPhoneNumberRegion);
     const user = await Users.findOne({
       where: {

@@ -5,8 +5,17 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "globals": {
+    "ts-jest": {
+      "tsconfig": {
+        "types": ["node", "jest"]
+      }
+    }
+  },
   "moduleNameMapper": {
-    "^@/(.*)": "<rootDir>/$1"
+    "^@/(.*)": "<rootDir>/$1",
+    "^@ace-pomelo/shared/server$": "<rootDir>/../../../packages/pomelo-shared/src/server",
+    "^@ace-pomelo/shared/server/(.*)$": "<rootDir>/../../../packages/pomelo-shared/src/server/$1"
   },
   "collectCoverageFrom": ["**/*.(t|j)s"],
   "coverageDirectory": "../coverage",

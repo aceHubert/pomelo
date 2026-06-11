@@ -5,6 +5,13 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
+  "globals": {
+    "ts-jest": {
+      "tsconfig": {
+        "types": ["node", "jest"]
+      }
+    }
+  },
   "moduleNameMapper": {
     "^@/(.*)": "<rootDir>/$1",
     "^@ace-nestjs/(.*)$": "<rootDir>/../../../packages/nestjs-$1/src",

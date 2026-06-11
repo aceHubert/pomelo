@@ -1,8 +1,10 @@
 import { AUTH_BASENAME, HOME_URL } from '@/services/app/env';
 
 export const LOGIN_ROUTE = '/login';
+export const REGISTER_ROUTE = '/register';
 export const MODIFY_PASSWORD_ROUTE = '/password/modify';
 export const FORGOT_PASSWORD_ROUTE = '/password/forgot';
+export const OAUTH_CALLBACK_ROUTE = '/oauth/:provider/callback';
 
 export type MissingReturnUrlScene = 'login-success' | 'modify-cancel' | 'forgot-cancel';
 
@@ -55,6 +57,7 @@ export function toSearch(params: Record<string, string | undefined>) {
 export function normalizeLegacyEntry() {
   const { pathname, search, hash } = window.location;
   const canonicalLoginPath = buildCanonicalPath(LOGIN_ROUTE);
+  const canonicalRegisterPath = buildCanonicalPath(REGISTER_ROUTE);
   const canonicalModifyPath = buildCanonicalPath(MODIFY_PASSWORD_ROUTE);
   const canonicalForgotPath = buildCanonicalPath(FORGOT_PASSWORD_ROUTE);
   const canonicalRootPath = buildAuthRootPath();
@@ -62,9 +65,19 @@ export function normalizeLegacyEntry() {
   const aliasMap = new Map<string, string>([
     ['/', canonicalRootPath],
     [LOGIN_ROUTE, canonicalLoginPath],
+    [REGISTER_ROUTE, canonicalRegisterPath],
     [MODIFY_PASSWORD_ROUTE, canonicalModifyPath],
     [FORGOT_PASSWORD_ROUTE, canonicalForgotPath],
   ]);
+  const oauthCallbackMatch = pathname.match(/^\/oauth\/([^/]+)\/callback$/);
+  if (oauthCallbackMatch) {
+    window.history.replaceState(
+      null,
+      '',
+      `${buildCanonicalPath(`/oauth/${oauthCallbackMatch[1]}/callback`)}${search}${hash}`,
+    );
+    return;
+  }
 
   const nextPath = aliasMap.get(pathname);
   if (!nextPath || nextPath === pathname) return;

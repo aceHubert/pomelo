@@ -1,16 +1,22 @@
 .shell {
   position: relative;
   z-index: 0;
-  display: grid;
+  display: flex;
+  width: 100%;
   min-height: 100vh;
-  place-items: center;
-  overflow: hidden;
+  min-height: 100dvh;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 24px;
   background: @var-login-bg;
 
   &::before {
-    position: absolute;
+    position: fixed;
     inset: -30% -16%;
+    pointer-events: none;
     content: '';
     background: @var-login-aura;
     filter: blur(24px);
@@ -18,9 +24,10 @@
   }
 
   &::after {
-    position: absolute;
-    z-index: -1;
+    position: fixed;
+    z-index: 0;
     inset: 0;
+    pointer-events: none;
     content: '';
     background: linear-gradient(@var-login-grid 1px, transparent 1px),
       linear-gradient(90deg, @var-login-grid 1px, transparent 1px);
@@ -30,8 +37,9 @@
 }
 
 .gradient-field {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  pointer-events: none;
   background: @var-login-field;
   opacity: @var-login-field-opacity;
   mix-blend-mode: @var-login-field-blend;
@@ -39,7 +47,11 @@
 
 .panel {
   z-index: 1;
-  width: min(520px, calc(100vw - 48px));
+  flex: 0 1 520px;
+  width: 100%;
+  max-width: 520px;
+  min-width: 0;
+  margin: auto;
 }
 
 .panelContent {
@@ -87,30 +99,8 @@
   }
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: @var-text-primary;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.brandMark {
-  display: inline-grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid @var-glass-border;
-  border-radius: 8px;
-  color: @var-text-primary;
-  background: @var-brand-mark-bg;
-  box-shadow: @var-brand-mark-shadow;
-  font-weight: 800;
-}
-
 .title {
-  margin: 12px 0 8px;
+  margin: 0 0 8px;
   color: @var-text-primary;
   font-size: 30px;
   line-height: 1.1;

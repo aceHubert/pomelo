@@ -8,6 +8,8 @@ import {
   IdOrUserNamePayload,
   PagedUserQueryPayolad,
   NewUserPayload,
+  AuthCreateUserPayload,
+  AuthProviderSubjectPayload,
   UpdateUserPayload,
   BulkDeleteUserPayload,
   DeleteUserPayLoad,
@@ -49,6 +51,11 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
     @Payload(new ValidatePayloadExistsPipe({ oneOf: ['id', 'username'] })) payload: IdOrUserNamePayload,
   ): Promise<Pick<UserModel, 'id' | 'email'> | undefined> {
     return this.userDataSource.getEmail(payload.id || payload.username!);
+  }
+
+  @MessagePattern(UserPattern.GetByAuthProviderSubject)
+  getByAuthProviderSubject(@Payload() payload: AuthProviderSubjectPayload): Promise<UserModel | undefined> {
+    return this.userDataSource.getByAuthProviderSubject(payload.provider, payload.subject);
   }
 
   @MessagePattern(UserPattern.GetMobile)
@@ -128,6 +135,11 @@ export class UserController extends createMetaController<UserMetaModel, NewUserM
   create(@Payload() payload: NewUserPayload): Promise<UserModel> {
     const { requestUserId, ...model } = payload;
     return this.userDataSource.create(model, requestUserId);
+  }
+
+  @MessagePattern(UserPattern.AuthCreate)
+  createForAuth(@Payload() payload: AuthCreateUserPayload): Promise<UserModel> {
+    return this.userDataSource.createForAuth(payload);
   }
 
   @MessagePattern(UserPattern.Update)

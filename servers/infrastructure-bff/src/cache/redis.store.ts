@@ -3,10 +3,26 @@ import { CacheManagerStore } from 'cache-manager';
 
 export class RedisCacheStore implements CacheManagerStore {
   readonly name = 'redis';
+  private connectPromise?: Promise<void>;
 
   constructor(private readonly redis: Redis) {}
 
+  private async ensureConnected(): Promise<void> {
+    if (this.redis.status === 'ready') {
+      return;
+    }
+
+    if (!this.connectPromise) {
+      this.connectPromise = this.redis.connect().finally(() => {
+        this.connectPromise = undefined;
+      });
+    }
+
+    await this.connectPromise;
+  }
+
   async get(key: string): Promise<unknown> {
+    await this.ensureConnected();
     const value = await this.redis.get(key);
     return value === null ? undefined : JSON.parse(value);
   }
@@ -16,6 +32,7 @@ export class RedisCacheStore implements CacheManagerStore {
       return [];
     }
 
+    await this.ensureConnected();
     const values = await this.redis.mget(...keys);
     return values.map((value) => (value === null ? undefined : JSON.parse(value)));
   }
@@ -26,6 +43,7 @@ export class RedisCacheStore implements CacheManagerStore {
       return value;
     }
 
+    await this.ensureConnected();
     const serialized = JSON.stringify(value);
     if (ttl && ttl > 0) {
       await this.redis.set(key, serialized, 'PX', ttl);
@@ -41,20 +59,24 @@ export class RedisCacheStore implements CacheManagerStore {
   }
 
   async del(key: string): Promise<void> {
+    await this.ensureConnected();
     await this.redis.del(key);
   }
 
   async mdel(...keys: string[]): Promise<void> {
     if (keys.length > 0) {
+      await this.ensureConnected();
       await this.redis.del(...keys);
     }
   }
 
   async ttl(key: string): Promise<number> {
+    await this.ensureConnected();
     return this.redis.pttl(key);
   }
 
   async keys(): Promise<string[]> {
+    await this.ensureConnected();
     return this.redis.keys('keyv:*');
   }
 
