@@ -87,6 +87,19 @@ a {
   color: @var-control-placeholder;
 }
 
+.ant-input:-webkit-autofill,
+.ant-input:-webkit-autofill:hover,
+.ant-input:-webkit-autofill:focus {
+  color: @var-text-primary !important;
+  caret-color: @var-text-primary;
+  -webkit-text-fill-color: @var-text-primary;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  transition: background-color 999999s ease-in-out 0s;
+}
+
 .ant-input:hover,
 .ant-input-affix-wrapper:hover,
 .ant-select:hover .ant-select-selector {
@@ -116,18 +129,18 @@ a {
 
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
   color: @var-primary;
-  background: fade(@primary-color, 12%);
+  background: @var-selected-bg;
 }
 
 .ant-btn-primary {
   font-weight: 700;
-  box-shadow: 0 18px 36px fade(@primary-color, 24%);
+  box-shadow: 0 18px 36px @var-primary-shadow;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .ant-btn-primary:not(:disabled):hover {
   transform: translateY(-1px);
-  box-shadow: 0 22px 42px fade(@primary-color, 28%);
+  box-shadow: 0 22px 42px @var-primary-shadow-hover;
 }
 
 .ant-btn-primary:not(:disabled):active {

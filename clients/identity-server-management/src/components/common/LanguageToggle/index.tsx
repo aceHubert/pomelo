@@ -80,7 +80,7 @@ export function LanguageToggle({
         title={label}
         type={type}
       >
-        <span>{currentLanguage.shortName}</span>
+        <span className={styles.shortName}>{currentLanguage.shortName}</span>
       </Button>
     </Popover>
   );

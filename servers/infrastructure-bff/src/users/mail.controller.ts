@@ -3,7 +3,9 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Anonymous, Authorized } from '@ace-nestjs/authorization';
 import { createResponseSuccessType } from '@ace-pomelo/shared/server';
 import { BaseController } from '@/common/controllers/base.controller';
+import { ForgotPasswordEmailCodeInput } from './dto/forgot-password.input';
 import { RegisterEmailCodeInput } from './dto/register.input';
+import { ForgotPasswordEmailCodeResultResp } from './resp/forgot-password.resp';
 import { RegisterEmailCodeResultResp } from './resp/register.resp';
 import { UserService } from './user.service';
 
@@ -24,6 +26,19 @@ export class MailController extends BaseController {
   async sendRegisterEmailCode(@Body() input: RegisterEmailCodeInput) {
     return this.success({
       data: await this.userService.sendRegisterEmailCode(input),
+    });
+  }
+
+  @Post('forgot-password/email-code')
+  @Anonymous()
+  @ApiOkResponse({
+    description: 'Forgot password email code result',
+    type: () =>
+      createResponseSuccessType({ data: ForgotPasswordEmailCodeResultResp }, 'ForgotPasswordEmailCodeSuccessResp'),
+  })
+  async sendForgotPasswordEmailCode(@Body() input: ForgotPasswordEmailCodeInput) {
+    return this.success({
+      data: await this.userService.sendForgotPasswordEmailCode(input),
     });
   }
 }

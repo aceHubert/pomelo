@@ -121,7 +121,13 @@ export function InitializePage() {
               title={t('initialize.checkError')}
               subTitle={formatError(checkError, t('initialize.checkError')).message}
               extra={
-                <Button type="primary" shape="round" size="large" onClick={() => window.location.reload()}>
+                <Button
+                  color="default"
+                  variant="solid"
+                  shape="round"
+                  size="large"
+                  onClick={() => window.location.reload()}
+                >
                   {t('common.refresh')}
                 </Button>
               }
@@ -210,7 +216,8 @@ export function InitializePage() {
                 </Form.Item>
                 <Button
                   block
-                  type="primary"
+                  color="default"
+                  variant="solid"
                   htmlType="submit"
                   loading={submitting}
                   shape="round"

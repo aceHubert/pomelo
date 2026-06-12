@@ -168,7 +168,16 @@ export function LoginPage() {
           </div>
         </div>
         {submitError ? <Alert message={submitError} type="error" showIcon /> : null}
-        <Button block type="primary" htmlType="submit" loading={loading} shape="round" size="large" className="mt-3">
+        <Button
+          block
+          color="default"
+          variant="solid"
+          htmlType="submit"
+          loading={loading}
+          shape="round"
+          size="large"
+          className="mt-3"
+        >
           {t('login.submit')}
         </Button>
         {registerEnabled || socialProviders.length ? (

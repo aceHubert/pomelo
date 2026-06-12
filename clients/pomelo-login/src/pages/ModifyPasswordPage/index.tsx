@@ -109,7 +109,7 @@ export function ModifyPasswordPage() {
         </Form.Item>
         {submitError ? <Alert message={submitError} type="error" showIcon /> : null}
         <div className="auth-button-stack">
-          <Button block type="primary" htmlType="submit" loading={loading} shape="round" size="large">
+          <Button block color="default" variant="solid" htmlType="submit" loading={loading} shape="round" size="large">
             {t('modify.submit')}
           </Button>
           <Button

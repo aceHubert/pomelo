@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AUTOLOAD_OPTIONS, REGISTER, REGISTER_USERNAME_AVAILABLE, SEND_REGISTER_EMAIL_CODE } from '@/apis/operations';
 import { AuthShell } from '@/components/auth/AuthShell';
+import { PasswordStrengthIndicator } from '@/components/auth/PasswordStrength';
 import { APP_TITLE } from '@/services/app/env';
 import { sha256Hex } from '@/services/auth/hash';
 import { clearStoredAuthToken } from '@/services/auth/token';
@@ -30,7 +31,6 @@ type RegisterFormValues = {
 };
 
 type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'unavailable' | 'error';
-type PasswordStrength = 'weak' | 'medium' | 'strong';
 
 const USERNAME_CHECK_DEBOUNCE_MS = 400;
 const USERNAME_PATTERN = /^[A-Za-z0-9_.-]{3,32}$/;
@@ -61,27 +61,6 @@ function normalizeUsername(value: string | undefined) {
 
 function buildEmail(values: Pick<RegisterFormValues, 'emailName' | 'emailSuffix'>) {
   return `${values.emailName.trim()}@${values.emailSuffix}`.toLowerCase();
-}
-
-function getPasswordStrength(value: string | undefined): { level: 1 | 2 | 3; status: PasswordStrength } {
-  const password = value ?? '';
-  const score = [
-    password.length >= 6,
-    password.length >= 10,
-    /[a-z]/.test(password) && /[A-Z]/.test(password),
-    /\d/.test(password),
-    /[^A-Za-z0-9]/.test(password),
-  ].filter(Boolean).length;
-
-  if (score >= 5) {
-    return { level: 3, status: 'strong' };
-  }
-
-  if (score >= 3) {
-    return { level: 2, status: 'medium' };
-  }
-
-  return { level: 1, status: 'weak' };
 }
 
 export function RegisterPage() {
@@ -132,8 +111,7 @@ export function RegisterPage() {
     () => parseEmailSuffixes(optionsData?.result?.['auth-register-email-suffixes']),
     [optionsData?.result],
   );
-  const passwordStrength = useMemo(() => getPasswordStrength(watchedPassword), [watchedPassword]);
-  const passwordStrengthLabels: Record<PasswordStrength, string> = {
+  const passwordStrengthLabels = {
     weak: t('register.passwordStrengthWeak'),
     medium: t('register.passwordStrengthMedium'),
     strong: t('register.passwordStrengthStrong'),
@@ -307,7 +285,7 @@ export function RegisterPage() {
         <div className="auth-button-stack">
           <Alert message={t('register.closedMessage')} type="info" showIcon />
           <Link to={{ pathname: LOGIN_ROUTE, search: location.search }}>
-            <Button block type="primary" shape="round" size="large">
+            <Button block color="default" variant="solid" shape="round" size="large">
               {t('common.backToLogin')}
             </Button>
           </Link>
@@ -403,19 +381,7 @@ export function RegisterPage() {
         >
           <Input.Password autoComplete="new-password" placeholder={t('register.passwordPlaceholder')} size="large" />
         </Form.Item>
-        {watchedPassword ? (
-          <div className={`auth-password-strength auth-password-strength-${passwordStrength.status}`}>
-            <div className="auth-password-strength-bars" aria-hidden="true">
-              {[1, 2, 3].map((level) => (
-                <span
-                  key={level}
-                  className={level <= passwordStrength.level ? 'auth-password-strength-bar-active' : undefined}
-                />
-              ))}
-            </div>
-            <span className="auth-password-strength-text">{passwordStrengthLabels[passwordStrength.status]}</span>
-          </div>
-        ) : null}
+        <PasswordStrengthIndicator password={watchedPassword} labels={passwordStrengthLabels} />
         <Form.Item
           name="confirmPassword"
           label={t('register.confirmPassword')}
@@ -440,7 +406,15 @@ export function RegisterPage() {
           />
         </Form.Item>
         {submitError ? <Alert message={submitError} type="error" showIcon /> : null}
-        <Button block type="primary" htmlType="submit" loading={registering} shape="round" size="large">
+        <Button
+          block
+          color="default"
+          variant="solid"
+          htmlType="submit"
+          loading={registering}
+          shape="round"
+          size="large"
+        >
           {t('register.submit')}
         </Button>
         <Button

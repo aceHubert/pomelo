@@ -1,4 +1,8 @@
-import { AUTH_REGISTER_EMAIL_TEMPLATE, OptionPresetKeys } from '@ace-pomelo/shared/server';
+import {
+  AUTH_FORGOT_PASSWORD_EMAIL_TEMPLATE,
+  AUTH_REGISTER_EMAIL_TEMPLATE,
+  OptionPresetKeys,
+} from '@ace-pomelo/shared/server';
 
 /**
  * Option 访问等级。
@@ -53,6 +57,12 @@ export const OPTION_DEFINITIONS: OptionDefinition[] = [
     access: 'admin-read-write',
     defaultValue: JSON.stringify(AUTH_REGISTER_EMAIL_TEMPLATE),
     description: '注册验证码邮件模板 JSON',
+  },
+  {
+    key: OptionPresetKeys.AuthForgotPasswordEmailTemplate,
+    access: 'admin-read-write',
+    defaultValue: JSON.stringify(AUTH_FORGOT_PASSWORD_EMAIL_TEMPLATE),
+    description: '忘记密码验证码邮件模板 JSON',
   },
   {
     key: OptionPresetKeys.AuthGoogleEnable,

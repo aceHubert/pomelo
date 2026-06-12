@@ -123,7 +123,8 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
             {error ? <Alert message={error} type="error" showIcon /> : null}
             <Button
               block
-              type="primary"
+              color="default"
+              variant="solid"
               htmlType="submit"
               loading={loading}
               shape="round"

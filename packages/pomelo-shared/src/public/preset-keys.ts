@@ -11,6 +11,8 @@ export enum OptionPresetKeys {
   AuthRegisterEmailSuffixes = 'auth-register-email-suffixes',
   /** 注册验证码邮件模板 */
   AuthRegisterEmailTemplate = 'auth-register-email-template',
+  /** 忘记密码验证码邮件模板 */
+  AuthForgotPasswordEmailTemplate = 'auth-forgot-password-email-template',
   /** 是否开启 Google 第三方登录 */
   AuthGoogleEnable = 'auth-google-enable',
   /** Google 第三方登录 JSON 配置 */
@@ -201,10 +203,18 @@ export enum AuthUserMetaPresetKeys {
 
 export const REGISTER_EMAIL_CODE_SCENE = 'register-email-code';
 
+export const FORGOT_PASSWORD_EMAIL_CODE_SCENE = 'forgot-password-email-code';
+
 export const AUTH_REGISTER_EMAIL_TEMPLATE = {
   subject: 'Pomelo 注册验证码',
   text: '你正在注册 Pomelo 账号。验证码：{{code}}，有效期 {{expiresInMinutes}} 分钟。注册邮箱：{{email}}，站点：{{siteName}}。',
   html: '<p>你正在注册 Pomelo 账号。</p><p>验证码：<strong>{{code}}</strong></p><p>有效期 {{expiresInMinutes}} 分钟。</p><p>注册邮箱：{{email}}</p><p>站点：{{siteName}}</p>',
+};
+
+export const AUTH_FORGOT_PASSWORD_EMAIL_TEMPLATE = {
+  subject: 'Pomelo 重置密码验证码',
+  text: '你正在重置 Pomelo 账号密码。验证码：{{code}}，有效期 {{expiresInMinutes}} 分钟。账号邮箱：{{email}}，站点：{{siteName}}。如非本人操作请忽略本邮件。',
+  html: '<p>你正在重置 Pomelo 账号密码。</p><p>验证码：<strong>{{code}}</strong></p><p>有效期 {{expiresInMinutes}} 分钟。</p><p>账号邮箱：{{email}}</p><p>站点：{{siteName}}</p><p>如非本人操作请忽略本邮件。</p>',
 };
 
 export const AUTH_OPTION_DEFAULTS: ReadonlyArray<{
@@ -217,6 +227,11 @@ export const AUTH_OPTION_DEFAULTS: ReadonlyArray<{
   {
     optionName: OptionPresetKeys.AuthRegisterEmailTemplate,
     optionValue: JSON.stringify(AUTH_REGISTER_EMAIL_TEMPLATE),
+    autoload: 'no',
+  },
+  {
+    optionName: OptionPresetKeys.AuthForgotPasswordEmailTemplate,
+    optionValue: JSON.stringify(AUTH_FORGOT_PASSWORD_EMAIL_TEMPLATE),
     autoload: 'no',
   },
   { optionName: OptionPresetKeys.AuthGoogleEnable, optionValue: '0', autoload: 'yes' },

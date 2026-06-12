@@ -25,11 +25,13 @@ import { UserService } from './user.service';
 import { SocialService } from './social.service';
 import { NewUserInput } from './dto/new-user.input';
 import { NewUserMetaInput } from './dto/new-user-meta.input';
+import { ForgotPasswordEmailCodeInput, ResetPasswordInput } from './dto/forgot-password.input';
 import { RegisterEmailCodeInput, RegisterInput } from './dto/register.input';
 import { SocialAuthCompleteInput, SocialAuthStartInput } from './dto/social-auth.input';
 import { UpdateUserInput, UpdateUserPasswordInput } from './dto/update-user.input';
 import { PagedUserArgs } from './dto/user.args';
 import { SignInInput } from './dto/signin.input';
+import { ForgotPasswordEmailCodeResult, ResetPasswordResult } from './models/forgot-password.model';
 import { RegisterEmailCodeResult } from './models/register.model';
 import { SocialAuthStartResult } from './models/social-auth.model';
 import { User as UserModel, UserMeta, PagedUser, SignInResult } from './models/user.model';
@@ -200,6 +202,20 @@ export class UserResolver extends createMetaResolver(UserModel, UserMeta, NewUse
   @Mutation(() => RegisterEmailCodeResult, { description: 'Send register email code.' })
   sendRegisterEmailCode(@Args('model') model: RegisterEmailCodeInput): Promise<RegisterEmailCodeResult> {
     return this.userService.sendRegisterEmailCode(model);
+  }
+
+  @Anonymous()
+  @Mutation(() => ForgotPasswordEmailCodeResult, { description: 'Send forgot password email code.' })
+  sendForgotPasswordEmailCode(
+    @Args('model') model: ForgotPasswordEmailCodeInput,
+  ): Promise<ForgotPasswordEmailCodeResult> {
+    return this.userService.sendForgotPasswordEmailCode(model);
+  }
+
+  @Anonymous()
+  @Mutation(() => ResetPasswordResult, { description: 'Reset password with email code.' })
+  resetPassword(@Args('model') model: ResetPasswordInput): Promise<ResetPasswordResult> {
+    return this.userService.resetPassword(model);
   }
 
   @Anonymous()

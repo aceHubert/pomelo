@@ -183,7 +183,7 @@ export function ResourcePage({
                 {loading ? t('resource.loading') : t('resource.count', { count: total })}
               </Typography.Text>
             </div>
-            <Button icon={<PlusOutlined />} type="primary" onClick={() => setCreateOpen(true)}>
+            <Button icon={<PlusOutlined />} color="default" variant="solid" onClick={() => setCreateOpen(true)}>
               {t('resource.create')}
             </Button>
           </div>

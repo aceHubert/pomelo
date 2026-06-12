@@ -216,3 +216,63 @@ export const UPDATE_USER_PASSWORD = gql`
     result: updateUserPassword(model: $model)
   }
 `;
+
+export type ForgotPasswordEmailCodeInput = {
+  username: string;
+};
+
+export type ForgotPasswordEmailCodeResult = {
+  success: boolean;
+  expiresInSeconds: number;
+  cooldownSeconds: number;
+  maskedEmail: string;
+  message?: string | null;
+};
+
+export type ForgotPasswordEmailCodeMutationData = {
+  result: ForgotPasswordEmailCodeResult;
+};
+
+export type ForgotPasswordEmailCodeMutationVariables = {
+  model: ForgotPasswordEmailCodeInput;
+};
+
+export const SEND_FORGOT_PASSWORD_EMAIL_CODE = gql`
+  mutation sendForgotPasswordEmailCode($model: ForgotPasswordEmailCodeInput!) {
+    result: sendForgotPasswordEmailCode(model: $model) {
+      success
+      expiresInSeconds
+      cooldownSeconds
+      maskedEmail
+      message
+    }
+  }
+`;
+
+export type ResetPasswordInput = {
+  username: string;
+  code: string;
+  password: string;
+};
+
+export type ResetPasswordResult = {
+  success: boolean;
+  message?: string | null;
+};
+
+export type ResetPasswordMutationData = {
+  result: ResetPasswordResult;
+};
+
+export type ResetPasswordMutationVariables = {
+  model: ResetPasswordInput;
+};
+
+export const RESET_PASSWORD = gql`
+  mutation resetPassword($model: ResetPasswordInput!) {
+    result: resetPassword(model: $model) {
+      success
+      message
+    }
+  }
+`;

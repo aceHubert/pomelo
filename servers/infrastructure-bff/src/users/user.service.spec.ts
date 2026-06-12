@@ -1,4 +1,5 @@
 import {
+  FORGOT_PASSWORD_EMAIL_CODE_SCENE,
   OptionPresetKeys,
   REGISTER_EMAIL_CODE_SCENE,
   UserInputError,
@@ -258,5 +259,121 @@ describe('UserService registration', () => {
         password: 'sha256-password',
       }),
     ).rejects.toThrow(UserInputError);
+  });
+
+  describe('forgot password', () => {
+    const getEmailResult = (user: { id: number; email?: string } | undefined) => (pattern: unknown, payload: any) => {
+      if (pattern === UserPattern.GetEmail && payload.username) {
+        return user;
+      }
+      return undefined;
+    };
+
+    it('rejects sending code when user does not exist', async () => {
+      const { service, mailService } = createService({
+        sendResult: getEmailResult(undefined),
+      });
+
+      await expect(service.sendForgotPasswordEmailCode({ username: 'ghost' })).rejects.toThrow('用户不存在');
+      expect(mailService.send).not.toHaveBeenCalled();
+    });
+
+    it('rejects sending code when user has no email', async () => {
+      const { service, mailService } = createService({
+        sendResult: getEmailResult({ id: 7, email: undefined }),
+      });
+
+      await expect(service.sendForgotPasswordEmailCode({ username: 'noemail' })).rejects.toThrow(UserInputError);
+      expect(mailService.send).not.toHaveBeenCalled();
+    });
+
+    it('rejects sending code during cooldown', async () => {
+      const { service, mailService } = createService({
+        sendResult: getEmailResult({ id: 7, email: 'user@linux.do' }),
+        cacheValues: {
+          'auth:forgot-password:email-code-cooldown:7': Date.now() + 30_000,
+        },
+      });
+
+      await expect(service.sendForgotPasswordEmailCode({ username: 'user' })).rejects.toThrow(UserInputError);
+      expect(mailService.send).not.toHaveBeenCalled();
+    });
+
+    it('sends forgot password code and caches it with masked email result', async () => {
+      const { service, cacheService, mailService } = createService({
+        sendResult: getEmailResult({ id: 7, email: 'user@linux.do' }),
+      });
+
+      await expect(service.sendForgotPasswordEmailCode({ username: 'user' })).resolves.toMatchObject({
+        success: true,
+        expiresInSeconds: 600,
+        cooldownSeconds: 60,
+        maskedEmail: 'us***@linux.do',
+      });
+      expect(mailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scene: FORGOT_PASSWORD_EMAIL_CODE_SCENE,
+          to: 'user@linux.do',
+          variables: expect.objectContaining({
+            email: 'user@linux.do',
+            expiresInMinutes: 10,
+          }),
+        }),
+      );
+      expect(cacheService.set).toHaveBeenCalledWith(
+        'auth:forgot-password:email-code:7',
+        expect.objectContaining({
+          userId: 7,
+          email: 'user@linux.do',
+          code: expect.stringMatching(/^\d{6}$/),
+        }),
+        600000,
+      );
+    });
+
+    it('rejects reset when cached code is invalid or expired', async () => {
+      const { service, basicService } = createService({
+        sendResult: getEmailResult({ id: 7, email: 'user@linux.do' }),
+        cacheValues: {
+          'auth:forgot-password:email-code:7': {
+            userId: 7,
+            email: 'user@linux.do',
+            code: '123456',
+            expiresAt: Date.now() - 1,
+          },
+        },
+      });
+
+      await expect(
+        service.resetPassword({ username: 'user', code: '123456', password: 'sha256-password' }),
+      ).rejects.toThrow(UserInputError);
+      expect(basicService.send).not.toHaveBeenCalledWith(UserPattern.ResetPassword, expect.anything());
+    });
+
+    it('resets password with valid code and clears the cache', async () => {
+      const { service, basicService, cacheService } = createService({
+        sendResult: getEmailResult({ id: 7, email: 'user@linux.do' }),
+        cacheValues: {
+          'auth:forgot-password:email-code:7': {
+            userId: 7,
+            email: 'user@linux.do',
+            code: '123456',
+            expiresAt: Date.now() + 60_000,
+          },
+        },
+      });
+
+      await expect(
+        service.resetPassword({ username: 'user', code: ' 123456 ', password: 'sha256-password' }),
+      ).resolves.toMatchObject({ success: true });
+      expect(basicService.send).toHaveBeenCalledWith(
+        UserPattern.ResetPassword,
+        expect.objectContaining({
+          id: 7,
+          password: expect.stringMatching(/^[a-f0-9]{32}$/),
+        }),
+      );
+      expect(cacheService.del).toHaveBeenCalledWith('auth:forgot-password:email-code:7');
+    });
   });
 });

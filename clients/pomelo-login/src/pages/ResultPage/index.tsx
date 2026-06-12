@@ -52,7 +52,14 @@ export function ResultPage() {
             <li>{t('result.step4')}</li>
           </ol>
           <div className={styles.actions}>
-            <Button block type="primary" shape="round" size="large" onClick={() => redirectTo(LOGIN_ROUTE)}>
+            <Button
+              block
+              color="default"
+              variant="solid"
+              shape="round"
+              size="large"
+              onClick={() => redirectTo(LOGIN_ROUTE)}
+            >
               {t('common.backToLogin')}
             </Button>
             <Button block type="link" shape="round" size="large" onClick={() => redirectTo(HOME_URL)}>

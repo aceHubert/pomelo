@@ -1,11 +1,17 @@
 import * as net from 'net';
 import * as tls from 'tls';
 import { Injectable } from '@nestjs/common';
-import { OptionPresetKeys, REGISTER_EMAIL_CODE_SCENE, RuntimeError, UserInputError } from '@ace-pomelo/shared/server';
+import {
+  FORGOT_PASSWORD_EMAIL_CODE_SCENE,
+  OptionPresetKeys,
+  REGISTER_EMAIL_CODE_SCENE,
+  RuntimeError,
+  UserInputError,
+} from '@ace-pomelo/shared/server';
 import { OptionService } from '@/options/option.service';
 import { renderTemplate } from './user-auth.utils';
 
-type MailScene = typeof REGISTER_EMAIL_CODE_SCENE;
+type MailScene = typeof REGISTER_EMAIL_CODE_SCENE | typeof FORGOT_PASSWORD_EMAIL_CODE_SCENE;
 
 type SendSceneMailOptions = {
   scene: MailScene;
@@ -35,16 +41,37 @@ export class UserMailService {
       case REGISTER_EMAIL_CODE_SCENE:
         await this.sendRegisterEmailCode(options.to, options.variables);
         return;
+      case FORGOT_PASSWORD_EMAIL_CODE_SCENE:
+        await this.sendForgotPasswordEmailCode(options.to, options.variables);
+        return;
     }
   }
 
   private async sendRegisterEmailCode(to: string, variables: Record<string, string | number>) {
+    await this.sendSceneEmailCode(to, variables, OptionPresetKeys.AuthRegisterEmailTemplate, '注册邮件模板配置无效');
+  }
+
+  private async sendForgotPasswordEmailCode(to: string, variables: Record<string, string | number>) {
+    await this.sendSceneEmailCode(
+      to,
+      variables,
+      OptionPresetKeys.AuthForgotPasswordEmailTemplate,
+      '忘记密码邮件模板配置无效',
+    );
+  }
+
+  private async sendSceneEmailCode(
+    to: string,
+    variables: Record<string, string | number>,
+    templateOptionKey: OptionPresetKeys,
+    invalidTemplateMessage: string,
+  ) {
     const [mailConfig, rawTemplate, siteName] = await Promise.all([
       this.optionService.getMailConfig(),
-      this.optionService.getRawValue(OptionPresetKeys.AuthRegisterEmailTemplate),
+      this.optionService.getRawValue(templateOptionKey),
       this.optionService.getRawValue(OptionPresetKeys.BlogName),
     ]);
-    const template = this.parseRegisterTemplate(rawTemplate);
+    const template = this.parseTemplate(rawTemplate, invalidTemplateMessage);
     const context = {
       siteName: siteName || 'Pomelo',
       ...variables,
@@ -58,7 +85,7 @@ export class UserMailService {
     });
   }
 
-  private parseRegisterTemplate(rawTemplate: string | undefined): RenderedMail {
+  private parseTemplate(rawTemplate: string | undefined, invalidTemplateMessage: string): RenderedMail {
     try {
       const parsed = JSON.parse(rawTemplate || '{}') as Partial<RenderedMail>;
       if (!parsed.subject || !parsed.text) {
@@ -71,7 +98,7 @@ export class UserMailService {
         html: parsed.html,
       };
     } catch {
-      throw new UserInputError('注册邮件模板配置无效');
+      throw new UserInputError(invalidTemplateMessage);
     }
   }
 

@@ -72,7 +72,14 @@ export function InitializeResultPage({ adminUrl, homeUrl, localeLabel, email, va
         variant === 'success' ? t('initialize.result.successSubtitle') : t('initialize.result.initializedSubtitle')
       }
       extra={[
-        <Button key="admin" type="primary" shape="round" size="large" onClick={() => openTarget(adminUrl)}>
+        <Button
+          key="admin"
+          color="default"
+          variant="solid"
+          shape="round"
+          size="large"
+          onClick={() => openTarget(adminUrl)}
+        >
           {t('initialize.result.goAdmin')}
         </Button>,
         <Button key="home" shape="round" size="large" onClick={() => openTarget(homeUrl)}>

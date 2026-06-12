@@ -62,7 +62,8 @@ export function ChildPanel({
           disabled={disabled}
           icon={<PlusOutlined />}
           size="small"
-          type="primary"
+          color="default"
+          variant="solid"
           onClick={() => setCreateOpen(true)}
         >
           {t('resource.add')}

@@ -7,6 +7,7 @@ import { AuthorizationService } from '@ace-nestjs/authorization';
 import { isEmail } from 'class-validator';
 import {
   INFRASTRUCTURE_SERVICE,
+  FORGOT_PASSWORD_EMAIL_CODE_SCENE,
   OptionPresetKeys,
   REGISTER_EMAIL_CODE_SCENE,
   UserInputError,
@@ -18,10 +19,12 @@ import {
 } from '@ace-pomelo/shared/server';
 import { AppCacheService } from '@/cache/cache.service';
 import { OptionService } from '@/options/option.service';
+import { ForgotPasswordEmailCodeInput, ResetPasswordInput } from './dto/forgot-password.input';
 import { RegisterEmailCodeInput, RegisterInput } from './dto/register.input';
 import { UserOptions } from './interfaces/user-options.interface';
 import { UserModel } from './interfaces/user-model.interface';
 import { UserClaims } from './interfaces/user-claims.interface';
+import { ForgotPasswordEmailCodeResult, ResetPasswordResult } from './models/forgot-password.model';
 import { RegisterEmailCodeResult } from './models/register.model';
 import { USER_OPTIONS } from './constants';
 import { UserMailService } from './mail.service';
@@ -29,8 +32,17 @@ import { assertAllowedEmailSuffix, parseEmailSuffixes, randomDigits } from './us
 
 const REGISTER_CODE_TTL_MS = 10 * 60 * 1000;
 const REGISTER_CODE_COOLDOWN_MS = 60 * 1000;
+const FORGOT_PASSWORD_CODE_TTL_MS = 10 * 60 * 1000;
+const FORGOT_PASSWORD_CODE_COOLDOWN_MS = 60 * 1000;
 
 type RegisterCodeCache = {
+  email: string;
+  code: string;
+  expiresAt: number;
+};
+
+type ForgotPasswordCodeCache = {
+  userId: number;
   email: string;
   code: string;
   expiresAt: number;
@@ -252,6 +264,109 @@ export class UserService {
 
     const exists = await this.basicService.send<boolean>(UserPattern.LoginNameExists, { loginName }).lastValue();
     return !exists;
+  }
+
+  async sendForgotPasswordEmailCode(input: ForgotPasswordEmailCodeInput): Promise<ForgotPasswordEmailCodeResult> {
+    const { id: userId, email } = await this.getForgotPasswordUser(input.username);
+
+    const cooldownKey = this.getForgotPasswordCooldownKey(userId);
+    const cooldown = await this.cacheService.get<number>(cooldownKey);
+    if (cooldown && cooldown > Date.now()) {
+      throw new UserInputError('验证码发送过于频繁，请稍后再试');
+    }
+
+    const code = randomDigits();
+    const expiresAt = Date.now() + FORGOT_PASSWORD_CODE_TTL_MS;
+    await this.mailService.send({
+      scene: FORGOT_PASSWORD_EMAIL_CODE_SCENE,
+      to: email,
+      variables: {
+        code,
+        email,
+        expiresInMinutes: Math.floor(FORGOT_PASSWORD_CODE_TTL_MS / 60_000),
+      },
+    });
+    await this.cacheService.set<ForgotPasswordCodeCache>(
+      this.getForgotPasswordCodeKey(userId),
+      {
+        userId,
+        email,
+        code,
+        expiresAt,
+      },
+      FORGOT_PASSWORD_CODE_TTL_MS,
+    );
+    await this.cacheService.set(
+      cooldownKey,
+      Date.now() + FORGOT_PASSWORD_CODE_COOLDOWN_MS,
+      FORGOT_PASSWORD_CODE_COOLDOWN_MS,
+    );
+
+    return {
+      success: true,
+      expiresInSeconds: Math.floor(FORGOT_PASSWORD_CODE_TTL_MS / 1000),
+      cooldownSeconds: Math.floor(FORGOT_PASSWORD_CODE_COOLDOWN_MS / 1000),
+      maskedEmail: this.maskEmail(email),
+      message: '验证码已发送',
+    };
+  }
+
+  async resetPassword(input: ResetPasswordInput): Promise<ResetPasswordResult> {
+    const { id: userId } = await this.getForgotPasswordUser(input.username);
+
+    const codeKey = this.getForgotPasswordCodeKey(userId);
+    const cached = await this.cacheService.get<ForgotPasswordCodeCache>(codeKey);
+    if (!cached || cached.expiresAt < Date.now() || cached.code !== input.code.trim()) {
+      throw new UserInputError('验证码无效或已过期');
+    }
+
+    await this.basicService
+      .send<void>(UserPattern.ResetPassword, {
+        id: userId,
+        password: md5(input.password).toString(),
+      })
+      .lastValue();
+    await this.cacheService.del(codeKey);
+
+    return {
+      success: true,
+      message: '密码已重置',
+    };
+  }
+
+  private async getForgotPasswordUser(username: string): Promise<{ id: number; email: string }> {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
+      throw new UserInputError('请输入用户名/邮箱/手机号');
+    }
+
+    const user = await this.basicService
+      .send<Pick<UserModel, 'id' | 'email'> | undefined>(UserPattern.GetEmail, {
+        username: trimmedUsername,
+      })
+      .lastValue();
+    if (!user) {
+      throw new UserInputError('用户不存在');
+    }
+    if (!user.email) {
+      throw new UserInputError('该账号未绑定邮箱，请联系管理员重置密码');
+    }
+
+    return { id: user.id, email: user.email };
+  }
+
+  private maskEmail(email: string) {
+    const [name, domain] = email.split('@');
+    const visible = name.slice(0, 2) || name.slice(0, 1);
+    return `${visible}***@${domain}`;
+  }
+
+  private getForgotPasswordCodeKey(userId: number) {
+    return `auth:forgot-password:email-code:${userId}`;
+  }
+
+  private getForgotPasswordCooldownKey(userId: number) {
+    return `auth:forgot-password:email-code-cooldown:${userId}`;
   }
 
   private async assertRegisterEnabled() {

@@ -130,7 +130,7 @@ export function PropertyForm({
         {renderValueControl()}
       </Form.Item>
       <Form.Item className={styles.actions}>
-        <Button type="primary" htmlType="button" loading={submitting} onClick={() => form.submit()}>
+        <Button color="default" variant="solid" htmlType="button" loading={submitting} onClick={() => form.submit()}>
           {submitText}
         </Button>
       </Form.Item>

@@ -76,7 +76,7 @@ export function OAuthCallbackPage() {
         <div className="auth-button-stack">
           <Alert message={error} type="error" showIcon />
           <Link to={LOGIN_ROUTE}>
-            <Button block type="primary" shape="round" size="large">
+            <Button block color="default" variant="solid" shape="round" size="large">
               {t('common.backToLogin')}
             </Button>
           </Link>
