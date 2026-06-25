@@ -50,40 +50,13 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
       <div className={styles['gradient-field']} aria-hidden="true" />
       <div className={styles.topActions}>
         <div className={styles.actionSlot}>
-          <LiquidGlass
-            className={styles.actionGlass}
-            padding="0"
-            overLight={false}
-            cornerRadius={999}
-            displacementScale={42}
-            blurAmount={0.12}
-            saturation={130}
-            aberrationIntensity={2}
-            elasticity={0.12}
-            layout="inline"
-          >
-            <LanguageToggle buttonClassName={styles.actionButton} />
-          </LiquidGlass>
+          <LanguageToggle />
         </div>
         <div className={styles.actionSlot}>
-          <LiquidGlass
-            className={styles.actionGlass}
-            padding="0"
-            overLight={false}
-            cornerRadius={999}
-            displacementScale={42}
-            blurAmount={0.12}
-            saturation={130}
-            aberrationIntensity={2}
-            elasticity={0.12}
-            layout="inline"
-          >
-            <ThemeToggle buttonClassName={styles.actionButton} shape="circle" type="text" />
-          </LiquidGlass>
+          <ThemeToggle />
         </div>
       </div>
       <LiquidGlass
-        className={styles.panel}
         padding="0"
         overLight={false}
         cornerRadius={18}
@@ -93,7 +66,7 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
         aberrationIntensity={2}
         elasticity={0}
         glassSize={{ width: 'min(500px, calc(100vw - 48px))' }}
-        style={{ position: 'fixed', top: '50%', left: '50%' }}
+        style={{ position: 'absolute', top: '50%', left: '50%' }}
       >
         <div className={styles.panelContent}>
           <Form<LoginValues> className={styles.form} layout="vertical" requiredMark={false} onFinish={submit}>
@@ -129,7 +102,7 @@ export function LoginPage({ onLogin }: { onLogin: (token: string) => void }) {
               loading={loading}
               shape="round"
               size="large"
-              className="mt-3"
+              className="mt-3 border-0"
             >
               {t('login.submit')}
             </Button>

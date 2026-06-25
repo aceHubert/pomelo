@@ -3,6 +3,8 @@ import { DesktopOutlined, MoonOutlined, SunOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { applyThemePreference, getStoredThemePreference } from '@/services/theme/theme';
 import { useI18n } from '@/services/i18n/i18n';
+import LiquidGlass from '../LiquidGlass';
+import styles from './index.module.less';
 import type { ButtonProps } from 'antd';
 import type { ThemePreference } from '@/services/theme/theme';
 
@@ -25,8 +27,6 @@ function joinClasses(...classes: Array<string | undefined>) {
 export function ThemeToggle({
   className,
   buttonClassName,
-  shape = 'round',
-  type = 'default',
 }: {
   className?: string;
   buttonClassName?: string;
@@ -44,15 +44,27 @@ export function ThemeToggle({
   }
 
   return (
-    <Button
-      aria-label={meta.label}
-      className={joinClasses(buttonClassName, className)}
-      htmlType="button"
-      icon={meta.icon}
-      shape={shape}
-      title={meta.label}
-      type={type}
+    <LiquidGlass
+      className={className}
+      padding="0"
+      cornerRadius={100}
+      displacementScale={62}
+      blurAmount={0.12}
+      saturation={130}
+      aberrationIntensity={2}
+      elasticity={0.35}
+      inline
       onClick={toggleTheme}
-    />
+    >
+      <Button
+        aria-label={meta.label}
+        className={joinClasses(buttonClassName, styles.themeToggle)}
+        htmlType="button"
+        icon={meta.icon}
+        title={meta.label}
+        shape="circle"
+        type="text"
+      />
+    </LiquidGlass>
   );
 }

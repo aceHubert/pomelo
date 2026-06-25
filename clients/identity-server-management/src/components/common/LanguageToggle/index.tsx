@@ -2,6 +2,7 @@ import { Button, Menu, Popover } from 'antd';
 import { CheckOutlined, TranslationOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
 import { useI18n } from '@/services/i18n/i18n';
+import LiquidGlass from '../LiquidGlass';
 import styles from './index.module.less';
 import type { ButtonProps } from 'antd';
 import type { AppLocale } from '@/services/i18n/i18n';
@@ -71,17 +72,30 @@ export function LanguageToggle({
       trigger="click"
       onOpenChange={setOpen}
     >
-      <Button
-        aria-label={label}
-        className={joinClasses(styles.trigger, buttonClassName, className)}
-        htmlType="button"
-        icon={<TranslationOutlined aria-hidden="true" />}
-        shape="round"
-        title={label}
-        type={type}
+      <LiquidGlass
+        className={className}
+        padding="0"
+        overLight={false}
+        cornerRadius={100}
+        displacementScale={200}
+        blurAmount={0.12}
+        saturation={130}
+        aberrationIntensity={2}
+        elasticity={0.12}
+        inline
       >
-        <span className={styles.shortName}>{currentLanguage.shortName}</span>
-      </Button>
+        <Button
+          aria-label={label}
+          className={joinClasses(styles.trigger, buttonClassName)}
+          htmlType="button"
+          icon={<TranslationOutlined aria-hidden="true" />}
+          shape="round"
+          title={label}
+          type={type}
+        >
+          <span className={styles.shortName}>{currentLanguage.shortName}</span>
+        </Button>
+      </LiquidGlass>
     </Popover>
   );
 }

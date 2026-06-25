@@ -32,24 +32,11 @@
 .gradient-field {
   position: absolute;
   inset: 0;
-  background: @var-login-field;
+  // background: @var-login-field;
+  background: url('https://picsum.photos/id/45/1920/1080') center no-repeat;
+  background-size: cover;
   opacity: @var-login-field-opacity;
   mix-blend-mode: @var-login-field-blend;
-}
-
-.panel {
-  z-index: 1;
-  width: ~'min(500px, calc(100vw - 48px))';
-
-  :global(.glass) {
-    width: 100%;
-    min-height: 0;
-  }
-
-  :global(.glass > div) {
-    display: block;
-    width: 100%;
-  }
 }
 
 .panelContent {
@@ -132,27 +119,6 @@
   flex: 0 0 auto;
 }
 
-.actionGlass {
-  display: inline-flex;
-}
-
-.actionButton {
-  color: @var-text-primary;
-  background: transparent;
-  font: inherit;
-  font-size: 16px;
-  text-shadow: none;
-  border: 0;
-  gap: 2px;
-  cursor: pointer;
-
-  &:hover,
-  &:focus {
-    color: @var-primary !important;
-    background: transparent !important;
-  }
-}
-
 .brand {
   display: flex;
   align-items: center;
@@ -185,6 +151,10 @@
 @media (max-width: 640px) {
   .shell {
     padding: 16px;
+  }
+
+  .gradient-field {
+    background: url('https://picsum.photos/id/45/700/1300')  center no-repeat;
   }
 
   .panelContent {
