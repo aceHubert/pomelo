@@ -44,3 +44,11 @@
 ## Security & Configuration
 - Never commit secrets. Start from `.env.sample` and create local overrides (e.g., `.env.docker.local`).
 - Prefer env‑driven config for servers; review `nest-cli*.json` and Docker runtime config when deploying.
+
+## Execution Plans & Histories
+
+Long-running tasks and completed code changes must be tracked in the repository, not just in chat logs.
+
+- **Execution Plans** (`docs/exec-plans/`): Required for tasks that span multiple sessions, carry architectural risk, or need phased verification. Put work-in-progress plans in `active/`, move finished ones to `completed/`, start from `templates/execution-plan.md`, and record debts you are intentionally deferring in `tech-debt-tracker.md`. See `docs/PLANS_GUIDE.md` for the full spec.
+- **Histories** (`docs/histories/`): Every task that actually modifies the repo should leave a history under `YYYY-MM/YYYYMMDD-HHmm-task-slug.md`. The template at `docs/histories/template.md` requires a `Git User` entry (from `git config user.name <email>`) and a `Change Stats` section generated via `git diff --shortstat` / `git diff --numstat`. See `docs/HISTORY_GUIDE.md` for details.
+- Pure Q&A or research tasks don't need a history. Creating or updating only research, assessment, report, or execution-plan files under `docs/` does not count as a repository change for this requirement and must not generate a history.
