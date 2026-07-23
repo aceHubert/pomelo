@@ -669,7 +669,12 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
           return {
             sub: String(accountId),
             // TODO: add rams
-            ram: [],
+            ram: [
+              {
+                pn: 'temporary-bypass',
+                st: [{ e: 'A', a: ['basic:*'], r: ['*'] }],
+              },
+            ],
           };
         } else if (use === 'userinfo' || use === 'id_token') {
           const claims = await this.accountProviderService.getClaims(Number(id));
