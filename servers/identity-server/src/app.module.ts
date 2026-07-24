@@ -22,7 +22,7 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4js';
-import { configuration, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import { configuration, INFRASTRUCTURE_SERVICE, RolePolicyProvider } from '@ace-pomelo/shared/server';
 import { AuthorizationModule, getJWKS, createLocalJWKSet } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
@@ -31,6 +31,7 @@ import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemerySto
 import { IdentityDatasourceModule } from './datasource/datasource.module';
 import { ApisModule } from './apis/apis.module';
 import { AccountProviderModule } from './account-provider/account-provider.module';
+import { AccountProviderService } from './account-provider/account-provider.service';
 import { AccountConfigService } from './account-config/account-config.service';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
@@ -163,6 +164,10 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService],
     }),
+    AccountProviderModule.forRootAsync({
+      isGlobal: true,
+      useClass: AccountConfigService,
+    }),
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => {
@@ -191,9 +196,21 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService],
     }),
-    RamAuthorizationModule.forRoot({
+    RamAuthorizationModule.forRootAsync({
       isGlobal: true,
-      serviceName: 'identity',
+      useFactory: (accountProviderService: AccountProviderService) => ({
+        serviceName: 'identity',
+        policyProviders: [
+          new RolePolicyProvider(async (userId) => {
+            const claims = await accountProviderService.getClaims(userId);
+            return {
+              role: claims.role,
+              superAdministrator: claims.super_administrator,
+            };
+          }),
+        ],
+      }),
+      inject: [AccountProviderService],
     }),
     IdentityDatasourceModule.registerAsync({
       isGlobal: true,
@@ -223,10 +240,6 @@ const logger = new Logger('AppModule', { timestamp: true });
       inject: [ConfigService, I18nService],
     }),
     ApisModule,
-    AccountProviderModule.forRootAsync({
-      isGlobal: true,
-      useClass: AccountConfigService,
-    }),
     AccountModule.forRootAsync({
       useFactory: (storageOptions: StorageOptions) => ({
         storage: storageOptions.use,

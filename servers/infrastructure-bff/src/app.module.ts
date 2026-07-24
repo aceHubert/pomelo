@@ -5,7 +5,7 @@ import { APP_PIPE, APP_FILTER, ModuleRef } from '@nestjs/core';
 import { Module, NestModule, MiddlewareConsumer, Logger } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ClientsModule } from '@nestjs/microservices';
+import { ClientProxy, ClientsModule } from '@nestjs/microservices';
 import { MulterModule } from '@nestjs/platform-express';
 import { HttpModule } from '@nestjs/axios';
 import { TerminusModule } from '@nestjs/terminus';
@@ -26,7 +26,14 @@ import {
   GraphQLWebsocketResolver,
 } from 'nestjs-i18n';
 import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4js';
-import { configuration, normalizeRoutePath, INFRASTRUCTURE_SERVICE } from '@ace-pomelo/shared/server';
+import {
+  configuration,
+  normalizeRoutePath,
+  INFRASTRUCTURE_SERVICE,
+  RolePolicyProvider,
+  UserMetaPresetKeys,
+  UserPattern,
+} from '@ace-pomelo/shared/server';
 import {
   AuthorizationModule,
   AuthorizationService,
@@ -213,9 +220,28 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService],
     }),
-    RamAuthorizationModule.forRoot({
+    RamAuthorizationModule.forRootAsync({
       isGlobal: true,
-      serviceName: 'basic',
+      useFactory: (basicService: ClientProxy) => ({
+        serviceName: 'basic',
+        policyProviders: [
+          new RolePolicyProvider(async (userId) => {
+            const metas = await basicService
+              .send<Array<{ metaKey: string; metaValue: unknown }>>(UserPattern.GetMetas, {
+                userId,
+                metaKeys: [UserMetaPresetKeys.Capabilities, UserMetaPresetKeys.SuperAdministrator],
+                fields: ['metaKey', 'metaValue'],
+              })
+              .lastValue();
+            const values = new Map(metas.map(({ metaKey, metaValue }) => [metaKey, metaValue]));
+            return {
+              role: values.get(UserMetaPresetKeys.Capabilities),
+              superAdministrator: values.get(UserMetaPresetKeys.SuperAdministrator),
+            };
+          }),
+        ],
+      }),
+      inject: [INFRASTRUCTURE_SERVICE],
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,

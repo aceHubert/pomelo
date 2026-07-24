@@ -668,13 +668,8 @@ export class OidcConfigService implements OidcModuleOptionsFactory {
         if (use === 'extra_token_claims') {
           return {
             sub: String(accountId),
-            // TODO: add rams
-            ram: [
-              {
-                pn: 'temporary-bypass',
-                st: [{ e: 'A', a: ['basic:*'], r: ['*'] }],
-              },
-            ],
+            // TODO: 添加当前用户的额外 RAM 策略。
+            ram: [],
           };
         } else if (use === 'userinfo' || use === 'id_token') {
           const claims = await this.accountProviderService.getClaims(Number(id));
