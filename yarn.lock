@@ -97,7 +97,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-nestjs/ram-authorization@workspace:^, @ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization":
+"@ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization":
   version: 0.0.0-use.local
   resolution: "@ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization"
   dependencies:
@@ -154,7 +154,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/shared@workspace:packages/pomelo-shared"
   dependencies:
-    "@ace-nestjs/ram-authorization": "workspace:^"
     "@ace-util/core": ^0.7.2
     "@nestjs/common": ^10.0.0
     "@nestjs/config": ^3.2.3
@@ -169,6 +168,7 @@ __metadata:
     graphql-parse-resolve-info: ^4.12.0
     js-yaml: ^4.1.0
   peerDependencies:
+    "@ace-nestjs/ram-authorization": ^0.1.0-alpha.0
     "@nestjs/common": ^10.0.0
     "@nestjs/config": ^3.2.3
     "@nestjs/core": ^10.0.0
@@ -180,6 +180,8 @@ __metadata:
     graphql: ^16.0.0
     graphql-parse-resolve-info: ^4.12.0
   peerDependenciesMeta:
+    "@ace-nestjs/ram-authorization":
+      optional: true
     "@apollo/client":
       optional: true
     "@nestjs/graphql":
