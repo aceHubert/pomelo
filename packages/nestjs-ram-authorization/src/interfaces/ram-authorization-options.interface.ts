@@ -1,6 +1,7 @@
 import { ModuleMetadata, Type } from '@nestjs/common';
 
 import { RAMEvaluateMethods } from '../core/RAMEvaluateMethods';
+import { IRamPolicyProvider } from '../providers/ram-policy-provider.interface';
 
 export interface RamAuthorizationOptions {
   /**
@@ -47,6 +48,11 @@ export interface RamAuthorizationOptions {
    * @default 'po'
    */
   resourcePrefix?: string;
+
+  /**
+   * 追加在 JWT Claims Provider 之后的自定义策略提供者。
+   */
+  policyProviders?: IRamPolicyProvider[];
 }
 
 export interface RamAuthorizationOptionsFactory {
