@@ -97,7 +97,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization":
+"@ace-nestjs/ram-authorization@workspace:^, @ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization":
   version: 0.0.0-use.local
   resolution: "@ace-nestjs/ram-authorization@workspace:packages/nestjs-ram-authorization"
   dependencies:
