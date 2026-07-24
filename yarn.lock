@@ -154,6 +154,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ace-pomelo/shared@workspace:packages/pomelo-shared"
   dependencies:
+    "@ace-nestjs/ram-authorization": "workspace:^"
     "@ace-util/core": ^0.7.2
     "@nestjs/common": ^10.0.0
     "@nestjs/config": ^3.2.3
