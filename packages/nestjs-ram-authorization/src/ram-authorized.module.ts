@@ -39,7 +39,7 @@ export class RamAuthorizationModule {
         },
         {
           provide: RAM_POLICY_PROVIDERS,
-          useFactory: () => [new JwtClaimsPolicyProvider(options.ramClaimTypeName)],
+          useFactory: () => [new JwtClaimsPolicyProvider(options.ramClaimTypeName), ...(options.policyProviders ?? [])],
         },
         CompositePolicyProvider,
         RAMAuthorizationEvaluator,
@@ -68,6 +68,7 @@ export class RamAuthorizationModule {
           provide: RAM_POLICY_PROVIDERS,
           useFactory: (ramOptions: RamAuthorizationOptions) => [
             new JwtClaimsPolicyProvider(ramOptions.ramClaimTypeName),
+            ...(ramOptions.policyProviders ?? []),
           ],
           inject: [RAM_AUTHORIZATION_OPTIONS],
         },

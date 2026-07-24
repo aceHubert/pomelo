@@ -70,8 +70,12 @@ export class SiteInitController {
                 { metaKey: UserMetaPresetKeys.Description, metaValue: 'Administrator' },
                 { metaKey: UserMetaPresetKeys.Locale, metaValue: '' },
                 { metaKey: UserMetaPresetKeys.AdminColor, metaValue: '' },
-                { metaKey: UserMetaPresetKeys.SuperAdministrator, metaValue: '1' },
                 // 带数据库前缀属性
+                {
+                  metaKey: UserMetaPresetKeys.SuperAdministrator,
+                  metaValue: '1',
+                  keyWithTablePrefix: true,
+                },
                 {
                   metaKey: UserMetaPresetKeys.Capabilities,
                   metaValue: UserRole.Administrator,

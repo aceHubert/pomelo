@@ -24,6 +24,7 @@ import { Log4jsModule, LOG4JS_NO_COLOUR_DEFAULT_LAYOUT } from '@ace-nestjs/log4j
 import { AuthorizationModule, getJWKS, getSigningKey, createLocalJWKSet } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
 import { configuration } from './common/utils/configuration.util';
+import { RolePolicyProvider } from './common/authorization/role-policy.provider';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { StorageModule, STORAGE_OPTIONS, StorageOptions, RedisStorage, MemeryStorage } from './storage';
 import { IdentityDatasourceModule } from './datasource/datasource.module';
@@ -31,6 +32,7 @@ import { IdentityMigrationService } from './datasource';
 import { OpenApiModule } from './openapi/openapi.module';
 import { AccountProviderModule } from './account-provider/account-provider.module';
 import { AccountProviderUse } from './account-provider/interfaces/account-provider-options.interface';
+import { AccountProviderService } from './account-provider/account-provider.service';
 import { OidcConfigModule } from './oidc-config/oidc-config.module';
 import { OidcConfigService } from './oidc-config/oidc-config.service';
 import { AccountModule } from './account/account.module';
@@ -164,6 +166,16 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService],
     }),
+    AccountProviderModule.forRootAsync({
+      isGlobal: true,
+      providerUse: (process.env.ACCOUNT_PROVIDER || 'database') as AccountProviderUse,
+    }),
+    AccountModule.forRootAsync({
+      useFactory: (storageOptions: StorageOptions) => ({
+        storage: storageOptions.use,
+      }),
+      inject: [STORAGE_OPTIONS],
+    }),
     AuthorizationModule.forRootAsync({
       isGlobal: true,
       useFactory: async (config: ConfigService) => {
@@ -194,9 +206,21 @@ const logger = new Logger('AppModule', { timestamp: true });
       },
       inject: [ConfigService],
     }),
-    RamAuthorizationModule.forRoot({
+    RamAuthorizationModule.forRootAsync({
       isGlobal: true,
-      serviceName: 'identity',
+      useFactory: (accountProviderService: AccountProviderService) => ({
+        serviceName: 'identity',
+        policyProviders: [
+          new RolePolicyProvider(async (userId) => {
+            const claims = await accountProviderService.getClaims(userId);
+            return {
+              role: claims.role,
+              superAdministrator: claims.super_administrator,
+            };
+          }),
+        ],
+      }),
+      inject: [AccountProviderService],
     }),
     IdentityDatasourceModule.registerAsync({
       isGlobal: true,
@@ -226,16 +250,6 @@ const logger = new Logger('AppModule', { timestamp: true });
       inject: [ConfigService, I18nService],
     }),
     OpenApiModule,
-    AccountProviderModule.forRootAsync({
-      isGlobal: true,
-      providerUse: (process.env.ACCOUNT_PROVIDER || 'database') as AccountProviderUse,
-    }),
-    AccountModule.forRootAsync({
-      useFactory: (storageOptions: StorageOptions) => ({
-        storage: storageOptions.use,
-      }),
-      inject: [STORAGE_OPTIONS],
-    }),
     // All routes proxy to oidc provider, must be the last one
     OidcConfigModule.forRootAsync({
       isGlobal: true,
