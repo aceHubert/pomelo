@@ -1,5 +1,6 @@
-import { UserRole } from '../src/server/enums';
-import { RolePolicyProvider, UserAuthorizationSnapshot } from '../src/server/services/role-policy.provider';
+import { UserRole } from '@ace-pomelo/shared/server';
+
+import { RolePolicyProvider, UserAuthorizationSnapshot } from './role-policy.provider';
 
 describe('RolePolicyProvider', () => {
   const getPolicy = async (authorization: UserAuthorizationSnapshot) =>

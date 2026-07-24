@@ -30,7 +30,6 @@ import {
   configuration,
   normalizeRoutePath,
   INFRASTRUCTURE_SERVICE,
-  RolePolicyProvider,
   UserMetaPresetKeys,
   UserPattern,
 } from '@ace-pomelo/shared/server';
@@ -42,6 +41,7 @@ import {
   getSigningKey,
 } from '@ace-nestjs/authorization';
 import { RamAuthorizationModule } from '@ace-nestjs/ram-authorization';
+import { RolePolicyProvider } from './common/authorization/role-policy.provider';
 import { ErrorHandlerClientTCP, I18nSerializer } from './common/utils/i18n-client-tcp.util';
 import { AllExceptionFilter } from './common/filters/all-exception.filter';
 import { MediaModule } from './medias/media.module';

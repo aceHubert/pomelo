@@ -77,7 +77,6 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "@ace-nestjs/ram-authorization": "workspace:^",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
@@ -91,7 +90,6 @@
     "graphql-parse-resolve-info": "^4.12.0"
   },
   "peerDependencies": {
-    "@ace-nestjs/ram-authorization": "^0.1.0-alpha.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
@@ -104,9 +102,6 @@
     "graphql-parse-resolve-info": "^4.12.0"
   },
   "peerDependenciesMeta": {
-    "@ace-nestjs/ram-authorization": {
-      "optional": true
-    },
     "@apollo/client": {
       "optional": true
     },

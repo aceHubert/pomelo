@@ -10,4 +10,3 @@ export {
   UserPattern,
   createMetaPattern,
 } from './infrastructure.service';
-export * from './role-policy.provider';

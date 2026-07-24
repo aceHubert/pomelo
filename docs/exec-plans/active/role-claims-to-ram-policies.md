@@ -81,8 +81,9 @@ RAMAuthorizationEvaluator
 
 ### 角色预设 RAM
 
-由共享的 `RolePolicyProvider` 负责。它只信任 `sub`，不信任客户端提供的角色值，并将
-`basic`、`identity` Action 汇总到同一个 Policy 的 Statements 中：
+由 BFF 和 identity-server 各自保留一份临时的 `RolePolicyProvider`。两份实现保持
+一致，只信任 `sub`，不信任客户端提供的角色值，并将 `basic`、`identity` Action
+汇总到同一个 Policy 的 Statements 中：
 
 1. 根据 `sub` 查询用户当前单角色和超级管理员标记。
 2. 按角色生成 BFF Action Policy。
@@ -484,10 +485,10 @@ master 没有 `feat/ioc` 中的 Identity Management JWT 签发路径，因此没
 ## 实施顺序
 
 1. 给 `RamAuthorizationModule` 增加 `policyProviders` 注册入口和聚合测试。
-2. 在 shared 增加唯一的汇总 RolePolicyProvider 及单元测试。
+2. 在 BFF 和 identity-server 分别增加相同的 RolePolicyProvider 及单元测试。
 3. 复用现有 `UserPattern.GetMetas` 查询最小用户授权元数据。
-4. 在 infrastructure-bff 通过 RPC loader 注册共享 RolePolicyProvider。
-5. 在 identity-server 通过 Account Provider loader 注册共享 RolePolicyProvider。
+4. 在 infrastructure-bff 通过 RPC loader 注册本地 RolePolicyProvider。
+5. 在 identity-server 通过 Account Provider loader 注册本地 RolePolicyProvider。
 6. 将 master 的 OIDC Access Token `ram` 改为空数组。
 7. 验证超级管理员、普通管理角色和 Subscriber。
 8. 单独验证 `RamAuthorized + Anonymous` 的 Meta GET 行为。
@@ -544,7 +545,8 @@ subscriber                   taxonomy 只读四个 Action     *                 
 - [ ] 创建正式 OpenSpec change（本次未要求）。
 - [x] 将计划复制到 master worktree，并核对分支差异。
 - [x] 开放自定义 `IRamPolicyProvider` 注册并保留 JWT Provider。
-- [x] 实现唯一的共享 RolePolicyProvider，并由 basic/identity 分别提供数据 loader。
+- [x] 在 BFF 和 identity-server 临时复制 RolePolicyProvider，并分别提供数据 loader。
+- [ ] 待共享包依赖边界稳定后，将两份 RolePolicyProvider 重新合并。
 - [x] 将 OIDC Access Token 的 `ram` 恢复为空数组。
 - [x] 验证角色矩阵、查询失败、JWT 聚合及 Deny 优先。
 - [x] 验证 `RamAuthorized + Anonymous` 仍会执行 RAM Guard。
@@ -562,18 +564,18 @@ subscriber                   taxonomy 只读四个 Action     *                 
 - 2026-07-24：Subscriber 只授予 taxonomy 四个只读 Action。
 - 2026-07-24：master 复用现有 `UserPattern.GetMetas`，不新增内部查询接口。
 - 2026-07-24：master 不存在 Identity Management JWT 签发路径，该项标记为不适用。
-- 2026-07-24：角色 Statements 在 shared Provider 中统一汇总，不在 BFF 和 identity
-  分别维护；identity 只通过 `AccountProviderModule` 获取账户 claims。
+- 2026-07-24：原定放入 shared 的 Provider 会导致 shared 独立构建无法解析 RAM 包，
+  暂时复制到 BFF 和 identity-server；两份实现仍各自汇总完整 Statements，后期重构。
+- 2026-07-24：identity 只通过 `AccountProviderModule` 获取账户 claims。
 - 2026-07-24：`Anonymous` 只跳过登录校验，不会移除 `RamAuthorized` 注册的 RAM Guard；
   Meta GET 若需要真正匿名，应单独调整装饰器组合，不能靠角色扩权。
 
 ## 验证记录
 
 - RAM 授权包单元测试：3 个测试套件、21 个测试通过。
-- shared RolePolicyProvider：1 个测试套件、3 个测试通过。
+- BFF、identity-server RolePolicyProvider：2 个测试套件、共 6 个测试通过。
 - `RamAuthorized + Anonymous`：确认 Authorization Guard 与 RAM Guard 同时保留。
 - ESLint：本次涉及的 TypeScript 文件全部通过。
-- TypeScript：`nestjs-ram-authorization`、`pomelo-shared`、`infrastructure-bff`、
-  `infrastructure-service` 通过。
+- TypeScript：`pomelo-shared`、`infrastructure-bff` 通过；shared 已不再依赖 RAM 包。
 - `identity-server` 仍有 master 既有的 `OidcModuleFactoryFn` 类型错误，位置在
   `oidc-config.service.ts:63`；本次变更位于同文件的 Access Token claims，不是新增错误。

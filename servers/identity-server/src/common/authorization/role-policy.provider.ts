@@ -5,8 +5,7 @@ import {
   RAMPolicy,
   RAMStatement,
 } from '@ace-nestjs/ram-authorization';
-
-import { UserRole } from '../enums';
+import { UserRole } from '@ace-pomelo/shared/server';
 
 export interface UserAuthorizationSnapshot {
   role?: unknown;
@@ -22,7 +21,7 @@ const MANAGEMENT_ROLES = new Set<UserRole>([
   UserRole.Contributor,
 ]);
 
-/** 根据用户当前元数据生成跨服务汇总角色策略。 */
+// TODO: 待共享包能够稳定引用 RAM 包后，与 infrastructure-bff 中的实现重新合并。
 export class RolePolicyProvider implements IRamPolicyProvider {
   readonly sourceType = PolicySourceType.External;
   readonly priority = 10;
