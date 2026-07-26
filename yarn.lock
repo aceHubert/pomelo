@@ -12047,7 +12047,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:^4.4.0, debug@npm:^4.4.1":
+"debug@npm:^4.4.0, debug@npm:^4.4.1, debug@npm:^4.4.3":
   version: 4.4.3
   resolution: "debug@npm:4.4.3::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fdebug%2F-%2Fdebug-4.4.3.tgz"
   dependencies:
@@ -21372,6 +21372,8 @@ __metadata:
     tsconfig-paths: ^3.10.1
     typescript: ^4.6.5
     umzug: ^3.8.2
+    vite: ^4.5.3
+    vite-plugin-mkcert: ^2.1.0
     vue: ^2.6.10
     vue-template-compiler: ^2.6.10
     webpack-node-externals: ^3.0.0
@@ -25509,6 +25511,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"supports-color@npm:^10.2.2":
+  version: 10.2.2
+  resolution: "supports-color@npm:10.2.2::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fsupports-color%2F-%2Fsupports-color-10.2.2.tgz"
+  checksum: bd132705fc07213a4024131fb061f0a46a48b49ecaf434bb029c0a5aa0339b969236d496d63969e3c248a90fdcac16d4f9c5bf187e7be0bfb5e804ed13bef6b0
+  languageName: node
+  linkType: hard
+
 "supports-color@npm:^2.0.0":
   version: 2.0.0
   resolution: "supports-color@npm:2.0.0"
@@ -26713,6 +26722,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"undici@npm:^8.3.0":
+  version: 8.9.0
+  resolution: "undici@npm:8.9.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fundici%2F-%2Fundici-8.9.0.tgz"
+  checksum: 71ce29ec2426519e2aa56df2eeffffcc633d7d121aa65c206dc3cc764f36528df20fadd519a2e0603e7b51e087920ebca392b509f48c618e652e460a8ea89541
+  languageName: node
+  linkType: hard
+
 "unfetch@npm:^4.2.0":
   version: 4.2.0
   resolution: "unfetch@npm:4.2.0"
@@ -27093,6 +27109,19 @@ __metadata:
   version: 1.1.2
   resolution: "vary@npm:1.1.2"
   checksum: ae0123222c6df65b437669d63dfa8c36cee20a504101b2fcd97b8bf76f91259c17f9f2b4d70a1e3c6bbcee7f51b28392833adb6b2770b23b01abec84e369660b
+  languageName: node
+  linkType: hard
+
+"vite-plugin-mkcert@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "vite-plugin-mkcert@npm:2.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fvite-plugin-mkcert%2F-%2Fvite-plugin-mkcert-2.1.0.tgz"
+  dependencies:
+    debug: ^4.4.3
+    supports-color: ^10.2.2
+    undici: ^8.3.0
+  peerDependencies:
+    vite: ">=3"
+  checksum: d777cde8ff819e8624c8179835b277a48ecc469efe1acfe593173ef176419e2138c22455c388eba100f346b077275f42c9a195132d944727df5260af5558ebce
   languageName: node
   linkType: hard
 

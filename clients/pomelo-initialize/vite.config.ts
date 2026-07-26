@@ -2,6 +2,7 @@ import path from 'node:path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import type { Plugin } from 'vite';
+import mkcert from 'vite-plugin-mkcert';
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -58,7 +59,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: env.BASE_URL,
-    plugins: [react(), initializeSingleFile()],
+    plugins: [react(), mkcert(), initializeSingleFile()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
@@ -67,6 +68,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: env.DEV_HOST || undefined,
       port: parsePort(env.DEV_PORT),
+      https: env.HTTPS === 'true',
     },
     build: {
       outDir: 'dist',
